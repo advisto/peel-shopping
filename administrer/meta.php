@@ -1,0 +1,203 @@
+<?php
+// This file should be in UTF8 without BOM - Accents examples: éèê
+// +----------------------------------------------------------------------+
+// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// +----------------------------------------------------------------------+
+// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | opensource GPL license: you are allowed to customize the code		  |
+// | for your own needs, but must keep your changes under GPL			  |
+// | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
+// +----------------------------------------------------------------------+
+// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
+// +----------------------------------------------------------------------+
+// $Id: meta.php 35064 2013-02-08 14:16:40Z gboussin $
+
+define('IN_PEEL_ADMIN', true);
+include("../configuration.inc.php");
+necessite_identification();
+necessite_priv("admin_content,admin_webmastering");
+
+$DOC_TITLE = $GLOBALS['STR_ADMIN_META_PAGE_TITLE'];
+include("modeles/haut.php");
+
+$id = vb($_REQUEST['id']);
+
+$form_error_object = new FormError();
+$frm = $_POST;
+
+switch (vb($_REQUEST['mode'])) {
+	case "ajout" :
+		affiche_formulaire_ajout_meta();
+		break;
+
+	case "modif" :
+		affiche_formulaire_modif_meta($id, $frm);
+		break;
+
+	case "maj" :
+		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
+			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+		}
+		if (!$form_error_object->count()) {
+			maj_meta($_POST['id'], $_POST);
+			affiche_liste_meta();
+		} else {
+			if ($form_error_object->has_error('token')) {
+				echo $form_error_object->text('token');
+			}
+			affiche_formulaire_modif_meta($_GET['id'], $frm);
+		}
+		break;
+
+	default :
+		affiche_liste_meta();
+		break;
+}
+
+include("modeles/bas.php");
+
+/**
+ * FONCTIONS
+ */
+
+/**
+ * affiche_formulaire_modif_meta()
+ *
+ * @param integer $id
+ * @param array $frm Array with all fields data
+ * @return
+ */
+function affiche_formulaire_modif_meta($id, &$frm)
+{
+	if(empty($frm)){
+		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
+		$qid = query("SELECT *
+			FROM peel_meta
+			WHERE id = " . intval($id) . "");
+		$frm = fetch_assoc($qid);
+	}
+	
+	$frm["nouveau_mode"] = "maj";
+	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+
+	affiche_formulaire_meta($frm);
+}
+
+/**
+ * affiche_formulaire_meta()
+ *
+ * @param array $frm Array with all fields data
+ * @return
+ */
+function affiche_formulaire_meta(&$frm)
+{
+	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_meta.tpl');
+	$tpl->assign('action', get_current_url(false) . '?start=0');
+	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
+	$tpl->assign('mode', $frm["nouveau_mode"]);
+	$tpl->assign('id', intval($frm['id']));
+	$tpl_langs = array();
+	foreach ($GLOBALS['lang_codes'] as $lng) {
+		$tpl_langs[] = array('lng' => $lng,
+			'meta_titre' => $frm['meta_titre_' . $lng],
+			'meta_key' => $frm['meta_key_' . $lng],
+			'meta_desc' => $frm['meta_desc_' . $lng],
+			);
+	}
+	$tpl->assign('langs', $tpl_langs);
+	$tpl->assign('technical_code', $frm['technical_code']);
+	$tpl->assign('titre_bouton', $frm['titre_bouton']);
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_META_PAGE_TITLE', $GLOBALS['STR_ADMIN_META_PAGE_TITLE']);
+	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
+	$tpl->assign('STR_ADMIN_META_TITLE', $GLOBALS['STR_ADMIN_META_TITLE']);
+	$tpl->assign('STR_ADMIN_META_KEYWORDS', $GLOBALS['STR_ADMIN_META_KEYWORDS']);
+	$tpl->assign('STR_ADMIN_SEPARATE_KEYWORDS_EXPLAIN', $GLOBALS['STR_ADMIN_SEPARATE_KEYWORDS_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_META_DESCRIPTION', $GLOBALS['STR_ADMIN_META_DESCRIPTION']);
+	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
+	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
+	echo $tpl->fetch();
+}
+
+/**
+ * Supprime le meta spécifié par $id.
+ *
+ * @param integer $id
+ * @return
+ */
+function supprime_meta($id)
+{
+	/* Efface le meta */
+	query("DELETE FROM peel_meta WHERE id = " . intval($id));
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_META_META_DELETED'], $id)))->fetch();
+}
+
+/**
+ * Met à jour le meta $id avec de nouvelles valeurs. Les champs sont dans $frm
+ *
+ * @param integer $id
+ * @param array $frm Array with all fields data
+ * @return
+ */
+function maj_meta($id, $frm)
+{
+	$sql = 'UPDATE peel_meta SET
+		technical_code = "' . word_real_escape_string($frm['technical_code']) . '"';
+	foreach ($GLOBALS['lang_codes'] as $lng) {
+		$sql .= '
+		, meta_titre_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . '"
+		, meta_key_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_key_' . $lng]) . '"
+		, meta_desc_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . '"';
+	}
+	$sql .= '
+		WHERE id = ' . intval($id);
+
+	/* Met à jour la table meta */
+	$qid = query($sql);
+}
+
+/**
+ * affiche_liste_meta()
+ *
+ * @return
+ */
+function affiche_liste_meta()
+{
+	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_meta.tpl');
+
+	$anchor = '';
+	$result = query("SELECT * FROM peel_meta");
+	if (!(num_rows($result) == 0)) {
+		$tpl_results = array();
+		while ($ligne = fetch_assoc($result)) {
+			// On génère le lien vers les méta ici :
+			// - si le titre est vide, on se sert de la description, sinon des mots clé
+			$meta_titre = String::html_entity_decode_if_needed(trim($ligne['meta_titre_' . $_SESSION['session_langue']]));
+			$meta_desc = String::html_entity_decode_if_needed(trim($ligne['meta_desc_' . $_SESSION['session_langue']]));
+			$meta_key = String::html_entity_decode_if_needed(trim($ligne['meta_key_' . $_SESSION['session_langue']]));
+			if (!empty($meta_titre)) {
+				$anchor = $meta_titre;
+			} elseif (!empty($meta_desc)) {
+				$anchor = $meta_desc;
+			} elseif (!empty($meta_key)) {
+				$meta_key_array = explode(',', $meta_key);
+				for ($i = 0; $i < 4; $i++) {
+					$anchor .= $meta_key_array[$i] . ' ';
+				}
+				$anchor .= ' ...';
+			}
+			$tpl_results[] = array('href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
+				'technical_code' => $ligne['technical_code'],
+				'anchor' => $anchor
+				);
+		}
+		$tpl->assign('results', $tpl_results);
+	}
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_META_PAGE_TITLE', $GLOBALS['STR_ADMIN_META_PAGE_TITLE']);
+	$tpl->assign('STR_ADMIN_META_UPDATE', $GLOBALS['STR_ADMIN_META_UPDATE']);
+	$tpl->assign('STR_ADMIN_META_EMPTY_EXPLAIN', $GLOBALS['STR_ADMIN_META_EMPTY_EXPLAIN']);
+	echo $tpl->fetch();
+}
+
+?>

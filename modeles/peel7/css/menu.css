@@ -1,0 +1,221 @@
+/* Menu du haut */
+
+#main_header {
+	z-index: 1500;
+}
+.header_menu {
+	float: left;
+	margin-top: 0px;
+	z-index: 1500;
+	width:100%;
+}
+.main_menu_wide {
+	/*background-image: url(../images/menu_background.jpg);
+	background-repeat: repeat-x;*/
+	background-color: #5c5758;
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	text-align: center;
+	display: block;
+	float: left;
+	clear: both;
+	z-index: 1500;
+}
+.main_menu {
+	float: left;
+	margin-bottom: 0;
+	margin-right: auto;
+	margin-top: 0;
+	position: relative;
+	text-align: center;
+	z-index: 1500;
+}
+#menu1 {
+	float: left;
+	width: 100%;
+	position: relative;
+	padding: 0px;
+	margin: 0px;
+	height: 26px;
+	display: block;
+	z-index: 15001;
+	text-align: center;
+}
+
+#menu1 li {
+	background-color: #5c5758;
+	position: relative;
+	list-style: none;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	z-index: 1502;
+	display: block;
+	float: left;
+	font-size: 12px;
+	float: left;
+}
+#menu1 .menu_main_item > span, #menu1 .menu_main_item > a {
+	/* Elements principaux du menu */
+	display: block;
+	height: 26px;
+	line-height: 26px;
+	vertical-align: middle;
+	/*background: url(images/menu/menu_main_item.gif) center top no-repeat ;*/
+	padding: 0px 10px 0px 10px;
+	color: #FFFFFF;
+	font-weight: bold;
+	text-decoration: none;
+	border-left:1px solid #FFFFFF;
+}
+#menu1 .menu_main_item a.current, #menu1 .menu_main_item a:hover, #menu1 .menu_main_item a:focus, #menu1 .menu_main_item a:active{
+	/*background: url(images/menu/menu_main_item.gif) center bottom no-repeat ;*/
+	background-color: #2597EE;
+	color: #FFFFFF;
+}
+#menu1 .menu_main_item ul.sousMenu li > span, #menu1 .menu_main_item ul.sousMenu li > a {
+	/* Elements dans la liste déroulante du menu */
+	display: block;
+	height: 26px;
+	line-height: 26px;
+	vertical-align: middle;
+	color: #FFFFFF;
+	background-color: #2597EE;
+	padding-left: 5px;
+	padding-right: 2px;
+	text-decoration: none;
+	border-left:1px solid #FFFFFF;
+}
+#menu1 .menu_main_item ul.sousMenu li > span {
+	/* Element non sélectionnable du menu */
+	background-color: #0055AA;
+	border-top: 1px solid #FFFFFF;
+	text-align: center;
+}
+#menu1 .menu_main_item:hover > a, #menu1 .menu_main_item:hover > span {
+	/*background: url(images/menu/menu_main_item.gif) center bottom no-repeat ;*/
+	background-color: #2597EE;
+	color: #FFFFFF;
+}
+
+#menu1 .sousMenu{
+	display: none;
+	list-style-type: none;
+	position: absolute;
+	text-align: left;
+	width: 200px;
+	z-index: 1503;
+	top: 26px;
+	left: 0px;
+	padding: 0px;
+	margin: 0px;
+	color: #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
+}
+
+#menu1 .sousMenu li{
+	z-index: 1504;
+	height: auto;
+	font-weight: bold;
+	width: 200px;
+	display: block;
+	padding: 0px;
+	margin: 0px;
+}
+
+#menu1 .sousMenu li span, #menu1 .sousMenu li a {
+	z-index: 1505;
+}
+#menu1 .menu_main_item ul.sousMenu li a:hover, #menu1 .menu_main_item ul.sousMenu li a.current {
+	background-color: #2277DD;
+}
+#menu1 ul.sousMenu ul.sousMenu {
+	left: 200px;
+	top: 0px;
+}
+#menu1 li:hover > ul.sousMenu {
+	display: block;
+}
+
+/*
+#menu1 .menu_home a.current, #menu1 .menu_home ul.sousMenu li a, #menu1 .menu_home:hover > a {
+	background-color: #005491;
+}
+#menu1 .menu_home ul.sousMenu li a:hover, #menu1 .menu_home ul.sousMenu li a.current {
+	background-color: #013670;
+}
+#menu1 .menu_home ul.sousMenu li span {
+	background-color: #003481;
+}
+*/
+
+/* Menus latéraux */
+.left_column li, .right_column li {
+	background-image: none;
+	display: block;
+	font-size: 12px;
+	list-style: none outside none;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-left: 5px;
+	padding-bottom: 0px;
+	position: relative;
+}
+.left_column li > span, .left_column li > a, .right_column li > span, .right_column li > a {
+	display: block;
+	min-height: 26px;
+	line-height: 26px;
+	vertical-align: middle;
+	/*background: url(images/menu/menu_main_item.gif) center top no-repeat ;*/
+	padding: 0px 4px 0px 10px;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.left_column .sousMenu, .right_column .sousMenu {
+	background-color: #F3FBFE;
+	display: none;
+	list-style-type: none;
+	position: absolute;
+	text-align: left;
+	width: 195px;
+	z-index: 1003;
+	top: -2px;
+	padding: 0px;
+	margin: 0px;
+	border: 2px solid #1E82D8;
+}
+.left_column .sousMenu {
+	left: 195px;
+}
+.right_column .sousMenu {
+	left: -199px;
+}
+.left_column .sousMenu li, .right_column .sousMenu li {
+	z-index: 1004;
+	border: 0px;
+	display: block;
+	margin: 0px;
+	background-image: url(../images/sideblocktitle_content.jpg);
+	background-repeat: repeat-y;
+	background-position: center;
+}
+
+.left_column .sousMenu li span, .left_column .sousMenu li a, .right_column .sousMenu li span, .right_column .sousMenu li a {
+	z-index: 1005;
+}
+.left_column li:hover > a, .left_column li a:focus, .left_column li a:active, .left_column li.current > a, .right_column li:hover > a, .right_column li a:focus, .right_column li a:active, .right_column li.current > a {
+	background-color: #DCE2FF;
+	background-image: none;
+	color: #000000;
+}
+
+.left_column li.plus:hover > ul.sousMenu, .right_column li.plus:hover > ul.sousMenu {
+	display: block;
+}
+.left_column .sousMenu:hover > a, .right_column .sousMenu:hover > a {
+	color: #FFFFFF;
+}

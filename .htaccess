@@ -1,0 +1,157 @@
+# +----------------------------------------------------------------------+
+# | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+# +----------------------------------------------------------------------+
+# | This file is part of PEEL Shopping 7.0.0, which is subject to an	 |
+# | opensource GPL license: you are allowed to customize the code		 |
+# | for your own needs, but must keep your changes under GPL			 |
+# | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
+# +----------------------------------------------------------------------+
+# | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
+# +----------------------------------------------------------------------+
+# $Id: compte.php 6440 2010-01-25 10:35:25Z sdelaporte $
+#
+# DEBUT CONFIGURATION ###
+# Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
+#
+# - Chez OVH, activez les lignes suivantes en retirant le # en début de ligne :
+# SetEnv PHP_VER 5
+# SetEnv REGISTER_GLOBALS 0
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+#
+# - Chez 1&1, activez les lignes suivantes en retirant le # en début de ligne :
+# Options +FollowSymLinks
+# RewriteBase / ou /monrepertoiredeboutique/ # présente et expliquée aussi plus loin dans le fichier
+# ... et pour PHP 5 :
+# AddType x-mapp-php5 .php
+#   ou
+# AddHandler x-mapp-php5 .php
+#
+# - Chez Free, activez la ligne suivante en retirant le # en début de ligne :
+# php 1
+#
+# - Chez Aquaray, activez la ligne suivante en retirant le # en début de ligne :
+# AddHandler php5 .php
+#
+# - Chez Lycos, activez la ligne suivante en retirant le # en début de ligne :
+# AddHandler application/x-httpd-php5 .php
+#
+# - Chez Web1 / nFrance, activez la ligne suivante en retirant le # en début de ligne :
+# AddHandler php-fastcgi5 .php
+#
+# - Chez Online.net, activez la ligne suivante en retirant le # en début de ligne :
+# AddType application/x-httpd-php5 .php
+#
+# - Chez eXtend, activez la ligne suivante en retirant le # en début de ligne :
+# SetEnv DEFAULT_PHP_VERSION 5
+#
+# - Chez Nuxit, activez les lignes suivantes en retirant le # en début de ligne :
+# AddHandler x-httpd-php5 .php
+# AddType application/x-httpd-php5 .php
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+#
+# - Chez Produweb, activez les lignes suivantes en retirant le # en début de ligne :
+# SetEnv DEFAULT_PHP_VERSION 5
+#
+# - Chez Infomaniak, activez PHP5 dans votre espace client et activez les lignes suivantes en retirant le # en début de ligne :
+# php_flag allow_url_fopen On
+# php_flag allow_url_include On
+# php_flag register_globals Off
+#
+# - Chez Planet-work, activez la ligne suivante en retirant le # en début de ligne :
+# AddHandler application/x-httpd-php5 .php
+#
+# - Chez Netissime, activez la ligne suivante en retirant le # en début de ligne :
+# php_flag register_globals Off
+#
+# - Chez Amen, activez PHP5 dans votre espace client catégorie Langage supportés
+#
+# - Chez Godaddy, activez PHP5 dans votre espace client catégorie Languages
+#
+# - TOUT TYPE D'HEBERGEUR - A ACTIVER EN CAS DE CONFIGURATION DU SERVEUR INCOMPLETE 
+# AddType video/ogg .ogv
+# AddType video/ogg .ogg
+# AddType video/mp4 .mp4
+# AddType video/webm .webm
+# AddType application/x-shockwave-flash swf
+
+# Gestion des 404
+# Une erreur 404 est associé à une mauvaise recherche (désactivée par défaut).
+# ATTENTION : configurez le ErrorDocument en précisant le bon chemin en cas d'installation dans un répertoire
+# Le code est à adapter en cas de site multilingue.
+ErrorDocument 404 /search.php?type=error404
+
+<FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">
+	ErrorDocument 404 default
+</FilesMatch>
+# Si on appelle http://lesite.com/http://unsite.com/image.png => comme http: n'est pas un répertoire existant, FilesMatch ne va pas prendre en compte la fin de l'URL => png$ ne marche pas
+# Donc on fait une règle spécifique pour ce genre de cas
+<FilesMatch "^http:">
+	ErrorDocument 404 default
+</FilesMatch>
+
+# FIN DE CONFIGURATION ###
+
+# Interdit l'accès à des répertoires sans index
+Options -Indexes
+
+# Déclaration de l'encodage du contenu, notamment au cas où le serveur soit configuré en UTF8 par défaut
+AddDefaultCharset UTF-8
+
+# Interdire fichiers .htaccess et .htpasswd, info et configuration, et avec extensions exotiques
+<FilesMatch "\.(inc|tpl|h|ihtml|sql|ini|conf|class|bin|spd|theme|module|exe|asa|log|dat|bak|db|PHPEditBackup|htaccess|htpasswd)$">
+	Deny from all
+</FilesMatch>
+
+<ifModule mod_headers.c>
+	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc)$">
+		# Mise en cache par le navigateur pendant 24h par défaut des images, CSS, Javascript.
+		Header set Cache-Control "max-age=604800"
+	</FilesMatch>
+</ifModule>
+
+<IfModule mod_deflate.c>
+	SetEnvIfNoCase Request_URI telechargement/download\.php$ no-gzip dont-vary
+</ifModule>
+
+<Files ~ "^\.ht">
+	Order allow,deny
+	Deny from all
+</Files>
+<Files ~ "\info.inc.php$">
+	Deny from all
+</Files>
+<Files ~ "\configuration.inc.php$">
+	Deny from all
+</Files>
+
+<IfModule mod_rewrite.c>
+	# Toute la section des Rewrite[...] ne fonctionnera que si l'hébergement ne supporte pas l'URL Rewriting
+	# Pour avoir PEEL Shopping utilisant l'URL Rewriting, vous devez installer le module Premium
+	RewriteEngine on
+
+	# CONFIGURATION : Sur certains hébergements (OVH, Amen, ...) il faut parfois configurer le RewriteBase en retirant le # en début de ligne
+	# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredeboutique/
+	# RewriteBase /
+	# ...ou... :
+	# RewriteBase /monrepertoiredeboutique/
+
+	RewriteCond %{REQUEST_URI} !^/js/(.*)$
+	RewriteCond %{REQUEST_URI} !^js/(.*)$
+	RewriteRule ^([a-z]{2})/(.*)$ /$2?langue=$1 [QSA,L]
+
+	#Navigation sur RSS
+	RewriteRule ^rss\.php$ modules/rss/rss.php [QSA,L]
+	RewriteRule ^rss\.xml$  modules/rss/rss.php [QSA,L]
+	RewriteRule ^rss-([0-9]+)\.xml  modules/rss/rss.php?cat=$1 [QSA,L]
+
+	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/$ achat/index.php [QSA,L]
+	RewriteRule ^(achat|buy|comprar|kauf|acquisto|koop)/cat-(.*)-([0-9]+)\.html$ achat/index.php?catid=$3 [QSA,L]
+	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/(.*)\.(.*)$ achat/$2.$3 [QSA,L]
+	RewriteRule ^(lire|read|leer|lesen|lees)/(.*)-([0-9]+)/(.*)-([0-9]+)\.html$ lire/article_details.php?id=$5&rubid=$3 [QSA,L]
+	RewriteRule ^(lire|read|leer|lesen|lees)/(.*)-([0-9]+)\.html$ lire/index.php?rubid=$3 [QSA,L]
+	RewriteRule ^(.*)-([0-9]+)/(.*)-([0-9]+)\.html$ achat/produit_details.php?id=$4&catid=$2 [QSA,L]
+	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/lettre-(.)\.html$ lexique/index.php?lettre=$2 [QSA,L]
+	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]
+	RewriteRule ^(lexicon|lexico|lexikon|lessico)/ lexique/index.php [QSA,L]
+	RewriteRule ^(dire-a-un-ami|tell-a-friend|haga-conocer-a-amigos|vertel-een-vriend)$ modules/direaunami/direaunami.php [L,QSA]
+</ifModule>

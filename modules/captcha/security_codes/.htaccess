@@ -1,0 +1,4 @@
+Options -Indexes
+<FilesMatch "\.(pl|cgi|php|php3|php4|php5|phtml|phtm|php6|php7)$">
+        Deny from All
+</FilesMatch>
