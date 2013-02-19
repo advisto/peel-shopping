@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: fonctions.php 35389 2013-02-19 16:29:38Z gboussin $
 if (!defined('PAYPAL_SANDBOX')) {
 	// Mettre à true pour faire des tests avec des comptes Sandbox
 	define('PAYPAL_SANDBOX', false);
@@ -55,15 +55,13 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	$tpl->assign('zip', str_replace(array("\n", "\r", "\r\n"), "", $zip_ship));
 	$tpl->assign('city', str_replace(array("\n", "\r", "\r\n"), "", $ville_ship));
 	$tpl->assign('country', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_ship)), 0, 2)));
-	if($ville_bill!==null) {
-		$tpl->assign('first_name', str_replace(array("\n", "\r", "\r\n"), "", $prenom_bill));
-		$tpl->assign('last_name', str_replace(array("\n", "\r", "\r\n"), "", $nom_bill));
-		$tpl->assign('address1', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 0, 100));
-		$tpl->assign('address2', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
-		$tpl->assign('zip', str_replace(array("\n", "\r", "\r\n"), "", $zip_bill));
-		$tpl->assign('city', str_replace(array("\n", "\r", "\r\n"), "", $ville_bill));
-		$tpl->assign('country', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
-	}
+	$tpl->assign('prenom_bill', str_replace(array("\n", "\r", "\r\n"), "", $prenom_bill));
+	$tpl->assign('nom_bill', str_replace(array("\n", "\r", "\r\n"), "", $nom_bill));
+	$tpl->assign('adresse1_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 0, 100));
+	$tpl->assign('address2_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
+	$tpl->assign('zip_bill', str_replace(array("\n", "\r", "\r\n"), "", $zip_bill));
+	$tpl->assign('ville_bill', str_replace(array("\n", "\r", "\r\n"), "", $ville_bill));
+	$tpl->assign('pays_bill', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
 	$tpl->assign('return', $GLOBALS['wwwroot'] . '/modules/paypal/ok.php?id=' . $order_id);
 	$tpl->assign('cancel_return', $GLOBALS['wwwroot'] . '/modules/paypal/nok.php?id=' . $order_id);
 	$tpl->assign('notify_url', $GLOBALS['wwwroot'] . '/modules/paypal/ipn.php');

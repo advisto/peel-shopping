@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: fonctions.php 35393 2013-02-19 17:59:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -881,12 +881,12 @@ function get_email_template_options($option_id_nature = 'id', $category_id = nul
 		if ($option_id_nature == 'id') {
 			$this_value = vn($row_template['id']);
 			if (!empty($value_select)) {
-				$this_select = frmvalide(String::str_form_value(vn($value_select)) == $this_value, 'selected="selected"');
+				$this_select = frmvalide(vn($value_select) == $this_value, 'selected="selected"');
 			}
 		} elseif ($option_id_nature == 'technical_code') {
 			$this_value = vb($row_template['technical_code']);
 			if (!empty($value_select)) {
-				$this_select = frmvalide(String::str_form_value(vb($value_select)) == $this_value, 'selected="selected"');
+				$this_select = frmvalide(vb($value_select) == $this_value, 'selected="selected"');
 			}
 		}
 		$output .= '

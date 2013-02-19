@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35357 2013-02-17 20:38:49Z gboussin $
+// $Id: fonctions.php 35393 2013-02-19 17:59:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -806,7 +806,7 @@ function get_delivery_type_options($selected_delivery_type_id_or_name = null)
 	$output = '';
 	$sql_type = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_types
-		WHERE etat = 1 AND (nom_" . $_SESSION['session_langue'] . "!='' OR id='".intval($selected_delivery_type_id_or_name)."'".(!empty($selected_delivery_type_id_or_name)?" OR id='".$selected_delivery_type_id_or_name."'":"").")
+		WHERE etat = 1 AND (nom_" . $_SESSION['session_langue'] . "!=''".(!empty($selected_delivery_type_id_or_name)?" OR id='" . real_escape_string($selected_delivery_type_id_or_name) . "'":"").")
 		ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC";
 	$res_type = query($sql_type);
 

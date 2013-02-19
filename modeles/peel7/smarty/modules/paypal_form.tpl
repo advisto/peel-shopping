@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paypal_form.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: paypal_form.tpl 35389 2013-02-19 16:29:38Z gboussin $
 *}<form id="paypalForm" action="{$url}" method="post">
 	<input type="hidden" name="charset" value="{$charset|str_form_value}">
 	<input type="hidden" name="cmd" value="_ext-enter" />
@@ -29,8 +29,8 @@
 	<input type="hidden" name="country" value="{$country|str_form_value}">
 	{if $prenom_bill}<input type="hidden" name="billing_first_name" value="{$prenom_bill|str_form_value}" />{/if}
 	{if $nom_bill}<input type="hidden" name="billing_last_name" value="{$nom_bill|str_form_value}" />{/if}
-	{if $adresse_bill}<input type="hidden" name="billing_address1" value="{$adresse1_bill|str_form_value}" />{/if}
-	{if $adresse_bill}<input type="hidden" name="billing_address2" value="{$adresse2_bill|str_form_value}" />{/if}
+	{if $adresse1_bill}<input type="hidden" name="billing_address1" value="{$adresse1_bill|str_form_value}" />{/if}
+	{if $adresse2_bill}<input type="hidden" name="billing_address2" value="{$adresse2_bill|str_form_value}" />{/if}
 	{if $zip_bill}<input type="hidden" name="billing_zip" value="{$zip_bill|str_form_value}" />{/if}
 	{if $ville_bill}<input type="hidden" name="billing_city" value="{$ville_bill|str_form_value}" />{/if}
 	{if $pays_bill}<input type="hidden" name="billing_country" value="{$pays_bill|str_form_value}" />{/if}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 35356 2013-02-17 17:59:15Z gboussin $
+// $Id: configuration.inc.php 35388 2013-02-19 15:56:22Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -559,7 +559,7 @@ if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GL
 	$GLOBALS['repertoire_modele'] = $GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'];
 }
 
-if ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0) {
+if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
 	redirect_and_die(str_replace('http://', 'https://', get_current_url()), true);

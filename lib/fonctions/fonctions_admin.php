@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 35130 2013-02-11 16:44:03Z sdelaporte $
+// $Id: fonctions_admin.php 35391 2013-02-19 17:12:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -520,7 +520,7 @@ function send_avis_expedition($commandeid, $delivery_tracking)
 	$custom_template_tags['NOM_FAMILLE'] = $commande->nom_bill;
 	$custom_template_tags['PRENOM'] = $commande->prenom_bill;
 	$custom_template_tags['CLIENT_INFOS_SHIP'] = $order_infos['client_infos_ship'];
-	$custom_template_tags['COUT_TRANSPORT'] = fprix($commande->cout_transport, true) . " " . TTC;
+	$custom_template_tags['COUT_TRANSPORT'] = fprix($commande->cout_transport, true) . " " . $GLOBALS['STR_TTC'];
 
 	$custom_template_tags['SHIPPED_ITEMS'] = '';
 	$product_infos_array = get_product_infos_array_in_order($commandeid, $commande->devise, $commande->currency_rate);
