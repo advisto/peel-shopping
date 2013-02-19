@@ -58,7 +58,7 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	$tpl->assign('prenom_bill', str_replace(array("\n", "\r", "\r\n"), "", $prenom_bill));
 	$tpl->assign('nom_bill', str_replace(array("\n", "\r", "\r\n"), "", $nom_bill));
 	$tpl->assign('adresse1_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 0, 100));
-	$tpl->assign('address2_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
+	$tpl->assign('adresse2_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
 	$tpl->assign('zip_bill', str_replace(array("\n", "\r", "\r\n"), "", $zip_bill));
 	$tpl->assign('ville_bill', str_replace(array("\n", "\r", "\r\n"), "", $ville_bill));
 	$tpl->assign('pays_bill', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
