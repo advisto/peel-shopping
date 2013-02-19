@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35189 2013-02-12 21:15:55Z gboussin $
+// $Id: fonctions.php 35384 2013-02-19 10:01:16Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -443,18 +443,17 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
 	$attributs_infos_array_count = count($attributs_infos_array);
 	$output = '' . $attr_var_name . '="";
 ';
-	$j = 0;
 	foreach($attributs_infos_array as $this_nom_attribut_id => $this_attributs_array_infos) {
 		$this_attributs_infos = current($this_attributs_array_infos);
 		// type_affichage_attribut vaut 0, 1 ou 2 et jamais 3. En effet 3 est une configuration par produit pour dire : prendre la valeur générale du site, et est déjà remplacé par la vraie valeur retenue qui est <=2.
 		if ($this_attributs_infos['type_affichage_attribut'] == 0) {
 			// Affichage sous forme de select
 			$output .= '
-	' . $attr_var_name . '+= "§"+document.getElementById("' . $form_id . '_custom_attribut' . $j . '").options[document.getElementById("' . $form_id . '_custom_attribut' . $j . '").selectedIndex].value;';
+	' . $attr_var_name . '+= "§"+document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '").options[document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '").selectedIndex].value;';
 		} elseif ($this_attributs_infos['type_affichage_attribut'] == 1) {
 			// Affichage sous forme de boutons radio
 			$output .= '
-	radio = document.getElementById("' . $form_id . '").attribut' . $j . ';
+	radio = document.getElementById("' . $form_id . '").attribut' . $this_nom_attribut_id . ';
 	for (var i=0; radio && i<radio.length;i++) {
 		if (radio[i].checked) {
 			' . $attr_var_name . '+= "§"+radio[i].value;
@@ -464,15 +463,14 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
 		} elseif ($this_attributs_infos['type_affichage_attribut'] == 2) {
 			// Affichage sous forme de checkbox
 			$output .= '
-	for (var i=0; eval(\'document.getElementById("' . $form_id . '").attribut' . $j . '_\'+i);i++) {
-		checkbox = eval(\'document.getElementById("' . $form_id . '").attribut' . $j . '_\'+i);
+	for (var i=0; document.getElementById("attribut' . $this_nom_attribut_id . '-"+i);i++) {
+		checkbox = document.getElementById("attribut' . $this_nom_attribut_id . '-"+i);
 		if (checkbox.checked) {
 			' . $attr_var_name . '+= "§"+checkbox.value;
 		}
 	}
 ';
 		}
-		$j++;
 	}
 	return $output;
 }
