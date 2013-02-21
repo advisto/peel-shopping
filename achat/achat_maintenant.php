@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: achat_maintenant.php 35410 2013-02-20 21:20:17Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -48,12 +48,14 @@ if (is_socolissimo_module_active() && !empty($_REQUEST) && !empty($_REQUEST['PUD
 		$check_fields['ville2'] = $GLOBALS['STR_ERR_TOWN'];
 	}
 	$form_error_object->valide_form($_SESSION['session_commande'], $check_fields);
-	$q_check_country_to_zone = query('SELECT zone
-		FROM peel_pays
-		WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '"');
-	if ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
-		if ($r_check_country_to_zone['zone'] != $_SESSION['session_caddie']->zoneId) {
-			$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
+	if(!empty($GLOBALS['site_parameters']['mode_transport'])) {
+		$q_check_country_to_zone = query('SELECT zone
+			FROM peel_pays
+			WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '"');
+		if ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
+			if ($r_check_country_to_zone['zone'] != $_SESSION['session_caddie']->zoneId) {
+				$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
+			}
 		}
 	}
 	$_SESSION['session_caddie']->set_paiement($_POST['payment_technical_code']);

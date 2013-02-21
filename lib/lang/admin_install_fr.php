@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_fr.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_install_fr.php 35413 2013-02-20 23:14:37Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -69,7 +69,7 @@ $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "Vous pouvez maintenant vous
 $GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Une fois identifié, cliquez sur Mon compte > Administrer le site en bas de page.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Remarques relatives à la sécurité de votre site :";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "OBLIGATOIRE : supprimez le répertoire installation pour commencer à travailler";
-$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "FORTEMENT RECOMMANDE : Pour la sécurité de votre site, renommez le nom du répertoire \"administrer\" en utilisant FTP par un nom difficile à deviner, et changez la variable {$GLOBALS['site_parameters']['backoffice_directory_name']} dans le fichier configuration.inc.php pour mettre ce nouveau nom.";
+$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "FORTEMENT RECOMMANDE : Pour la sécurité de votre site, renommez le nom du répertoire d'administration => Dans la page de gestion des \"variables de configuration\", changez la variable {$GLOBALS['site_parameters']['backoffice_directory_name']} par un nom difficile à deviner, puis changez le nom du dossier en FTP juste après.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Votre site a été configuré pour n'afficher les erreurs PHP que pour votre IP, à savoir {$_SERVER['REMOTE_ADDR']}. Ce paramètre est modifiable dans l'administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB : Si vous souhaitez intervenir sur le code PHP de votre site, faites attention lorsque vous modifiez vos fichiers d'utiliser un éditeur qui gère bien l'UTF-8 et ne rajoute pas de BOM (caractères invisibles) en entête des fichiers. En cas de doute, utilisez Notepad++ qui est téléchargeable gratuitement sur Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Choisissez les langues à installer :";

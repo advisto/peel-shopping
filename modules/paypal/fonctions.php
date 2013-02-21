@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35389 2013-02-19 16:29:38Z gboussin $
+// $Id: fonctions.php 35396 2013-02-19 21:35:18Z gboussin $
 if (!defined('PAYPAL_SANDBOX')) {
 	// Mettre à true pour faire des tests avec des comptes Sandbox
 	define('PAYPAL_SANDBOX', false);

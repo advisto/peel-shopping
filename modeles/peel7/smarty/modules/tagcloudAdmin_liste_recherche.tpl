@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tagcloudAdmin_liste_recherche.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: tagcloudAdmin_liste_recherche.tpl 35402 2013-02-20 14:27:37Z gboussin $
 *}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="4">{$STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE}</td>
@@ -28,7 +28,7 @@
 	{foreach $results as $res}
 		{$res.tr_rollover}
 		<td class="center">
-			<a onclick="return confirm('{$STR_ADMIN_DELETE_WARNING}');" title="{$STR_DELETE|str_form_value} {$res.tag_name}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a>
+			<a onclick="return confirm('{$STR_ADMIN_DELETE_WARNING|filtre_javascript:true:true:true}');" title="{$STR_DELETE|str_form_value} {$res.tag_name}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a>
 			<a title="{$STR_MODULE_TAGCLOUD_ADMIN_MODIFY_THIS_TAG}" href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" width="16" height="16" alt="" /></a>
 		</td>
 		<td><a title="{$STR_MODULE_TAGCLOUD_ADMIN_MODIFY_THIS_TAG}" href="{$res.edit_href|escape:'html'}">{$res.tag_name}</a></td>

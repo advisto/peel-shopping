@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 35350 2013-02-17 12:48:00Z gboussin $
+// $Id: import_produits.php 35420 2013-02-21 11:28:43Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -191,18 +191,30 @@ switch ($action) {
 						// Gestion des champs impactant $field_values (transformation d'un nom en id par exemple)
 						foreach($field_values as $this_field_name => $this_field_value) {
 							if ($this_field_name == 'id_marque') {
-								$q = query('SELECT id
-									FROM peel_marques
-									WHERE id=' . intval($this_field_value));
-								// Marque existante
-								if ($brand = fetch_assoc($q)) {
-									$field_values['id_marque'] = $brand['id'];
-								} else {
-									// Marque inexistante, on l'insère en base de données.
-									$q = query('INSERT INTO peel_marques
-										SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1"');
-									$field_values['id_marque'] = insert_id();
-									echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_BRAND_CREATED'], $line_number, $field_values['id_marque'])))->fetch();
+								if(String::strlen($this_value)>0) {
+									// La marque n'est pas vide - il faut que l'import soit compatible avec des noms de marque pouvant être des nombres
+									// Par défaut on considère qu'une marque donnée est une id de marque, sinon on gère comme si c'était un nom si pas trouvée
+									$q = query('SELECT id
+										FROM peel_marques
+										WHERE id=' . intval($this_field_value));
+									if ($brand = fetch_assoc($q)) {
+										// Marque existante
+										$field_values['id_marque'] = $brand['id'];
+									} else {
+										$sql_select_brand = 'SELECT id 
+											FROM peel_marques
+											WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_field_value).'"';
+										$query_brand = query($sql_select_brand);
+										if($brand = fetch_assoc($query_brand)){
+											$field_values['id_marque'] = $brand['id'];
+										}else{
+											// Marque inexistante, on l'insère en base de données.
+											$q = query('INSERT INTO peel_marques
+												SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1"');
+											$field_values['id_marque'] = insert_id();
+											echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_BRAND_CREATED'], $line_number, $field_values['id_marque'])))->fetch();
+										}
+									}
 								}
 							}
 						}

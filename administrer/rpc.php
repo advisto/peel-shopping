@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: rpc.php 35407 2013-02-20 16:48:04Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -44,13 +44,35 @@ if (!empty($search)) {
 	if (num_rows($query) > 0) {
 		$tpl_results = array();
 		while ($result = fetch_object($query)) {
+			$is_reseller = false;
+			if(!empty($id_utilisateur)) {
+				$priv = query("SELECT priv
+					FROM peel_utilisateurs
+					WHERE id_utilisateur='" . intval($id_utilisateur) . "'");
+				$rep = fetch_assoc($priv);
+				if ($rep['priv'] == 'reve') {
+					$is_reseller = true;
+				}
+			}
 			$product_object = new Product($result->id, $result, true, null, true, !is_micro_entreprise_module_active());
+			// Prix hors ecotaxe
+			$purchase_prix_ht = $product_object->get_final_price(0, false, $is_reseller) * $currency_rate;
+			$purchase_prix = $product_object->get_final_price(0, $apply_vat, $is_reseller) * $currency_rate;
+			$prix_cat_ht = $product_object->get_original_price(false, false, false, false) * $currency_rate;
+			$prix_cat = $product_object->get_original_price($apply_vat, false, false, false) * $currency_rate;
+			if (display_prices_with_taxes_in_admin()) {
+				$purchase_prix_displayed = fprix($purchase_prix, true, $currency, false, $currency_rate, false);
+			} else {
+				$purchase_prix_displayed = fprix($purchase_prix_ht, true, $currency, false, $currency_rate, false);
+			}
 			// Code pour recupérer select des tailles
-			$possible_sizes = $product_object->get_possible_sizes(true, true);
+			$possible_sizes = $product_object->get_possible_sizes('infos', 0, true, false, false, true);
 			$size_options_html = '';
 			if (!empty($possible_sizes)) {
-				foreach ($possible_sizes as $this_size_id => $this_size_name) {
-					$size_options_html .= '<option value="' . intval($this_size_id) . '">' . $this_size_name . '</option>';
+				foreach ($possible_sizes as $this_size_id => $this_size_infos) {
+					$option_content = $this_size_infos['name'];
+					$option_content .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . fprix($purchase_prix + $this_size_infos['final_price_formatted'], true) . ' => ' . $GLOBALS["STR_ADMIN_UPDATE"];
+					$size_options_html .= '<option value="' . intval($this_size_id) . '">' . $option_content . '</option>';
 				}
 			}
 			$possible_colors = $product_object->get_possible_colors();
@@ -62,26 +84,6 @@ if (!empty($search)) {
 				}
 			}
 			$tva_options_html = get_vat_select_options($result->tva);
-			$is_reseller = false;
-			if(!empty($id_utilisateur)) {
-				$priv = query("SELECT priv
-					FROM peel_utilisateurs
-					WHERE id_utilisateur='" . intval($id_utilisateur) . "'");
-				$rep = fetch_assoc($priv);
-				if ($rep['priv'] == 'reve') {
-					$is_reseller = true;
-				}
-			}
-			// Prix hors ecotax
-			$purchase_prix_ht = $product_object->get_final_price(0, false, $is_reseller) * $currency_rate;
-			$purchase_prix = $product_object->get_final_price(0, $apply_vat, $is_reseller) * $currency_rate;
-			$prix_cat_ht = $product_object->get_original_price(false, false, false, false) * $currency_rate;
-			$prix_cat = $product_object->get_original_price($apply_vat, false, false, false) * $currency_rate;
-			if (display_prices_with_taxes_in_admin()) {
-				$purchase_prix_displayed = fprix($purchase_prix, true, $currency, false, $currency_rate, false);
-			} else {
-				$purchase_prix_displayed = fprix($purchase_prix_ht, true, $currency, false, $currency_rate, false);
-			}
 			$tpl_results[] = array('id' => $result->id,
 				'reference' => $result->reference,
 				'nom' => $result->nom,

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 35391 2013-02-19 17:12:55Z gboussin $
+// $Id: fonctions_admin.php 35402 2013-02-20 14:27:37Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1455,7 +1455,7 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 			<table class="admin_commande_details" id="line' . $i . '">
 				<tr class="top">
 					<td width="20">
-						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.$GLOBALS['STR_DELETE'] . '" onclick="if(confirm(\''.$GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] .'\')){delete_order_line(' . $i . ');} return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
+						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="if(confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, false, true) .'\')){delete_order_line(' . $i . ');} return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
 						<input name="nom_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['nom_attribut'])) . '" />
 						<input name="total_prix_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['total_prix_attribut'])) . '" />
 					</td>

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_en.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_install_en.php 35413 2013-02-20 23:14:37Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -69,7 +69,7 @@ $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "You can now connect to the 
 $GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Once logged in, click on My Account > Manage the site footer.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Notes on the security of your site:";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "REQUIRED: Delete the installation directory to start working";
-$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "STRONGLY RECOMMENDED: For the security of your site, rename the directory name \"administer\" using FTP name difficult to guess, and change the variable {$GLOBALS['site_parameters']['backoffice_directory_name']} in the file configuration.inc.php to put the new name.";
+$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "STRONGLY RECOMMENDED: For the security of your site, rename the administration folder => In the \"Configuration variables\" administration page, change the variable \"backoffice_directory_name\" from \"{$GLOBALS['site_parameters']['backoffice_directory_name']}\" to a new name, and then rename the directory accordingly using FTP.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Your site has been configured to display PHP errors for your IP, namely {$_SERVER['REMOTE_ADDR']}. This parameter can be changed in the administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB: If you want to work on the PHP code on your site, be careful when you edit your files using an editor that supports UTF-8 well and does not add BOM (invisible characters) in the header files. If in doubt, use Notepad++ is a free download on the Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Select the languages ​​to install:";

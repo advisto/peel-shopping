@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_es.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_install_es.php 35413 2013-02-20 23:14:37Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -58,7 +58,7 @@ $GLOBALS["STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN"] = "Nota: El siguiente paso 5/6
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_OK"] = "Los derechos son correctas";
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_NOK"] = "Por favor, corrija los errores antes de continuar";
 $GLOBALS["STR_ADMIN_INSTALL_CONTINUE_WITH_ERRORS_BUTTON"] = "Continuar a pesar de los errores";
-$GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_RENAME_TABLES"] = "Si continúa, las tablas existentes no se pueden eliminar, pero si la estructura de datos no se espera que esto genere errores. Además, las bases de datos serán añadido, y que podría crear duplicados debe cambiar el nombre o eliminar tablas existentes ";
+$GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_RENAME_TABLES"] = "Si continúa, las tablas existentes no se pueden eliminar, pero si la estructura de datos no se espera que esto genere errores. Además, las bases de datos serán añadido, y que podría crear duplicados debe cambiar el nombre o eliminar tablas existentes.";
 $GLOBALS["STR_ADMIN_INSTALL_EXISTING_TABLES"] = "Tablas PEEL existentes:";
 $GLOBALS["STR_ADMIN_INSTALL_ADMIN_EMAIL"] = "Cuenta de administrador de correo electrónico";
 $GLOBALS["STR_ADMIN_INSTALL_SQL_FILE_EXECUTED"] = "Archivo SQL ejecutado";
@@ -69,9 +69,9 @@ $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "Ahora se puede conectar a l
 $GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Una vez conectado, haga clic en Mi cuenta > Administrar el pie de página del sitio.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Notas sobre la seguridad de su sitio:";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "REQUERIDO: Elimine el directorio de instalación para empezar a trabajar";
-$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "MUY RECOMENDADO: Para la seguridad de su sitio, cambie el nombre el nombre del directorio \"administrar\" utilizando el nombre de FTP difícil de adivinar, y cambiar la variable {$GLOBALS['site_parameters']['backoffice_directory_name']} en el archivo configuration.inc.php para poner el nuevo nombre";
+$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "MUY RECOMENDADO: Para la seguridad de su sitio, cambie el nombre del directorio => En la pagina \"Variables de configuración\", cambie la variable \"backoffice_directory_name\" de \"{$GLOBALS['site_parameters']['backoffice_directory_name']}\" a un nombre difícil de adivinar, y despues cambiar este directorio con FTP.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Su sitio ha sido configurado para mostrar los errores de PHP para su propiedad intelectual, a saber, {$_SERVER['REMOTE_ADDR']} Este parámetro se puede cambiar en la administración.";
-$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "Nota: Si usted desea trabajar en el código PHP en su sitio, tenga cuidado al editar los archivos con un editor que soporte UTF-8 bien y no añadir la lista de materiales (caracteres invisibles ) en los archivos de cabecera En caso de duda, el uso de Notepad++ es una descarga gratuita a través de Internet";
+$GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "Nota: Si usted desea trabajar en el código PHP en su sitio, tenga cuidado al editar los archivos con un editor que soporte UTF-8 bien y no añadir la lista de materiales (caracteres invisibles) en los archivos de cabecera. En caso de duda, el uso de Notepad++ es una descarga gratuita a través de Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Seleccione los idiomas que desea instalar:";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Debe habilitar PHP5 en su sitio: editar el archivo htaccess en la raíz del sitio para permitir a las líneas correspondientes a su alojamiento quitando el # al principio de la línea, o póngase en contacto con su hosting - Para el alojamiento en PEEL contacto : contact@peel.fr o +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Usted tendrá que cambiar manualmente la codificación de la página - PEEL contacto: contact@peel.fr o +33 (0) 1 75 43 67 97";

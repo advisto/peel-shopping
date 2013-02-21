@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_liste_nom.tpl 35187 2013-02-12 19:02:41Z gboussin $
+// $Id: attributsAdmin_liste_nom.tpl 35402 2013-02-20 14:27:37Z gboussin $
 *}<table class="main_table" cellpadding="2">
 	<tr>
 		<td class="entete" colspan="4">{$STR_MODULE_ATTRIBUTS_ADMIN_TITLE}</td>
@@ -32,7 +32,7 @@
 	</tr>
 	{foreach $results as $res}
 		{$res.tr_rollover}
-			<td class="center"><a onclick="return confirm('{$STR_ADMIN_CONFIRM_JAVASCRIPT}');" title="{$STR_DELETE|str_form_value} {$res.nom}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> <a href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" alt="{$STR_ADMIN_UPDATE}" /></a></td>
+			<td class="center"><a onclick="return confirm('{$STR_ADMIN_CONFIRM_JAVASCRIPT|filtre_javascript:true:true:true}');" title="{$STR_DELETE|str_form_value} {$res.nom}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> <a href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" alt="{$STR_ADMIN_UPDATE}" /></a></td>
 			<td class="center"><a title="{$STR_MODULE_ATTRIBUTS_ADMIN_UPDATE|str_form_value}" href="{$res.edit_href|escape:'html'}">{$res.nom}</a></td>
 			<td class="center">
 				{if !$res.texte_libre && !$res.upload}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35393 2013-02-19 17:59:28Z gboussin $
+// $Id: fonctions.php 35412 2013-02-20 22:56:24Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -938,6 +938,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			ORDER BY p.position';
 		$res_paiement = query($sql_paiement);
 	}
+	$results_count = num_rows($res_paiement);
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
 		if((empty($tab_paiement['etat']) || empty($tab_paiement['nom_' . $_SESSION['session_langue']])) && (!$show_selected_even_if_not_available || $tab_paiement['technical_code'] != $selected_payment_technical_code)){
 			// On ne prend que les moyens de paiement actifs, ou ceux qui ont pour code technique $selected_payment_technical_code si $show_selected_even_if_not_available = true
@@ -967,7 +968,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
 			$tpl->assign('technical_code', $tab_paiement['technical_code']);
 			$tpl->assign('nom', $tab_paiement['nom_' . $_SESSION['session_langue']]);
-			$tpl->assign('issel', (vn($selected_payment_technical_code) == $tab_paiement['technical_code'] || num_rows($res_paiement) == 1));
+			$tpl->assign('issel', (vn($selected_payment_technical_code) == $tab_paiement['technical_code'] || $results_count == 1));
 			if ($tab_paiement['tarif'] != 0) {
 				$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
 			}

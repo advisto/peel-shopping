@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 35388 2013-02-19 15:56:22Z gboussin $
+// $Id: configuration.inc.php 35412 2013-02-20 22:56:24Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -48,7 +48,8 @@ if (!function_exists('ini_get') || @ini_get('register_globals')) {
 // ***********************************
 // * DEBUT CONFIGURATION PAR DEFAUT  *
 // Les valeurs ci-dessous sont ensuite remplacées après l'installation par les valeurs contenues dans la table peel_configuration
-$GLOBALS['site_parameters']['backoffice_directory_name'] = 'administrer';
+// Si vous voulez imposer ce paramètre après l'installation, mettez vos lignes dans la section plus bas appelée FORCE SITE_PARAMETERS
+$GLOBALS['site_parameters']['backoffice_directory_name'] = 'administrer'; // VOIR DANS FORCE SITE_PARAMETERS
 $GLOBALS['site_parameters']['cache_folder'] = 'cache';
 $GLOBALS['site_parameters']['css'] = 'screen.css,menu.css';
 $GLOBALS['site_parameters']['sha256_encoding_salt'] = "k)I8#;z=TIxnXmIPdW2TRzt4Ov89|#V~cU@]";
@@ -239,6 +240,8 @@ if (!IN_INSTALLATION) {
 		$parameters_loaded = true;
 	}
 } 
+// FORCE SITE_PARAMETERS : Si on veut forcer des paramètres site_parameters en priorité sur la table peel_configuration, retirez les // devant la ligne suivante et remplacez adminfolder par votre valeur :
+// $GLOBALS['site_parameters']['backoffice_directory_name'] = 'adminfolder';
 
 $GLOBALS['display_errors'] = 0;
 if (!isset($GLOBALS['site_parameters']['display_errors_for_ips'])) {

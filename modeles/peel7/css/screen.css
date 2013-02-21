@@ -865,6 +865,7 @@ div.enregistrement span.enregistrementgauche {
 	margin: 0px;
 	width: 200px;
 	padding-right: 10px;
+	vertical-align: top;
 }
 div.enregistrement span.enregistrementdroite {
 	display: inline-block;

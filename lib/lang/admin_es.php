@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: admin_es.php 35402 2013-02-20 14:27:37Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -776,7 +776,7 @@ $GLOBALS["STR_ADMIN_PRIX_TITLE"] = "productos de gestión de precios por categor
 $GLOBALS["STR_ADMIN_PRIX_UPDATE"] = "Cambio de precios";
 $GLOBALS["STR_ADMIN_PRODUCT_NAME"] = "Nombre del producto";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"] = "Eliminar esta línea";
-$GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] = "¿Está seguro que desea eliminar este producto de mi pedido \ nEste borrará después definitivo en Guardar cambios en la parte inferior de la página?";
+$GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] = "¿Está seguro que desea eliminar este producto de mi pedido? Este borrará después definitivo en Guardar cambios en la parte inferior de la página.";
 $GLOBALS["STR_ADMIN_PRODUCTS_CATEGORY"] = "categorías de sus productos";
 $GLOBALS["STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED"] = "Número de pensar en este estúpido";
 $GLOBALS["STR_ADMIN_PRODUITS_ACHETES_ERR_ID_NOT_FOUND"] = "El identificador proporcionado no existe.";
