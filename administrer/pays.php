@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: pays.php 35432 2013-02-21 17:40:20Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -260,11 +260,10 @@ function insere_pays(&$frm)
  * Met à jour le pays $id avec de nouvelles valeurs. Les champs sont dans $frm
  *
  * @param integer $id
- * @param mixed $img
  * @param array $frm Array with all fields data
  * @return
  */
-function maj_pays($id, $img, $frm)
+function maj_pays($id, $frm)
 {
 	$sql = "UPDATE peel_pays
 		SET zone = '" . intval($frm['zone']) . "'";
