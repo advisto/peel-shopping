@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: display_caddie.php 35435 2013-02-21 19:28:02Z gboussin $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -648,7 +648,7 @@ if (!function_exists('affichage_fin_cb')) {
 		if ($payment_validated) {
 			$tpl->assign('payment_msg', $GLOBALS['STR_PAYMENT_SUCCEED']);
 			$tpl->assign('bottom_msg', $GLOBALS['STR_YOU_CAN_EDIT_YOUR_ORDER']);
-			$tpl->assign('resume_commande', affiche_resume_commande($commandeid, false, true));
+			$tpl->assign('resume_commande', affiche_resume_commande($order_id, false, true));
 		}else{
 			$tpl->assign('payment_msg', $GLOBALS['STR_PAYMENT_FAILED']);
 			$tpl->assign('bottom_msg', $GLOBALS['STR_ORDER_RENEW_INVITE']);
