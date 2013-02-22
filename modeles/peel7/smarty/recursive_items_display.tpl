@@ -10,11 +10,11 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: recursive_items_display.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: recursive_items_display.tpl 35395 2013-02-19 19:05:51Z sdelaporte $
 *}{foreach $items as $it}
 <li class="{if $it.has_sons}plus{else}minus{/if}{if $it.is_current} current{/if}{if isset($it.technical_code)} m_item_{$it.technical_code}{/if}">
 	{if isset($it.href)}
-		{$max_length=25}
+		{$max_length=$item_max_length}
 		{if !empty($it.nb)}
 		{$max_length=$max_length-strlen($it.nb)-5}
 		{/if}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: caddie_content_html.tpl 35443 2013-02-22 00:16:25Z gboussin $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -51,8 +51,6 @@
 				</tr>
 				{/if}
 			</table>
-		</form>
-		<form id="caddieform" method="post" action="{$action|escape:'html'}">
 			<table class="cart_button_and_link">
 				<tr>
 					<td class="half_expand_in_container">

@@ -51,8 +51,6 @@
 				</tr>
 				{% endif %}
 			</table>
-		</form>
-		<form id="caddieform" method="post" action="{{ action|escape('html') }}">
 			<table class="cart_button_and_link">
 				<tr>
 					<td class="half_expand_in_container">

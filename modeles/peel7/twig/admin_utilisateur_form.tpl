@@ -32,7 +32,7 @@
 {% endif %}
 {% if gift_check_link %}
 		<tr>
-			<td style="font-weight:bold;" colspan="2"><img src="{{ wwwroot_in_admin }}/images/mail.gif" />&nbsp;<a onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM }}');" href="{{ gift_checks_href|escape('html') }}">{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK }}</a></td>
+			<td style="font-weight:bold;" colspan="2"><img src="{{ wwwroot_in_admin }}/images/mail.gif" />&nbsp;<a onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM|filtre_javascript(true,true,true) }}');" href="{{ gift_checks_href|escape('html') }}">{{ STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK }}</a></td>
 		</tr>
 {% endif %}
 {% if societe %}

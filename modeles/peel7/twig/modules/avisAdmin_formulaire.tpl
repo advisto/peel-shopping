@@ -44,7 +44,7 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				{% for this_note=$note_max; $this_note>=1; $this_note-- }}
+				{% for this_note in range(note_max, 1, -1) }}
 				<input type="radio" name="note" value="{{ this_note }}"{% if note == this_note %} checked="checked"{% endif %} />{% for i in 1..this_note %}<img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" />{% endfor %}<br />
 				{% endfor %}
 			</td>

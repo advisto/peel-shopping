@@ -29,8 +29,8 @@
 	<input type="hidden" name="country" value="{{ country|str_form_value }}">
 	{% if prenom_bill %}<input type="hidden" name="billing_first_name" value="{{ prenom_bill|str_form_value }}" />{% endif %}
 	{% if nom_bill %}<input type="hidden" name="billing_last_name" value="{{ nom_bill|str_form_value }}" />{% endif %}
-	{% if adresse_bill %}<input type="hidden" name="billing_address1" value="{{ adresse1_bill|str_form_value }}" />{% endif %}
-	{% if adresse_bill %}<input type="hidden" name="billing_address2" value="{{ adresse2_bill|str_form_value }}" />{% endif %}
+	{% if adresse1_bill %}<input type="hidden" name="billing_address1" value="{{ adresse1_bill|str_form_value }}" />{% endif %}
+	{% if adresse2_bill %}<input type="hidden" name="billing_address2" value="{{ adresse2_bill|str_form_value }}" />{% endif %}
 	{% if zip_bill %}<input type="hidden" name="billing_zip" value="{{ zip_bill|str_form_value }}" />{% endif %}
 	{% if ville_bill %}<input type="hidden" name="billing_city" value="{{ ville_bill|str_form_value }}" />{% endif %}
 	{% if pays_bill %}<input type="hidden" name="billing_country" value="{{ pays_bill|str_form_value }}" />{% endif %}

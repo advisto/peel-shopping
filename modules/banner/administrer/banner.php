@@ -11,7 +11,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: banner.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: banner.php 35430 2013-02-21 16:50:47Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -61,7 +61,6 @@ if (is_module_banner_active ()) {
 			if (!$form_error_object->count()) {
 				$_POST['image'] = upload('image', false, 'image_or_swf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
 				insere_banniere($_POST);
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"], vb($_POST['description']))))->fetch();
 				affiche_filtre_banner($frm);
 				affiche_liste_banniere();
 			}else{

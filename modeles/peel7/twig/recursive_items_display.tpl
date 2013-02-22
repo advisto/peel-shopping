@@ -14,7 +14,7 @@
 #}{% for it in items %}
 <li class="{% if it.has_sons %}plus{% else %}minus{% endif %}{% if it.is_current %} current{% endif %}{% if (it.technical_code) %} m_item_{{ it.technical_code }}{% endif %}">
 	{% if (it.href) %}
-		{% set max_length=25 %}
+		{% set max_length=item_max_length %}
 		{% if (it.nb) %}
 		{% set max_length=max_length-(it.nb|length)-5 %}
 		{% endif %}

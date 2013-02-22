@@ -47,5 +47,5 @@
 	{{ token }}
 	<p><a href="{{ login_href|escape('html') }}">{{ login_txt }}</a> | <a href="{{ home_href|escape('html') }}">{{ home_txt }}</a></p>
 </form>
-{% endif %}
 {{ js_password_control }}
+{% endif %}

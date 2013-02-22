@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 35379 2013-02-18 17:11:58Z gboussin $
+// $Id: display.php 35395 2013-02-19 19:05:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -526,17 +526,18 @@ if (!function_exists('get_recursive_items_display')) {
 	 * @param string $mode
 	 * @param mixed $location indicates the position in the website : left or right
 	 * @param integer $max_depth_allowed
+	 * @param integer $item_max_length spécifie le nombre de caractère des ancres dans les liens
 	 * @return
 	 */
-	function get_recursive_items_display(&$all_parents_with_ordered_direct_sons_array, &$item_name_array, $this_parent, $this_parent_depth, $highlighted_item, $mode = 'categories', $location = null, $max_depth_allowed = null)
+	function get_recursive_items_display(&$all_parents_with_ordered_direct_sons_array, &$item_name_array, $this_parent, $this_parent_depth, $highlighted_item, $mode = 'categories', $location = null, $max_depth_allowed = null, $item_max_length = 25)
 	{
 		$output = '';
 		if (!empty($all_parents_with_ordered_direct_sons_array[$this_parent])) {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('recursive_items_display.tpl');
 			$tpl->assign('sons_ico_src', $GLOBALS['wwwroot'] . '/images/right.gif');
 			$tpl->assign('location', $location);
+			$tpl->assign('item_max_length', $item_max_length);
 			$tplItems = array();
-
 			$this_depth = $this_parent_depth + 1;
 			foreach ($all_parents_with_ordered_direct_sons_array[$this_parent] as $this_item) {
 				$searched_item = '';
@@ -588,12 +589,11 @@ if (!function_exists('get_recursive_items_display')) {
 							$tplItem['nb'] = $nb;
 						}
 					}
-					$tplItem['max_length'] = 25;
 					$tplItem['name'] = $item_name_array[$this_item];
 				}
 
 				if (!empty($all_parents_with_ordered_direct_sons_array[$this_item]) && (empty($max_depth_allowed) || $this_depth<$max_depth_allowed)) {
-					$tplItem['SONS'] = get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $this_item, $this_depth, $highlighted_item, $mode, $location, $max_depth_allowed);
+					$tplItem['SONS'] = get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $this_item, $this_depth, $highlighted_item, $mode, $location, $max_depth_allowed, $item_max_length);
 					$tplItem['depth'] = $this_depth;
 				}
 				if (is_advistofr_module_active())

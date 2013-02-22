@@ -32,7 +32,7 @@
 	</tr>
 	{% for res in results %}
 		{{ res.tr_rollover }}
-			<td class="center"><a onclick="return confirm('{{ STR_ADMIN_CONFIRM_JAVASCRIPT }}');" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> <a href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_ADMIN_UPDATE }}" /></a></td>
+			<td class="center"><a onclick="return confirm('{{ STR_ADMIN_CONFIRM_JAVASCRIPT|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> <a href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_ADMIN_UPDATE }}" /></a></td>
 			<td class="center"><a title="{{ STR_MODULE_ATTRIBUTS_ADMIN_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}">{{ res.nom }}</a></td>
 			<td class="center">
 				{% if not res.texte_libre and not res.upload %}

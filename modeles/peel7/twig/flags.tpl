@@ -12,5 +12,5 @@
 // +----------------------------------------------------------------------+
 // $Id: flags.tpl 35067 2013-02-08 14:21:55Z gboussin $
 #}{% for d in data %}
-<span class="{{ d.flag_css_class }}" lang="{{ d.lang }}" title="{{ d.lang_name }}">{% if not d.selected %}<a href="{{ d.href|htmlspecialchars }}" title="{{ d.lang_name }}">{% endif %}<img src="{{ d.src|escape('html') }}" alt="{{ d.lang_name }}"/>{% if not d.selected %}</a>{% endif %}</span>{% if not 0 %}&nbsp;{% endif %}
+{% if display_names %}<div class="full_flag">{% endif %}<span class="{{ d.flag_css_class }}" lang="{{ d.lang }}" title="{{ d.lang_name }}">{% if not d.selected %}<a href="{{ d.href|htmlspecialchars }}" title="{{ d.lang_name }}">{% endif %}<img class="{{ d.flag_css_class }}" src="{{ d.src|escape('html') }}" alt="{{ d.lang_name }}"/>{% if not d.selected %}</a>{% endif %}</span>{% if not 0 %}&nbsp;{% endif %}{% if display_names %}<br /><a href="{{ d.href|htmlspecialchars }}">{{ d.lang_name }}</a></div>{% endif %}
 {% endfor %}

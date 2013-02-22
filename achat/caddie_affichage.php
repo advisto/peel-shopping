@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: caddie_affichage.php 35443 2013-02-22 00:16:25Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_caddie.php");
 
@@ -58,6 +58,7 @@ if (isset($_POST['func'])) {
 } else {
 	$mode = vb($_GET['func']);
 }
+
 if ($mode) {
 	switch ($mode) {
 		case "enleve" :
@@ -71,27 +72,26 @@ if ($mode) {
 			break;
 
 		case "recalc" :
-			$_SESSION['session_caddie']->change_lines_data($_POST);
-			break;
-
 		case "commande" :
 		default :
 			$_SESSION['session_caddie']->change_lines_data($_POST);
-			if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
-				// Frais de port calculés à partir du poids total ou du montant total d'une commande
-				if (empty($_SESSION['session_caddie']->zoneId)) {
-					$form_error_object->add('pays_zone', $GLOBALS['STR_ERR_ZONE']);
-				} elseif (empty($_SESSION['session_caddie']->typeId)) {
-					$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
-				} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone = '" . intval($_SESSION['session_caddie']->zoneId) . "'")) == 0) {
-					// Ici on teste la cohérence entre le type et la zone
-					$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
+			if($mode!='recalc') {
+				if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
+					// Frais de port calculés à partir du poids total ou du montant total d'une commande
+					if (empty($_SESSION['session_caddie']->zoneId)) {
+						$form_error_object->add('pays_zone', $GLOBALS['STR_ERR_ZONE']);
+					} elseif (empty($_SESSION['session_caddie']->typeId)) {
+						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
+					} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone = '" . intval($_SESSION['session_caddie']->zoneId) . "'")) == 0) {
+						// Ici on teste la cohérence entre le type et la zone
+						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
+					} else {
+						$redirect_next_step = true;
+					}
 				} else {
+					// Pas de frais de port (c'est la configuration pour tout le site)
 					$redirect_next_step = true;
 				}
-			} else {
-				// Pas de frais de port (c'est la configuration pour tout le site)
-				$redirect_next_step = true;
 			}
 			break;
 	}

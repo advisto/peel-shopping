@@ -50,7 +50,7 @@
 			<td>
 			{% if (directory_options) %}
 			<select name="template_directory">
-				<option>{{ STR_CHOOSE }}...</option>
+				<option value="">{{ STR_CHOOSE }}...</option>
 				{% for o in directory_options %}
 				<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.value }}</option>
 				{% endfor %}
@@ -66,6 +66,8 @@
 					<option value="default_1"{% if template_multipage == 'default_1' %} selected="selected"{% endif %}>{{ STR_ADMIN_SITES_DISPLAY }} n°1</option>
 					<option value="default_2"{% if template_multipage == 'default_2' %} selected="selected"{% endif %}>{{ STR_ADMIN_SITES_DISPLAY }} n°2</option>
 					<option value="default_3"{% if template_multipage == 'default_3' %} selected="selected"{% endif %}>{{ STR_ADMIN_SITES_DISPLAY }} n°3</option>
+					<option value="default_4"{% if template_multipage == 'default_4' %} selected="selected"{% endif %}>{{ STR_ADMIN_SITES_DISPLAY }} n°4</option>
+					{% if template_multipage and template_multipage != 'default_1' and template_multipage != 'default_2' and template_multipage != 'default_3' %}<option value="{{ template_multipage }}" selected="selected">{{ STR_ADMIN_SITES_DISPLAY }} "{{ template_multipage }}"</option>{% endif %}
 				</select>
 			</td>
    	 	</tr>

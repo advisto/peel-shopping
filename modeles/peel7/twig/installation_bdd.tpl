@@ -38,7 +38,9 @@
 			<tr>
 				<td colspan="2">
 					<h2>{{ STR_ADMIN_INSTALL_LANGUAGE_CHOOSE|escape('html') }}</h2>
-					<p>{html_checkboxes name='langs' options=$select_languages selected=$install_langs_value separator='<br />' %}</p>
+					<p>{% for lang,name in select_languages %}
+						<input type="checkbox" name="langs[]" value="{{ lang|str_form_value }}"{% if lang == install_langs_value %} checked="checked"{% endif %} /> {{ name }}<br />
+					{% endfor %}</p>
 				</td>
 			</tr>
 			<tr>

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35191 2013-02-12 23:54:37Z gboussin $
+// $Id: fonctions.php 35430 2013-02-21 16:50:47Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -236,13 +236,13 @@ function supprime_banniere($id)
  * @param array $frm Array with all fields data
  * @return
  */
-function insere_banniere($img, &$frm)
+function insere_banniere(&$frm)
 {
 	/*ajoute le banniere dans la table banniere */
 	if (empty($frm['etat'])) {
 		$frm['etat'] = 0;
 	}
-	if (!empty($img) || !empty($frm['tag_html'])) {
+	if (!empty($frm['image']) || !empty($frm['tag_html'])) {
 		$sql = "INSERT INTO peel_banniere (
 			description
 			, image
@@ -275,7 +275,7 @@ function insere_banniere($img, &$frm)
 			, keywords
 		) VALUES (
 			'" . nohtml_real_escape_string($frm['description']) . "'
-			, '" . nohtml_real_escape_string($img) . "'
+			, '" . nohtml_real_escape_string($frm['image']) . "'
 			, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['date_debut'])) . "'
 			, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['date_fin'])) . "'
 			, '" . nohtml_real_escape_string($frm['etat']) . "'";
@@ -305,6 +305,7 @@ function insere_banniere($img, &$frm)
 			, '" . nohtml_real_escape_string(vb($frm['keywords'])) . "'
 		)";
 		$qid = query($sql);
+		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"], vb($_POST['description']))))->fetch();
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_BANNER_ADMIN_ERROR_INSERTED"]))->fetch();
 	}
@@ -352,10 +353,11 @@ function maj_banniere($id, &$frm)
 		, keywords = "' . nohtml_real_escape_string(vb($frm['keywords'])) . '"
 		WHERE id = "' . intval($id) . '"';
 	if (query($sql)) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"], $id)))->fetch();
+		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"], $id)))->fetch();
 	} else {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_BANNER_ADMIN_ERR_UPDATED"]))->fetch();
+		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_BANNER_ADMIN_ERR_UPDATED"]))->fetch();
 	}
+	return $ouptut;
 }
 
 /**

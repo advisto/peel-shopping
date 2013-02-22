@@ -15,8 +15,8 @@
 	{{ msg }}
 	{% if (allowed_types) %}
 		<ul>
-		{% for allowed_types as type => $name }}
-			<li>{{ type }} ({{ name }})</li>
+		{% for type in allowed_types }}
+			<li>{{ type }} ({{ allowed_types.type }})</li>
 		{% endfor %}
 		</ul>
 	{% endif %}

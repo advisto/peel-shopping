@@ -106,8 +106,6 @@
 										</tr>
 									</table>
 									{% endif %}
-								</td>
-								<td>
 									{% if (tous_avis) %}
 									<table class="product_link_to_modules">
 										<tr class="picto-tous_avis">
