@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: choixbase.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: choixbase.php 35460 2013-02-22 12:53:50Z gboussin $
 define('IN_INSTALLATION', 3);
 include("../configuration.inc.php");
 
@@ -35,7 +35,7 @@ if (!empty($_POST['wwwroot'])) {
 	$_SESSION['session_install_wwwroot'] = $_POST['wwwroot'];
 }
 
-if (mysql_connect($_SESSION['session_install_serveur'], $_SESSION['session_install_utilisateur'], $_SESSION['session_install_motdepasse']) === false) {
+if (@mysql_connect($_SESSION['session_install_serveur'], $_SESSION['session_install_utilisateur'], $_SESSION['session_install_motdepasse']) === false) {
 	redirect_and_die("bdd.php?err=1");
 }
 $i = 0;

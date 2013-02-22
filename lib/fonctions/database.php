@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 35103 2013-02-10 22:17:14Z gboussin $
+// $Id: database.php 35460 2013-02-22 12:53:50Z gboussin $
 if (!defined('IN_PEEL')) {
 die();
 }
@@ -45,12 +45,31 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 	if(empty($database_name) && $database_name!==false) {
 		$database_name = $GLOBALS['nom_de_la_base'];
 	}
+	$port = @ini_get("mysqli.default_port");
+	if(empty($port)) {
+		// Port par défaut
+		$port = 3306;
+	}
+	$socket = @ini_get("mysqli.default_socket");
+	if($socket === false) {
+		// Socket par défaut
+		$socket = null;
+	}
+	// Gestion des connexions du type server:socket ou server:port
+	$server_infos = explode(':',$serveur_mysql);
+	if(isset($server_infos[1])) {
+		if(is_numeric($server_infos[1])){
+			$port = $server_infos[1];
+		} else {
+			$socket = $server_infos[1];
+		}
+	}
 	if(isset($GLOBALS['site_parameters']['use_database_permanent_connection']) && ($GLOBALS['site_parameters']['use_database_permanent_connection'] === true || ($GLOBALS['site_parameters']['use_database_permanent_connection'] == 'local' && (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false)))) {
 		// L'utilisation de pconnect est souvent plus rapide, mais peut créer des problèmes divers
 		// Pour le travail en local sur un PC winbows, l'amélioration de performance peut être très grande
-		$database_object = new mysqli('p:'.$serveur_mysql, $utilisateur_mysql, $mot_de_passe_mysql);
+		$database_object = new mysqli('p:'.$server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
 	} else {
-		$database_object = new mysqli($serveur_mysql, $utilisateur_mysql, $mot_de_passe_mysql);
+		$database_object = new mysqli($server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
 	}
 	if (mysqli_connect_error()) {
 		$sujet_du_mail = 'MySQL connection problem (' . mysqli_connect_errno() . '): '.mysqli_connect_error();
