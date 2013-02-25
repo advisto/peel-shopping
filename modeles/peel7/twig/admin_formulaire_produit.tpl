@@ -238,7 +238,7 @@
 		<tr>
 			<td class="label">{{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input name="default_image{{ c.cmp_default_image }}" value="{{ c.default_image|str_form_value }}" /> {{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT }}
+				<input name="default_image{{ c.id }}" value="{{ c.default_image|str_form_value }}" /> {{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT }}
 			</td>
 		</tr>
 		{% if (c.images) %}
@@ -267,7 +267,7 @@
 		{% endfor %}
 		{% else %}
 		<tr>
-			<td class="label" id="td_{{ c.nom }}" colspan="2"><a href="" onclick="addImagesFields('{{ c.nom|filtre_javascript }}','{{ upload_images_per_color|filtre_javascript }}');return false">{{ STR_ADMIN_PRODUITS_ADD_INPUT_FOR_THIS_COLOR }}</a></td>
+			<td class="label" id="td_{{ c.id }}" colspan="2"><a href="" onclick="addImagesFields('{{ c.id|filtre_javascript }}','{{ upload_images_per_color|filtre_javascript }}');return false">{{ STR_ADMIN_PRODUITS_ADD_INPUT_FOR_THIS_COLOR }}</a></td>
 		</tr>
 		{% endif %}
 	{% endfor %}

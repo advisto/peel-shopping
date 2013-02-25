@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: fine_uploader.php 35480 2013-02-23 15:51:54Z gboussin $
 
 include("configuration.inc.php");
 
@@ -20,9 +20,10 @@ require($GLOBALS['dirroot'].'/lib/class/FineUploader.php');
 $uploader = new FineUploader();
 
 $file_kind = 'any';
-
-// Specify the list of valid extensions, ex. array("jpeg", "xml", "bmp")
-$uploader->allowedExtensions = $GLOBALS['site_parameters']['extensions_valides_'.$file_kind];
+if (!empty($GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
+	// Specify the list of valid extensions, ex. array("jpeg", "xml", "bmp")
+	$uploader->allowedExtensions = $GLOBALS['site_parameters']['extensions_valides_'.$file_kind];
+}
 
 // Specify max file size in bytes.
 $uploader->sizeLimit = $GLOBALS['site_parameters']['uploaded_file_max_size'];

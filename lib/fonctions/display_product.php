@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 35353 2013-02-17 17:37:44Z gboussin $
+// $Id: display_product.php 35474 2013-02-22 19:32:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -736,14 +736,31 @@ if (!function_exists('affiche_critere_stock')) {
 
 		$output = '';
 		$product_object = new Product($product_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-		$product_object->set_configuration($saved_color_id, $saved_size_id, $saved_attributs_list, is_reseller_module_active() && is_reseller(), false);
+		
+		// Gestion de la couleur
+		$and_scId_if_needed = empty($save_cart_id) || (!empty($save_cart_id) && !empty($_GET['scId']) && $save_cart_id == vn($_GET['scId']));
+		if ($and_scId_if_needed && ((!empty($_GET['cId']) && !$is_in_catalog) || ($is_in_catalog && !empty($_GET['cId']) && !empty($_GET['pId']) && vn($_GET['pId']) == $product_object->id))) {
+			$selected_color_id = intval($_GET['cId']);
+		} elseif (!empty($product_object->configuration_color_id)) {
+			$selected_color_id = $product_object->configuration_color_id;
+		} elseif (!empty($product_object->default_color_id)) {
+			$selected_color_id = $product_object->default_color_id;
+		} elseif($saved_color_id) {
+			// On prend la première valeur du tableau
+			$selected_color_id = $saved_color_id;
+		} else {
+			// On prend la première valeur du tableau
+			$selected_color_id = 0;
+		}
+	
+		$product_object->set_configuration($selected_color_id, $saved_size_id, $saved_attributs_list, is_reseller_module_active() && is_reseller(), false);
 		if (is_stock_advanced_module_active() && $product_object->on_stock == 1) {
-			// Gestion de tous les attributs et des stocks associés
 			$product_stock_infos = get_product_stock_infos($product_id);
 			// on regarde la quantité du produit en stock
 			$stock_remain_all = 0;
 			if (!empty($product_stock_infos)) {
 				foreach ($product_stock_infos as $stock_infos) {
+					if (($is_in_catalog && empty($product_object->configuration_color_id)) || (!empty($product_object->configuration_color_id) && $stock_infos['couleur_id'] == $product_object->configuration_color_id) || (empty($_GET['cId']) && empty($_GET['tId'])) || (!empty($stock_infos['couleur_id']) && !empty($_GET['cId']) && $_GET['cId'] == $stock_infos['couleur_id']) || (!empty($stock_infos['taille_id']) && !empty($_GET['tId']) && $_GET['tId'] == $stock_infos['taille_id'])) {
 					$stock_remain_all += $stock_infos['stock_temp'];
 				}
 			}
@@ -783,19 +800,6 @@ if (!function_exists('affiche_critere_stock')) {
 				// DISPLAY BY DEFAULT OF $GLOBALS['STR_COLOR'] AND $GLOBALS['STR_SIZE'] SELECTS BEGINS HERE
 				if (!empty($colors_array)) {
 					$tpl->assign('is_color', true);
-					
-					// Gestion de la couleur
-					$and_scId_if_needed = empty($save_cart_id) || (!empty($save_cart_id) && !empty($_GET['scId']) && $save_cart_id == vn($_GET['scId']));
-					if ($and_scId_if_needed && ((!empty($_GET['cId']) && !$is_in_catalog) || ($is_in_catalog && !empty($_GET['cId']) && !empty($_GET['pId']) && vn($_GET['pId']) == $product_object->id))) {
-						$selected_color_id = intval($_GET['cId']);
-					} elseif (!empty($product_object->configuration_color_id)) {
-						$selected_color_id = $product_object->configuration_color_id;
-					} elseif (!empty($product_object->default_color_id)) {
-						$selected_color_id = $product_object->default_color_id;
-					} else {
-						// On prend la première valeur du tableau
-						$selected_color_id = 0;
-					}
 					$id_select_color = 'couleur' . $save_suffix_id;
 					if (!empty($save_cart_id)) {
 						$scId_if_needed = '+\'&scId=' . $save_cart_id . '#save_cart_' . $save_cart_id . '\'';

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 35187 2013-02-12 19:02:41Z gboussin $
+// $Id: compte.tpl 35480 2013-02-23 15:51:54Z gboussin $
 *}<h1 class="page_title">{$compte}</h1>
 <div class="page_content">
 <p>{$msg_support}</p>
@@ -27,6 +27,14 @@
 		{if isset($return_history)}
 		<h3>{$return_history.header}</h3>
 		- <a href="{$return_history.href|escape:'html'}">{$return_history.txt}</a><br />
+		<br />
+		{/if}
+		
+		{if !empty($download_links)}
+		<h3>{$STR_DOWNLOAD_CENTER}</h3>
+			{foreach $download_links as $item}
+		- <a href="{$item.href|escape:'html'}">{$item.name}</a><br />
+			{/foreach}
 		<br />
 		{/if}
 		

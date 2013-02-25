@@ -8,7 +8,7 @@
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 35362 2013-02-18 12:01:43Z gboussin $
+# $Id: peel.sql 35513 2013-02-25 16:10:25Z gboussin $
 #
 
 --
@@ -1119,6 +1119,7 @@ CREATE TABLE IF NOT EXISTS `peel_nom_attributs` (
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `texte_libre` tinyint(1) NOT NULL DEFAULT '0',
   `type_affichage_attribut` tinyint(1) NOT NULL DEFAULT '3',
+  `show_description` tinyint(1) NOT NULL DEFAULT '1',
   `upload` tinyint(1) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`)

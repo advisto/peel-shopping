@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateur_form.php 35191 2013-02-12 23:54:37Z gboussin $
+// $Id: utilisateur_form.php 35480 2013-02-23 15:51:54Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -179,7 +179,11 @@ if (is_module_gift_checks_active() && !empty($frm['id_utilisateur'])) {
 	$tpl->assign('gift_checks_href', get_current_url(false) . '?mode=cheque&id_utilisateur=' . $frm['id_utilisateur']);
 	$tpl->assign('gift_checks_prix', fprix($GLOBALS['site_parameters']['avoir'], true, $GLOBALS['site_parameters']['code'], false));
 }
-
+if (is_telechargement_module_active()) {
+	include($GLOBALS['dirroot'] . "/modules/telechargement/administrer/fonctions.php");
+	include($GLOBALS['dirroot'] . "/modules/telechargement/lang/" . $_SESSION['session_langue'] . ".php");
+	$tpl->assign('download_files', affiche_liste_telechargement($frm['id_utilisateur']));
+}
 $tpl->assign('is_annonce_module_active', is_annonce_module_active());
 $tpl->assign('is_destockplus_module_active', is_destockplus_module_active());
 $tpl->assign('is_algomtl_module_active', is_algomtl_module_active());

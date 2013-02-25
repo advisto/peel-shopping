@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 35402 2013-02-20 14:27:37Z gboussin $
+// $Id: admin_utilisateur_form.tpl 35480 2013-02-23 15:51:54Z gboussin $
 *}<form enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -533,6 +533,13 @@
 <table class="full_width">
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>{$list_user_mail}</td></tr>
+</table>
+<br />
+{/if}
+{if isset($download_files)}
+<a name="download_files"></a>
+<table class="full_width">
+	<tr><td>{$download_files}</td></tr>
 </table>
 <br />
 {/if}

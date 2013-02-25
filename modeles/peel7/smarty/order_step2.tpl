@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step2.tpl 35391 2013-02-19 17:12:55Z gboussin $
+// $Id: order_step2.tpl 35477 2013-02-23 12:02:45Z gboussin $
 *}<h2 class="order_step2">&nbsp;{$STR_STEP2}</h2>
 <div class="totalcaddie">
 	<p>{$STR_DATE}{$STR_BEFORE_TWO_POINTS}: {$date}</p>
@@ -41,8 +41,8 @@
 			<p>{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}:	<span class="right">{$societe2}</span></p>
 			{/if}
 			<p>{$STR_CUSTOMER}{$STR_BEFORE_TWO_POINTS}:	<span class="right">{$nom2} {$prenom2}</span></p>
-			<p>{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$email2}</span></p>
 			<p>{$STR_TELEPHONE}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$contact2}</span></p>
+			<p>{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$email2}</span></p>
 			<p>{$STR_ADDRESS}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$adresse2}</span></p>
 			<p>{$STR_ZIP}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$code_postal2}</span></p>
 			<p>{$STR_TOWN}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$ville2}</span></p>

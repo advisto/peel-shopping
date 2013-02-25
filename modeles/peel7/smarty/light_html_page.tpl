@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: light_html_page.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: light_html_page.tpl 35512 2013-02-25 16:07:04Z gboussin $
 *}<!DOCTYPE html>
 <html lang="{$lang}" dir="ltr">
 {if !$full_head_section_text}
@@ -18,6 +18,16 @@
 		<meta charset="{$charset}" />
 		<title>{$title}</title>
 		{$additional_header}
+	{if !empty($css_files)}
+		{foreach $css_files as $css_href}
+		<link rel="stylesheet" media="all" href="{$css_href|escape:'html'}" />
+		{/foreach}
+	{/if}
+	{if !empty($js_files)}
+		{foreach $js_files as $js_href}
+		<script src="{$js_href|escape:'html'}"></script>
+		{/foreach}
+	{/if}
 		<!--[if lt IE 9]>
 		<script src="{$wwwroot}/lib/js/html5shiv.js"></script>
 		<![endif]-->
@@ -25,17 +35,7 @@
 {else}
 	{$full_head_section_text}
 {/if}
-{if !empty($css_files)}
-	{foreach $css_files as $css_href}
-	<link rel="stylesheet" media="all" href="{$css_href|escape:'html'}" />
-	{/foreach}
-{/if}
-{if !empty($js_files)}
-	{foreach $js_files as $js_href}
-	<script src="{$js_href|escape:'html'}"></script>
-	{/foreach}
-{/if}
-	<body vocab="http://schema.org/">
+	<body {if !empty($onload)} onload="{$onload}"{/if} vocab="http://schema.org/">
 		{$body}
 	</body>
 </html>

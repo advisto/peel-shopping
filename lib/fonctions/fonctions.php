@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35412 2013-02-20 22:56:24Z gboussin $
+// $Id: fonctions.php 35480 2013-02-23 15:51:54Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -2169,11 +2169,12 @@ function delete_uploaded_file_and_thumbs($filename)
  *
  * @param string $filename_with_realpath
  * @param boolean $serve_download_with_php
- * @param mixed $file_content_given Le contenu peut être donné dans une variable ce qui désactive la lecture du fichier sur le disque
+ * @param string $file_content_given Le contenu peut être donné dans une variable ce qui désactive la lecture du fichier sur le disque
+ * @param string $file_name_given Optionnel : nom du fichier vu par la personne qui télécharge. A défaut, nom du fichier sur le serveur.
  * @return
  */
 
-function http_download_and_die($filename_with_realpath, $serve_download_with_php = true, $file_content_given = null)
+function http_download_and_die($filename_with_realpath, $serve_download_with_php = true, $file_content_given = null, $file_name_given = null)
 {
 	if (!$serve_download_with_php) {
 		// redirection vers le fichier à télécharger
@@ -2231,6 +2232,9 @@ function http_download_and_die($filename_with_realpath, $serve_download_with_php
 		} else {
 			$content_length = filesize($filename_with_realpath);
 		}
+		if(empty($file_name_given)) {
+			$file_name_given = basename($filename_with_realpath);
+		}
 		header('Content-Description: File Transfer');
 		header("Pragma: no-cache");
 		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -2241,7 +2245,7 @@ function http_download_and_die($filename_with_realpath, $serve_download_with_php
 		header('Content-Type: application/octet-stream', false);
 		header('Content-Type: application/download', false);
 		header("Content-Type: " . $type . "", false);
-		header("Content-disposition: attachment; filename=\"" . rawurlencode(basename($filename_with_realpath)) . "\"");
+		header("Content-disposition: attachment; filename=\"" . rawurlencode($file_name_given) . "\"");
 		header("Content-Transfer-Encoding: binary");
 		header("Content-Length: " . intval($content_length));
 		if (!empty($file_content_given)) {

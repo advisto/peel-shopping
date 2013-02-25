@@ -18,6 +18,16 @@
 		<meta charset="{{ charset }}" />
 		<title>{{ title }}</title>
 		{{ additional_header }}
+	{% if (css_files) %}
+		{% for css_href in css_files %}
+		<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" />
+		{% endfor %}
+	{% endif %}
+	{% if (js_files) %}
+		{% for js_href in js_files %}
+		<script src="{{ js_href|escape('html') }}"></script>
+		{% endfor %}
+	{% endif %}
 		<!--[if lt IE 9]>
 		<script src="{{ wwwroot }}/lib/js/html5shiv.js"></script>
 		<![endif]-->
@@ -25,17 +35,7 @@
 {% else %}
 	{{ full_head_section_text }}
 {% endif %}
-{% if (css_files) %}
-	{% for css_href in css_files %}
-	<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" />
-	{% endfor %}
-{% endif %}
-{% if (js_files) %}
-	{% for js_href in js_files %}
-	<script src="{{ js_href|escape('html') }}"></script>
-	{% endfor %}
-{% endif %}
-	<body vocab="http://schema.org/">
+	<body {% if !empty(onload) %} onload="onload"{% endif %} vocab="http://schema.org/">
 		{{ body }}
 	</body>
 </html>

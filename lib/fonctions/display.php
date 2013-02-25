@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 35395 2013-02-19 19:05:51Z sdelaporte $
+// $Id: display.php 35502 2013-02-25 01:26:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -941,6 +941,20 @@ if (!function_exists('print_compte')) {
 						'buy_href' => $GLOBALS['wwwroot'] . '/achat/?catid=' . $cat['id'],
 						)
 					);
+			}
+			if (is_telechargement_module_active()) {
+				$sql = "SELECT *
+					FROM peel_telechargement
+					WHERE user_restriction='".intval($_SESSION['session_utilisateur']['id_utilisateur'])."'";
+				$res = query($sql);
+				while($select = fetch_assoc($res)) {
+					$select['href'] = $GLOBALS['wwwroot'] . '/modules/telechargement/download.php?id=' . $select['id'];
+					$download_links[] = $select;
+				}
+				if(!empty($download_links)) {
+					$tpl->assign('download_links', $download_links);
+				}
+				$tpl->assign('STR_DOWNLOAD_CENTER', $GLOBALS['STR_DOWNLOAD_CENTER']);
 			}
 			if (is_vitrine_module_active()) {
 				$tpl->assign('shop', array('header' => $GLOBALS['STR_MODULE_ANNONCES_MY_SHOP'], 'txt' => $GLOBALS['STR_MODULE_ANNONCES_CREATE_MY_SHOP'] . ' / ' . $GLOBALS['STR_MODULE_ANNONCES_UPDATE_YOUR_SHOP'], 'href' => $GLOBALS['wwwroot'] . '/modules/vitrine/boutique_form.php'));
@@ -1875,12 +1889,14 @@ if (!function_exists('output_light_html_page')) {
 		$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
 		$tpl->assign('body', $body);
 		$tpl->assign('full_head_section_text', $full_head_section_text);
-		if(!empty($GLOBALS['css_files'])) {
-			$tpl->assign('css_files', array_unique($GLOBALS['css_files']));
-		}
-		if(!empty($GLOBALS['js_files'])) {
-			// L'ordre des fichiers js doit être respecté ensuite dans le template
-			$tpl->assign('js_files', array_unique($GLOBALS['js_files']));
+		if (empty($full_head_section_text)) {
+			if(!empty($GLOBALS['css_files'])) {
+				$tpl->assign('css_files', array_unique($GLOBALS['css_files']));
+			}
+			if(!empty($GLOBALS['js_files'])) {
+				// L'ordre des fichiers js doit être respecté ensuite dans le template
+				$tpl->assign('js_files', array_unique($GLOBALS['js_files']));
+			}
 		}
 		$output = $tpl->fetch();
 		if (!empty($convert_to_encoding)) {

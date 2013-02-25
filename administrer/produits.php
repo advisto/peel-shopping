@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 35218 2013-02-13 13:31:40Z gboussin $
+// $Id: produits.php 35512 2013-02-25 16:07:04Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -590,7 +590,6 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 			ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($selectCouleur);
 		// Compteur permettant de fournir la default image en fonction de chaque couleurs
-		$cmp_default_image = 0;
 		$nomCouleur_array = array();
 		while ($nomCouleur = fetch_assoc($query)) {
 			$nomCouleur_array[] = $nomCouleur;
@@ -627,13 +626,12 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				}
 			}
 			$tpl_colors[] = array('nom' => $this_couleur['nom_' . $_SESSION['session_langue']],
+				'id' => $this_couleur['id'],
 				'issel' => vb($frm['default_color_id']) == $this_couleur['coul'],
 				'coul' => $this_couleur['coul'],
-				'cmp_default_image' => $cmp_default_image,
 				'default_image' => vb($this_couleur['default_image']),
 				'images' => $tpl_images
 				);
-			$cmp_default_image++;
 		}
 		$tpl->assign('colors', $tpl_colors);
 
@@ -1371,10 +1369,8 @@ function maj_produit($id, $frm)
 		// On recupere chaque champ default_image par couleur
 		$qid = query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id, default_image)
 			VALUES ('" . nohtml_real_escape_string($frm["couleurs"][$i]) . "', '" . intval($id) . "','" . intval(vn($frm["default_image" . $i])) . "')");
-		$this_field_name = 'default_image' . $frm['couleurs'][$i];
-		$_POST[$this_field_name] = upload('default_image' . $frm['couleurs'][$i], false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
 		query("UPDATE peel_produits_couleurs
-			SET default_image = '" . nohtml_real_escape_string($_POST[$this_field_name]) . "'
+			SET default_image = '" . nohtml_real_escape_string($_POST['default_image' . $frm['couleurs'][$i]]) . "'
 			WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($frm["couleurs"][$i]) . "'");
 		for ($h = 1; $h <= 5; $h++) {
 			$this_field_name = 'imagecouleur' . $frm['couleurs'][$i] . '_' . $h;
