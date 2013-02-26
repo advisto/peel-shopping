@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 35512 2013-02-25 16:07:04Z gboussin $
+// $Id: produits.php 35530 2013-02-26 17:37:36Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -617,7 +617,6 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 						$tpl_images[$i] = array('nom' => $this_couleur['image' . $i],
 							'sup_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&coul=' . $this_couleur['coul'] . '&file=image' . $i . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1),
 							'src' => $GLOBALS['repertoire_upload'] . '/' . $this_couleur['image' . $i],
-							'id' => $this_couleur['id'],
 							'is_pdf' => pathinfo($this_couleur["image" . $i], PATHINFO_EXTENSION) == 'pdf'
 							);
 					} else {

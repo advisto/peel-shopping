@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 35510 2013-02-25 15:32:44Z gboussin $
+// $Id: admin_formulaire_produit.tpl 35530 2013-02-26 17:37:36Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -250,7 +250,7 @@
 				{$STR_ADMIN_FILE_NAME}{$STR_BEFORE_TWO_POINTS}: {$f.nom} &nbsp;
 				<a href="{$f.sup_href|escape:'html'}">
 				<img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_IMAGE}</a>
-				<input type="hidden" name="imagecouleur{$f.id}_{$i}" value="{$f.nom|str_form_value}" />
+				<input type="hidden" name="imagecouleur{$c.id}_{$i}" value="{$f.nom|str_form_value}" />
 			</td>
 		</tr>
 		<tr>
@@ -260,7 +260,7 @@
 		<tr>
 			<td class="label">{$STR_ADMIN_IMAGE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<input style="width: 100%" name="imagecouleur{$f.id}_{$i}" type="file" value="" />
+				<input style="width: 100%" name="imagecouleur{$c.id}_{$i}" type="file" value="" />
 			</td>
 		</tr>
 		{/if}

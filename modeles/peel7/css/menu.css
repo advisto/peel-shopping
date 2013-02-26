@@ -178,6 +178,7 @@
 .left_column .sousMenu, .right_column .sousMenu {
 	background-color: #F3FBFE;
 	display: none;
+	clear: both;
 	list-style-type: none;
 	position: absolute;
 	text-align: left;
