@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 35474 2013-02-22 19:32:39Z sdelaporte $
+// $Id: display_product.php 35522 2013-02-26 13:06:29Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -761,7 +761,8 @@ if (!function_exists('affiche_critere_stock')) {
 			if (!empty($product_stock_infos)) {
 				foreach ($product_stock_infos as $stock_infos) {
 					if (($is_in_catalog && empty($product_object->configuration_color_id)) || (!empty($product_object->configuration_color_id) && $stock_infos['couleur_id'] == $product_object->configuration_color_id) || (empty($_GET['cId']) && empty($_GET['tId'])) || (!empty($stock_infos['couleur_id']) && !empty($_GET['cId']) && $_GET['cId'] == $stock_infos['couleur_id']) || (!empty($stock_infos['taille_id']) && !empty($_GET['tId']) && $_GET['tId'] == $stock_infos['taille_id'])) {
-					$stock_remain_all += $stock_infos['stock_temp'];
+						$stock_remain_all += $stock_infos['stock_temp'];
+					}
 				}
 			}
 			if (empty($stock_remain_all) && empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {

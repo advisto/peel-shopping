@@ -184,6 +184,7 @@
 	width: 195px;
 	z-index: 1003;
 	top: -2px;
+	clear: both;
 	padding: 0px;
 	margin: 0px;
 	border: 2px solid #1E82D8;

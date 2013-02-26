@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 35189 2013-02-12 21:15:55Z gboussin $
+// $Id: order.php 35521 2013-02-26 13:01:59Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -222,9 +222,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				SET ' . implode(', ', $sql_set_array) . '
 				WHERE id="' . intval($order_id) . '"' . (!$allow_update_paid_orders?' AND id_statut_paiement NOT IN ("2","3")':''));
 		}
-		if ($id_statut_paiement !== null && !empty($id_statut_paiement) && $id_statut_paiement_ex != $id_statut_paiement) {
-			// On vérifie le statut paiement avant la mise à jour de la base avec celui du formulaire. Ils doivent être différent,
-			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisi l'annulation de livraison.
+		if ($id_statut_paiement !== null && $id_statut_paiement_ex != $id_statut_paiement) {
+			// On vérifie le statut paiement avant la mise à jour de la base avec celui du formulaire. Ils doivent être différents,
+			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisit l'annulation de livraison.
 			if (in_array(intval($id_statut_paiement), array(6,9)) && !in_array(intval($id_statut_paiement_ex), array(6,9))) {
 				// La commande passe en annulé ou remboursé
 				if (!is_numeric($id_statut_livraison)) {
@@ -235,7 +235,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				}
 			}
 		}
-		if(is_stock_advanced_module_active() && !empty($id_statut_paiement)) {
+		if(is_stock_advanced_module_active() && $id_statut_paiement !== null) {
 			//  Les stocks sont gérés sur le site, et un statut de paiement est spécifié => Il faut éventuellement modifier les stocks des produits de la commande. Si id_statut_paiement est vide, il n'est pas nécessaire de faire le calcul.
 			$want_decrement = in_array($id_statut_paiement, explode(',', $GLOBALS['site_parameters']['payment_status_decrement_stock']));
 			// Quand on appelle cette fonction à partir de create_or_update_order
