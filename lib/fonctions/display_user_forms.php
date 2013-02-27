@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: display_user_forms.php 35531 2013-02-27 08:48:06Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -426,6 +426,7 @@ if (!function_exists('get_recover_password_form')) {
 		$tpl->assign('get_password', $GLOBALS['STR_GET_PASSWORD']);
 		$tpl->assign('action', $_SERVER['REQUEST_URI']);
 		$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('token', get_form_token_input('oubli_mot_passe', true));
 		$tpl->assign('login_href', $GLOBALS['wwwroot'] . '/membre.php');
 		$tpl->assign('login_txt', $GLOBALS['STR_LOGIN']);
