@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: TwigEngine.php 35347 2013-02-17 11:26:09Z gboussin $
+// $Id: TwigEngine.php 35806 2013-03-10 21:24:06Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'TwigTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: TwigEngine.php 35347 2013-02-17 11:26:09Z gboussin $
+ * @version $Id: TwigEngine.php 35806 2013-03-10 21:24:06Z gboussin $
  * @access public
  */
 class TwigEngine extends EngineTpl {
@@ -110,8 +110,10 @@ class TwigEngine extends EngineTpl {
 		$data['languages'] = $GLOBALS['lang_codes'];
 		$data['lang_iso'] = $_SESSION['session_langue'];
 		$data['shop_name'] = vb($GLOBALS['site_parameters']['nom_' . $_SESSION['session_langue']]);
-		$data['cart_qties'] = $_SESSION['session_caddie']->count_products();
-		$data['cart'] = $_SESSION['session_caddie']->articles;
+		if(!empty($_SESSION['session_caddie'])) {
+			$data['cart_qties'] = $_SESSION['session_caddie']->count_products();
+			$data['cart'] = $_SESSION['session_caddie']->articles;
+		}
 		$data['currencies'] = array($_SESSION['session_devise']['code']);
 		$data['id_currency_cookie'] = $_SESSION['session_devise']['code'];
 		$data['logged'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur']));

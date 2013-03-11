@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 35232 2013-02-13 19:44:33Z gboussin $
+// $Id: String.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 35232 2013-02-13 19:44:33Z gboussin $
+ * @version $Id: String.php 35805 2013-03-10 20:43:50Z gboussin $
  * @access public
  */
 class String {
@@ -760,7 +760,8 @@ class String {
 			// Rewind ne va pas marcher si le fichier est en HTTP
 			$bom = fread($file, 3);
 			// On retire le BOM en début de fichier UTF8 si on en trouve un
-			if ($bom != b"\xEF\xBB\xBF") {
+			// Le BOM est détecté avec pack("CCC", 0xef, 0xbb, 0xbf) ou "\xEF\xBB\xBF" ou b'\xEF\xBB\xBF' depuis PHP 5.2.1
+			if ($bom != "\xEF\xBB\xBF") {
 				// On n'a pas trouvé de BOM, donc on revient au début du fichier - sinon on ne fait rien, donc on a passé le BOM
 				if (strpos($filename, 'http://') !== 0 && strpos($filename, 'https://') !== 0) {
 					rewind($file);

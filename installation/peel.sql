@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.0.1, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 35513 2013-02-25 16:10:25Z gboussin $
+# $Id: peel.sql 35805 2013-03-10 20:43:50Z gboussin $
 #
 
 --
@@ -476,6 +476,7 @@ CREATE TABLE IF NOT EXISTS `peel_commandes_articles` (
   `date_download` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `ecotaxe_ttc` float(10,5) NOT NULL DEFAULT '0.00000',
   `ecotaxe_ht` float(10,5) NOT NULL DEFAULT '0.00000',
+  `attributs_list` MEDIUMTEXT NOT NULL,
   `nom_attribut` MEDIUMTEXT NOT NULL,
   `total_prix_attribut` float(15,5) NOT NULL DEFAULT '0.00000',
   `statut` tinyint(1) NOT NULL DEFAULT '0',
@@ -1122,7 +1123,8 @@ CREATE TABLE IF NOT EXISTS `peel_nom_attributs` (
   `show_description` tinyint(1) NOT NULL DEFAULT '1',
   `upload` tinyint(1) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`),
+  KEY `technical_code` (`technical_code`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -32,6 +32,7 @@ function affiche_formulaire_ajout_nom_attribut(&$frm)
 		$frm['upload'] = 0;
 		$frm['mandatory'] = 0;
 		$frm['technical_code'] = "";
+		$frm['show_description'] = 1;
 		if (empty($frm['type_affichage_attribut'])) {
 			// On préremplit par une référence à la configuration générale du site
 			// NB : On ne préremplit pas par la valeur par défaut utilisée sur le site pour permettre changement général plus facile si on n'a pas de spécificité par produit
@@ -89,6 +90,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('titre_bouton', vb($frm["titre_bouton"]));
 	$tpl->assign('type_affichage_attribut', vn($frm["type_affichage_attribut"]));
 	$tpl->assign('technical_code', vb($frm["technical_code"]));
+	$tpl->assign('show_description', vb($frm["show_description"]));
 	$tpl->assign('mandatory', vn($frm["mandatory"]));
 	$tpl_langs = array();
 	foreach ($GLOBALS['lang_codes'] as $lng) {
@@ -97,6 +99,8 @@ function affiche_formulaire_nom_attribut(&$frm)
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
+	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
+	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
@@ -159,13 +163,13 @@ function insere_nom_attribut($frm)
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
-	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut
+	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description
 	) VALUES ('" . intval($frm['etat']) . "'
 			, '" . intval($frm['mandatory']) . "'";
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "')";
+	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "')";
 
 	query($sql);
 }
@@ -187,7 +191,8 @@ function maj_nom_attribut($id, $frm)
 	} elseif (vn($frm['attribut_type']) == 2) {
 		$frm['upload'] = 1;
 	}
-	$sql = "UPDATE peel_nom_attributs SET etat='" . intval($frm['etat']) . "'";
+	$sql = "UPDATE peel_nom_attributs 
+		SET etat='" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sql .= ", nom_" . nohtml_real_escape_string($lng) . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -196,11 +201,14 @@ function maj_nom_attribut($id, $frm)
 			 , upload ='" . intval(vn($frm['upload'])) . "'
 			 , technical_code ='" . nohtml_real_escape_string($frm['technical_code']) . "'
 			 , type_affichage_attribut ='" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "'
+			 , show_description ='" . nohtml_real_escape_string($frm['show_description']) . "'
 			WHERE id='" . intval($id) . "'";
 	query($sql);
 	// Si le nom de l'attribut est un texte libre alors on retire toutes ces options :
 	if (!empty($frm['texte_libre'])) {
-		$sql = "SELECT DISTINCT produit_id FROM peel_produits_attributs WHERE nom_attribut_id = '" . intval($id) . "'";
+		$sql = "SELECT DISTINCT produit_id 
+			FROM peel_produits_attributs 
+			WHERE nom_attribut_id = '" . intval($id) . "'";
 		$resultat = query($sql);
 		$sql = "DELETE FROM peel_attributs WHERE id_nom_attribut = '" . intval($id) . "'";
 		query($sql);
@@ -225,7 +233,7 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload
+	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description
 		FROM peel_nom_attributs
 		ORDER BY nom_" . $_SESSION['session_langue'] . "");
 	$nr = num_rows($result);

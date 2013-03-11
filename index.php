@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 35067 2013-02-08 14:21:55Z gboussin $
-/*! \mainpage PEEL Shopping 7.0.0 - Open eCommerce
+// $Id: index.php 35805 2013-03-10 20:43:50Z gboussin $
+/*! \mainpage PEEL Shopping 7.0.1 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -44,6 +44,8 @@ $tpl->assign('nouveaute', affiche_produits(null, null, "nouveaute", 10, 'home', 
 
 $tpl->assign('pub1', affiche_banner(1, true));
 $tpl->assign('pub2', affiche_banner(2, true));
+
+$tpl->assign('actu', print_actu(true, 0));
 
 $tpl->assign('image_accueil', vb($GLOBALS['site_parameters']['general_home_image1']));
 $tpl->assign('image_accueil_2', vb($GLOBALS['site_parameters']['general_home_image2']));

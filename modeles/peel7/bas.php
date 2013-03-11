@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 35336 2013-02-17 00:56:56Z gboussin $
+// $Id: bas.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,6 +21,7 @@ $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
 if ($GLOBALS['page_columns_count'] == 3) {
 	$tpl->assign('MODULES_RIGHT', get_modules('right', true, null, vn($_GET['catid'])));
 }
+$tpl->assign('IN_HOME', defined('IN_HOME'));
 if (defined('IN_HOME')) {
 	$tpl->assign('CONTENT_HOME_BOTTOM', affiche_contenu_html("home_bottom", true));
 }
@@ -28,14 +29,14 @@ $tpl->assign('CONTENT_FOOTER', affiche_contenu_html("footer", true));
 $tpl->assign('MODULES_FOOTER', get_modules('footer', true, null, vn($_GET['catid'])));
 $tpl->assign('FOOTER', affiche_footer(true));
 // Dévelopement de la popup affichant les détail de l'ajout au caddie (si la quantité demandée est supérieure à la quantité disponible en stock) et suppression de la variable de session
-if (is_stock_advanced_module_active() && !empty($_SESSION['session_display_popup_quantity_error']['add_cart'])) {
-	// $tpl->assign('add_cart_alert', filtre_javascript($_SESSION['session_display_popup_quantity_error']['add_cart'], true, true, false));
-	$tpl->assign('add_cart_alert', $_SESSION['session_display_popup_quantity_error']['add_cart']);
-	unset($_SESSION['session_display_popup_quantity_error']['add_cart']);
+if (is_stock_advanced_module_active() && !empty($_SESSION['session_display_popup']['error_text'])) {
+	// $tpl->assign('add_cart_alert', filtre_javascript($_SESSION['session_display_popup']['add_cart'], true, true, false));
+	$tpl->assign('add_cart_alert', $_SESSION['session_display_popup']['error_text']);
+	unset($_SESSION['session_display_popup']['error_text']);
 }
 // Message d'alerte de problème de téléchargement d'image
-if (!empty($_SESSION["session_display_popup_quantity_error"]["no_uploaded_image"])) {
-	unset($_SESSION["session_display_popup_quantity_error"]["no_uploaded_image"]);
+if (!empty($_SESSION["session_display_popup"]["no_uploaded_image"])) {
+	unset($_SESSION["session_display_popup"]["no_uploaded_image"]);
 }
 
 $tpl->assign('tag_analytics', get_tag_analytics());

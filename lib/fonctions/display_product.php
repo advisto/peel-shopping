@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 35522 2013-02-26 13:06:29Z gboussin $
+// $Id: display_product.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -957,7 +957,7 @@ if (!function_exists('affiche_critere_stock')) {
 		$tpl->assign('STR_NONE_COLOR_SELECTED', $GLOBALS['STR_NONE_COLOR_SELECTED']);
 		$tpl->assign('STR_NONE_SIZE_SELECTED', $GLOBALS['STR_NONE_SIZE_SELECTED']);
 		$tpl->assign('STR_ADD_CART', $GLOBALS['STR_ADD_CART']);
-		$tpl->assign('display_javascript_for_price_update', display_javascript_for_price_update($product_object, $save_suffix_id, $form_id, !empty($update_product_price_needed)));
+		$tpl->assign('display_javascript_for_price_update', display_javascript_for_price_update($product_object, $save_suffix_id, $form_id, 0, !empty($update_product_price_needed)));
 
 		if (empty($product_object->on_rupture)) {
 			// Gestion des autres attributs
@@ -1383,15 +1383,26 @@ if (!function_exists('display_javascript_for_price_update')) {
 	 * @param string $form_id
 	 * @param integer $taille_display_mode
 	 * @param boolean $update_product_price_needed
+	 * @param boolean $product_object2
 	 * @return
 	 */
-	function display_javascript_for_price_update(&$product_object, $save_suffix_id, $form_id, $taille_display_mode = 0, $update_product_price_needed = true)
+	function display_javascript_for_price_update(&$product_object, $save_suffix_id, $form_id, $taille_display_mode = 0, $update_product_price_needed = true, $product_object2 = null)
 	{
 		$output = '';
 		$get_infos_js = '';
 		$get_javascript_price = array();
 		$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
+		if(!empty($product_object2)) {
+			foreach($product_object2->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) as $this_key => $this_value) {
+				$attributs_infos_array[$this_key] = $this_value;
+			}
+		}
 		$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
+		if(!empty($product_object2)) {
+			foreach($product_object2->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) as $this_key => $this_value) {
+				$sizes_infos_array[$this_key] = $this_value;
+			}
+		}
 		if ((!empty($sizes_infos_array) && count($sizes_infos_array)>1) || (is_attributes_module_active() && !empty($attributs_infos_array))) {
 			$output .= '
 <script><!--//--><![CDATA[//><!--
@@ -1426,7 +1437,7 @@ function update_product_price' . ($save_suffix_id) . '(){
 	var attribut_list="";
 	var size_id="";
 	' . $get_infos_js . '
-	jQuery.post("get_product_price.php", {product_id: '.$product_object->id.', size_id: size_id, attribut_list: attribut_list, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\'}, function(data){
+	jQuery.post("get_product_price.php", {product_id: '.$product_object->id.', product2_id: '.(!empty($product_object2)?$product_object2->id:'""').', size_id: size_id, attribut_list: attribut_list, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\'}, function(data){
 		var divtoshow = "#prix_' . vn($product_object->id) . $save_suffix_id . '";
 		if(data.length >0) {
 			jQuery(divtoshow).show();

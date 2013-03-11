@@ -3,12 +3,12 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) Butterflive - en collaboration avec contact@peel.fr    |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// $Id: add_json_functions.php 35062 2013-02-08 14:13:26Z gboussin $
+// $Id: add_json_functions.php 35805 2013-03-10 20:43:50Z gboussin $
 // Adds json_decode and json_encode for PHP <5.2
 if (!function_exists('json_decode')) {
 	function json_decode($content, $assoc = false)

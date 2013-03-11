@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 35210 2013-02-13 12:46:54Z gboussin $
+// $Id: Product.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 35210 2013-02-13 12:46:54Z gboussin $
+ * @version $Id: Product.php 35805 2013-03-10 20:43:50Z gboussin $
  * @access public
  */
 class Product {
@@ -447,6 +447,7 @@ class Product {
 	 * Product::get_possible_attributs()
 	 *
 	 * @param string $return_mode Values allowed : 'infos', 'rough', 'option_name', 'full_name'
+	 * @param boolean $get_configuration_results_only
 	 * @param integer $user_promotion_percentage
 	 * @param boolean $with_taxes
 	 * @param boolean $reseller_mode
@@ -454,18 +455,25 @@ class Product {
 	 * @param boolean $add_tax_type_text
 	 * @param boolean $get_attributes_with_multiple_options_only
 	 * @param boolean $get_attributes_with_single_options_only
+	 * @param string $filter_technical_code
 	 * @return
 	 */
-	function get_possible_attributs($return_mode = 'name', $get_configuration_results_only = false, $user_promotion_percentage = 0, $with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $get_attributes_with_multiple_options_only = true, $get_attributes_with_single_options_only = false)
+	function get_possible_attributs($return_mode = 'name', $get_configuration_results_only = false, $user_promotion_percentage = 0, $with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $get_attributes_with_multiple_options_only = true, $get_attributes_with_single_options_only = false, $filter_technical_code = null)
 	{
+		if (!is_attributes_module_active()) {
+			continue;
+		}
 		if(!empty($this->id)) {
-			$attributs_array = get_possible_attributs($this->id, ($return_mode=='infos'?'rough':$return_mode), $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only, $this->configuration_attributs_list);
+			$attributs_array = get_possible_attributs($this->id, ($return_mode=='infos'?'rough':$return_mode), $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only, ($get_configuration_results_only?$this->configuration_attributs_list:null));
 		} else {
 			$attributs_array = array();
 		}
 		if (!empty($attributs_array) && $return_mode == 'infos') {
 			foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
 				foreach ($this_attribut_values_array as $this_attribut_id => $result) {
+					if(!empty($filter_technical_code) && $result['technical_code'] == $filter_technical_code) {
+						continue;
+					}
 					if ($reseller_mode && $result["prix_revendeur"] != 0) {
 						$original_price = $result["prix_revendeur"] / (1 + $this->tva / 100);
 					} else {
@@ -482,7 +490,7 @@ class Product {
 		}
 		return $attributs_array;
 	}
-
+	
 	/**
 	 * Product::get_product_references()
 	 *

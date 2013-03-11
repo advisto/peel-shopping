@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: recursive_items_display.tpl 35395 2013-02-19 19:05:51Z sdelaporte $
+// $Id: recursive_items_display.tpl 35805 2013-03-10 20:43:50Z gboussin $
 *}{foreach $items as $it}
 <li class="{if $it.has_sons}plus{else}minus{/if}{if $it.is_current} current{/if}{if isset($it.technical_code)} m_item_{$it.technical_code}{/if}">
 	{if isset($it.href)}

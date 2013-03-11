@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35480 2013-02-23 15:51:54Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -700,9 +700,10 @@ function get_category_name($id)
  *
  * @param mixed $id_or_ids_array
  * @param string $mode
+ * @param string $table_to_use
  * @return
  */
-function get_category_tree_and_itself($id_or_ids_array, $mode = 'sons')
+function get_category_tree_and_itself($id_or_ids_array, $mode = 'sons', $table_to_use = 'categories')
 {
 	static $result_array;
 	if (is_array($id_or_ids_array)) {
@@ -717,19 +718,31 @@ function get_category_tree_and_itself($id_or_ids_array, $mode = 'sons')
 			$result_array[$ids_list][] = $id_or_ids_array;
 		}
 		if ($mode == 'sons') {
-			$select_field = ' c.id';
-			$condition_field = ' c.parent_id';
+			$select_field = 'id';
+			$condition_field = 'parent_id';
 		} elseif ($mode == 'parents') {
-			$select_field = ' c.parent_id as id';
-			$condition_field = ' c.id';
+			$select_field = 'parent_id AS id';
+			$condition_field = 'id';
 		} else {
+			// erreur de paramétrage
+			return false;
+		}
+		
+		if ($table_to_use == 'rubriques') {
+			$table = 'peel_rubriques';
+		} elseif ($table_to_use == 'categories') {
+			$table = 'peel_categories';
+		} elseif ($table_to_use == 'annonces') {
+			$table = 'peel_categories_annonces';
+		} else {
+			// erreur de paramétrage
 			return false;
 		}
 
 		$sql = 'SELECT ' . $select_field . '
-			FROM peel_categories c
+			FROM ' . $table . '
 			WHERE ' . $condition_field . ' IN ("' . str_replace(',', '","', nohtml_real_escape_string($ids_list)) . '")
-			ORDER BY c.position';
+			ORDER BY position';
 
 		$qid = query($sql);
 		while ($cat = fetch_assoc($qid)) {
@@ -2621,7 +2634,7 @@ function formSelect ($name, $tab, $preselected_value = null, $addOne = 0, $get =
  * @param string $type_html_editor // Permet de forcer le type d'editeur de texte sans passer par la variable Globals
  * @return string HTML généré
  */
-function getTextEditor($instance_name, $width, $height, $default_text, $default_path = '../', $type_html_editor = 0)
+function getTextEditor($instance_name, $width, $height, $default_text, $default_path = '../', $type_html_editor = 0, $compter_char_max = 255, $placeholder = '')
 {
 	$output = '';
 	if (is_numeric($width)) {
@@ -2717,6 +2730,12 @@ bkLib.onDomLoaded(function() {
 		}
 		$output .= '
 			<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width . 'px; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . ($width / 12) . '">' . String::htmlentities($default_text) . '</textarea>
+';
+	} elseif($this_html_editor == '5') {
+		// Champ textarea de base + Compteur de caractères
+		$output .= '
+			<textarea placeholder="'. $placeholder.'" name="' . $instance_name . '" cols="' . ($width / 12) . '" rows="' . ($height / 12) . '" onfocus="Compter(this,'.$compter_char_max.',compteur, true)" onkeypress="Compter(this,'.$compter_char_max.',compteur, true)" onkeyup="Compter(this,'.$compter_char_max.',compteur, true)" onblur="Compter(this,'.$compter_char_max.',compteur, true)">' . String::htmlentities($default_text) . '</textarea><br />
+			<div class="compteur_contener"><span style="margin:5px;">'.$GLOBALS['STR_REMINDING_CHAR'].'</span><input class="compteur" type="text" name="compteur" size="4" onfocus="blur()" value="0" /></div>
 ';
 	} else {
 		// Champ textarea de base

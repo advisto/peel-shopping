@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 35412 2013-02-20 22:56:24Z gboussin $
+// $Id: configuration.inc.php 35805 2013-03-10 20:43:50Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -49,6 +49,7 @@ if (!function_exists('ini_get') || @ini_get('register_globals')) {
 // * DEBUT CONFIGURATION PAR DEFAUT  *
 // Les valeurs ci-dessous sont ensuite remplacées après l'installation par les valeurs contenues dans la table peel_configuration
 // Si vous voulez imposer ce paramètre après l'installation, mettez vos lignes dans la section plus bas appelée FORCE SITE_PARAMETERS
+$GLOBALS['site_parameters']['mysql_extension'] = 'mysqli'; // Mettre "mysqli" (par défaut, à laisser dans 99% des cas) ou "mysql". Si mysqli n'est pas disponible, mysql sera utilisé à la place
 $GLOBALS['site_parameters']['backoffice_directory_name'] = 'administrer'; // VOIR DANS FORCE SITE_PARAMETERS
 $GLOBALS['site_parameters']['cache_folder'] = 'cache';
 $GLOBALS['site_parameters']['css'] = 'screen.css,menu.css';
@@ -62,12 +63,14 @@ $GLOBALS['site_parameters']['avoir'] = null;
 $GLOBALS['site_parameters']['commission_affilie'] = null;
 // * FIN CONFIGURATION PAR DEFAUT *
 // ***********************************
-
+if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('mysqli')) {
+	$GLOBALS['site_parameters']['mysql_extension'] = 'mysql';
+}
 define('SITE_SUSPENDED', false); // Modifier ici si on veut suspendre l'affichage du site côté client (hors administration)
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.0.0');
+define('PEEL_VERSION', '7.0.1');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {

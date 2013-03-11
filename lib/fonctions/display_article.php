@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 35316 2013-02-16 12:18:06Z gboussin $
+// $Id: display_article.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -110,13 +110,22 @@ if (!function_exists('get_articles_html')) {
 	 * get_articles_html()
 	 *
 	 * @param integer $rubid
+	 * @param boolean $get_sub_rubrique
 	 * @return
 	 */
-	function get_articles_html($rubid = 0) {
+	function get_articles_html($rubid = 0, $get_sub_rubrique = false) {
 		$output = '';
+		$extra_sql = '';
+		if (!empty($rubid)) {
+			if (!empty($get_sub_rubrique)) {
+				$extra_sql .= " AND pc.rubrique_id IN (" . real_escape_string(implode(',', get_category_tree_and_itself($rubid, 'sons', 'rubriques'))) . ")";
+			} else {
+				$extra_sql .= " AND pc.rubrique_id = '" . intval($rubid) . "'";
+			}
+		}
 		$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
 			FROM peel_articles p
-			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id " . (!empty($rubid)?" AND pc.rubrique_id = '" . intval($rubid) . "'":'') . "
+			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id " . $extra_sql. "
 			INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id
 			WHERE p.etat = '1' AND titre_" . $_SESSION['session_langue'] . " != ''
 			ORDER BY p.`" . word_real_escape_string((isset($_GET['tri']) ? $_GET['tri'] : 'position')) . "` " . word_real_escape_string((isset($_GET['sort']) ? $_GET['sort'] : 'ASC')) . " , p.id DESC";
@@ -143,6 +152,7 @@ if (!function_exists('get_articles_html')) {
 					'src' => (!empty($art['image1']) ? $GLOBALS['repertoire_upload'] . '/' . $art['image1'] : FALSE),
 					'titre' => $art['titre'],
 					'chapo' => $chapo,
+					'texte' => $art['texte'],
 					'is_texte' => !empty($art['texte']),
 				);
 			}
@@ -170,30 +180,29 @@ if (!function_exists('get_articles_list_brief_html')) {
 			WHERE id = '" . intval($rubid) . "' AND nom_" . $_SESSION['session_langue'] . " != '' AND r.technical_code NOT IN ('other', 'iphone_content')
 			ORDER BY position";
 		$resrub = query($sqlrub);
-		if($rowrub = fetch_assoc($resrub)) {
-			$tpl = $GLOBALS['tplEngine']->createTemplate('articles_list_brief_html.tpl');
-			$tpl->assign('is_not_empty', !empty($rowrub));
+		$rowrub = fetch_assoc($resrub);
+		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_list_brief_html.tpl');
+		$tpl->assign('is_not_empty', !empty($rowrub));
+		if (!empty($rowrub)){
 			$tpl->assign('name', $rowrub['nom']);
-			if (!empty($rowrub)){
-				if($rowrub['etat'] == 0 && a_priv('admin_content', false)) {
-					$tpl->assign('offline_rub_txt', $GLOBALS['STR_OFFLINE_RUB']);
-				}
-				if (!empty($rowrub['image'])) {
-					$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-					$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
-				}
-				$tpl->assign('description', $rowrub['description']);
-				if($rowrub['technical_code'] == 'clients' && is_clients_module_active()) {
-					$tpl->assign('descriptions_clients', affiche_descriptions_clients());
-				}
-				if($rowrub['technical_code'] == 'creation' && is_references_module_active()) {
-					$tpl->assign('reference_multipage', affiche_reference_multipage(vn($_GET['refid'])));
-				}
+			if($rowrub['etat'] == 0 && a_priv('admin_content', false)) {
+				$tpl->assign('offline_rub_txt', $GLOBALS['STR_OFFLINE_RUB']);
+			}
+			if (!empty($rowrub['image'])) {
+				$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
+				$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 			}
 			if ($GLOBALS['site_parameters']['category_count_method'] == 'global') {
 				$tpl->assign('rubriques_sons_html', get_rubriques_sons_html($rubid));
 			}
-			if (!empty($rowrub) && $rowrub['articles_review'] == '1') {
+			$tpl->assign('description', $rowrub['description']);
+			if($rowrub['technical_code'] == 'clients' && is_clients_module_active()) {
+				$tpl->assign('descriptions_clients', affiche_descriptions_clients());
+			}
+			if($rowrub['technical_code'] == 'creation' && is_references_module_active()) {
+				$tpl->assign('reference_multipage', affiche_reference_multipage(vn($_GET['refid'])));
+			}
+			if ($rowrub['articles_review'] == '1') {
 				// On affiche des extraits d'articles qui correspondent à cette rubrique
 				$tpl->assign('articles_html', get_articles_html($rubid));
 			} elseif($rowrub['technical_code'] == 'tradefaire_home') {
@@ -203,40 +212,38 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('user_picture', get_user_picture('exhibitors'));
 				$tpl->assign('articles_html', get_articles_html($result_articles_home_tradefaire['id']));
 			}
-			if (est_identifie() && a_priv('admin_content')) {
-				$tpl->assign('admin', array(
-					'href' => $GLOBALS['administrer_url'] . '/rubriques.php?mode=modif&id=' . $rubid,
-					'modify_content_category_txt' => $GLOBALS['STR_MODIFY_CONTENT_CATEGORY']
-				));
-			}
-			if (is_advistofr_module_active()) {
-				$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
-					FROM peel_articles p
-					INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id " . (!empty($rubid) ? " AND pc.rubrique_id = '" . intval($rubid) . "'" : '') . "
-					INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id
-					WHERE p.etat = '1' AND p.on_special = 1 AND titre_" . $_SESSION['session_langue'] . " != ''
-					ORDER BY p.position ASC, p.id ASC";
-				$res = query($sql);
-				if (num_rows($res) > 0) {
-					$plus = array(
-						'src' => $GLOBALS['repertoire_images'] . '/coin.png',
-						'arts' => array()
-					);
-					while ($art = fetch_assoc($res)) {
-						$plus['arts'][] = array(
-							'titre' => $art['titre'],
-							'texte' => $art['texte']
-						);
-					}
-					$tpl->assign('plus', $plus);
-				}
-				$output .= $tpl->fetch();
-			} else {
-				$output .= $tpl->fetch();
-				$output .= print_actu(true);
-			}
-			correct_output($output, true, 'html');
 		}
+		if (est_identifie() && a_priv('admin_content')) {
+			$tpl->assign('admin', array(
+				'href' => $GLOBALS['administrer_url'] . '/rubriques.php?mode=modif&id=' . $rubid,
+				'modify_content_category_txt' => $GLOBALS['STR_MODIFY_CONTENT_CATEGORY']
+			));
+		}
+		if (is_advistofr_module_active() && !empty($rubid)) {
+			$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
+				FROM peel_articles p
+				INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id AND pc.rubrique_id = '" . intval($rubid) . "'
+				INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id
+				WHERE p.etat = '1' AND p.on_special = 1 AND titre_" . $_SESSION['session_langue'] . " != ''
+				ORDER BY p.position ASC, p.id ASC";
+			$res = query($sql);
+			if (num_rows($res) > 0) {
+				$plus = array(
+					'src' => $GLOBALS['repertoire_images'] . '/coin.png',
+					'arts' => array()
+				);
+				while ($art = fetch_assoc($res)) {
+					$plus['arts'][] = array(
+						'titre' => $art['titre'],
+						'texte' => $art['texte']
+					);
+				}
+				$tpl->assign('plus', $plus);
+			}
+		}
+		
+		$output .= $tpl->fetch();
+		correct_output($output, true, 'html');
 		return $output;
 	}
 }

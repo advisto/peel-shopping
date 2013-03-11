@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35122 2013-02-11 12:18:16Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -110,31 +110,43 @@ function display_select_attribute($categorie, $attribute) {
 
 /*
  * Affichage des attributs crées via l'administration du site
+ * A FAIRE : Cette fonction est à fusionner avec display_form_part du modules attributs
  *
+ * @param array $selected_attributes
+ * @param string $technical_code identifiant unique d'un attribut
+ * @param boolean $show_all
  * @return
  */
-
-function display_custom_attribute($selected_attributes=null) {
+function display_custom_attribute($selected_attributes=null, $technical_code = null, $show_all = false) {
 	$output = '';
+	if(!empty($technical_code)) {
+		$sql_technical_code_condition = 'a.technical_code ="' . real_escape_string($technical_code) . '"';
+	} else {
+		// On ne prend que les choix multiples
+		$sql_technical_code_condition = 'a.`texte_libre`=0 ';
+	}
 	$sql = 'SELECT DISTINCT o.`id`, o.`id_nom_attribut`, a.`nom_' . $_SESSION['session_langue'] . '` AS `attribut`, o.`descriptif_' . $_SESSION['session_langue'] . '` AS `nom`
 		FROM `peel_nom_attributs`  a
-		INNER JOIN `peel_attributs` o ON a.`id` = o.`id_nom_attribut`
-		INNER JOIN `peel_produits_attributs` pa ON o.`id` = pa.`attribut_id`
-		WHERE a.`etat`=1 AND a.`texte_libre`=0 AND a.technical_code NOT IN ("duration", "categorie_number")';
+		LEFT JOIN `peel_attributs` o ON a.`id` = o.`id_nom_attribut`
+		'.(!$show_all? 'INNER JOIN `peel_produits_attributs` pa ON o.`id` = pa.`attribut_id`':'').'
+		WHERE '.$sql_technical_code_condition.' AND a.`etat`=1 AND a.technical_code NOT IN ("duration", "categorie_number")';
 	$result = query($sql);
-	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_custom_attribute.tpl');
-	$tpl->assign('select_attrib_txt', $GLOBALS['STR_MODULE_SEARCH_SELECT_ATTRIB']);
-	$tpl_attrs = array();
 	while ($this_attribute = fetch_assoc($result)) {
 		$tpl_attrs[$this_attribute['id_nom_attribut']]['name'] = $this_attribute['attribut'];
-		$tpl_attrs[$this_attribute['id_nom_attribut']]['options'][] = array(
-			'value' => intval($this_attribute['id']),
-			'issel'	=> (!empty($selected_attributes) && is_array($selected_attributes) && vb($selected_attributes[$this_attribute['id_nom_attribut']]) == $this_attribute['id']),
-			'name' => $this_attribute['nom']
-		);
+		if(!empty($this_attribute['id'])) {
+			$tpl_attrs[$this_attribute['id_nom_attribut']]['options'][] = array(
+				'value' => intval($this_attribute['id']),
+				'issel'	=> (!empty($selected_attributes) && is_array($selected_attributes) && vb($selected_attributes[$this_attribute['id_nom_attribut']]) == $this_attribute['id']),
+				'name' => $this_attribute['nom']
+			);
+		}
 	}
-	$tpl->assign('attributes', $tpl_attrs);
-	$output = $tpl->fetch();
+	if(!empty($tpl_attrs)) {
+		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_custom_attribute.tpl');
+		$tpl->assign('select_attrib_txt', $GLOBALS['STR_MODULE_SEARCH_SELECT_ATTRIB']);
+		$tpl->assign('attributes', $tpl_attrs);
+		$output .= $tpl->fetch();
+	}
 	return $output;
 }
 

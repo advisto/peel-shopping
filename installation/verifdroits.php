@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: verifdroits.php 35211 2013-02-13 13:15:07Z gboussin $
+// $Id: verifdroits.php 35807 2013-03-10 21:27:05Z gboussin $
 define('IN_INSTALLATION', 4);
 include("../configuration.inc.php");
 
@@ -31,7 +31,7 @@ if (!select_db($_SESSION['session_install_choixbase'], $GLOBALS['database_object
 }
 $error = 0;
 $directories_checkup_messages = '';
-$liste = array("../lib/setup", "../upload", "../upload/thumbs", "../download", "../comparateur", "../cache");
+$liste = array($GLOBALS['dirroot'] . "/lib/setup", $GLOBALS['dirroot'] . "/upload", $GLOBALS['dirroot'] . "/upload/thumbs", $GLOBALS['dirroot'] . "/download", $GLOBALS['dirroot'] . "/comparateur", $GLOBALS['dirroot'] . "/cache", $GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile");
 for($i = 0; $i < count($liste); $i++) {
 	if (!is_writable($liste[$i])) {
 		$directories_checkup_messages .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], $liste[$i])))->fetch();

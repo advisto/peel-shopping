@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: ipn.php 35805 2013-03-10 20:43:50Z gboussin $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -46,11 +46,11 @@ if ($r = fetch_assoc($q)) {
 			$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
 			$header .= "Content-Length: " . String::strlen($req) . "\r\n\r\n";
 			// On essaie sans SSL si l'hébergement ne le permet pas
-			$fp = fsockopen ($paypal_domain, 80, $errno, $errstr, 30);
+			$fp = fsockopen (str_replace('ipnpb', 'www', $paypal_domain), 80, $errno, $errstr, 30);
 		}
 		if (!$fp) {
 			// HTTP ERROR
-			send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement n\'a pas pu être pris en compte pour des raisons techniques. L\'IP du serveur qui a voulu confirmer une transaction est : ' . $_SERVER['REMOTE_ADDR']);
+			send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement n\'a pas pu être pris en compte pour des raisons techniques : ' . $errno . ' - ' . $errstr . '. L\'IP du serveur qui a voulu confirmer une transaction est : ' . $_SERVER['REMOTE_ADDR']);
 		} else {
 			$item_name = vb($_POST['item_name']);
 			$item_number = intval($_POST['item_number']);

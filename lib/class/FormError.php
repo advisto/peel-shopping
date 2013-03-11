@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: FormError.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: FormError.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: FormError.php 35067 2013-02-08 14:21:55Z gboussin $
+ * @version $Id: FormError.php 35805 2013-03-10 20:43:50Z gboussin $
  * @access public
  */
 class FormError {
@@ -71,19 +71,19 @@ class FormError {
 	/**
 	 * formError::add()
 	 *
-	 * @param mixed $name
-	 * @param integer $text
+	 * @param string $name
+	 * @param string $text
 	 * @return
 	 */
-	function add($name, $text = 0)
+	function add($name, $text = null)
 	{
-		$this->error[$name] = $text ? $text : '';
+		$this->error[$name] = ($text ? $text : '');
 	}
 
 	/**
 	 * formError::has_error()
 	 *
-	 * @param mixed $name
+	 * @param string $name
 	 * @return
 	 */
 	function has_error($name)

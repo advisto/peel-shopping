@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 35502 2013-02-25 01:26:38Z sdelaporte $
+// $Id: display.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -803,14 +803,15 @@ if (!function_exists('print_actu')) {
 	 * print_actu()
 	 *
 	 * @param boolean $return_mode
+	 * @param integer $rubid
 	 * @return
 	 */
-	function print_actu($return_mode = false)
+	function print_actu($return_mode = false, $rubid = null)
 	{
 		$output = '';
-		$sql = 'SELECT p.id, p.surtitre_' . $_SESSION['session_langue'] . ', p.titre_' . $_SESSION['session_langue'] . ', p.chapo_' . $_SESSION['session_langue'] . ', p.texte_' . $_SESSION['session_langue'] . ', p.image1, p.on_special, p.date_maj, pc.rubrique_id
+		$sql = 'SELECT p.id, p.surtitre_' . $_SESSION['session_langue'] . ', p.titre_' . $_SESSION['session_langue'] . ', p.chapo_' . $_SESSION['session_langue'] . ', p.texte_' . $_SESSION['session_langue'] . ', p.image1, p.on_special, p.date_maj
 			FROM peel_articles p
-			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id
+			'.(!empty($rubid)?'INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id AND pc.rubrique_id='.intval($rubid):'').'
 			WHERE p.on_special = "1" AND p.etat = "1"
 			ORDER BY p.date_maj DESC
 			LIMIT 0,1';
@@ -1575,7 +1576,7 @@ if (!function_exists('getHTMLHead')) {
 		}
 		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/filesearchhover.js';
 		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/overlib.js';
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/peel.js';
+		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/advisto.js';
 		if (vb($GLOBALS['site_parameters']['anim_prod']) == 1) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/fly-to-basket.js';
 		}
@@ -1885,6 +1886,7 @@ if (!function_exists('output_light_html_page')) {
 		$tpl->assign('lang', $_SESSION['session_langue']);
 		$tpl->assign('charset', $encoding);
 		$tpl->assign('title', $title);
+		$tpl->assign('onload', $onload);
 		$tpl->assign('additional_header', $additional_header);
 		$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
 		$tpl->assign('body', $body);
@@ -1964,15 +1966,19 @@ if (!function_exists('print_delete_installation_folder')) {
 		if(!empty($peel_langues['nom'])) {
 			$GLOBALS['lang_names'] = $peel_langues['nom'];
 		}
-		$tpl = $GLOBALS['tplEngine']->createTemplate('delete_installation_folder.tpl');
-		$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
-		$tpl->assign('installation_links', affiche_flags(true, $GLOBALS['wwwroot'] . '/installation/index.php', true));
-		$tpl->assign('STR_INSTALLATION_PROCEDURE', $GLOBALS['STR_INSTALLATION_PROCEDURE']);
-		$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN']);
-		$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE']);
-		$tpl->assign('STR_INSTALLATION_DELETED_LINK', $GLOBALS['STR_INSTALLATION_DELETED_LINK']);
-		$tpl->assign('PEEL_VERSION', PEEL_VERSION);
-		$body = $tpl->fetch();
+		if (!is_writable($GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile")) {
+			$body = sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], "/lib/templateEngines/smarty/compile");
+		} else {
+			$tpl = $GLOBALS['tplEngine']->createTemplate('delete_installation_folder.tpl');
+			$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
+			$tpl->assign('installation_links', affiche_flags(true, $GLOBALS['wwwroot'] . '/installation/index.php', true));
+			$tpl->assign('STR_INSTALLATION_PROCEDURE', $GLOBALS['STR_INSTALLATION_PROCEDURE']);
+			$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN']);
+			$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE']);
+			$tpl->assign('STR_INSTALLATION_DELETED_LINK', $GLOBALS['STR_INSTALLATION_DELETED_LINK']);
+			$tpl->assign('PEEL_VERSION', PEEL_VERSION);
+			$body = $tpl->fetch();
+		}
 		$additional_header = '
 		<style>
 			h1 { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #337733; }

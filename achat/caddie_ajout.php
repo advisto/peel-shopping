@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: caddie_ajout.php 35805 2013-03-10 20:43:50Z gboussin $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -90,17 +90,16 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 				}
 			}
 		}
-		// contrôle de la présence des attributs ayant un mandatory==1
-		if (!empty($error_attribut_mandatory)) {
+		// Contrôle de la présence des attributs ayant un mandatory==1 - tableau d'erreurs rempli par l'appel à get_attribut_list_from_post_data() ci-dessus
+		if (!empty($GLOBALS['error_attribut_mandatory'])) {
 			// on n'ajoute rien au panier
 			$can_add_to_cart = false;
-			// le tableau $error_attribut_mandatory contient le nom des attributs qui devraient être renseignés mais qui sont vides.
-			foreach($error_attribut_mandatory as $missed_attribut) {
-				$_SESSION['session_display_popup']['error_text'] .= sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $missed_attribut);
-				break;
+			// le tableau $GLOBALS['error_attribut_mandatory'] contient le nom des attributs qui devraient être renseignés mais qui sont vides.
+			foreach($GLOBALS['error_attribut_mandatory'] as $missed_attribut) {
+				$_SESSION['session_display_popup']['error_text'] .= sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $missed_attribut) . '<br />';
 			}
 		}
-
+		// Gestion de l'ajout au caddie
 		if ($can_add_to_cart) {
 			// Pas de problème => on ajoute le produit
 			$_SESSION['session_caddie']->add_product($product_object, $quantite, $email_check, $listcadeaux_owner);

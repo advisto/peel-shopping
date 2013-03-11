@@ -21,6 +21,7 @@ Il vous suffit de lancer le site avec http://votre_url/installation et de rempli
 
 Néanmoins, voici la démarche à suivre si l'installation échoue :
 
+0. Assurez-vous que le répertoires /lib/templateEngines/smarty/compile est accessible en écriture par le serveur web, sinon Smarty ne pourra pas afficher l'installation
 1. Installez la base mysql à partir du fichier /installation/peel.sql via phpMyAdmin par exemple
 2. Renommer le fichier /lib/setup/info.inc.src en lib/setup/info.inc.php
 3. Renseigner les variables du fichier /lib/setup/info.inc.php

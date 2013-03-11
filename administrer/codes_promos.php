@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: codes_promos.php 35805 2013-03-10 20:43:50Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -202,7 +202,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_MIN', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_MIN'], $GLOBALS['site_parameters']['symbole']));
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_MIN_EXPLAIN', $GLOBALS['STR_ADMIN_CODES_PROMOS_MIN_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_PERCENT', $GLOBALS['STR_ADMIN_CODES_PROMOS_PERCENT']);
-	$tpl->assign('STR_ADMIN_CODES_PROMOS_VALUE', $GLOBALS['STR_ADMIN_CODES_PROMOS_VALUE']);
+	$tpl->assign('STR_ADMIN_CODES_PROMOS_VALUE', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_VALUE'], $GLOBALS['site_parameters']['symbole']));
 	$tpl->assign('STR_ADMIN_BEGIN_DATE', $GLOBALS['STR_ADMIN_BEGIN_DATE']);
 	$tpl->assign('STR_ADMIN_END_DATE', $GLOBALS['STR_ADMIN_END_DATE']);
 	$tpl->assign('STR_PROMO_CODE', $GLOBALS['STR_PROMO_CODE']);

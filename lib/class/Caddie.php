@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: Caddie.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 35067 2013-02-08 14:21:55Z gboussin $
+ * @version $Id: Caddie.php 35805 2013-03-10 20:43:50Z gboussin $
  * @access public
  */
 class Caddie {
@@ -233,6 +233,7 @@ class Caddie {
 		$this->attribut = array();
 		$this->id_attribut = array();
 		$this->total_prix_attribut = array();
+		$this->reference = array();
 
 		/* Montant total du caddie */
 		$this->total = 0;
@@ -331,9 +332,10 @@ class Caddie {
 	 * @param integer $quantite
 	 * @param string $email_check
 	 * @param string $listcadeaux_owner
+	 * @param string $custom_product_reference
 	 * @return
 	 */
-	function add_product(&$product_object, $quantite, $email_check, $listcadeaux_owner = null)
+	function add_product(&$product_object, $quantite, $email_check, $listcadeaux_owner = null, $custom_product_reference = null)
 	{
 		if (in_array($product_object->id, $this->articles) && empty($email_check)) {
 			// Si le produit est dans le caddie, et que ce n'est pas un chèque cadeau, alors on va vouloir fusionner les données dans une même ligne
@@ -358,6 +360,7 @@ class Caddie {
 				$quantite = $this->quantite[$line_found] + $quantite;
 				$this->change_line_data($line_found, $product_object->id, $quantite, $product_object->configuration_color_id, $product_object->configuration_size_id, $email_check, $product_object->configuration_attributs_list);
 			}
+			$this->reference[$line_found] = $custom_product_reference;
 		} else {
 			// on ajoute le produit au panier
 			// Une nouvelle ligne doit être créée dans le panier
@@ -375,6 +378,7 @@ class Caddie {
 			$this->email_check[$numero_ligne] = $email_check;
 			$this->id_attribut[$numero_ligne] = $product_object->configuration_attributs_list;
 			$this->conditionnement[$numero_ligne] = $product_object->conditionnement;
+			$this->reference[$numero_ligne] = $custom_product_reference;
 			if (is_giftlist_module_active()) {
 				$this->giftlist_owners[$numero_ligne] = $listcadeaux_owner;
 			}
@@ -584,17 +588,17 @@ class Caddie {
 			$this->email_check[$numero_ligne],
 			$this->ecotaxe_ttc[$numero_ligne],
 			$this->ecotaxe_ht[$numero_ligne],
+			$this->reference[$numero_ligne],
 			$this->id_attribut[$numero_ligne],
 			$this->attribut[$numero_ligne],
 			$this->total_prix_attribut[$numero_ligne]);
 		// suppression des attributs d'image existants
 		if (!empty($attributs_list)) {
-			foreach(explode("-", $attributs_list) as $tableau_id_array) {
-				$tableau_attribut_id = explode("|", $tableau_id_array);
-				if (count($tableau_attribut_id)) {
-					if (array_key_exists(0, $tableau_attribut_id)) { // si c'est un attribut en texte libre
-						delete_uploaded_file_and_thumbs($tableau_attribut_id[2]);
-					}
+			foreach(explode("§", $attributs_list) as $attribut_infos_list) {
+				$attribut_infos = explode("|", $attribut_infos_list);
+				if (!empty($attribut_infos[2])) { 
+					// si c'est un attribut de type upload ou texte libre
+					delete_uploaded_file_and_thumbs($attribut_infos[2]);
 				}
 			}
 		}
@@ -843,6 +847,7 @@ class Caddie {
 				unset($this->email_check[$numero_ligne]);
 				unset($this->ecotaxe_ttc[$numero_ligne]);
 				unset($this->ecotaxe_ht[$numero_ligne]);
+				unset($this->reference[$numero_ligne]);
 				unset($this->id_attribut[$numero_ligne]);
 				unset($this->attribut[$numero_ligne]);
 				unset($this->total_prix_attribut[$numero_ligne]);
@@ -1099,6 +1104,7 @@ class Caddie {
 			$articles[$numero_ligne]['email_check'] = $this->email_check[$numero_ligne];
 			$articles[$numero_ligne]['ecotaxe_ttc'] = $this->ecotaxe_ttc[$numero_ligne];
 			$articles[$numero_ligne]['ecotaxe_ht'] = $this->ecotaxe_ht[$numero_ligne];
+			$articles[$numero_ligne]['reference'] = $this->reference[$numero_ligne];
 			$articles[$numero_ligne]['attribut'] = $this->attribut[$numero_ligne];
 			$articles[$numero_ligne]['id_attribut'] = $this->id_attribut[$numero_ligne];
 			$articles[$numero_ligne]['total_prix_attribut'] = $this->total_prix_attribut[$numero_ligne];

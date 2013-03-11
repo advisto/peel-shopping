@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 35328 2013-02-16 17:37:33Z gboussin $
+// $Id: search.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -97,6 +97,8 @@ $tpl_f = $GLOBALS['tplEngine']->createTemplate('search_form.tpl');
 $tpl_f->assign('action', (defined('IN_404_ERROR_PAGE') ? $GLOBALS['wwwroot']. '/search.php':get_current_url(false)));
 $tpl_f->assign('value', $search);
 $tpl_f->assign('match', $match);
+$tpl_f->assign('prix_min', vb($_GET['prix_min']));
+$tpl_f->assign('prix_max', vb($_GET['prix_max']));
 $tpl_f->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 $tpl_f->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 $tpl_f->assign('STR_ENTER_KEY', $GLOBALS['STR_ENTER_KEY']);
@@ -237,30 +239,36 @@ if (!is_annonce_module_active()) {
 		if (!empty($_GET['custom_attribut']) && is_array($_GET['custom_attribut'])) {
 			foreach($_GET['custom_attribut'] as $this_attribut_id) {
 				if (!empty($this_attribut_id)) {
-					$attributs_array[$this_attribut_id] = $this_attribut_id;
+					$attributs_array[$this_attribut_id] = true;
 				}
 			}
 		}
 		if (!empty($_GET['custom_nom_attribut']) && is_array($_GET['custom_nom_attribut'])) {
 			foreach($_GET['custom_nom_attribut'] as $this_nom_attribut_id) {
 				if (!empty($this_nom_attribut_id)) {
-					$nom_attributs_array[$this_nom_attribut_id] = $this_nom_attribut_id;
+					$nom_attributs_array[$this_nom_attribut_id] = true;
 				}
 			}
 		}
 		if (!empty($attributs_array) || !empty($nom_attributs_array)) {
 			$additional_sql_inner .= ' INNER JOIN peel_produits_attributs pat ON p.id=pat.produit_id';
 			if (!empty($attributs_array)) {
-				$additional_sql_cond_array[] = 'pat.attribut_id IN (' . nohtml_real_escape_string(implode(',', $attributs_array)) . ')';
-				$having_cond_array[] = 'COUNT(DISTINCT pat.attribut_id)>=' . count($attributs_array);
+				$additional_sql_cond_array[] = 'pat.attribut_id IN (' . nohtml_real_escape_string(implode(',', array_keys($attributs_array))) . ')';
+				if(count($attributs_array)>1) {
+					$having_cond_array[] = 'COUNT(DISTINCT pat.attribut_id)>=' . count($attributs_array);
+				}
 			}
 			if (!empty($nom_attributs_array)) {
-				$additional_sql_cond_array[] = 'pat.nom_attribut_id IN (' . nohtml_real_escape_string(implode(',', $nom_attributs_array)) . ')';
-				$having_cond_array[] = 'COUNT(DISTINCT pat.nom_attribut_id)>=' . count($nom_attributs_array);
+				$additional_sql_cond_array[] = 'pat.nom_attribut_id IN (' . nohtml_real_escape_string(implode(',', array_keys($nom_attributs_array))) . ')';
+				if(count($attributs_array)>1) {
+					$having_cond_array[] = 'COUNT(DISTINCT pat.nom_attribut_id)>=' . count($nom_attributs_array);
+				}
 			}
 			// On veut que le produit ait tous les attributs cherchés : on fait la jointure pour trouver les différentes lignes concernées,
 			// et ensuite on doit vérifier que le nombre de lignes trouvées correspond bien à la recherche
-			$additional_sql_having .= 'HAVING '.implode(' AND ', $having_cond_array);
+			if(!empty($having_cond_array)) {
+				$additional_sql_having .= 'HAVING '.implode(' AND ', $having_cond_array);
+			}
 		}
 	}
 	if (count($terms) > 0 || !empty($additional_sql_cond_array)) {
@@ -300,10 +308,10 @@ if (is_annonce_module_active()) {
 	$categorie_annonce = '';
 	$tpl_r->assign('STR_MODULE_ANNONCES_SEARCH_RESULT_ADS', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_RESULT_ADS']);
 	$tpl_r->assign('STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS']);
-	if (!empty($frm['cat_select'])) {
-		$categorie_annonce = intval($frm['cat_select']);
+	if (!empty($_GET['cat_select'])) {
+		$categorie_annonce = intval($_GET['cat_select']);
 	}
-	$res_affiche_annonces = affiche_annonces($categorie_annonce, get_ad_search_sql($_GET, false), null, 'search', $GLOBALS['site_parameters']['ads_per_page'], 'line', true, null, 4, false, true, false);
+	$res_affiche_annonces = affiche_annonces($categorie_annonce, get_ad_search_sql($_GET, false), null, 'search', $GLOBALS['site_parameters']['ads_per_page'], 'line', true, null, 4, false, true, false, false, 0, '', '', false);
 	if(is_user_alerts_module_active()) {
 		// Sauvegarde de la recherche
 		$res_affiche_annonces .= display_save_search_button($_GET);

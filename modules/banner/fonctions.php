@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35290 2013-02-15 15:56:13Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -48,7 +48,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 	// Taille par défaut des bannières à modifier en fonction du template du site.
 	if (!empty($GLOBALS['page_columns_count']) && $GLOBALS['page_columns_count'] == 2) {
 		$max_banner_width = 750;
-		$max_banner_height = 500;
+		$max_banner_height = 748;
 	} else {
 		$max_banner_width = 1200;
 		$max_banner_height = 748;

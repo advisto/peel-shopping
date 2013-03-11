@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,10 +36,18 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 		return false;
 	}
 	if ($path === null) {
-		$path = $GLOBALS['uploaddir'];
+		if(strpos($image, '/cache')===false) {
+			$path = $GLOBALS['uploaddir'];
+		} else {
+			$path = $GLOBALS['dirroot'];
+		}
 	}
 	if (empty($new_file_path)) {
-		$new_file_path = $GLOBALS['uploaddir'] . '/thumbs/';
+		if(strpos($image, '/cache')===false) {
+			$new_file_path = $GLOBALS['uploaddir'] . '/thumbs/';
+		} else {
+			$new_file_path = $GLOBALS['dirroot'].'/cache';
+		}
 	}
 	if(strpos($image, '://')!==false) {
 		// URL présente dans le nom de l'image

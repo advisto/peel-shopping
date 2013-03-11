@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 35521 2013-02-26 13:01:59Z gboussin $
+// $Id: order.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -166,14 +166,14 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			$sql_set_array[] = "a_timestamp='" . date('Y-m-d H:i:s', time()) . "'";
 			if (is_annonce_module_active()) {
 				// On gère les crédits d'annonces GOLD
-				$sql = 'SELECT technical_code
+				$sql = 'SELECT pp.technical_code, pca.attributs_list, pca.reference
 					FROM peel_produits pp
 					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id
 					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id
 					WHERE pc.id = ' . intval($order_id);
 				$query_t = query($sql);
-				while ($technical_code = fetch_assoc($query_t)) {
-					if (substr($technical_code['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_') {
+				while ($product_ordered_infos = fetch_assoc($query_t)) {
+					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_') {
 						// Format : annonce_g_12m_1c
 						// Les droits sur les annonces GOLD ont deux aspects : gold_credit pour l'utilisateur, et une ligne dans peel_gold_ads_to_users - les deux varient dans le même sens au même moment. 
 						// Le champ gold_credit est donc inutile car venant en doublon de peel_gold_ads_to_users, mais il évite jointure pour savoir simplement nombre d'annonces GOLD commandables à créer par l'utilisateur.
@@ -182,8 +182,14 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '"';
 						query($update_credit);
 						$insert_credit = 'INSERT INTO peel_gold_ads_to_users (user_id,order_id,gold_type)
-							VALUES (' . intval($commande['id_utilisateur']) . ',' . intval($commande['id']) . ',"' . nohtml_real_escape_string($technical_code['technical_code']) . '")';
+							VALUES (' . intval($commande['id_utilisateur']) . ',' . intval($commande['id']) . ',"' . nohtml_real_escape_string($product_ordered_infos['technical_code']) . '")';
 						query($insert_credit);
+					} elseif (substr($product_ordered_infos['technical_code'], 0, strlen('ad_')) == 'ad_') {
+						// On ajoute les attributs commandés à l'annonce
+						$update_attributs = 'UPDATE peel_lot_vente
+							SET attributs_list=CONCAT(attributs_list,IF(attributs_list="", "", "§"), "'.nohtml_real_escape_string($product_ordered_infos['attributs_list']).'")
+							WHERE ref ="' . intval($product_ordered_infos['reference']) . '"';
+						query($update_attributs);
 					}
 				}
 			}
@@ -195,10 +201,10 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id
 					WHERE pc.id = ' . intval($order_id);
 				$query_t = query($sql);
-				while ($technical_code = fetch_assoc($query_t)) {
-					if (substr($technical_code['technical_code'], 0, strlen('forfait_p_')) == 'forfait_p_') {
+				while ($product_ordered_infos = fetch_assoc($query_t)) {
+					if (substr($product_ordered_infos['technical_code'], 0, strlen('forfait_p_')) == 'forfait_p_') {
 						// Format : forfait_p_3
-						$n_days = 30 * substr($technical_code['technical_code'], strlen('forfait_p_'));
+						$n_days = 30 * substr($product_ordered_infos['technical_code'], strlen('forfait_p_'));
 						$update_credit = 'UPDATE peel_utilisateurs
 							SET platinum_status ="YES", platinum_activation_date ="' . date('Y-m-d H:i:s') . '", platinum_until =GREATEST(' . time() . ',platinum_until)+' . (3600 * 24 * $n_days).'
 							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '"';
@@ -671,6 +677,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 			, conditionnement = '" . nohtml_real_escape_string(vb($product_object->conditionnement)) . "'";
 		}
 		$sql .= "
+			, attributs_list = '" . nohtml_real_escape_string(vb($article_infos['id_attribut'])) . "'
 			, nom_attribut = '" . nohtml_real_escape_string(str_replace('<br />', "\r\n", $attribut)) . "'
 			, total_prix_attribut = '" . nohtml_real_escape_string(vb($article_infos['total_prix_attribut'])) . "'";
 		query($sql);

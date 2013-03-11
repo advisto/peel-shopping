@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35384 2013-02-19 10:01:16Z gboussin $
+// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -31,16 +31,21 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 	$attributs_array = array();
 	// $attributs_list permet de sélectionner uniquement certains attributs et leurs options
 	// Ceci évite notamment dans certains cas de récupérer des informations inutiles
-	$attributs_list_array = explode('§', $attributs_list);
-	foreach($attributs_list_array as $this_attributs_list) {
-		$this_attributs_list_array = explode("|", $this_attributs_list);
-		if(isset($this_attributs_list_array[1])) {
-			// On récupère l'id de l'option sélectionnée si format est attribut_id|option_id, ou le texte si le format est attribut_id|0|texte
-			$attribut_and_options_filter_array[$this_attributs_list_array[0]][] = end($this_attributs_list_array);
-			if(empty($this_attributs_list_array[1])) {
-				$sql_cond_array[] = 'na.id="'.intval($this_attributs_list_array[0]).'"';
-			} else {
-				$sql_cond_array[] = '(na.id="'.intval($this_attributs_list_array[0]).'" AND a.id="'.intval(end($this_attributs_list_array)).'")';
+	if($attributs_list === '') {
+		// On veut les attributs possibles correspondant à une liste vide
+		$sql_cond_array[] = '0';
+	} else {
+		$attributs_list_array = explode('§', $attributs_list);
+		foreach($attributs_list_array as $this_attributs_list) {
+			$this_attributs_list_array = explode("|", $this_attributs_list);
+			if(isset($this_attributs_list_array[1])) {
+				// On récupère l'id de l'option sélectionnée si format est attribut_id|option_id, ou le texte si le format est attribut_id|0|texte
+				$attribut_and_options_filter_array[$this_attributs_list_array[0]][$this_attributs_list_array[1]] = end($this_attributs_list_array);
+				if(empty($this_attributs_list_array[1])) {
+					$sql_cond_array[] = 'na.id="'.intval($this_attributs_list_array[0]).'"';
+				} else {
+					$sql_cond_array[] = '(na.id="'.intval($this_attributs_list_array[0]).'" AND a.id="'.intval($this_attributs_list_array[1]).'")';
+				}
 			}
 		}
 	}
@@ -50,11 +55,11 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		// Pour chacun des attributs, il y a diverses options possibles qui sont stockées dans peel_attributs
 		// Dans le cas d'attributs upload ou texte_libre, aucune option n'est associée => LEFT JOIN peel_attributs et non pas INNER JOIN
 		if(!empty($product_id)) {
-		// Pour un produit donné, on peut associer les attributs que l'on veut, et également spécifier les options acceptables de ces attributs pour ce produit en particulier
-		// Il ne faut donc pas faire de jointure entre peel_attributs et peel_nom_attributs, mais passer par peel_produits_attributs pour faire les deux jointures indépendemment
+			// Pour un produit donné, on peut associer les attributs que l'on veut, et également spécifier les options acceptables de ces attributs pour ce produit en particulier
+			// Il ne faut donc pas faire de jointure entre peel_attributs et peel_nom_attributs, mais passer par peel_produits_attributs pour faire les deux jointures indépendemment
 			$sql_from_and_where = "FROM peel_produits_attributs pa
-			LEFT JOIN peel_attributs a ON a.id = pa.attribut_id
-			INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1'
+				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id
+				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1'
 				WHERE pa.produit_id = '" . intval($product_id) . "'";
 		} else {
 			$sql_from_and_where = "FROM peel_nom_attributs na
@@ -64,7 +69,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
-		$sql = "SELECT a.id AS attribut_id, na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur
+		$sql = "SELECT a.id AS attribut_id, na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur
 			".$sql_from_and_where."
 			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
@@ -73,6 +78,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 				// On prend la valeur générale de la boutique
 				$result['type_affichage_attribut'] = $GLOBALS['site_parameters']['type_affichage_attribut'];
 			}
+			$result['descriptif'] = String::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
 			$possible_attributs[$product_id . '-' . $_SESSION['session_langue']][] = $result;
 		}
 	}
@@ -104,13 +110,20 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 					}
 					unset($attributs_array[$this_nom_attribut_id][0]);
 				}
+				if(!empty($attribut_and_options_filter_array) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id]) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)])) {
+					$attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif'] = $attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)];
+					if(String::strpos($attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['technical_code'], 'date') === 0) {
+						$attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif'] = get_formatted_date($attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif']);
+					}
+				}
 			}
 			// FIN de gestion d'attributs avec options fictives
 		}
 		if($get_attributes_with_multiple_options_only || $get_attributes_with_single_options_only) {
 			// On retire les attributs qui ne respectent pas les conditions : unique ou multiple
 			foreach($attributs_array as $this_attribute => $this_options_array) {
-				if($get_attributes_with_multiple_options_only && count($this_options_array)<=1) {
+				if($get_attributes_with_multiple_options_only && (count($this_options_array)<=1 && $this_options_array[key($this_options_array)]['type_affichage_attribut']!=2)) {
+					// Cet attribut n'est pas une checkbox et a moins de 2 valeurs
 					if(empty($attributs_list) && key($this_options_array) && empty($this_options_array[key($this_options_array)]['texte_libre']) && empty($this_options_array[key($this_options_array)]['upload'])) {
 						// attribut_id est différent de 0 et ce n'est pas un attribut avec options fictives
 						// => il s'agit bien d'une option qu'on peut afficher dans la description produit
@@ -123,7 +136,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		}
 		if ($return_mode == 'option_name' || $return_mode == 'full_name') {
 			// On renvoie les noms et pas les informations plus complètes
-		foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
+			foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
 				foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
 					$this_name_parts = array();
 					if($return_mode == 'full_name') {
@@ -152,9 +165,10 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
  * @param array $excluded_technical_code_array
  * @param boolean $force_reseller_mode
  * @param boolean $get_attributes_with_multiple_options_only
+ * @param boolean $filter_using_show_description
  * @return
  */
-function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true)
+function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true, $filter_using_show_description = false)
 {
 	$output = '';
 	$GLOBALS['last_calculation_additional_price_ht'] = 0;
@@ -183,10 +197,12 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 			$input_value = '';
 			$input_type = '';
 			$input_name = '';
+			$input_class = '';
 			$input_on_change = '';
 			$options = array();
 			$preselected_value = vb($attribut_preselect_infos[$this_nom_attribut_id]);
 			unset($type_affichage_attribut);
+			$attribut_additional_price_ttc = 0;
 			foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
 				if (!empty($technical_code_array) && !in_array($this_attribut_infos['technical_code'], $technical_code_array)) {
 					break;
@@ -194,35 +210,46 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				if (!empty($excluded_technical_code_array) && in_array($this_attribut_infos['technical_code'], $excluded_technical_code_array)) {
 					break;
 				}
-				if ($this_attribut_infos['type_affichage_attribut'] == 3) {
-					// L'administrateur choisi la configuration général du site pour l'affichage de ce paramétre.
-					$type_affichage_attribut = $GLOBALS['site_parameters']['type_affichage_attribut'];
-				} else {
-					$type_affichage_attribut = $this_attribut_infos['type_affichage_attribut'];
-				}
 				if($force_reseller_mode!==null) {
 					$reseller_mode = $force_reseller_mode;
 				} else {
 					$reseller_mode = (is_reseller_module_active() && is_reseller());
 				}
-				if ($reseller_mode && $this_attribut_infos['prix_revendeur'] != 0) {
+				$show_additionnal_price = true;
+				if(!empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']) && !empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$this_attribut_infos['technical_code']])) {
+					$prices_list_by_elements_count = explode(',',$GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$this_attribut_infos['technical_code']]);
+					$additional_price_ttc = (isset($prices_list_by_elements_count[$j])?$prices_list_by_elements_count[$j]:$prices_list_by_elements_count[0]) - $attribut_additional_price_ttc;
+					$show_additionnal_price = false;
+				} elseif ($reseller_mode && $this_attribut_infos['prix_revendeur'] != 0) {
 					$additional_price_ttc = vn($this_attribut_infos['prix_revendeur']);
 				} else {
 					$additional_price_ttc = vn($this_attribut_infos['prix']);
 				}
-				if ($reseller_mode && isset($_SESSION['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id])) {
-					$additional_price_ttc += $_SESSION['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id];
-				} elseif(isset($_SESSION['site_parameters']['attribut_prix'][$this_nom_attribut_id])) {
-					$additional_price_ttc += $_SESSION['site_parameters']['attribut_prix'][$this_nom_attribut_id];
+				if ($reseller_mode && isset($GLOBALS['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id])) {
+					$additional_price_ttc += $GLOBALS['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id];
+				} elseif(isset($GLOBALS['site_parameters']['attribut_prix'][$this_nom_attribut_id])) {
+					$additional_price_ttc += $GLOBALS['site_parameters']['attribut_prix'][$this_nom_attribut_id];
 				}
+				$attribut_additional_price_ttc += $additional_price_ttc;
 				$additional_price_ht = $additional_price_ttc / (1 + $product_object->tva / 100);
 				// On garde en mémoire le calcul pour utilisation potentielle après exécution de cette fonction
 				$GLOBALS['last_calculation_additional_price_ht'] += $additional_price_ht;
-				if ($additional_price_ttc != 0) {
+				if ($additional_price_ttc != 0 && $show_additionnal_price) {
 					$final_additional_price_ht = $additional_price_ht * (1 - $product_object->get_all_promotions_percentage($reseller_mode, get_current_user_promotion_percentage(), false) / 100);
 					$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, true);
 				} else {
 					$price_text = '';
+				}
+				if($filter_using_show_description && empty($this_attribut_infos['show_description'])) {
+					// L'attribut ne doit pas avoir son texte affiché dans la description récapitulative
+					$j++;
+					continue;
+				}
+				if ($this_attribut_infos['type_affichage_attribut'] == 3) {
+					// L'administrateur choisi la configuration général du site pour l'affichage de ce paramétre.
+					$type_affichage_attribut = $GLOBALS['site_parameters']['type_affichage_attribut'];
+				} else {
+					$type_affichage_attribut = $this_attribut_infos['type_affichage_attribut'];
 				}
 				if (!empty($this_attribut_infos['upload']) && empty($this_attribut_id)) {
 					// cas des attributs d'upload d'image
@@ -231,6 +258,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 					} else {
 						$type_affichage_attribut = 'upload';
 						$input_name = 'attribut' . $this_nom_attribut_id . '_upload';
+						$input_id = $form_id . '_custom_attribut' . $this_nom_attribut_id;
 						if (empty($_SESSION["session_display_popup"][$input_name]) && preg_match('`' . $GLOBALS['site_parameters']['uploaded_images_name_pattern'] . '`' , $preselected_value)) {
 							// Si pas déjà image téléchargée en cours et qu'on a passé une image dans attributs_list, on vérifie qu'elle semble avec nom cohérent, et on la prend
 							$_SESSION["session_display_popup"][$input_name] = $preselected_value;
@@ -246,9 +274,13 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				} elseif (!empty($this_attribut_infos['texte_libre']) && empty($this_attribut_id)) {
 					// Le test sur empty($this_attribut_id) permet de savoir qu'on est dans un texte_libre "normal", sans options fictives qui tirent N valeurs de la base de données
 					$type_affichage_attribut = 'texte_libre';
+					$input_id = $form_id . '_custom_attribut' . $this_nom_attribut_id;
 					$input_name = 'attribut' . $this_nom_attribut_id . '_texte_libre';
 					$input_type = 'text';
 					$input_value = $preselected_value;
+					if(String::strpos($this_attribut_infos['technical_code'], 'date') === 0) {
+						$input_class = 'datepicker';
+					}
 				} else {
 					if(!empty($this_attribut_infos['texte_libre'])) {
 						// Cas d'options fictives
@@ -278,7 +310,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$options[] = array(
 								'value' => $this_value,
 								'name' => $input_name,
-								'id' =>  'attribut' . $this_nom_attribut_id . '-' . $j,
+								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'onclick' => $input_on_change.' update_product_price' . ($save_suffix_id) . '();'
@@ -289,7 +321,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$options[] = array(
 								'value' => $this_value,
 								'name' => 'attribut' . $this_nom_attribut_id . '-' . $j,
-								'id' =>  'attribut' . $this_nom_attribut_id . '-' . $j,
+								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'onclick' => $input_on_change.' update_product_price' . ($save_suffix_id) . '();'
@@ -304,12 +336,13 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'technical_code' => $this_attribut_infos['technical_code'],
 						'name' => String::html_entity_decode_if_needed($this_attribut_infos['nom']),
 						'type_affichage_attribut' => $type_affichage_attribut,
-							'input_id' => $input_id,
+						'input_id' => $input_id,
 						'input_name' => $input_name,
 						'input_value' => $input_value,
 						'input_type' => $input_type,
+						'input_class' => $input_class,
 						'options' => $options,
-							'onchange' => $input_on_change . ' update_product_price' . $save_suffix_id . '();'
+						'onchange' => $input_on_change . ' update_product_price' . $save_suffix_id . '();'
 					);
 			}
 		}
@@ -326,7 +359,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 		$tpl->assign('input_on_change', $input_on_change);
 		$tpl->assign('technical_code', $product_object->technical_code);
 		// Dans le cas où on veut le résultat en mode texte, il faut retirer les sauts de ligne et tabulations => on applique trim()
-		$output .= trim(str_replace(array("\r", "\n", "\t"), '', $tpl->fetch()));
+		$output .= trim(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $tpl->fetch()));
 	}
 	return $output;
 }
@@ -350,7 +383,7 @@ function display_option_image($str_image, $set = false)
 			foreach ($option_tab as $str_img) {
 				if (($end_str = String::strpos($str_img, "}}")) !== false) {
 					$str_img = String::substr($str_img, 0, $end_str);
-					$small_option_image = thumbs($str_img, 25, 25, 'fit');
+					$small_option_image = thumbs($str_img, 0, 25, 'fit');
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 							'set' => TRUE,
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $str_img,
@@ -362,7 +395,7 @@ function display_option_image($str_image, $set = false)
 		}
 		$output .= $str_image;
 	} else {
-		$small_option_image = thumbs($str_image, 25, 25, 'fit');
+		$small_option_image = thumbs($str_image, 0, 25, 'fit');
 		$output .= $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 				'set' => FALSE,
 				'href' => $GLOBALS['repertoire_upload'] . '/' . $str_image,
@@ -445,6 +478,10 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
 ';
 	foreach($attributs_infos_array as $this_nom_attribut_id => $this_attributs_array_infos) {
 		$this_attributs_infos = current($this_attributs_array_infos);
+		if(empty($this_attributs_infos['attribut_id'])) {
+			// Champ texte libre ou upload, sans options à choisir
+			continue;
+		}
 		// type_affichage_attribut vaut 0, 1 ou 2 et jamais 3. En effet 3 est une configuration par produit pour dire : prendre la valeur générale du site, et est déjà remplacé par la vraie valeur retenue qui est <=2.
 		if ($this_attributs_infos['type_affichage_attribut'] == 0) {
 			// Affichage sous forme de select
@@ -463,8 +500,8 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
 		} elseif ($this_attributs_infos['type_affichage_attribut'] == 2) {
 			// Affichage sous forme de checkbox
 			$output .= '
-	for (var i=0; document.getElementById("attribut' . $this_nom_attribut_id . '-"+i);i++) {
-		checkbox = document.getElementById("attribut' . $this_nom_attribut_id . '-"+i);
+	for (var i=0; document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '-"+i);i++) {
+		checkbox = document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '-"+i);
 		if (checkbox.checked) {
 			' . $attr_var_name . '+= "§"+checkbox.value;
 		}
@@ -480,15 +517,65 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
  *
  * @param object $product_object
  * @param array $frm Array with all fields data
+ * @param boolean $keep_free_attributs_only
+ * @param boolean $keep_costly_attributs_only
  * @return
  */
-function get_attribut_list_from_post_data(&$product_object, &$frm)
+function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_attributs_only = false, $keep_costly_attributs_only = false)
 {
+	$reseller_mode = is_reseller_module_active() && is_reseller();
 	$combinaisons_array = array();
-	if(!empty($frm)) {
+	foreach(array_keys($_FILES) as $this_key) {
+		if(!isset($frm[$this_key]) && String::strpos($this_key, 'attribut') === 0) {
+			$frm[$this_key] = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			if(!empty($_FILES[$this_key]['name']) && $frm[$this_key] === false) {
+				// on signale que l'image n'a pas été chargée correctement
+				$_SESSION["session_display_popup"][$this_key] = false; 
+				// Préparation d'un message d'erreur
+				$tpl = $GLOBALS['tplEngine']->createTemplate('image_upload_error_option.tpl');
+				$tpl->assign('STR_PICTURE', $GLOBALS['STR_PICTURE']);
+				$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+				$tpl->assign('STR_NO_UPLOADED', $GLOBALS['STR_NO_UPLOADED']);
+				$tpl->assign('picture_size_extention_error_txt', sprintf($GLOBALS['STR_PICTURE_SIZE_EXTENTION_ERROR'], implode(",", $GLOBALS['site_parameters']['extensions_valides_image']), $GLOBALS['site_parameters']['uploaded_file_max_size'] / 1024));
+				$tpl_labels = array();
+				foreach ($_SESSION["session_display_popup"] as $label => $error) {
+					if ($error === false) {
+						$tpl_labels[] = $label;
+					}
+				}
+				$tpl->assign('labels', $tpl_labels);
+				$_SESSION["session_display_popup"]["upload_error_text"] = $tpl->fetch();
+			}
+		}
+	}
+	if(!empty($frm) && is_object($product_object)) {
 		// On charge les informations de base de données relative aux attributs choisis par l'utilisateur
 		// On va ainsi pouvoir vérifier que ces attributs sont bien possibles, et par ailleurs que ceux obligatoires sont bien remplis
-		$attributs_array = $product_object->get_possible_attributs('rough', false);
+		$attributs_array = $product_object->get_possible_attributs('rough', false, 0, true, false, false, false, false, false, null);
+		if(!empty($frm['attributs_list'])){
+			$attributs_list_array = explode('§', $frm['attributs_list']);
+			foreach($attributs_list_array as  $this_attributs_list) {
+				$this_attributs_list_array = explode("|", $this_attributs_list);
+				$this_nom_attribut_id = $this_attributs_list_array[0];
+				$this_attribut_id = $this_attributs_list_array[1];
+				if(isset($attributs_array[$this_nom_attribut_id][$this_attribut_id])) {
+					$attributs_infos = $attributs_array[$this_nom_attribut_id][$this_attribut_id];
+					if(!empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']) && !empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$attributs_infos['technical_code']])) {
+						$costly = true;
+					} elseif (($reseller_mode && floatval($attributs_infos["prix_revendeur"]) > 0) || floatval($attributs_infos["prix"]) > 0) {
+						$costly = true;
+					} else {
+						$costly = false;
+					}
+					if(($keep_free_attributs_only && $costly) || ($keep_costly_attributs_only && !$costly)) {
+						continue;
+					}
+				}
+				//if(isset($attributs_array[$this_nom_attribut_id][$this_attribut_id]) || (!empty($attributs_array[$this_nom_attribut_id]) && empty($this_attribut_id))) {
+					$combinaisons_array[] = $this_attributs_list;
+				//}
+			}
+		}
 		foreach($frm as $this_key => $this_value) {
 			if (String::strpos($this_key, 'attribut') === 0) {
 				// On a un attribut
@@ -499,49 +586,40 @@ function get_attribut_list_from_post_data(&$product_object, &$frm)
 					continue;
 				}
 				$attributs_infos = current($attributs_array[$this_nom_attribut_id]);
+				// Exclusion des attributs gratuits ou payant suivant les paramètres
+				if(!empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']) && !empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$attributs_infos['technical_code']])) {
+					$costly = true;
+				} elseif (($reseller_mode && floatval($attributs_infos["prix_revendeur"]) > 0) || floatval($attributs_infos["prix"]) > 0) {
+					$costly = true;
+				} else {
+					$costly = false;
+				}
+				if(($keep_free_attributs_only && $costly) || ($keep_costly_attributs_only && !$costly)) {
+					continue;
+				}
 				if (String::strpos($this_key, '_texte_libre') !== false) {
 					// attribut au texte libre
-					$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $this_value;
 					if (intval($attributs_infos['mandatory']) == 1 && empty($this_value)) {
 						// Attribut obligatoire
-						$error_attribut_mandatory[] = $attributs_infos['nom'];
+						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
 					}
+					if(!empty($this_value) && String::strpos($attributs_infos['technical_code'], 'date') === 0) {
+						$this_value = get_mysql_date_from_user_input($this_value);
+					}
+					$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $this_value;
 				} elseif (String::strpos($this_key, '_upload') !== false) {
 					// attribut des champs file
 					if (!empty($_SESSION["session_display_popup"][$this_key])) { 
 						// si l'image a été déjà téléchargée
 						$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $_SESSION["session_display_popup"][$this_key];
-					} elseif (!empty($_FILES[$this_key]['name'])) {
-						if (($$this_key = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']))) {
-							$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $$this_key;
-							// on sauvegarde le nom de l'image en session
-							$_SESSION["session_display_popup"][$this_key] = $$this_key; 
-						} else {
-							// on signale que l'image n'a pas été chargée correctement
-							$_SESSION["session_display_popup"][$this_key] = false; 
-							// Préparation d'un message d'erreur
-							$tpl = $GLOBALS['tplEngine']->createTemplate('image_upload_error_option.tpl');
-							$tpl->assign('STR_PICTURE', $GLOBALS['STR_PICTURE']);
-							$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-							$tpl->assign('STR_NO_UPLOADED', $GLOBALS['STR_NO_UPLOADED']);
-							$tpl->assign('picture_size_extention_error_txt', sprintf($GLOBALS['STR_PICTURE_SIZE_EXTENTION_ERROR'], implode(",", $GLOBALS['site_parameters']['extensions_valides_image']), $GLOBALS['site_parameters']['uploaded_file_max_size'] / 1024));
-							$tpl_labels = array();
-							foreach ($_SESSION["session_display_popup"] as $label => $error) {
-								if ($error === false) {
-									$tpl_labels[] = $label;
-								}
-							}
-							$tpl->assign('labels', $tpl_labels);
-							$_SESSION["session_display_popup"]["upload_error_text"] = $tpl->fetch();
-						}
 					} elseif (!empty($this_value)) { 
-						// Cas où on vient de la sauvegarde de panier
+						// Cas où on vient de télécharger, ou si on vient de la sauvegarde de panier
 						$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $this_value;
 						// on sauvegarde le nom de l'image en session
 						$_SESSION["session_display_popup"][$this_key] = $this_value;
 					} elseif (intval($attributs_infos['mandatory']) == 1) {
 						// Attribut obligatoire
-						$error_attribut_mandatory[] = $attributs_infos['nom'];
+						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
 					}
 				} elseif (empty($temp[1]) || is_numeric($temp[1])) {
 					// Attribut standard au format 'attributN' ou 'attributN_N' si checkbox
@@ -560,7 +638,7 @@ function get_attribut_list_from_post_data(&$product_object, &$frm)
 					}
 					if (intval($attributs_infos['mandatory']) == 1 && empty($this_value)) {
 						// Attribut obligatoire
-						$error_attribut_mandatory[] = $attributs_infos['nom'];
+						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
 					}
 				}
 			}

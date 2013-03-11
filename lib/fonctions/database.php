@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 35460 2013-02-22 12:53:50Z gboussin $
+// $Id: database.php 35805 2013-03-10 20:43:50Z gboussin $
 if (!defined('IN_PEEL')) {
-die();
+	die();
 }
 
 // If you want to use a database server different from MySQL,
@@ -45,33 +45,41 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 	if(empty($database_name) && $database_name!==false) {
 		$database_name = $GLOBALS['nom_de_la_base'];
 	}
-	$port = @ini_get("mysqli.default_port");
-	if(empty($port)) {
-		// Port par défaut
-		$port = 3306;
-	}
-	$socket = @ini_get("mysqli.default_socket");
-	if($socket === false) {
-		// Socket par défaut
-		$socket = null;
-	}
-	// Gestion des connexions du type server:socket ou server:port
-	$server_infos = explode(':',$serveur_mysql);
-	if(isset($server_infos[1])) {
-		if(is_numeric($server_infos[1])){
-			$port = $server_infos[1];
-		} else {
-			$socket = $server_infos[1];
+	if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+		$port = @ini_get("mysqli.default_port");
+		if(empty($port)) {
+			// Port par défaut
+			$port = 3306;
 		}
-	}
-	if(isset($GLOBALS['site_parameters']['use_database_permanent_connection']) && ($GLOBALS['site_parameters']['use_database_permanent_connection'] === true || ($GLOBALS['site_parameters']['use_database_permanent_connection'] == 'local' && (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false)))) {
-		// L'utilisation de pconnect est souvent plus rapide, mais peut créer des problèmes divers
-		// Pour le travail en local sur un PC winbows, l'amélioration de performance peut être très grande
-		$database_object = new mysqli('p:'.$server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
+		$socket = @ini_get("mysqli.default_socket");
+		if($socket === false) {
+			// Socket par défaut
+			$socket = null;
+		}
+		// Gestion des connexions du type server:socket ou server:port
+		$server_infos = explode(':',$serveur_mysql);
+		if(isset($server_infos[1])) {
+			if(is_numeric($server_infos[1])){
+				$port = $server_infos[1];
+			} else {
+				$socket = $server_infos[1];
+			}
+		}
+		if(isset($GLOBALS['site_parameters']['use_database_permanent_connection']) && ($GLOBALS['site_parameters']['use_database_permanent_connection'] === true || ($GLOBALS['site_parameters']['use_database_permanent_connection'] == 'local' && (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false)))) {
+			// L'utilisation de pconnect est souvent plus rapide, mais peut créer des problèmes divers
+			// Pour le travail en local sur un PC winbows, l'amélioration de performance peut être très grande
+			$database_object = new mysqli('p:'.$server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
+		} else {
+			$database_object = new mysqli($server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
+		}
+		if (mysqli_connect_error()) {
+			$error_no = mysqli_connect_errno();
+			$error_text = mysqli_connect_error();
+		}
 	} else {
-		$database_object = new mysqli($server_infos[0], $utilisateur_mysql, $mot_de_passe_mysql, '', $port, $socket);
+		$database_object = mysql_connect($serveur_mysql, $utilisateur_mysql, $mot_de_passe_mysql);
 	}
-	if (mysqli_connect_error()) {
+	if(!empty($error_no)) {
 		$sujet_du_mail = 'MySQL connection problem (' . mysqli_connect_errno() . '): '.mysqli_connect_error();
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL on " . $serveur_mysql . " - the user is " . $utilisateur_mysql . ". Please check if MySQL is currently launched and if the connection parameters are valid.";
 		$contenu_du_mail .= "\n\nLa page " . $_SERVER['REQUEST_URI'] . " a provoqué une erreur lors de sa tentative de connexion à MySQL situé sur le serveur " . $serveur_mysql . " - l'utilisateur est " . $utilisateur_mysql . ". Il faudrait vérifier si le serveur MySQL est actuellement lancé et si les paramètres de connexion sont valides.";
@@ -100,7 +108,11 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
  */
 function select_db($database_name, &$database_object, $continue_if_error = false)
 {
-	$selection_de_la_base = $database_object->select_db($database_name);
+	if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+		$selection_de_la_base = $database_object->select_db($database_name);
+	} else {
+		$selection_de_la_base = mysql_select_db($database_name, $database_object);
+	}
 	if (!$selection_de_la_base && !$continue_if_error) {
 		$sujet_du_mail = "Database selection problem - Problème de sélection de la base de données";
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL database " . $database_name;
@@ -177,16 +189,29 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		unset($error_number);
 		unset($error_name);
 		if(!empty($database_object)) {
-			if ($silent_if_error) {
-				$query_values = @$database_object->query($query);
+			if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+				if ($silent_if_error) {
+					$query_values = @$database_object->query($query);
+				} else {
+					$query_values = $database_object->query($query);
+				}
 			} else {
-				$query_values = $database_object->query($query);
+				if ($silent_if_error) {
+					$query_values = @mysql_query($query, $database_object);
+				} else {
+					$query_values = @mysql_query($query, $database_object);
+				}
 			}
 		}
 		if (empty($query_values) && !empty($database_object)) {
 			// Si problème dans la requête, on récupère les codes d'erreur
-			$error_number = $database_object->errno;
-			$error_name = $database_object->error;
+			if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+				$error_number = $database_object->errno;
+				$error_name = $database_object->error;
+			} else {
+				$error_number = mysql_errno($database_object);
+				$error_name = mysql_error($database_object);
+			}
 		}
 		$i++;
 		if ($i >= 2) {
@@ -227,7 +252,11 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 function fetch_row($query_result)
 {
 	if (!empty($query_result)) {
-		return $query_result->fetch_row();
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			return $query_result->fetch_row();
+		} else {
+			return mysql_fetch_row($query_result);
+		}
 	} else {
 		return null;
 	}
@@ -242,7 +271,11 @@ function fetch_row($query_result)
 function fetch_assoc($query_result)
 {
 	if (!empty($query_result)) {
-		return $query_result->fetch_assoc();
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			return $query_result->fetch_assoc();
+		} else {
+			return mysql_fetch_assoc($query_result);
+		}
 	} else {
 		return null;
 	}
@@ -257,7 +290,11 @@ function fetch_assoc($query_result)
 function fetch_object($query_result)
 {
 	if (!empty($query_result)) {
-		return $query_result->fetch_object();
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			return $query_result->fetch_object();
+		} else {
+			return mysql_fetch_object($query_result);
+		}
 	} else {
 		return null;
 	}
@@ -272,7 +309,11 @@ function fetch_object($query_result)
 function num_rows($query_result)
 {
 	if (!empty($query_result)) {
-		return $query_result->num_rows;
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			return $query_result->num_rows;
+		} else {
+			return mysql_num_rows($query_result);
+		}
 	} else {
 		return null;
 	}
@@ -288,7 +329,11 @@ function insert_id($database_object = null)
 	if (empty($database_object)) {
 		$database_object = &$GLOBALS['database_object'];
 	}
-	return $database_object->insert_id;
+	if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+		return $database_object->insert_id;
+	} else {
+		return mysql_insert_id();
+	}
 }
 
 /**
@@ -301,7 +346,11 @@ function affected_rows($database_object = null)
 	if(empty($database_object)) {
 		$database_object = &$GLOBALS['database_object'];
 	}
-	return $database_object->affected_rows;
+	if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+		return $database_object->affected_rows;
+	} else {
+		return mysql_affected_rows();
+	}
 }
 
 /**
@@ -317,7 +366,11 @@ function real_escape_string($value)
 			$value[$this_key] = real_escape_string($this_value);
 		}
 	} elseif(!empty($GLOBALS['database_object'])) {
-		$value = $GLOBALS['database_object']->real_escape_string($value);
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			$value = $GLOBALS['database_object']->real_escape_string($value);
+		} else {
+			$value = mysql_real_escape_string($value);
+		}
 	} else {
 		$value = null;
 	}
@@ -339,7 +392,11 @@ function nohtml_real_escape_string($value, $allowed_tags = null)
 			$value[$this_key] = nohtml_real_escape_string($this_value, $allowed_tags);
 		}
 	} elseif(!empty($GLOBALS['database_object'])) {
-		$value = $GLOBALS['database_object']->real_escape_string(@String::strip_tags($value, $allowed_tags));
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			$value = $GLOBALS['database_object']->real_escape_string(@String::strip_tags($value, $allowed_tags));
+		} else {
+			$value = mysql_real_escape_string(@String::strip_tags($value, $allowed_tags));
+		}
 	} else {
 		$value = null;
 	}
@@ -359,7 +416,12 @@ function word_real_escape_string($value)
 			$value[$this_key] = word_real_escape_string($this_value);
 		}
 	} elseif(!empty($GLOBALS['database_object'])) {
-		$value = $GLOBALS['database_object']->real_escape_string(String::substr($value, 0, min(String::strpos(str_replace(array('+', ',', ';', '(', ')', '!', '=', '`', '|', '&'), ' ', $value) . ' ', ' '), 60)));
+		$value = String::substr($value, 0, min(String::strpos(str_replace(array('+', ',', ';', '(', ')', '!', '=', '`', '|', '&'), ' ', $value) . ' ', ' '), 60));
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			$value = $GLOBALS['database_object']->real_escape_string($value);
+		} else {
+			$value = mysql_real_escape_string($value);
+		}
 	} else {
 		$value = null;
 	}
@@ -467,7 +529,11 @@ function db_close($database_object = null)
 		$database_object = &$GLOBALS['database_object'];
 	}
 	if(!empty($database_object)) {
-		$database_object->close();
+		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
+			$database_object->close();
+		} else {
+			mysql_close($GLOBALS['database_object']);	
+		}
 	}
 }
 

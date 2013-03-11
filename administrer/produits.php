@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 35530 2013-02-26 17:37:36Z gboussin $
+// $Id: produits.php 35805 2013-03-10 20:43:50Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -93,7 +93,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "client" :
-		$output .= affiche_formulaire_ajout_produit(vn($_REQUEST['id']), $frm);
+		$output .= affiche_formulaire_ajout_produit(vn($_REQUEST['id']), $frm, $form_error_object);
 		break;
 
 	case "suppr" :
@@ -193,9 +193,8 @@ include("modeles/bas.php");
  * @param class $form_error_object
  * @return
  */
-function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, $form_error_object)
+function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error_object)
 {
-	$form_error_object = new FormError();
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
@@ -283,7 +282,6 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, $form_error_
  */
 function affiche_formulaire_controle_produit($categorie_id = 0, &$frm, &$form_error_object)
 {
-	$form_error_object = new FormError();
 	/* Valeurs par défault */
 	if (is_array($categorie_id)) {
 		$frm['categories'] = $categorie_id;
@@ -380,7 +378,6 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 {
 	$output = '';
 	$GLOBALS['load_timepicker']=true;
-	$form_error_object = new FormError();
 	if (empty($frm['default_image'])) {
 		$frm['default_image'] = 1;
 	}
@@ -594,10 +591,10 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		while ($nomCouleur = fetch_assoc($query)) {
 			$nomCouleur_array[] = $nomCouleur;
 		}
-		// Le nombre de champs d'images téléchargeable est limité par la configuration PHP upload_max_filesize qui peut être modifiée dans php.ini ou httpd.conf
+		// Le nombre de champs d'images téléchargeable est limité par la configuration PHP max_file_uploads qui peut être modifiée dans php.ini ou httpd.conf
 		// Il est donc nécessaire de limiter le nombre de champs par couleur afin de ne pas dépasser cette limite
-		if (function_exists('ini_get') && @ini_get('upload_max_filesize') && !empty($nomCouleur_array)) {
-			$upload_images_per_color = ceil(min(5, ini_get('upload_max_filesize')) / count($nomCouleur_array));
+		if (function_exists('ini_get') && @ini_get('max_file_uploads') && !empty($nomCouleur_array)) {
+			$upload_images_per_color = min(5, ceil(ini_get('max_file_uploads')) / count($nomCouleur_array));
 		} else {
 			$upload_images_per_color = 2;
 		}
@@ -1207,16 +1204,10 @@ function insere_produit($frm)
  */
 function maj_produit($id, $frm)
 {
-	// if (!empty($frm['promotion'])) {
-	// $frm['on_promo'] = 1;
-	// }
-	// if (empty($frm['promotion'])) {
-	// $frm['on_promo'] = 0;
-	// }
 	// Le nombre de champs d'images téléchargeable est limité par la configuration PHP upload_max_filesize qui peut être modifiée dans php.ini ou httpd.conf
 	// Il est donc nécessaire de limiter le nombre de champs par couleur afin de ne pas dépasser cette limite
-	if (function_exists('ini_get') && @ini_get('upload_max_filesize') && !empty($frm['couleurs'])) {
-		$upload_images_per_color = ceil(min(5, ini_get('upload_max_filesize')) / count($frm['couleurs']));
+	if (function_exists('ini_get') && @ini_get('max_file_uploads') && !empty($frm['couleurs'])) {
+		$upload_images_per_color = min(5, ceil(ini_get('max_file_uploads')) / count($frm['couleurs']));
 	} else {
 		$upload_images_per_color = 2;
 	}
@@ -1341,16 +1332,16 @@ function maj_produit($id, $frm)
 	query("DELETE FROM peel_produits_couleurs WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_tailles WHERE produit_id = '" . intval($id) . "'");
 
-	if (count(vn($frm['categories'])) == 0) {
+	if (empty($frm['categories'])) {
 		$frm['categories'][] = 0;
 	}
-	if (count(vn($frm['references'])) == 0) {
+	if (empty($frm['references'])) {
 		$frm['references'][] = 0;
 	}
-	if (count(vn($frm['couleurs'])) == 0) {
+	if (empty($frm['couleurs'])) {
 		$frm['couleurs'][] = 0;
 	}
-	if (count(vn($frm['tailles'])) == 0) {
+	if (empty($frm['tailles'])) {
 		$frm['tailles'][] = 0;
 	}
 	for ($i = 0; $i < count($frm['categories']); $i++) {
@@ -1363,20 +1354,23 @@ function maj_produit($id, $frm)
 				VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
 		}
 	}
-
-	for ($i = 0; $i < count($frm['couleurs']); $i++) {
+	
+	foreach($frm['couleurs'] as $this_color_id) {
 		// On recupere chaque champ default_image par couleur
 		$qid = query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id, default_image)
-			VALUES ('" . nohtml_real_escape_string($frm["couleurs"][$i]) . "', '" . intval($id) . "','" . intval(vn($frm["default_image" . $i])) . "')");
-		query("UPDATE peel_produits_couleurs
-			SET default_image = '" . nohtml_real_escape_string($_POST['default_image' . $frm['couleurs'][$i]]) . "'
-			WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($frm["couleurs"][$i]) . "'");
-		for ($h = 1; $h <= 5; $h++) {
-			$this_field_name = 'imagecouleur' . $frm['couleurs'][$i] . '_' . $h;
+			VALUES ('" . nohtml_real_escape_string($this_color_id) . "', '" . intval($id) . "','" . intval(vn($frm["default_image" . $this_color_id])) . "')");
+		if(isset($_POST['default_image' . $this_color_id])) {
+			// En cas de nouvelle association d'une couleur avec le produit, il ne peut pas y avoir d'ajout d'images pour cette nouvelle couleur.
+			query("UPDATE peel_produits_couleurs
+				SET default_image = '" . nohtml_real_escape_string($_POST['default_image' . $this_color_id]) . "'
+				WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($this_color_id) . "'");
+		}
+		for ($h = 1; $h <= $upload_images_per_color; $h++) {
+			$this_field_name = 'imagecouleur' . $this_color_id . '_' . $h;
 			$_POST[$this_field_name] = upload($this_field_name, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
 			query("UPDATE peel_produits_couleurs
 				SET image" . $h . " = '" . nohtml_real_escape_string($_POST[$this_field_name]) . "'
-				WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($frm["couleurs"][$i]) . "'");
+				WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($this_color_id) . "'");
 		}
 	}
 
