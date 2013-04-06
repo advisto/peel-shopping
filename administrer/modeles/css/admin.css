@@ -368,11 +368,13 @@ tr.classe3 {
 	vertical-align: top;
 }
 .home_block tr.footer {
-	background-image: url('../images/home_block_footer.jpg');
-	height: 10px;
+	height: auto;
 }
 .home_block tr.footer td {
-	font-size: 10px;
+	background-image: url('../images/home_block_footer.jpg');
+	background-repeat: no-repeat;
+	height: 11px;
+	line-height: 11px;
 }
 
 .home_block_data_table {
@@ -515,10 +517,11 @@ table.admin_liste_clients_par_produit td {
 	padding: 2px;
 }
 table.admin_liste_marque {
-	border-spacing: 2px;
+	border-spacing: 0px;
+	width: 100%;
 }
 table.admin_liste_marque td {
-	padding: 0px;
+	padding: 5px;
 }
 table.admin_best_sell_products {
 	width: 100%;

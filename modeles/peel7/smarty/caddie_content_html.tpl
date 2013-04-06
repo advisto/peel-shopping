@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: caddie_content_html.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -41,7 +41,7 @@
 					</td>
 				</tr>
 				{if isset($code_promo_delete)}
-				<tr><td class="right" style="padding-right:10px"><a href="{$code_promo_delete.href|escape:'html'}"><img src="{$code_promo_delete.src|escape:'html'}" /></a></td><td colspan="2"><a href="{$code_promo_delete.href|escape:'html'}">{$code_promo_delete.txt} {$code_promo.value}</a></td></tr>
+				<tr><td class="right" colspan="3" style="padding-right:10px"><a href="{$code_promo_delete.href|escape:'html'}"><img src="{$code_promo_delete.src|escape:'html'}" /></a></td><td colspan="2"><a href="{$code_promo_delete.href|escape:'html'}">{$code_promo_delete.txt} {$code_promo.value}</a></td></tr>
 				{/if}
 				{else}
 				<tr>
@@ -105,7 +105,7 @@
 										</p>
 									{else}
 										<p class="center">
-											<input type="submit" class="bouton_order" value="{$STR_ORDER|upper|str_form_value}" name="func" {if !empty($shipping_text)} onmouseover="return overlib('{$shipping_text|filtre_javascript:true:true:true}');" onmouseout="return nd();"{/if} />
+											<input type="submit" class="bouton_order" value="{$STR_ORDER|str_form_value}" name="func" {if !empty($shipping_text)} onmouseover="return overlib('{$shipping_text|filtre_javascript:true:true:true}');" onmouseout="return nd();"{/if} />
 										</p>
 									{/if}
 								</td>

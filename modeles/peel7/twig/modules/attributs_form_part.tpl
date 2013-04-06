@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -32,7 +32,7 @@
 		{% endif %}
 		{{ a.name }}{{ STR_BEFORE_TWO_POINTS }}:
 		{% if a.input_type=='select' %}
-			<select id="{{ a.input_id }}" name="{{ a.input_name }}" onchange="{{ a.onchange }}">
+			<select id="{{ a.input_id }}" name="{{ a.input_name }}" onchange="{{ a.onchange }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %}>
 			{% for o in a.options %}	
 				<option value="{{ o.value }}" {% if o.issel %} selected="selected"{% endif %}>{{ o.text }}</option>
 			{% endfor %}
@@ -41,8 +41,8 @@
 			{% for o in a.options %}
 			<br /><input type="{{ a.input_type }}" value="{{ o.value }}" id="{{ o.id }}" name="{{ o.name }}" {% if o.issel %} checked="checked"{% endif %} onclick="{{ o.onclick }}" /><label for="{{ o.id }}">{{ o.text }}</label>
 			{% endfor %}
-		{% else %}
-			<input type="{{ a.input_type }}" name="{{ a.input_name }}" value="{{ a.input_value }}" />
+		{% elseif a.input_type %}
+			<input id="{{ a.input_id }}" type="{{ a.input_type }}" name="{{ a.input_name }}" value="{{ a.input_value }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %} />
 		{% endif %}
 		{{ a.text }}
 		{% if display_mode=='table' %}

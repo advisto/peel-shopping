@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: categories.php 36232 2013-04-05 13:16:01Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -226,6 +226,7 @@ function affiche_formulaire_ajout_categorie($id, &$frm)
 		$frm['position'] = 0;
 		$frm['etat'] = "0";
 		$frm['on_special'] = "";
+		$frm['technical_code'] = "";
 		$frm['on_carrousel'] = "";
 		$frm['background_menu'] = $frm['background_color'] = "#";
 		$frm['type_affichage'] = 0;
@@ -313,6 +314,7 @@ function insere_sous_categorie(&$frm)
 		$sql = 'INSERT INTO peel_categories (parent_id
 			, etat
 			, on_special
+			, technical_code
 			, on_carrousel
 			, position
 			, type_affichage
@@ -337,6 +339,7 @@ function insere_sous_categorie(&$frm)
 		$sql .= ") VALUES (" . intval($frm['parent_id']) . "
 			, '" . intval($frm['etat']) . "'
 			, '" . intval(vn($frm['on_special'])) . "'
+			, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 			, '" . intval(vn($frm['on_carrousel'])) . "'
 			, '" . intval($frm['position']) . "'
 			, '" . intval($frm['type_affichage']) . "'
@@ -391,6 +394,7 @@ function maj_categorie($id, $frm)
 		, etat = '" . intval($frm['etat']) . "'
 		, position = '" . intval($frm['position']) . "'
 		, on_special = '" . intval(vn($frm['on_special'])) . "'
+		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 		, on_carrousel = '" . intval(vn($frm['on_carrousel'])) . "'
 		, type_affichage = '" . intval($frm['type_affichage']) . "'
 		, background_menu = '" . nohtml_real_escape_string($frm['background_menu']) . "'
@@ -459,6 +463,7 @@ function affiche_liste_categorie($parent_id)
 	$tpl->assign('STR_PROMOTION', $GLOBALS['STR_PROMOTION']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
+	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	echo $tpl->fetch();
 }
 
@@ -481,6 +486,7 @@ function affiche_formulaire_categorie(&$frm)
 	$tpl->assign('issel_parent_zero', vb($frm['parent_id']) == 0);
 	$tpl->assign('categorie_options', $GLOBALS['categorie_options']);
 	$tpl->assign('is_on_special', !empty($frm['on_special']));
+	$tpl->assign('technical_code', vb($frm["technical_code"]));
 	$tpl->assign('is_carrousel_module_active', is_carrousel_module_active());
 	$tpl->assign('is_on_carrousel', !empty($frm['on_carrousel']));
 	$tpl->assign('position', $frm['position']);
@@ -527,6 +533,7 @@ function affiche_formulaire_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL', $GLOBALS['STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
+	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_IN_COLUMNS', $GLOBALS['STR_ADMIN_IN_COLUMNS']);
 	$tpl->assign('STR_ADMIN_IN_LINES', $GLOBALS['STR_ADMIN_IN_LINES']);
 	$tpl->assign('STR_ADMIN_CATEGORIES_DISPLAY_MODE', $GLOBALS['STR_ADMIN_CATEGORIES_DISPLAY_MODE']);

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -21,8 +21,8 @@
 		<tr>
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="etat" value="1" {% if etat == '1' %} checked="checked"{% endif %} /> {{ STR_YES }}
-				<input type="radio" name="etat" value="0" {% if etat == '0' or not(etat) %} checked="checked"{% endif %} /> {{ STR_NO }}
+				<input type="radio" name="etat" value="1" {% if etat == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_ACTIVATED }}
+				<input type="radio" name="etat" value="0" {% if etat == '0' or not(etat) %} checked="checked"{% endif %} /> {{ STR_ADMIN_DEACTIVATED }}
 			</td>
 		</tr>
 		<tr>
@@ -68,7 +68,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><p><input class="bouton" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
+			<td colspan="2" class="center"><p><input type="hidden" name="show_description" value="{{ show_description|str_form_value }}"><input class="bouton" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
 		</tr>
 	</table>
 </form>

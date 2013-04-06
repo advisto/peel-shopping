@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: en.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -287,7 +287,6 @@ $GLOBALS["STR_FWRITE_FAILED"] = "File writing failed";
 $GLOBALS["STR_GENDER"] = "Title";
 $GLOBALS["STR_GET_MY_POSITION"] = "Get my position (mandatory for this query)";
 $GLOBALS["STR_GET_PASSWORD"] = "Get a new password";
-$GLOBALS["STR_GIFT_CATALOGUE"] = "Gifts catalog";
 $GLOBALS["STR_GIFT_POINTS"] = "Gift points";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "General promotion";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Compressed file opening failed";
@@ -380,7 +379,7 @@ $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "You want to file a comment o
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Your comment on the product";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "Your opinion has been sent.<br /> After validation, it will be published on";
 $GLOBALS["STR_MODULE_BANNER_MSG_ERR_DATE"] = "You must complete the date.\n";
-$GLOBALS["STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED"] = "The product has been added";
+$GLOBALS["STR_MODULE_CART_POPUP_PRODUCT_ADDED"] = "The product has been added";
 $GLOBALS["STR_MODULE_DEVIS_CONSEIL"] = "To contact our consultants, please fill out the form below";
 $GLOBALS["STR_MODULE_DEVISES_CHOISIR_DEVISE"] = "Currency:";
 $GLOBALS["STR_MODULE_DIREAUNAMI_BACK_REFERER"] = "Go back to the referer.";

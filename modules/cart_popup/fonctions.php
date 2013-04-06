@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!function_exists('get_cart_popup_div')) {
 	{
 		$output = '';
 		$tpl_content = $GLOBALS['tplEngine']->createTemplate('modules/cart_popup_content.tpl');
-		$tpl_content->assign('STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED', $GLOBALS['STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED']);
+		$tpl_content->assign('STR_MODULE_CART_POPUP_PRODUCT_ADDED', $GLOBALS['STR_MODULE_CART_POPUP_PRODUCT_ADDED']);
 		$tpl_content->assign('STR_CADDIE', $GLOBALS['STR_CADDIE']);
 		$tpl_content->assign('STR_QUANTITY', $GLOBALS['STR_QUANTITY']);
 		$tpl_content->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);

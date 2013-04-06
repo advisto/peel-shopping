@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: configuration.inc.php 36232 2013-04-05 13:16:01Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -18,12 +18,20 @@
 if (version_compare(PHP_VERSION, '5.4', '>=')) {
 	// On veut de la compatibilité avec la formalisation des objets qui est compatible PHP4 mais ne passe pas en strict dans PHP 5
 	// Dans PHP>=5.4, E_STRICT est incorporé dans E_ALL, on l'exclut donc ici
-	error_reporting(E_ALL & ~E_STRICT);
+	@error_reporting(E_ALL & ~E_STRICT);
 } else {
-	error_reporting(E_ALL);
+	@error_reporting(E_ALL);
+}
+if (version_compare(PHP_VERSION, '5.0.0', '<')) {
+	// Si PHP5 n'est pas présent sur le serveur, on affiche un message d'erreur et on s'arrête
+	// NB : Si on allait plus loin, le chargement du moteur de template n'étant pas compatible PHP5, ça mettrait des erreurs diverses à la place
+	echo '<div>PHP ' . PHP_VERSION . ' < 5.0.0 => check .htaccess or your server configuration to enable PHP 5</div>';
+	die();
 }
 // Désactivation de scream qui altère le fonctionnement normale de error_reporting
-ini_set('scream.enabled', false);
+@ini_set('scream.enabled', false);
+// Eviter de bloquer sur la récupération d'une information venant d'un serveur extérieur
+@ini_set('default_socket_timeout', 4);
 if (function_exists('ini_set')) {
 	// Cette valeur est ensuite modifiée quand on accède à la base de données suivant la configuration du site
 	@ini_set('display_errors', 1);
@@ -70,7 +78,7 @@ define('SITE_SUSPENDED', false); // Modifier ici si on veut suspendre l'affichag
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.0.1');
+define('PEEL_VERSION', '7.0.2');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -221,6 +229,7 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/order.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/emails.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/user.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/format.php");
+
 // A partir de cette ligne vous n'avez a priori pas de variable à modifier.
 if (!IN_INSTALLATION) {
 	if (empty($_POST) && String::substr_count($GLOBALS['wwwroot'], '/') == 2) {
@@ -375,7 +384,7 @@ $GLOBALS['fonctionspeelfr'] = $GLOBALS['dirroot'] . '/modules/peelfr/fonctions.p
 $GLOBALS['fonctionssmv'] = $GLOBALS['dirroot'] . "/modules/smv/fonctions.php";
 $GLOBALS['fonctionsoriental'] = $GLOBALS['dirroot'] . "/modules/pages-orientales/fonctions.php";
 if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_peelfr_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][] = '/modules/peelfr/lang/';
+	$GLOBALS['modules_lang_directory_array'][1001] = '/modules/peelfr/lang/';
 	include($GLOBALS['fonctionspeelfr']);
 }
 // Module site de présentation destockplus
@@ -391,13 +400,13 @@ if (is_algomtl_module_active()) {
 // Module site de présentation advistocom
 $GLOBALS['fonctionsadvistocom'] = $GLOBALS['dirroot'] . '/modules/advistocom/fonctions.php';
 if (is_advistocom_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][] = '/modules/advistocom/lang/';
+	$GLOBALS['modules_lang_directory_array'][1002] = '/modules/advistocom/lang/';
 	include($GLOBALS['fonctionsadvistocom']);
 }
 // Module site de présentation advisto.fr
 $GLOBALS['fonctionsadvistofr'] = $GLOBALS['dirroot'] . '/modules/advistofr/fonctions.php';
 if (is_advistofr_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][] = '/modules/advistofr/lang/';
+	$GLOBALS['modules_lang_directory_array'][1003] = '/modules/advistofr/lang/';
 	include($GLOBALS['fonctionsadvistofr']);
 }
 if (is_module_url_rewriting_active()) {
@@ -571,12 +580,6 @@ if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'of
 	redirect_and_die(str_replace('http://', 'https://', get_current_url()), true);
 }
 
-if (version_compare(PHP_VERSION, '5.0.0', '<')) {
-	// Si PHP5 n'est pas présent sur le serveur, on affiche un message d'erreur et on s'arrête
-	// NB : Si on allait plus loin, le chargement du moteur de template n'étant pas compatible PHP5, ça mettrait des erreurs diverses à la place
-	echo '<div class="global_error">PHP ' . PHP_VERSION . ' < 5.0.0</div>';
-	die();
-}
 // Chargement du moteur de template : Smarty ou Twig
 include($GLOBALS['dirroot'] . "/lib/templateEngines/EngineTpl.php");
 /* @var $GLOBALS['tplEngine'] EngineTpl */
@@ -865,8 +868,6 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	$GLOBALS['fonctionswelcomead'] = $GLOBALS['dirroot'] . "/modules/welcome_ad/fonctions.php";
 	// Module de graphiques flash
 	$GLOBALS['fonctionschart'] = $GLOBALS['dirroot'] . "/modules/chart/open-flash-chart.php";
-	// Module produits cadeaux
-	$GLOBALS['fichierproduitscadeaux'] = $GLOBALS['dirroot'] . "/modules/cadeaux/catalogue_cadeaux.php";
 	// Module KEKOLI
 	$GLOBALS['fonctionskekoli'] = $GLOBALS['dirroot'] . "/modules/kekoli/administrer/fonctions.php";
 	// Module de devis
@@ -1036,11 +1037,11 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Fichiers nécessitant que les fonctions d'URL soient toutes définies et les constantes de langue
 	if (is_destockplus_module_active()) {
-		$GLOBALS['modules_lang_directory_array'][] = '/modules/destockplus/lang/';
+		$GLOBALS['modules_lang_directory_array'][1004] = '/modules/destockplus/lang/';
 		include($GLOBALS['dirroot'] . "/modules/destockplus/includes/configure.php");
 	}
 	if (is_algomtl_module_active()) {
-		$GLOBALS['modules_lang_directory_array'][] = '/modules/algomtl/lang/';
+		$GLOBALS['modules_lang_directory_array'][1005] = '/modules/algomtl/lang/';
 		include($GLOBALS['dirroot'] . "/modules/algomtl/includes/configure.php");
 	}
 }

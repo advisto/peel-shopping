@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,7 +13,7 @@
 // $Id: avis_formulaire.tpl 35330 2013-02-16 18:27:13Z gboussin $
 #}<h2>{{ STR_DONNEZ_AVIS }}</h2>
 <form class="entryform" method="post" action="{{ action|escape('html') }}">
-	<table class="full_width" cellpadding="4">
+	<table class="avis_formulaire">
 		<tr>
 			<td colspan="2" class="entete">
 			{% if type == 'produit' %}
@@ -38,7 +38,7 @@
 				<br />{{ error_avis }}
 			</td>
 			<td>
-				<textarea name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur)" onkeyup="Compter(this,255,compteur)" onblur="Compter(this,255,compteur)">{{ avis|html_entity_decode_if_needed }}</textarea>
+				<textarea name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur, false)" onkeyup="Compter(this,255,compteur, false)" onblur="Compter(this,255,compteur, false)">{{ avis|html_entity_decode_if_needed }}</textarea>
 			</td>
 		</tr>
 		<tr>

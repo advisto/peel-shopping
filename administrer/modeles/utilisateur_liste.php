@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateur_liste.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: utilisateur_liste.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,7 +127,7 @@ while (isset($GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i])) {
 $tpl->assign('user_origin_options', $tpl_user_origin_opts);
 
 $tpl->assign('ville_cp', vb($_GET['ville_cp']));
-$tpl->assign('seg_who', formSelect('seg_who', tab_Who(), vb($_GET['seg_who'])));
+$tpl->assign('seg_who', formSelect('seg_who', tab_who(), vb($_GET['seg_who'])));
 $tpl->assign('seg_buy', formSelect('seg_buy', tab_buy(), vb($_GET['seg_buy'])));
 $tpl->assign('seg_want', formSelect('seg_want', tab_want(), vb($_GET['seg_want'])));
 $tpl->assign('seg_think', formSelect('seg_think', tab_think(), vb($_GET['seg_think'])));
@@ -212,12 +212,12 @@ if (!empty($results_array)) {
 	foreach ($results_array as $user) {
 		$phone_output_array = array();
 		if (!empty($user['telephone']) && is_phone_cti_module_active()) {
-			$phone_output_array[] = getCallLink($user['id_utilisateur'], String::str_shorten_words($user['telephone'], 12, ' '), $user['email'], $user['pays'], true);
+			$phone_output_array[] = getCallLink($user['id_utilisateur'], String::str_shorten_words($user['telephone'], 16, ' '), $user['email'], $user['pays'], true);
 		} elseif (!empty($user['telephone'])) {
 			$phone_output_array[] = $user['telephone'];
 		}
 		if (!empty($user['portable']) && is_phone_cti_module_active()) {
-			$phone_output_array[] = getCallLink($user['id_utilisateur'], String::str_shorten_words($user['portable'], 12, ' '), $user['email'], $user['pays'], true);
+			$phone_output_array[] = getCallLink($user['id_utilisateur'], String::str_shorten_words($user['portable'], 16, ' '), $user['email'], $user['pays'], true);
 		} elseif (!empty($user['portable'])) {
 			$phone_output_array[] = $user['portable'];
 		}

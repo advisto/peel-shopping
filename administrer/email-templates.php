@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: email-templates.php 36248 2013-04-05 17:32:15Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -300,12 +300,18 @@ if (!empty($results_array)) {
 	}
 	$tpl->assign('results', $tpl_results);
 }
+$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TITLE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE']);
 $tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 $tpl->assign('STR_ADMIN_SUBJECT', $GLOBALS['STR_ADMIN_SUBJECT']);
 $tpl->assign('STR_ADMIN_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUAGE']);
 $tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 $tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
+$tpl->assign('STR_ADMIN_ID', $GLOBALS['STR_ADMIN_ID']);
+$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
+$tpl->assign('STR_ADMIN_HTML_TEXT', $GLOBALS['STR_ADMIN_HTML_TEXT']);
 $tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
+$tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
+
 $report = $tpl->fetch();
 
 include('modeles/haut.php');

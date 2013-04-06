@@ -145,12 +145,12 @@
 
 /* line 95, ../sass/lightbox.sass */
 .lb-data {
-  padding: 0 10px;
+  padding: 0px;
   color: #bbbbbb;
 }
 /* line 98, ../sass/lightbox.sass */
 .lb-data .lb-details {
-  width: 85%;
+  width: 80%;
   float: left;
   text-align: left;
   line-height: 1.1em;

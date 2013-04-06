@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -39,7 +39,7 @@
 					<label>{{ STR_SIZE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 				</td>
 				<td>
-					<select id="{{ id_select_size }}" name="taille" onchange="update_product_price{{ save_suffix_id }}(this.value, '{{ product_id }}{{ save_suffix_id }}')">
+					<select id="{{ id_select_size }}" name="taille" onchange="update_product_price{{ save_suffix_id }}()">
 						<option value="0">{{ STR_CHOOSE_SIZE }}</option>
 						{% for so in sizes_options %}
 							<option value="{{ so.id|intval }}"{% if so.issel %} selected="selected"{% endif %}{% if not so.isavailable %} disabled="disabled"{% endif %}>

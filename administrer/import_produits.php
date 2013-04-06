@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an     |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: import_produits.php 36248 2013-04-05 17:32:15Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -578,7 +578,7 @@ switch ($action) {
 									}
 								}
 							}
-							insere_stock_produit($stock_frm);
+							echo insere_stock_produit($stock_frm);
 						}
 						if (is_stock_advanced_module_active() && !empty($field_values['on_stock']) && $field_values['on_stock'] == 1) {
 							insert_product_in_stock_table_if_not_exist($product_id, 1);

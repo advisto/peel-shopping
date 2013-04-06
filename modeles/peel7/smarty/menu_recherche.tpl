@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: menu_recherche.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: menu_recherche.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}<div{if $display_mode == 'header'} id="top_search"{/if}>
 <form method="get" action="{$action|escape:'html'}" id="recherche">
 	<fieldset>
-		<input type="hidden" name="match" value="2" />
+		<input type="hidden" name="match" value="1" />
 		<input type="text" name="search" id="search" value="" />
 		<input type="submit" class="bouton_go" value="" name="action" />
 		<div id="placement_produit" class="autocomplete"></div>

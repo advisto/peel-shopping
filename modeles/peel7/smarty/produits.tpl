@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: produits.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}{if $is_associated_product}
 	<div class="associated_product">
 {/if}
@@ -45,7 +45,7 @@
 				</div>
 		{/if}
 		{if $prods_line_mode}
-				<table>
+				<table class="line-item">
 			{if isset($prod.flash)}
 					<tr>
 						<td colspan="6" class="col_flash">
@@ -54,11 +54,18 @@
 					</tr>
 			{/if}
 					<tr>
-						<td class="col_image" style="width:10%;">
+						<td class="col_image">
 							<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt}" /></a>
 						</td>
-						<td style="width:45%;">
-							<a property="url" href="{$prod.href|escape:'html'}" title="{$prod.name|str_form_value}"><span property="name">{$prod.name}</span></a>
+						<td class="col_product_description">
+							<table>
+								<tr>
+									<td><a property="url" href="{$prod.href|escape:'html'}" title="{$prod.name|str_form_value}"><span property="name">{$prod.name}</span></a></td>
+								</tr>
+								<tr>
+									<td><p style="text-align:justify;color:#9D9D9D;">{$prod.description}</p></td>
+								</tr>
+							</table>
 						</td>
 						<td style="text-align:center; width:12%;">
 			{if isset($prod.on_estimate)}
@@ -78,7 +85,7 @@
 						</td>
 			{if isset($prod.check_critere_stock)}
 						<td class="fc_add_to_cart">
-						<!-- Ajout au panier -->
+							<!-- Ajout au panier -->
 							{$prod.check_critere_stock}
 						</td>
 			{/if}
@@ -106,20 +113,24 @@
 							<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt}" /></a>
 						</td>
 					</tr>
+					{if !empty($details_text)}
 					<tr>
-						<td colspan="2" class="fc_prix">
-							{if isset($prod.on_estimate)}
-							{$prod.on_estimate}
-							{/if}
-						</td>
+						<td colspan="2" class="fc_prix">{if isset($prod.on_estimate)}{$prod.on_estimate}{/if}</td>
 					</tr>
+					{/if}
 					<tr>
 						<td class="fc_zoom">
 							{if isset($prod.image.zoom)}
 							<a href="{$prod.image.zoom.href|escape:'html'}" {if $prod.image.zoom.is_lightbox}class="lightbox"{else}onclick="return(window.open(this.href)?false:true);"{/if} title="{$prod.name|str_form_value}">{$prod.image.zoom.label}</a>
+							{elseif empty($details_text)}
+							<a href="{$prod.href|escape:'html'}" title="{$prod.name|str_form_value}">{$prod.image.zoom.label}</a>
 							{/if}
 						</td>
+						{if !empty($details_text)}
 						<td class="fc_detail"><a class="plus_detail" href="{$prod.href|escape:'html'}" title="{$prod.name|str_form_value}">{$details_text}</a></td>
+						{else}
+						<td class="fc_prix">{if isset($prod.on_estimate)}{$prod.on_estimate}{/if}</td>
+						{/if}
 					</tr>
 			{if isset($prod.check_critere_stock)}
 					<tr>

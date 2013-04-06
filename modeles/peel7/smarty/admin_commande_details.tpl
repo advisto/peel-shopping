@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: admin_commande_details.tpl 36264 2013-04-06 12:40:37Z gboussin $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -41,7 +41,7 @@
 						</p>
 						<p><b>{$STR_ORDER_FORM|upper}{$STR_BEFORE_TWO_POINTS}:</b> <img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$bdc_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_ORDER_FORM} PDF</a></p>
 					{if $is_module_factures_html_active}
-						<form method="post" action="{$bdc_action}">
+						<form method="post" action="{$bdc_action|escape:'html'}">
 							<p><b>{$STR_ORDER_FORM} HTML</b> {$STR_ADMIN_COMMANDER_WITH_PARTIAL_AMOUNT}
 							<input type="hidden" name="bdc_code_facture" value="{$bdc_code_facture|str_form_value}" />
 							<input type="hidden" name="bdc_id" value="{$bdc_id|str_form_value}" />
@@ -434,7 +434,11 @@ function order_line_calculate(id, mode){
 			document.getElementById("remis"+id).value= numberFormat((parseFloat(p_cat)*document.getElementById("perc"+id).value/100), 5);
 		}else if(document.getElementById("remis"+id).value!="" && isFinite(parseFloat(document.getElementById("remis"+id).value))){
 			// On ne limite pas la remise au montant p_cat pour permettre édition des cases facilitée dans désordre par utilisateur => si on veut limiter, on peut rajouter dans condition if ci-dessus : && Math.abs(document.getElementById("remis"+id).value)<=Math.abs(parseFloat(p_cat))
-			document.getElementById("perc"+id).value= numberFormat((document.getElementById("remis"+id).value)/ parseFloat(p_cat)*100, 5);
+			if(parseFloat(p_cat)!=0) {
+				document.getElementById("perc"+id).value = numberFormat((document.getElementById("remis"+id).value) / parseFloat(p_cat)*100, 5);
+			} else {
+				document.getElementById("perc"+id).value = '';
+			}
 		}else {
 			document.getElementById("perc"+id).value='0';
 			if(mode!='percentage' && document.getElementById("remis"+id).value!='-' && document.getElementById("remis"+id).value!=''){
@@ -450,7 +454,7 @@ function order_line_calculate(id, mode){
 }
 {/literal}
 //--><!]]></script>
-				<p style="margin-top:0px;"><input value="{$STR_ADMIN_ADD_EMPTY_LINE|str_form_value}" name="add_product" class="bouton" type="button" onclick="add_order_line(0, '', '', 0, 1, 0, 0, '', '', '', '{$default_vat_select_options|filtre_javascript:true:true:true}', 0, 0, 0); return false;" /> {$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}');" onclick="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}');" /></p>
+				<p style="margin-top:0px;"><input value="{$STR_ADMIN_ADD_EMPTY_LINE|str_form_value}" name="add_product" class="bouton" type="button" onclick="add_order_line(0, '', '', 0, 1, '', '', '{$default_vat_select_options|filtre_javascript:true:true:true}', 0, 0, 0); return false;" /> {$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}');" onclick="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}');" /></p>
 				<div class="suggestions" id="suggestions"></div>
 			</td>
 		</tr>

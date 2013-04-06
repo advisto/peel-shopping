@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -101,6 +101,10 @@
 		<tr>
 			<td>{{ STR_REFERENCE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="width:250px" type="text" name="reference" value="{{ reference|html_entity_decode_if_needed|str_form_value }}" /></td>
+		</tr>
+		<tr>
+			<td>{{ STR_ADMIN_TECHNICAL_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input style="width:250px" type="text" name="technical_code" value="{{ technical_code|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_PRODUITS_EAN_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -219,7 +223,7 @@
 		{% if (files.i) %}
 		<tr>
 			<td class="label">{% if files.i.type == 'img' %}{{ STR_ADMIN_IMAGE }} {% else %}{{ STR_ADMIN_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{% include "uploaded_file.tpl" with {'f':f,'STR_DELETE':STR_ADMIN_DELETE_THIS_FILE} }}</td>
+			<td>{% include "uploaded_file.tpl" with {'f':f,'STR_DELETE':STR_ADMIN_DELETE_THIS_FILE} %}</td>
 		</tr>
 		{% else %}
 		<tr>
@@ -250,7 +254,7 @@
 				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ files.i.nom }} &nbsp;
 				<a href="{{ files.i.sup_href|escape('html') }}">
 				<img src="{{ drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_ADMIN_DELETE_IMAGE }}</a>
-				<input type="hidden" name="imagecouleur{{ files.i.id }}_{{ i }}" value="{{ files.i.nom|str_form_value }}" />
+				<input type="hidden" name="imagecouleur{{ c.id }}_{{ i }}" value="{{ files.i.nom|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
@@ -260,7 +264,7 @@
 		<tr>
 			<td class="label">{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input style="width: 100%" name="imagecouleur{{ files.i.id }}_{{ i }}" type="file" value="" />
+				<input style="width: 100%" name="imagecouleur{{ c.id }}_{{ i }}" type="file" value="" />
 			</td>
 		</tr>
 		{% endif %}

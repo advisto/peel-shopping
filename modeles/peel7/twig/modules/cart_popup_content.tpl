@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,7 +12,7 @@
 // +----------------------------------------------------------------------+
 // $Id: cart_popup_content.tpl 35067 2013-02-08 14:21:55Z gboussin $
 #}<div class="popup_cart_top" style="background:url({{ header_src }}) no-repeat scroll left top transparent;">
-	<div class="popup_cart_top_left">{{ STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED }}</div>
+	<div class="popup_cart_top_left">{{ STR_MODULE_CART_POPUP_PRODUCT_ADDED }}</div>
 	<div class="popup_cart_top_right">
 		<a class="close" href="javascript:close_interstitiel('popup_cart_container');">&nbsp;&nbsp;</a>
 	</div>

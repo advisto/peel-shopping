@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: es.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -287,7 +287,6 @@ $GLOBALS["STR_FWRITE_FAILED"] = "No se pudo escribir en el archivo";
 $GLOBALS["STR_GENDER"] = "Civilidad";
 $GLOBALS["STR_GET_MY_POSITION"] = "Obtener mi posición (obligatorio para esta consulta)";
 $GLOBALS["STR_GET_PASSWORD"] = "Recuperar su contraseña";
-$GLOBALS["STR_GIFT_CATALOGUE"] = "catálogo de regalos";
 $GLOBALS["STR_GIFT_POINTS"] = "puntos de regalo";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "de promoción general";
 $GLOBALS["STR_GZOPEN_FAILED"] = "No se pudo abrir el archivo comprimido";
@@ -380,7 +379,7 @@ $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Desea hacer un comentario so
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Su comentario sobre el producto";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "Su opinión ha sido registrado.<br /> Después de la validación de este último, se publicará en";
 $GLOBALS["STR_MODULE_BANNER_MSG_ERR_DATE"] = "Usted debe completar la fecha.\n";
-$GLOBALS["STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED"] = "El producto fue añadido";
+$GLOBALS["STR_MODULE_CART_POPUP_PRODUCT_ADDED"] = "El producto fue añadido";
 $GLOBALS["STR_MODULE_DEVIS_CONSEIL"] = "Para entrar en contact con pagína web, completa el formulario siguiente";
 $GLOBALS["STR_MODULE_DEVISES_CHOISIR_DEVISE"] = "Moneda:";
 $GLOBALS["STR_MODULE_DIREAUNAMI_BACK_REFERER"] = "Regreso sobre el articulo referido.";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_paiement.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: statut_paiement.php 36248 2013-04-05 17:32:15Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -246,6 +246,7 @@ function affiche_liste_statut()
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=statut_paiement';
 	$tpl->assign('STR_ADMIN_STATUT_PAIEMENT_TITLE', $GLOBALS['STR_ADMIN_STATUT_PAIEMENT_TITLE']);
 	$tpl->assign('STR_ADMIN_STATUT_PAIEMENT_EXPLAIN', $GLOBALS['STR_ADMIN_STATUT_PAIEMENT_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_STATUT_PAIEMENT_CREATE', $GLOBALS['STR_ADMIN_STATUT_PAIEMENT_CREATE']);

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: display.php 36236 2013-04-05 14:10:14Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -111,7 +111,7 @@ if (!function_exists('affiche_meta')) {
 		} elseif (defined('IN_DEVIS')) {
 			$GLOBALS['strSpecificMeta']['Title'][$page_name] = $GLOBALS['STR_DEVIS_ON_LINE_SHOP'];
 		} elseif (defined('IN_DOWNLOAD_PEEL')) {
-			$GLOBALS['strSpecificMeta']['Title'][$page_name] = $GLOBALS['STR_DOWNLOAD_PEEL'];
+			$GLOBALS['strSpecificMeta']['Title'][$page_name] = $GLOBALS['STR_MODULE_PEEL_DOWNLOAD_PEEL'];
 		}
 		// PRIORITE 4 : Récupération des metas par défaut
 		$sql_Meta = 'SELECT *
@@ -347,9 +347,6 @@ if (!function_exists('affiche_ariane')) {
 				$other['txt'] = $GLOBALS['STR_STEP3'];
 			} elseif (defined('IN_SEARCH_BRAND')) {
 				$other['txt'] = $GLOBALS['STR_SEARCH_BRAND'];
-			} elseif (defined('IN_GIFT_CATALOGUE')) {
-				$other['txt'] = $GLOBALS['STR_GIFT_CATALOGUE'];
-				$other['href'] = $GLOBALS['wwwroot'] . '/modules/cadeaux/catalogue_cadeaux.php';
 			} elseif (defined('IN_PENSE_BETE')) {
 				$other['txt'] = $GLOBALS['STR_PENSE_BETE'];
 				$other['href'] = $GLOBALS['wwwroot'] . '/modules/pensebete/voir.php';
@@ -421,9 +418,10 @@ if (!function_exists('get_brand_link_html')) {
 	 *
 	 * @param integer $id_marque
 	 * @param boolean $return_mode
+	 * @param boolean $show_all_brands_link
 	 * @return
 	 */
-	function get_brand_link_html($id_marque = null, $return_mode = false)
+	function get_brand_link_html($id_marque = null, $return_mode = false, $show_all_brands_link = false)
 	{
 		$output = '';
 		$sql = 'SELECT id, nom_' . $_SESSION['session_langue'] . ' AS marque, image
@@ -435,11 +433,19 @@ if (!function_exists('get_brand_link_html')) {
 		$query = query($sql);
 		$links = array();
 		while ($brand = fetch_object($query)) {
-			$links[] = array('href' => $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $brand->id,
+			$this_url = $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $brand->id;
+			$links[] = array('href' => $this_url,
 				'value' => $brand->marque,
-				'image' => $brand->image);
+				'image' => $brand->image,
+				'is_current' => (get_current_url(true) == $this_url));
 		}
-
+		if($show_all_brands_link) {
+			$this_url = $GLOBALS['wwwroot'] . '/achat/marque.php';
+			$links[] = array('href' => $this_url,
+				'value' => $GLOBALS['STR_ALL_BRAND'],
+				'image' => '',
+				'is_current' => (get_current_url(true) == $this_url));
+		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('brand_link_html.tpl');
 		$tpl->assign('as_list', empty($id_marque));
 		$tpl->assign('links', $links);
@@ -974,10 +980,6 @@ if (!function_exists('print_compte')) {
 			if (is_parrainage_module_active()) {
 				$tpl->assign('parrainage', array('header' => $GLOBALS['STR_PARRAIN_ENTETE'], 'txt' => sprintf($GLOBALS['STR_PARRAIN_TEXTE'], fprix($GLOBALS['site_parameters']['avoir']), fprix($GLOBALS['site_parameters']['avoir'])), 'href' => $GLOBALS['wwwroot'] . '/modules/parrainage/parrain.php'));
 			}
-			if (is_produit_cadeaux_module_active()) {
-				$tpl->assign('produit_cadeaux', array('header' => $GLOBALS['STR_GIFT_CATALOGUE'], 'txt' => $GLOBALS['STR_GIFT_CATALOGUE'], 'href' => $GLOBALS['wwwroot'] . '/modules/cadeaux/catalogue_cadeaux.php',
-						'points_label' => $GLOBALS['STR_MY_GIFT_POINT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'points' => $_SESSION['session_utilisateur']['points']));
-			}
 			// les codes utilisés
 			$code_promo_query = query('SELECT code_promo, valeur_code_promo, percent_code_promo
 				FROM peel_commandes pc
@@ -1456,7 +1458,7 @@ if (!function_exists('getHTMLHead')) {
 			} elseif (defined('IN_DEVIS')) {
 				$default_title = $GLOBALS['STR_DEVIS_ON_LINE_SHOP'];
 			} elseif (defined('IN_DOWNLOAD_PEEL')) {
-				$default_title = $GLOBALS['STR_DOWNLOAD_PEEL'];
+				$default_title = $GLOBALS['STR_MODULE_PEEL_DOWNLOAD_PEEL'];
 			} else {
 				$default_title = null;
 			}
@@ -1994,26 +1996,6 @@ if (!function_exists('print_delete_installation_folder')) {
 		</style>
 ';
 		output_light_html_page($body, $title, $additional_header);
-	}
-}
-
-if (!function_exists('affiche_brand')) {
-	/**
-	 * NO_TPL affiche_brand doesn't outputs nor returns anything
-	 * affiche_brand()
-	 *
-	 * @param mixed $location indicates the position in the website : left or right
-	 * @param boolean $return_mode
-	 * @return
-	 */
-	function affiche_brand($location, $return_mode = false)
-	{
-		$output = get_brand_link_html(null, true) . '
-	<ul>
-		<li class="minus"><a href="' . $GLOBALS['wwwroot'] . '/achat/marque.php">' . $GLOBALS['STR_ALL_BRAND'] . '</a></li>
-	</ul>
-	';
-		return $output;
 	}
 }
 

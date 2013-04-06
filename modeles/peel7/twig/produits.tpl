@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -45,7 +45,7 @@
 				</div>
 		{% endif %}
 		{% if prods_line_mode %}
-				<table>
+				<table class="line-item">
 			{% if (prod.flash) %}
 					<tr>
 						<td colspan="6" class="col_flash">
@@ -54,11 +54,18 @@
 					</tr>
 			{% endif %}
 					<tr>
-						<td class="col_image" style="width:10%;">
+						<td class="col_image">
 							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
 						</td>
-						<td style="width:45%;">
-							<a property="url" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}"><span property="name">{{ prod.name }}</span></a>
+						<td class="col_product_description">
+							<table>
+								<tr>
+									<td><a property="url" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}"><span property="name">{{ prod.name }}</span></a></td>
+								</tr>
+								<tr>
+									<td><p style="text-align:justify;color:#9D9D9D;">{{ prod.description }}</p></td>
+								</tr>
+							</table>
 						</td>
 						<td style="text-align:center; width:12%;">
 			{% if (prod.on_estimate) %}
@@ -106,20 +113,24 @@
 							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
 						</td>
 					</tr>
+					{% if (details_text) %}
 					<tr>
-						<td colspan="2" class="fc_prix">
-							{% if (prod.on_estimate) %}
-							{{ prod.on_estimate }}
-							{% endif %}
-						</td>
+						<td colspan="2" class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% endif %}</td>
 					</tr>
+					{% endif %}
 					<tr>
 						<td class="fc_zoom">
 							{% if (prod.image.zoom) %}
 							<a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
+							{% elseif details_text=='' %}
+							<a href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
 							{% endif %}
 						</td>
+						{% if (details_text) %}
 						<td class="fc_detail"><a class="plus_detail" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}">{{ details_text }}</a></td>
+						{% else %}
+						<td class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% endif %}</td>
+						{% endif %}
 					</tr>
 			{% if (prod.check_critere_stock) %}
 					<tr>

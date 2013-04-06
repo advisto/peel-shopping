@@ -3,12 +3,12 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) Butterflive - en collaboration avec contact@peel.fr    |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// $Id: butterflive.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: butterflive.php 36232 2013-04-05 13:16:01Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 //define('BUTTERFLIVE_WEBSITE_URL', 'http://www.butterflive.com/');
@@ -432,7 +432,7 @@ table.creation-form tr td input.bouton:hover {
 </table>
 </form>
 </div>
-<div class="right-side"><iframe frameborder="0"	src="http://www.butterflive.com/frames/peel/index.php" width="100%"	scrolling="no" height="600"> </iframe></div>
+<div class="right-side"><iframe src="http://www.butterflive.com/frames/peel/index.php" width="100%" height="600"> </iframe></div>
 </div>
 <div style="clear:both"></div>
 ';
@@ -475,7 +475,7 @@ jQuery(document).ready(function() {
 echo '
 <form method="post" action="' .  get_current_url(false)  . '?start=0" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="modif" />
-	<table width="100%">
+	<table class="full_width">
 		<tr>
 			<td class="top">
 				'.$GLOBALS["STR_MODULE_BUTTERFLIVE_ID"].'
@@ -512,7 +512,7 @@ echo '
 </div>
 
 <div style="width:40%;margin-right: 2%;float:left;">
-<iframe src="http://www.butterflive.com/frames/peel/index.php?mode=logged" style="width:100%;height:400px;border: 0px solid #ffffff;" scrolling="no"></iframe>
+<iframe src="http://www.butterflive.com/frames/peel/index.php?mode=logged" style="width:100%; height:400px;"></iframe>
 </div>
 <div style="clear:both"></div>
 ';

@@ -3,12 +3,12 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) Butterflive - en collaboration avec contact@peel.fr    |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// $Id: config.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: config.php 36232 2013-04-05 13:16:01Z gboussin $
 define('BUTTERFLIVE_WEBSITE_URL', 'https://www.butterflive.com/');
 //define('BUTTERFLIVE_WEBSITE_URL', 'http://localhost.fr/butterflive/');
 ?>

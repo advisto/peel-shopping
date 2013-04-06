@@ -84,12 +84,16 @@ fieldset {
 	color: #000000;
 	border: 1px solid #DDDDDD;
 }
-
 legend {
 	color: #000000;
 	font-weight: bold;
 }
-
+iframe {
+	border: none; 
+	overflow: hidden;
+	background-color: transparent;
+	margin: 0px;
+}
 .bouton_ok {
 	background-color: transparent;
 	background-image: url(../images/ok.png);
@@ -154,6 +158,9 @@ legend {
 .full_width {
 	width: 100%;
 }
+.main_table {
+	width: 100%;
+}
 /* Tables */
 table {
 	border-collapse: collapse;
@@ -179,6 +186,12 @@ table.affiche_attributs_form_part {
 table.affiche_attributs_form_part td {
 	padding: 3px;
 }
+table.affiche_formulaire_enregistrement {
+	width:100%
+}
+table.affiche_formulaire_enregistrement td {
+	padding: 3px;
+}
 table.attributs_form_part {
 	width: 100%;
 	border-spacing: 3px;
@@ -191,6 +204,12 @@ table.attributs_form_part2 {
 }
 table.attributs_form_part2 td {
 	padding: 3px;
+}
+table.avis_formulaire {
+	width: 100%;
+}
+table.avis_formulaire td {
+	padding: 4px;
 }
 table.inside_rubrique {
 	border-spacing: 7px;
@@ -230,6 +249,12 @@ table.affiche_attributs_form_part {
 table.affiche_attributs_form_part td {
 	padding: 3px;
 }
+table.reseller_register_form {
+	width: 95%;
+}
+table.reseller_register_form td {
+	padding: 3px;
+}
 
 /* body / total */
 
@@ -243,6 +268,9 @@ table.affiche_attributs_form_part td {
 	width: 995px;
 	clear: both;
 	z-index: 1;
+}
+.display_wrapper{
+	width:100%;
 }
 
 /* Header : everything in header is positioned with absoltue positioning */
@@ -1293,11 +1321,15 @@ td.col_flash {
 	color: #dd0000;
 	font-weight: bold;
 }
-
+td.col_image {
+	width:10%;
+}
 td.col_image img{
 	border: 1px solid #9E9D9C;
 }
-
+td.col_product_description {
+	width:45%;
+}
 .col_zoom, .col_detail {
 	font-size: 1em;
 	font-weight: bold;
@@ -1517,7 +1549,6 @@ div.fp_produit .prix {
 	font-size: 20px;
 	font-weight: bold;
 }
-
 div.fp_image_grande {
 	float: left;
 	text-align: center;
@@ -2118,6 +2149,7 @@ td.tab_content a {
 	color: #000000;
 }
 .bouton_add_cart {
+	background-color:transparent;
 	background-image: url(../images/add_to_cart.jpg);
 	background-repeat: no-repeat;
 	border-style: none;
@@ -2313,7 +2345,10 @@ td.tab_content a {
 #liste_lettre{
 	margin: 0 auto;
 }
-.form.entryform .inscription_form{
+.column_3 form.entryform .inscription_form{
+	padding: 10px 0px;
+}
+.column_2 form.entryform .inscription_form{
 	padding: 10px 80px;
 }
 form.entryform .inscription_form td{
@@ -2412,7 +2447,7 @@ span.fcb {
 /* Links on product pages */
 .product_link_to_modules {
 	width: 80%;
-	margin: auto;
+	margin: 5px auto 5px auto;
 }
 .picto-tell_friends {
 }

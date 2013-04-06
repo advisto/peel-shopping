@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -253,6 +253,7 @@ function insere_banniere(&$frm)
 			$sql .= "
 			, pages_allowed
 			, list_id
+			, do_not_display_on_pages_related_to_user_ids_list
 			, annonce_number
 			, on_ad_page_details";
 		}
@@ -283,6 +284,7 @@ function insere_banniere(&$frm)
 			$sql .= "
 			, '" . nohtml_real_escape_string(vb($frm['pages_allowed'])) . "'
 			, '" . nohtml_real_escape_string(vn($frm['list_id'])) . "'
+			, '" . nohtml_real_escape_string(vb($frm['do_not_display_on_pages_related_to_user_ids_list'])) . "'
 			, '" . intval(vn($frm['annonce_number'])) . "'
 			, '" . intval(vn($frm['on_ad_page_details'])) . "'";
 		}

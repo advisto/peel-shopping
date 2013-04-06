@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form_isutil.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: admin_utilisateur_form_isutil.tpl 36264 2013-04-06 12:40:37Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
 	<input name="mode" type="hidden" value="event_comment" />
 	<center>
@@ -83,7 +83,7 @@
 	{/foreach}
 	<tr>
 		<td class="center" colspan="{$columns}">
-			<form method="post" action="{$action2}">
+			<form method="post" action="{$action2|escape:'html'}">
 				{$form_token}
 				<input type="submit" name="print_all_bill" value="{$STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS|str_form_value}" class="bouton" />
 				<input type="hidden" name="user_id" value="{$user_id|str_form_value}" />

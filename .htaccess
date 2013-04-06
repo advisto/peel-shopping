@@ -1,7 +1,7 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.0.2, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
@@ -26,8 +26,11 @@
 #   ou
 # AddHandler x-mapp-php5 .php
 #
-# - Chez Free, activez la ligne suivante en retirant le # en début de ligne :
+# - Chez Free, plusieurs choses sont à faire : 
+#   . Activez la ligne suivante en retirant le # en début de ligne (ce qui active PHP5) :
 # php 1
+#   . Supprimez les .htaccess des dossiers suivants : administrer/modeles/css/  administrer/modeles/  lib/js/ lib/css/ images/  upload/  modeles/peel7/  modeles/peel7/images/  modeles/peel7/css/ 
+#   . Supprimez tout ce qui est après la ligne ErrorDocument 404 /search.php?type=error404 de ce document
 #
 # - Chez Aquaray, activez la ligne suivante en retirant le # en début de ligne :
 # AddHandler php5 .php
@@ -142,7 +145,7 @@ AddDefaultCharset UTF-8
 	#Navigation sur RSS
 	RewriteRule ^rss\.php$ modules/rss/rss.php [QSA,L]
 	RewriteRule ^rss\.xml$  modules/rss/rss.php [QSA,L]
-	RewriteRule ^rss-([0-9]+)\.xml  modules/rss/rss.php?cat=$1 [QSA,L]
+	RewriteRule ^rss-([0-9]+)\.xml$  modules/rss/rss.php?cat=$1 [QSA,L]
 
 	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/$ achat/index.php [QSA,L]
 	RewriteRule ^(achat|buy|comprar|kauf|acquisto|koop)/cat-(.*)-([0-9]+)\.html$ achat/index.php?catid=$3 [QSA,L]
@@ -152,6 +155,6 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(.*)-([0-9]+)/(.*)-([0-9]+)\.html$ achat/produit_details.php?id=$4&catid=$2 [QSA,L]
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/lettre-(.)\.html$ lexique/index.php?lettre=$2 [QSA,L]
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]
-	RewriteRule ^(lexicon|lexico|lexikon|lessico)/ lexique/index.php [QSA,L]
+	RewriteRule ^(lexicon|lexico|lexikon|lessico)/$ lexique/index.php [QSA,L]
 	RewriteRule ^(dire-a-un-ami|tell-a-friend|haga-conocer-a-amigos|vertel-een-vriend)$ modules/direaunami/direaunami.php [L,QSA]
 </ifModule>

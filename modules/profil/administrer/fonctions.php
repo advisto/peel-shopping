@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -26,8 +26,12 @@ function affiche_formulaire_ajout_profil(&$frm)
 {
 	/* Valeurs par défaut */
 	if(empty($frm)) {
-		$frm = array();
-		$frm['name'] = "";
+		$frm = array();	
+		foreach ($GLOBALS['lang_codes'] as $lng) {
+			$frm['name_' . $lng] = "";
+			$frm['description_document_' . $lng] = "";
+			$frm['document_' . $lng] = "";
+		}
 		$frm['priv'] = "";
 	}
 	$frm['nouveau_mode'] = "insere";
@@ -139,9 +143,9 @@ function insere_profil(&$frm)
 		";
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sql .= "
-		, '" . nohtml_real_escape_string($frm['name_' . $lng]) . "'
-		, '" . nohtml_real_escape_string($frm['document_' . $lng]) . "'
-		, '" . nohtml_real_escape_string($frm['description_document_' . $lng]) . "'
+		, '" . nohtml_real_escape_string(vb($frm['name_' . $lng])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['document_' . $lng])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['description_document_' . $lng])) . "'
 		";
 	}
 	$sql .= "

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: compte.php 36232 2013-04-05 13:16:01Z gboussin $
 
 include("configuration.inc.php");
 
@@ -22,6 +22,8 @@ if (!est_identifie()) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true);
 	redirect_and_die($GLOBALS['wwwroot'] . '/membre.php');
 }
+
+$GLOBALS['page_related_to_user_id'] = $_SESSION['session_utilisateur']['id_utilisateur'];
 
 define('IN_COMPTE', true);
 $page_name = 'compte';

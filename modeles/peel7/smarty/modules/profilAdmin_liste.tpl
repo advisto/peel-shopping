@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: profilAdmin_liste.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: profilAdmin_liste.tpl 36236 2013-04-05 14:10:14Z gboussin $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="3">{$STR_MODULE_PROFIL_ADMIN_TITLE}</td>
@@ -23,7 +23,7 @@
 					<td><a href="{$add_href|escape:'html'}">{$STR_MODULE_PROFIL_ADMIN_CREATE}</a></td>
 				</tr>
 			</table>
-			<p>{$STR_MODULE_PROFIL_ADMIN_LIST_EXPLAIN}</p>
+			<p class="global_help">{$STR_MODULE_PROFIL_ADMIN_LIST_EXPLAIN}</p>
 		</td>
 	</tr>
 	{if isset($results)}

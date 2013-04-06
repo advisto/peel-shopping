@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions_admin.php 36266 2013-04-06 15:02:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -274,6 +274,9 @@ function get_admin_menu()
 			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/produits_achetes.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"];
 			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/import_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
 			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/export_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"];
+			if (file_exists($GLOBALS['dirroot'] . '/modules/import/administrer/import_clients.php')) {
+				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/import/administrer/import_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
+			}
 			if (is_module_export_clients_active ()) {
 				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"];
 			}
@@ -504,6 +507,7 @@ function sendclient($commandeid, $prefered_mode = 'html', $mode = 'bdc', $partia
  * send_avis_expedition()
  *
  * @param integer $commandeid
+ * @param integer $delivery_tracking
  * @return
  */
 function send_avis_expedition($commandeid, $delivery_tracking)
@@ -561,7 +565,7 @@ function ftp_download($host, $user, $password, $directory, $remote_filename, $lo
 		return $GLOBALS['STR_FTP_CHDIR_FAILED'];
 	}
 	// Create a file for the compressed file
-	if (!($handle = String::fopen_utf8($GLOBALS['uploaddir'] . '/' . $local_filename, 'rb'))) {
+	if (!($handle = String::fopen_utf8($GLOBALS['uploaddir'] . '/' . $local_filename, 'wb'))) {
 		return $GLOBALS['STR_FOPEN_FAILED'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $GLOBALS['uploaddir'] . '/' . $local_filename;
 	}
 	// Get the compressed file in the temporary file
@@ -687,11 +691,13 @@ function get_data_lang()
 {
 	$get_options = '';
 	foreach ($_GET as $this_item => $this_value) {
-		$get_options .= '<input type="hidden" name="' . $this_item . '" value="' . String::str_form_value($this_value) . '" />';
+		if($this_item != 'langue') {
+			$get_options .= '<input type="hidden" name="' . $this_item . '" value="' . String::str_form_value($this_value) . '" />';
+		}
 	}
 	$lang_select = '
-<form id="langue" method="get" action="' . htmlspecialchars($_SERVER['REQUEST_URI']) . '">
-	<div>Langue des données administrées :
+<form id="langue" method="get" action="' . String::str_form_value(get_current_url(false)) . '">
+	<div>'.$GLOBALS["STR_ADMIN_LANGUAGE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].':
 		' . $get_options . '<select name="langue" onchange="document.getElementById(\'langue\').submit()">
 			<option value="">' . $GLOBALS['STR_CHOOSE'] . '...</option>
 ';
@@ -701,7 +707,7 @@ function get_data_lang()
 
 	$i = 0;
 	$lang_select .= '
-		</select> (sans influence sur la langue de l\'interface d\'administration)
+		</select>
 	</div>
 </form>
 ';
@@ -877,11 +883,14 @@ function envoie_client_code_promo($id_utilisateur, $id_codepromo)
 /**
  * nettoyer_dir()
  *
- * @param string $chemin_du_repertoire
+ * @param string $dir
  * @param integer $older_than_seconds
  */
 function nettoyer_dir($dir, $older_than_seconds = 3)
 {
+	if (a_priv('demo')) {
+		return false;
+	}
 	$files_deleted = 0;
 	if ($dir != $GLOBALS['dirroot'] && $dir != $GLOBALS['dirroot'] . '/' && is_dir($dir) && ($dossier = opendir($dir))) {
 		while ($file = readdir($dossier)) {
@@ -1417,6 +1426,7 @@ function save_commande_in_database($frm)
  * @param array $line_data
  * @param string $color_options_html
  * @param string $size_options_html
+ * @param string $tva_options_html
  * @param integer $i
  * @return
  */
@@ -1511,7 +1521,7 @@ function affiche_actions_moderations_user($user_id)
 	while ($res = fetch_assoc($q)) {
 		if ($countResultats == 0) {
 			$output .= '
-			<table style="background-color:#FFFFFF;" border="1" width="100%">
+			<table style="background-color:#FFFFFF; border:1px; width:100%">
 				<tr>
 					<th class="menu" style="width:' . $width['date'] . '%;">'.$GLOBALS['STR_DATE'].'</th>
 					<th class="menu" style="width:' . $width['login'] . '%;">'.$GLOBALS['STR_BY'].'</th>
@@ -1654,7 +1664,7 @@ function affiche_phone_event($user_id)
 			<hr /><center><h2 id="phone_section" style="color:green">' . sprintf(($res['action'] == 'PHONE_EMITTED'?$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_EMITTED"]:$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_RECEIVED"]), vb($res['pseudo_membre'])) . ' : '.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_ON"].' ' . get_formatted_date($res['date']) . '</h2></center>
 			<br />
 			<center>
-				<table width="100%">
+				<table class="full_width">
 					<tr>
 						<th>'.$GLOBALS["STR_COMMENTS"].'</th>
 						<td class="center">
@@ -1684,14 +1694,14 @@ function affiche_phone_event($user_id)
 					<table >
 						<tr>
 							<td class="center" style="width:50%;">
-								<table width="100%">
+								<table class="full_width">
 									<tr>
 										<td class="center"><input name="phone_emitted_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_INITIATE"].'" class="bouton" /></td>
 									</tr>
 								</table>
 							</td>
 							<td class="center" style="width:50%;">
-								<table width="100%">
+								<table class="full_width">
 									<tr>
 										<td class="center"><input name="phone_received_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_RECEIVED_INITIATE"].'" class="bouton" /></td>
 									</tr>
@@ -1710,7 +1720,6 @@ function affiche_phone_event($user_id)
  * Renvoie la note d'un client en fonction de l'intérêt qu'on souhaite lui porter
  *
  * @param integer $user_infos
- * @param boolean $return_mode
  * @return Points
  */
 function getClientNote(&$user_infos)
@@ -1919,7 +1928,7 @@ function tab_followed_nombre_produit()
 {
 	$result = array('-1' => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_PRODUCTS_NEVER_BOUGHT"]);
 	for($i=1; $i<=12; $i++) {
-		$result['nombre_produit'][$i] = sprintf($GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_PRODUCTS_AT_LEAST_N"], $i);
+		$result[$i] = sprintf($GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_PRODUCTS_AT_LEAST_N"], $i);
 	}
 	return $result;
 }
@@ -1964,10 +1973,10 @@ function get_all_site_names()
  *
  * @param array $frm Array with all fields data
  * @param boolean $try_alter_table_even_if_modules_not_active
- * @param boolean or array $force_update_database_lang_content 
+ * @param mixed $force_update_database_lang_content 
  * @return
  */
-function insere_langue($frm, $try_alter_table_even_if_modules_not_active=true, $force_update_database_lang_content = false)
+function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true, $force_update_database_lang_content = false)
 {
 	$output = '';
 	$new_lang = String::strtolower($frm['lang']);
@@ -2316,10 +2325,10 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active=true, $
 			LIMIT 1";
 		$query = query($sql);
 		if(fetch_assoc($query)) {
-			// Il y a déjà d'autres langues avec url_rewriting='' => on dit par défaut que cette langue est accessible dans le répertoire xx/
+			// Il y a déjà d'autres langues avec url_rewriting='' => on dit par défaut que cette langue est accessible dans le répertoire xx/ si pas d'autre règle existante
 			$sql = "UPDATE peel_langues
 				SET url_rewriting='".real_escape_string($new_lang)."/'
-				WHERE lang='" . real_escape_string($new_lang)."'";
+				WHERE lang='" . real_escape_string($new_lang)."' AND url_rewriting=''";
 			query($sql);
 		}
 		if(!empty($imported_texts)){
@@ -2496,7 +2505,7 @@ if (!function_exists('affiche_liste_produits')) {
 			$tpl->assign('top_search_one_issel', (vb($_GET['top_search']) == 1));
 			$tpl->assign('top_search_zero_issel', (vb($_GET['top_search']) === "0"));
 			
-			$tpl->assign('is_produit_cadeaux_module_active', is_produit_cadeaux_module_active());
+			$tpl->assign('is_gifts_module_active', is_gifts_module_active());
 			$tpl->assign('gift_product_one_issel', (vb($_GET['gift_product']) == 1));
 			$tpl->assign('gift_product_zero_issel', (vb($_GET['gift_product']) === "0"));
 			
@@ -2506,8 +2515,9 @@ if (!function_exists('affiche_liste_produits')) {
 			
 			
 			$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'reference' => $GLOBALS['STR_REFERENCE'], $GLOBALS['STR_CATEGORY'], $GLOBALS['STR_WEBSITE'], ('nom_' . $_SESSION['session_langue']) => $GLOBALS['STR_ADMIN_NAME'], 'prix' => $GLOBALS['STR_PRICE'] . ' ' . $GLOBALS['site_parameters']['symbole'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']), 'etat' => $GLOBALS['STR_STATUS'], 'on_stock' => $GLOBALS['STR_STOCK']);
-						if (is_gifts_module_active()) {
+			if (is_gifts_module_active()) {
 				$HeaderTitlesArray['points'] = $GLOBALS['STR_GIFT_POINTS'];
+				$tpl->assign('STR_MODULE_GIFTS_ADMIN_GIFT', $GLOBALS['STR_MODULE_GIFTS_ADMIN_GIFT']);
 			}
 			$HeaderTitlesArray['date_maj'] = $GLOBALS['STR_ADMIN_UPDATED_DATE'];
 			$HeaderTitlesArray[] = $GLOBALS['STR_ADMIN_SUPPLIER'];
@@ -2535,7 +2545,7 @@ if (!function_exists('affiche_liste_produits')) {
 			if (is_best_seller_module_active() && isset($frm['top_search']) && $frm['top_search'] != "null") {
 				$where .= " AND p.on_top = '" . nohtml_real_escape_string($frm['top_search']) . "'";
 			}
-			if (is_produit_cadeaux_module_active() && isset($frm['gift_product']) && $frm['gift_product'] != "null") {
+			if (is_gifts_module_active() && isset($frm['gift_product']) && $frm['gift_product'] != "null") {
 				$where .= " AND p.on_gift = '" . nohtml_real_escape_string($frm['gift_product']) . "'";
 			}
 			if (isset($frm['cat_search']) && is_numeric($frm['cat_search'])) {

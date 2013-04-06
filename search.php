@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: search.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -35,6 +35,9 @@ define('IN_SEARCH', true);
 
 if (is_annonce_module_active()) {
 	include($GLOBALS['dirroot'] . '/modules/annonces/rating_bar/functions/drawrating.php');
+	if (is_map_module_active()) {
+		include_once($GLOBALS['fonctionsmap']);
+	}
 }
 // Si vous mettez plusieurs multipage sur la page, on ne doit pas considérer que chacun connait le nombre de pages
 // => dans ce cas, repassez à false avant le dernier Multipage et pas avant
@@ -316,6 +319,18 @@ if (is_annonce_module_active()) {
 		// Sauvegarde de la recherche
 		$res_affiche_annonces .= display_save_search_button($_GET);
 	}
+	if (vn($_GET['page'])<=1) {
+		// On transmet le GET, en étant compatible avec les tableaux en GET (=> ne pas reconstruire chaine à partir de GET)
+		$xml_call_args = String::substr(get_current_url(true),String::strlen(get_current_url(false))+1);
+		if(!empty($_GET['search']) && strpos($xml_call_args, 'search=')===false) {
+			// Gestion des pages avec URL rewriting
+			if(!empty($xml_call_args)) {
+				$xml_call_args .= '&';
+			}
+			$xml_call_args .= 'search='.$_GET['search'];
+		}
+		$res_affiche_annonces = getUserMap(null, $xml_call_args, 0, false, false) . $res_affiche_annonces;
+	}
 	$tpl_r->assign('res_affiche_annonces', $res_affiche_annonces);
 }
 
@@ -345,22 +360,24 @@ if (count($terms) > 0) {
 		// on ajoute dans le tableau  $terme_existant[]
 		foreach ($terms as $this_term) {
 			$preg_condition = getPregConditionCompatAccents($this_term);
-			if ((strpos($texte, $this_term)) !== false) {
-				$texte = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $texte, -1);
-				$terme_existant[] = $this_term;
-			}
-			if ((strpos($titre, $this_term)) !== false) {
-				$titre = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $titre, -1);
-				$terme_existant[] = $this_term;
-			}
-			// certains champ ne sont pas affichés, mais on teste pour savoir si le mot se trouve dedans pour l'ajouter au tag_cloud
-			$surtitre = preg_match('/' . $preg_condition . '/i', $surtitre);
-			if ($surtitre > 0) {
-				$terme_existant[] = $this_term;
-			}
-			$chapo = preg_match('/' . $preg_condition . '/i', $chapo);
-			if ($chapo > 0) {
-				$terme_existant[] = $this_term;
+			if(!empty($this_term)) {
+				if ((strpos($texte, $this_term)) !== false) {
+					$texte = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $texte, -1);
+					$terme_existant[] = $this_term;
+				}
+				if ((strpos($titre, $this_term)) !== false) {
+					$titre = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $titre, -1);
+					$terme_existant[] = $this_term;
+				}
+				// certains champ ne sont pas affichés, mais on teste pour savoir si le mot se trouve dedans pour l'ajouter au tag_cloud
+				$surtitre = preg_match('/' . $preg_condition . '/i', $surtitre);
+				if ($surtitre > 0) {
+					$terme_existant[] = $this_term;
+				}
+				$chapo = preg_match('/' . $preg_condition . '/i', $chapo);
+				if ($chapo > 0) {
+					$terme_existant[] = $this_term;
+				}
 			}
 		}
 		// on remplace le BBcode

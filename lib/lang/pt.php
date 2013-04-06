@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: pt.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -288,7 +288,6 @@ $GLOBALS["STR_FWRITE_FAILED"] = "";
 $GLOBALS["STR_GENDER"] = "Título";
 $GLOBALS["STR_GET_MY_POSITION"] = "";
 $GLOBALS["STR_GET_PASSWORD"] = "Recuperar o seu password";
-$GLOBALS["STR_GIFT_CATALOGUE"] = "Parcourir le catalogue des cadeaux";
 $GLOBALS["STR_GIFT_POINTS"] = "Pontos prémios";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "";
@@ -378,7 +377,7 @@ $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "";
 $GLOBALS["STR_MODULE_BANNER_MSG_ERR_DATE"] = "";
-$GLOBALS["STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED"] = "";
+$GLOBALS["STR_MODULE_CART_POPUP_PRODUCT_ADDED"] = "";
 $GLOBALS["STR_MODULE_DEVIS_CONSEIL"] = "Fazer uma sugestão";
 $GLOBALS["STR_MODULE_DEVISES_CHOISIR_DEVISE"] = "Divisa ";
 $GLOBALS["STR_MODULE_DIREAUNAMI_BACK_REFERER"] = "Regressar ao produto referido.";

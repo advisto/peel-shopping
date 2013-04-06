@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_nl.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: database_email_template_text_nl.php 36232 2013-04-05 13:16:01Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -61,14 +61,14 @@ Bericht :
 
 [TEXTE]
 
-IP : [REMOTE_ADDR] ⏎
+IP : [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hallo, 
 
 een bestelling met nummer [ORDER_ID] is net geregistreerd op [WWWROOT]",
   "admin_info_payment_credit_card_3_times" => "Hallo, 
 
-een bestelling met betaling in drie termijnen met nummer [ORDER_ID] is geregistreerd op [SITE] ⏎
+een bestelling met betaling in drie termijnen met nummer [ORDER_ID] is geregistreerd op [SITE]
 ",
   "send_client_order_html" => "Hallo, 
 
@@ -81,7 +81,7 @@ Als de link niet correct wordt weergegeven in uw browser, deze  alstublieft kopi
 
 Uw bestelling wordt verwerkt na ontvangst van uw betaling. 
 
-Wij danken u voor uw vertrouwen in [SITE] ⏎
+Wij danken u voor uw vertrouwen in [SITE]
 ",
   "send_client_order_pdf" => "Hallo, 
 
@@ -94,7 +94,7 @@ Als de link niet correct wordt weergegeven in uw browser, deze  alstublieft kopi
 
 Uw bestelling wordt verwerkt na ontvangst van uw betaling. 
 
-Wij danken u voor uw vertrouwen in [SITE] ⏎
+Wij danken u voor uw vertrouwen in [SITE]
 ",
   "send_avis_expedition" => "Hallo [PRENOM] [NOM_FAMILLE], 
 
@@ -175,7 +175,7 @@ Orderbedrag : [MONTANT]
 Orderdatum : [O_TIMESTAMP]
 Betaling : [PAIEMENT]
 
-Raadpleeg de administratie-interface van uw website. ⏎
+Raadpleeg de administratie-interface van uw website.
 ",
   "initialise_mot_passe" => "Hallo,
 
@@ -184,7 +184,7 @@ Een aanvraag voor een nieuwe wachtwoord op de website [SITE] is geïnitialiseerd
 Om uw aanvraag voor een nieuw wachtwoord te bevestigen, moet u op de volgende link klikken : [LINK]
 U heeft 24 uur na het verzoek om een nieuwe wachtwoord om deze bewerking uit te voeren. Hierna is de link niet meer geldig.
 
-Deze e-mail is automatisch verzonden, dank u voor het niet reageren op dit bericht. ⏎
+Deze e-mail is automatisch verzonden, dank u voor het niet reageren op dit bericht.
 ",
   "send_mail_for_account_creation" => "Hallo,
 

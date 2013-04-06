@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: subcategories_table.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: subcategories_table.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}<table class="sub_category">
 {foreach $cats as $cat}
 	{if $cat.row_start}
-		<tr>
+	<tr>
 	{/if}
 	{if isset($cat.href)}
 		<td class="center" style="width:{$cat.width}%">
@@ -27,9 +27,9 @@
 	{/if}
 	{if $cat.row_end}
 		{for $var=1 to $cat.empty_cells}
-			<td></td>
+		<td></td>
 		{/for}
-		</tr>
+	</tr>
 	{/if}
 {/foreach}
 </table>

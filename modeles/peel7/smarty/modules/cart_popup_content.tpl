@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: cart_popup_content.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: cart_popup_content.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}<div class="popup_cart_top" style="background:url({$header_src}) no-repeat scroll left top transparent;">
-	<div class="popup_cart_top_left">{$STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED}</div>
+	<div class="popup_cart_top_left">{$STR_MODULE_CART_POPUP_PRODUCT_ADDED}</div>
 	<div class="popup_cart_top_right">
 		<a class="close" href="javascript:close_interstitiel('popup_cart_container');">&nbsp;&nbsp;</a>
 	</div>

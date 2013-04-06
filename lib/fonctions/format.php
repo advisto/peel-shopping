@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: format.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -328,9 +328,10 @@ function get_currency_international_numerical_code($currency_code)
  * get_country_iso_2_letter_code()
  *
  * @param mixed $country_id_or_name
+ * @param boolean $guess_if_not_found
  * @return
  */
-function get_country_iso_2_letter_code($country_id_or_name)
+function get_country_iso_2_letter_code($country_id_or_name, $guess_if_not_found = true)
 {
 	$sql = 'SELECT iso
 		FROM peel_pays
@@ -342,7 +343,7 @@ function get_country_iso_2_letter_code($country_id_or_name)
 	}
 	if (!empty($result)) {
 		return $result;
-	} elseif (!is_numeric($country_id_or_name)) {
+	} elseif ($guess_if_not_found && !is_numeric($country_id_or_name)) {
 		// On renvoie les 2 premières lettres plutôt que rien du tout, on a des chances que ce soit bon
 		return String::substr(String::strtoupper($country_id_or_name), 0, 2);
 	} else {
@@ -354,9 +355,10 @@ function get_country_iso_2_letter_code($country_id_or_name)
  * get_country_iso_3_letter_code()
  *
  * @param mixed $country_id_or_name
+ * @param boolean $guess_if_not_found
  * @return
  */
-function get_country_iso_3_letter_code($country_id_or_name)
+function get_country_iso_3_letter_code($country_id_or_name, $guess_if_not_found = true)
 {
 	$sql = 'SELECT iso3
 		FROM peel_pays
@@ -368,7 +370,7 @@ function get_country_iso_3_letter_code($country_id_or_name)
 	}
 	if (!empty($result)) {
 		return $result;
-	} elseif (!is_numeric($country_id_or_name)) {
+	} elseif ($guess_if_not_found && !is_numeric($country_id_or_name)) {
 		// On renvoie les 3 premières lettres plutôt que rien du tout, on a des chances que ce soit bon
 		return String::substr(String::strtoupper($country_id_or_name), 0, 3);
 	} else {
@@ -841,7 +843,7 @@ function smileysFormat ($string)
 /**
  * Convertit un tableau en chaine de caractère simple à gérer par un utilisateur
  *
- * @param mixed $chaine
+ * @param mixed $array
  * @return
  */
 function get_string_from_array($array)
@@ -871,7 +873,7 @@ function get_string_from_array($array)
 /**
  * Convertit un tableau en chaine de caractère simple à gérer par un utilisateur
  *
- * @param mixed $chaine
+ * @param mixed $string
  * @return
  */
 function get_array_from_string($string)

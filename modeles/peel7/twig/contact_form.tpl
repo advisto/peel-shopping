@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -19,7 +19,7 @@
 		<div class="contact_intro">{{ STR_CONTACT_INTRO }}</div>
 		<form class="entryform" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
 			{{ extra_field }}
-			<table cellpadding="3" width="100%" >
+			<table cellpadding="3" class="full_width">
 				<tr>
 					<td {% if is_advistofr_module_active %} colspan="2"{% endif %}><label for="sujet">{{ STR_CONTACT_SUBJECT }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">(*)</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
 		{% if is_advistofr_module_active %}
@@ -103,7 +103,7 @@
 				{% endif %}
 				<tr>
 					<td><label for="texte">{{ STR_TEXT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
-					<td>{{ texte_error }}<textarea id="texte" name="texte">{{ texte_value }}</textarea></td>
+					<td>{{ texte_error }}<textarea id="texte" name="texte" rows="10">{{ texte_value }}</textarea></td>
 				</tr>
 				<tr>
 					<td><label for="dispo">{{ STR_DISPO }}{{ STR_BEFORE_TWO_POINTS }}:</label></td>

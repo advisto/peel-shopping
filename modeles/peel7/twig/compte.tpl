@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -27,6 +27,14 @@
 		{% if (return_history) %}
 		<h3>{{ return_history.header }}</h3>
 		- <a href="{{ return_history.href|escape('html') }}">{{ return_history.txt }}</a><br />
+		<br />
+		{% endif %}
+		
+		{% if (download_links) %}
+		<h3>{{ STR_DOWNLOAD_CENTER }}</h3>
+			{% for item in download_links %}
+		- <a href="{{ item.href|escape('html') }}">{{ item.name }}</a><br />
+			{% endfor %}
 		<br />
 		{% endif %}
 		

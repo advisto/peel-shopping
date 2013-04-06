@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: user_register_form.tpl 36232 2013-04-05 13:16:01Z gboussin $
 *}<h1 class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form">
 	<p>{$STR_FIRST_REGISTER_TEXT}</p>
@@ -22,7 +22,7 @@
 		</tr>
 	</table>
 	<form class="entryform" method="post" action="{$action|escape:'html'}">
-	<div class="inscription_form" >
+	<div class="inscription_form">
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="email">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite"><input class="champtexte" type="text" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
@@ -84,11 +84,11 @@
 			<span class="enregistrementdroite">
 				<select id="type" name="type">
 					<option value="">{$STR_CHOOSE}...</option>
-					<option disabled="disabled" style="text-align:center;font-weigth:bold;" value="">{$STR_BUYERS}{$STR_BEFORE_TWO_POINTS}:</option>
+					<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{$STR_BUYERS}{$STR_BEFORE_TWO_POINTS}:</option>
 					<option value="importers_exporters"{if $type=='importers_exporters'} selected="selected"{/if}>{$STR_IMPORTERS_EXPORTERS}</option>
 					<option value="commercial_agent"{if $type=='commercial_agent'} selected="selected"{/if}>{$STR_COMMERCIAL_AGENT}</option>
 					<option value="purchasing_manager"{if $type=='purchasing_manager'} selected="selected"{/if}>{$STR_PURCHASING_MANAGER}</option>
-					<option disabled="disabled" style="text-align:center;font-weigth:bold;" value="">{$STR_WORD_SELLERS}{$STR_BEFORE_TWO_POINTS}:</option>
+					<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{$STR_WORD_SELLERS}{$STR_BEFORE_TWO_POINTS}:</option>
 					<option value="wholesaler"{if $type=='wholesaler'} selected="selected"{/if}>{$STR_WHOLESALER}</option>
 					<option value="half_wholesaler"{if $type=='half_wholesaler'} selected="selected"{/if}>{$STR_HALF_WHOLESALER}</option>
 					<option value="retailers"{if $type=='retailers'} selected="selected"{/if}>{$STR_RETAILERS}</option>

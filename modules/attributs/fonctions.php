@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36258 2013-04-06 11:00:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -313,7 +313,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
-								'onclick' => $input_on_change.' update_product_price' . ($save_suffix_id) . '();'
+								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
 					} elseif ($type_affichage_attribut == 2) {
 						// Affichage sous forme de checkbox
@@ -324,7 +324,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
-								'onclick' => $input_on_change.' update_product_price' . ($save_suffix_id) . '();'
+								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
 					}
 				}
@@ -334,7 +334,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				$attributes_text_array[] = array(
 						'text' => $attribut_text,
 						'technical_code' => $this_attribut_infos['technical_code'],
-						'name' => String::html_entity_decode_if_needed($this_attribut_infos['nom']),
+						'name' => String::html_entity_decode_if_needed($this_attribut_infos['nom']).(!empty($this_attribut_infos['mandatory']) && $display_mode != 'selected_text'?' *':''),
 						'type_affichage_attribut' => $type_affichage_attribut,
 						'input_id' => $input_id,
 						'input_name' => $input_name,
@@ -545,6 +545,9 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 				}
 				$tpl->assign('labels', $tpl_labels);
 				$_SESSION["session_display_popup"]["upload_error_text"] = $tpl->fetch();
+			} elseif(!empty($frm[$this_key])) {
+				// Nom de l'image mise en doubles accolades pour être facilement détecté dans l'administration
+				$frm[$this_key] = '{{' . $frm[$this_key] . '}}';
 			}
 		}
 	}

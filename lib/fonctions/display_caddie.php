@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: display_caddie.php 36232 2013-04-05 13:16:01Z gboussin $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -135,7 +135,8 @@ if (!function_exists('get_caddie_content_html')) {
 						$sqlType = 'SELECT DISTINCT(t.id), t.nom_' . $_SESSION['session_langue'] . '
 							FROM peel_tarifs tf
 							INNER JOIN peel_types t ON t.id = tf.type
-							WHERE t.etat = 1 AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0)';
+							WHERE t.etat = 1 AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0)
+							ORDER BY t.position ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC';
 						$resType = query($sqlType);
 					}
 					$tpl->assign('shipping_type_error', $form_error_object->text('type'));
@@ -234,7 +235,7 @@ if (!function_exists('get_order_step1')) {
 				$tpl->assign('is_mode_transport', true);
 				$tpl->assign('STR_SHIP_ADDRESS', $GLOBALS['STR_SHIP_ADDRESS']);
 				if(is_icirelais_module_active() && !empty($_SESSION['session_commande']['is_icirelais_order'])) {
-					$tpl->assign('text_temp_address', STR_MODULE_ICIRELAIS_TEMP_ADDRESS);
+					$tpl->assign('text_temp_address', $GLOBALS["STR_MODULE_ICIRELAIS_TEMP_ADDRESS"]);
 				}
 				$tpl->assign('societe2', $frm['societe2']);
 				$tpl->assign('nom2_error', $form_error_object->text('nom2'));
@@ -291,6 +292,7 @@ if (!function_exists('get_order_step2')) {
 		if ($_SESSION['session_caddie']->count_products() == 0) {
 			$output .= $GLOBALS['STR_EMPTY_CADDIE'];
 		} else {
+			$is_delivery_address_necessary_for_delivery_type = is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId));
 			$tpl = $GLOBALS['tplEngine']->createTemplate('order_step2.tpl');
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			$tpl->assign('STR_STEP2', $GLOBALS['STR_STEP2']);
@@ -327,7 +329,6 @@ if (!function_exists('get_order_step2')) {
 				$tpl->assign('payment', get_payment_name($_SESSION['session_caddie']->payment_technical_code));
 				$tpl->assign('shipping_zone', $_SESSION['session_caddie']->zone);
 				$tpl->assign('shipping_type', $_SESSION['session_caddie']->type);
-				$is_delivery_address_necessary_for_delivery_type = is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId));
 				$tpl->assign('is_delivery_address_necessary_for_delivery_type', $is_delivery_address_necessary_for_delivery_type);
 				if($is_delivery_address_necessary_for_delivery_type) {
 					$tpl->assign('societe2', $frm['societe2']);
@@ -346,7 +347,7 @@ if (!function_exists('get_order_step2')) {
 			$tpl->assign('action', $GLOBALS['wwwroot'] . '/achat/fin_commande.php');
 			
 			if (is_icirelais_module_active() && !empty($_SESSION['session_commande']['is_icirelais_order'])) {
-				$tpl->assign('icirelais_id_delivery_points_radio_inputs', get_icirelais_id_delivery_points_radio_inputs());
+				$tpl->assign('icirelais_id_delivery_points_radio_inputs', get_icirelais_id_delivery_points_radio_inputs($is_delivery_address_necessary_for_delivery_type));
 			}
 			if(is_tnt_module_active() && $GLOBALS['web_service_tnt']->is_type_tntdropoffpoint(vn($_SESSION['session_caddie']->typeId)) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId)) && (defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
 				try {

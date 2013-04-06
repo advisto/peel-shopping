@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -64,9 +64,9 @@
 						{% endif %}
 						</td>
 					</tr>
-					{% if is_produit_cadeaux_module_active %}
+					{% if is_gifts_module_active %}
 					<tr>
-						<td class="top" style="padding:5px">{{ STR_ADMIN_PRODUITS_IS_PRODUCT }} <strong>{{ STR_GIFT }}</strong> ?<br />
+						<td class="top" style="padding:5px">{{ STR_ADMIN_PRODUITS_IS_PRODUCT }} <strong>{{ STR_MODULE_GIFTS_ADMIN_GIFT }}</strong> ?<br />
 							<span>
 								<input type="radio" name="gift_product" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
 								<input type="radio" name="gift_product"{% if gift_product_one_issel %} checked="checked"{% endif %} value="1" /> {{ STR_YES }}

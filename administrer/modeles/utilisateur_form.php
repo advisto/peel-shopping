@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateur_form.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: utilisateur_form.php 36264 2013-04-06 12:40:37Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -190,7 +190,7 @@ $tpl->assign('is_algomtl_module_active', is_algomtl_module_active());
 $tpl->assign('fonction', vb($frm['fonction']));
 $tpl->assign('type', vb($frm['type']));
 $tpl->assign('client_note', intval(getClientNote($frm)));
-$tpl->assign('seg_who', formSelect('seg_who', tab_Who(), vb($frm['seg_who'])));
+$tpl->assign('seg_who', formSelect('seg_who', tab_who(), vb($frm['seg_who'])));
 $tpl->assign('seg_buy', formSelect('seg_buy', tab_buy(), vb($frm['seg_buy'])));
 $tpl->assign('seg_want', formSelect('seg_want', tab_want(), vb($frm['seg_want'])));
 $tpl->assign('seg_think', formSelect('seg_think', tab_think(), vb($frm['seg_think'])));
@@ -438,7 +438,7 @@ if (!empty($frm['id_utilisateur'])) {
 			$i++;
 		}
 		$tpl2->assign('results', $tpl_results);
-		$tpl2->assign('action2', htmlspecialchars($_SERVER['REQUEST_URI']));
+		$tpl2->assign('action2', $_SERVER['REQUEST_URI']);
 		$tpl2->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['id_utilisateur']));
 		$tpl2->assign('user_id', intval(vn($frm['id_utilisateur'])));
 	}

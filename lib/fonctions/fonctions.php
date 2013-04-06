@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36266 2013-04-06 15:02:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -211,9 +211,10 @@ function calcul_nbarti_parrub($rub)
  * @param boolean $format
  * @param string $format_separator
  * @param boolean $add_rdfa_properties 
+ * @param boolean $round_even_if_no_format 
  * @return
  */
-function fprix($price, $display_currency = false, $currency_code_or_default = null, $convertion_needed_into_currency = true, $currency_rate = null, $display_iso_currency_code = false, $format = true, $format_separator = ',', $add_rdfa_properties = false)
+function fprix($price, $display_currency = false, $currency_code_or_default = null, $convertion_needed_into_currency = true, $currency_rate = null, $display_iso_currency_code = false, $format = true, $format_separator = ',', $add_rdfa_properties = false, $round_even_if_no_format = false)
 {
 	static $currency_infos_by_code;
 	$prices_precision = 2;
@@ -280,6 +281,8 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 				$price_displayed .= ' <span class="hidden" property="priceCurrency">'.$currency_code.'</span>';
 			}*/
 		}
+	} elseif($round_even_if_no_format) {
+		$price_displayed = round($price_displayed, $prices_precision);
 	}
 	return $price_displayed;
 }
@@ -486,7 +489,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				}
 			} elseif ($this_module['technical_code'] == 'brand') {
 				// affiche du block marque
-				$this_module_output = affiche_brand($this_module['location'], true);
+				$this_module_output = get_brand_link_html(null, true, true);
 			} elseif ($this_module['technical_code'] == 'last_views') {
 				if (is_last_views_module_active ()) {
 					$this_module_output = affiche_last_views(true);
@@ -523,7 +526,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				if (!empty($keywords_array)) {
 					$sql_cond .= ' AND ' . build_terms_clause($keywords_array, array('keywords'), 2);
 				}
-				$this_module_output = affiche_banner(String::substr($this_module['technical_code'], strlen('advertising')), true, (isset($criterias['page'])?$criterias['page']:null), $id_categorie, $this_annonce_number, $page_type, (isset($criterias['search'])?explode(' ', $criterias['search']):null), $_SESSION['session_langue'], $return_array_with_raw_information, (isset($criterias['ref'])?$criterias['ref']:null));
+				$this_module_output = affiche_banner(String::substr($this_module['technical_code'], strlen('advertising')), true, (isset($criterias['page'])?$criterias['page']:null), $id_categorie, $this_annonce_number, $page_type, (isset($criterias['search'])?explode(' ', $criterias['search']):null), $_SESSION['session_langue'], $return_array_with_raw_information, (isset($criterias['ref'])?$criterias['ref']:null), vn($GLOBALS['page_related_to_user_id']));
 			} elseif ($this_module['technical_code'] == 'menu') {
 				$this_block_style = ' ';
 				foreach ($modules_array as $this_module2) {
@@ -671,6 +674,29 @@ function get_country_name($id)
 	$q = query($sql);
 	if ($result = fetch_assoc($q)) {
 		return String::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
+	} else {
+		return false;
+	}
+}
+
+/**
+ * get_country_id()
+ *
+ * @param mixed $country_name
+ * @return
+ */
+function get_country_id($country_name)
+{
+	$sql = 'SELECT id
+		FROM peel_pays
+		WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"
+		LIMIT 1';
+	$query = query($sql);
+	if ($obj = fetch_object($query)) {
+		$result = $obj->id;
+	}
+	if (!empty($result)) {
+		return $result;
 	} else {
 		return false;
 	}
@@ -1226,7 +1252,7 @@ function get_current_url($with_get = true, $get_short_url = false, $take_away_ge
 		foreach($take_away_get_args_array as $key) {
 			$url = str_replace(urlencode($key).'='.urlencode(vb($_GET[$key])), '', $url);
 			$url = str_replace(array('?&', '&&'), array('?','&'), $url);
-	}
+		}
 		if (String::substr($url, - 1) == '?' || String::substr($url, - 1) == '&') {
 			$url = String::substr($url, 0, String::strlen($url) - 1);
 		}
@@ -1309,8 +1335,8 @@ function get_current_generic_url()
 		foreach ($params as $key => $value) {
 			if (!in_array($key, $excluded_get) && (!empty($value) || $value==='0')) {
 				if(is_array($value)){
-					foreach($value as $this_value){
-						$queryString[] = $key . '[]=' . urlencode($this_value);
+					foreach($value as $this_key => $this_value){
+						$queryString[] = $key . '[' . $this_key . ']=' . urlencode($this_value);
 					}
 				}else{
 					$queryString[] = $key . '=' . urlencode($value);
@@ -1435,6 +1461,7 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 			if($load_modules_files && !empty($GLOBALS['modules_lang_directory_array'])){
 				// Les variables de langue dans les modules sont plus prioritaires que celles de lib/lang/
 				// => la surcharge des valeurs par défaut est possible
+				ksort($GLOBALS['modules_lang_directory_array']);
 				foreach($GLOBALS['modules_lang_directory_array'] as $this_directory) {
 					if(file_exists($GLOBALS['dirroot'] . $this_directory . $this_lang . ".php")) {
 						include($GLOBALS['dirroot'] . $this_directory . $this_lang . ".php");
@@ -1598,13 +1625,8 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	$limit = '';
 	$affiche_filtre = '';
 	$sql_inner = '';
-	$sup = '';
 	$params_list = array();
-	if (vn($GLOBALS['site_parameters']['category_order_on_catalog']) == '1' || $type == 'save_cart') {
-		if ($nb_colonnes > 2)
-			$nb_colonnes--;
-	}
-	if ($nb_par_page % $nb_colonnes > 0) {
+	if (!empty($nb_colonnes) && ($nb_par_page % $nb_colonnes > 0)) {
 		$nb_par_page = $nb_par_page + ($nb_colonnes - ($nb_par_page % $nb_colonnes));
 	}
 	if ($type == 'associated_product') {
@@ -1614,15 +1636,11 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$params_list['small_width'] = vn($GLOBALS['site_parameters']['small_width']);
 		$params_list['small_height'] = vn($GLOBALS['site_parameters']['small_height']);
 	}
-	$params_list['cartridge_product_css_class'] = 'product_per_line_' . $nb_colonnes;
-	$params_list['nb_colonnes'] = $nb_colonnes;
+	$params_list['cartridge_product_css_class'] = 'item-column product_per_line_' . $nb_colonnes;
 	if ($type == 'category' && function_exists('is_special_menu_items') && is_special_menu_items($condition_value1)) {
-		$mode = 'line';
-		$sup = 'associated_product';
-		$params_list['small_width'] = 150;
-		$params_list['small_height'] = 125;
-		if ($condition_value1 == 1) { // On affiche le module à la carte
-			$params_list['qid_carte'] = query('SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom , c.description_' . $_SESSION['session_langue'] . ' AS description , c.image_' . $_SESSION['session_langue'] . ' AS image
+		if ($condition_value1 == 1) { 
+			// On affiche le module à la carte
+			$params_list['qid_carte'] = query('SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom, c.description_' . $_SESSION['session_langue'] . ' AS description , c.image_' . $_SESSION['session_langue'] . ' AS image
 				FROM peel_categories c
 				WHERE c.etat = "1" AND c.parent_id = "1"
 				ORDER BY c.position ASC, nom ASC');
@@ -1756,10 +1774,13 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	}
 	$sql .= '
 		ORDER BY ';
-	if ($type == 'save_cart') {
-		$sql .= ' save_cart_id DESC, ';
+	if (vb($GLOBALS['site_parameters']['category_count_method']) == 'global' && !empty($condition_value1)) {
+		$sql .= 'IF(pc.categorie_id="'.intval($condition_value1).'", 1, 0) DESC, ';
 	}
-	$sql .= ' p.`';
+	if ($type == 'save_cart') {
+		$sql .= 'save_cart_id DESC, ';
+	}
+	$sql .= 'p.`';
 	if (isset($_GET['tri'])) {
 		if (!in_array($_GET['tri'], array('nom_' . $_SESSION['session_langue'], 'prix'))) {
 			$_GET['tri'] = 'nom_' . $_SESSION['session_langue'];
@@ -2163,6 +2184,9 @@ function format_filename_base($original_name, $rename_file = true) {
  */
 function delete_uploaded_file_and_thumbs($filename)
 {
+	if (a_priv('demo')) {
+		return false;
+	}
 	// Protection : ne pas prendre autre chose qu'un nom de fichier
 	$filename = str_replace(array('/', '.htaccess'), '', $filename);
 	$extension = @pathinfo($filename , PATHINFO_EXTENSION);
@@ -2528,6 +2552,9 @@ function optimize_Tables()
  */
 function clean_Cache($days_max = 15)
 {
+	if (a_priv('demo')) {
+		return false;
+	}
 	$dir = $GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['cache_folder'] . '/';
 	$i = 0;
 	if ($handle = opendir($dir)) {
@@ -2904,6 +2931,30 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 	}
 	$files_array[] = str_replace($GLOBALS['dirroot'], $GLOBALS['wwwroot'], $file_path);
 	return $files_array;
+}
+
+/**
+ * get_load_facebook_sdk_script()
+ *
+ * @param string $facebook_api_id
+ * @return
+ */
+function get_load_facebook_sdk_script($facebook_api_id = null) {
+	static $sdk_loaded;
+	$output = '';
+	if(empty($sdk_loaded)) {
+		$sdk_loaded = true;
+		$output .= '
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/all.js#xfbml=1'.(!empty($facebook_api_id)?'&appId='.$facebook_api_id:'').'";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, \'script\', \'facebook-jssdk\'));</script>';
+	}
+	return $output;
 }
 
 ?>

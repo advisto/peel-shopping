@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: produits.php 36258 2013-04-06 11:00:04Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -82,7 +82,7 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "InsereStock" :
 		if (is_stock_advanced_module_active ()) {
-			insere_stock_produit($_POST);
+			$output .= insere_stock_produit($_POST);
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_STOCKS_UPDATED'], get_current_url(false))))->fetch();
 			$output .= affiche_formulaire_stock(intval($_GET['id']));
 		}
@@ -223,6 +223,7 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 		$frm['on_stock'] = "";
 		$frm['on_download'] = "";
 		$frm['extra_link'] = "";
+		$frm['technical_code'] = "";
 		$frm['on_download'] = "";
 		$frm['zip'] = "";
 		$frm['prix'] = 0;
@@ -464,6 +465,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_on_promo', !empty($frm['on_promo']));
 
 		$tpl->assign('extra_link', vb($frm['extra_link']));
+		$tpl->assign('technical_code', vb($frm['technical_code']));
 
 		$tpl->assign('is_best_seller_module_active', is_best_seller_module_active());
 		$tpl->assign('is_on_top', !empty($frm['on_top']));
@@ -741,6 +743,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_PROMOTIONS', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_PROMOTIONS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_PROMOTIONS_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_PROMOTIONS_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_EXTRA_LINK', $GLOBALS['STR_ADMIN_PRODUITS_EXTRA_LINK']);
+		$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_BEST_SELLERS', $GLOBALS['STR_ADMIN_PRODUITS_BEST_SELLERS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ROLLOVER', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ROLLOVER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ESTIMATE', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ESTIMATE']);
@@ -1025,7 +1028,8 @@ function insere_produit($frm)
 		, display_price_by_weight
 		, volume
 		, on_estimate
-		, extra_link";
+		, extra_link
+		, technical_code";
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sqlProd .= "
 		, nom_" . $lng . "
@@ -1104,7 +1108,8 @@ function insere_produit($frm)
 		, '" . nohtml_real_escape_string($frm['display_price_by_weight']) . "'
 		, '" . nohtml_real_escape_string($frm['volume']) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'";
+		, '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
 	foreach ($GLOBALS['lang_codes'] as $lng) {
 		$sqlProd .= "
 		, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
@@ -1271,6 +1276,7 @@ function maj_produit($id, $frm)
 		, delai_stock = '" . nohtml_real_escape_string(String::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
 		, etat_stock = '" . intval(vn($frm['etat_stock'])) . "'
 		, extra_link = '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
+		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 		, id_marque = '" . intval(vn($frm['id_marque'])) . "'
 		, on_rupture = '" . intval(vn($frm['on_rupture'])) . "'
 		, id_ecotaxe = '" . intval(vn($frm['id_ecotaxe'])) . "'

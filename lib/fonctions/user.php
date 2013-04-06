@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: user.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -439,7 +439,8 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			, lang = '" . nohtml_real_escape_string(vb($frm['lang'])) . "'
 			, project_budget_ht = '" . nohtml_real_escape_string(vb($frm['project_budget_ht'])) . "'
 			, project_chances_estimated = '" . nohtml_real_escape_string(vb($frm['project_chances_estimated'])) . "'
-			, seg_who = '" . nohtml_real_escape_string(vb($frm['seg_who'])) . "'
+			" . (isset($frm['type'])?", type = '" . nohtml_real_escape_string(vb($frm['type'])) . "'":"") . "
+            , seg_who = '" . nohtml_real_escape_string(vb($frm['seg_who'])) . "'
 			, seg_want = '" . nohtml_real_escape_string(vb($frm['seg_want'])) . "'
 			, seg_think = '" . nohtml_real_escape_string(vb($frm['seg_think'])) . "'
 			, seg_followed = '" . nohtml_real_escape_string(vb($frm['seg_followed'])) . "'
@@ -615,7 +616,7 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			}
 
 			query('INSERT INTO peel_utilisateur_connexions(user_id, user_login, user_ip, date)
-				VALUES (' . real_escape_string($_SESSION['session_utilisateur']['id_utilisateur']) . ', "' . nohtml_real_escape_string($user_pseudo) . '", "' . ip2long(ipget()) . '", "' . date('Y-m-d H:i:s', time()) . '")');
+				VALUES (' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . ', "' . nohtml_real_escape_string($user_pseudo) . '", "' . ip2long(ipget()) . '", "' . date('Y-m-d H:i:s', time()) . '")');
 
 			$_SESSION['session_login_tried'] = 0;
 		}

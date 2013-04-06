@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: Multipage.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 35805 2013-03-10 20:43:50Z gboussin $
+ * @version $Id: Multipage.php 36232 2013-04-05 13:16:01Z gboussin $
  * @access public
  */
 class Multipage {
@@ -69,7 +69,7 @@ class Multipage {
 	/**
 	 * Constructeur
 	 */
-	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null)
+	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1)
 	{
 		if (empty($template_name)) {
 			// Si aucun template n'est précisé spécifiquement lors de l'appel de la fonction, la sélection en back office est utilisée
@@ -79,9 +79,9 @@ class Multipage {
 		$this->sqlRequest = $sqlRequest;
 		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
 		if ($this->DefaultResultsPerPage != '*') {
-			$this->nb1 = max(1, round($this->DefaultResultsPerPage / 5));
-			$this->nb2 = max(2, round($this->DefaultResultsPerPage));
-			$this->nb3 = max(10, round($this->DefaultResultsPerPage * 5));
+			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / 5) - round($this->DefaultResultsPerPage / 5) % $round_elements_per_page);
+			$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
+			$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
 		}
 		$this->LinkPerPage = $LinkPerPage;
 		$this->AddToColspan = $AddToColspan;

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -31,9 +31,10 @@ $GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_
  * @param string $lang
  * @param boolean $return_array_with_raw_information
  * @param integer $ad_id
+ * @param integer $page_related_to_user_id
  * @return
  */
-function affiche_banner($position = null, $return_mode = false, $page = null, $cat_id = null, $this_annonce_number = 0, $page_type=null, $keywords_array=null, $lang = null, $return_array_with_raw_information = false, $ad_id=null)
+function affiche_banner($position = null, $return_mode = false, $page = null, $cat_id = null, $this_annonce_number = 0, $page_type=null, $keywords_array=null, $lang = null, $return_array_with_raw_information = false, $ad_id=null, $page_related_to_user_id = null)
 {
 	$output = '';
 	$cmp = 0;
@@ -56,6 +57,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 	if (is_module_banner_active()) {
 		// Si le champ catégorie est renseigné, alors on prend les bannières pour la catégorie définie OU sans catégorie définie
 		// Par la suite dans le tri, on sélectionne en priorité les bannières avec id_catégorie précisée
+		if(!empty($page_related_to_user_id)){
+			$sql_cond .= ' AND CONCAT(",",do_not_display_on_pages_related_to_user_ids_list,",") NOT LIKE ("%,' . intval($page_related_to_user_id) . ',%")';
+		}
 		if(!empty($cat_id)){
 			$sql_cond .= ' AND id_categorie IN ("0", "' . intval($cat_id) . '")';
 		}else{
@@ -80,6 +84,8 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 			$sql_cond .= ' AND ' . build_terms_clause(array_unique($keywords_array), array('keywords'), 2);
 			// On ne met pas en cache les bannières dans ce cas, sinon le nombre de fichiers de cache peut devenir déraisonnable
 			$disable_cache = true;
+		} else {
+			$sql_cond .= ' AND keywords=""';
 		}
 		// Alternance de bannière pair/impair sur le dernier chiffre de l'id de l'annonce ou de la page d'annonce pour une catégorie. Le choix du type de page est fait précédemment dans la requête.
 		if ((defined('IN_CATALOGUE_ANNONCE') || defined('IN_IPHONE_ADS_MODULE')) && !empty($page)) {

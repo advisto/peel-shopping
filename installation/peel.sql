@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.0.2, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 35805 2013-03-10 20:43:50Z gboussin $
+# $Id: peel.sql 36232 2013-04-05 13:16:01Z gboussin $
 #
 
 --
@@ -209,6 +209,7 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `keywords` mediumtext NOT NULL,
   `list_id` varchar(255) NOT NULL DEFAULT '',
   `pages_allowed` enum('all','odd','even') NOT NULL DEFAULT 'all',
+  `do_not_display_on_pages_related_to_user_ids_list` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -695,7 +696,14 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (187, 'product_categories_depth_in_menu', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
 (188, 'content_categories_depth_in_menu', 'core', 'integer', '1', '', '2013-01-01 12:00:00', 'Seules les rubriques de contenu avec position>0 s''afficheront, ce qui permet d''en exclure du menu en les mettant à position=0', 1),
 (189, 'main_menu_items_if_available', 'core', 'array', '"home", "catalog", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "admin"', '', '2013-01-01 12:00:00', 'Liste à définir dans l''ordre d''affichage parmi : "home", "catalog", "content", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "promotions", "admin"', 1),
-(190, 'template_engine', 'core', 'string', 'smarty', '', '2013-01-01 12:00:00', 'Par défaut : smarty - Existe aussi en version de test : twig', 1);
+(190, 'template_engine', 'core', 'string', 'smarty', '', '2013-01-01 12:00:00', 'Par défaut : smarty - Existe aussi en version de test : twig', 1),
+(191, 'catalog_products_columns_default', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
+(192, 'associated_products_columns_default', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
+(193, 'associated_products_display_mode', 'core', 'string', 'column', '', '2013-01-01 12:00:00', '', 1),
+(194, 'show_on_estimate_text', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
+(195, 'show_add_to_cart_on_free_products', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
+(196, 'show_short_description_on_product_details', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
+(197, 'category_show_more_on_catalog_if_no_order_allowed', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1);
 
 -- --------------------------------------------------------
 

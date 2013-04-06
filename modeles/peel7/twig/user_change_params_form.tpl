@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -14,6 +14,7 @@
 #}<h1 class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform" method="post" action="{{ action|escape('html') }}">
+<div class="inscription_form">
 	{% if (verified_account_info) %}{{ verified_account_info }}{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label>{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -53,11 +54,11 @@
 		<span class="enregistrementdroite">
 			<select id="type" name="type">
 				<option value="">{{ STR_CHOOSE }}...</option>
-				<option disabled="disabled" style="text-align:center;font-weigth:bold;" value="">{{ STR_BUYERS }}{{ STR_BEFORE_TWO_POINTS }}:</option>
+				<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{{ STR_BUYERS }}{{ STR_BEFORE_TWO_POINTS }}:</option>
 				<option value="importers_exporters"{% if type=='importers_exporters' %} selected="selected"{% endif %}>{{ STR_IMPORTERS_EXPORTERS }}</option>
 				<option value="commercial_agent"{% if type=='commercial_agent' %} selected="selected"{% endif %}>{{ STR_COMMERCIAL_AGENT }}</option>
 				<option value="purchasing_manager"{% if type=='purchasing_manager' %} selected="selected"{% endif %}>{{ STR_PURCHASING_MANAGER }}</option>
-				<option disabled="disabled" style="text-align:center;font-weigth:bold;" value="">{{ STR_WORD_SELLERS }}{{ STR_BEFORE_TWO_POINTS }}:</option>
+				<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{{ STR_WORD_SELLERS }}{{ STR_BEFORE_TWO_POINTS }}:</option>
 				<option value="wholesaler"{% if type=='wholesaler' %} selected="selected"{% endif %}>{{ STR_WHOLESALER }}</option>
 				<option value="half_wholesaler"{% if type=='half_wholesaler' %} selected="selected"{% endif %}>{{ STR_HALF_WHOLESALER }}</option>
 				<option value="retailers"{% if type=='retailers' %} selected="selected"{% endif %}>{{ STR_RETAILERS }}</option>
@@ -194,10 +195,11 @@
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="commercial" value="1"{% if commercial_issel %} checked="checked"{% endif %} />{{ STR_COMMERCIAL_YES }}</span>
-		<p class="center">
-			{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="clicbouton" />
-			<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
-		</p>
-		<p>{{ cnil_txt|textEncode }}</p>
-	</div>
+	</div>	
+</div>
+	<p class="center">
+		{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="clicbouton" />
+		<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
+	</p>
+	<p>{{ cnil_txt|textEncode }}</p>
 </form>

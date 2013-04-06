@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: rpc.php 36260 2013-04-06 11:18:04Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -37,7 +37,7 @@ if (empty($currency_rate)) {
 if (!empty($search)) {
 	$query = query("SELECT *, nom_" . $_SESSION['session_langue'] . " AS nom
 		FROM peel_produits
-		WHERE reference LIKE '" . nohtml_real_escape_string($search) . "%' OR nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($search) . "%'
+		WHERE reference LIKE '" . nohtml_real_escape_string($search) . "%' OR nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR id='" . nohtml_real_escape_string($search) . "'
 		ORDER BY IF(SUBSTRING(nom,1," . strlen($search) . ")='" . $search . "',1,0) DESC, IF(SUBSTRING(reference,1," . strlen($search) . ")='" . $search . "',1,0) DESC, nom_" . $_SESSION['session_langue'] . " ASC
 		LIMIT 7");
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_rpc.tpl');

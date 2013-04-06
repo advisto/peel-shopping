@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: contact.php 36258 2013-04-06 11:00:04Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -23,8 +23,7 @@ $page_name = 'contact';
 $frm = $_POST;
 $form_error_object = new FormError();
 
-if (!empty($_POST)) {
-
+if (!empty($_POST) && empty($_GET['prodid'])) {
 	if (!empty($frm['phone'])) {
 		// Formulaire de demande de rappel par téléphone
 		// Non implémenté par défaut
@@ -103,6 +102,30 @@ if (!empty($_POST)) {
 			die();
 		}
 	}
+} elseif (!empty($_GET['prodid'])) {
+	$product_object = new Product($_GET['prodid'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+	$attribut_list = get_attribut_list_from_post_data($product_object, $_POST);
+	if (!empty($_POST['critere'])) {
+		// Affichage des combinaisons de couleur et taille dans un unique select
+		$criteres = explode("|", $_POST['critere']);
+		$couleur_id = intval(vn($criteres[0]));
+		$taille_id = intval(vn($criteres[1]));
+	} else {
+		$couleur_id = intval(vn($_POST['couleur']));
+		$taille_id = intval(vn($_POST['taille']));
+	}
+	// On enregistre la taille pour revenir sur la bonne valeur du select
+	$_SESSION['session_taille_id'] = $taille_id;
+	// On enregistre le message à afficher si la quantité demandée est trop élevée par rapport au stock disponnible
+	$product_object->set_configuration($couleur_id, $taille_id, $attribut_list, is_reseller_module_active() && is_reseller());
+	
+	$color = $product_object->get_color();
+	$size = $product_object->get_size();
+	
+	$frm['texte'] = $GLOBALS['STR_PRODUCT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " .$product_object->name.
+		(!empty($color)?"\r\n" . $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . $color :'' ). 
+		(!empty($size)?"\r\n" . $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . $size :'' ). 
+		(!empty($product_object->configuration_attributs_list) ? "\r\n" .  str_replace('<br />', "\r\n", $product_object->configuration_attributs_description) : '');
 }
 
 define('IN_CONTACT', true);
@@ -112,7 +135,17 @@ include($GLOBALS['repertoire_modele'] . "/haut.php");
 if (!empty($noticemsg)) {
 	echo $noticemsg;
 }
-
+if(empty($frm) && est_identifie()) {
+	$frm['email'] = vb($_SESSION['session_utilisateur']['email']);
+	$frm['telephone'] = vb($_SESSION['session_utilisateur']['telephone']);
+	$frm['nom'] = vb($_SESSION['session_utilisateur']['nom_famille']);
+	$frm['prenom'] = vb($_SESSION['session_utilisateur']['prenom']);
+	$frm['societe'] = vb($_SESSION['session_utilisateur']['societe']);
+	$frm['adresse'] = vb($_SESSION['session_utilisateur']['adresse']);
+	$frm['ville'] = vb($_SESSION['session_utilisateur']['ville']);
+	$frm['code_postal'] = vb($_SESSION['session_utilisateur']['code_postal']);
+	$frm['pays'] = get_country_name($_SESSION['session_utilisateur']['pays']);
+}
 echo get_contact_form($frm, $form_error_object);
 
 include($GLOBALS['repertoire_modele'] . "/bas.php");

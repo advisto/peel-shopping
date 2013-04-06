@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 35805 2013-03-10 20:43:50Z gboussin $
+// $Id: fr.php 36232 2013-04-05 13:16:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -287,7 +287,6 @@ $GLOBALS["STR_FWRITE_FAILED"] = "Echec de l'écriture dans le fichier";
 $GLOBALS["STR_GENDER"] = "Civilité";
 $GLOBALS["STR_GET_MY_POSITION"] = "Récupérer ma position (nécessaire pour cette fonctionnalité)";
 $GLOBALS["STR_GET_PASSWORD"] = "Récupérer son mot de passe";
-$GLOBALS["STR_GIFT_CATALOGUE"] = "Catalogue cadeaux";
 $GLOBALS["STR_GIFT_POINTS"] = "Points cadeaux";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "Promotion générale";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Echec de l'ouverture du fichier compressé";
@@ -380,7 +379,7 @@ $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Vous avez souhaité déposer
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Votre commentaire sur le produit";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "Votre avis a bien été enregistré.<br /> Après validation de ce dernier, il sera publié sur";
 $GLOBALS["STR_MODULE_BANNER_MSG_ERR_DATE"] = "Vous devez remplir la date.\n";
-$GLOBALS["STR_MODULE_CART_POPUP_CART_POPUP_PRODUCT_ADDED"] = "Le produit a été ajouté";
+$GLOBALS["STR_MODULE_CART_POPUP_PRODUCT_ADDED"] = "Le produit a été ajouté";
 $GLOBALS["STR_MODULE_DEVIS_CONSEIL"] = "Pour prendre contact avec nos conseillers, remplissez le formulaire suivant";
 $GLOBALS["STR_MODULE_DEVISES_CHOISIR_DEVISE"] = "Devise :";
 $GLOBALS["STR_MODULE_DIREAUNAMI_BACK_REFERER"] = "Retour vers l'article référé.";
@@ -656,7 +655,7 @@ $GLOBALS["STR_QUANTITY"] = "Quantité";
 $GLOBALS["STR_QUOTATION"] = "Devis";
 $GLOBALS["STR_READ_ENTIRE_ARTICLE"] = "Lire l'article en entier";
 $GLOBALS["STR_REBATE_NOW"] = "maintenant si vous avez un bon de réduction";
-$GLOBALS["STR_RECOVER_PASSWORD_OK"] = "Le renouvellement de votre mot de passe s'est achevé avec succès.\r\nVous pouvez à présent vous identifiez avec ce nouveau mot de passe en cliquant sur <a href=\"{$GLOBALS['wwwroot']}/membre.php\"> ce lien </a>";
+$GLOBALS["STR_RECOVER_PASSWORD_OK"] = "Le renouvellement de votre mot de passe s'est achevé avec succès.\r\nVous pouvez à présent vous identifier avec ce nouveau mot de passe en cliquant sur <a href=\"{$GLOBALS['wwwroot']}/membre.php\"> ce lien </a>";
 $GLOBALS["STR_RECURRENT"] = "Récurrente";
 $GLOBALS["STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE"] = "Tous les produits de cette catégorie bénéficient d'une remise de";
 $GLOBALS["STR_REFERENCE_ON_LINE_SHOP"] = "Références boutiques en ligne";
@@ -684,7 +683,7 @@ $GLOBALS["STR_SEARCH_ANY_WORDS"] = "N'importe quel mot";
 $GLOBALS["STR_SEARCH_BRAND"] = "Recherche par marque";
 $GLOBALS["STR_SEARCH_CATEGORY"] = "Recherche par catégorie";
 $GLOBALS["STR_SEARCH_EXACT_SENTENCE"] = "La phrase exacte";
-$GLOBALS["STR_SEARCH_HELP"] = "<h2>Aide sur la recherche</h2> <ul> <li>Les résultats contiennent tous les mots recherchés sans tenir compte des majuscules et minucules. Par exemple la recherche pour Chien Chat retourne tous les résultats contenant ces 2 mots.</li> <li>Les GUILLEMETS (\") permettent des recherches sur des phrases. Dans ce cas, la recherche pour \"chien chat\" retourne tous les messages contenant cette phrase exacte, avec l'espace.</li> <li>Le MOINS (-) élimine les mots. Dans ce cas, la recherche pour chien et -chat retourne tous les messages contenant chien mais pas chat. Vous pouvez mettre un MOINS (-) devant une phrase entre GUILLEMETS (\"), comme chien -\"chat siamois\".</li> </ul>";
+$GLOBALS["STR_SEARCH_HELP"] = "<h2>Aide sur la recherche</h2> <ul><li>Les guillemets permettent des recherches sur des phrases exactes, par exemple \"chat noir\".</li> <li>Les moins éliminent les mots, par exemple pour avoir chien sans chat siamois : chien -\"chat siamois\".</li> </ul>";
 $GLOBALS["STR_SEARCH_NO_RESULT_ARTICLE"] = "Aucun article pour cette recherche.";
 $GLOBALS["STR_SEARCH_NO_RESULT_BRAND"] = "Aucune marque pour cette recherche.";
 $GLOBALS["STR_SEARCH_NO_RESULT_PRODUCT"] = "Aucun produit pour cette recherche.";
