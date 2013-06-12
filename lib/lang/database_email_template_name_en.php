@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_en.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database_email_template_name_en.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -50,7 +50,7 @@ $peel_email_template["name"] = array(
   "signature" => "Automatic emails signature",
   "admin_login" => "Administrator login information",
   "cree_cheque_cadeau_client_type1" => "[FRIEND] offers you a voucher",
-  "warn_admin_user_subscription" => "Warning the user registration",
+  "warn_admin_user_subscription" => "User registration warning",
   "email_retour_virement" => "Validation of your return number [RETURN_ID]",
   "email_retour_avoir" => "Validation of your return number [RETURN_ID]",
   "email_reste_avoir_remboursement" => "Repayment of your credit number [RETURN_ID]",

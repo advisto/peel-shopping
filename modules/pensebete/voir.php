@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: voir.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: voir.php 36927 2013-05-23 16:15:39Z gboussin $
 
 include("../../configuration.inc.php");
 
@@ -25,7 +25,7 @@ define('IN_PENSE_BETE', true);
 if(! empty($_GET['mode'])){
 	if($_GET['mode']== 'delete'){
 		if(!empty($_GET['id'])){
-			$sql_delete= 'DELETE FROM peel_pensebete WHERE id='.intval($_GET['id']);
+			$sql_delete= 'DELETE FROM peel_pensebete WHERE id='.intval($_GET['id']). (!a_priv('admin*', false)?' AND id_utilisateur="' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . '"':'');
 			query($sql_delete);
 		}
 	}
@@ -34,9 +34,9 @@ if(! empty($_GET['mode'])){
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 if(is_annonce_module_active()) {
 	display_ads_in_reminder();
-} else {
-	display_product_in_reminder();
+	echo '<br />';
 }
+display_product_in_reminder();
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
 ?>

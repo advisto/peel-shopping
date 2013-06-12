@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: caddie_content_html.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<div class="totalcaddie">
 	{% if is_empty %}
 	<p>{{ STR_EMPTY_CADDIE }}</p>
@@ -41,7 +41,7 @@
 					</td>
 				</tr>
 				{% if (code_promo_delete) %}
-				<tr><td class="right" colspan="3" style="padding-right:10px"><a href="{{ code_promo_delete.href|escape('html') }}"><img src="{{ code_promo_delete.src|escape('html') }}" /></a></td><td colspan="2"><a href="{{ code_promo_delete.href|escape('html') }}">{{ code_promo_delete.txt }} {{ code_promo.value }}</a></td></tr>
+				<tr><td class="right" colspan="3" style="padding-right:10px"><a href="{{ code_promo_delete.href|escape('html') }}"><img src="{{ code_promo_delete.src|escape('html') }}" /></a> <a href="{{ code_promo_delete.href|escape('html') }}">{{ code_promo_delete.txt }} {{ code_promo.value }}</a></td></tr>
 				{% endif %}
 				{% else %}
 				<tr>

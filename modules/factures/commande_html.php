@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an		|
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: commande_html.php 36927 2013-05-23 16:15:39Z gboussin $
 include("../../configuration.inc.php");
 
 if (!is_module_factures_html_active() || is_user_bot()) {
@@ -40,7 +40,7 @@ $qid_commande = query($sql);
 if ($commande = fetch_object($qid_commande)) {
 	$_SESSION['session_last_bill_viewed'] = $commande->id;
 	$output = '';
-	$additional_header = '<link rel="stylesheet" href="' . $GLOBALS['repertoire_css'] . '/html_bill.css" />';
+	$GLOBALS['site_parameters']['css'] = 'html_bill.css';
 	$order_infos = get_order_infos_array($commande);
 	$client = get_user_information($commande->id_utilisateur);
 	$id = intval($commande->id);
@@ -75,24 +75,24 @@ if ($commande = fetch_object($qid_commande)) {
 		</tr>
 		<tr>
 			<td>
-				<table cellpadding="5" width="50%">
+				<table cellpadding="5" style="width:50%">
 					<tr>
 						<td>' . print_societe(true) . '</td>
 					</tr>
 				</table>
 				<table class="full_width">
 					<tr>
-						<td class="top" width="50%" style="padding-right:10px">
+						<td class="top" style="width:50%; padding-right:10px">
 							<table class="full_width" cellpadding="5">
 								<tr>
 									<td class="bill_cell_title">' . $bill_address_title . '</td>
 								</tr>
 								<tr>
-									<td class="bill_cell">' . nl2br($order_infos['client_infos_bill'] . $client['intracom_for_billing']) . '</td>
+									<td class="bill_cell">' . nl2br($order_infos['client_infos_bill']) . '</td>
 								</tr>
 							</table>
 						</td>
-						<td class="top" width="50%">
+						<td class="top" style="width:50%">
 							' . (!empty($order_infos['client_infos_ship'])?'
 							<table class="full_width" cellpadding="5">
 								<tr>
@@ -133,15 +133,15 @@ if ($commande = fetch_object($qid_commande)) {
 
 		$output .= '
 					<tr>
-						<td width="90" class="bill_cell center">' . $reference . '</td>
+						<td style="width:90px" class="bill_cell center">' . $reference . '</td>
 						<td class="left bill_cell">' . str_replace("\n", '<br />', $this_ordered_product["product_text"]) . '</td>
-						<td width="90" class="bill_cell right">' . $prix_cat . '</td>
-						<td width="70" class="bill_cell right">' . $prix . '</td>
-						<td width="70" class="bill_cell center">' . $quantite . '</td>
-						<td width="70" class="bill_cell right">' . $total_prix . '</td>';
+						<td style="width:90px" class="bill_cell right">' . $prix_cat . '</td>
+						<td style="width:70px" class="bill_cell right">' . $prix . '</td>
+						<td style="width:70px" class="bill_cell center">' . $quantite . '</td>
+						<td style="width:70px" class="bill_cell right">' . $total_prix . '</td>';
 		if (!is_micro_entreprise_module_active()) {
 			$output .= '
-						<td width="70" class="bill_cell right">' . $tva . ' %</td>';
+						<td style="width:70px" class="bill_cell right">' . $tva . ' %</td>';
 		}
 		$output .= '
 					</tr>
@@ -151,18 +151,18 @@ if ($commande = fetch_object($qid_commande)) {
 				</table>
 				<table class="full_width" cellpadding="5">
 					<tr>
-						<td class="right" width="80%" >' . $GLOBALS['STR_SHIPPING_COST'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right" style="width:80%" >' . $GLOBALS['STR_SHIPPING_COST'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="right">' . $order_infos['net_infos_array']['displayed_cout_transport'] . '</td>
 					</tr>
 					<tr>
-						<td class="right" width="80%">' . $GLOBALS['STR_TOTAL_HT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
-						<td class="right" ><b>' . $order_infos['net_infos_array']['montant_ht'] . '</b></td>
+						<td class="right" style="width:80%">' . $GLOBALS['STR_TOTAL_HT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right"><b>' . $order_infos['net_infos_array']['montant_ht'] . '</b></td>
 					</tr>';
 
 	if (!is_micro_entreprise_module_active()) {
 		$output .= '
 					<tr>
-						<td class="right" width="80%">' . $GLOBALS['STR_VAT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right" style="width:80%">' . $GLOBALS['STR_VAT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="right" ><b>' . $order_infos['net_infos_array']['total_tva'] . '</b></td>
 					</tr>';
 	} else {
@@ -175,14 +175,14 @@ if ($commande = fetch_object($qid_commande)) {
 	if ($commande->tarif_paiement > 0) {
 		$output .= '
 					<tr>
-						<td class="right" width="80%">' . $GLOBALS['STR_MODULE_FACTURES_PAY_COST'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right" style="width:80%">' . $GLOBALS['STR_MODULE_FACTURES_PAY_COST'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="right">+ ' . $order_infos['net_infos_array']['tarif_paiement'] . ' ' . $GLOBALS['site_parameters']['symbole'] . '</td>
 					</tr>
 	';
 	}
 	$output .= '
 					<tr>
-						<td class="right" width="80%"><b>' . $GLOBALS['STR_NET'] . '</b>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right" style="width:80%"><b>' . $GLOBALS['STR_NET'] . '</b>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="bill_cell_to_pay right"><b>' . $order_infos['net_infos_array']['montant'] . '</b></td>
 					</tr>
 	';
@@ -241,26 +241,26 @@ if ($commande = fetch_object($qid_commande)) {
 		$output .= '
 		<tr>
 			<td class="center">
-				<table cellpadding="10" width="350">
-				<tr>
-					<td class="bill_cell_title">' . $GLOBALS['STR_ACCORD'] . '</td>
-				</tr>
-				<tr>
-					<td class="bill_cell left">
-					<div class="left">
-						<p><i>' . $GLOBALS['STR_DATE'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</i></p>
-					</div>
-					<div class="left">
-						<p><i>' . $GLOBALS['STR_ACCORD_OK'] . '</i></p>
-					</div>
-					<div class="left">
-						<p><i>' . $GLOBALS['STR_SIGNATURE'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</i></p>
-					</div>
-					<div class="center" style="height:50px">
-						<p>&nbsp;</p>
-					</div>
-					</td>
-				</tr>
+				<table cellpadding="10" style="width:350px">
+					<tr>
+						<td class="bill_cell_title">' . $GLOBALS['STR_ACCORD'] . '</td>
+					</tr>
+					<tr>
+						<td class="bill_cell left">
+							<div class="left">
+								<p><i>' . $GLOBALS['STR_DATE'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</i></p>
+							</div>
+							<div class="left">
+								<p><i>' . $GLOBALS['STR_ACCORD_OK'] . '</i></p>
+							</div>
+							<div class="left">
+								<p><i>' . $GLOBALS['STR_SIGNATURE'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</i></p>
+							</div>
+							<div class="center" style="height:50px">
+								<p>&nbsp;</p>
+							</div>
+						</td>
+					</tr>
 				</table>
 			</td>
 		</tr>
@@ -271,7 +271,7 @@ if ($commande = fetch_object($qid_commande)) {
 </div>
 ';
 	$title = $libelle . " " . $GLOBALS['STR_NUMBER'] . " " . $numero . " - " . get_formatted_date($date_document) ;
-	output_light_html_page($output, $title, $additional_header);
+	output_light_html_page($output, $title);
 } else {
 	echo '<h1>' . $GLOBALS['STR_NO_ORDER'] . '</h1>';
 }

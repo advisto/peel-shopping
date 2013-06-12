@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateur_liste.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: utilisateur_liste.php 37156 2013-06-05 12:42:24Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -67,7 +67,7 @@ $tpl->assign('commercial_options', $tpl_comm_opts);
 $tpl->assign('country_select_options', get_country_select_options(null, vb($_GET['pays']), 'id', true, null, false));
 
 $tpl_langs = array();
-foreach ($GLOBALS['lang_codes'] as $lng) {
+foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 	$tpl_langs[] = array('value' => $lng,
 		'issel' => (vb($_GET['user_lang']) == $lng),
 		'name' => $lng
@@ -382,6 +382,17 @@ $tpl->assign('STR_ORIGIN', $GLOBALS['STR_ORIGIN']);
 $tpl->assign('STR_ADMIN_UTILISATEURS_SUBSCRIBER', $GLOBALS['STR_ADMIN_UTILISATEURS_SUBSCRIBER']);
 $tpl->assign('STR_ADMIN_UTILISATEURS_PRODUCT_BOUGHT_AND_QUANTITY', $GLOBALS['STR_ADMIN_UTILISATEURS_PRODUCT_BOUGHT_AND_QUANTITY']);
 if (is_annonce_module_active()) {
+	if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && $GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories'] == 'checkbox') {
+		$tpl->assign('favorite_category', get_announcement_select_options(null, vb($_GET['id_categories']), 'id', false, false, 'checkbox', 'id_categories'));	
+	} else {
+		$tpl->assign('favorite_category_1', get_announcement_select_options(null, vb($_GET['id_cat_1']), 'id'));
+		$tpl->assign('favorite_category_2', get_announcement_select_options(null, vb($_GET['id_cat_2']), 'id'));
+		$tpl->assign('favorite_category_3', get_announcement_select_options(null, vb($_GET['id_cat_3']), 'id'));
+	}
+	$tpl->assign('STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES', $GLOBALS['STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES']);
+	$tpl->assign('STR_FIRST_CHOICE', $GLOBALS['STR_FIRST_CHOICE']);
+	$tpl->assign('STR_SECOND_CHOICE', $GLOBALS['STR_SECOND_CHOICE']);
+	$tpl->assign('STR_THIRD_CHOICE', $GLOBALS['STR_THIRD_CHOICE']);
 	$tpl->assign('STR_MODULE_ANNONCES_ADMIN_USER_WITH_GOLD', $GLOBALS['STR_MODULE_ANNONCES_ADMIN_USER_WITH_GOLD']);
 	$tpl->assign('STR_MODULE_ANNONCES_ADMIN_USER_ADS_COUNT', $GLOBALS['STR_MODULE_ANNONCES_ADMIN_USER_ADS_COUNT']);
 	$tpl->assign('STR_MODULE_ANNONCES_ADMIN_ADS_AVAILABLE', $GLOBALS['STR_MODULE_ANNONCES_ADMIN_ADS_AVAILABLE']);

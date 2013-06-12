@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_fr.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database_email_template_text_fr.php 37077 2013-05-31 15:39:56Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -201,7 +201,7 @@ Nom du produit : [NOM_PRODUIT]
 
 Avis déposé : [AVIS]
 
-Afin de valider cet avis, vous devez vous connecter à l'interface d'administration et modifier son statut dans la rubrique Webmastering > Marketing > Avis des internautes.",
+Afin de valider cet avis, vous devez vous connecter à l'interface d'administration et modifier son statut dans la rubrique Webmastering > Marketing > Gérer les avis des internautes.",
   "bons_anniversaires" => "Bonjour [CIVILITE] [PRENOM] [NOM_FAMILLE],
 
 Pour votre anniversaire, nous vous offrons ce code promotionnel : [NOM_CODE_PROMO].
@@ -349,9 +349,73 @@ RETOUR NUMERO [RETURN_ID].
 
 Nous vous rappelons que les articles retournés doivent être en bon état et dans leur emballage d'origine.
 Dès réception de vos articles, nous validerons le remboursement de ces derniers.",
-  "cron_order_payment_failure_alerts" => "",
-  "cron_order_not_paid_alerts" => "",
-  "cron_update_contact_info" => ""
+  "cron_order_payment_failure_alerts" => "Bonjour [PRENOM] [NOM],
+
+NB : Si vous avez bien procédé au paiement et avez eu une confirmation de paiement, ne tenez pas compte de cet email car votre paiement sera validé manuellement très bientôt.
+
+Nous vous écrivons à propos de la commande que vous avez essayé de payer récemment sur [WWWROOT]
+
+Nature de votre commande : [PRODUCT_NAME]
+Montant total de votre commande : [TOTAL_AMOUNT]
+Moyen de paiement que vous avez choisi : [PAYMENT_MEAN]
+
+Notre système de traitement automatisé des commandes n''a pas reçu confirmation de votre paiement.
+Quel problème avez-vous rencontré ?
+
+Nous sommes à votre écoute pour valider cette commande éventuellement via un autre mode de paiement.
+
+Nous nous tenons à votre disposition pour toutes informations supplémentaires.
+Dans l''attente de votre réponse, nous vous souhaitons une bonne journée.
+
+A bientôt sur [WWWROOT]
+L''équipe [SITE_NAME]
+
+NB : Ce message vous est envoyé automatiquement. Si vous êtes déjà rentré en contact avec nous à propos de ce paiement, veuillez ne pas tenir compte de cet email.",
+  "cron_order_not_paid_alerts" => "Bonjour [PRENOM] [NOM],
+
+Nous vous écrivons à propos de la commande que vous avez passée il y a [DAYS_SINCE] jours sur [SITE_NAME].
+
+Nature de votre commande : [PRODUCT_NAME]
+Montant total de votre commande : [TOTAL_AMOUNT]
+Moyen de paiement que vous avez choisi : [PAYMENT_MEAN]
+
+Or nous n''avons pas encore reçu votre paiement. Avez-vous besoin d''informations complémentaires afin de nous faire parvenir votre paiement ?
+
+Nous nous tenons à votre disposition pour toute information supplémentaire.
+
+Dans l''attente de votre réponse, nous vous souhaitons une bonne journée.
+
+NB : Ce message vous est envoyé automatiquement. Si vous êtes déjà rentré en contact avec nous à propos de ce paiement, veuillez ne pas tenir compte de cet email.",
+  "cron_update_contact_info" => "Bonjour [CIVILITE] [NOM],
+
+Afin de garder à jour les données associées à votre compte utilisateur, nous vous faisons parvenir le détail de vos informations pour vérification.
+
+Détails de vos informations :
+
+Email : [EMAIL]
+Civilité : [CIVILITE]
+Pseudo : [PSEUDO]
+Prénom : [PRENOM]
+Nom : [NOM]
+Société : [SOCIETE]
+N° TVA Intracom : [TVA_INTRA]
+Téléphone : [TELEPHONE]
+Portable : [PORTABLE]
+Fax : [FAX]
+Date de naissance : [NAISSANCE]
+Adresse : [ADRESSE]
+Code postal : [CODE_POSTAL]
+Ville : [VILLE]
+Pays : [PAYS]
+Site web : [SITE_WEB]
+
+Si des informations ci-dessus s''avèrent inexactes, nous vous prions de les mettre à jour en vous connectant à votre compte utilisateur sur [WWWROOT]/utilisateurs/change_params.php
+
+Si vous avez oubliez votre mot de passe, merci d''utiliser l''outil de récupération accessible à partir du lien suivant : [WWWROOT]/utilisateurs/oubli_mot_passe.php
+
+Nous vous rappelons que l''exactitude de ces informations est primordiale pour le bon fonctionnement du site et pour la bonne réussite commerciale de chacun. Toute information inexacte ou erronée peut entraîner l''annulation de votre compte utilisateur.
+
+Pour toute information complémentaire, n''hésitez pas à nous contacter."
 );
 
 ?>

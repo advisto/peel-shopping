@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: nl.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,7 +168,7 @@ $GLOBALS["STR_DEVISE"] = "Valuta";
 $GLOBALS["STR_DISPO"] = "Beschikbaarheid";
 $GLOBALS["STR_DO_NOT_MISS"] = "Mis het niet";
 $GLOBALS["STR_DOMICILIATION"] = "Domiciliëring";
-$GLOBALS["STR_DONNEZ_AVIS"] = "Geef uw mening over dit product";
+$GLOBALS["STR_DONNEZ_AVIS"] = "Geef uw mening";
 $GLOBALS["STR_DONT_FORGET_COMMENT"] = "Vergeet niet uw mening toe te voegen";
 $GLOBALS["STR_DONT_FORGET_NOTE"] = "U heeft vergeten een notitie aan uw commentaar toe te voegen";
 $GLOBALS["STR_DOWNLOAD_AGAIN"] = "Probeer het later opnieuw (server niet beschikbaar)";
@@ -511,8 +511,8 @@ $GLOBALS["STR_NEWSLETTER"] = "De e-nieuwsbrief";
 $GLOBALS["STR_NEXT_PAGE"] = "Volgende pagina";
 $GLOBALS["STR_NEXT"] = "Volgende";
 $GLOBALS["STR_NO_AVAILABLE"] = "Niet beschikbaar";
-$GLOBALS["STR_NO_FIND_ART"] = "<h2>Produkt niet gevonden.</h2><blockquote class=\"normal\">Sorry, het artikel dat u zoekt werd niet gevonden.";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>Produkt niet gevonden</h2><blockquote class=\"normal\">sorry";
+$GLOBALS["STR_NO_FIND_ART"] = "<h1>Produkt niet gevonden.</h1><blockquote class=\"normal\">Sorry, het artikel dat u zoekt werd niet gevonden.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Produkt niet gevonden</h1><blockquote class=\"normal\">Sorry</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "Geen beschikbare produkten in deze categorie";
 $GLOBALS["STR_NO_ORDER"] = "Geen bestelling opgenomen";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "U beschikt niet over de noodzakelijke toestemmingen om de administratie van de website te openen.";

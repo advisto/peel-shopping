@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 36258 2013-04-06 11:00:04Z gboussin $
+// $Id: produits.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -121,7 +121,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			foreach (array('image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10') as $this_image) {
-				$frm[$this_image] = upload($this_image, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+				$frm[$this_image] = upload($this_image, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_image]));
 			}
 			$output .= insere_produit($frm);
 			$output .= affiche_liste_produits(array());
@@ -148,7 +148,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			foreach (array('image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10') as $this_image) {
-				$frm[$this_image] = upload($this_image, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+				$frm[$this_image] = upload($this_image, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_image]));
 			}
 			$output .= maj_produit($frm['id'], $frm);
 			$output .= affiche_liste_produits($frm);
@@ -198,7 +198,7 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 			$frm['descriptif_' . $lng] = "";
 			$frm['description_' . $lng] = "";
@@ -480,7 +480,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 
 		$tpl->assign('is_id', !empty($frm['id']));
 		$tpl_lang_names = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$tpl_lang_names[] = array('lng' => $lng,
 				'nom' => vb($frm['nom_' . $lng]),
 				'nom_error' => $form_error_object->text('nom_' . $lng),
@@ -559,7 +559,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				} else {
 					$type = 'img';
 				}
-				if(strpos($frm['image' . $i], '/cache') === 0) {
+				if(strpos($frm['image' . $i], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
 					$this_url = $GLOBALS['wwwroot'] . $frm['image' . $i];
 				} else {
 					$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image' . $i];
@@ -735,6 +735,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_VIEWS_COUNT', $GLOBALS['STR_ADMIN_PRODUITS_VIEWS_COUNT']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
+		$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_POSITION_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_POSITION_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_GIFT_CHECK', $GLOBALS['STR_ADMIN_PRODUITS_IS_GIFT_CHECK']);
@@ -1030,7 +1031,7 @@ function insere_produit($frm)
 		, on_estimate
 		, extra_link
 		, technical_code";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sqlProd .= "
 		, nom_" . $lng . "
 		, descriptif_" . $lng . "
@@ -1110,7 +1111,7 @@ function insere_produit($frm)
 		, '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sqlProd .= "
 		, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
 		, '" . real_escape_string($frm['descriptif_' . $lng]) . "'
@@ -1216,7 +1217,6 @@ function maj_produit($id, $frm)
 	} else {
 		$upload_images_per_color = 2;
 	}
-	$frm['on_gift_points'] = (isset($frm['on_gift_points'])) ? $frm['on_gift_points'] : 0;
 	if (display_prices_with_taxes_in_admin ()) {
 		$prix = get_float_from_user_input($frm['prix']);
 	} else {
@@ -1288,7 +1288,7 @@ function maj_produit($id, $frm)
 		, volume = '" . nohtml_real_escape_string($frm['volume']) . "'
 		, on_estimate = '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'
 		, default_color_id = '" . intval(vn($frm['default_color_id'])) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
 		, descriptif_" . $lng . " = '" . real_escape_string($frm['descriptif_' . $lng]) . "'
@@ -1313,11 +1313,14 @@ function maj_produit($id, $frm)
 		$sql .= "
 		, on_rollover = '" . nohtml_real_escape_string(vn($frm['on_rollover'])) . "'";
 	}
-	if (is_module_gift_checks_active()) {
+	if (is_gifts_module_active()) {
 		$sql .= "
 		, points = '" . nohtml_real_escape_string($frm['points']) . "'
 		, on_gift = '" . nohtml_real_escape_string(vn($frm['on_gift'])) . "'
-		, on_gift_points = '" . nohtml_real_escape_string($frm['on_gift_points']) . "'
+		, on_gift_points = '" . nohtml_real_escape_string(vn($frm['on_gift_points'])) . "'";
+	}
+	if (is_module_gift_checks_active()) {
+		$sql .= "
 		, on_check = '" . nohtml_real_escape_string(vn($frm['on_check'])) . "'";
 	}
 	if (is_download_module_active()) {
@@ -1373,7 +1376,7 @@ function maj_produit($id, $frm)
 		}
 		for ($h = 1; $h <= $upload_images_per_color; $h++) {
 			$this_field_name = 'imagecouleur' . $this_color_id . '_' . $h;
-			$_POST[$this_field_name] = upload($this_field_name, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST[$this_field_name] = upload($this_field_name, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST[$this_field_name]));
 			query("UPDATE peel_produits_couleurs
 				SET image" . $h . " = '" . nohtml_real_escape_string($_POST[$this_field_name]) . "'
 				WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($this_color_id) . "'");

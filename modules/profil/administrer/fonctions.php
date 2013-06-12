@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37040 2013-05-30 13:17:16Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -27,7 +27,7 @@ function affiche_formulaire_ajout_profil(&$frm)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();	
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['name_' . $lng] = "";
 			$frm['description_document_' . $lng] = "";
 			$frm['document_' . $lng] = "";
@@ -77,7 +77,7 @@ function affiche_formulaire_profil(&$frm)
 	$tpl->assign('id', intval($frm['id']));
 	
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$this_image_html = '';
 		if(!empty($frm['document_' . $lng])) {
 			$imgExtension = array(".png", ".jpg", ".jpeg", ".gif");
@@ -130,7 +130,7 @@ function insere_profil(&$frm)
 {
 	$sql = "INSERT INTO peel_profil (
 		priv";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, name_" . $lng."
 		, document_" . $lng."
@@ -141,7 +141,7 @@ function insere_profil(&$frm)
 	) VALUES (
 		'" . nohtml_real_escape_string($frm['priv']) . "'
 		";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, '" . nohtml_real_escape_string(vb($frm['name_' . $lng])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['document_' . $lng])) . "'
@@ -165,7 +165,7 @@ function maj_profil($id, &$frm)
 	$sql = "UPDATE peel_profil SET
 		priv = '" . nohtml_real_escape_string($frm['priv']) . "'
 		";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, name_" . $lng." = '" . nohtml_real_escape_string($frm['name_' . $lng]) . "'
 		, document_" . $lng." = '" . nohtml_real_escape_string(vb($frm['document_' . $lng])) . "'

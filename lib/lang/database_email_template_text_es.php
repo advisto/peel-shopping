@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database_email_template_text_es.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -349,7 +349,67 @@ En la actualidad, los envíos de artículos a la siguiente dirección:
 Número Detrás [RETURN_ID].
 
 Le recordamo que los artículos devueltos deben estar en buenas condiciones y en su embalaje original.
-Tras la recepción de sus artículos, validaremos el reembolso de éstos. "
-);
+Tras la recepción de sus artículos, validaremos el reembolso de éstos. ",
+  "cron_order_payment_failure_alerts" => "Hola [PRENOM] [NOM],
+
+Nota: Si ha hecho su pago y ha recibido una confirmación de pago, por favor ignore este email porque su pago pronto será validado manualmente.
+
+Le escribimos en lo que concierne el pedido que ha tratado de pagar recientemente sobre [WWWROOT]
+
+El contenido de su pedido: [PRODUCT_NAME]
+La cantidad total de su pedido: [TOTAL_AMOUNT]
+El método de pago que ha elegido: [PAYMENT_MEAN]
+
+Nuestro sistema automatizado para el procesamiento de pedidos no ha recibido confirmación de su pago.
+¿Qué problema ha encontrado?
+
+Estamos a su disposición para validar su pedido quizás a través de otro método de pago.
+
+Nota: Este email se envía de forma automática. Si ya ha puesto en contacto con nosotros con respecto a este pago, por favor ignore este email.
+
+Estamos a su disposición para cualquier información adicional. En espera de su respuesta, le deseamos un buen día.",
+  "cron_order_not_paid_alerts" => "Hola [PRENOM] [NOM],
+
+Le escribimos en lo que concierne el pedido que ha pasado desde hace [DAYS_SINCE] sobre [SITE_NAME].
+
+El contenido de su pedido: [PRODUCT_NAME]
+La cantidad total de su pedido: [TOTAL_AMOUNT]
+El método de pago que ha elegido: [PAYMENT_MEAN]
+
+Pero aún no hemos recibido su pago. ¿Necesita más información para enviar su pago?
+
+Nota: Este mensaje se envía de forma automática. Si se encuentra en contacto con nosotros con respecto a este pago, por favor ignore este email. Estamos a su disposición para más información
+
+En espera de su respuesta, le deseamos un buen día.",
+  "cron_update_contact_info" => "Hola [CIVILITE] [NOM],
+
+Para mantener al día los datos asociados a su cuenta de usuario, le enviamos la información detallada para su verificación.
+
+Los detalles de su información:
+
+E-mail: [EMAIL]
+Título: [CIVILITE]
+Apodo: [PSEUDO]
+Nombre: [PRENOM]
+Apellido: [NOM]
+Empresa: [SOCIETE]
+Intracom CIF: [TVA_INTRA]
+Teléfono: [TELEPHONE]
+Móvil: [PORTABLE]
+Fax: [FAX]
+Fecha de Nacimiento: [NAISSANCE]
+Dirección: [ADRESSE]
+Código postal: [CODE_POSTAL]
+Ciudad: [VILLE]
+País: [PAYS]
+Sitio web: [SITE_WEB]
+
+Si esta información es inexacta, por favor, actualice su sesión en su cuenta de usuario en [Wwwroot] / users / change_params.php
+
+Si usted olvida su contraseña, gracias por utilizar la herramienta de recuperación disponible en el siguiente enlace: [WWWROOT]/utilisateurs/change_params.php
+
+Por favor, recuerde que la exactitud de esta información es esencial para el buen funcionamiento del sitio y para el éxito de cada negocio. Cualquier información incorrecta o inexacta puede resultar en la cancelación de su cuenta.
+
+Para más información, póngase en contacto con nosotros.");
 
 ?>

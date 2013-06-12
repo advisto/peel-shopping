@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_en.php 37007 2013-05-28 22:07:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -78,6 +78,7 @@ $GLOBALS["STR_ADMIN_CATEGORIES_ERR_NOT_FOUND"] = "No category found with the id 
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON"] = "Add this category";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_MODIFY"] = "Change Category";
 $GLOBALS["STR_ADMIN_CATEGORIES_LIST_TITLE"] = "Category List";
+$GLOBALS["STR_ADMIN_CATEGORIES_LOT_PRICE"] = "Discount per lot (different discounts depending on quantities ordered)";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_CREATED_OK"] = "The category %s has been added successfully.";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_DELETED"] = "The category %s has been deleted. All products and subcategories were reassigned to the parent category %s.";
 $GLOBALS["STR_ADMIN_CATEGORIES_PARENT"] = "Parent Category";
@@ -455,7 +456,7 @@ $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN1"] = "To add a language, it is necessary to 
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN2"] = "If several languages ​​coexist on the same URL and no user session is active, this is the language that is used first position (arrival of a user or search engine).";
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN3"] = "To URL Rewriting on. Htaccess contains default decoding directories 2 letters. For any other configuration, you must edit the. Htaccess.";
 $GLOBALS["STR_ADMIN_LANGUES_EXTENSION"] = "Extension";
-$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "Directory of the image of the flag (default /lib/flag/)";
+$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "Image file path for the flag (default path: /lib/flag/)";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT_EXPLAIN"] = "The language must be composed of two letters (ISO 639-1).";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT"] = "Extension (2 characters) - Once completed, it will not be possible to edit this field later";
 $GLOBALS["STR_ADMIN_LANGUES_MSG_CONTENT_NOT_IMPORTED"] = "The default contents were imported to the following tables";
@@ -670,6 +671,7 @@ $GLOBALS["STR_ADMIN_MUTIPLE_SENDING"] = "Sending multiple";
 $GLOBALS["STR_ADMIN_NAME"] = "Name";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE"] = "Choose a template";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Add a newsletter";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] =  "¿Está seguro que quiere mandar este boletín";;
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "Note: The cron module is enabled, the number of users that can be sent the newsletter is not limited here, but can nevertheless be used by your host.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Note: this module shipments are limited to 250 recipients and treated at once, which can be problematic because of time limitations running on some servers. Shipments to mass, use the cron module or module specific interconnection Wanewsletter.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Add or edit a newsletter";
@@ -1046,12 +1048,12 @@ $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "The module micro-enterprise
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro Business";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "If you do not ask for a minimum order value, leave the field above 0.";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED"] = "Minimum Order";
-$GLOBALS["STR_ADMIN_SITES_MODULE"] = "Module";
+$GLOBALS["STR_ADMIN_SITES_MODULE"] = "MODULE";
 $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "You can combine modules to the desired location (bottom, top, left or right) by setting the display order of the position.<br />For left and right positions : sideblock mode formats the module in a block, and sideblocktitle same with a title.<br />On a given space, only one banner is displayed at the same time, a random rotation is performed if several banners are configured on this space.<br />special module \"Advertising random\" appears in random rotation of banners from all advertising whatsoever.<br />module catalog shows the Category tree products: you need to have categories to be displayed.<br />";
 $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Management module slots in the site columns";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_EMAIL"] = "Email merchant account on moneybookers.com (active Moneybookers module if specified)";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_MODULE"] = "Moneybookers payment";
-$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "You must set this password randomly. It will help secure exchanges between your site and Moneybookers.";
+$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "This secret word is defined in Moneybookers account. It secures exchanges between your site and Moneybookers.";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD"] = "secret word used for trade with Moneybookers";
 $GLOBALS["STR_ADMIN_SITES_MSG_DELETED_OK"] = "The site <b>%s</b> has been deleted.";
 $GLOBALS["STR_ADMIN_SITES_MSG_UPDATED_OK"] = "Site settings have been updated.";

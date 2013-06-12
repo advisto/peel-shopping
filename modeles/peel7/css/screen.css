@@ -11,7 +11,7 @@ body {
 	background-image: url(../images/repeat_body_header.jpg);
 	background-repeat: repeat-x;
 }
-body.mceContentBody {
+body.mceContentBody, body.light {
    background: #FFFFFF;
 }
 
@@ -255,7 +255,9 @@ table.reseller_register_form {
 table.reseller_register_form td {
 	padding: 3px;
 }
-
+table.contact_form_table td {
+	padding: 3px;
+}
 /* body / total */
 
 #total {
@@ -840,7 +842,7 @@ td.produit_col {
 .allow_order .affiche_critere_stock del {
 	margin-right: 5px;
 }
-.allow_order .affiche_critere_stock .attribut-cell input[type="text"] {
+.allow_order .affiche_critere_stock .attribut-cell input[type=text], .allow_order .affiche_critere_stock .attribut-cell input[type=email] {
 	width: 90px;
 }
 .allow_order .attribut-cell{
@@ -900,9 +902,8 @@ div.enregistrement span.enregistrementdroite {
 	margin: 0px;
 	width: 300px;
 }
-
-.entryform span input.champtexte {
-	width: 250px;
+.entryform input[type="text"], .entryform input[type="tel"], .entryform input[type="number"], .entryform input[type="email"], .entryform input[type="url"], .entryform input[type="password"], .entryform textarea{
+	width: 250px; 
 }
 .entryform fieldset {
 	border: 1px solid #DDDDDD;
@@ -2142,11 +2143,14 @@ td.tab_content a {
 	margin-top: 10px;
 	width: 416px;
 }
-.affiche_critere_stock input[type=text] {
+.affiche_critere_stock input[type=text], .affiche_critere_stock input[type=email] {
 	border: 1px solid #9e9d9c;
 }
 .affiche_critere_stock del {
 	color: #000000;
+}
+.addtocart_from_giftlist .affiche_critere_stock {
+	width: 100%;
 }
 .bouton_add_cart {
 	background-color:transparent;
@@ -2415,6 +2419,7 @@ form.entryform .inscription_form_table{
 
 .nb_item {
 	color:#1E82D8;
+	display: inline !important;
 	font-size: 9px;
 }
 span.fcb {
@@ -2504,4 +2509,7 @@ span.fcb {
 	padding-right: 150px;
 	text-align: center;
 	float: right;
+}
+.description {
+	margin-bottom: 10px;
 }

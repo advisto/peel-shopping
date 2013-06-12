@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: direaunami.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: direaunami.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}">
 	<!-- Début Dire à un ami -->
 	<h2>{{ STR_TELL_FRIEND }}</h2><p>{{ STR_MODULE_DIREAUNAMI_MSG_TELL_FRIEND|nl2br_if_needed }}</p>

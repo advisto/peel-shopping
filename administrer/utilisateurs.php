@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: utilisateurs.php 37156 2013-06-05 12:42:24Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -123,8 +123,8 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('pseudo', $GLOBALS['STR_ERR_NICKNAME_STILL']);
 		}
 		if (!$form_error_object->count()) {
-			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
 			$frm['mot_passe'] = (!empty($frm['mot_passe']))?$frm['mot_passe']:MDP();
 			if (insere_utilisateur($frm, false, false, false)) {
 				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_CREATED_OK'], vb($frm['email']), $frm['mot_passe'])))->fetch();
@@ -163,8 +163,8 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('pseudo', $GLOBALS['STR_ERR_NICKNAME_STILL']);
 		}
 		if (!$form_error_object->count()) {
-			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
 			// Suppression de l'ancien fichier
 			if (!empty($frm['old_document']) && $frm['document'] != $frm['old_document']) {
 				delete_uploaded_file_and_thumbs($frm['old_document']);
@@ -277,7 +277,7 @@ switch (vb($_REQUEST['mode'])) {
 					query("DELETE FROM peel_gold_ads
 						WHERE ad_id ='" . intval($ref_annonce) . "'");
 					// Supression des fichiers de l'annonce
-					supprime_fichier_annonce(intval($ref_annonce));
+					echo supprime_fichier_annonce(intval($ref_annonce));
 					// Tracert de la suppression
 					tracert_history_admin(intval(vn($_POST['annonce_ref'])), 'SUP_AD', $GLOBALS['STR_MODULE_ANNONCES_AD'] . ' ' . intval(vn($_POST['annonce_ref'])));
 				}
@@ -296,9 +296,10 @@ switch (vb($_REQUEST['mode'])) {
 		if (!empty($_POST['update_to_gold'])) {
 			if (!empty($_POST['annonce_ref']) && !empty($_POST['expiration_date'])) {
 				foreach ($_POST['annonce_ref'] as $ref_annonce) {
-					$query = "SELECT id_personne,id_categorie
-						FROM peel_lot_vente
-						WHERE ref ='" . intval(vn($ref_annonce)) . "' AND enligne = 'OK' AND gold = '0'";
+					$query = "SELECT lv.id_personne, lv.id_categorie, IF(u.diamond_status='YES', '".intval($GLOBALS['site_parameters']["ads_gold_update_credit_for_period_per_subscription"]["diamond"])."', IF(u.platinum_status='YES', '".intval($GLOBALS['site_parameters']["ads_gold_update_credit_for_period_per_subscription"]["platinum"])."', '".intval($GLOBALS['site_parameters']["ads_gold_update_credit_for_period_per_subscription"]["free"])."')) AS ads_gold_update_credit
+						FROM peel_lot_vente lv
+						INNER JOIN peel_utilisateurs u ON u.id_utilisateur=lv.id_personne
+						WHERE lv.ref='" . intval(vn($ref_annonce)) . "' AND lv.enligne='OK' AND lv.gold='0'";
 					$qannonce = query($query);
 					$annonce = fetch_assoc($qannonce);
 					// Si l'annonce est en ligne et n'est pas déjà gold, alors on la convertit en GOLD
@@ -326,8 +327,8 @@ switch (vb($_REQUEST['mode'])) {
 									'" . intval(vn($annonce['id_personne'])) . "',
 									'" . nohtml_real_escape_string($date) . "',
 									'1',
-									'" . nohtml_real_escape_string(str_pad($annonce['id_categorie'], 2, "0", STR_PAD_LEFT)) . "'
-									IF(u.diamond_status='YES', '".intval($GLOBALS["ads_gold_update_credit_for_period_per_subscription"]["diamond"])."', IF(u.platinum_status='YES', '".intval($GLOBALS["ads_gold_update_credit_for_period_per_subscription"]["platinum"])."', '".intval($GLOBALS["ads_gold_update_credit_for_period_per_subscription"]["free"])."')))";
+									'" . nohtml_real_escape_string(str_pad($annonce['id_categorie'], 2, "0", STR_PAD_LEFT)) . "',
+									'". nohtml_real_escape_string($annonce['ads_gold_update_credit'])."')";
 							query($insert);
 						}
 					}
@@ -358,7 +359,7 @@ switch (vb($_REQUEST['mode'])) {
 					// Déclenchement de l'appel
 					$makecall = file('https://ssl.keyyo.com/makecall.html?ACCOUNT=' . getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true) . '&CALLEE=' . $_GET['callee'] . '&CALLEE_NAME=' . $_GET['callee_name']);
 					if (!empty($makecall)) {
-						echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_CALL_INITIATED_KEYYO'], getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true), $_GET['callee_name'], $_GET['callee'], implode(' - ', $makecall)))->fetch();
+						echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_CALL_INITIATED_KEYYO'], getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true), $_GET['callee_name'], $_GET['callee'], implode(' - ', $makecall))))->fetch();
 					}
 				}
 			}
@@ -750,7 +751,14 @@ function affiche_recherche_utilisateurs($frm, $priv, $cle)
 		$sql_where_array[] = 'u.url ' . (!empty($frm['site_on'])?' <> ""':' = ""');
 	}
 	if (!empty($frm['id_cat'])) {
-		$sql_where_array[] = '(u.id_cat_1 = "' . nohtml_real_escape_string($frm['id_cat']) . '" OR u.id_cat_2 = "' . nohtml_real_escape_string($frm['id_cat']) . '" OR u.id_cat_3 = "' . nohtml_real_escape_string($frm['id_cat']) . '")';
+			$sql_where_array[] = '(u.id_cat_1 = "' . nohtml_real_escape_string($frm['id_cat']) . '" OR u.id_cat_2 = "' . nohtml_real_escape_string($frm['id_cat']) . '" OR u.id_cat_3 = "' . nohtml_real_escape_string($frm['id_cat']) . '")';
+	}
+	if (!empty($frm['id_categories'])) {
+		$this_categories_where_array = array();
+		foreach($frm['id_categories'] as $this_categories) {
+			$this_categories_where_array[] = 'CONCAT(",",u.id_categories,",") LIKE "%,'.$this_categories.',%"';
+		}
+		$sql_where_array[] = '('.implode(' OR ', $this_categories_where_array).')';
 	}
 
 	if (!empty($frm['tel'])) {
@@ -859,7 +867,7 @@ function affiche_recherche_utilisateurs($frm, $priv, $cle)
 		}
 		if (!empty($frm['annonces_contiennent'])) {
 			$sql_inner_array['peel_lot_vente'] = 'INNER JOIN peel_lot_vente plv ON plv.id_personne=u.id_utilisateur';
-			foreach ($GLOBALS['lang_codes'] as $lng) {
+			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 				$sql_where_array[] = 'plv.description_' . word_real_escape_string($lng) . ' LIKE "%' . nohtml_real_escape_string($frm['annonces_contiennent']) . '%"';
 			}
 		}

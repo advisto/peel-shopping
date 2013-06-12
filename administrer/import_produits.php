@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an     |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 36248 2013-04-05 17:32:15Z gboussin $
+// $Id: import_produits.php 37240 2013-06-11 21:23:03Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -56,7 +56,7 @@ switch ($action) {
 			// Mise à jour de la table de préférence des champs
 			query("UPDATE peel_import_field SET etat='0'");
 			foreach($_POST['on_update'] as $this_id => $this_value) {
-				echo '<input type="hidden" name="on_update[' . $this_id . ']" value="' . String::str_form_value($this_value) . '"/>';
+				echo '<input type="hidden" name="on_update[' . $this_id . ']" value="' . String::str_form_value($this_value) . '" />';
 				query("UPDATE peel_import_field
 					SET etat='1'
 					WHERE champs='" . nohtml_real_escape_string($this_value) . "'");
@@ -74,7 +74,7 @@ switch ($action) {
 		} elseif ($_POST['type_import'] == 'chosen_fields' && empty($_POST['on_update'])) {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_ERR_FIELDS_NOT_CHOSEN']))->fetch();
 		} else {
-			$fichier = upload('fichier', true, 'data', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$fichier = upload('fichier', false, 'data', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
 			if (empty($fichier) || !file_exists($GLOBALS['uploaddir'] . '/' . $fichier)) {
 				/* le fichier n'existe pas */
 				echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_ERR_FILE_NOT_FOUND']))->fetch();
@@ -193,7 +193,7 @@ switch ($action) {
 							if ($this_field_name == 'id_marque') {
 								if(String::strlen($this_value)>0) {
 									// La marque n'est pas vide - il faut que l'import soit compatible avec des noms de marque pouvant être des nombres
-									// Par défaut on considère qu'une marque donnée est une id de marque, sinon on gère comme si c'était un nom si pas trouvée
+									// Par défaut on considère qu'une marque donnée est une id de marque, sinon on gère comme si c'était un nom si pas trouvée et non numérique
 									$q = query('SELECT id
 										FROM peel_marques
 										WHERE id=' . intval($this_field_value));
@@ -207,7 +207,7 @@ switch ($action) {
 										$query_brand = query($sql_select_brand);
 										if($brand = fetch_assoc($query_brand)){
 											$field_values['id_marque'] = $brand['id'];
-										}else{
+										}elseif(!empty($this_field_value) && !is_numeric($this_field_value)) {
 											// Marque inexistante, on l'insère en base de données.
 											$q = query('INSERT INTO peel_marques
 												SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1"');
@@ -359,38 +359,40 @@ switch ($action) {
 									$quantity = $this_package_price[0];
 									$price_standard = $this_package_price[1];
 									$price_reseller = $this_package_price[2];
-									$sql_prix_lot = 'SELECT * 
-										FROM peel_quantites 
-										WHERE produit_id="' . intval($product_id) . '" AND quantite = "'.intval($quantity).'"';
-									$query_prix_lot = query($sql_prix_lot);
-									if(fetch_assoc($query_prix_lot)){
-										$sql_update = 'UPDATE peel_quantites 
-											SET quantite = "'.intval($quantity).'"';
-										if(isset($this_price_standard) && isset($price_standard)){
-											$sql_update.= ', prix ="'.nohtml_real_escape_string($price_standard ).'"';
-										}
-										if(isset($this_price_reseller) && isset($price_reseller)){
-											$sql_update.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
-										}
-										$sql_update.= '
+									if (is_lot_module_active()) {
+										$sql_prix_lot = 'SELECT * 
+											FROM peel_quantites 
 											WHERE produit_id="' . intval($product_id) . '" AND quantite = "'.intval($quantity).'"';
-										query($sql_update);
-										echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_UPDATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
-									} else {
-										if(isset($quantity) && $quantity > 0){
-											$q = 'INSERT INTO peel_quantites 
-												SET produit_id="' . intval($product_id) . '"';	
-											$q.= ', quantite ="'.intval($quantity).'"';
+										$query_prix_lot = query($sql_prix_lot);
+										if(fetch_assoc($query_prix_lot)){
+											$sql_update = 'UPDATE peel_quantites 
+												SET quantite = "'.intval($quantity).'"';
 											if(isset($this_price_standard) && isset($price_standard)){
-												$q.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
+												$sql_update.= ', prix ="'.nohtml_real_escape_string($price_standard ).'"';
 											}
 											if(isset($this_price_reseller) && isset($price_reseller)){
-												$q.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
+												$sql_update.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
 											}
-											query($q);
-											echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_CREATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+											$sql_update.= '
+												WHERE produit_id="' . intval($product_id) . '" AND quantite = "'.intval($quantity).'"';
+											query($sql_update);
+											echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_UPDATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+										} else {
+											if(isset($quantity) && $quantity > 0){
+												$q = 'INSERT INTO peel_quantites 
+													SET produit_id="' . intval($product_id) . '"';	
+												$q.= ', quantite ="'.intval($quantity).'"';
+												if(isset($this_price_standard) && isset($price_standard)){
+													$q.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
+												}
+												if(isset($this_price_reseller) && isset($price_reseller)){
+													$q.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
+												}
+												query($q);
+												echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_CREATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+											}
 										}
-									}	
+									}
 								}
 							} elseif (strpos($this_field_name, "#") !== false) {
 								// Gestion des attributs

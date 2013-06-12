@@ -4,14 +4,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: banner.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: banner.php 36927 2013-05-23 16:15:39Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -59,8 +59,8 @@ if (is_module_banner_active ()) {
 				'date_fin' => $GLOBALS['STR_MODULE_BANNER_MSG_ERR_DATE'],
 				));
 			if (!$form_error_object->count()) {
-				$_POST['image'] = upload('image', false, 'image_or_swf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-				insere_banniere($_POST);
+				$frm['image'] = upload('image', false, 'image_or_swf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
+				insere_banniere($frm);
 				affiche_filtre_banner($frm);
 				affiche_liste_banniere();
 			}else{
@@ -77,12 +77,12 @@ if (is_module_banner_active ()) {
 			array('date_debut' => $GLOBALS['STR_MODULE_BANNER_MSG_ERR_DATE'],
 				'date_fin' => $GLOBALS['STR_MODULE_BANNER_MSG_ERR_DATE'],
 				));
-			if (((empty($_POST['image'])) && empty($_FILES['image']['name'])) && empty($_POST['tag_html'])) {
+			if (((empty($frm['image'])) && empty($_FILES['image']['name'])) && empty($frm['tag_html'])) {
 				$form_error_object->add('no_content','Il faut renseigner soit une image, soit un tag HTML.');
 			}
 			if (!$form_error_object->count()) {
-				$_POST['image'] = upload('image', false, 'image_or_swf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-				maj_banniere($id, $_POST);
+				$frm['image'] = upload('image', false, 'image_or_swf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
+				maj_banniere($id, $frm);
 				affiche_filtre_banner($frm);
 				affiche_liste_banniere();
 			} else {

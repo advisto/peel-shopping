@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: newsletter.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -161,7 +161,7 @@ function affiche_formulaire_newsletter(&$frm)
 	$tpl->assign('template_technical_code_options', get_email_template_options('technical_code', null, null, vb($frm['template_technical_code'])));
 
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $this_lang) {
+	foreach ($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$tpl_langs[] = array('lng' => $this_lang,
 			'sujet' => vb($frm['sujet_' . $this_lang]),
 			'message_te' => getTextEditor('message_' . $this_lang, 760, 500, vb($frm['message_' . $this_lang]))
@@ -207,11 +207,11 @@ function insere_newsletter($frm)
 {
 	$req = "INSERT INTO peel_newsletter (";
 	// Insertion de la nouvelle news en fonction des langues définit sur le site
-	foreach($GLOBALS['lang_codes'] as $this_lang) {
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$req .= "sujet_" . $this_lang . ", message_" . $this_lang . ",";
 	}
 	$req .= "date, format, statut, template_technical_code) VALUES (";
-	foreach($GLOBALS['lang_codes'] as $this_lang) {
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$req .= "'" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "','" . real_escape_string($frm['message_' . $this_lang]) . "',";
 	}
 	$req .= " '" . date('Y-m-d H:i:s', time()) . "', 'html', 'envoi nok', '" . nohtml_real_escape_string($frm['template_technical_code']) . "')";
@@ -230,7 +230,7 @@ function maj_newsletter($id, $frm)
 {
 	$req = "UPDATE peel_newsletter SET ";
 	// Maj d'une news en fonction des langues définit sur le site
-	foreach($GLOBALS['lang_codes'] as $this_lang) {
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$req .= "sujet_" . $this_lang . " = '" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "', message_" . $this_lang . " = '" . real_escape_string($frm['message_' . $this_lang]) . "',";
 	}
 	$req .= " format = 'html', date = '" . date('Y-m-d H:i:s', time()) . "', template_technical_code= '" . nohtml_real_escape_string($frm['template_technical_code']) . "'  WHERE id = '" . intval($id) . "'";
@@ -258,7 +258,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 	// Récupération technical_code du template associé à la newsletter
 	$template_technical_code = $news_infos['template_technical_code'];
 	// Stockage des messages et sujets, selon les langues disponibles sur le site
-	foreach($GLOBALS['lang_codes'] as $this_lang) {
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		// Ajout des Custom template tag de la newsletter en fonction de la langue
 		$custom_template_tags[$this_lang] = null;
 		if (!empty($news_infos['message_' . $this_lang])) {
@@ -266,7 +266,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 			if (!empty($template_technical_code)) {
 				$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $this_lang);
 				$message[$this_lang] = $template_infos['text'];
-				$custom_template_tags[$this_lang]['STR_NEWSLETTER'] = $news_infos['message_' . $this_lang];
+				$custom_template_tags[$this_lang]['NEWSLETTER'] = $news_infos['message_' . $this_lang];
 			} else {
 				$message[$this_lang] = $news_infos['message_' . $this_lang];
 			}
@@ -361,7 +361,7 @@ function affiche_liste_newsletter()
 		while ($ligne = fetch_assoc($result)) {
 			$this_langs_array = array();
 			$titre = $ligne['sujet_' . $_SESSION['session_langue']];
-			foreach($GLOBALS['lang_codes'] as $this_lang) {
+			foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 				// Ajout des Custom template tag de la newsletter en fonction de la langue
 				if (!empty($ligne['message_' . $this_lang])) {
 					$this_langs_array[] = $this_lang;
@@ -409,6 +409,7 @@ function affiche_liste_newsletter()
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_ADMIN_NEWSLETTERS_UPDATE', $GLOBALS['STR_ADMIN_NEWSLETTERS_UPDATE']);
+	$tpl->assign('STR_ADMIN_NEWSLETTERS_SEND_CONFIRM', $GLOBALS['STR_ADMIN_NEWSLETTERS_SEND_CONFIRM']);
 	$tpl->assign('STR_ADMIN_NEWSLETTERS_SEND_ALL_USERS', $GLOBALS['STR_ADMIN_NEWSLETTERS_SEND_ALL_USERS']);
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
 	$tpl->assign('STR_ADMIN_NEWSLETTERS_NOTHING_FOUND', $GLOBALS['STR_ADMIN_NEWSLETTERS_NOTHING_FOUND']);

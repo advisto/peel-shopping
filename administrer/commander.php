@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: commander.php 37236 2013-06-11 19:10:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -29,6 +29,14 @@ if (!empty($_GET['commandeid'])) {
 	$frm['commandeid'] = $_GET['commandeid'];
 }
 switch (vb($_REQUEST['mode'])) {
+    case "duplicate" :
+        if (is_duplicate_module_active() && isset($_GET['id'])) {
+            include($fonctionsduplicate);
+            duplicate_order(intval($_GET['id']));
+        }
+		affiche_liste_commandes_admin();
+		break;
+
 	case "ajout" :
 		// Affiche le formulaire d'ajout de commande à partir d'un utilisateur
 		if (!empty($_GET['id_utilisateur'])) {
@@ -43,7 +51,7 @@ switch (vb($_REQUEST['mode'])) {
 		if (!empty($_POST['bdc_code_facture']) && !empty($_POST['bdc_sendclient'])) {
 			sendclient($_POST['bdc_id'], 'html', 'bdc', $_POST['bdc_partial']);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
-		} elseif (!empty($_POST)) {
+		} elseif (!empty($_POST)) {	
 			// Ajout d'une commande en db + affichage du détail de la commande
 			$order_id = save_commande_in_database($frm);
 			if (!empty($frm['commandeid'])) {
@@ -57,8 +65,7 @@ switch (vb($_REQUEST['mode'])) {
 			} else {
 				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER'].' : ' . intval(vn($frm['id'])));
 			}
-			// Met à jour le nombre de points d'une commande offert à l'utilisateur
-			update_points($frm);
+
 		}
 		// Si il n'y a pas de POST, cela signifie que l'on veut uniquement afficher le détail de la commande a modifier.
 		if (empty($_POST)) {

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: langues.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: langues.php 37233 2013-06-11 17:12:57Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -68,7 +68,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "repair" :
-		foreach($GLOBALS['lang_codes'] as $this_lang) {
+		foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 			echo insere_langue(array('lang' => $this_lang), true, vb($_GET['full']));
 		}
 		affiche_liste_langue();
@@ -96,7 +96,7 @@ function affiche_formulaire_ajout_langue(&$frm)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 		}
 		$frm['flag'] = "";
@@ -153,7 +153,7 @@ function affiche_formulaire_langue(&$frm)
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng]
 			);
@@ -166,6 +166,7 @@ function affiche_formulaire_langue(&$frm)
 	$tpl->assign('position', $frm["position"]);
 	$tpl->assign('url_rewriting', $frm["url_rewriting"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('STR_ADMINISTRATION', $GLOBALS['STR_ADMINISTRATION']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_LANGUES_ADD_OR_MODIFY_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUES_ADD_OR_MODIFY_LANGUAGE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
@@ -218,7 +219,7 @@ function maj_langue($id, $frm)
 
 	$sql = "UPDATE peel_langues
 		SET lang = '" . nohtml_real_escape_string(String::strtolower($frm['lang'])) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, nom_" . $lng . "= '" . nohtml_real_escape_string($frm['nom_' . $lng]) ."'";
 	}
@@ -263,7 +264,7 @@ function affiche_liste_langue()
 				'url_rewriting' => $ligne['url_rewriting'],
 				'position' => $ligne['position'],
 				'etat_onclick' => 'change_status("langues", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
-				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
+				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : ($ligne['etat']<0 ? 'puce-orange.gif' : 'puce-verte.gif')),
 				);
 			$i++;
 		}

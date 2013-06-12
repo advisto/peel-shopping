@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contacts.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: contacts.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -29,7 +29,7 @@ $frm = $_POST;
 switch (vb($_REQUEST['mode'])) {
 	case "maj" :
 		if (!empty($frm)) {
-			foreach ($GLOBALS['lang_codes'] as $lng) {
+			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 				$empty_field_messages_array['titre_' . $lng] = $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE'];
 			}
 			$empty_field_messages_array['token'] = $GLOBALS['STR_INVALID_TOKEN'];
@@ -100,7 +100,7 @@ function affiche_formulaire_contact(&$frm, &$form_error_object)
 	$tpl->assign('mode', $frm['nouveau_mode']);
 	$tpl->assign('id', intval(vn($frm['id'])));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('titre_' . $lng),
 			'titre' => vb($frm['titre_' . $lng]),
@@ -125,7 +125,7 @@ function affiche_formulaire_contact(&$frm, &$form_error_object)
  */
 function maj_contacts($frm)
 {
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		query('UPDATE peel_contacts SET
 			titre_' . $lng . ' = "' . real_escape_string($frm['titre_' . $lng]) . '"
 			, texte_' . $lng . ' = "' . real_escape_string($frm['texte_' . $lng]) . '"

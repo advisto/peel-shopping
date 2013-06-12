@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: admin_formulaire_produit.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -161,12 +161,6 @@
 			<td class="label">{{ STR_ADMIN_PRODUITS_DISCOUNT_PERCENTAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" name="promotion" value="{{ promotion|str_form_value }}" style="width:150px" /> % {{ STR_ADMIN_PRODUITS_DISCOUNT_PERCENTAGE_OVER_LISTED_PRICE }}</td>
 		</tr>
-	{% if is_gifts_module_active %}
-		<tr>
-			<td class="label">{{ STR_ADMIN_PRODUITS_GIFT_POINTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="points" value="{{ points|str_form_value }}" style="width:150px" /></td>
-		</tr>
-	{% endif %}
 		<tr>
 			<td class="label">{{ STR_ADMIN_PRODUITS_WEIGHT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" name="poids" value="{{ poids|str_form_value }}" style="width:150px" /> {{ STR_ADMIN_PRODUITS_WEIGHT_UNIT }}</td>
@@ -199,7 +193,7 @@
 			<td class="label">
 				<a href="{{ lot_href|escape('html') }}">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}</a>
 				{% if (lot_supprime_href) %}
-				/ <a href="{{ lot_supprime_href|escape('html') }}" onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');">Effacer les prix par lot</a>
+				/ <a href="{{ lot_supprime_href|escape('html') }}" onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');">{{ STR_DELETE }}</a>
 				{% endif %}
 			</td>
 		</tr>
@@ -392,7 +386,7 @@
 			<td><input type="checkbox" name="on_ref_produit" value="1"{% if is_on_ref_produit %} checked="checked"{% endif %} /></td>
 		</tr>
 		<tr>
-			<td class="top">{{ STR_ADMIN_PRODUITS_AUTO_REF_NUMBER_PRODUCTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top label">{{ STR_ADMIN_PRODUITS_AUTO_REF_NUMBER_PRODUCTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="width:150px" name="nb_ref_produits" type="text" value="{{ nb_ref_produits|str_form_value }}" /></td>
 		</tr>
 		<tr>
@@ -444,7 +438,7 @@
 			<td><input type="checkbox" name="on_download" value="1"{% if is_on_download %} checked="checked"{% endif %} /></td>
 		</tr>
 		<tr>
-			<td class="top">{{ STR_ADMIN_PRODUITS_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top label">{{ STR_ADMIN_PRODUITS_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="width:150px" name="zip" type="text" value="{{ zip|str_form_value }}" /></td>
 		</tr>
 	{% endif %}
@@ -456,33 +450,37 @@
 			</td>
 		</tr>
 		<tr>
-			<td>{{ STR_ADMIN_PRODUITS_FLASH_PRICE }} <b>{{ site_symbole }} {{ ttc_ht }}</b>{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="label">{{ STR_ADMIN_PRODUITS_FLASH_PRICE }} <b>{{ site_symbole }} {{ ttc_ht }}</b>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left"><input style="width:150px" type="text" name="prix_flash" value="{{ prix_flash|str_form_value }}" /></td>
 		</tr>
 		<tr>
-			<td>{{ STR_ADMIN_PRODUITS_FLASH_START_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="label">{{ STR_ADMIN_PRODUITS_FLASH_START_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="width:150px" type="text" name="flash_start" class="datetimepicker" value="{% if (flash_start) %}{{ flash_start|str_form_value }}{% endif %}" /></td>
 		</tr>
 		<tr>
-			<td>{{ STR_ADMIN_PRODUITS_FLASH_END_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="label">{{ STR_ADMIN_PRODUITS_FLASH_END_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="width:150px" type="text" name="flash_end" class="datetimepicker" value="{% if (flash_end) %}{{ flash_end|str_form_value }}{% endif %}" /></td>
 		</tr>
 		<tr>
-			<td class="top">{{ STR_ADMIN_PRODUITS_IS_ON_FLASH }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top label">{{ STR_ADMIN_PRODUITS_IS_ON_FLASH }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_flash" value="1"{% if is_on_flash %} checked="checked"{% endif %} /></td>
 		</tr>
 	{% endif %}
-	{% if is_module_gift_checks_active %}
+	{% if is_gifts_module_active %}
 		<tr><td class="bloc" colspan="2">{{ STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER }}</td></tr><tr>
 			<td colspan="2"><p>{{ STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN }}</p></td>
 		</tr>
 		<tr>
-			<td class="top">{{ STR_ADMIN_PRODUITS_IS_ON_GIFT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top label">{{ STR_ADMIN_PRODUITS_IS_ON_GIFT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" id="on_gift" name="on_gift" value="1"{% if is_on_gift %} checked="checked"{% endif %} /></td>
 		</tr>
-		<tr id="on_gift_points_tr">
+		<tr class="label" id="on_gift_points_tr">
 			<td>{{ STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" value="{{ on_gift_points|html_entity_decode_if_needed|str_form_value }}" name="on_gift_points" id="on_gift_points" size="3" /></td>
+		</tr>
+		<tr>
+			<td class="label">{{ STR_ADMIN_PRODUITS_GIFT_POINTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" name="points" value="{{ points|str_form_value }}" style="width:150px" /></td>
 		</tr>
 	{% endif %}
 		<tr>

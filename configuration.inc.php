@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: configuration.inc.php 37040 2013-05-30 13:17:16Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -22,10 +22,10 @@ if (version_compare(PHP_VERSION, '5.4', '>=')) {
 } else {
 	@error_reporting(E_ALL);
 }
-if (version_compare(PHP_VERSION, '5.0.0', '<')) {
+if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 	// Si PHP5 n'est pas présent sur le serveur, on affiche un message d'erreur et on s'arrête
 	// NB : Si on allait plus loin, le chargement du moteur de template n'étant pas compatible PHP5, ça mettrait des erreurs diverses à la place
-	echo '<div>PHP ' . PHP_VERSION . ' < 5.0.0 => check .htaccess or your server configuration to enable PHP 5</div>';
+	echo '<div>PHP ' . PHP_VERSION . ' < 5.1.2 => check .htaccess or your server configuration to enable PHP >= 5.2</div>';
 	die();
 }
 // Désactivation de scream qui altère le fonctionnement normale de error_reporting
@@ -64,8 +64,11 @@ $GLOBALS['site_parameters']['css'] = 'screen.css,menu.css';
 $GLOBALS['site_parameters']['sha256_encoding_salt'] = "k)I8#;z=TIxnXmIPdW2TRzt4Ov89|#V~cU@]";
 $GLOBALS['site_parameters']['id'] = '1';
 $GLOBALS['site_parameters']['complete_lang_files'] = array('fr', 'en', 'es');
+$GLOBALS['site_parameters']['display_warning_if_connection_problem'] = true;
+
 // Ci-dessous :
-// Variables servant dans le processus installation car nécessaires dans les fichiers de langues => les valeurs n'ont pas d'importance, mais elles doivent être définies
+// Valeurs par défaut de variables servant dans le processus installation car nécessaires dans les fichiers de langues 
+// => les valeurs n'ont pas d'importance car pas utilisées, mais elles doivent être définies
 $GLOBALS['site_parameters']['quotation_delay'] = null;
 $GLOBALS['site_parameters']['avoir'] = null;
 $GLOBALS['site_parameters']['commission_affilie'] = null;
@@ -74,11 +77,10 @@ $GLOBALS['site_parameters']['commission_affilie'] = null;
 if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('mysqli')) {
 	$GLOBALS['site_parameters']['mysql_extension'] = 'mysql';
 }
-define('SITE_SUSPENDED', false); // Modifier ici si on veut suspendre l'affichage du site côté client (hors administration)
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.0.2');
+define('PEEL_VERSION', '7.0.3');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -138,7 +140,7 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 // Fin compatibilité IIS
 $GLOBALS['dirroot'] = dirname(__FILE__);
 // On détecte l'URL de base du site pour l'installation uniquement
-// Si wwwroot est précisé dans /lib/setup/info.inc.php, alors il aura la priorité
+// Si $GLOBALS['wwwroot'] est précisé dans /lib/setup/info.inc.php, alors il aura la priorité
 if (!empty($_SERVER['SCRIPT_FILENAME'])) {
 	$file_called_real_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME']));
 } else {
@@ -168,10 +170,9 @@ $GLOBALS['apparent_folder'] = substr($file_called_relative_path, 0, strlen($file
 if (empty($GLOBALS['apparent_folder']) || substr($GLOBALS['apparent_folder'], strlen($GLOBALS['apparent_folder']) - 1) != '/') {
 	$GLOBALS['apparent_folder'] .= '/';
 }
-if (!defined('IN_CRON')) {
-	require($GLOBALS['dirroot'] . "/lib/fonctions/fonctions.php");
-	require($GLOBALS['dirroot'] . "/lib/fonctions/database.php");
-}
+require($GLOBALS['dirroot'] . "/lib/fonctions/fonctions.php");
+require($GLOBALS['dirroot'] . "/lib/fonctions/database.php");
+
 if (!IN_INSTALLATION && is_dir($GLOBALS['dirroot'] . '/installation')) {
 	// Le site est configuré mais a toujours le répertoire d'installation présent
 	$GLOBALS['installation_folder_active'] = true;
@@ -252,9 +253,15 @@ if (!IN_INSTALLATION) {
 		$parameters_loaded = true;
 	}
 } 
-// FORCE SITE_PARAMETERS : Si on veut forcer des paramètres site_parameters en priorité sur la table peel_configuration, retirez les // devant la ligne suivante et remplacez adminfolder par votre valeur :
+// ***********************************
+// * FORCER DES VALEURS DE SITE_PARAMETERS *
+// Le fonctionnement normal est l'utilisation de variables de configurations stockés dans la table peel_configuration et éditable dans l'administration (section Variables de configuration)
+// Si néanmoins vous voulez forcer en PHP des paramètres site_parameters en priorité sur la table peel_configuration, vous pouvez les imposer ci-après.
+// Pär exemple retirez les // devant la ligne suivante et remplacez adminfolder par votre valeur :
 // $GLOBALS['site_parameters']['backoffice_directory_name'] = 'adminfolder';
-
+// $GLOBALS['site_parameters']['site_suspended'] = true;
+// * FIN SITE_PARAMETERS *
+// ***********************************
 $GLOBALS['display_errors'] = 0;
 if (!isset($GLOBALS['site_parameters']['display_errors_for_ips'])) {
 	$GLOBALS['display_errors'] = 1;
@@ -415,34 +422,39 @@ if (is_module_url_rewriting_active()) {
 }
 require($GLOBALS['dirroot'] . "/lib/fonctions/url_standard.php");
 
-$GLOBALS['lang_codes'] = array(); //Variable session récuperant les codes Langue
-$GLOBALS['lang_flags'] = array(); //Variable session récuperant l'URL des drapeaux de langues
-$GLOBALS['lang_names'] = array(); //Variable session récuperant le nom de la langue dans sa propre langue
+$GLOBALS['lang_codes'] = array(); // Variable de session récuperant les codes Langue
+$GLOBALS['admin_lang_codes'] = array(); // Variable de session récuperant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
+$GLOBALS['lang_flags'] = array(); // Variable de session récuperant l'URL des drapeaux de langues
+$GLOBALS['lang_names'] = array(); // Variable de session récuperant le nom de la langue dans sa propre langue
 $GLOBALS['langs_flags_correspondance'] = array('en'=>'uk.gif');
 $GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'] = null;
 if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 	// We get the activated languages
-	foreach(array("etat = '1'", "1") as $this_cond) {
-		$sqlLng = "SELECT *
-			FROM peel_langues
-			WHERE " . $this_cond . (!empty($_GET['langue'])?" OR lang='" . word_real_escape_string($_GET['langue']) . "'":'') . "
-			GROUP BY lang
-			ORDER BY position";
-		$resLng = query($sqlLng);
-		while ($lng = fetch_assoc($resLng)) {
+	$sqlLng = "SELECT *
+		FROM peel_langues
+		WHERE 1
+		GROUP BY lang
+		ORDER BY IF(etat = '1'". (!empty($_GET['langue'])?" OR lang='" . word_real_escape_string($_GET['langue']) . "'":'') . ", 1, 0) DESC, position ASC";
+	$resLng = query($sqlLng);
+	while ($lng = fetch_assoc($resLng)) {
+		if($lng['etat'] == 1 || (!empty($_GET['langue']) && $lng['lang'] == $_GET['langue'])) {
 			$GLOBALS['lang_codes'][] = $lng['lang'];
-			$GLOBALS['lang_flags'][$lng['lang']] = $lng['flag'];
-			$GLOBALS['lang_names'][$lng['lang']] = $lng["nom_" . $lng['lang']];
-			$GLOBALS['lang_etat'][$lng['lang']] = $lng['etat'];
-			$GLOBALS['lang_url_rewriting'][$lng['lang']] = $lng["url_rewriting"];
-			if(!empty($lng["load_default_lang_files_before_main_lang"])) {
-				$GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$lng['lang']] = explode(',', $lng["load_default_lang_files_before_main_lang"]);
-			}
+			$GLOBALS['admin_lang_codes'][] = $lng['lang'];
+		} elseif($lng['etat'] == -1) {
+			// Langue administrable mais pas en production
+			$GLOBALS['admin_lang_codes'][] = $lng['lang'];
 		}
-		if(!empty($GLOBALS['lang_codes'])){
-			// Si on a trouvé au moins une langue, on s'arrête, sinon on relance le SQL mais sans contrainte d'etat=1
-			break;
+		$GLOBALS['lang_flags'][$lng['lang']] = $lng['flag'];
+		$GLOBALS['lang_names'][$lng['lang']] = $lng["nom_" . $lng['lang']];
+		$GLOBALS['lang_etat'][$lng['lang']] = $lng['etat'];
+		$GLOBALS['lang_url_rewriting'][$lng['lang']] = $lng["url_rewriting"];
+		if(!empty($lng["load_default_lang_files_before_main_lang"])) {
+			$GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$lng['lang']] = explode(',', $lng["load_default_lang_files_before_main_lang"]);
 		}
+	}
+	if(empty($GLOBALS['lang_codes'])){
+		// Si on n'a pas trouvé au moins une langue, on prend les langues même inactives
+		$GLOBALS['lang_codes'] = array_keys($GLOBALS['lang_etat']);
 	}
 	// Initialisation de la SESSION langue
 	foreach($GLOBALS['lang_codes'] as $this_lang) {
@@ -459,6 +471,7 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 					$lng = substr($file, strlen('admin_install_'), 2);
 					// Fichier du type admin_install_xx.php pour l'interface d'installation
 					$GLOBALS['lang_codes'][] = $lng;
+					$GLOBALS['admin_lang_codes'][] = $lng;
 					if(!empty($GLOBALS['langs_flags_correspondance'][$lng])){
 						$GLOBALS['lang_flags'][$lng] = $GLOBALS['langs_flags_correspondance'][$lng];
 					} else {
@@ -483,7 +496,7 @@ if(defined('IN_PEEL_ADMIN') || IN_INSTALLATION) {
 	$GLOBALS['load_admin_lang'] = true;
 }
 // Si nécessaire dans get_identified_lang, on redirige si langue pas définie
-$_SESSION['session_langue'] = get_identified_lang();
+$_SESSION['session_langue'] = get_identified_lang((defined('IN_PEEL_ADMIN')?$GLOBALS['admin_lang_codes']:$GLOBALS['lang_codes']));
 // On est maintenant sûr que la langue est correctement définie et que le fichier de langue associé existe
 // Dans la ligne suivante, on modifie notamment $GLOBALS['site'] et $GLOBALS['wwwroot'], $GLOBALS['wwwroot_in_admin'] et $GLOBALS['administrer_url']
 // On charge les fichiers de langue de base, on va gérer les modules ensuite
@@ -634,7 +647,7 @@ if (defined('IN_PEEL_ADMIN')) {
 }
 
 if (!IN_INSTALLATION) {
-	if (!defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && vb($GLOBALS['site_parameters']['site_suspended']) === 'TRUE' && !a_priv('admin*', false)) {
+	if (!defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && vb($GLOBALS['site_parameters']['site_suspended']) && !a_priv('admin*', false)) {
 		echo '<div align="center" style="font-size:14px;font-weight:bold;"><br /><br />' . $GLOBALS['STR_UPDATE_WEBSITE'] . '<br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
 		die();
 	}
@@ -712,15 +725,16 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_thumbs_module_active()) {
 		include($GLOBALS['fonctionsthumbs']);
 	}
-	// Affichage des attributs produits
-	$GLOBALS['fonctionsattributs'] = $GLOBALS['dirroot'] . "/modules/attributs/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_attributes_module_active()) {
-		include($GLOBALS['fonctionsattributs']);
-	}
 	// Module de recherche par catégorie
 	$GLOBALS['fonctionssearch'] = $GLOBALS['dirroot'] . "/modules/search/fonctions.php";
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_advanced_search_active()) {
 		include($GLOBALS['fonctionssearch']);
+	}
+	// Affichage des attributs produits
+	$GLOBALS['fonctionsattributs'] = $GLOBALS['dirroot'] . "/modules/attributs/fonctions.php";
+	if (is_attributes_module_active()) {
+		// Utilisé par Product => nécessaire pour rpc.php => Pas d'exclusion LOAD_NO_OPTIONAL_MODULE
+		include($GLOBALS['fonctionsattributs']);
 	}
 	// Module de gestion des promotions par marques
 	$GLOBALS['fonctionsmarquepromotions'] = $GLOBALS['dirroot'] . "/modules/marques_promotion/fonctions.php";
@@ -774,6 +788,11 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_giftlist_module_active()) {
 		include($GLOBALS['fonctionsgiftlist']);
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/listecadeau/lang/';
+	}
+	// Module des cadeaux
+	$GLOBALS['fonctionsgift'] = $GLOBALS['dirroot'] . '/modules/gifts/fonctions.php';
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_gifts_module_active()) {
+		include($GLOBALS['fonctionsgift']);
 	}
 	// Module ecotaxe
 	$GLOBALS['fonctionsecotaxe'] = $GLOBALS['dirroot'] . "/modules/ecotaxe/fonctions.php";
@@ -852,8 +871,6 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	$GLOBALS['fonctionsbirthday'] = $GLOBALS['dirroot'] . '/modules/birthday/administrer/bons_anniversaires.php';
 	// Module des bons clients
 	$GLOBALS['fonctionsgoodclients'] = $GLOBALS['dirroot'] . '/modules/good_clients/administrer/bons_clients.php';
-	// Module des cadeaux
-	$GLOBALS['fonctionsgift'] = $GLOBALS['dirroot'] . '/modules/gifts/administrer/fonctions.php';
 	// Module de gestion des groupes
 	$GLOBALS['fonctionsgroups'] = $GLOBALS['dirroot'] . "/modules/groups/administrer/fonctions.php";
 	// Module de generation de facture pdf
@@ -957,7 +974,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 			// On inclue ces fonctions sur toute l'administration pour pouvoir manipuler des notions d'abonnement
 			include($GLOBALS['fonctionsabonnement_admin']);
 		}
-	} 
+	}
 	// Module sauvegarde recherche
 	$fonctionsuser_alerts = $GLOBALS['dirroot'] . "/modules/user_alerts/fonctions.php";
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_user_alerts_module_active()) {
@@ -1035,14 +1052,11 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_crons_module_active()) {
 		include($GLOBALS['dirroot'] . "/modules/crons/functions/emails.php");
 	}
-	// Fichiers nécessitant que les fonctions d'URL soient toutes définies et les constantes de langue
 	if (is_destockplus_module_active()) {
 		$GLOBALS['modules_lang_directory_array'][1004] = '/modules/destockplus/lang/';
-		include($GLOBALS['dirroot'] . "/modules/destockplus/includes/configure.php");
 	}
 	if (is_algomtl_module_active()) {
 		$GLOBALS['modules_lang_directory_array'][1005] = '/modules/algomtl/lang/';
-		include($GLOBALS['dirroot'] . "/modules/algomtl/includes/configure.php");
 	}
 }
 if (!IN_INSTALLATION) {
@@ -1078,6 +1092,15 @@ if (!IN_INSTALLATION) {
 if (!defined('SKIP_SET_LANG')) {
 	// On charge les fichiers de langue des modules
 	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), false, true, false);
+}
+if ((!IN_INSTALLATION || IN_INSTALLATION >= 5) && !defined('LOAD_NO_OPTIONAL_MODULE')) {
+	// Fichiers nécessitant que les fonctions d'URL soient toutes définies et les constantes de langue
+	if (is_destockplus_module_active()) {
+		include($GLOBALS['dirroot'] . "/modules/destockplus/includes/configure.php");
+	}
+	if (is_algomtl_module_active()) {
+		include($GLOBALS['dirroot'] . "/modules/algomtl/includes/configure.php");
+	}
 }
 if (!empty($GLOBALS['installation_folder_active'])) {
 	// Le site est configuré mais a toujours le répertoire d'installation présent

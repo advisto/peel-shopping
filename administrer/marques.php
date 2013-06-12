@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: marques.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -46,7 +46,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image']));
 			insere_sous_marque($_POST);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MARQUES_BRAND_CREATED'], vb($frm['nom_' . $_SESSION["session_langue"]]))))->fetch();
 			affiche_formulaire_liste_marque($_REQUEST['id'], $frm);
@@ -63,7 +63,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image']));
 			maj_marque($_POST);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MARQUES_BRAND_UPDATED'], vn($_POST['id']))))->fetch();
 			affiche_formulaire_liste_marque($_REQUEST['id'], $frm);
@@ -97,7 +97,7 @@ function affiche_formulaire_ajout_marque(&$frm, &$form_error_object)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "Marque langue $lng";
 			$frm['description_' . $lng] = "";
 
@@ -183,7 +183,7 @@ function insere_sous_marque(&$frm)
 		image
 		, etat
 		, position";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . ", description_" . $lng;
 		$sql .= ", meta_titre_" . $lng;
 		$sql .= ", meta_key_" . $lng;
@@ -194,7 +194,7 @@ function insere_sous_marque(&$frm)
 		'" . nohtml_real_escape_string($frm['image']) . "'
 		,'" . intval(vn($frm['etat'])) . "'
 		,'" . intval($frm['position']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 		$sql .= ", '" . real_escape_string($frm['description_' . $lng]) . "'";
 		$sql .= ", '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'";
@@ -229,7 +229,7 @@ function maj_marque(&$frm)
 
 	$sql = "UPDATE peel_marques
 		SET image = '" . nohtml_real_escape_string($frm['image']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 		$sql .= ", description_" . $lng . "='" . real_escape_string($frm['description_' . $lng]) . "'";
 		$sql .= ", meta_titre_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'";
@@ -256,7 +256,7 @@ function affiche_formulaire_liste_marque($id, &$frm)
 	/* Valeurs par défaut */
 	$frm = array();
 	$frm["nouveau_mode"] = "insere";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$frm['nom_' . $lng] = "";
 		$frm['description_' . $lng] = "";
 	}
@@ -341,7 +341,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 	$tpl->assign('etat', vb($frm["etat"]));
 
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('nom_' . $lng),
 			'nom' => vb($frm['nom_' . $lng]),

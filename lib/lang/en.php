@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: en.php 36971 2013-05-26 21:58:44Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,7 +168,7 @@ $GLOBALS["STR_DEVISE"] = "Devise";
 $GLOBALS["STR_DISPO"] = "Availability";
 $GLOBALS["STR_DO_NOT_MISS"] = "Do not miss";
 $GLOBALS["STR_DOMICILIATION"] = "Domiciliation";
-$GLOBALS["STR_DONNEZ_AVIS"] = "Give your opinion on this product";
+$GLOBALS["STR_DONNEZ_AVIS"] = "Give your opinion";
 $GLOBALS["STR_DONT_FORGET_COMMENT"] = "Do not forget to insert your comment";
 $GLOBALS["STR_DONT_FORGET_NOTE"] = "You have forget to add a note to your comment";
 $GLOBALS["STR_DOWNLOAD_AGAIN"] = "Try again later (server unavailable)";
@@ -197,60 +197,60 @@ $GLOBALS["STR_EMPTY_TEXT_CONTACTS"] = "The contact information for the website {
 $GLOBALS["STR_EMPTY_TEXT_LEGAL"] = "The legal information for the website {$GLOBALS['site']} is not yet defined";
 $GLOBALS["STR_ENTER_KEY"] = "Enter your keywords";
 $GLOBALS["STR_ERR_ACTIVITY"] = "You have not specified your activity.\n";
-$GLOBALS["STR_ERR_ADDRESS"] = "Please fill your address.\n";
+$GLOBALS["STR_ERR_ADDRESS"] = "Please fill in your address.\n";
 $GLOBALS["STR_ERR_BAD_EMAIL_OR_PASSWORD"] = "Bad email or password.";
 $GLOBALS["STR_ERR_BIRTHDAY1"] = "In case of mistake on your birthday date, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">please contact us using this contact form</a>";
 $GLOBALS["STR_ERR_BIRTHDAY2"] = "If you want to add your birthday date, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">please contact us using this contact form</a>";
-$GLOBALS["STR_ERR_CAT"] = "Please fill your login category.\n";
+$GLOBALS["STR_ERR_CAT"] = "Please fill in your login category.\n";
 $GLOBALS["STR_ERR_CGV_CONFIRM"] = "You have not read and agreed to the terms of sale .\n";
 $GLOBALS["STR_ERR_CGV"] = "Please validate the Terms and Conditions.\r\n";
 $GLOBALS["STR_ERR_CODE_PROMO"] = "Your promotional code is not valid anymore or does not exist.\nIf your code seems exact to you, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">contact the support with this contact form</a>\n";
 $GLOBALS["STR_ERR_COUNTRY"] = "You do not specify your country.\n";
 $GLOBALS["STR_ERR_DATE_BAD"] = "The date is incorrect.";
-$GLOBALS["STR_ERR_DESCRIPTION"] = "Please fill your description.\n";
+$GLOBALS["STR_ERR_DESCRIPTION"] = "Please fill in your description.\n";
 $GLOBALS["STR_ERR_EMAIL_BAD"] = "Please provide a correct email address.";
 $GLOBALS["STR_ERR_EMAIL_STILL"] = "This address email already exists.";
 $GLOBALS["STR_ERR_EMAIL_VIDE"] = "Please type in your email account.";
 $GLOBALS["STR_ERR_EMAIL"] = "Please type in your email.";
-$GLOBALS["STR_ERR_EXPIRATION_DATE"] = "Please fill your expiration date.\n";
-$GLOBALS["STR_ERR_FILL_IN_ALL"] = "Veuillez remplir tous les champs";
+$GLOBALS["STR_ERR_EXPIRATION_DATE"] = "Please fill in your expiration date.\n";
+$GLOBALS["STR_ERR_FILL_IN_ALL"] = "Please fill in all fields";
 $GLOBALS["STR_ERR_FIRST_CHOICE"] = "You must choose at least one favorite category.\n";
-$GLOBALS["STR_ERR_FIRSTNAME"] = "Please fill your first name.\n";
+$GLOBALS["STR_ERR_FIRSTNAME"] = "Please fill in your first name.\n";
 $GLOBALS["STR_ERR_FORM"] = "Your form is incomplete or comprises errors";
 $GLOBALS["STR_ERR_HASH"] = "The link is not valid.\nNo changes were made.";
 $GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "You haven't yet chosen your country, or your delivery information.<br /><br />Please fill in the missing fields.";
 $GLOBALS["STR_ERR_KEYB"] = "Press the button X to close the keyboard";
-$GLOBALS["STR_ERR_LOGIN"] = "Please fill your login.\n";
-$GLOBALS["STR_ERR_MESSAGE"] = "Please fill your message.\n";
+$GLOBALS["STR_ERR_LOGIN"] = "Please fill in your login.\n";
+$GLOBALS["STR_ERR_MESSAGE"] = "Please fill in your message.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "The passwords do not match. \n Please re-enter passwords";
-$GLOBALS["STR_ERR_NAME"] = "Please fill your surname.\n";
+$GLOBALS["STR_ERR_NAME"] = "Please fill in your surname.\n";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "Please confirm your new password.\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "Please insert a new password.\n";
 $GLOBALS["STR_ERR_NICKNAME_STILL"] = "This nickname already exists.";
 $GLOBALS["STR_ERR_NOEMAIL"] = "This email doesn't exist.";
 $GLOBALS["STR_ERR_OLDPASS_VALID"] = "Your old password is wrong, please try again.\n";
 $GLOBALS["STR_ERR_OLDPASS"] = "Please insert your old password.\n";
-$GLOBALS["STR_ERR_ORDER_NUMBER"] = "Please fill your order number.\n";
+$GLOBALS["STR_ERR_ORDER_NUMBER"] = "Please fill in your order number.\n";
 $GLOBALS["STR_ERR_PASS_CONFIRM"] = "Your two passwords must match.\n";
 $GLOBALS["STR_ERR_PASSWORD_CONFIRM"] = "You do not confirm your password.\n";
 $GLOBALS["STR_ERR_PASSWORD_EMPTY"] = "Please type in your password.";
-$GLOBALS["STR_ERR_PASSWORD"] = "Please fill your password.\n";
-$GLOBALS["STR_ERR_PAYMENT"] = "Please fill your means of payment.\n";
-$GLOBALS["STR_ERR_PRICE"] = "Please fill your price.\n";
+$GLOBALS["STR_ERR_PASSWORD"] = "Please fill in your password.\n";
+$GLOBALS["STR_ERR_PAYMENT"] = "Please fill in your payment mean.\n";
+$GLOBALS["STR_ERR_PRICE"] = "Please fill in your price.\n";
 $GLOBALS["STR_ERR_PSEUDO"] = "You do not specify your nickname, or it contains an at sign, or word blacklisted\n";
-$GLOBALS["STR_ERR_QUANTITY"] = "Please fill your quantity\n";
+$GLOBALS["STR_ERR_QUANTITY"] = "Please fill in your quantity\n";
 $GLOBALS["STR_ERR_SIREN"] = "You did not specify a company identification number.\n";
 $GLOBALS["STR_ERR_SOCIETY"] = "You did not specify a company name.\n";
-$GLOBALS["STR_ERR_SUBJECT"] = "Please fill your request subject.\n";
+$GLOBALS["STR_ERR_SUBJECT"] = "Please fill in your request subject.\n";
 $GLOBALS["STR_ERR_TEL"] = "You did not specify your telephone number.\n";
 $GLOBALS["STR_ERR_TIME"] = "The period of 24 hours after the renewal application password is exceeded.";
-$GLOBALS["STR_ERR_TOWN"] = "Please fill your town.\n";
+$GLOBALS["STR_ERR_TOWN"] = "Please fill in your town.\n";
 $GLOBALS["STR_ERR_TWOPASS"] = "The two words don't match, please try again.\n";
-$GLOBALS["STR_ERR_TYPE"] = "Please fill your means of shipping.\n";
+$GLOBALS["STR_ERR_TYPE"] = "Please fill in your shipping mean.\n";
 $GLOBALS["STR_ERR_URL"] = "You did not specify your website url.\n";
 $GLOBALS["STR_ERR_YOU_ARE"] = "You do not specify your status.\n";
-$GLOBALS["STR_ERR_ZIP"] = "Please fill your zip code.\n";
-$GLOBALS["STR_ERR_ZONE"] = "Please fill your shipping zone.\n";
+$GLOBALS["STR_ERR_ZIP"] = "Please fill in your zip code.\n";
+$GLOBALS["STR_ERR_ZONE"] = "Please fill in your shipping zone.\n";
 $GLOBALS["STR_ERREUR_TYPE"] = "We can currently not deliver this order in this delivery area ";
 $GLOBALS["STR_ERROR_DECOD_PICTURE"] = "Error in the decoding of the image. Make sure the image is valid.";
 $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Something does not work: Check the directory permissions";
@@ -395,7 +395,7 @@ $GLOBALS["STR_MODULE_FORUM_EDIT"] = "Edit";
 $GLOBALS["STR_MODULE_LAST_VIEWS_NO_LAST_VIEWS"] = "No products visited yet.";
 $GLOBALS["STR_MODULE_MONEYBOOKERS_SUBMIT_BUTTON"] = "Click here to pay with Moneybookers";
 $GLOBALS["STR_MODULE_MULTISITE_PARTENAIRES"] = "Partners";
-$GLOBALS["STR_MODULE_PAGES-ORIENTALES_MSG_ERR_CUSTOMER"] = "Please fill your surname.\n";
+$GLOBALS["STR_MODULE_PAGES-ORIENTALES_MSG_ERR_CUSTOMER"] = "Please fill in your surname.\n";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_ERR_CATEGORY_PARTNER"] = "No category of partner available.";
 $GLOBALS["STR_MODULE_PAYBOX_DEVISE"] = "Currencies";
 $GLOBALS["STR_MODULE_PAYPAL_BOUTON"] = "https://www.paypal.com/en_US/i/btn/x-click-but23.gif";
@@ -432,7 +432,7 @@ $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "A click on the buttom below w
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "This product is currently unavailable, we can notify you by email as soon as this product arrives in stock.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Click here to return to your account.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "This email address cannot be sponsored: already on our database";
-$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Please fill in the obligatory fields in order to sponsor your friends.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\" class=\"label\">Click here to return to the previous page</a>.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Please fill in the mandatory fields in order to sponsor your friends.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\" class=\"label\">Click here to return to the previous page</a>.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Your friends have received your demand for sponsorship. As soon as they validate their account, you will beneficiate a credit of %s on their first order. They also will be able to benefit from their credit of %s on their first order.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Please confirm your registration with the reference ID you receive by email! you will receive a credit certificate of %s usable on your first order on our website.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmation of registration to the sposoring program of {$GLOBALS['site']} website";
@@ -503,13 +503,13 @@ $GLOBALS["STR_NEW_CUSTOMER"] = "New customer?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Re-enter new password ";
 $GLOBALS["STR_NEW_PASSWORD"] = "New password";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Subscribe to the newsletter";
-$GLOBALS["STR_NEWSLETTER_YES"] = "Yes I wish to be subscribed with the newsletter and to receive each month the produced catalogue";
+$GLOBALS["STR_NEWSLETTER_YES"] = "Yes, I would like to receive the newsletter";
 $GLOBALS["STR_NEWSLETTER"] = "Newsletter";
 $GLOBALS["STR_NEXT_PAGE"] = "Next page";
 $GLOBALS["STR_NEXT"] = "Next";
 $GLOBALS["STR_NO_AVAILABLE"] = "Not available";
-$GLOBALS["STR_NO_FIND_ART"] = "	<h2>We didn't find this article</h2><blockquote class=\"normal\"><a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/lire/\">Please see full list of headings.</a></blockquote>";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>We didn't find this product</h2><blockquote class=\"normal\"><a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/achat/\">Please see full list of products ranges.</a></blockquote>";
+$GLOBALS["STR_NO_FIND_ART"] = "	<h1>We didn't find this article</h1><blockquote class=\"normal\"><a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/lire/\">Please see full list of headings.</a></blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>We didn't find this product</h1><blockquote class=\"normal\"><a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/achat/\">Please see full list of products ranges.</a></blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "There is no product in this category";
 $GLOBALS["STR_NO_ORDER"] = "no order is recorded in our database.";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "You do not have the necessary authorizations to access the website administration.";
@@ -772,12 +772,12 @@ $GLOBALS["STR_UPDATE_WEBSITE"] = "The website {$GLOBALS['site']} is currently un
 $GLOBALS["STR_UPDATE"] = "Update your cart";
 $GLOBALS["STR_USER_CANCEL"] = "Cancellation of the Internet user.";
 $GLOBALS["STR_USER_ORIGIN"] = "How do you know our website?";
-$GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "By a friend or parents";
-$GLOBALS["STR_USER_ORIGIN_OPTIONS_2"] = "By search engine";
-$GLOBALS["STR_USER_ORIGIN_OPTIONS_3"] = "By price comparator";
+$GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "By a friend or parent";
+$GLOBALS["STR_USER_ORIGIN_OPTIONS_2"] = "Through a search engine";
+$GLOBALS["STR_USER_ORIGIN_OPTIONS_3"] = "Through a price comparator";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_4"] = "On another website";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_5"] = "By one of our sales representatives";
-$GLOBALS["STR_USER_ORIGIN_OPTIONS_6"] = "At exhibitions";
+$GLOBALS["STR_USER_ORIGIN_OPTIONS_6"] = "At an exhibition";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_7"] = "Other";
 $GLOBALS["STR_VALIDATE_ORDER"] = "Confirm the order";
 $GLOBALS["STR_VALIDATION_CODE_COPY"] = "Copy the confirmation code";

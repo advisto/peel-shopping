@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 36266 2013-04-06 15:02:43Z gboussin $
+// $Id: fonctions_admin.php 37238 2013-06-11 19:26:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -99,11 +99,6 @@ function get_admin_menu()
 			if (is_module_gift_checks_active ()) {
 				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/gift_check/administrer/cheques_cadeaux.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_GIFT_CHECKS"];
 			}
-			if (is_gifts_module_active ()) {
-				if (is_stock_advanced_module_active ()) {
-					$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/gifts/administrer/cadeaux.php?mode=commande'] = $GLOBALS["STR_ADMIN_MENU_USERS_GIFTS_ORDERS"];
-				}
-			}
 			// Si le module commerciale existe, alors on affiche le menu relation client
 			if (is_commerciale_module_active()) {
 				$menu_items['users'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_USERS_SALES_MANAGEMENT"].' &nbsp; -';
@@ -154,11 +149,6 @@ function get_admin_menu()
 			$main_menu_items['sales'] = array($GLOBALS['administrer_url'] . '/commander.php' => $GLOBALS["STR_ADMIN_MENU_SALES_SALES_TITLE"]);
 			$menu_items['sales'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_SALES_SALES_HEADER"].' &nbsp; -';
 			$menu_items['sales'][$GLOBALS['administrer_url'] . '/commander.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDERS"];
-			if (is_gifts_module_active ()) {
-				if (is_stock_advanced_module_active ()) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/gifts/administrer/cadeaux.php?mode=commande'] = $GLOBALS["STR_ADMIN_MENU_SALES_GIFTS"];
-				}
-			}
 			$menu_items['sales'][$GLOBALS['administrer_url'] . '/commander.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDER_CREATION"];
 			if (is_payback_module_active ()) {
 				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/payback/administrer/retours.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PRODUCT_RETURN"];
@@ -756,7 +746,7 @@ function insere_code_promo($frm)
 		return false;
 	}
 	if (empty($frm["date_debut"])) {
-		$frm["date_debut"] = get_formatted_date();
+		$frm["date_debut"] = get_formatted_date(time());
 	} 
 	if (empty($frm["date_fin"])) {
 		$frm["date_fin"] = get_formatted_date(date("Y-m-d", mktime(0, 0, 0, date('m'), date('d') + 30, date('Y'))));
@@ -953,7 +943,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			}
 		} else {
 			// $date_facture = Date du jour
-			$date_facture = get_formatted_date();
+			$date_facture = get_formatted_date(time());
 			$montant_displayed = 0;
 		}
 		// Affiche le modeles d'une commande en detail
@@ -1054,31 +1044,6 @@ function send_facture_pdf_commandes($frm)
 	}
 }
 
-/**
- * Fontion permettant de mettre à jour les points cadeaux
- *
- * @param array $frm Array with all fields data
- * @return
- */
-function update_points($frm)
-{
-	if (!empty($frm)) {
-		query("UPDATE peel_commandes
-			SET points_etat='" . intval($frm['points_etat']) . "'
-			WHERE id='" . intval($frm['id']) . "'");
-		$points = intval($frm['points']);
-
-		if ($frm['points_etat'] == 1) {
-			query("UPDATE peel_utilisateurs
-				SET points=points+'" . intval($points) . "'
-				WHERE id_utilisateur='" . intval($frm['id_utilisateur']) . "'");
-		} elseif ($frm['points_etat'] == 2) {
-			query("UPDATE peel_utilisateurs
-				SET points=points-'" . intval($points) . "'
-				WHERE id_utilisateur='" . intval($frm['id_utilisateur']) . "'");
-		}
-	}
-}
 
 /**
  * Crée ou modifie en base de données une commande et les produits commandés qui y sont associés
@@ -1096,6 +1061,7 @@ function save_commande_in_database($frm)
 	$frm['total_ecotaxe_ttc'] = 0;
 	$frm['total_ecotaxe_ht'] = 0;
 	$frm['total_poids'] = 0;
+	$frm['total_points'] = 0;
 	if (!isset($frm['delivery_tracking'])) {
 		$frm['delivery_tracking'] = null;
 	}
@@ -1332,18 +1298,19 @@ function save_commande_in_database($frm)
 		$this_article['delai_stock'] = $product_object->delai_stock;
 
 		$product_object->set_configuration($this_article['couleurId'], $this_article['tailleId'], null, is_reseller_module_active() && is_reseller()); // on fixe les options
-		$frm['total_poids'] += ($product_object->poids + $product_object->configuration_overweight) * $this_article['quantite'];
+		$this_article['poids'] = ($product_object->poids + $product_object->configuration_overweight) * $this_article['quantite'];
+		$frm['total_poids'] += $this_article['poids'];
 		$this_article['option'] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, $frm['apply_vat'], false, false, false) + $this_article['total_prix_attribut'];
 		$this_article['option_ht'] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false) + $total_prix_attribut_ht;
 
 		$this_article['option'] = round($this_article['option'], 2); //On doit arrondir les valeurs tarifaires officielles
 		$this_article['option_ht'] = round($this_article['option_ht'], 2); //On doit arrondir les valeurs tarifaires officielles
-		$this_article['points'] = $product_object->points;
+		$this_article['points'] = $product_object->points * $this_article['quantite'];
+		$frm['total_points'] += $this_article['points'];
 
 		/*
 		  Non renseignés :
 		  $this_article['giftlist_owners'] = ;
-		  $this_article['points'] = ;
 		  $this_article['email_check'] = ;
 		 */
 		if (!empty($this_article['product_id']) || !empty($this_article['product_name']) || !empty($this_article['reference']) || !empty($this_article['prix'])) {
@@ -1464,31 +1431,31 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 	$output = '
 			<table class="admin_commande_details" id="line' . $i . '">
 				<tr class="top">
-					<td width="20">
+					<td style="width:20px">
 						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="if(confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, false, true) .'\')){delete_order_line(' . $i . ');} return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
 						<input name="nom_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['nom_attribut'])) . '" />
 						<input name="total_prix_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['total_prix_attribut'])) . '" />
 					</td>
-					<td width="40">
-						<input name="id' . $i . '" style="width:100%" type="text" value="' . String::str_form_value(vb($line_data['id'])) . '" />
+					<td style="width:40px">
+						<input name="id' . $i . '" style="width:100%" type="number" value="' . String::str_form_value(vb($line_data['id'])) . '" />
 					</td>
-					<td width="65">
-						<input id="ref' . $i . '" name="ref' . $i . '" style="width:100%"  type="text" value="' . String::str_form_value(vb($line_data['ref'])) . '" />
+					<td style="width:65px">
+						<input id="ref' . $i . '" name="ref' . $i . '" style="width:100%" type="text" value="' . String::str_form_value(vb($line_data['ref'])) . '" />
 					</td>
 					<td>
 						<input type="text" id="l' . $i . '" name="l' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['nom']) . '" />' . (isset($line_data['on_download'])?($line_data['on_download'] == 1?'<br/><a href="' . get_current_url(false) . '?mode=download">'.$GLOBALS["STR_ADMIN_PRODUITS_NUMERIC_PRODUCT_SEND"].'</a>':''):'') . '
 					</td>
-					<td width="70" id="s' . $i . '" class="center"><select style="width:70px" name="size_' . $i . '">' . $size_options_html . '</select></td>
-					<td width="70" id="c' . $i . '" class="center"><select style="width:70px" name="color_' . $i . '">' . $color_options_html . '</select></td>
-					<td width="40"><input type="text" name="q' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['quantite']) . '" id="q' . $i . '" /></td>
-					<td width="70"><input type="text" name="p_cat' . $i . '" style="width:100%" value="' . String::str_form_value($prix_cat_displayed) . '" id="p_cat' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
-					<td width="60"><input type="text" name="remis' . $i . '" style="width:100%" value="' . String::str_form_value($unit_fixed_remise_displayed) . '" id="remis' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'amount\');" /></td>
-					<td width="40"><input type="text" name="perc' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['percent']) . '" id="perc' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
-					<td width="70"><input type="text" name="p' . $i . '" style="width:100%" value="' . String::str_form_value($purchase_prix_displayed) . '" id="p' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'final\');" /></td>
-					<td width="60" id="t' . $i . '">
+					<td style="width:70px" id="s' . $i . '" class="center"><select style="width:70px" name="size_' . $i . '">' . $size_options_html . '</select></td>
+					<td style="width:70px" id="c' . $i . '" class="center"><select style="width:70px" name="color_' . $i . '">' . $color_options_html . '</select></td>
+					<td style="width:40px"><input type="number" name="q' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['quantite']) . '" id="q' . $i . '" /></td>
+					<td style="width:70px"><input type="number" name="p_cat' . $i . '" style="width:100%" value="' . String::str_form_value($prix_cat_displayed) . '" id="p_cat' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
+					<td style="width:60px"><input type="number" name="remis' . $i . '" style="width:100%" value="' . String::str_form_value($unit_fixed_remise_displayed) . '" id="remis' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'amount\');" /></td>
+					<td style="width:40px"><input type="number" name="perc' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['percent']) . '" id="perc' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
+					<td style="width:70px"><input type="number" name="p' . $i . '" style="width:100%" value="' . String::str_form_value($purchase_prix_displayed) . '" id="p' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'final\');" /></td>
+					<td style="width:60px" id="t' . $i . '">
 						<select name="t' . $i . '">' . $tva_options_html . '</select>
 					</td>
-					<td width="120"> ' . vb($attribute_display) . ' </td>
+					<td style="width:120px"> ' . vb($attribute_display) . ' </td>
 				</tr>
 			</table>
 			';
@@ -1654,8 +1621,7 @@ function affiche_phone_event($user_id)
 		LIMIT 1');
 	$res = fetch_assoc($q);
 	$output = '
-	<form method="post" id="phone" action="' . get_current_url(false) . '#phone_event" >
-		<a name="phone_event"></a>
+	<form method="post" id="phone" action="' . get_current_url(false) . '#phone_section" >
 		<input type="hidden" name="mode" value="phone_call" />
 		<input type="hidden" name="id_utilisateur" value="' . intval($user_id) . '" />';
 	if (!empty($res)) {
@@ -2074,7 +2040,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 			$query_alter_table[] = 'ALTER TABLE `peel_lot_vente` DROP INDEX (`search_fulltext`)';
 		}
 		unset($index_array);
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$index_array[]='titre_'.$lng;
 			$index_array[]='description_'.$lng;
 		}
@@ -2162,6 +2128,15 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	// Ajout des langues au module carrousel
 	if (is_carrousel_module_active()) {
 		$query_alter_table[] = 'ALTER TABLE `peel_carrousels` ADD `langue_' . word_real_escape_string($new_lang) . '` tinyint(1) NOT NULL DEFAULT "0"';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `descriptif_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `description_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `image1_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `image2_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `image3_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `lien1_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `lien2_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_vignettes_carrousels` ADD `lien3_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	}
 	$created = 0;
 	foreach ($query_alter_table as $this_alter_table) {
@@ -2189,7 +2164,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 				, etat
 				, url_rewriting
 				, position";
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			if(!empty($frm['nom_' . $lng])) {
 				$sql .= ", nom_" . $lng;
 			}
@@ -2201,7 +2176,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 				, '" . intval(vb($frm['etat'])) . "'
 				, '" . nohtml_real_escape_string(vb($frm['url_rewriting'])) . "'
 				, '" . intval(vb($frm['position'])) . "'";
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			if(!empty($frm['nom_' . $lng])) {
 				$sql .= ", '" . nohtml_real_escape_string(vb($frm['nom_' . $lng])) . "'";
 			}
@@ -2278,7 +2253,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 									$sql_set_array[] = word_real_escape_string($column_name)."='".real_escape_string($this_value)."'";
 								}
 								$sql_line_array[$reference_column] = word_real_escape_string($reference_column)."='".real_escape_string($this_reference)."'";
-								if(in_array('position', $table_field_names) && $reference_column == 'id'){
+								if(in_array('position', $table_field_names) && $reference_column == 'id' && !in_array($this_table_short_name, array('pays', 'modules'))){
 									// La table a une colonne lang => on a une ligne par langue
 									$sql_set_array[] = "position=id";
 								}
@@ -2366,7 +2341,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_date_filter_form.tpl');
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('form_title', $form_title);
-		$tpl->assign('date', get_formatted_date());
+		$tpl->assign('date', get_formatted_date(time()));
 		$tpl->assign('information_select_html', $information_select_html);
 		if($submit_html !== null) {
 			$tpl->assign('submit_html', $submit_html);
@@ -2506,8 +2481,8 @@ if (!function_exists('affiche_liste_produits')) {
 			$tpl->assign('top_search_zero_issel', (vb($_GET['top_search']) === "0"));
 			
 			$tpl->assign('is_gifts_module_active', is_gifts_module_active());
-			$tpl->assign('gift_product_one_issel', (vb($_GET['gift_product']) == 1));
-			$tpl->assign('gift_product_zero_issel', (vb($_GET['gift_product']) === "0"));
+			$tpl->assign('on_gift_one_issel', (vb($_GET['on_gift']) == 1));
+			$tpl->assign('on_gift_zero_issel', (vb($_GET['on_gift']) === "0"));
 			
 			$tpl->assign('blank_src', $GLOBALS['wwwroot'] . '/images/blank.gif');
 			$tpl->assign('STR_PHOTO_NOT_AVAILABLE_ALT', $GLOBALS['STR_PHOTO_NOT_AVAILABLE_ALT']);
@@ -2542,11 +2517,11 @@ if (!function_exists('affiche_liste_produits')) {
 			if (isset($frm['promo_search']) && $frm['promo_search'] != "null") {
 				$where .= " AND p.on_promo = '" . nohtml_real_escape_string($frm['promo_search']) . "'";
 			}
-			if (is_best_seller_module_active() && isset($frm['top_search']) && $frm['top_search'] != "null") {
+			if (isset($frm['top_search']) && $frm['top_search'] != "null" && is_best_seller_module_active()) {
 				$where .= " AND p.on_top = '" . nohtml_real_escape_string($frm['top_search']) . "'";
 			}
-			if (is_gifts_module_active() && isset($frm['gift_product']) && $frm['gift_product'] != "null") {
-				$where .= " AND p.on_gift = '" . nohtml_real_escape_string($frm['gift_product']) . "'";
+			if (isset($frm['on_gift']) && $frm['on_gift'] != "null" && is_gifts_module_active()) {
+				$where .= " AND p.on_gift = '" . nohtml_real_escape_string($frm['on_gift']) . "'";
 			}
 			if (isset($frm['cat_search']) && is_numeric($frm['cat_search'])) {
 				$children_cat_list = get_children_cat_list(vn($frm['cat_search']));
@@ -2785,7 +2760,7 @@ if (!function_exists('affiche_liste_articles')) {
 					// recherche des articles sans associations
 					$rubrique_condition = ' ar.rubrique_id IS NULL OR ar.rubrique_id=0';
 				} else {
-					$rubrique_condition = ' ar.rubrique_id IN ' . implode(',', get_children_cat_list(vn($frm['cat_search'])), array(), 'rubriques');
+					$rubrique_condition = ' ar.rubrique_id IN ' . implode(',', get_children_cat_list(vn($frm['cat_search']), array(), 'rubriques'));
 				}
 				$where .= ' AND '.$rubrique_condition;
 			}

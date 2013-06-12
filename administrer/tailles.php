@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tailles.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: tailles.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -91,7 +91,7 @@ function affiche_formulaire_ajout_taille(&$frm)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 		}
 		$frm['position'] = 0;
@@ -148,7 +148,7 @@ function affiche_formulaire_taille(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng]
 			);
@@ -218,7 +218,7 @@ function insere_taille(&$frm)
 		, prix_revendeur
 		, signe
 		";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
@@ -228,7 +228,7 @@ function insere_taille(&$frm)
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix']) . "'
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix_revendeur']) . "'
 		,'" . nohtml_real_escape_string($frm['signe']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= ")";
@@ -252,7 +252,7 @@ function maj_taille($id, &$frm)
 	$sql = "UPDATE peel_tailles
 		SET	poids = '" . nohtml_real_escape_string($frm['poids']) . "'
 			, position = '" . intval($frm['position']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "	, prix = '" . nohtml_real_escape_string($prix) . "', prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "', signe ='" . nohtml_real_escape_string($frm['signe']) . "'

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateur_form.php 36264 2013-04-06 12:40:37Z gboussin $
+// $Id: utilisateur_form.php 37156 2013-06-05 12:42:24Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -103,6 +103,7 @@ $tpl->assign('telephone_calllink', (is_phone_cti_module_active() && !empty($frm[
 $tpl->assign('portable_calllink', (is_phone_cti_module_active() && !empty($frm['id_utilisateur']) ? getCallLink(vb($frm['id_utilisateur']), vb($frm['portable']), vb($frm['nom_famille']), vb($frm['pays'])) : ''));
 $tpl->assign('country_select_options', get_country_select_options(null, vb($frm['pays']), 'id', true));
 
+$tpl->assign('specific_fields', get_specific_field_infos($frm));
 $tpl->assign('code_client', vb($frm['code_client']));
 $tpl->assign('societe', vb($frm['societe']));
 $tpl->assign('civilite', vb($frm['civilite']));
@@ -268,9 +269,13 @@ $tpl->assign('etat', vb($frm['etat']));
 $tpl->assign('on_vacances', $frm['on_vacances']);
 $tpl->assign('titre_soumet', $frm['titre_soumet']);
 if (is_annonce_module_active()) {
-	$tpl->assign('favorite_category_1', get_announcement_select_options(null, vb($frm['id_cat_1']), 'id'));
-	$tpl->assign('favorite_category_2', get_announcement_select_options(null, vb($frm['id_cat_2']), 'id'));
-	$tpl->assign('favorite_category_3', get_announcement_select_options(null, vb($frm['id_cat_3']), 'id'));
+	if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && $GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories'] == 'checkbox') {
+		$tpl->assign('favorite_category', get_announcement_select_options(null, vb($frm['id_categories']), 'id', false, false, 'checkbox', 'id_categories'));	
+	} else {
+		$tpl->assign('favorite_category_1', get_announcement_select_options(null, vb($frm['id_cat_1']), 'id'));
+		$tpl->assign('favorite_category_2', get_announcement_select_options(null, vb($frm['id_cat_2']), 'id'));
+		$tpl->assign('favorite_category_3', get_announcement_select_options(null, vb($frm['id_cat_3']), 'id'));
+	}
 }
 $tpl->assign('STR_MLLE', $GLOBALS['STR_MLLE']);
 $tpl->assign('STR_MME', $GLOBALS['STR_MME']);
@@ -396,6 +401,7 @@ if (!empty($frm['id_utilisateur'])) {
 	}
 
 	$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form_isutil.tpl');
+	
 	$tpl2->assign('action', get_current_url(false) . '?id_utilisateur=' . intval($_REQUEST['id_utilisateur']) . '&mode=modif');
 	$tpl2->assign('pseudo', (!empty($frm['pseudo'])?$frm['pseudo']:vb($frm['email'])));
 	$tpl2->assign('event_comment', (!empty($_POST['event_comment']) ? $_POST['event_comment'] : ''));

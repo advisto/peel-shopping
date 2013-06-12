@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: plan.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: plan.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -99,7 +99,7 @@ function affiche_formulaire_contact(&$frm, &$form_error_object)
 	$tpl->assign('id', intval(vn($frm['id'])));
 
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'text_te' => getTextEditor('text_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['text_' . $lng]))),
 			);
@@ -130,7 +130,7 @@ function maj_contacts($frm)
 	$sql = 'UPDATE peel_access_map SET
 		map_tag = "' . real_escape_string($frm['map_tag']) . '"
 		, date_maj = "' . date('Y-m-d H:i:s', time()) . '" ';
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= '
 		, text_' . $lng . ' = "' . real_escape_string($frm['text_' . $lng]) . '"';
 	}

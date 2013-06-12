@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_livraison.php 36248 2013-04-05 17:32:15Z gboussin $
+// $Id: statut_livraison.php 37040 2013-05-30 13:17:16Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -90,7 +90,7 @@ function affiche_formulaire_ajout_statut(&$frm)
 	if(empty($frm)) {
 		$frm = array();
 		$frm['position'] = 0;
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 		}
 	}
@@ -140,7 +140,7 @@ function affiche_formulaire_statut(&$frm)
 	$tpl->assign('id', intval(vb($frm['id'])));
 	$tpl->assign('new_id', intval(vb($frm['new_id'])));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng]
 			);
@@ -180,12 +180,12 @@ function supprime_statut($id)
 function insere_statut($frm)
 {
 	$sql = "INSERT INTO peel_statut_livraison (position, id";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
 	) VALUES ('" . intval($frm['position']) . "', '" . intval($frm['new_id']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= ")";
@@ -202,7 +202,7 @@ function insere_statut($frm)
 function maj_statut($id, $frm)
 {
 	$sql = "UPDATE peel_statut_livraison SET position='" . intval($frm['position']) . "', id='" . intval($frm['new_id']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "WHERE id = '" . intval($id) . "'";

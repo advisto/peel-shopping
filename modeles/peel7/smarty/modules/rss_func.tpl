@@ -3,17 +3,23 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rss_func.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: rss_func.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<div class="rss_bloc">
-	{if isset($fb_src) AND isset($fb_href)}
+{if isset($fb_href)}
 	<a style="margin-right:5px;" href="{$fb_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$fb_src|escape:'html'}" alt="facebook" title="facebook" /></a>
-	{/if}
-	<a href="{$href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$src|escape:'html'}" alt="rss" style="vertical-align:top;" title="RSS" /></a>
+{/if}
+{if isset($twitter_href)}
+ 	<a style="margin-right:5px;" href="{$twitter_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$twitter_src|escape:'html'}" alt="twitter" style="vertical-align:top;" title="twitter" /></a>
+{/if}
+{if isset($googleplus_href)}
+ 	<a style="margin-right:5px;" href="{$googleplus_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$googleplus_src|escape:'html'}" alt="google+" style="vertical-align:top;" title="google+" /></a>
+{/if}
+	<a href="{$href|escape:'html'}" {if $rss_new_window}onclick="return(window.open(this.href)?false:true);"{/if}><img src="{$src|escape:'html'}" alt="rss" style="vertical-align:top;" title="RSS" /></a>
 </div>

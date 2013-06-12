@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: pays.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -41,7 +41,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image']));
 			$output .= insere_pays($_POST);
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PAYS_MSG_CREATED_OK'], vb($_POST['pays_' . $_SESSION["session_langue"]]))))->fetch();
 			$output .= affiche_liste_pays();
@@ -58,7 +58,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image']));
 			$output .= maj_pays($_POST['id'], $_POST);
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PAYS_MSG_UPDATED_OK'], vn($_POST['id']))))->fetch();
 			$output .= affiche_liste_pays();
@@ -99,7 +99,7 @@ function affiche_formulaire_ajout_pays(&$frm)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['pays_' . $lng] = "";
 		}
 		$frm['etat'] = "";
@@ -164,7 +164,7 @@ function affiche_formulaire_pays(&$frm)
 	$tpl->assign('iso_num', $frm["iso_num"]);
 	$tpl->assign('etat', $frm["etat"]);
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'pays' => $frm['pays_' . $lng],
 			);
@@ -236,7 +236,7 @@ function insere_pays(&$frm)
 		, iso3
 		, iso_num
 		, position";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", pays_" . $lng;
 	}
 	$sql .= "
@@ -247,7 +247,7 @@ function insere_pays(&$frm)
 		, '" . nohtml_real_escape_string($frm['iso3']) . "'
 		, '" . intval($frm['iso_num']) . "'
 		, '" . intval($frm['position']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
 	$sql .= "
@@ -267,7 +267,7 @@ function maj_pays($id, $frm)
 {
 	$sql = "UPDATE peel_pays
 		SET zone = '" . intval($frm['zone']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= " , pays_" . $lng . " = '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
 	$sql .= "

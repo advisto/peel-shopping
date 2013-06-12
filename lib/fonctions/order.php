@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 36258 2013-04-06 11:00:04Z gboussin $
+// $Id: order.php 37236 2013-06-11 19:10:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -156,7 +156,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			}
 			query($sql);
 		}
-		if ($id_statut_paiement !== null && in_array($id_statut_paiement, array(2,3)) && ($id_statut_paiement_ex != $id_statut_paiement)) {
+		if ($id_statut_paiement !== null && in_array($id_statut_paiement, array(2,3)) && !in_array($id_statut_paiement_ex, array(2,3))) {
 			if (!empty($GLOBALS['fonctionsfianet_sac']) && file_exists($GLOBALS['fonctionsfianet_sac'])) {
 				require_once($GLOBALS['fonctionsfianet_sac']);
 				// envoi des informations sur la commande au service d'analyse des commande FIANET
@@ -175,12 +175,6 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				while ($product_ordered_infos = fetch_assoc($query_t)) {
 					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_') {
 						// Format : annonce_g_12m_1c
-						// Les droits sur les annonces GOLD ont deux aspects : gold_credit pour l'utilisateur, et une ligne dans peel_gold_ads_to_users - les deux varient dans le même sens au même moment. 
-						// Le champ gold_credit est donc inutile car venant en doublon de peel_gold_ads_to_users, mais il évite jointure pour savoir simplement nombre d'annonces GOLD commandables à créer par l'utilisateur.
-						$update_credit = 'UPDATE peel_utilisateurs
-							SET gold_credit=gold_credit+1
-							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '"';
-						query($update_credit);
 						$insert_credit = 'INSERT INTO peel_gold_ads_to_users (user_id,order_id,gold_type)
 							VALUES (' . intval($commande['id_utilisateur']) . ',' . intval($commande['id']) . ',"' . nohtml_real_escape_string($product_ordered_infos['technical_code']) . '")';
 						query($insert_credit);
@@ -239,6 +233,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 						SET id_statut_livraison=6
 						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=3");
 				}
+				// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée
+				// On devrait gérer ici le fait de recréditer les points de la commande de cadeaux, mais ça nécessite de stocker en BDD les informations de points dépensés des commandes
+				// => ça nécessite actuellement une intervention manuelle par un administrateur pour recréditer le compte utilisateur
 			}
 		}
 		if(is_stock_advanced_module_active() && $id_statut_paiement !== null) {
@@ -335,6 +332,20 @@ function put_session_commande(&$frm)
  */
 function create_or_update_order(&$order_infos, &$articles_array)
 {
+	// "nom du champ dans la BDD" => "nom du champ dans $order_infos"
+	$name_compatibility_array = array(
+		"paiement" => "payment_technical_code"
+		, "type" => "typeId"
+		, "zone_tva" => "apply_vat"
+		, "zone_franco" => "zoneFranco"
+		, "produit_id" => "product_id"
+		, "couleur_id" => "couleurId"
+		, "taille_id" => "tailleId"
+		, "nom_produit" => "product_name"
+		, "option" => "prix_option"
+		, "option_ht" => "prix_option_ht"
+		, "giftlist_owners" => "listcadeaux_owner");
+	
 	// Si touts les produits ont été supprimés de la commande, on initialise le tableau
 	if (empty($articles_array)) {
 		$articles_array = array();
@@ -344,6 +355,33 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		$order_infos['statut_paiement'] = 1;
 		$order_infos['statut_livraison'] = 1;
 	}
+	
+	foreach($name_compatibility_array as $key => $value) {
+		// On rend compatible des entrées du tableau order_infos
+		if (isset($order_infos[$key])) {
+			// Nécessite une conversion du nom de l'index.
+			$order_infos[$value] = $order_infos[$key];
+			// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage;
+			unset($order_infos[$key]);
+		}
+	}
+	foreach(array('prenom', 'nom', 'adresse', 'zip', 'ville', 'pays', 'email', 'telephone', 'societe') as $this_item) {
+		// En complément de name_compatibility_array
+		if ($this_item == 'zip') {
+			$this_field = 'code_postal';
+		} elseif($this_item == 'telephone') {
+			$this_field = 'contact';
+		} else {
+			$this_field = $this_item;
+		}
+		if (!empty($order_infos[$this_item . '_bill'])) {
+			$order_infos[$this_field . '1'] = $order_infos[$this_item . '_bill'];
+		}
+		if (!empty($order_infos[$this_item . '_ship'])) {
+			$order_infos[$this_field . '2'] = $order_infos[$this_item . '_ship'];
+		}
+	}
+	
 	// On complète les données si nécessaire
 	if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($order_infos['typeId']) || is_delivery_address_necessary_for_delivery_type($order_infos['typeId']))) {
 		foreach(array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact') as $this_item) {
@@ -354,20 +392,34 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	}
 	// Avant de mettre à jour la commande, on récupère l'ancienne valeur du statut de paiement
 	if (!empty($order_infos['id'])) {
-		$statut_q = query('SELECT id_statut_paiement AS statut
+		$statut_q = query('SELECT id_statut_paiement, total_points, points_etat
 			FROM peel_commandes
 			WHERE id=' . intval($order_infos['id']));
-		$result = fetch_assoc($statut_q);
-		$id_statut_paiement_ex = $result['statut'];
+		$order_infos_ex = fetch_assoc($statut_q);
 	} else {
-		$id_statut_paiement_ex = 0;
+		$order_infos_ex = null;
 	}
 	if (empty($order_infos['devise'])) {
 		// Par exemple si !is_devises_module_active() : on prend la devise de la boutique
 		$order_infos['devise'] = $GLOBALS['site_parameters']['devise'];
 	}
-	$set_sql = "email = '" . nohtml_real_escape_string(vb($order_infos['email1'])) . "'
+	$old_id_utilisateur = $order_infos['id_utilisateur'];
+	if(empty($order_infos['email'])) {
+		$order_infos['email'] = vb($order_infos['email1']);
+	}
+	$set_sql = "email = '" . nohtml_real_escape_string(vb($order_infos['email'])) . "'
 		";
+	if(!empty($order_infos['email1'])){
+		// Si on change l'email associé à une commande, et qu'il correspond à un utilisateur en BDD, on ajuste l'id_utilisateur
+		// Sinon, on laisse l'id_utilisateur comme il était (0 si la commande avait préalablement été créée sans association à un utilisateur, ou l'id d'un compte quelconque dont l'email n'est peut-être pas à jour)
+		$searched_id_utilisateur = get_user_id_from_email($order_infos['email']);
+		if(!empty($searched_id_utilisateur)) {
+			$order_infos['id_utilisateur'] = $searched_id_utilisateur;
+		}
+	}
+	if (isset($order_infos['id_utilisateur'])) {
+		$set_sql .= ", id_utilisateur = '" . nohtml_real_escape_string($order_infos['id_utilisateur']) . "'";
+	}
 	if (isset($order_infos['commentaires'])) {
 		$set_sql .= ", commentaires = '" . nohtml_real_escape_string($order_infos['commentaires']) . "'";
 	}
@@ -391,7 +443,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	if (isset($order_infos['percent_remise_user'])) {
 		$set_sql .= ", percent_remise_user = '" . nohtml_real_escape_string(vb($order_infos['percent_remise_user'])) . "'";
 	}
-	if (isset($order_infos['percent_remise_user'])) {
+	if (isset($order_infos['percent_code_promo'])) {
 		$set_sql .= ", percent_code_promo = '" . nohtml_real_escape_string(vb($order_infos['percent_code_promo'])) . "'";
 	}
 	if (isset($order_infos['valeur_code_promo'])) {
@@ -416,9 +468,6 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		, lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
 	if (isset($order_infos['total_points'])) {
 		$set_sql .= ", total_points = '" . nohtml_real_escape_string(vb($order_infos['total_points'])) . "'";
-	}
-	if (isset($order_infos['points_etat'])) {
-		$set_sql .= ", points_etat = '0'";
 	}
 	if (isset($order_infos['total_poids'])) {
 		$set_sql .= ", total_poids = '" . nohtml_real_escape_string(vb($order_infos['total_poids'])) . "'";
@@ -519,11 +568,11 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		// On met à jour la commande
 		$sql = "UPDATE peel_commandes
 			SET " . $set_sql . "
-			WHERE id_utilisateur='" . intval($order_infos['id_utilisateur']) . "' AND id='" . intval($order_infos['commandeid']) . "'";
+			WHERE id_utilisateur='" . intval($old_id_utilisateur) . "' AND id='" . intval($order_infos['commandeid']) . "'";
 	} else {
 		// On crée la commande - pour cela, on définit le code facture, et l'id utilisateur
 		$code_facture = vb($order_infos['code_facture']);
-		while (empty($code_facture) || num_rows($qid_commande)) {
+		while (empty($code_facture) || (isset($qid_commande) && num_rows($qid_commande))) {
 			// On s'assure que le code facture généré n'existe pas encore
 			$code_facture = MDP(10);
 			$qid_commande = query("SELECT *
@@ -533,7 +582,6 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		// Attention : on ne doit pas mettre de "a_timestamp" ici, car ça dépend de si la commande est à passer en payer ou non => c'est géré dans update_order_payment_status
 		$sql = "INSERT INTO peel_commandes
 			SET " . $set_sql . "
-			, id_utilisateur = '" . intval($order_infos['id_utilisateur']) . "'
 			, code_facture = '" . nohtml_real_escape_string($code_facture) . "'
 			, o_timestamp = '" . date('Y-m-d H:i:s', time()) . "' ";
 	}
@@ -543,29 +591,47 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	} else {
 		$order_id = insert_id();
 	}
-	if(!empty($order_infos['numero'])){
-		// Si un numéro est spécifié, alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
-		query("UPDATE peel_commandes
-			SET numero = '" . nohtml_real_escape_string(get_bill_number($order_infos['numero'], $order_id, false)) . "'
-			WHERE id = '" . intval($order_id) . "'");
-	}
+	if(!empty($order_infos['numero']) && $order_infos['numero']!=vb($GLOBALS['site_parameters']['format_numero_facture'])) {
+		// Si un numéro est spécifié par l'admin (donc n'est pas le format par défaut), alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
+		$numero = get_bill_number($order_infos['numero'], $order_id, false);
+	} else {
+		$numero = '';
+	}	
+	query("UPDATE peel_commandes
+		SET numero = '" . nohtml_real_escape_string($numero) . "'
+		WHERE id = '" . intval($order_id) . "'");
 	// On va enregistrer l'ensemble des produits commandés pour la commande $order_id
 	// Tout d'abord on supprime ce qui existait en BDD pour cette commande
-	if (is_stock_advanced_module_active()) {
-		// On réincrémente les stocks si il y avait des articles précédemment stockés
-		$product_infos_array = get_product_infos_array_in_order($order_id);
-
-		foreach ($product_infos_array as $this_ordered_product) {
-			// On réincrémente le stock uniquement pour les articles onstock=1, c'est-à-dire dont le stock est géré
-			if ($this_ordered_product['etat_stock'] == 1 && in_array($id_statut_paiement_ex, explode(',', $GLOBALS['site_parameters']['payment_status_decrement_stock'])) ) {
-				incremente_stock($this_ordered_product['quantite'] - $this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
+	if (!empty($order_infos_ex)) {
+		if(is_stock_advanced_module_active()) {
+			// On réincrémente les stocks si il y avait des articles précédemment stockés
+			$product_infos_array = get_product_infos_array_in_order($order_id);
+			foreach ($product_infos_array as $this_ordered_product) {
+				// On réincrémente le stock uniquement pour les articles onstock=1, c'est-à-dire dont le stock est géré
+				if ($this_ordered_product['etat_stock'] == 1 && in_array($order_infos_ex['id_statut_paiement'], explode(',', $GLOBALS['site_parameters']['payment_status_decrement_stock'])) ) {
+					incremente_stock($this_ordered_product['quantite'] - $this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
+				}
 			}
+		}
+		if(is_gifts_module_active()) {
+			// On retire les points attribués préalablement, pour redonner les nouveaux points ensuite
+			update_points($order_infos['total_points'], vn($order_infos['points_etat']), $order_id, null);
 		}
 	}
 	query("DELETE FROM peel_commandes_articles
 		WHERE commande_id='" . intval($order_id) . "'");
 	// On ajoute les articles à la table commandes_articles
 	foreach ($articles_array as $article_infos) {
+		// On rend compatible des entrées du tableau 
+		foreach($name_compatibility_array as $key => $value) {
+		// On rend compatible des entrées du tableau article_infos
+			if (isset($article_infos[$key])) {
+				// Nécessite une conversion du nom de l'index.
+				$article_infos[$value] = $article_infos[$key];
+				// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage;
+				unset($article_infos[$key]);
+			}
+		}
 		// On construit un objet product à partir des informations de $article_infos.
 		// On l'utilise pour des informations diverses, mais surtout pas pour les prix par exemple, qui doivent être ceux imposés par $article_infos
 		// L'objet produit n'a pas besoin d'être initialisé avec toute les informations de $article_infos car on ne l'utilise que pour les parties sur lesquelles on n'a pas d'information dans $article_infos
@@ -691,6 +757,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
 	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
 	update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
+	// On met à jour les points de l'utilisateur avec les nouveaux points de la commande
 	return $order_id;
 }
 
@@ -1196,6 +1263,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 	$tpl->assign('STR_FOR_A_CHECK_PAYMENT', $GLOBALS['STR_FOR_A_CHECK_PAYMENT']);
 	$tpl->assign('STR_SEND_CHECK', $GLOBALS['STR_SEND_CHECK']);
 	$tpl->assign('STR_SEND_TRANSFER', $GLOBALS['STR_SEND_TRANSFER']);
+	$tpl->assign('STR_FOR_A_TRANSFERT', $GLOBALS['STR_FOR_A_TRANSFERT']);
 	$tpl->assign('STR_PRINT_PROFORMA', $GLOBALS['STR_PRINT_PROFORMA']);
 	$tpl->assign('STR_FOLLOWING_ADDRESS', $GLOBALS['STR_FOLLOWING_ADDRESS']);
 	$tpl->assign('STR_FOLLOWING_ACCOUNT', $GLOBALS['STR_FOLLOWING_ACCOUNT']);

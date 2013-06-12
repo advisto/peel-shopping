@@ -139,7 +139,7 @@ div#page_title {
 form {
 	margin:0px;
 }
-input[type=text], input[type=file], input[type=password], select, textarea {
+input[type=text], input[type=number], input[type=email], input[type=tel], input[type=file], input[type=password], input[type=url], select, textarea {
 	color: #000000;
 	border: solid 1px #828282;
 	background-color: #EEEEEE;
@@ -149,10 +149,10 @@ input[type=text], input[type=file], input[type=password], select, textarea {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
-input[type=text]:focus, input[type=file]:focus, input[type=password]:focus, select:focus, textarea:focus {
+input[type=text]:focus, input[type=number]:focus, input[type=email]:focus, input[type=tel]:focus, input[type=file]:focus, input[type=password]:focus, input[type=url]:focus, select:focus, textarea:focus {
 	background-color: #F7F7FF;
 }
-input[type=text], input[type=file], input[type=password], textarea {
+input[type=text], input[type=number], input[type=email], input[type=tel], input[type=file], input[type=password], input[type=url], textarea {
 	padding: 1px;
 }
 textarea {
@@ -454,7 +454,7 @@ div.suggestions ul li {
 	padding-bottom: 5px;
 	color: #000000;
 }
-tr.is_gift_product{
+tr.is_on_gift{
     background:#ffd3cc;
 }
 .edit_module_title {

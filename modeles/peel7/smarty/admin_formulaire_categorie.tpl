@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_formulaire_categorie.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -125,8 +125,8 @@
 		{if $is_category_promotion_module_active}
 		<tr>
 			<td class="label">{$STR_ADMIN_CATEGORIES_DISCOUNT_IN_CATEGORY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="promotion_devises" value="{$promotion_devises|str_form_value}" /> {$site_symbole} {$STR_TTC}
-				<input style="width:100px" type="text" name="promotion_percent" value="{$promotion_percent|str_form_value}" />%
+			<td><input style="width:100px" type="number" name="promotion_devises" value="{$promotion_devises|str_form_value}" /> {$site_symbole} {$STR_TTC}
+				<input style="width:100px" type="number" name="promotion_percent" value="{$promotion_percent|str_form_value}" />%
 			</td>
 		</tr>
 		<tr>
@@ -136,6 +136,28 @@
 				<input type="radio" name="on_child" value="0"{if $on_child == '0'} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
+		{/if}
+		{if $is_lot_module_active}
+			<tr>
+				<td colspan="2" class="label">{$STR_ADMIN_CATEGORIES_LOT_PRICE}{$STR_BEFORE_TWO_POINTS}:</td>
+			</tr>
+			{if $mode == "maj"}
+			<tr>
+				<td class="label">{$lot_explanation_table}</td>
+			</tr>
+			<tr>
+				<td class="label">
+					<a href="{$lot_href|escape:'html'}">{$STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE}</a>
+					{if isset($lot_supprime_href)}
+					/ <a href="{$lot_supprime_href|escape:'html'}" onclick="return confirm('{$STR_ADMIN_DELETE_WARNING|filtre_javascript:true:true:true}');">{$STR_DELETE}</a>
+					{/if}
+				</td>
+			</tr>
+			{else}
+			<tr>
+				<td colspan="2">{$STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN}</td>
+			</tr>
+			{/if}
 		{/if}
 		<tr>
 			<td colspan="2" class="top bloc">{$STR_ADMIN_CUSTOMIZE_APPEARANCE}</td>

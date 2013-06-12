@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: profilAdmin_formulaire_profil.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: profilAdmin_formulaire_profil.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
@@ -25,7 +25,7 @@
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
 		<tr>
 			<td>{$STR_ADMIN_NAME} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td width="540"><input type="text" name="name_{$l.lng}" style="width:100%" value="{$l.name|str_form_value}" /></td>
+			<td style="width:540px"><input type="text" name="name_{$l.lng}" style="width:100%" value="{$l.name|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td class="entete" colspan="2">{$STR_ADMIN_DESCRIPTION} {$l.lng|upper} ({$STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN} {$l.name})</td>

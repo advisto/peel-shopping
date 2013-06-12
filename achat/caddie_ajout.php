@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: caddie_ajout.php 37235 2013-06-11 18:50:30Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -34,7 +34,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	}
 	$product_object = new Product($id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
 	$listcadeaux_owner = null;
-	if (is_giftlist_module_active() && !empty($_POST['listcadeaux_owner'])) {
+	if (!empty($_POST['listcadeaux_owner']) && is_giftlist_module_active()) {
 		$listcadeaux_owner = $_POST['listcadeaux_owner'];
 	}
 	$attributs_array = array();
@@ -96,7 +96,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 			$can_add_to_cart = false;
 			// le tableau $GLOBALS['error_attribut_mandatory'] contient le nom des attributs qui devraient être renseignés mais qui sont vides.
 			foreach($GLOBALS['error_attribut_mandatory'] as $missed_attribut) {
-				$_SESSION['session_display_popup']['error_text'] .= sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $missed_attribut) . '<br />';
+				$_SESSION['session_display_popup']['error_text'] .= sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $missed_attribut);
 			}
 		}
 		// Gestion de l'ajout au caddie

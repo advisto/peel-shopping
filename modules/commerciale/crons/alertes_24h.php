@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: alertes_24h.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: alertes_24h.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -31,7 +31,7 @@ function warnAdminContactPlanified ()
 
 	while ($result = fetch_assoc($q)) {
 		if (empty($admins_contacts_array[$result['admin_email']])) {
-			$admins_contacts_array[$result['admin_email']] = 'Contacts planifiés aujourd\'hui sur ' . $GLOBALS['wwwroot'] . ':<br />(<a href="' . $GLOBALS['wwwroot'] . '/modules/commerciale/administrer/list_admin_contact_planified.php?ad_date=' . get_formatted_date() . '">Voir la liste des contacts planifiés</a>)<br /><br />';
+			$admins_contacts_array[$result['admin_email']] = 'Contacts planifiés aujourd\'hui sur ' . $GLOBALS['wwwroot'] . ':<br />(<a href="' . $GLOBALS['wwwroot'] . '/modules/commerciale/administrer/list_admin_contact_planified.php?ad_date=' . get_formatted_date(time()) . '">Voir la liste des contacts planifiés</a>)<br /><br />';
 		}
 		$admins_contacts_array[$result['admin_email']] .= '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $result['client_id'] . '">' . $result['client_login'] . '</a> : ' . (!empty($result['comments'])?$result['comments']:'Pas de commentaire') . '<br />';
 	}

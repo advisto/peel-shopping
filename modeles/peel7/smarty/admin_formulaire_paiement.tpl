@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_paiement.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_formulaire_paiement.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -63,8 +63,8 @@
 		<tr>
 			<td>{$STR_ADMIN_PAIEMENT_ALLOW_REIMBURSMENTS}{$STR_BEFORE_TWO_POINTS}?</td>
 			<td>
-				<input type="radio" name="retour_possible" id="retour_possible1" value="1"{if $is_retour_possible1} checked{/if} /><label for="retour_possible1">{$STR_YES}</label>&nbsp;&nbsp;
-				<input type="radio" name="retour_possible" id="retour_possible0" value="0"{if $is_retour_possible0} checked{/if} /><label for="retour_possible0">{$STR_NO}</label>
+				<input type="radio" name="retour_possible" id="retour_possible1" value="1"{if $is_retour_possible1} checked="checked"{/if} /><label for="retour_possible1">{$STR_YES}</label>&nbsp;&nbsp;
+				<input type="radio" name="retour_possible" id="retour_possible0" value="0"{if $is_retour_possible0} checked="checked"{/if} /><label for="retour_possible0">{$STR_NO}</label>
 			</td>
 		</tr>
 		{/if}

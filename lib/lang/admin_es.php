@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_es.php 37007 2013-05-28 22:07:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -78,6 +78,7 @@ $GLOBALS["STR_ADMIN_CATEGORIES_ERR_NOT_FOUND"] = "No se ha encontrado categoría
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON"] = "Añadir esta categoría";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_MODIFY"] = "Modificar Categoría";
 $GLOBALS["STR_ADMIN_CATEGORIES_LIST_TITLE"] = "Lista de categoría";
+$GLOBALS["STR_ADMIN_CATEGORIES_LOT_PRICE"] = "Descuento por lote (descuentos diferentes en función de las cantidades pedidas)";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_CREATED_OK"] = "La categoría %s ha sido agregado con éxito.";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_DELETED"] = "La categoría %s ha sido eliminado todos los productos y subcategorías fueron reasignados a la matriz %s categoría.";
 $GLOBALS["STR_ADMIN_CATEGORIES_PARENT"] = "Categoría de Padres";
@@ -456,7 +457,7 @@ $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN1"] = "Para añadir un idioma, es necesario p
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN2"] = "Si coexisten varias lenguas en la misma dirección URL y no hay ninguna sesión de usuario está activo, este es el lenguaje que se utiliza la primera posición (la llegada de un usuario o un motor de búsqueda).";
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN3"] = "Para reescritura de URL en htaccess contiene por defecto los directorios de decodificación 2 letras Para cualquier otra configuración, debe editar el htaccess....";
 $GLOBALS["STR_ADMIN_LANGUES_EXTENSION"] = "Extensión";
-$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "El directorio de la imagen de la bandera (default /lib/flag/)";
+$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "Archivo de la imagen de la bandera (directorio por defecto: /lib/flag/)";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT_EXPLAIN"] = "El idioma debe estar compuesto por dos letras (ISO 639-1).";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT"] = "Extensión (2 caracteres) - Una vez terminado, no será posible editar este campo más adelante";
 $GLOBALS["STR_ADMIN_LANGUES_MSG_CONTENT_NOT_IMPORTED"] = "El contenido por defecto fueron importados a los siguientes cuadros";
@@ -671,6 +672,7 @@ $GLOBALS["STR_ADMIN_MUTIPLE_SENDING"] = "El envío múltiple";
 $GLOBALS["STR_ADMIN_NAME"] = "Apellidos";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE"] = "Elija una plantilla";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Añadir un boletín de noticias";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "Etes-vous sûr de vouloir envoyer cette newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "Nota:. El módulo de cron está activada, el número de usuarios que se pueden enviar el boletín no se limita aquí, pero sin embargo puede ser utilizado por el host";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Nota: los envíos. Este módulo está limitado a 250 destinatarios y se trata a la vez, lo cual puede ser problemático debido a las limitaciones de tiempo que se ejecutan en algunos servidores de envíos a masa, utilice el módulo cron o Wanewsletter módulo de interconexión específica.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Agregar o editar un boletín de noticias";
@@ -1000,7 +1002,7 @@ $GLOBALS["STR_ADMIN_SITES_DISPLAY"] = "Mostrar";
 $GLOBALS["STR_ADMIN_SITES_ECOTAX_MODULE"] = "Entrega";
 $GLOBALS["STR_ADMIN_SITES_EMAIL_CONFIGURATION_EXPLAIN"] = "Independientemente del ajuste anterior, no se envía correo electrónico si usted visita el sitio local: localhost o 127.0.0.1 direcciones de correo electrónico<br />a continuación se utilizan para el envío de correos electrónicos a los clientes, y se dirige a algunos mensajes de gestión del sitio<br />Nota técnica:. si tiene un servidor de correo electrónico independiente de su servidor web, asegúrese de que usted no tiene SPF campo limitando prohíbe el envío por el servidor web.";
 $GLOBALS["STR_ADMIN_SITES_EMAIL_CONFIGURATION"] = "Gestión del correo electrónico";
-$GLOBALS["STR_ADMIN_SITES_EMAIL_EMPTY_DEFAULT_EXPLAIN"] = "Si está vacío: es el webmaster de correo electrónico será utilizada";
+$GLOBALS["STR_ADMIN_SITES_EMAIL_EMPTY_DEFAULT_EXPLAIN"] = "Si está vacío: el correo electrónico webmaster será utilizada";
 $GLOBALS["STR_ADMIN_SITES_EMAIL_SENDING_ALLOWED"] = "Activar el envío de mensajes de correo electrónico a través del sitio";
 $GLOBALS["STR_ADMIN_SITES_EMAIL_SENDING_DEACTIVATE_EXPLAIN"] = "(para desactivar el servidor de prueba, por ejemplo)";
 $GLOBALS["STR_ADMIN_SITES_ERR_EMPTY_EMAIL"] = "Debe introducir una dirección válida de correo electrónico en la casilla";
@@ -1047,12 +1049,12 @@ $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "El módulo de microempresas
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro Empresas";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Si no pregunten por un valor de pedido mínimo, deje el campo por encima de 0.";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED"] = "mínima";
-$GLOBALS["STR_ADMIN_SITES_MODULE"] = "Módulo";
+$GLOBALS["STR_ADMIN_SITES_MODULE"] = "MÓDULO";
 $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Se pueden combinar módulos a la posición deseada (abajo, arriba, izquierda o derecha) al establecer el orden de visualización de la posición.<br />En las posiciones de izquierda y derecha : sideblock modo formata el módulo en un bloque, y sideblocktitle mismo con un título.<br />En un espacio dado, sólo una pancarta se muestra al mismo tiempo, una rotación aleatoria se realiza si varios banners se configuran en este espacio.<br />El módulo especial \"Publicidad azar\" en rotación aleatoria de las banderas de toda la publicidad que sea.<br />El árbol módulo catálogo muestra las categorías de productos: debe tener categorías para que aparezca.<br />";
 $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "ranuras para módulos de gestión en las columnas de sitio";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_EMAIL"] = "Cuenta de comerciante de correo electrónico en moneybookers.com (módulo Moneybookers activa si se ha especificado)";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_MODULE"] = "Moneybookers pago";
-$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "Debe establecer esta contraseña al azar Le ayudará intercambio seguro entre su sitio y Moneybookers.";
+$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "Le ayudará intercambio seguro entre su sitio y Moneybookers.";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD"] = "palabra secreta que se utiliza para el comercio con Moneybookers";
 $GLOBALS["STR_ADMIN_SITES_MSG_DELETED_OK"] = "El sitio <b>%s</b> ha sido eliminado.";
 $GLOBALS["STR_ADMIN_SITES_MSG_UPDATED_OK"] = "Configuración del sitio ha sido actualizado.";
@@ -1104,7 +1106,7 @@ $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_ADS_TOP"] = "iPhone - Lista Top Anunci
 $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_BOTTOM"] = "iPhone - Favoritos Low";
 $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_TOP"] = "iPhone - página Top Favoritos";
 $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_HOME"] = "iPhone - SplashScreen aplicación";
-$GLOBALS["STR_ADMIN_SITES_PREMIUM_MODULE"] = "módulo premium";
+$GLOBALS["STR_ADMIN_SITES_PREMIUM_MODULE"] = "MÓDULO PREMIUM";
 $GLOBALS["STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT"] = "Módulo y esta habilitado por defecto";
 $GLOBALS["STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION"] = "Administración de botones anterior y siguiente en el producto";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_liste_nom.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: attributsAdmin_liste_nom.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<table class="main_table" cellpadding="2">
 	<tr>
 		<td class="entete" colspan="4">{$STR_MODULE_ATTRIBUTS_ADMIN_TITLE}</td>
@@ -25,7 +25,7 @@
 	<tr><td><b>{$STR_MODULE_ATTRIBUTS_ADMIN_NOTHING_FOUND}</b></td></tr>
 {else}
 	<tr>
-		<td class="menu" width="200">{$STR_ADMIN_ACTION}</td>
+		<td class="menu" style="width:200px">{$STR_ADMIN_ACTION}</td>
 		<td class="menu">{$STR_ADMIN_NAME}</td>
 		<td class="menu">{$STR_TYPE}</td>
 		<td class="menu">{$STR_STATUS}</td>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_formulaire_categorie.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -63,6 +63,28 @@
 				<input type="radio" name="type_affichage" value="1"{% if type_affichage == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_IN_LINES }}
 			</td>
 		</tr>
+		{% if is_lot_module_active %}
+		<tr>
+			<td colspan="2" class="bloc">{{ STR_ADMIN_PRODUITS_LOT_PRICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+		</tr>
+			{% if mode == "maj" %}
+		<tr>
+			<td class="label">{{ lot_explanation_table }}</td>
+		</tr>
+		<tr>
+			<td class="label">
+				<a href="{{ lot_href|escape('html') }}">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}</a>
+					{% if (lot_supprime_href) %}
+				/ <a href="{{ lot_supprime_href|escape('html') }}" onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');">{{ STR_DELETE }}</a>
+					{% endif %}
+			</td>
+		</tr>
+			{% else %}
+		<tr>
+			<td class="label" colspan="2">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN }}</td>
+		</tr>
+			{% endif %}
+		{% endif %}
 		{% for l in langs %}
 		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ l.lng|upper }}</td></tr>
 		<tr>

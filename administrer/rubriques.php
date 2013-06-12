@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: rubriques.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -48,7 +48,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 			insere_sous_rubrique($frm);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_CREATED_OK'], vb($_POST['nom_' . $_SESSION['session_langue']]))))->fetch();
 			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
@@ -63,7 +63,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 			maj_rubrique(vn($_REQUEST['id']), $frm);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_UPDATED_OK'], vn($_REQUEST['id']))))->fetch();
 			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
@@ -171,7 +171,7 @@ function affiche_formulaire_ajout_rubrique($id, &$frm)
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 			$frm['description_' . $lng] = "";
 			$frm['meta_titre_' . $lng] = "";
@@ -281,7 +281,7 @@ function insere_sous_rubrique($frm)
 		, technical_code
 		, position
 		, articles_review';
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, nom_" . $lng . "
 		, description_" . $lng . '
@@ -297,7 +297,7 @@ function insere_sous_rubrique($frm)
 		,'" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 		,'" . intval($frm['position']) . "'
 		,'" . nohtml_real_escape_string($frm['articles_review']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
 		, '" . real_escape_string($frm['description_' . $lng]) . "'
@@ -326,7 +326,7 @@ function maj_rubrique($id, $frm)
 	$sql = "UPDATE peel_rubriques
 		SET parent_id = '" . intval($parent_id) . "'";
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ",nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
 		, description_" . $lng . " = '" . real_escape_string($frm['description_' . $lng]) . "'
 		, meta_titre_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
@@ -410,7 +410,7 @@ function affiche_formulaire_rubrique(&$frm)
 	$tpl->assign('articles_review', vb($frm['articles_review']));
 	$tpl->assign('technical_code', vb($frm['technical_code']));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => vb($frm['nom_' . $lng]),
 			'description_te' => getTextEditor('description_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),

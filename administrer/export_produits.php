@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an     |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: export_produits.php 36927 2013-05-23 16:15:39Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -34,7 +34,7 @@ if (!empty($_GET['encoding'])) {
 $output = '';
 $filename = "export_produits_" . str_replace('/', '-', date($GLOBALS['date_basic_format_short'])) . ".csv";
 // On ne veut pas polluer le fichier exporté par un quelconque message d'erreur
-error_reporting(0);
+@ini_set('display_errors', 0);
 output_csv_http_export_header($filename, 'csv', $page_encoding);
 // On récupère les noms des champs de la table de produits
 $product_fields_infos = get_table_fields('peel_produits');
@@ -59,16 +59,19 @@ while ($this_attribut = fetch_assoc($nom_attrib)) {
 	$product_field_names[] = $this_attribut['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['id'];
 }
 
-// Gestion des prix par lots
-$i = 1;
-$query_produits_lot = query("SELECT * 
-	FROM peel_quantites
-	WHERE produit_id='" . intval($product_object->id) . "'");
-while ($prix_lot = fetch_assoc($query_produits_lot)) {
-	$product_field_names[] = 'quantite§prix§prix_revendeur'.$i;
-	$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
-	$i++;
+if (is_lot_module_active()) {
+	// Gestion des prix par lots
+	$i = 1;
+	$query_produits_lot = query("SELECT * 
+		FROM peel_quantites
+		WHERE produit_id='" . intval($product_object->id) . "'");
+	while ($prix_lot = fetch_assoc($query_produits_lot)) {
+		$product_field_names[] = 'quantite§prix§prix_revendeur'.$i;
+		$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
+		$i++;
+	}
 }
+
 // On construit la ligne des titres
 $title_line_output = array();
 foreach($product_field_names as $this_field_name) {
@@ -141,14 +144,17 @@ while ($result = fetch_assoc($query)) {
 		}
 		$result['Stock'] = implode(',', $infos_stocks);
 	}
-	// Gestion des prix par lots
-	$i = 1;
-	$query_produits_lot = query("SELECT * 
-		FROM peel_quantites
-		WHERE produit_id='" . intval($product_object->id) . "'");
-	while ($prix_lot = fetch_assoc($query_produits_lot)) {
-		$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
-		$i++;
+	
+	if (is_lot_module_active()) {
+		// Gestion des prix par lots
+		$i = 1;
+		$query_produits_lot = query("SELECT * 
+			FROM peel_quantites
+			WHERE produit_id='" . intval($product_object->id) . "'");
+		while ($prix_lot = fetch_assoc($query_produits_lot)) {
+			$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
+			$i++;
+		}
 	}
 	// On génère la ligne
 	$this_line_output = array();

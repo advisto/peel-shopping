@@ -3,23 +3,23 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_form.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: search_form.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<form class="search_form" action="{{ action|escape('html') }}" method="get">
 	<h2>{{ STR_SEARCH_PRODUCT }}</h2>
 	<ul class="attribute_select_search attribute_select_search_part1">
 		<li class="input">
-			{{ STR_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" id="search_" name="search" size="48" value="{{ value|str_form_value }}" onclick="updateTextField('search_', '{{ STR_ENTER_KEY|filtre_javascript(true,true,true) }}');" onblur="updateTextField('search_', '{{ STR_ENTER_KEY|filtre_javascript(true,true,true) }}', 'blur');" />
+			{{ STR_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" id="search_" name="search" size="48" value="{{ value|str_form_value }}" placeholder="{{ STR_ENTER_KEY|str_form_value }}" />
 			<select name="match">
-				<option value="1"{% if match == 1 %}selected="selected"{% endif %}>{{ STR_SEARCH_ALL_WORDS }}</option>
-				<option value="2"{% if match == 2 %}selected="selected"{% endif %}>{{ STR_SEARCH_ANY_WORDS }}</option>
-				<option value="3"{% if match == 3 %}selected="selected"{% endif %}>{{ STR_SEARCH_EXACT_SENTENCE }}</option>
+				<option value="1"{% if match == 1 %} selected="selected"{% endif %}>{{ STR_SEARCH_ALL_WORDS }}</option>
+				<option value="2"{% if match == 2 %} selected="selected"{% endif %}>{{ STR_SEARCH_ANY_WORDS }}</option>
+				<option value="3"{% if match == 3 %} selected="selected"{% endif %}>{{ STR_SEARCH_EXACT_SENTENCE }}</option>
 			</select>
 		</li>
 	</ul>

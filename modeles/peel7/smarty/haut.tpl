@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: haut.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<!DOCTYPE html>
 <html lang="{$lang}" dir="ltr">
 	{$HTML_HEAD}
@@ -56,6 +56,9 @@
 				{if $page_columns_count > 1}
 				<!-- Début left_column -->
 				<div class="side_column left_column">
+					{if !empty($appstore_link)}
+					<a href="{$appstore_link|escape:'html'}" class="appstore_link"><img src="{$appstore_image|escape:'html'}" alt="Download on AppStore" style="width:100%" /></a>
+					{/if}
 					{$MODULES_LEFT}
 					{if isset($user_information_boutique)}{$user_information_boutique}{/if}
 				</div>

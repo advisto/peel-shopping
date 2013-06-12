@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: es.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -239,7 +239,7 @@ $GLOBALS["STR_ERR_PAYMENT"] = "Usted no ha completado su método de pago.\n";
 $GLOBALS["STR_ERR_PRICE"] = "No se especifica su precio.\n";
 $GLOBALS["STR_ERR_PSEUDO"] = "No ha especificado su nombre de usuario, O éste contiene una arroba, o una palabra blacklisté.\n";
 $GLOBALS["STR_ERR_QUANTITY"] = "Usted no dice la cantidad.\n";
-$GLOBALS["STR_ERR_SIREN"] = "Se deben completar la Sirena.";
+$GLOBALS["STR_ERR_SIREN"] = "Se deben completar la identificación de la empresa.";
 $GLOBALS["STR_ERR_SOCIETY"] = "No se ha especificado su empresa.\n";
 $GLOBALS["STR_ERR_SUBJECT"] = "Usted no ha especificado el motivo de su solicitud .\n";
 $GLOBALS["STR_ERR_TEL"] = "Usted no ha completado su numero de telefono.\n";
@@ -445,7 +445,7 @@ $GLOBALS["STR_MODULE_PREMIUM_SAVE_CART_SUCCESS"] = "El carro ha sido guardado co
 $GLOBALS["STR_MODULE_PREMIUM_SAVED_CART_DELETED"] = "La cesta guardada ha sido borrado.";
 $GLOBALS["STR_MODULE_PREMIUM_THANKS_CHECK_DOWNLOAD"] = "Gracias por comprobar la validez de su enlace de descarga.";
 $GLOBALS["STR_MODULE_PREMIUM_TOP_PAGE"] = "arriba de pagina";
-$GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "comprar";
+$GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "compra";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD"] = "busqueda-proveedor";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ANNOTATION_SYSTEM"] = "sistema-anotacion";
 $GLOBALS["STR_MODULE_PREMIUM_URL_LEXIQUE"] = "lexico";
@@ -511,8 +511,8 @@ $GLOBALS["STR_NEWSLETTER"] = "Boletín de noticias";
 $GLOBALS["STR_NEXT_PAGE"] = " Siguiente";
 $GLOBALS["STR_NEXT"] = "Siguiente";
 $GLOBALS["STR_NO_AVAILABLE"] = "No disponible";
-$GLOBALS["STR_NO_FIND_ART"] = "	<h2>Producto no encontrado</h2><blockquote class=\"normal\">Lo siento, el producto buscado no fue encontrado. Vea nuestra <a href=\"{$GLOBALS['wwwroot']}/lire/\">informationes generales</a> para realizar una nueva búsqueda.</blockquote>";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "producto no encontrado<blockquote class=\"normal\">Lo siento, el producto que Usted busca no fue encontrado. Visita nuestra<a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> para hacer una nueva busqueda.</blockquote>";
+$GLOBALS["STR_NO_FIND_ART"] = "	<h1>Artículo no encontrado</h1><blockquote class=\"normal\">Lo siento, el artículo buscado no fue encontrado. Vea nuestra <a href=\"{$GLOBALS['wwwroot']}/lire/\">informationes generales</a> para realizar una nueva búsqueda.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Producto no encontrado</h1><blockquote class=\"normal\">Lo siento, el producto que Usted busca no fue encontrado. Visita nuestra<a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> para hacer una nueva busqueda.</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = " Ningún producto disponible en esta categoría";
 $GLOBALS["STR_NO_ORDER"] = "Ningún pedido es registrado.";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "Usted no tiene permiso para acceder a la administración del sitio.";

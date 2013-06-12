@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: user_change_params_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
 #}<h1 class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform" method="post" action="{{ action|escape('html') }}">
@@ -47,7 +47,7 @@
 {% if is_destockplus_module_active or is_algomtl_module_active }}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="champtexte" id="url" name="url" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
+		<span class="enregistrementdroite"><input type="text" class="champtexte" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="type">{{ STR_YOU_ARE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -153,6 +153,15 @@
 		<span>{{ STR_ANNOUNCEMENT_INDICATION }}</span>
 	</div>
 	<div class="enregistrement">
+		{% if favorite_category %}
+		<span class="enregistrementgauche"><label for="favorite_category">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite">
+			<select id="favorite_category" name="favorite_category">
+				{{ favorite_category }}
+			</select>
+		</span>
+		{{ favorite_category_error }}
+		{% else %}
 		<span class="enregistrementgauche"><label for="id_cat_1">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select id="id_cat_1" name="id_cat_1">
@@ -175,6 +184,7 @@
 		</span>
 		{{ id_cat_3_error }}
 	</div>
+	{% endif %}
 {% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="origin">{{ STR_USER_ORIGIN }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: user_register_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
 *}<h1 class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form">
 	<p>{$STR_FIRST_REGISTER_TEXT}</p>
@@ -25,7 +25,7 @@
 	<div class="inscription_form">
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="email">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input class="champtexte" type="text" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
+			<span class="enregistrementdroite"><input class="champtexte" type="email" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="pseudo">{$STR_PSEUDO} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -77,7 +77,7 @@
 {if $is_destockplus_module_active || $is_algomtl_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="url">{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="url" name="url" value="{$url|html_entity_decode_if_needed|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="url" class="champtexte" id="url" name="url" placeholder="http://" value="{$url|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="type">{$STR_YOU_ARE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -133,16 +133,16 @@
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="telephone">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="telephone" name="telephone" value="{$telephone|str_form_value}" /></span>{$telephone_error}
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="telephone" name="telephone" value="{$telephone|str_form_value}" /></span>{$telephone_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="portable">{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="portable" name="portable" value="{$portable|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="portable" name="portable" value="{$portable|str_form_value}" /></span>
 		</div>
 		{if $is_annonce_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="user_fax">{$STR_FAX} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="user_fax" name="user_fax" value="{$fax|html_entity_decode_if_needed|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="user_fax" name="user_fax" value="{$fax|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
 		{/if}
 		<div class="enregistrement">
@@ -167,10 +167,6 @@
 		</div>
 		{if $is_annonce_module_active}
 		<div class="enregistrement">
-			<span class="enregistrementgauche"><label for="user_website">{$STR_WEBSITE} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="user_website" name="user_website" value="{$website|html_entity_decode_if_needed|str_form_value}" /></span>
-		</div>
-		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="promo_code">{$STR_PROMO_CODE} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite"><input type="text" class="champtexte" id="promo_code" name="promo_code" value="{$promo_code|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
@@ -178,6 +174,13 @@
 			<span>{$STR_ANNOUNCEMENT_INDICATION}</span>
 		</div>
 		<div class="enregistrement">
+		{if !empty($favorite_category)}
+			<span class="enregistrementgauche"><label for="favorite_category">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
+			<span class="enregistrementdroite">
+				{$favorite_category}
+			</span>
+			{$favorite_category_error}
+		{else}
 			<span class="enregistrementgauche">
 			<label for="id_cat_1">{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
@@ -199,12 +202,19 @@
 					{$favorite_category_3}
 				</select> {$id_cat_3_error}
 			</span>
+		{/if}
 		</div>
 		{/if}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="origin">{$STR_USER_ORIGIN}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">{include file="user_origins.tpl" origin_infos=$origin_infos}{$origin_infos.error_text}</span>
 		</div>
+		{foreach $specific_fields as $f}
+		<div class="enregistrement">
+			<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+			<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
+		</div>
+		{/foreach}
 		{if isset($captcha)}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code">{$captcha.validation_code_txt}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -217,7 +227,7 @@
 			<span class="enregistrementdroite">
 				<input name="code" size="5" maxlength="5" type="text" id="code" value="{$captcha.value|str_form_value}" />
 			</span>{$captcha.error}
-		</div>			
+		</div>
 		{/if}
 		<p><span class="form_mandatory">(*) {$STR_MANDATORY}</span></p>
 	</div>

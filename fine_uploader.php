@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fine_uploader.php 36927 2013-05-23 16:15:39Z gboussin $
 
 include("configuration.inc.php");
 
@@ -32,9 +32,9 @@ $uploader->sizeLimit = $GLOBALS['site_parameters']['uploaded_file_max_size'];
 $uploader->inputName = key($_FILES);
 
 // If you want to use resume feature for uploader, specify the folder to save parts.
-$uploader->chunksFolder = $GLOBALS['dirroot'].'/cache';
+$uploader->chunksFolder = $GLOBALS['dirroot'].'/'.$GLOBALS['site_parameters']['cache_folder'];
 
-$save_path = '/cache';
+$save_path = '/'.$GLOBALS['site_parameters']['cache_folder'];
 $save_full_path = $GLOBALS['dirroot'].$save_path;
 
 $rename_file = false; // Si false : on ne fait que retraiter le nom de base

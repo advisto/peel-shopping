@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: Product.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 36232 2013-04-05 13:16:01Z gboussin $
+ * @version $Id: Product.php 36927 2013-05-23 16:15:39Z gboussin $
  * @access public
  */
 class Product {
@@ -195,8 +195,6 @@ class Product {
 					, p.volume
 					, p.position
 					, p.extra_link
-					, p.on_gift
-					, p.on_gift_points
 					, c.id AS categorie_id
 					, c.nom_" . $_SESSION['session_langue'] . " AS categorie";
 			if (is_conditionnement_module_active()) {
@@ -240,6 +238,16 @@ class Product {
 			$this->description = String::html_entity_decode_if_needed($this->description);
 		}
 		correct_output($this->description, false, 'html');
+		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
+		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, true, false, true);
+		foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
+			foreach($this_options_array as $this_attribut_id => $this_options_infos) {
+				if($this_attribut_id && empty($this_options_infos['texte_libre']) && empty($this_options_infos['upload'])) {
+					// Ceci n'est pas un attribut texte ou upload
+					$this->description .= $this_options_infos['nom'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $this_options_infos['descriptif'] . '<br />';
+				}
+			}
+		}
 		$this->categorie = String::html_entity_decode_if_needed(vb($this->categorie));
 		$this->poids = floatval($this->poids);
 		$this->volume = floatval($this->volume);
@@ -264,10 +272,14 @@ class Product {
 			$this->ecotaxe_ttc = 0;
 		}
 		$this->prix_ht = $this->prix / (1 + $this->tva / 100);
+		$price_calculation = affiche_attributs_form_part($this, 'price_calculation', null, null, null, null, null, is_reseller_module_active() && is_reseller(), false, false, true);
+		$this->prix_ht += vn($GLOBALS['last_calculation_additional_price_ht']);
 		$this->vat_applicable = $vat_applicable;
 		if (empty($vat_applicable)) {
 			$this->ecotaxe_ttc = $this->ecotaxe_ht;
 			$this->prix = $this->prix_ht;
+		}else {
+			$this->prix = $this->prix_ht * (1 + $this->tva / 100);
 		}
 	}
 
@@ -676,9 +688,11 @@ class Product {
 	 * @param integer $quantity
 	 * @param boolean $add_ecotax
 	 * @param boolean $get_price_for_this_configuration
+	 * @param boolean $add_rdfa_properties
+	 * @param integer $quantity_product_same_in_category
 	 * @return
 	 */
-	function get_final_price($user_promotion_percentage = 0, $with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $quantity = 1, $add_ecotax = true, $get_price_for_this_configuration = true, $add_rdfa_properties = false)
+	function get_final_price($user_promotion_percentage = 0, $with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $quantity = 1, $add_ecotax = true, $get_price_for_this_configuration = true, $add_rdfa_properties = false, $quantity_product_same_in_category = 1)
 	{
 		// Choix entre prix grossiste et prix public
 		if ($reseller_mode) {
@@ -719,11 +733,11 @@ class Product {
 			}
 		}
 		if (!$this->is_price_flash($reseller_mode)) {
-			// Si on veut cumuler les réductions par produit, par marque et par catégorie, décommenter la ligne suivante
-			$promotion_devises = 0;
-			if (!$reseller_mode && is_marque_promotion_module_active()) {
+			if (!$reseller_mode) {
+				// Pour les revendeurs, on n'applique pas d'autre réduction que le pourcentage de réduction explicite pour cet utilisateur
+				$promotion_devises = 0;
 				if (is_category_promotion_module_active()) {
-					$cat = get_category_promotion_by_product($this->id);
+					$cat = get_category_promotion_by_product($this->id, vn($quantity_product_same_in_category));
 					if (!empty($cat) && $cat['promotion_devises'] > 0) {
 						// Réduction par marque en valeur et non pas en pourcentage
 						$promotion_devises = max($promotion_devises, $cat['promotion_devises']);
@@ -733,13 +747,14 @@ class Product {
 					$marque = get_marque_promotion_by_product($this->id);
 					if (!empty($marque) && $marque['promotion_devises'] > 0) {
 						// Réduction par marque en valeur et non pas en pourcentage
+						// Si on veut cumuler les réductions par produit, par marque et par catégorie, changer la ligne ci-dessous
 						$promotion_devises = max($promotion_devises, $marque['promotion_devises']);
 					}
 				}
+				$price_ht = max($price_ht - $promotion_devises / (1 + $this->tva / 100), 0);
 			}
-			$price_ht = max($price_ht - $promotion_devises / (1 + $this->tva / 100), 0);
 			// Application des réductions en pourcentages
-			$price_ht = $price_ht * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage, false) / 100) ;
+			$price_ht = $price_ht * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage, false, vn($quantity_product_same_in_category)) / 100) ;
 		} else {
 			// Si c'est un prix flash, on n'applique pas les réductions en pourcentage ni en valeur
 			// (mais sur les options, les pourcentages seront quand même appliqués - pas gérés ici)
@@ -767,14 +782,16 @@ class Product {
 	 * @param boolean $reseller_mode
 	 * @param integer $user_promotion_percentage
 	 * @param boolean $format
+	 * @param integer $quantity
 	 * @return
 	 */
-	function get_all_promotions_percentage($reseller_mode = false, $user_promotion_percentage = 0, $format = false)
+	function get_all_promotions_percentage($reseller_mode = false, $user_promotion_percentage = 0, $format = false, $quantity = 1)
 	{
 		$user_promotion_percentage = min($user_promotion_percentage, 100);
 		if (!$reseller_mode) {
+			// Pour les revendeurs, on n'applique pas d'autre réduction que le pourcentage de réduction explicite pour cet utilisateur
 			if (is_category_promotion_module_active()) {
-				$cat = get_category_promotion_by_product($this->id);
+				$cat = get_category_promotion_by_product($this->id, $quantity);
 			}
 			if (!empty($GLOBALS['site_parameters']['global_remise_percent'])) {
 				$global_promotion = array('nom' => $GLOBALS['STR_GLOBAL_PROMOTION'], 'promotion_devises' => 0, 'promotion_percent' => vn($GLOBALS['site_parameters']['global_remise_percent']));
@@ -968,7 +985,7 @@ class Product {
 	 */
 	function qrcode_image_src()
 	{
-		return $GLOBALS['wwwroot'].'/qrcode.php?path='.urlencode(str_replace($GLOBALS['wwwroot'], '', $this->get_product_url()));
+		return $GLOBALS['wwwroot'].'/qrcode.php?path='.urlencode(rawurldecode(str_replace($GLOBALS['wwwroot'], '', $this->get_product_url())));
 	}
 }
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database.php 37247 2013-06-11 22:14:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -86,7 +86,7 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 		if (!empty($support)) {
 			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
 		}
-		if (!empty($display_warning_if_connection_problem)) {
+		if (!empty($GLOBALS['site_parameters']['display_warning_if_connection_problem'])) {
 			echo $sujet_du_mail;
 		}
 		trigger_error($serveur_mysql. ' - ' .$sujet_du_mail, E_USER_NOTICE);
@@ -157,7 +157,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		// L'utilisateur ayant le profil "demo" ne peut pas faire de modification des données
 		return false;
 	}
-	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false)) {
+	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false)) {
 		// On empêche l'exécution de requêtes contenant certains mots clé
 		return false;
 	}
@@ -171,7 +171,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 	while (empty($query_values)) {
 		if ($i > 0) {
 			// Si on veut réessayer la requête, on regarde si c'est adapté de réinitialiser la connexion
-			if (empty($error_number) || in_array($error_number, array(111, 126, 127, 141, 144, 145, 1034, 1053, 1137, 1152, 1154, 1156, 1184, 1205, 2003, 2006, 2013))) {
+			if (empty($error_number) || in_array($error_number, array(111, 126, 127, 141, 144, 145, 1034, 1053, 1137, 1152, 1154, 1156, 1184, 1205, 1317, 2003, 2006, 2013))) {
 				// Liste des erreurs : http://dev.mysql.com/doc/mysql/fr/Error-messages.html
 				// par ailleurs : 2013 : Lost connection to MySQL server during query
 				// 2006 MySQL server has gone away
@@ -226,12 +226,10 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		return $query_values;
 	} else {
 		if (!$silent_if_error) {
-			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . ' - ' . $query . " - Error number " . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']);
-			if (!empty($GLOBALS['display_errors'])) {
-				if (a_priv('admin*', false) && empty($GLOBALS['display_errors'])) {
-					// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur
-					echo '[admin info : ' . $error_message . ']<br />';
-				}
+			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
+			if (empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
+				// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur
+				echo '[admin info : ' . $error_message . ']<br />';
 			}
 			trigger_error($error_message , E_USER_NOTICE);
 		}

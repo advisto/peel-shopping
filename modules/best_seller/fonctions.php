@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37130 2013-06-04 08:13:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -46,14 +46,15 @@ function affiche_best_seller_produit_colonne($return_mode = false)
 	$qid = query($requete);
 	$numrows = num_rows($qid);
 	if ($numrows > 0) {
-		$i = 1;
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/best_seller_produit_colonne.tpl');
 		$tpl_products = array();
 		while ($prod = fetch_assoc($qid)) {
 			// Faire attention que dans $prod on a bien les noms de colonnes correspondant à ce qui est nécessaire dans la classe product
 			$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-			$tpl_products[] = get_product_in_container_html($product_object);
-			$i++;
+			$this_product_in_container_html = get_product_in_container_html($product_object);
+			if (!empty($this_product_in_container_html)) {
+				$tpl_products[] = $this_product_in_container_html;
+			}
 		}
 		$tpl->assign('products', $tpl_products);
 		$output .= $tpl->fetch();

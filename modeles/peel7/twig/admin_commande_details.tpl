@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_commande_details.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -95,8 +95,8 @@
 			<td>{{ commande_date }}</td>
 		</tr>
 		<tr>
-			<td>{{ STR_BY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><a href="{{ email_href|escape('html') }}">{{ email }}</a></td>
+			<td>{{ STR_ADMIN_COMMANDER_ORDER_AUTHOR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input name="email" type="text" value="{{ email|str_form_value }}" /> <a href="{{ email_href|escape('html') }}">{{ email }}</a></td>
 		</tr>
 {% else %}
 </table>
@@ -247,12 +247,6 @@
 	<tr>
 		<td colspan="2" class="bloc">{{ STR_ADMIN_COMMANDER_CLIENT_INFORMATION }}</td>
 	</tr>
-	{% if action_name == "modif" %}
-	<tr>
-		<td>{{ STR_ADMIN_COMMANDER_ORDER_AUTHOR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-		<td><input name="email" type="text" value="{{ email|str_form_value }}" /></td>
-	</tr>
-	{% endif %}
 	<tr>
 		<td colspan="2" class="label">{{ STR_INVOICE_ADDRESS }}</td>
 	</tr>

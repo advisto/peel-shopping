@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_form_contact_user.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: commercialeAdmin_form_contact_user.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
-	<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+	<table class="full_width">
 		<tr>
 			<th style="width:40%;">{$STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE}{$STR_BEFORE_TWO_POINTS}:</th>
 			<td>
@@ -46,10 +46,10 @@
 {if isset($rce)}
 <form method="post" action="{$action|escape:'html'}">
 	<h2 class="entete">{$STR_MODULE_COMMERCIAL_ADMIN_EDIT_PLANIFIED_CONTACT} {$id_contact_planified}</h2>
-	<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+	<table class="full_width">
 		<tr>
 			<td>
-				<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+				<table class="full_width">
 					<tr>
 						<th style="width:40%;">{$STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE}{$STR_BEFORE_TWO_POINTS}:</th>
 						<td>
@@ -86,35 +86,28 @@
 </form>
 {/if}
 {if $are_results}
-<form method="post" action="{$modif_action}">
-	<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+<form id="contact_planified" method="post" action="{$modif_action}">
+	<table id="tablesForm" class="full_width">
+		{$links_header_row}
+		{foreach $results as $res}
+		{$res.tr_rollover}
+			<td style="width:30px; text-align:center;">
+				<input type="hidden" name="mode" value="suppr_contact_planified" />
+				<input name="form_delete_admins_contacts[]" type="checkbox" value="{$res.id|str_form_value}" id="cbx_{$res.id}" />
+				<a href="{$res.href|escape:'html'}"><img alt="edit" src="{$edit_src|escape:'html'}" /></a>
+			</td>
+			<td style="width:100px;text-align:center;">{$res.pseudo}</td>
+			<td style="width:100px;text-align:center;">{$res.date}</td>
+			<td style="width:100px;text-align:center;">{$res.reason}</td>
+			<td style="width:200px;text-align:center;">{$res.comments}</td>
+		</tr>
+		{/foreach}
 		<tr>
-			<td colspan="2">
-				<a name="contact_planified"></a>
-				<table id="tablesForm" style="border:0;cellpadding:0;cellspacing:0;width:100%;">
-					{$links_header_row}
-					{foreach $results as $res}
-					{$res.tr_rollover}
-						<td style="width:30px; text-align:center;">
-							<input type="hidden" name="mode" value="suppr_contact_planified" />
-							<input name="form_delete_admins_contacts[]" type="checkbox" value="{$res.id|str_form_value}" id="cbx_{$res.id}" />
-							<a href="{$res.href|escape:'html'}"><img alt="edit" src="{$edit_src|escape:'html'}" /></a>
-						</td>
-						<td style="width:100px;text-align:center;">{$res.pseudo}</td>
-						<td style="width:100px;text-align:center;">{$res.date}</td>
-						<td style="width:100px;text-align:center;">{$res.reason}</td>
-						<td style="width:200px;text-align:center;">{$res.comments}</td>
-					</tr>
-					{/foreach}
-					<tr>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td colspan="5" class="center">
-							<input name="contact_planified_delete" style="width:80px" type="submit" value="{$STR_DELETE|str_form_value}" class="bouton" />
-						</td>
-					</tr>
-				</table>
+			<td colspan="5">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="5" class="center">
+				<input name="contact_planified_delete" style="width:80px" type="submit" value="{$STR_DELETE|str_form_value}" class="bouton" />
 			</td>
 		</tr>
 	</table>

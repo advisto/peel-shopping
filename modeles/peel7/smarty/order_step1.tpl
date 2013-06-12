@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: order_step1.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
@@ -36,15 +36,15 @@
 			{$email1_error}
 			<p class="right">
 				<label for="email1">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="email1" id="email1" size="32" value="{$email1|str_form_value}" />
+				<input class="formulaire-achat" type="email" name="email1" id="email1" size="32" value="{$email1|str_form_value}" />
 			</p>
 			{$contact1_error}
 			<p class="right">
 				<label for="contact1">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="contact1" id="contact1" size="32" value="{$contact1|str_form_value}" />
+				<input class="formulaire-achat" type="tel" name="contact1" id="contact1" size="32" value="{$contact1|str_form_value}" />
 			</p>
 			{$adresse1_error}
-			<p class="right" style="margin-bottom:35px;">
+			<p class="right">
 				<label for="adresse1">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
 				<textarea cols="50" rows="3" name="adresse1" id="adresse1" class="formulaire-achat textarea-formulaire">{$adresse1}</textarea>
 			</p>
@@ -90,15 +90,15 @@
 			{$email2_error}
 			<p class="right">
 				<label for="email2">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="email2" id="email2" size="32" value="{$email2|str_form_value}" />
+				<input class="formulaire-achat" type="email" name="email2" id="email2" size="32" value="{$email2|str_form_value}" />
 			</p>
 			{$contact2_error}
 			<p class="right">
 				<label for="contact2">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="contact2" id="contact2" size="32" value="{$contact2|str_form_value}" />
+				<input class="formulaire-achat" type="tel" name="contact2" id="contact2" size="32" value="{$contact2|str_form_value}" />
 			</p>
 			{$adresse2_error}
-			<p class="right" style="margin-bottom:35px;">
+			<p class="right">
 				<label for="adresse2">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
 				<textarea cols="50" rows="3" class="formulaire-achat textarea-formulaire" name="adresse2" id="adresse2">{$adresse2}</textarea>
 			</p>

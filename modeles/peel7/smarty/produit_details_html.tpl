@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: produit_details_html.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -20,18 +20,18 @@
 		</div>
 	{/if}
 	<table class="product_title">
-	<tr>
-		{$prev}
-		<td class="title-details-product"><h2 property="name">{$product_name}</h2></td>
-		<td class="title-details-price">
-			{if $title_price.txt}
+		<tr>
+			{$prev}
+			<td class="title-details-product"><h1 class="page_title" property="name">{$product_name}</h1></td>
+			<td class="title-details-price">
+				{if $title_price.txt}
 				<span class="title_price_free">{$title_price.txt}</span>
-			{else}
+				{else}
 				{$title_price.value}
-			{/if}
-		</td>
-		{$next}
-	</tr>
+				{/if}
+			</td>
+			{$next}
+		</tr>
 	</table>
 	{if isset($flash_txt)}
 	<table>
@@ -200,28 +200,28 @@
 		</tr>
 	</table>				
 	{if isset($tabs)}
-		<br />
-		<table class="fp tab_table">
-			<tr>
-				{foreach $tabs as $tab}
-					<td id="title_{$tab.index}" class="{if $tab.is_current}current_tab{else}tab{/if}" onclick="switch_product_tab('tab_{$tab.index}','title_{$tab.index}');return false;">
-						<h3>{$tab.title}</h3>
-					</td>
-				{/foreach}
-			</tr>
-			<tr>
-				<td class="tab_content" colspan="{count($tabs)}">
-				{foreach $tabs as $tab}
-					<div style="display: {if $tab.is_current}block{else}none{/if};" id="tab_{$tab.index}">{$tab.content}</div>
-				{/foreach}
+	<br />
+	<table class="fp tab_table">
+		<tr>
+			{foreach $tabs as $tab}
+			<td id="title_{$tab.index}" class="{if $tab.is_current}current_tab{else}tab{/if}" onclick="switch_product_tab('tab_{$tab.index}','title_{$tab.index}');return false;">
+				<h3>{$tab.title}</h3>
+			</td>
+			{/foreach}
+		</tr>
+		<tr>
+			<td class="tab_content" colspan="{count($tabs)}">
+			{foreach $tabs as $tab}
+				<div style="display: {if $tab.is_current}block{else}none{/if};" id="tab_{$tab.index}">{$tab.content}</div>
+			{/foreach}
 				<input value="tab_1" id="current_tab_id" type="hidden" />
 				<input value="title_1" id="current_tab_title" type="hidden" />
-				</td>
-			</tr>
-		</table>
+			</td>
+		</tr>
+	</table>
 	{/if}
 	{if isset($youtube_code)}
-		{$youtube_code}
+	{$youtube_code}
 	{/if}
 	{$associated_products}
 </div>

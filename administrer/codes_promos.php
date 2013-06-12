@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: codes_promos.php 36927 2013-05-23 16:15:39Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -129,7 +129,7 @@ function affiche_formulaire_ajout_code_promo(&$frm)
 		$frm["nom"] = "";
 	}
 	$frm["nouveau_mode"] = "insere";
-	$frm["date_debut"] = get_formatted_date();
+	$frm["date_debut"] = get_formatted_date(time());
 	$frm["date_fin"] = get_formatted_date(time() + 7 * 24 * 3600);
 	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_CODES_PROMOS_CREATE'];
 	affiche_formulaire_code_promo($frm);

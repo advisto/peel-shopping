@@ -3,35 +3,35 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 35321 2013-02-16 14:48:56Z gboussin $
+// $Id: produit_details_html.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}
 <div typeof="Product">
 	{% if (global_error) %}
-		<div class="global_error">
-			{{ global_error.txt }}
-			{% if global_error.date %}<span>{{ global_error.date }}</span>{% endif %}
-		</div>
+	<div class="global_error">
+		{{ global_error.txt }}
+		{% if global_error.date %}<span>{{ global_error.date }}</span>{% endif %}
+	</div>
 	{% endif %}
 	<table class="product_title">
-	<tr>
-		{{ prev }}
-		<td class="title-details-product"><h2 property="name">{{ product_name }}</h2></td>
-		<td class="title-details-price">
-			{% if title_price.txt %}
-				<span class="title_price_free">{{ title_price.txt }}</span>
-			{% else %}
-				{{ title_price.value }}
-			{% endif %}
-		</td>
-		{{ next }}
-	</tr>
+		<tr>
+			{{ prev }}
+			<td class="title-details-product"><h1 class="page_title" property="name">{{ product_name }}</h1></td>
+			<td class="title-details-price">
+				{% if title_price.txt %}
+					<span class="title_price_free">{{ title_price.txt }}</span>
+				{% else %}
+					{{ title_price.value }}
+				{% endif %}
+			</td>
+			{{ next }}
+		</tr>
 	</table>
 	{% if (flash_txt) %}
 	<table>
@@ -41,9 +41,9 @@
 	</table>
 	{% endif %}
 	{% if (admin) %}
-		<p class="center"><a href="{{ admin.href|escape('html') }}" class="label">{{ admin.modify_txt }}</a></p>
+	<p class="center"><a href="{{ admin.href|escape('html') }}" class="label">{{ admin.modify_txt }}</a></p>
 		{% if admin.is_offline %}
-			<p style="color: red;">{{ admin.offline_txt }}</p>
+	<p style="color: red;">{{ admin.offline_txt }}</p>
 		{% endif %}
 	{% endif %}
 	<table class="fp">
@@ -200,25 +200,25 @@
 		</tr>
 	</table>				
 	{% if (tabs) %}
-		<br />
-		<table class="fp tab_table">
-			<tr>
-				{% for tab in tabs %}
-					<td id="title_{{ tab.index }}" class="{% if tab.is_current %}current_tab{% else %}tab{% endif %}" onclick="switch_product_tab('tab_{{ tab.index }}','title_{{ tab.index }}');return false;">
-						<h3>{{ tab.title }}</h3>
-					</td>
-				{% endfor %}
-			</tr>
-			<tr>
-				<td class="tab_content" colspan="{count(tabs) %}">
-				{% for tab in tabs %}
-					<div style="display: {% if tab.is_current %}block{% else %}none{% endif %};" id="tab_{{ tab.index }}">{{ tab.content }}</div>
-				{% endfor %}
+	<br />
+	<table class="fp tab_table">
+		<tr>
+			{% for tab in tabs %}
+			<td id="title_{{ tab.index }}" class="{% if tab.is_current %}current_tab{% else %}tab{% endif %}" onclick="switch_product_tab('tab_{{ tab.index }}','title_{{ tab.index }}');return false;">
+				<h3>{{ tab.title }}</h3>
+			</td>
+			{% endfor %}
+		</tr>
+		<tr>
+			<td class="tab_content" colspan="{count(tabs) %}">
+			{% for tab in tabs %}
+				<div style="display: {% if tab.is_current %}block{% else %}none{% endif %};" id="tab_{{ tab.index }}">{{ tab.content }}</div>
+			{% endfor %}
 				<input value="tab_1" id="current_tab_id" type="hidden" />
 				<input value="title_1" id="current_tab_title" type="hidden" />
-				</td>
-			</tr>
-		</table>
+			</td>
+		</tr>
+	</table>
 	{% endif %}
 	{% if (youtube_code) %}
 		{{ youtube_code }}

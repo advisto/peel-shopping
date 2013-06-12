@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 35191 2013-02-12 23:54:37Z gboussin $
+// $Id: admin_utilisateur_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
 #}<form enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -101,7 +101,7 @@
 {% endif %}
 		<tr>
 			<td class="label">{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
+			<td><input type="email" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td class="label">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -265,7 +265,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="url" style="width:100%" value="{{ url|str_form_value }}" /></td>
+			<td><input type="text" name="url" style="width:100%" placeholder="http://" value="{{ url|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_UTILISATEURS_WEBSITE_DESCRIPTION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -322,6 +322,14 @@
 		<tr>
 			<td colspan="2">{{ STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES }}</td>
 		</tr>
+	{% if favorite_category %}
+		<tr>
+			<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				{{ favorite_category }}
+			</td>
+		</tr>
+	{% else %}
 		<tr>
 			<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -346,6 +354,7 @@
 				</select>
 			</td>
 		</tr>
+	{% endif %}
 		<tr>
 			<td>&nbsp;</td>
 		</tr>

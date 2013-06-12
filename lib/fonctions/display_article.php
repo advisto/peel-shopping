@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: display_article.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -192,9 +192,6 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 				$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 			}
-			if ($GLOBALS['site_parameters']['category_count_method'] == 'global') {
-				$tpl->assign('rubriques_sons_html', get_rubriques_sons_html($rubid));
-			}
 			$tpl->assign('description', $rowrub['description']);
 			if($rowrub['technical_code'] == 'clients' && is_clients_module_active()) {
 				$tpl->assign('descriptions_clients', affiche_descriptions_clients());
@@ -212,6 +209,9 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('user_picture', get_user_picture('exhibitors'));
 				$tpl->assign('articles_html', get_articles_html($result_articles_home_tradefaire['id']));
 			}
+		}
+		if ($GLOBALS['site_parameters']['category_count_method'] == 'global' || (empty($rubid) && empty($rowrub))) {
+			$tpl->assign('rubriques_sons_html', get_rubriques_sons_html($rubid));
 		}
 		if (est_identifie() && a_priv('admin_content')) {
 			$tpl->assign('admin', array(
@@ -369,7 +369,7 @@ function get_rss_feed_content($feed_url) {
 	// Appel de la libraire SimplePie.
 	include_once $GLOBALS['dirroot'].'/lib/class/Simplepie.php';
 	$feed = new SimplePie();
-	$feed->set_cache_location($GLOBALS['dirroot'].'/cache');
+	$feed->set_cache_location($GLOBALS['dirroot'].'/'.$GLOBALS['site_parameters']['cache_folder']);
 	// On introduit une durée de cache random pour éviter qu'une page avec plusieurs flux mette à chaque fois tout à jour en même temps
 	if(!empty($_GET['update']) && $_GET['update']==1){
 		$feed->set_cache_duration(1);

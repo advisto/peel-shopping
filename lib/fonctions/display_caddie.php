@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: display_caddie.php 37236 2013-06-11 19:10:06Z sdelaporte $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -265,10 +265,10 @@ if (!function_exists('get_order_step1')) {
 				$tpl->assign('payment_error', $form_error_object->text('payment_technical_code'));
 				$tpl->assign('payment_select', get_payment_select($_SESSION['session_caddie']->payment_technical_code));
 				$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
-				$tpl->assign('STR_CGV_OK', $GLOBALS['STR_CGV_OK']);
 			} else {
 				$tpl->assign('is_payment_cgv', false);
 			}
+			$tpl->assign('STR_CGV_OK', $GLOBALS['STR_CGV_OK']);
 			$tpl->assign('commentaires', $frm['commentaires']);
 			$tpl->assign('STR_COMMENTS', $GLOBALS['STR_COMMENTS']);
 			$tpl->assign('STR_ETAPE_SUIVANTE', $GLOBALS['STR_ETAPE_SUIVANTE']);
@@ -306,7 +306,7 @@ if (!function_exists('get_order_step2')) {
 			$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
 			$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
 			$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
-			$tpl->assign('date', get_formatted_date());
+			$tpl->assign('date', get_formatted_date(time()));
 			$tpl->assign('societe1', $frm['societe1']);
 			$tpl->assign('nom1', $frm['nom1']);
 			$tpl->assign('prenom1', $frm['prenom1']);
@@ -445,10 +445,10 @@ if (!function_exists('affiche_resume_commande')) {
 						'src' => $GLOBALS['wwwroot'] . '/modules/icirelais/js/icirelais.js',
 						'value' => vb($commande->delivery_tracking)
 					));
-					$tpl->assign('STR_MODULE_ICIRELAIS_TRACKING_URL', STR_MODULE_ICIRELAIS_TRACKING_URL);
-					$tpl->assign('STR_MODULE_ICIRELAIS_COMMENT_TRACKING', STR_MODULE_ICIRELAIS_COMMENT_TRACKING);
-					$tpl->assign('STR_MODULE_ICIRELAIS_ERROR_TRACKING', STR_MODULE_ICIRELAIS_ERROR_TRACKING);
-					$tpl->assign('STR_MODULE_ICIRELAIS_CREATE_TRACKING', STR_MODULE_ICIRELAIS_CREATE_TRACKING);
+					$tpl->assign('STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE', $GLOBALS['STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE']);
+					$tpl->assign('STR_MODULE_ICIRELAIS_COMMENT_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_COMMENT_TRACKING']);
+					$tpl->assign('STR_MODULE_ICIRELAIS_ERROR_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_ERROR_TRACKING']);
+					$tpl->assign('STR_MODULE_ICIRELAIS_CREATE_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_CREATE_TRACKING']);
 				}
 			} else {
 				$tpl->assign('is_delivery_tracking', false);
@@ -496,7 +496,7 @@ if (!function_exists('affiche_resume_commande')) {
 					$tpl->assign('STR_MODULE_TNT_FEASIBILITY_REPORT', $GLOBALS['STR_MODULE_TNT_FEASIBILITY_REPORT']);
 					$tpl->assign('tnt_message', $GLOBALS['web_service_tnt']->get_tnt_feasibility_test($order_infos, $receiver_info, true));
 				} catch (SoapFault $ex) {
-					$tpl->assign('tnt_erreur_message', $GLOBALS['STR_MODULE_TNT_ERREUR_WEBSERVICE'] . BEFORE_TWO_POINTS . ': '.$ex->faultstring );
+					$tpl->assign('tnt_erreur_message', $GLOBALS['STR_MODULE_TNT_ERREUR_WEBSERVICE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '.$ex->faultstring );
 				}
 
 				$tpl->assign('tnt_message', $tnt_message);
@@ -790,7 +790,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 				} else {
 					$tmpProd['src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
 				}
-				if (is_giftlist_module_active() && $listcadeaux_owner) {
+				if (!empty($listcadeaux_owner) && is_giftlist_module_active()) {
 					$tmpProd['listcadeaux_owner_name'] = getUsername($listcadeaux_owner);
 				}
 				if (is_stock_advanced_module_active() && !empty($delivery_stock)) {

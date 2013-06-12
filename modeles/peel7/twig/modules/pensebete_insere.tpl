@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pensebete_insere.tpl 35067 2013-02-08 14:21:55Z gboussin $
+// $Id: pensebete_insere.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<h2>{{ STR_AJOUT_PENSE_BETE }}</h2>
 <p>{{ item }} &laquo;{{ name|html_entity_decode_if_needed }}&raquo; {{ STR_MODULE_PENSEBETE_HAS_BEEN_ADD_REMINDER }}.</p>
 <p>{{ STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB }} <a href="{{ account_url|escape('html') }}">{{ STR_COMPTE }}</a> {{ STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP }}.</p>

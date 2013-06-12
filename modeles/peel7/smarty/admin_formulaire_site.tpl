@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_formulaire_site.tpl 37098 2013-06-01 22:27:03Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<table class="main_table">
@@ -26,8 +26,8 @@
 		<tr>
 			<td>{$STR_ADMIN_SITES_SITE_ACTIVATION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<input type="radio" name="site_suspended" value="FALSE"{if $site_suspended == 'FALSE'} checked="checked"{/if} /> {$STR_ADMIN_SITES_SITE_ACTIVATED}
-				<input type="radio" name="site_suspended" value="TRUE"{if $site_suspended == 'TRUE'} checked="checked"{/if} /> {$STR_ADMIN_SITES_SITE_SUSPENDED}
+				<input type="radio" name="site_suspended" value="false"{if !$site_suspended} checked="checked"{/if} /> {$STR_ADMIN_SITES_SITE_ACTIVATED}
+				<input type="radio" name="site_suspended" value="true"{if $site_suspended} checked="checked"{/if} /> {$STR_ADMIN_SITES_SITE_SUSPENDED}
 			</td>
 		</tr>
 		<tr>
@@ -37,16 +37,16 @@
 		</tr>
 	{foreach $langs as $l}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_SITE_NAME} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_SITE_NAME} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" type="text" name="nom_{$l.lng}" value="{$l.nom|str_form_value}" /></td>
 		</tr>
 	{/foreach}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><select name="default_country_id">{$country_select_options}</select></td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_TEMPLATE_USED}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_TEMPLATE_USED}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 			{if isset($directory_options)}
 			<select name="template_directory">
@@ -59,7 +59,7 @@
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_PAGE_LINKS_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_PAGE_LINKS_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<select name="template_multipage">
 					<option value="">{$STR_CHOOSE}...</option>
@@ -72,7 +72,7 @@
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_CSS_FILES}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_CSS_FILES}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" type="text" name="css" value="{$css|str_form_value}" /></td>
    	 	</tr>
 		<tr>
@@ -80,19 +80,19 @@
    	 	</tr>
 	{foreach $langs as $l}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_LOGO_URL} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_LOGO_URL} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" type="text" name="logo_{$l.lng}" value="{$l.logo|str_form_value}" /></td>
 		</tr>
 	{/foreach}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_LOGO_HEADER_DISPLAY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_LOGO_HEADER_DISPLAY}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="on_logo" value="1"{if $on_logo == '1'} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="on_logo" value="0"{if $on_logo == '0'} checked="checked"{/if} /> {$STR_NO}
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_FAVICON}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_FAVICON}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 			{if isset($favicon)}
 				<img src="{$favicon.src|escape:'html'}" alt="{$favicon.favicon|str_form_value}" width="32" /> &nbsp; &nbsp; &nbsp;
@@ -104,7 +104,7 @@
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_ZOOM_SELECTION}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_ZOOM_SELECTION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="zoom" value="jqzoom" {if $zoom == 'jqzoom'} checked="checked"{/if} /> {$STR_ADMIN_SITES_JQZOOM}
 				<input type="radio" name="zoom" value="cloud-zoom" {if $zoom == 'cloud-zoom'} checked="checked"{/if} /> {$STR_ADMIN_SITES_CLOUD_ZOOM}
@@ -113,7 +113,7 @@
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_JAVASCRIPT_LIBRARIES_ACTIVATION} {$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_JAVASCRIPT_LIBRARIES_ACTIVATION} {$STR_BEFORE_TWO_POINTS}:</td>
  			<td>
 				<input type="checkbox" name="enable_prototype" value="1"{if $enable_prototype} checked="checked"{/if} /> {$STR_ADMIN_SITES_JAVASCRIPT_AJAX_ACTIVATE}
 				<input type="checkbox" name="enable_jquery" value="1"{if $enable_jquery} checked="checked"{/if} /> {$STR_ADMIN_SITES_JAVASCRIPT_JQUERY_ACTIVATE}
@@ -125,7 +125,7 @@
 			</td>
 	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_EXPORT_DEFAULT_ENCODING}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_EXPORT_DEFAULT_ENCODING}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<select name="export_encoding">
 					<option value="utf-8"{if $export_encoding == 'utf-8'} selected="selected"{/if}>{$STR_ADMIN_SITES_EXPORT_DEFAULT_ENCODING_UTF8}</option>
@@ -175,14 +175,14 @@
 			</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_SESSIONS_DURATION}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_SESSIONS_DURATION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" maxlength="5" type="text" name="sessions_duration" value="{$sessions_duration|str_form_value}" /> {$STR_MINUTES} </td>
    	 	</tr>
  		<tr>
 			<td colspan="2"><div class="global_help">{$STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN}</div></td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_DISPLAY_ERRORS_FOR_IP}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_DISPLAY_ERRORS_FOR_IP}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" value="{$display_errors_for_ips|str_form_value}" name="display_errors_for_ips" /></td>
 		</tr>
 		<tr>
@@ -192,7 +192,7 @@
 			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PRODUCTS_DISPLAY}</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_PRODUCTS_COUNT_IN_MENU}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_PRODUCTS_COUNT_IN_MENU}{$STR_BEFORE_TWO_POINTS}:</td>
  			<td>
 				<input type="radio" name="display_nb_product" value="1" {if $display_nb_product == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="display_nb_product" value="0" {if $display_nb_product == 0} checked="checked"{/if} /> {$STR_NO}
@@ -239,8 +239,8 @@
 				<div class="global_help">{$STR_ADMIN_SITES_PRODUCT_ATTRIBUTES_DISPLAY_EXPLAIN}</div>
 			</td>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_PRODUCTS_PER_PAGE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" maxlength="3" type="text" name="nb_produit_page" value="{$nb_produit_page|str_form_value}" /></td>
+			<td style="width:25%">{$STR_ADMIN_SITES_PRODUCTS_PER_PAGE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" maxlength="3" type="number" name="nb_produit_page" value="{$nb_produit_page|str_form_value}" /></td>
    	 	</tr>
 		<tr>
 			<td colspan="2">
@@ -248,14 +248,14 @@
 			</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_ADD_TO_CART_ANIMATION}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_ADD_TO_CART_ANIMATION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="anim_prod" value="1" {if $anim_prod == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="anim_prod" value="0" {if $anim_prod == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_DEFAULT_PRODUCT_PAGE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_DEFAULT_PRODUCT_PAGE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 			{if $default_picture}
 				<img src="{$default_picture_url|escape:'html'}" alt="{$default_picture|str_form_value}" width="32" /> &nbsp; &nbsp; &nbsp;
@@ -268,23 +268,23 @@
    	 	</tr>
 	{if $is_best_seller_module_active}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_TOP_SALES_CONFIGURATION}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_TOP_SALES_CONFIGURATION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="act_on_top" value="1" {if $act_on_top == 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_AUTO_TOP_SALES}
 				<input type="radio" name="act_on_top" value="0" {if $act_on_top == 0} checked="checked"{/if} /> {$STR_ADMIN_SITES_CONFIGURED_TOP_SALES}
 			</td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_TOP_SALES_MAX_PRODUCTS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" maxlength="3" type="text" name="nb_on_top" value="{$nb_on_top|str_form_value}" /></td>
+			<td style="width:25%">{$STR_ADMIN_SITES_TOP_SALES_MAX_PRODUCTS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" maxlength="3" type="number" name="nb_on_top" value="{$nb_on_top|str_form_value}" /></td>
    	 	</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_LAST_VISITS_MAX_PRODUCTS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" maxlength="3" type="text" name="nb_last_views" value="{$nb_last_views|str_form_value}" /></td>
+			<td style="width:25%">{$STR_ADMIN_SITES_LAST_VISITS_MAX_PRODUCTS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" maxlength="3" type="number" name="nb_last_views" value="{$nb_last_views|str_form_value}" /></td>
    	 	</tr>
 	{/if}
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_AUTO_PROMOTIONS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_AUTO_PROMOTIONS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="auto_promo" value="1" {if $auto_promo == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="auto_promo" value="0" {if $auto_promo == 0} checked="checked"{/if} /> {$STR_NO}
@@ -296,8 +296,8 @@
 			</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_GLOBAL_DISCOUNT_PERCENTAGE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" maxlength="8" type="text" name="global_remise_percent" value="{$global_remise_percent|str_form_value}" /> % </td>
+			<td style="width:25%">{$STR_ADMIN_SITES_GLOBAL_DISCOUNT_PERCENTAGE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" maxlength="8" type="number" name="global_remise_percent" value="{$global_remise_percent|str_form_value}" /> % </td>
    	 	</tr>
 
 		<tr>
@@ -318,7 +318,7 @@
 			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_BILLING_HEADER}</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_BILLING_NUMBER_FORMAT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_BILLING_NUMBER_FORMAT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" type="text" name="format_numero_facture" value="{$format_numero_facture|str_form_value}" /></td>
 		</tr>
 		<tr>
@@ -328,7 +328,7 @@
 			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_HEADER}</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_VALIDITY_DAYS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_VALIDITY_DAYS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" type="text" name="quotation_delay" value="{$quotation_delay|str_form_value}" /></td>
 		</tr>
 		<tr>
@@ -363,11 +363,11 @@
 			<td colspan="2" class="bloc">{$STR_ADMIN_SITES_ORDERS_UPDATING_LIMITATION} <a name="a_keep_old_orders_intact"></a></td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBID}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBID}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="keep_old_orders_intact" value="0" {if $keep_old_orders_intact == 0} checked="checked"{/if} /> {$STR_NO} <br />
 				<input type="radio" name="keep_old_orders_intact" value="1" {if $keep_old_orders_intact == 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_LAST_YEAR}<br />
-				<input type="radio" name="keep_old_orders_intact" value="2" {if $keep_old_orders_intact > 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE} <input style="width:100px" type="text" name="keep_old_orders_intact_date" value="{$keep_old_orders_intact_date|str_form_value}" />
+				<input type="radio" name="keep_old_orders_intact" value="2" {if $keep_old_orders_intact > 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE} <input style="width:100px" class="datepicker" type="text" name="keep_old_orders_intact_date" value="{$keep_old_orders_intact_date|str_form_value}" />
 			</td>
 		</tr>
 		<tr>
@@ -378,11 +378,11 @@
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="seuil_total" value="{$seuil_total|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
+			<td><input style="width:100px" type="number" name="seuil_total" value="{$seuil_total|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_RESELLER_FRANCO_LIMIT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="seuil_total_reve" value="{$seuil_total_reve|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
+			<td><input style="width:100px" type="number" name="seuil_total_reve" value="{$seuil_total_reve|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_METHOD}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -481,7 +481,7 @@
 			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_EMAIL_CONFIGURATION}</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_EMAIL_SENDING_ALLOWED}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_EMAIL_SENDING_ALLOWED}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="send_email_active" value="1" {if $send_email_active == 1} checked="checked"{/if} /> {$STR_ADMIN_ACTIVATE}
 				<input type="radio" name="send_email_active" value="0" {if $send_email_active == 0} checked="checked"{/if} /> {$STR_ADMIN_DEACTIVATE} {$STR_ADMIN_SITES_EMAIL_SENDING_DEACTIVATE_EXPLAIN}
@@ -497,7 +497,7 @@
 			<td><input style="width:250px" type="text" name="email_webmaster" value="{$email_webmaster|str_form_value}" /> {$STR_MODULE_PREMIUM_MANDATORY_EMAIL}</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_SUPPORT_SENDER_NAME}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_SUPPORT_SENDER_NAME}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" type="text" name="nom_expediteur" value="{$nom_expediteur|str_form_value}" /></td>
 		</tr>
 		<tr>
@@ -523,7 +523,7 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+				<table class="full_width">
 			{foreach $modules as $m}
 				{$m.tr_rollover}
 					<td>
@@ -809,15 +809,15 @@
 			</td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="timemax" value="{$timemax|str_form_value}" /> {$STR_ADMIN_SITES_STOCKS_BOOKING_DEFAULT}</td>
+			<td style="width:25%">{$STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" type="number" name="timemax" value="{$timemax|str_form_value}" /> {$STR_ADMIN_SITES_STOCKS_BOOKING_DEFAULT}</td>
 		</tr>
 		<tr>
 			<td colspan="2"><div class="global_help">{$STR_ADMIN_SITES_STOCKS_BOOKING_EXPLAIN}</div></td>
 		</tr>
 		<tr>
-			<td width="25%">{$STR_ADMIN_SITES_STOCKS_LIMIT_ALERT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="seuil" value="{$seuil|str_form_value}" /></td>
+			<td style="width:25%">{$STR_ADMIN_SITES_STOCKS_LIMIT_ALERT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" type="number" name="seuil" value="{$seuil|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -1313,7 +1313,7 @@
 		{if $is_fonctionspaybox}
 		<tr>
 			<td>{$STR_ADMIN_SITES_PAYBOX_CGI}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100%" type="text" name="paybox_cgi" value="{$paybox_cgi|str_form_value}" /></td>
+			<td><input style="width:100%" type="url" name="paybox_cgi" placeholder="http://" value="{$paybox_cgi|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_PAYBOX_SITE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -1362,8 +1362,8 @@
 		<tr>
 			<td>{$STR_ADMIN_SITES_SYSTEMPAY_TEST_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<label for="non">{$STR_NO}</label><input style="width:100%" type="radio" name="systempay_test_mode" value="false" id="non" {if $systempay_test_mode == 'false'} checked="checked"{/if} />
-				<label for="oui">{$STR_YES}</label><input style="width:100%" type="radio" name="systempay_test_mode" value="true" id="oui" {if $systempay_test_mode == 'true'} checked="checked"{/if} />
+				<label for="non">{$STR_NO}</label><input type="radio" name="systempay_test_mode" value="false" id="non" {if !$systempay_test_mode} checked="checked"{/if} />
+				<label for="oui">{$STR_YES}</label><input type="radio" name="systempay_test_mode" value="true" id="oui" {if $systempay_test_mode} checked="checked"{/if} />
 			</td>
 		</tr>
 		{else}
@@ -1395,7 +1395,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_FACEBOOK_PAGE_LINK}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100%" type="text" name="facebook_page_link" value="{$facebook_page_link|str_form_value}" /></td>
+			<td><input style="width:100%" type="url" name="facebook_page_link" placeholder="http://" value="{$facebook_page_link|str_form_value}" /></td>
 		</tr>
 		{else}
 		<tr>

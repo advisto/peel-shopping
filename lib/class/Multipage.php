@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: Multipage.php 36966 2013-05-26 17:10:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,13 +40,14 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 36232 2013-04-05 13:16:01Z gboussin $
+ * @version $Id: Multipage.php 36966 2013-05-26 17:10:43Z gboussin $
  * @access public
  */
 class Multipage {
 	var $DefaultResultsPerPage;
 	var $ResultPerPage;
 	var $sqlRequest;
+	var $sql_count = null;
 	var $LinkPerPage;
 	var $AddToColspan;
 	var $always_show;
@@ -54,12 +55,13 @@ class Multipage {
 	var $tpl_name;
 	var $page;
 	var $pages_count;
-	var $nbRecord;
+	var $nbRecord = null;
+	var $external_results_to_merge_at_beginning = null;
 	// $HeaderTitlesArray is a table of Titles. Each key can either be numeric if you do not want any sorting, or it can be the name of the SQL item
 	var $HeaderTitlesArray;
 	var $OrderDefault;
 	var $SortDefault;
-	var $forced_order_by_string;
+	var $forced_order_by_string = null;
 	var $nombre_session_var_name;
 	var $nb1;
 	var $nb2;
@@ -69,7 +71,7 @@ class Multipage {
 	/**
 	 * Constructeur
 	 */
-	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1)
+	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null)
 	{
 		if (empty($template_name)) {
 			// Si aucun template n'est précisé spécifiquement lors de l'appel de la fonction, la sélection en back office est utilisée
@@ -86,6 +88,7 @@ class Multipage {
 		$this->LinkPerPage = $LinkPerPage;
 		$this->AddToColspan = $AddToColspan;
 		$this->always_show = $always_show;
+		$this->external_results_to_merge_at_beginning = $external_results_to_merge_at_beginning;
 		if(!empty($nombre_session_var_name)){
 			$this->nombre_session_var_name = 'session_multipage_' . $nombre_session_var_name;
 		}
@@ -174,16 +177,27 @@ class Multipage {
 	function Query($return_objects = false)
 	{
 		$results_array = array();
-		$this->LimitSQL = $this->sqlRequest . ' ' . $this->getOrderBy();
+		$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning));
+		$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning)));
+		$this->LimitSQL = $this->sqlRequest;
+		if($lines_count > 0) {
+			$this->LimitSQL .= ' ' . $this->getOrderBy();
+		}
 		if ($this->DefaultResultsPerPage != '*') {
-			$this->LimitSQL .= " LIMIT " . max(0, intval($this->ResultPerPage * ($this->page - 1))) . ", " . max(0, intval($this->ResultPerPage));
+			// Si le nombre de $this->external_results_to_merge_at_beginning est élevé, potentiellement sur les premières pages on a uniquement des éléments extérieurs à cette requête SQL
+			// Donc on obtient ci-dessous LIMIT 0,0 => c'est nécessaire néanmoins de lancer la requête, car elle sert puisqu'elle contient SQL_CALC_FOUND_ROWS qui va servir ensuite au calcul pour le nombre de pages
+			$this->LimitSQL .= " LIMIT " . $lines_begin . ", " . $lines_count;
 		}
 		$sql = $this->LimitSQL;
-		if (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false) {
+		if (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || substr_count($sql, 'SELECT')<2)) {
 			// Si nécessaire, on rajoute SQL_CALC_FOUND_ROWS
-			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($this->LimitSQL, 0, 10)) . String::substr($this->LimitSQL, 10);
+			// On ne le fait pas pour une requête de type UNION - le test sur la parenthèse est une sécurité qui évite des hacks lors de recherche utilisateur
+			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($sql, 0, 10)) . String::substr($sql, 10);
 		}
 		$query = query($sql);
+		for($i=max(0, intval($this->ResultPerPage * ($this->page - 1)));isset($this->external_results_to_merge_at_beginning[$i]) && $i<max(0, intval($this->ResultPerPage * $this->page));$i++) {
+			$results_array[] = $this->external_results_to_merge_at_beginning[$i];
+		}
 		if ($return_objects) {
 			while ($ligne = fetch_object($query)) {
 				$results_array[] = $ligne;
@@ -206,12 +220,17 @@ class Multipage {
 	{
 		if($query_without_error) {
 			// Compte le nombre de liens qu'il y aura (= nombre de page)
-			$query_count = "SELECT FOUND_ROWS() AS rows_count";
-			$query_count_rs = query($query_count);
-			$query_count_row = fetch_assoc($query_count_rs);
-			$this->nbRecord = $query_count_row['rows_count'];
+			if($this->sql_count === null) {
+				$this->sql_count = "SELECT FOUND_ROWS() AS rows_count";
+			}
+			if(!empty($this->sql_count)) {
+				$query_count_rs = query($this->sql_count);
+				$query_count_row = fetch_assoc($query_count_rs);
+				$this->nbRecord = $query_count_row['rows_count'];
+				$this->nbRecord += count($this->external_results_to_merge_at_beginning);
+			}
 		} else {
-			$this->nbRecord = 0;
+			$this->nbRecord = count($this->external_results_to_merge_at_beginning);
 		}
 		if (!empty($this->ResultPerPage) && ($this->ResultPerPage < $this->nbRecord)) {
 			$this->pages_count = ceil($this->nbRecord / $this->ResultPerPage);
@@ -404,7 +423,7 @@ class Multipage {
 	 */
 	function getOrderBy()
 	{
-		if (empty($this->forced_order_by_string)) {
+		if ($this->forced_order_by_string === null) {
 			$columns = array_values(explode(',', str_replace(' ', '', vb($_GET['order']) . ',' . $this->OrderDefault)));
 			foreach($columns as $this_column) {
 				if (!empty($this_column)) {
@@ -425,8 +444,10 @@ class Multipage {
 			} else {
 				return 'ORDER BY ' . implode(', ', $order_by);
 			}
-		} else {
+		} elseif (!empty($this->forced_order_by_string)) {
 			return 'ORDER BY ' . $this->forced_order_by_string;
+		} else {
+			return null;
 		}
 	}
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_taille.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_formulaire_taille.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -29,23 +29,23 @@
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_TAILLES_OVERWEIGHT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="poids" style="width:100px" value="{$poids|str_form_value}" /> {$STR_ADMIN_GRAMS}</td>
+			<td><input type="number" name="poids" style="width:100px" value="{$poids|str_form_value}" /> {$STR_ADMIN_GRAMS}</td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_TAILLES_OVERCOST}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="prix" style="width:100px" value="{$prix|str_form_value}" /> <b>{$site_symbole} {$STR_TTC}</b></td>
+			<td><input type="number" name="prix" style="width:100px" value="{$prix|str_form_value}" /> <b>{$site_symbole} {$STR_TTC}</b></td>
 		</tr>
 
 		<tr>
 			<td class="label">{$STR_ADMIN_TAILLES_OVERCOST_RESELLER}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="prix_revendeur" style="width:100px" value="{$prix_revendeur|str_form_value}" /> <b>{$site_symbole} {$STR_TTC}</b></td>
+			<td><input type="number" name="prix_revendeur" style="width:100px" value="{$prix_revendeur|str_form_value}" /> <b>{$site_symbole} {$STR_TTC}</b></td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_TAILLES_SIGN}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><select name="signe"><option value="+"{if $signe == "+"} selected="selected"{/if}>+</option><option value="-"{if $signe == "-"} selected="selected"{/if}>-</option></select></td></tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="text" name="position" value="{$position|str_form_value}" /></td>
+			<td><input style="width:100px" type="number" name="position" value="{$position|str_form_value}" /></td>
    	 	</tr>
 		<tr>
 			<td class="center" colspan="2"><p><input class="bouton" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>

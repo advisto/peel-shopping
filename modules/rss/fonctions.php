@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37264 2013-06-12 13:46:33Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -26,15 +26,27 @@ if (!function_exists('affiche_rss')) {
 	{
 		$output = '';
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/rss_func.tpl');
-		$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/rss/rss.php?critere=on_promo');
+		if (is_annonce_module_active()) {
+			$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/annonces/rss.php');
+			$tpl->assign('rss_new_window', false);
+		} else {
+			$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/rss/rss.php?critere=on_promo');
+			$tpl->assign('rss_new_window', true);
+		}
 		$tpl->assign('src', $GLOBALS['wwwroot'] . '/icones/rss.png');
 
 		if (!empty($GLOBALS['site_parameters']['facebook_page_link'])) {
 			$tpl->assign('fb_href', $GLOBALS['site_parameters']['facebook_page_link']);
 			$tpl->assign('fb_src', $GLOBALS['wwwroot'] . '/icones/facebook.png');
 		}
-		// <a style="margin-right:5px;" href="https://twitter.com/#!/..." onclick="return(window.open(this.href)?false:true);"><img src="' . $GLOBALS['wwwroot'] . '/icones/logo_twitter.png" alt="twitter" style="vertical-align:top;" title="twitter" /></a>
-		// <a style="margin-right:5px;" href="https://plus.google.com/b/..../stream" onclick="return(window.open(this.href)?false:true);"><img src="' . $GLOBALS['wwwroot'] . '/icones/Google-1.png" alt="google+" style="vertical-align:top;" title="google+" /></a>
+		if (!empty($GLOBALS['site_parameters']['twitter_page_link'])) {
+			$tpl->assign('twitter_href', $GLOBALS['site_parameters']['twitter_page_link']);
+			$tpl->assign('twitter_src', $GLOBALS['wwwroot'] . '/icones/logo_twitter.png');
+		}
+		if (!empty($GLOBALS['site_parameters']['googleplus_page_link'])) {
+			$tpl->assign('googleplus_href', $GLOBALS['site_parameters']['googleplus_page_link']);
+			$tpl->assign('googleplus_src', $GLOBALS['wwwroot'] . '/icones/Google-1.png');
+		}
 		$output .= $tpl->fetch();
 		if ($return_mode) {
 			return $output;
@@ -119,8 +131,9 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
 			INNER JOIN peel_categories c ON c.id = pc.categorie_id
-			WHERE p.etat='1' " . (!empty($cat)?" AND pc.categorie_id='" . intval($cat) . "'":"") . "
+			WHERE p.etat='1' " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
 			GROUP BY p.id
+			ORDER BY p.date_maj DESC, p.id DESC
 			LIMIT " . intval($limit);
 		$result = query($sql);
 		while ($prod = fetch_assoc($result)) {
@@ -175,6 +188,10 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 
 	$output = str_replace(array('&euro;'), array('&#8364;'), $output);
 	echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
+
+	// Si on veut activer tracking Analytics de cette page : 
+	// il faut renseigner $GLOBALS['site_parameters']['google_analytics_site_code_for_nohtml_pages'] via la page de configuration de variables de l'administration
+	close_page_generation(false);
 	die();
 }
 ?>

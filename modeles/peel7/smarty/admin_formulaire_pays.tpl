@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_pays.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_formulaire_pays.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -37,7 +37,7 @@
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_PAYS_ISO_NUMERIC}</td>
-			<td><input style="width:45px" type="text" name="iso_num" value="{$iso_num|str_form_value}" /></td>
+			<td><input style="width:45px" type="number" name="iso_num" value="{$iso_num|str_form_value}" /></td>
 		</tr>
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
 		<tr>

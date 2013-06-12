@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 36966 2013-05-26 17:10:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,17 +36,17 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 		return false;
 	}
 	if ($path === null) {
-		if(strpos($image, '/cache')===false) {
+		if(strpos($image, '://') !== false || strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
 			$path = $GLOBALS['uploaddir'];
 		} else {
 			$path = $GLOBALS['dirroot'];
 		}
 	}
 	if (empty($new_file_path)) {
-		if(strpos($image, '/cache')===false) {
+		if(strpos($image, '://') !== false || strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
 			$new_file_path = $GLOBALS['uploaddir'] . '/thumbs/';
 		} else {
-			$new_file_path = $GLOBALS['dirroot'].'/cache';
+			$new_file_path = $GLOBALS['dirroot'].'/'.$GLOBALS['site_parameters']['cache_folder'].'/';
 		}
 	}
 	if(strpos($image, '://')!==false) {
@@ -71,7 +71,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 
 	if (empty($rename_file)) {
 		// On veut que le nom de la vignette soit le même que celui de l'image source
-		$cachedThumbFileName = $image;
+		$cachedThumbFileName = @basename($image);
 	} else {
 		$extension = @pathinfo($imageFile , PATHINFO_EXTENSION);
 		$nom = @basename($imageFile, '.' . $extension);
@@ -89,9 +89,11 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 	// Sinon, si image source accessible via HTTP et on ne peut pas avoir la date de modification de 'image source srcTime :
 	// => ALORS : Si la vignette n'existe pas ou qu'elle est datée de plus de 10 jours, on la calcule
 	if ((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($srcTime) && $srcTime > $cachedThumbFile_filemtime) || (empty($srcTime) && (empty($cachedThumbFile_filemtime) || time()-24*10*3600>$cachedThumbFile_filemtime))) {
-		if(!empty($GLOBALS['skip_images_keywords'])){
-			foreach($GLOBALS['skip_images_keywords'] as $this_keyword){
+		if(!empty($GLOBALS['site_parameters']['skip_images_keywords'])){
+			// On ne veut pas générer le thumb, et ATTENTION : on le prend si il existe
+			foreach($GLOBALS['site_parameters']['skip_images_keywords'] as $this_keyword){
 				if(strpos($image, $this_keyword)!==false) {
+					// On va prendre cette image uniquement si elle existe déjà, mais on ne va pas la générer (par exemple : problème temporaire de site distant)
 					$skip_creation = true;
 				}
 			}
@@ -100,7 +102,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 			$imgInfo = @getimagesize($imageFile);
 			if(empty($imgInfo)){
 				// L'image ne semble pas valide
-				if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
+				if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 					echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
 				}
 				$skip_creation = true;
@@ -111,10 +113,9 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 				// Le thumb n'existe pas du tout : on ne renvoie rien
 				return false;
 			} else {
-				// Le thumb existe même si arrivé à échéance, et le site ne renvoie plus rien du tout
+				// Le thumb existe même si arrivé à échéance, et le site distant ne renvoie plus rien du tout
 				// => on met à jour le timestamp du fichier pour éviter de chercher à recharger à chaque fois le fichier
 				touch($cachedThumbFile);
-				return false;
 			}
 		}elseif(empty($skip_creation)){
 			// On a trouvé l'image source et on veut générer le thumb
@@ -166,45 +167,45 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 					break;
 				default:
 					if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
-						echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED']))->fetch();
-					}
-					return false;
-			} ;
-			// Retaille l'image
-			imagecopyresampled($outImg, $srcImg, 0, 0, 0, 0, $outWidth, $outHeight, $srcWidth, $srcHeight);
-			// Sauvegarde dans le répertoire Cache
-			switch ($srcType) {
-				case "png":
-					$res = imagepng($outImg, $cachedThumbFile);
-					break;
-				case "gif":
-					$res = imagegif($outImg, $cachedThumbFile);
-					break;
-				case "jpeg":
-					$res = imagejpeg($outImg, $cachedThumbFile, vn($GLOBALS['site_parameters']['jpeg_quality']));
-					break;
-				default:
-					if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
 						echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
 					}
-					if(empty($cachedThumbFile_filemtime)){
-						return false;
-					}
+					return false;
 			}
-			if (!$res) {
+			if(!empty($srcImg)) {
+				// Retaille l'image
+				imagecopyresampled($outImg, $srcImg, 0, 0, 0, 0, $outWidth, $outHeight, $srcWidth, $srcHeight);
+				// Sauvegarde dans le répertoire Cache
+				switch ($srcType) {
+					case "png":
+						$res = imagepng($outImg, $cachedThumbFile);
+						break;
+					case "gif":
+						$res = imagegif($outImg, $cachedThumbFile);
+						break;
+					case "jpeg":
+						$res = imagejpeg($outImg, $cachedThumbFile, vn($GLOBALS['site_parameters']['jpeg_quality']));
+						break;
+					default:
+				}
+			}
+			if (empty($res)) {
 				if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
 					echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
 				}
 				if(empty($cachedThumbFile_filemtime)){
 					return false;
+				} else {
+					// Le thumb existe même si arrivé à échéance, et le site ne renvoie plus rien du tout
+					// => on met à jour le timestamp du fichier pour éviter de chercher à recharger à chaque fois le fichier
+					touch($cachedThumbFile);
 				}
 			}
 		}
 	}
 	if(!empty($return_absolute_path)) {
-		return $GLOBALS['repertoire_upload'] . '/thumbs/' . $cachedThumbFileName;
+		return $GLOBALS['repertoire_upload'] . '/thumbs/' . String::rawurlencode($cachedThumbFileName);
 	} else {
-		return $cachedThumbFileName;
+		return String::rawurlencode($cachedThumbFileName);
 	}
 }
 

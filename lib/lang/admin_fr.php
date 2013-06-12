@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_fr.php 37007 2013-05-28 22:07:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -78,6 +78,7 @@ $GLOBALS["STR_ADMIN_CATEGORIES_ERR_NOT_FOUND"] = "Aucune catégorie trouvée aya
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON"] = "Ajouter cette catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_MODIFY"] = "Modifier la catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_LIST_TITLE"] = "Liste des catégories";
+$GLOBALS["STR_ADMIN_CATEGORIES_LOT_PRICE"] = "Remise par lot (différentes remises en fonction des quantités commandées)";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_CREATED_OK"] = "La catégorie %s a été ajoutée avec succès.";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_DELETED"] = "La catégorie %s a été effacée. Tous ses produits et sous-catégories ont été réassignés à la catégorie parente %s.";
 $GLOBALS["STR_ADMIN_CATEGORIES_PARENT"] = "Catégorie parente";
@@ -316,7 +317,7 @@ $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN"] = "Voici le tableau vou
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME"] = "Nom modèle";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_TITLE"] = "Gestion des modèles d'emails";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_UPDATE_TEMPLATE"] = "Mettre à jour le modèle d'email";
-$GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_WARNING"] = "Vos modifications seront définitives. Faites attention lors de la modification d'emails d'envoi automatique !";
+$GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_WARNING"] = "Faites attention lors de la modification d'emails d'envoi automatique !";
 $GLOBALS["STR_ADMIN_END_DATE"] = "Date de fin (JJ/MM/AAAA)";
 $GLOBALS["STR_ADMIN_ERR_CHOOSE_TITLE"] = "Vous devez insérer un titre";
 $GLOBALS["STR_ADMIN_ERR_EMPTY_PATH"] = "chemin vide";
@@ -456,7 +457,7 @@ $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN1"] = "Pour ajouter une langue, il est néces
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN2"] = "Si plusieurs langues coexistent sur la même URL et qu'aucune session utilisateur n'est active, c'est la langue en première position qui est utilisée (arrivée d'un utilisateur ou moteur de recherche).";
 $GLOBALS["STR_ADMIN_LANGUES_EXPLAIN3"] = "Pour l'URL Rewriting, le .htaccess contient par défaut le décodage des répertoires en 2 lettres. Pour toute autre configuration, vous devez modifier le .htaccess.";
 $GLOBALS["STR_ADMIN_LANGUES_EXTENSION"] = "Extension";
-$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "Répertoire de l'image du drapeau (par défaut, dossier /lib/flag/)";
+$GLOBALS["STR_ADMIN_LANGUES_FLAG_PATH"] = "Fichier image du drapeau (dossier par défaut : /lib/flag/)";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT_EXPLAIN"] = "La langue doit être composée de 2 lettres (code ISO 639-1).";
 $GLOBALS["STR_ADMIN_LANGUES_FORMAT"] = "Extension (2 caractères) - Une fois renseigné, il ne sera plus possible de modifier ce champ par la suite";
 $GLOBALS["STR_ADMIN_LANGUES_MSG_CONTENT_NOT_IMPORTED"] = "Les contenus par défaut ont été importés pour les tables suivantes";
@@ -671,6 +672,7 @@ $GLOBALS["STR_ADMIN_MUTIPLE_SENDING"] = "Envoi multiple";
 $GLOBALS["STR_ADMIN_NAME"] = "Nom";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE"] = "Choisissez un template";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Ajouter une newsletter";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "Etes-vous sûr de vouloir envoyer cette newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "NB : Le module de crons est activé, le nombre d'utilisateurs à qui la newsletter peut être envoyée n'est donc pas limité ici, mais peut néanmoins l'être par votre hébergeur.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "NB : Les envois par ce module sont limités à 250 destinataires et traités en une seule fois, ce qui peut poser des problèmes à cause des limitations de temps d'exécution sur certains serveurs. Pour des envois en masse, utilisez le module de cron ou le module spécifique d'interconnexion avec Wanewsletter.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Ajouter ou modifier une newsletter";
@@ -1052,7 +1054,7 @@ $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Vous pouvez associer de
 $GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Gestion des emplacements des modules dans les colonnes du site";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_EMAIL"] = "Email du compte marchand sur moneybookers.com (active le module Moneybookers si renseigné)";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_MODULE"] = "Paiement Moneybookers";
-$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "Vous devez définir ce mot de passe aléatoirement. Il permettra de mieux sécuriser les échanges entre votre site et Moneybookers.";
+$GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "Ce mot de passe est défini dans le compte Moneybookers. Il permet sécuriser les échanges entre votre site et Moneybookers.";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD"] = "Mot secret utilisé pour les échanges avec Moneybookers";
 $GLOBALS["STR_ADMIN_SITES_MSG_DELETED_OK"] = "Le site <b>%s</b> a été effacée.";
 $GLOBALS["STR_ADMIN_SITES_MSG_UPDATED_OK"] = "Les paramètres du site ont été mis à jour.";

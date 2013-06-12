@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: de.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: de.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -174,7 +174,7 @@ $GLOBALS["STR_DEVISE"] = "Währung";
 $GLOBALS["STR_DISPO"] = "Verfügbarkeit";
 $GLOBALS["STR_DO_NOT_MISS"] = "Nicht zu versäumen";
 $GLOBALS["STR_DOMICILIATION"] = "Lastschriftverfahren";
-$GLOBALS["STR_DONNEZ_AVIS"] = "Geben Sie Ihre Meinung zu diesem Produkt.";
+$GLOBALS["STR_DONNEZ_AVIS"] = "Geben Sie Ihre Meinung.";
 $GLOBALS["STR_DONT_FORGET_COMMENT"] = "Vergessen Sie nicht, Ihre Meinung hinzuzufügen.";
 $GLOBALS["STR_DONT_FORGET_NOTE"] = "Sie haben Ihrem Kommentar keine Notiz hinzugefügt.";
 $GLOBALS["STR_DOWNLOAD_AGAIN"] = "Bitte versuchen Sie es später noch einmal (Server nicht verfügbar).";
@@ -448,7 +448,7 @@ $GLOBALS["STR_MODULE_PREMIUM_SAVE_CART_SUCCESS"] = "Der Warenkorb wurde erfolgre
 $GLOBALS["STR_MODULE_PREMIUM_SAVED_CART_DELETED"] = "Der gespeicherte Artikel wurde gelöscht.";
 $GLOBALS["STR_MODULE_PREMIUM_THANKS_CHECK_DOWNLOAD"] = "Bitte überprüfen Sie die Gültigkeit Ihres Download-Schlüssels.";
 $GLOBALS["STR_MODULE_PREMIUM_TOP_PAGE"] = "Seitenanfang";
-$GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "Kauf";
+$GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "kauf";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD"] = "Lieferantensuche";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ANNOTATION_SYSTEM"] = "Bewertungssystem";
 $GLOBALS["STR_MODULE_PREMIUM_URL_LEXIQUE"] = "Lexikon";
@@ -514,8 +514,8 @@ $GLOBALS["STR_NEWSLETTER"] = "Rundbrief";
 $GLOBALS["STR_NEXT_PAGE"] = "Weiter";
 $GLOBALS["STR_NEXT"] = "Weiter";
 $GLOBALS["STR_NO_AVAILABLE"] = "Nicht verfügbar";
-$GLOBALS["STR_NO_FIND_ART"] = "	<h2>Artikel nicht gefunden</h2><blockquote class=\"normal\">Leider wurde der gesuchte Artikel nicht gefunden. Konsultieren Sie unsere <a href=\"{$GLOBALS['wwwroot']}/lire/\">allgemeinen Informationen</a>, um eine neue Suche zu starten.</blockquote>";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>Produkt nicht gefunden</h2><blockquote class=\"normal\">Leider wurde das gesuchte Produkt nicht gefunden. Konsultieren Sie unseren <a href=\"{$GLOBALS['wwwroot']}/achat/\">Katalog</a>,  um eine neue Suche zu starten.</blockquote>";
+$GLOBALS["STR_NO_FIND_ART"] = "	<h1>Artikel nicht gefunden</h1><blockquote class=\"normal\">Leider wurde der gesuchte Artikel nicht gefunden. Konsultieren Sie unsere <a href=\"{$GLOBALS['wwwroot']}/lire/\">allgemeinen Informationen</a>, um eine neue Suche zu starten.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Produkt nicht gefunden</h1><blockquote class=\"normal\">Leider wurde das gesuchte Produkt nicht gefunden. Konsultieren Sie unseren <a href=\"{$GLOBALS['wwwroot']}/achat/\">Katalog</a>,  um eine neue Suche zu starten.</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "Kein Artikel in dieser Kategorie";
 $GLOBALS["STR_NO_ORDER"] = "Keine Bestellung gespeichert.";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "Sie haben keine Zugangsrechte für die Verwaltung der Website.";

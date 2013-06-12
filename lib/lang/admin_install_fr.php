@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_fr.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_install_fr.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -73,7 +73,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "FORTEMENT RECOMMAND
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Votre site a été configuré pour n'afficher les erreurs PHP que pour votre IP, à savoir {$_SERVER['REMOTE_ADDR']}. Ce paramètre est modifiable dans l'administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB : Si vous souhaitez intervenir sur le code PHP de votre site, faites attention lorsque vous modifiez vos fichiers d'utiliser un éditeur qui gère bien l'UTF-8 et ne rajoute pas de BOM (caractères invisibles) en entête des fichiers. En cas de doute, utilisez Notepad++ qui est téléchargeable gratuitement sur Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Choisissez les langues à installer :";
-$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Il vous faut activer PHP5 sur votre site : éditez le fichier .htaccess à la racine du site pour activer les lignes correspondant à votre hébergement en retirant le # en début de ligne, ou contactez votre hébergeur - Pour avoir un hébergement chez PEEL, contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
+$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Il vous faut activer PHP >= 5.2 sur votre site : éditez le fichier .htaccess à la racine du site pour activer les lignes correspondant à votre hébergement en retirant le # en début de ligne, ou contactez votre hébergeur - Pour avoir un hébergement chez PEEL, contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Le fonctionnement sera normal hormis le module Butterflive qui ne pourra pas fonctionner";

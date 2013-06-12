@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37040 2013-05-30 13:17:16Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -133,7 +133,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	}
 	$tpl->assign('options', $tpl_options);
 	$tpl->assign('email_template_options', get_email_template_options('id', vn($frm['id_cat']), vb($frm['lang_mail'])));
-	$langs_array = $GLOBALS['lang_codes'];
+	$langs_array = $GLOBALS['admin_lang_codes'];
 	foreach ($langs_array as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'issel' => !empty($frm['lang_mail']) && $frm['lang_mail'] == $lng
@@ -602,7 +602,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 		</tr>
 		<tr>
 			<th>' . $GLOBALS['STR_EMAIL'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
-			<td><input type="text" name="email" value="' . String::str_form_value(vb($recherche['email'])) . '" /></td>
+			<td><input type="email" name="email" value="' . String::str_form_value(vb($recherche['email'])) . '" /></td>
 		</tr>
 		<tr>
 			<td colspan="2">&nbsp;</td>
@@ -701,7 +701,7 @@ function update_state_mail($frm)
 				query('UPDATE `peel_webmail`
 					SET `read`="NO"
 					WHERE `id`="' . intval(vn($this_value)) . '" AND `read`!="NO"');
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_READ_NOT_OK"], intval(vn($this_value)))))->fetch();
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_NOT_READ_OK"], intval(vn($this_value)))))->fetch();
 			}
 		} else {
 			foreach($_POST['form_delete'] as $this_post => $this_value) {

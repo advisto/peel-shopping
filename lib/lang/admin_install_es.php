@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_es.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_install_es.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -73,7 +73,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "MUY RECOMENDADO: Pa
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Su sitio ha sido configurado para mostrar los errores de PHP para su propiedad intelectual, a saber, {$_SERVER['REMOTE_ADDR']} Este parámetro se puede cambiar en la administración.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "Nota: Si usted desea trabajar en el código PHP en su sitio, tenga cuidado al editar los archivos con un editor que soporte UTF-8 bien y no añadir la lista de materiales (caracteres invisibles) en los archivos de cabecera. En caso de duda, el uso de Notepad++ es una descarga gratuita a través de Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Seleccione los idiomas que desea instalar:";
-$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Debe habilitar PHP5 en su sitio: editar el archivo htaccess en la raíz del sitio para permitir a las líneas correspondientes a su alojamiento quitando el # al principio de la línea, o póngase en contacto con su hosting - Para el alojamiento en PEEL contacto : contact@peel.fr o +33 (0) 1 75 43 67 97";
+$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Debe habilitar PHP >= 5.2 en su sitio: editar el archivo htaccess en la raíz del sitio para permitir a las líneas correspondientes a su alojamiento quitando el # al principio de la línea, o póngase en contacto con su hosting - Para el alojamiento en PEEL contacto : contact@peel.fr o +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Usted tendrá que cambiar manualmente la codificación de la página - PEEL contacto: contact@peel.fr o +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Usted tendrá que cambiar manualmente la codificación de la página - PEEL contacto: contact@peel.fr o +33 (0)  1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "La operación será normal, excepto que el módulo Butterflive no funcionarán";

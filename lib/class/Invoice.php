@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: Invoice.php 37007 2013-05-28 22:07:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 36232 2013-04-05 13:16:01Z gboussin $
+ * @version $Id: Invoice.php 37007 2013-05-28 22:07:04Z gboussin $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -384,7 +384,7 @@ class Invoice extends TCPDF {
 
 		$this->SetFont("Helvetica", "", 10);
 		$this->SetXY($r1, $y1 + $this->cMargin + $header_height);
-		$this->MultiCell(90, 4, $pdf_facturation2);
+		$this->MultiCell(90, 4, $pdf_facturation2 . "\n");
 	}
 	/**
 	 * Affiche un cadre avec le règlement (chèque, etc...)

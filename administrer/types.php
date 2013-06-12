@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: types.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -99,7 +99,7 @@ function affiche_formulaire_ajout_type(&$frm)
 		$frm['tnt_threshold'] = 0;
 		$frm['is_tnt'] = 0;
 		$frm['fianet_type_transporteur'] = 0;
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 		}
 	}
@@ -149,7 +149,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng]
 			);
@@ -217,7 +217,7 @@ function insere_type($frm)
 {
 	$sql = "INSERT INTO peel_types (position
 		, without_delivery_address, etat";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	if (is_socolissimo_module_active()) {
@@ -237,7 +237,7 @@ function insere_type($frm)
 	) VALUES ('" . intval($frm['position']) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
 		, '" . intval($frm['etat']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	if (is_socolissimo_module_active()) {
@@ -270,7 +270,7 @@ function maj_type($id, $frm)
 	$sql = "UPDATE peel_types SET position = '" . nohtml_real_escape_string($frm['position']) . "'
 		, without_delivery_address='" . intval($frm['without_delivery_address']) . "'
 		, etat='" . intval(vn($frm['etat'])) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	if (is_socolissimo_module_active()) {

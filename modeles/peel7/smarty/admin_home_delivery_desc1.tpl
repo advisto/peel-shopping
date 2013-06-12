@@ -3,13 +3,13 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_home_delivery_desc1.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_home_delivery_desc1.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}{$STR_ADMIN_INDEX_DELIVERY_DESC1}
 <p><img src="{$src|escape:'html'}" alt="link_icon" style="margin-right:5px;" /><a href="{$link}">{$STR_ADMIN_INDEX_GENERATE_REPORT}</a></p>

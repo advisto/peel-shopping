@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: format.php 37007 2013-05-28 22:07:04Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -96,7 +96,7 @@ function frmvalide($variable_to_test, $true_value = 'checked="checked"', $false_
  */
 function vb(&$var, $default = "")
 {
-	return isset($var) ? $var : $default;
+	return isset($var) || is_null($var) ? $var : $default;
 }
 
 /**
@@ -425,9 +425,6 @@ function fdate(&$date_nok)
  */
 function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hour_minute = false)
 {
-	if($datetime_or_timestamp === null) {
-		$datetime_or_timestamp = time();
-	}
 	// Décommentez la fonction suivante et commentez l'autre, si votre serveur n'arrive pas à afficher les dates correctement (traductions).
 	// $date = strftime(str_replace('%A', $GLOBALS['day_of_week'][(0 + strftime('%w', strtotime($datetime_or_timestamp)))], str_replace('%B', $GLOBALS['months_names'][(0 + strftime('%m', strtotime($datetime_or_timestamp)))], $GLOBALS['date_format_long'])), strtotime($datetime_or_timestamp));
 	if (!empty($GLOBALS['date_format_'.$mode])) {
@@ -521,7 +518,7 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
 	$days = $total_seconds / (3600 * 24);
 	$hours = $total_seconds / 3600 - floor($days) * 24;
 	$minutes = $total_seconds / 60 - floor($days) * 60 * 24 - floor($hours) * 60;
-	$seconds = $total_seconds / 60 - floor($days) * 3600 * 24 - floor($hours) * 3600 - floor($minutes) * 60;
+	$seconds = $total_seconds - floor($days) * 3600 * 24 - floor($hours) * 3600 - floor($minutes) * 60;
 	$weeks = $total_seconds / (3600 * 24 * 7);
 	$months = $total_seconds / (3600 * 24 * 30);
 
@@ -543,7 +540,7 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
 		if ($minutes >= 1) {
 			$result[] = floor($minutes) . ' ' . $GLOBALS['strShortMinutes'];
 		}
-		if ($seconds >= 1 && $show_seconds) {
+		if ($seconds >= 1 && ($show_seconds || $total_seconds<60)) {
 			$result[] = floor($seconds) . ' ' . $GLOBALS['strShortSecs'];
 		}
 	}
@@ -611,7 +608,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			$tag_replace = '';
 			$ad_categories = get_ad_categories();
 			foreach ($ad_categories as $this_category_id => $this_category_name) {
-				$tag_replace .= '<option value="' . intval($this_category_id) . ' "' . (!empty($_POST['cat']) && intval($this_category_id) == intval($_POST['cat'])?'selected="selected"':'') . '>' . String::htmlentities($this_category_name) . '</option>';
+				$tag_replace .= '<option value="' . intval($this_category_id) . '" ' . (!empty($_POST['cat']) && intval($this_category_id) == intval($_POST['cat'])?'selected="selected"':'') . '>' . String::htmlentities($this_category_name) . '</option>';
 			}
 			$template_tags['AD_CATEGORIES_OPTIONS'] = $tag_replace;
 		}
@@ -927,5 +924,52 @@ function get_array_from_string($string)
 		}
 	}
 	return $result;
+}
+
+/**
+ * Nettoie une chaine des stop words, retire les mots trop courts, et renvoie une liste de mots clés
+ *
+ * @param mixed $string_or_array
+ * @param integer $min_length Doit être compatible avec la longueur minimale des stop words dans $GLOBALS['site_parameters']['filter_stop_words'] => normalement doit être >= 3
+ * @param integer $max_length
+ * @param boolean $allow_numeric
+ * @param boolean $get_long_keywords_first
+ * @param integer $max_words
+ * @return
+ */
+function get_keywords_from_text($string_or_array, $min_length = 3, $max_length = 20, $allow_numeric = false, $get_long_keywords_first = true, $max_words = 7) {
+	$keywords_array = array();
+	if(is_array($string_or_array)) {
+		$string = implode(' ', array_unique($string_or_array));
+	} else {
+		$string = $string_or_array;
+	}
+	$filter_stop_words_array = array_unique(explode(' ', str_replace(array("\t", "\r", "\n"), ' ', vb($GLOBALS['site_parameters']['filter_stop_words']))));
+	// On passe le texte en minuscules
+	$string = String::strtolower(' '.String::convert_accents($string));
+	// On retire les caractères de ponctuation divers
+	$string = str_replace(array(",", ".", "?", "!", ':', ';', "-", "+", '*', "d'", '/', '\\', '(', ')', '[', ']', '{', '}',  "'", '"', '<', '>', '«', '»', '´', '  '), " ", $string);
+	// On récupère dans le texte les mots clés candidats
+	foreach(explode(' ', $string) as $this_word) {
+		if(String::strlen($this_word)>=$min_length && ($allow_numeric || !is_numeric($this_word))){
+			$keywords_array[$this_word] = $this_word;
+		}
+	}
+	// On retire à la fin les stop words (moins il y a d'éléments à vérifier, plus c'est rapide)
+	$keywords_array = array_diff($keywords_array, $filter_stop_words_array);
+	if($get_long_keywords_first) {
+		// On garde les mots les plus longs en priorité
+		$keywords_lengths = array();
+		foreach($keywords_array as $this_word) {
+			$keywords_lengths[$this_word] = String::strlen($this_word);
+		}
+		arsort($keywords_lengths);
+		$keywords_array = array_keys($keywords_lengths);
+	}
+	// On ne garde que la longueur de tableau demandée
+	while($max_words !== null && count($keywords_array)>$max_words) {
+		array_pop($keywords_array);
+	}
+	return $keywords_array;
 }
 ?>

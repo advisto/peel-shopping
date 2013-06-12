@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_produits.tpl 34617 2013-01-20 11:53:05Z gboussin $
+// $Id: admin_liste_produits.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}{if $is_empty}
 	<p><a href="{$href|escape:'html'}">{$STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST}</a></p>
 {else}
@@ -68,9 +68,9 @@
 					<tr>
 						<td class="top" style="padding:5px">{$STR_ADMIN_PRODUITS_IS_PRODUCT} <strong>{$STR_MODULE_GIFTS_ADMIN_GIFT}</strong> ?<br />
 							<span>
-								<input type="radio" name="gift_product" value="null" checked="checked" /> {$STR_ADMIN_ANY} &nbsp;
-								<input type="radio" name="gift_product"{if $gift_product_one_issel} checked="checked"{/if} value="1" /> {$STR_YES}
-								<input type="radio" name="gift_product"{if $gift_product_zero_issel} checked="checked"{/if} value="0" /> {$STR_NO}
+								<input type="radio" name="on_gift" value="null" checked="checked" /> {$STR_ADMIN_ANY} &nbsp;
+								<input type="radio" name="on_gift"{if $on_gift_one_issel} checked="checked"{/if} value="1" /> {$STR_YES}
+								<input type="radio" name="on_gift"{if $on_gift_zero_issel} checked="checked"{/if} value="0" /> {$STR_NO}
 							</span>
 						</td>
 						<td></td>

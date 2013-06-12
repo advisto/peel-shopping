@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: rpc_status.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -29,7 +29,11 @@ if (!est_identifie() || empty($_POST)) {
 } else {
 	header('Content-type: text/html; charset=' . $page_encoding);
 	// On fait les tests de droits une bonne fois pour toutes
-	$new_status = 1-$_POST['current_status'];
+	if(vb($_POST['mode']) == 'langues') {
+		$new_status = ($_POST['current_status']+2)%3-1;
+	} else {
+		$new_status = 1-$_POST['current_status'];
+	}
 	$new_status_sql_value = $new_status;
 	if(vb($_POST['mode']) == 'countries' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_pays
@@ -136,7 +140,7 @@ if (!est_identifie() || empty($_POST)) {
 		die('nok2');
 	}
 	// On met à jour les positions en fonction de la liste reçue en POST
-	query(sprintf($sql, intval($new_status_sql_value), intval($_POST['id'])));
+	query(sprintf($sql, $new_status_sql_value, intval($_POST['id'])));
 	$output .= $new_status;
 }
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);

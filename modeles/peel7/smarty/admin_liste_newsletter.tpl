@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_newsletter.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_liste_newsletter.tpl 37002 2013-05-28 16:38:38Z gboussin $
 *}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="9">{$STR_ADMIN_NEWSLETTERS_TITLE}</td>
@@ -43,7 +43,7 @@
 		<td class="center">{$res.format}</td>
 		<td class="center">{$res.statut}</td>
 		<td class="center">{$res.date_envoi}</td>
-		<td class="center"><a href="{$res.mail_href|escape:'html'}"><img alt="{$STR_ADMIN_NEWSLETTERS_SEND_ALL_USERS|str_form_value}" onclick="return confirm('{$STR_ADMIN_DELETE_WARNING|filtre_javascript:true:true:true}');" src="{$mail_src|escape:'html'}" /></a></td>
+		<td class="center"><a href="{$res.mail_href|escape:'html'}"><img alt="{$STR_ADMIN_NEWSLETTERS_SEND_ALL_USERS|str_form_value}" onclick="return confirm('{$STR_ADMIN_NEWSLETTERS_SEND_CONFIRM|filtre_javascript:true:true:true}');" src="{$mail_src|escape:'html'}" /></a></td>
 		<td class="center"><a href="{$res.test_href|escape:'html'}">{$STR_ADMIN_NEWSLETTERS_TEST_SENDING_TO_ADMINISTRATORS}</a></td>
 	</tr>
 	{/foreach}

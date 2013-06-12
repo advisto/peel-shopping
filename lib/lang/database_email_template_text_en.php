@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_en.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database_email_template_text_en.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -297,6 +297,18 @@ This email enhances the security on you PEEL eshop.",
 [SITE] is offering you a 30 days voucher for an amount of [PERCENT].
 
 In order to benefit from it, please connect to the website [WWWROOT] and use your code [CODE].",
+  "warn_admin_user_subscription" => "On [DATE]
+
+The following user just opened an account:
+
+[CIVILITE] [PRENOM] [NOM_FAMILLE]
+[EMAIL]
+[SOCIETE]
+[TELEPHONE]
+[PRIV]
+
+[link=\"[ADMIN_URL]\"]Administrate this user account[/link]
+",
   "email_retour_virement" => "Hello,
 
 We have received your return number [RETURN_ID].
@@ -321,7 +333,68 @@ A this, send us the items to the following address:
 RETURN NUMBER [RETURN_ID].
 
 Please remember that items must be returned in good condition and in their original packaging.
-Upon receipt of your items, we will validate the repayment thereof."
+Upon receipt of your items, we will validate the repayment thereof.",
+  "cron_order_payment_failure_alerts" => "Dear [PRENOM] [NOM],
+
+We write you about the recent order you have posted on [WWWROOT]
+
+Order content: [PRODUCT_NAME]
+Total amount of your order: [TOTAL_AMOUNT]
+Payment mean you have chosen: [PAYMENT_MEAN]
+
+Our automated system has not detected any payment confirmation for this order.
+Have you encountered any problem?
+
+We are at your disposal to validate this order, and if you need you can switch to another payment mean.
+
+Best regards,
+
+[WWWROOT]
+
+NB: If you have already proceeded in the payment of the following order, please do not take into account this email, as your payment will be treated very soon.",
+  "cron_order_not_paid_alerts" => "Dear [PRENOM] [NOM],
+
+We write you about the recent order you have posted on [DAYS_SINCE] days ago on [SITE_NAME].
+
+Order content: [PRODUCT_NAME]
+Total amount of your order: [TOTAL_AMOUNT]
+Payment mean you have chosen: [PAYMENT_MEAN]
+
+Our automated system has not detected any payment confirmation for this order.
+Have you encountered any problem?
+
+We are at your disposal to validate this order, and if you need you can switch to another payment mean.
+
+NB: If you have already proceeded in the payment of the following order, please do not take into account the text hereunder, as your payment will be treated very soon.",
+  "cron_update_contact_info" => "Dear [CIVILITE] [NOM],
+
+In order to keep updated your contact information on your ads, here is your currently registered information to check :
+
+Email : [EMAIL]
+Gender : [CIVILITE]
+Login : [PSEUDO]
+First name : [PRENOM]
+Last name : [NOM]
+Company : [SOCIETE]
+VAT number : [TVA_INTRA]
+Phone : [TELEPHONE]
+Cell : [PORTABLE]
+Fax : [FAX]
+Birthday : [NAISSANCE]
+Address : [ADRESSE]
+Zip code : [CODE_POSTAL]
+City : [VILLE]
+Country : [PAYS]
+Website : [SITE_WEB]
+
+If you have any correction to make, please connect to your account on [WWWROOT]
+
+If you have forgotten your password, please go to: [WWWROOT]/utilisateurs/oubli_mot_passe.php
+
+Please remember that having correct contact information for your ads is important for your prospects and your company''s image.
+Any wrong information may oblige us to close your account.
+
+For any further information, please contact us."
 );
 
 ?>

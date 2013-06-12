@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 35138 2013-02-11 20:41:28Z gboussin $
+// $Id: admin_formulaire_site.tpl 37029 2013-05-29 20:18:51Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<table class="main_table">
@@ -26,8 +26,8 @@
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SITE_ACTIVATION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="site_suspended" value="FALSE"{% if site_suspended == 'FALSE' %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_SITE_ACTIVATED }}
-				<input type="radio" name="site_suspended" value="TRUE"{% if site_suspended == 'TRUE' %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_SITE_SUSPENDED }}
+				<input type="radio" name="site_suspended" value="false"{% if site_suspended != false %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_SITE_ACTIVATED }}
+				<input type="radio" name="site_suspended" value="true"{% if site_suspended == false %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_SITE_SUSPENDED }}
 			</td>
 		</tr>
 		<tr>
@@ -49,12 +49,12 @@
 			<td width="25%">{{ STR_ADMIN_SITES_TEMPLATE_USED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 			{% if (directory_options) %}
-			<select name="template_directory">
-				<option value="">{{ STR_CHOOSE }}...</option>
+				<select name="template_directory">
+					<option value="">{{ STR_CHOOSE }}...</option>
 				{% for o in directory_options %}
-				<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.value }}</option>
+					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.value }}</option>
 				{% endfor %}
-			</select>
+				</select>
 			{% endif %}
 			</td>
    	 	</tr>
@@ -367,7 +367,7 @@
 			<td>
 				<input type="radio" name="keep_old_orders_intact" value="0" {% if keep_old_orders_intact == 0 %} checked="checked"{% endif %} /> {{ STR_NO }} <br />
 				<input type="radio" name="keep_old_orders_intact" value="1" {% if keep_old_orders_intact == 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_LAST_YEAR }}<br />
-				<input type="radio" name="keep_old_orders_intact" value="2" {% if keep_old_orders_intact > 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE }} <input style="width:100px" type="text" name="keep_old_orders_intact_date" value="{{ keep_old_orders_intact_date|str_form_value }}" />
+				<input type="radio" name="keep_old_orders_intact" value="2" {% if keep_old_orders_intact > 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE }} <input style="width:100px" class="datepicker" type="text" name="keep_old_orders_intact_date" value="{{ keep_old_orders_intact_date|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
@@ -523,7 +523,7 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				<table style="border:0;cellpadding:0;cellspacing:0;width:100%">
+				<table class="full_width">
 			{% for m in modules %}
 				{{ m.tr_rollover }}
 					<td>
@@ -636,7 +636,6 @@
 		<tr>
 			<td colspan="2"><div class="global_help">{{ STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN }}</div></td>
 		</tr>
-
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_ADMIN_SITES_KEKOLI_MODULE }}</td>
 		</tr>
@@ -1362,8 +1361,8 @@
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SYSTEMPAY_TEST_MODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<label for="non">{{ STR_NO }}</label><input style="width:100%" type="radio" name="systempay_test_mode" value="false" id="non" {% if systempay_test_mode == 'false' %} checked="checked"{% endif %} />
-				<label for="oui">{{ STR_YES }}</label><input style="width:100%" type="radio" name="systempay_test_mode" value="true" id="oui" {% if systempay_test_mode == 'true' %} checked="checked"{% endif %} />
+				<label for="non">{{ STR_NO }}</label><input type="radio" name="systempay_test_mode" value="false" id="non" {% if systempay_test_mode == false %} checked="checked"{% endif %} />
+				<label for="oui">{{ STR_YES }}</label><input type="radio" name="systempay_test_mode" value="true" id="oui" {% if systempay_test_mode == true %} checked="checked"{% endif %} />
 			</td>
 		</tr>
 		{% else %}

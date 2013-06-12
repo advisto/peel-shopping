@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: articles.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -52,7 +52,7 @@ switch (vb($_REQUEST['mode'])) {
 		$form_error_object->valide_form($frm,
 			array('rubriques' => $GLOBALS['STR_ADMIN_ARTICLES_ERR_CHOOSE_ONE_CATEGORIE'],
 				'titre_' . $_SESSION['session_langue'] => $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE']));
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			if(!empty($frm['titre_' . $lng])) {
 				$title_not_empty=true;
 				break;
@@ -60,7 +60,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (empty($title_not_empty)) {
 			// Il faut au moins un nom d'article
-			foreach ($GLOBALS['lang_codes'] as $lng) {
+			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 				$form_error_object->add('titre_' . $lng, $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE']);
 			}
 		}
@@ -68,7 +68,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image1'] = upload('image1', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image1'] = upload('image1', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image1']));
 			insere_article($_POST);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ARTICLES_MSG_CREATED_OK'], vb($_POST['titre_' . $_SESSION['session_langue']]))))->fetch();
 			unset($_POST['etat']);
@@ -99,7 +99,7 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			$_POST['image1'] = upload('image1', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$_POST['image1'] = upload('image1', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image1']));
 			maj_article($frm['id'], $_POST);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MSG_CHANGES_OK'], vn($_REQUEST['id']))))->fetch();
 			unset($_POST['etat']);
@@ -146,7 +146,7 @@ function affiche_formulaire_ajout_article($rubrique_id = 0, &$frm, &$form_error_
 	/* Valeurs par défaut */
 	if(empty($frm)) {
 		$frm = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['titre_' . $lng] = "";
 			$frm['chapo_' . $lng] = "";
 			$frm['texte_' . $lng] = "";
@@ -272,7 +272,7 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		$tpl->assign('technical_code', $frm['technical_code']);
 
 		$tpl_langs = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$tpl_langs[] = array('lng' => $lng,
 				'error' => $form_error_object->text('titre_' . $lng),
 				'titre' => $frm['titre_' . $lng],
@@ -334,7 +334,7 @@ function insere_article($frm)
 			, position
 			, technical_code
 			, on_special";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", titre_" . $lng . "
 			, chapo_" . $lng . "
 			, texte_" . $lng . '
@@ -351,7 +351,7 @@ function insere_article($frm)
 			, '" . nohtml_real_escape_string($frm['technical_code']) . "'
 			, '" . intval(vn($frm['on_special'])) . "'";
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . real_escape_string($frm['titre_' . $lng]) . "'
 			, '" . real_escape_string($frm['chapo_' . $lng]) . "'
 			, '" . real_escape_string($frm['texte_' . $lng]) . "'
@@ -391,7 +391,7 @@ function maj_article($id, $frm)
 		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'
 		, on_special = '" . intval(vn($frm['on_special'])) . "'";
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, titre_" . $lng . "='" . real_escape_string($frm['titre_' . $lng]) . "'
 		, chapo_" . $lng . "='" . real_escape_string($frm['chapo_' . $lng]) . "'

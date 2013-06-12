@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: avis.php 36927 2013-05-23 16:15:39Z gboussin $
 include("../../configuration.inc.php");
 
 if (!is_module_avis_active()) {
@@ -35,6 +35,13 @@ $form_error_object = new FormError();
 if (is_module_avis_active() && (!empty($_GET['prodid']) || !empty($_GET['ref']))) {
 	// On charge les fonctions d'avis
 	include($fonctionsavis);
+	if (!empty($_GET['prodid'])) {
+		$id = $_GET['prodid'];
+		$type = 'produit';
+	} elseif ($_GET['ref']) {
+		$id = $_GET['ref'];
+		$type = 'annonce';
+	}
 	switch (vb($_REQUEST['mode'])) {
 		case "insere" :
 			$form_error_object->valide_form($frm,
@@ -43,7 +50,7 @@ if (is_module_avis_active() && (!empty($_GET['prodid']) || !empty($_GET['ref']))
 			if (!$form_error_object->count()) {
 				insere_avis($frm);
 			} else {
-				formulaire_avis(vb($_POST['prodid']), $frm, $form_error_object, $frm['type']);
+				formulaire_avis(vb($id), $frm, $form_error_object, $type);
 			}
 			break;
 

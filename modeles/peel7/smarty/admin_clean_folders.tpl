@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_clean_folders.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_clean_folders.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action_thumbs|escape:'html'}">
 	<p>{$STR_TEXT_CONFIG}</p>
 	<div class="center">
@@ -41,11 +41,11 @@
 			<tr>
 			<tr>
 				<td class="top"><b>{$STR_ADMIN_CLEAN_FOLDERS_MINIMAL_SIZE}</b></td>
-				<td><input size="10" type="text" name="size_ko" value="{$size_ko|str_form_value}" /><b> {$STR_KILOBYTE}</b></td>
+				<td><input size="10" type="number" name="size_ko" value="{$size_ko|str_form_value}" /><b> {$STR_KILOBYTE}</b></td>
 			</tr>
 			<tr>
 				<td class="top"><b>{$STR_ADMIN_CLEAN_FOLDERS_QUALITY}</b></td>
-				<td><input size="3" type="text" name="tx_qualite" value="{$tx_qualite|str_form_value}" /><b>%</b></td>
+				<td><input size="3" type="number" name="tx_qualite" value="{$tx_qualite|str_form_value}" /><b>%</b></td>
 			</tr>
 			<tr>
 				<td colspan="2" class="top"><b>{$STR_ADMIN_CLEAN_FOLDERS_ENLIGHTEN_IMAGE} </b><input type="checkbox" name="enlighten" value="1"{if $enlighten == "on"} checked="checked"{/if} /></td>

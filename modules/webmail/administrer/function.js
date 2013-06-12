@@ -113,7 +113,6 @@ function mail_signature(admin_name, admin_first_name, site_name, site_url, lang)
 	if (admin_function == 'none') {
 		signature = '';
 	}
-
 	document.getElementById("message").value = message + signature;
 }
 
@@ -124,7 +123,9 @@ function form_template_content_add(select_name, content_name, mode, wwwroot){
    url: wwwroot+"/modules/webmail/administrer/template_mail.php",
    data: "id="+jQuery("#"+select_name).val()+"&mode="+mode,
    success: function(msg){
-     jQuery("#"+content_name).val(msg);
+	if (msg !='') {
+		jQuery("#"+content_name).val(msg);
+	 }
    }
  });
  }

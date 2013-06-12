@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: emails.php 37040 2013-05-30 13:17:16Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -30,6 +30,7 @@ if (!defined('IN_PEEL')) {
  * @param boolean $html_convert_url_to_links Convertit les URL du texte en balises A
  * @param string $reply_to Email de destinataires en copie
  * @param array $attached_files_infos_array contient le nom des fichiers à joindre, le chemin et le type-mime de chacun d'entre eux.
+ * @param array $lang 
  * @return
  */
 function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = 'html', $from = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null)
@@ -38,7 +39,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$eol = "\r\n";
 	// $eol = PHP_EOL;
 	// $eol = "\n";
-	if(empty($lang) || !in_array($lang, $GLOBALS['lang_codes'])){
+	if(empty($lang) || !in_array($lang, $GLOBALS['admin_lang_codes'])){
 		$lang = $_SESSION['session_langue'];
 	}
 	if (defined('IN_PEEL_ADMIN') && a_priv('demo')) {
@@ -59,9 +60,11 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			if (empty($mail_content)) {
 				$mail_content = $template_infos['text'];
 			}
-			$signature_infos = getTextAndTitleFromEmailTemplateLang('signature', $lang);
-			if (!empty($signature_infos)) {
-				$mail_content .= $signature_infos['text'];
+			if (!empty($mail_content)) {
+				$signature_infos = getTextAndTitleFromEmailTemplateLang('signature', $lang);
+				if (!empty($signature_infos)) {
+					$mail_content .= $signature_infos['text'];
+				}
 			}
 		}
 	}

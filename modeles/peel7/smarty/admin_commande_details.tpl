@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 36264 2013-04-06 12:40:37Z gboussin $
+// $Id: admin_commande_details.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -95,8 +95,8 @@
 			<td>{$commande_date}</td>
 		</tr>
 		<tr>
-			<td>{$STR_BY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><a href="{$email_href|escape:'html'}">{$email}</a></td>
+			<td>{$STR_ADMIN_COMMANDER_ORDER_AUTHOR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input name="email" type="text" value="{$email|str_form_value}" /> <a href="{$email_href|escape:'html'}">{$email}</a></td>
 		</tr>
 {else}
 </table>
@@ -179,11 +179,11 @@
 	{/if}
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_SMALL_ORDERS_OVERCOST}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input type="text" name="small_order_overcost_amount" value="{$small_order_overcost_amount|str_form_value}" /> {$devise} TTC dont TVA <input type="text" name="tva_small_order_overcost" value="{$tva_small_order_overcost|str_form_value}" /> {$devise}</td>
+		<td><input type="number" name="small_order_overcost_amount" value="{$small_order_overcost_amount|str_form_value}" /> {$devise} TTC dont TVA <input type="number" name="tva_small_order_overcost" value="{$tva_small_order_overcost|str_form_value}" /> {$devise}</td>
 	</tr>
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input type="text" name="currency_rate" value="{$currency_rate|str_form_value}" /></td>
+		<td><input type="number" name="currency_rate" value="{$currency_rate|str_form_value}" /></td>
 	</tr>
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_ORDER_TOTAL}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -203,7 +203,7 @@
 	{/if}
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_INCLUDING_CREDIT_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input name="avoir" type="text" value="{$avoir_prix|str_form_value}" /> {$devise}</td>
+		<td><input name="avoir" type="number" value="{$avoir_prix|str_form_value}" /> {$devise}</td>
 	</tr>
 	{if $is_affilie}
 	<tr>
@@ -224,6 +224,7 @@
 		<td class="label_rouge"><a href="{$affilie_href|escape:'html'}">{$affilie_email}</a></td>
 	</tr>
 	{/if}
+	{if $is_gifts_module_active}
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_GIFT_POINTS}{$STR_BEFORE_TWO_POINTS}:</td>
 		<td>{$total_points} {$STR_GIFT_POINTS}<br />
@@ -236,6 +237,7 @@
 			</select>
 		</td>
 	</tr>
+	{/if}
 	<tr>
 		<td colspan="2" class="label">{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}:<br />
 			<textarea name="commentaires" style="width:100%" rows="5" cols="54">{$commentaires|trim}</textarea>
@@ -247,12 +249,6 @@
 	<tr>
 		<td colspan="2" class="bloc">{$STR_ADMIN_COMMANDER_CLIENT_INFORMATION}</td>
 	</tr>
-	{if $action_name == "modif"}
-	<tr>
-		<td>{$STR_ADMIN_COMMANDER_ORDER_AUTHOR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input name="email" type="text" value="{$email|str_form_value}" /></td>
-	</tr>
-	{/if}
 	<tr>
 		<td colspan="2" class="label">{$STR_INVOICE_ADDRESS}</td>
 	</tr>
@@ -279,7 +275,7 @@
 	</tr>
 	<tr>
 		<td>{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input type="text" name="email{$c.i}" style="width:100%" value="{$c.email|str_form_value}" /></td>
+		<td><input type="email" name="email{$c.i}" style="width:100%" value="{$c.email|str_form_value}" /></td>
 	</tr>
 	<tr>
 		<td>{$STR_TELEPHONE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -474,7 +470,7 @@ function order_line_calculate(id, mode){
 		<tr>
 			<td colspan="2">
 				{$STR_ADMIN_COMMANDER_ORDER_EMITTED_BY_GODCHILD} <a href="{$parrainage_form.href|escape:'html'}">{$parrainage_form.email}</a>.<br />
-				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_OF} <input type="text" size="5" maxlength="3" name="avoir" value="{$site_avoir|str_form_value}" /> {$site_symbole} {$STR_TTC}<br />
+				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_OF} <input type="number" size="5" maxlength="3" name="avoir" value="{$site_avoir|str_form_value}" /> {$site_symbole} {$STR_TTC}<br />
 				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_EXPLAIN}
 			</td>
 		</tr>

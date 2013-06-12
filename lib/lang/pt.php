@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: pt.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -496,8 +496,8 @@ $GLOBALS["STR_NEWSLETTER"] = "Newsletter";
 $GLOBALS["STR_NEXT_PAGE"] = "";
 $GLOBALS["STR_NEXT"] = "";
 $GLOBALS["STR_NO_AVAILABLE"] = "Não disponivel";
-$GLOBALS["STR_NO_FIND_ART"] = "	<h2>Article non trouvé</h2><blockquote class=normal>Não existem resultados correspondentes ao seu pedido.Visitem nosso<a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/lire/\">informations générales</a>pour faire une nouvelle recherche.</blockquote>";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>Produto não encontrado</h2><blockquote class=\"normal\">Não existem resultados correspondentes ao seu pedido. Visitem nosso<a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a>	para fazer uma nova pesquisa.	</blockquote>";
+$GLOBALS["STR_NO_FIND_ART"] = "	<h1>Article non trouvé</h1><blockquote class=\"normal\">Não existem resultados correspondentes ao seu pedido.Visitem nosso<a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/lire/\">informations générales</a>pour faire une nouvelle recherche.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Produto não encontrado</h1><blockquote class=\"normal\">Não existem resultados correspondentes ao seu pedido. Visitem nosso<a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a>	para fazer uma nova pesquisa.	</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "Nenhum produto disponível nesta categoria";
 $GLOBALS["STR_NO_ORDER"] = "Nemhuma encomenda foi registrada.";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37236 2013-06-11 19:10:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -45,11 +45,10 @@ function add_product_to_last_views_cookie($product_id)
 		}
 		// on crée le cookie avec 1 an de vie
 		if($GLOBALS['site_parameters']['force_sessions_for_subdomains']){
-			$domain = '.'.get_site_domain();
+			@setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, '/', '.'.get_site_domain());
 		} else {
-			$domain = '/';
+			@setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, '/');
 		}
-		setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, $domain);
 	}
 }
 
@@ -76,12 +75,17 @@ function affiche_last_views()
 		for ($i = count($tab_last_views) - 1; $i >= 0; $i--) {
 			$product_object = new Product($tab_last_views[$i], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
 			$product_html = get_product_in_container_html($product_object, true);
-			if (!empty($product_html)) {
+			if (!empty($product_html) && $product_object->on_gift == 0) {
 				// si le produit existe et est activé (en ligne)
 				$products_html_array[] = get_product_in_container_html($product_object, true);
 			} else {
 				unset($tab_last_views[$i]); // on supprime une fois ce produit de la liste
-				@setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, "/"); //et on met à jour la liste dans le cookie
+				// et on met à jour la liste dans le cookie
+				if($GLOBALS['site_parameters']['force_sessions_for_subdomains']){
+					@setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, '/', '.'.get_site_domain());
+				} else {
+					@setcookie('last_views', serialize($tab_last_views), time() + 365 * 24 * 60 * 60, '/');
+				}
 			}
 			unset($product_object);
 		}

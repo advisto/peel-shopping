@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: index.php 36927 2013-05-23 16:15:39Z gboussin $
 define('IN_INSTALLATION', 1);
 include("../configuration.inc.php");
 
@@ -27,7 +27,7 @@ $_SESSION['session_install_choixbase'] = "";
 $_SESSION['session_install_langs'] = "";
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('installation_index.tpl');
-$tpl->assign('php_version_info', (version_compare(PHP_VERSION, '5.0.0', '>=')?'<span class="global_success">' . PHP_VERSION . '</span>':'<div class="global_error">' . PHP_VERSION . ' - ' . $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] . '</div>'));
+$tpl->assign('php_version_info', (version_compare(PHP_VERSION, '5.1.2', '>=')?'<span class="global_success">' . PHP_VERSION . '</span>':'<div class="global_error">' . PHP_VERSION . ' - ' . $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] . '</div>'));
 $tpl->assign('mbstring_info', (function_exists('mb_internal_encoding')?'<span class="global_success">'.$GLOBALS['STR_YES'].'</span>':'<div class="global_error">'.$GLOBALS['STR_NO'].' - ' . $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] . '</div>'));
 $tpl->assign('utf8_info', ((function_exists('mb_list_encodings') && in_array('UTF-8', mb_list_encodings())) || (function_exists('mb_internal_encoding') && strtolower(mb_internal_encoding()) == 'utf-8')?'<span class="global_success">'.$GLOBALS['STR_YES'].'</span>':'<div class="global_error">'.$GLOBALS['STR_NO'].' - ' . $GLOBALS["STR_ADMIN_INSTALL_UTF8"] . '</div>'));
 $tpl->assign('allow_url_fopen_info', (function_exists('ini_get') && (@ini_get('allow_url_fopen') == 1 || strtolower(@ini_get('allow_url_fopen')) == 'on')?'<span class="global_success">'.$GLOBALS['STR_YES'].'</span>':'<div class="global_error">'.$GLOBALS['STR_NO'].' - ' . $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] . '</div>'));

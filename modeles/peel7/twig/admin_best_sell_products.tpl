@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_best_sell_products.tpl 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_best_sell_products.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<table class="main_table">
 	<tr>
 		<td class="entete">{{ STR_ADMIN_PRODUITS_ACHETES_MOST_WANTED }}</td>
@@ -21,8 +21,8 @@
 				<tr>
 					<th class="menu">{{ STR_PRODUCT }}</th>
 					<th class="menu">{{ STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED }}</th>
-					<th class="menu" width="120">{{ STR_QUANTITY }}</th>
-					<th class="menu" width="120">{{ STR_AMOUNT }}</th>
+					<th class="menu" style="width:120px">{{ STR_QUANTITY }}</th>
+					<th class="menu" style="width:120px">{{ STR_AMOUNT }}</th>
 				</tr>
 			{% for p in prods %}
 				{{ p.tr_rollover }}

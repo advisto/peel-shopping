@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: user.php 37226 2013-06-11 14:53:03Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -195,7 +195,13 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			}
 		}
 	}
-
+	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
+		// Paramètre lié à la fonction get_specific_field_infos.
+		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+			$user_specific_field[] = $this_field;
+			$user_specific_field_values[] = nohtml_real_escape_string($frm[$this_field]);
+		}
+	}
 	$qid = query("INSERT INTO peel_utilisateurs (
 		date_insert
 		, date_update
@@ -240,9 +246,10 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, on_vacances
 		, on_vacances_date
 		, promo
-		, id_cat_1
-		, id_cat_2
-		, id_cat_3
+		" . (!empty($frm['id_categories'])?', id_categories':'') . "
+		" . (!empty($frm['id_cat_1'])?', id_cat_1':'') . "
+		" . (!empty($frm['id_cat_2'])?', id_cat_2':'') . "
+		" . (!empty($frm['id_cat_3'])?', id_cat_3':'') . "
 		, activity
 		, seg_who
 		, seg_want
@@ -263,6 +270,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, logo
 		, description_document
 		" . (!empty($frm['document'])? ", document " : "") . "
+		" . (!empty($user_specific_field)? ',' . implode(',', $user_specific_field) : "") . "
 	) VALUES (
 		'" . nohtml_real_escape_string($date_insert) . "'
 		, '" . nohtml_real_escape_string($date_update) . "'
@@ -307,9 +315,10 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . intval(vn($frm['on_vacances'])) . "'
 		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['on_vacances_date']))) . "'
 		, '" . nohtml_real_escape_string(vb($frm['promo_code'])) . "'
-		, '" . intval(vn($frm['id_cat_1'])) . "'
-		, '" . intval(vn($frm['id_cat_2'])) . "'
-		, '" . intval(vn($frm['id_cat_3'])) . "'
+		" . (!empty($frm['id_categories'])? ",'" . implode("','", $frm['id_categories']) : "") . "
+		" . (!empty($frm['id_cat_1'])? ', ' . intval(vn($frm['id_cat_1'])):'') . "
+		" . (!empty($frm['id_cat_2'])? ', ' . intval(vn($frm['id_cat_2'])):'') . "
+		" . (!empty($frm['id_cat_3'])? ', ' . intval(vn($frm['id_cat_3'])):'') . "
 		, '" . nohtml_real_escape_string(vb($frm['activity'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['seg_who'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['seg_want'])) . "'
@@ -330,8 +339,8 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . nohtml_real_escape_string(vb($frm['logo'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['description_document'])) . "'
 		" . (!empty($frm['document'])? ", '" . nohtml_real_escape_string(vb($frm['document'])) . "'" : "") . "
+		" . (!empty($user_specific_field_values)? ", '" . implode("','", $user_specific_field_values) . "'" : "") . "
 		)");
-
 	$clientid = insert_id();
 	if (is_module_wanewsletter_active()) {
 		insere_wa_utilisateur($frm);
@@ -358,7 +367,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$custom_template_tags['PRENOM'] = $frm['prenom'];
 		$custom_template_tags['NOM_FAMILLE'] = $frm['nom_famille'];
 		$custom_template_tags['EMAIL'] = $frm['email'];
-		$custom_template_tags['DATE'] = get_formatted_date(null, 'short', 'long');
+		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
 		$custom_template_tags['SOCIETE'] = $frm['societe'];
 		$custom_template_tags['TELEPHONE'] = $frm['telephone'];
 		$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $clientid . '&start=0';
@@ -388,13 +397,19 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$priv = $frm['priv'];
 		}
 	}
+	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
+		// Paramètre lié à la fonction get_specific_field_infos.
+		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+			$user_specific_field[] = $this_field . ' = "' . nohtml_real_escape_string($frm[$this_field]) . '"';
+		}
+	}
 	query("UPDATE peel_utilisateurs SET
 			civilite = '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
 			, prenom = '" . nohtml_real_escape_string($frm['prenom']) . "'
 			, pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'
 			, nom_famille = '" . nohtml_real_escape_string($frm['nom_famille']) . "'
 			, societe = '" . nohtml_real_escape_string($frm['societe']) . "'
-			, intracom_for_billing  = '" . nohtml_real_escape_string(String::strtoupper($frm['intracom_for_billing'])) . "'
+			, intracom_for_billing  = '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
 			, telephone = '" . nohtml_real_escape_string($frm['telephone']) . "'
 			, fax = '" . nohtml_real_escape_string($frm['fax']) . "'
 			, portable = '" . nohtml_real_escape_string($frm['portable']) . "'
@@ -448,6 +463,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			, project_product_proposed = '" . nohtml_real_escape_string(vb($frm['project_product_proposed'])) . "'
 			, project_date_forecasted = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['project_date_forecasted']))) . "'
 			" . (isset($frm['url'])?", url = '" . nohtml_real_escape_string(vb($frm['url'])) . "'":"") . "
+			" . (isset($frm['id_categories'])?", id_categories = '" . implode(',', nohtml_real_escape_string($frm['id_categories'])) . "'":"") . "
 			" . (isset($frm['id_cat_1'])?", id_cat_1 = '" . nohtml_real_escape_string(vb($frm['id_cat_1'])) . "'":"") . "
 			" . (isset($frm['id_cat_2'])?", id_cat_2 = '" . nohtml_real_escape_string(vb($frm['id_cat_2'])) . "'":"") . "
 			" . (isset($frm['id_cat_3'])?", id_cat_3 = '" . nohtml_real_escape_string(vb($frm['id_cat_3'])) . "'":"") . "
@@ -458,6 +474,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			" . (!empty($frm['document'])? ", document =  '" . nohtml_real_escape_string($frm['document']) . "'" : "") . "
 			" . (!empty($frm['logo'])? ", logo =  '" . nohtml_real_escape_string($frm['logo']) . "'" : "") . "
 			" . (is_map_module_active()?", address_hash = ''" : "") . "
+			" . (!empty($user_specific_field)? "," . implode(',', $user_specific_field) : "") . "
 		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'");
 	if ($update_current_session) {
 		// Mise à jour de la session en cours
@@ -467,7 +484,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 		$_SESSION['session_utilisateur']['pseudo'] = $frm['pseudo'];
 		$_SESSION['session_utilisateur']['nom_famille'] = $frm['nom_famille'];
 		$_SESSION['session_utilisateur']['societe'] = $frm['societe'];
-		$_SESSION['session_utilisateur']['intracom_for_billing'] = String::strtoupper($frm['intracom_for_billing']);
+		$_SESSION['session_utilisateur']['intracom_for_billing'] = String::strtoupper(vb($frm['intracom_for_billing']));
 		$_SESSION['session_utilisateur']['telephone'] = $frm['telephone'];
 		$_SESSION['session_utilisateur']['fax'] = $frm['fax'];
 		$_SESSION['session_utilisateur']['portable'] = $frm['portable'];
@@ -802,7 +819,7 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 4) {
+			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 4) {
 				// Utilisateur avec un n° de TVA intracom, en Europe mais pas en France
 				return true;
 			}

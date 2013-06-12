@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: installation_configuration.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: installation_configuration.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<div id="contourMenu">
 	<div id="menuHorizontal">
 		<h1>{$step_title|escape:'html'}</h1>
@@ -22,7 +22,7 @@
 	<form action="{$next_step_url|escape:'html'}" method="post">
 		{$form_messages}
 		<div class="col">{$STR_ADMIN_INSTALL_ADMIN_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</div>
-		<div class="col"><input type="text" size="30" name="email" value="" /><br /></div>
+		<div class="col"><input type="email" size="30" name="email" value="" /><br /></div>
  
 		<div class="col">{$STR_PSEUDO} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</div>
 		<div class="col"><input type="text" size="30" name="pseudo" value="" /><br /></div>
@@ -37,7 +37,7 @@
 		<div class="col"><input type="text" name="prenom" value="" size="30" /></div>
 
 		<div class="col">{$STR_TELEPHONE}{$STR_BEFORE_TWO_POINTS}:</div>
-		<div class="col"><input type="text" name="telephone" value="" size="30" /></div>
+		<div class="col"><input type="tel" name="telephone" value="" size="30" /></div>
 
 		<div class="col">{$STR_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</div>
 		<div class="col"><input type="text" name="adresse" value="" size="30" /></div>

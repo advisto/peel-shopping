@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 36248 2013-04-05 17:32:15Z gboussin $
+// $Id: email-templates.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -97,8 +97,8 @@ if (!empty($_GET['id'])) {
 	$tpl->assign('text', vb($template_infos['text']));
 
 	$tpl_langs = array();
-	$langs_array = $GLOBALS['lang_codes'];
-	if (!empty($template_infos['lang']) && !in_array($template_infos['lang'], $GLOBALS['lang_codes'])) {
+	$langs_array = $GLOBALS['admin_lang_codes'];
+	if (!empty($template_infos['lang']) && !in_array($template_infos['lang'], $GLOBALS['admin_lang_codes'])) {
 		$langs_array[] = $template_infos['lang'];
 	}
 	foreach ($langs_array as $lng) {
@@ -174,8 +174,8 @@ if (empty($_GET['id'])) {
 	$tpl->assign('form_subject', vb($_POST['form_subject']));
 	$tpl->assign('form_text', vb($_POST['form_text']));
 	$tpl_langs = array();
-	$langs_array = $GLOBALS['lang_codes'];
-	if (!empty($_POST['form_lang']) && !in_array($_POST['form_lang'], $GLOBALS['lang_codes'])) {
+	$langs_array = $GLOBALS['admin_lang_codes'];
+	if (!empty($_POST['form_lang']) && !in_array($_POST['form_lang'], $GLOBALS['admin_lang_codes'])) {
 		$langs_array[] = $_POST['form_lang'];
 	}
 	foreach ($langs_array as $lng) {
@@ -216,7 +216,7 @@ while ($row_categories = fetch_assoc($result)) {
 }
 $tpl->assign('options', $tpl_options);
 $tpl_langs = array();
-foreach ($GLOBALS['lang_codes'] as $lng) {
+foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 	$tpl_langs[] = array('name' => $lng,
 		'value' => $lng,
 		'issel' => vb($_GET['form_lang_template']) == $lng
@@ -286,7 +286,7 @@ if (!empty($results_array)) {
 		}
 		$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 			'id' => $this_template["id"],
-			'technical_code' => String::str_shorten_words($this_template["technical_code"], 20),
+			'technical_code' => String::str_shorten_words($this_template["technical_code"], 20, '<br />'),
 			'category_name' => $category_name,
 			'name' => $this_template["name"],
 			'subject' => String::str_shorten_words($this_template["subject"], 40),

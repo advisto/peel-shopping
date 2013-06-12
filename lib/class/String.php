@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: String.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 36232 2013-04-05 13:16:01Z gboussin $
+ * @version $Id: String.php 36927 2013-05-23 16:15:39Z gboussin $
  * @access public
  */
 class String {
@@ -300,7 +300,7 @@ class String {
 				$string_array[$this_main_key] = implode(' ', $tab);
 			}
 			// on reconstitue la chaîne initiale
-			$sentences_array[$this_main_sentence_key] = implode('\t', $string_array);
+			$sentences_array[$this_main_sentence_key] = implode("\t", $string_array);
 		}
 		$string = implode("\n", $sentences_array);
 		return $string;
@@ -611,9 +611,12 @@ class String {
 	 * @param mixed $additional_config
 	 * @param boolean $safe
 	 * @param string $additional_elements
+	 * @param integer $max_caracters_length On coupe le texte si le nombre de caractères dépasse la valeur autorisée ads_max_caracters_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - En cas de langue avec beaucoup de caractères spéciaux, cette valeur doit être fortement inférieure à la taille du champ en base de données
+	 * @param integer $max_octets_length On coupe sans ménagement le texte si la taille en octets dépasse la valeur autorisée ads_max_octets_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - ads_max_caracters_length doit être inférieur à la taille du champs en base de données en laissant la place pour les balises de cloture (champ TEXT = 65 536 octets)
+
 	 * @return
 	 */
-	static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null)
+	static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000)
 	{
 		require_once($GLOBALS['dirroot'] . "/lib/fonctions/htmlawed.php");
 		if (empty($text)) {
@@ -635,6 +638,15 @@ class String {
 		// On raccourcit tout ce qui dépasse 100 caractères de long sans espace : ce n'est pas normal car plus haut, on a ajouté des espaces derrières les ; et autres ...
 		$text = String::str_shorten_words($text, 100, ' ');
 		$text = str_replace(': //', '://', $text);
+		if(!empty($max_caracters_length) && String::strlen(vb($text)) > $max_caracters_length * 1.1) {
+			// On coupe le texte si il dépasse la valeur autorisée de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes
+			$text = String::substr($text, 0, $max_caracters_length);
+		}
+		if(!empty($max_octets_length) && String::strlen(vb($text)) > $max_octets_length * 1.1) {
+			// On coupe le texte si il dépasse la valeur autorisée, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes
+			// Coupure en octets, pas en caractères => substr et non pas String::substr
+			$text = substr($text, 0, $max_octets_length);
+		}
 		// $html_config['tidy']=1;
 		// ATTENTION : clean_ms_char corrompt le UTF8, donc il ne faut pas l'appliquer (si c'était compatible on aurait mis la valeur 2)
 		$html_config['clean_ms_char'] = 0;
@@ -776,7 +788,7 @@ class String {
 	}
 
 	/**
-	 * Returns string compatible with Apache without the AllowEncodedSlashes directive ON => avoids systematic 404 error when %2F in URL (when is is present outside of GET)
+	 * Returns string compatible with Apache without the AllowEncodedSlashes directive ON => avoids systematic 404 error when %2F in URL (when it is present outside of GET)
 	 *
 	 * @param string $string The input string.
 	 * @param boolean $avoid_slash

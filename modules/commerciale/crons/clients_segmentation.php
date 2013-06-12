@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clients_segmentation.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: clients_segmentation.php 37230 2013-06-11 16:13:31Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -192,10 +192,16 @@ function updateClientsContactDates()
 			$next_contact_reason = '';
 			$next_contact_timestamp = 0;
 		}
-		if ($next_contact_timestamp != $user['next_contact_timestamp'] || $next_contact_reason != $user['next_contact_reason'] || $seg_followed != $user['seg_followed']) {
+		
+		query('INSERT INTO peel_admins_contacts_planified (`user_id`, `timestamp`, `reason`)
+			VALUES(
+				' . intval($user['id_utilisateur']) . ',
+				"' . nohtml_real_escape_string(vb($next_contact_timestamp)) . '",
+				"' . nohtml_real_escape_string(vb($next_contact_reason)) . '")');
+		if ($seg_followed != $user['seg_followed']) {
 			// Mise à jour des utilisateurs dont la date de contact (et/ou la raison) a/ont changé
 			query('UPDATE peel_utilisateurs
-				SET next_contact_timestamp="' . nohtml_real_escape_string($next_contact_timestamp) . '", next_contact_reason="' . nohtml_real_escape_string($next_contact_reason) . '", seg_followed="' . nohtml_real_escape_string($seg_followed) . '"
+				SET seg_followed="' . nohtml_real_escape_string($seg_followed) . '"
 				WHERE id_utilisateur=' . intval($user_id));
 		}
 		unset($next_contact_time);

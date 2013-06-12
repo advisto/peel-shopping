@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: sites.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -37,15 +37,15 @@ if (!empty($frm['logo']) && strpos($frm['logo'], 'http') === false) {
 
 switch (vb($_GET['mode'])) {
 	case "ajout" :
-		$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-		$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+		$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['favicon']));
+		$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
 		$output .= affiche_formulaire_ajout_site($frm);
 		break;
 
 	case "modif" :
 		if (!empty($frm)) {
-			$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-			$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['favicon']));
+			$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
 			
 			if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']) . vb($_GET['id']))) {
 				$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
@@ -127,7 +127,7 @@ function affiche_formulaire_ajout_site(&$frm)
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
 	$frm['default_country_id'] = vn($GLOBALS['site_parameters']['default_country_id']);
-	foreach($GLOBALS['lang_codes'] as $lng) {
+	foreach($GLOBALS['admin_lang_codes'] as $lng) {
 		$frm['nom_' . $lng] = "";
 		$frm['logo_' . $lng] = 1;
 	}
@@ -162,7 +162,7 @@ function affiche_formulaire_ajout_site(&$frm)
 	$frm['fb_secret'] = "";
 	$frm['fb_baseurl'] = "";
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$frm['module_vacances_client_msg_' . $lng] = "";
 	}
 
@@ -261,7 +261,6 @@ function affiche_formulaire_modif_site($id, &$frm)
 	$frm['id'] = $id;
 	$frm["nouveau_mode"] = "modif";
 	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-
 	return affiche_formulaire_site($frm, $frm_modules);
 }
 
@@ -274,6 +273,15 @@ function affiche_formulaire_modif_site($id, &$frm)
  */
 function affiche_formulaire_site(&$frm, $frm_modules)
 {
+	foreach(array('site_suspended', 'systempay_test_mode') as $this_field) {
+		if(isset($frm[$this_field])) {
+			if($frm[$this_field] === 'false') {
+				$frm[$this_field] = false;
+			} elseif($frm[$this_field] === 'true') {
+				$frm[$this_field] = true;
+			}
+		}
+	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_site.tpl');
 
 	$tpl_zones = array();
@@ -296,7 +304,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('membre_admin_href', $GLOBALS['wwwroot_in_admin'] . '/membre.php');
 
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng],
 			'logo' => $frm['logo_' . $lng],
@@ -906,7 +914,7 @@ function create_or_update_site($id, $frm)
 	}
 	if (intval(vn($frm['keep_old_orders_intact']))>1 && empty($frm['keep_old_orders_intact_date'])) {
 		// Par défaut : date du jour
-		$frm['keep_old_orders_intact_date'] = get_formatted_date();
+		$frm['keep_old_orders_intact_date'] = get_formatted_date(time());
 		$frm['keep_old_orders_intact'] = (intval(vn($frm['keep_old_orders_intact']))>1? strtotime(get_mysql_date_from_user_input($frm['keep_old_orders_intact_date'])) : intval(vn($frm['keep_old_orders_intact'])));
 	}
 	if(isset($frm['template_directory']) && !file_exists($GLOBALS['dirroot'] . "/modeles/" . vb($frm['template_directory']))) {

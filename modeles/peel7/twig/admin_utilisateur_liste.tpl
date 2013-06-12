@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 35064 2013-02-08 14:16:40Z gboussin $
+// $Id: admin_utilisateur_liste.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
 #}<form method="get" action="{{ action|escape('html') }}">
 	<table class="full_width" cellpadding="2">
 		<tr>
@@ -26,7 +26,7 @@
 						<td>{{ STR_TELEPHONE }} / {{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 					</tr>
 					<tr>
-						<td><input type="text" name="email" value="{{ email|str_form_value }}" style="width: 200px;" /></td>
+						<td><input type="email" name="email" value="{{ email|str_form_value }}" style="width: 200px;" /></td>
 						<td><input type="text" name="client_info" value="{{ client_info|str_form_value }}" style="width: 200px;" /></td>
 						<td><input type="text" name="societe" value="{{ societe|str_form_value }}" style="width: 200px;" /></td>
 						<td><input type="text" name="tel" value="{{ tel|str_form_value }}" style="width: 200px;" /></td>
@@ -261,6 +261,42 @@
 						</td>
 					</tr>
 					{% if is_annonce_module_active %}
+					<tr>
+						<td colspan="2">{{STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES}}</td>
+					</tr>
+				{% if !empty(favorite_category) %}
+					<tr>
+						<td>{{STR_FIRST_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>
+							{{favorite_category}}
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td>{{STR_FIRST_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>
+							<select id="id_cat_1" name="id_cat_1">
+								{{favorite_category_1}}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{STR_SECOND_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>
+							<select id="id_cat_2" name="id_cat_2">
+								{{favorite_category_2}}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{STR_THIRD_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>
+							<select id="id_cat_3" name="id_cat_3">
+								{{favorite_category_3}}
+							</select>
+						</td>
+					</tr>
+				{% endif %}
 					<tr>
 						<td>
 							<tr>

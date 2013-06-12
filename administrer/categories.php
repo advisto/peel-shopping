@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: categories.php 37040 2013-05-30 13:17:16Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -214,7 +214,7 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 function affiche_formulaire_ajout_categorie($id, &$frm)
 {
 	if(empty($frm)) {
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 			$frm['description_' . $lng] = "";
 			$frm['meta_titre_' . $lng] = "";
@@ -308,8 +308,8 @@ function supprime_categorie($id)
 function insere_sous_categorie(&$frm)
 {
 	if (!empty($frm['nom_' . $_SESSION['session_langue']])) {
-		foreach ($GLOBALS['lang_codes'] as $lng) {
-			${'img_' . $lng} = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
+			$frm['image_' . $lng] = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_' . $lng]));
 		}
 		$sql = 'INSERT INTO peel_categories (parent_id
 			, etat
@@ -325,7 +325,7 @@ function insere_sous_categorie(&$frm)
 			, promotion_percent
 			, on_child';
 		}
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$sql .= "
 			, alpha_" . $lng . "
 			, nom_" . $lng . "
@@ -350,7 +350,7 @@ function insere_sous_categorie(&$frm)
 			, '" . floatval(get_float_from_user_input($frm['promotion_percent'])) . "'
 			, '" . intval($frm['on_child']) . "'";
 		}
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$sql .= "
 			, '" . nohtml_real_escape_string(String::substr(String::strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 			, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
@@ -358,7 +358,7 @@ function insere_sous_categorie(&$frm)
 			, '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'
-			, '" . nohtml_real_escape_string(${'img_' . $lng}) . "'
+			, '" . nohtml_real_escape_string($frm['image_' . $lng]) . "'
 			, '" . real_escape_string($frm['header_html_' . $lng]) . "'";
 		}
 		$sql .= ')';
@@ -386,8 +386,8 @@ function maj_categorie($id, $frm)
 		$frm['parent_id'] = 0;
 	}
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
-		$frm['image_' . $lng] = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
+		$frm['image_' . $lng] = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_' . $lng]));
 	}
 	$sql = "UPDATE peel_categories
 		SET parent_id = '" . intval($frm['parent_id']) . "'
@@ -405,7 +405,7 @@ function maj_categorie($id, $frm)
 		, on_child = '" . intval($frm['on_child']) . "'";
 	}
 
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(String::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 		, nom_" . $lng . "='" . real_escape_string($frm['nom_' . $lng]) . "'
 		, image_" . $lng . "='" . real_escape_string($frm['image_' . $lng]) . "'
@@ -495,7 +495,18 @@ function affiche_formulaire_categorie(&$frm)
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	$tpl->assign('is_lot_module_active', is_lot_module_active());
+	if (is_lot_module_active()) {
+		if (vb($frm['nouveau_mode']) == "maj") {
+			include ($GLOBALS['fonctionslot']);
+			$tpl->assign('lot_explanation_table', get_lot_explanation_table(null, $frm['id']));
+			$tpl->assign('lot_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?cat_id=' . vb($frm['id']));
+			if (num_rows(query("SELECT 1 FROM peel_quantites WHERE cat_id='" . intval($frm['id']) . "'")) > 0) {
+				$tpl->assign('lot_supprime_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?cat_id=' . vb($frm['id']) . '&mode=supprime');
+			}
+		}
+	}
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_img = null;
 		if (!empty($frm["image_" . $lng])) {
 			$tpl_img = array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image_" . $lng],
@@ -557,6 +568,11 @@ function affiche_formulaire_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_META_DESCRIPTION', $GLOBALS['STR_ADMIN_META_DESCRIPTION']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_CATEGORIES_DISCOUNT_IN_CATEGORY', $GLOBALS['STR_ADMIN_CATEGORIES_DISCOUNT_IN_CATEGORY']);
+	$tpl->assign('STR_ADMIN_CATEGORIES_LOT_PRICE', $GLOBALS['STR_ADMIN_CATEGORIES_LOT_PRICE']);
+	$tpl->assign('STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE', $GLOBALS['STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE']);
+	$tpl->assign('STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
+	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);

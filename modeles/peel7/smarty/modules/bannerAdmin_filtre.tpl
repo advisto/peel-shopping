@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_filtre.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: bannerAdmin_filtre.tpl 36927 2013-05-23 16:15:39Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
 	<table class="full_width">
 		<tr>
-			<td class="entete" colspan="11">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</td>
+			<td class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</td>
 		</tr>
 		<tr>
-			<td colspan="11" class="input_search">
+			<td class="input_search">
 				<table class="full_width" class="center">
 					<tr>
 						<td>{$STR_ADMIN_SEARCH_IN_TITLE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -52,7 +52,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="4" align="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="bouton" value="{$STR_SEARCH|str_form_value}" /></p></td>
+			<td class="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="bouton" value="{$STR_SEARCH|str_form_value}" /></p></td>
 		</tr>
 	</table>
 </form>

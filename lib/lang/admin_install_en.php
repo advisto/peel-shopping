@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_en.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_install_en.php 37250 2013-06-12 09:25:38Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -48,11 +48,11 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_ADVISE_HOW_TO_CREATE"] = "If your database 
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_SELECT"] = "Please choose your database that will store your PEEL:";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_PLEASE_CLEAN_BEFORE_INSTALL"] = "CAUTION: If the database already contains tables \"peel_\", delete them before proceeding";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_NO_ACCESS"] = "You do not have access to the database";
-$GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_OK"] = "The directory% s is writable";
-$GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_NOK"] = "The directory% s is not writable => Add writable";
-$GLOBALS["STR_ADMIN_INSTALL_FILE_OK"] = "The file% s is writable";
-$GLOBALS["STR_ADMIN_INSTALL_FILE_NOK"] = "File% s is not writable => Add writable";
-$GLOBALS["STR_ADMIN_INSTALL_DATABASE_OK_PREFIX"] = "The database% s does not contain table PEEL (it's perfect).";
+$GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_OK"] = "The directory %s is writable";
+$GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_NOK"] = "The directory %s is not writable => Add writable";
+$GLOBALS["STR_ADMIN_INSTALL_FILE_OK"] = "The file %s is writable";
+$GLOBALS["STR_ADMIN_INSTALL_FILE_NOK"] = "File %s is not writable => Add writable";
+$GLOBALS["STR_ADMIN_INSTALL_DATABASE_OK_PREFIX"] = "The database %s does not contain table PEEL (it's perfect).";
 $GLOBALS["STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS"] = "We are going to check the access rights on files and directories";
 $GLOBALS["STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN"] = "NB: The next step 5/6 will create your data structure and may take a few seconds";
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_OK"] = "The rights are correct";
@@ -73,7 +73,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "STRONGLY RECOMMENDE
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Your site has been configured to display PHP errors for your IP, namely {$_SERVER['REMOTE_ADDR']}. This parameter can be changed in the administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB: If you want to work on the PHP code on your site, be careful when you edit your files using an editor that supports UTF-8 well and does not add BOM (invisible characters) in the header files. If in doubt, use Notepad++ is a free download on the Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Select the languages ​​to install:";
-$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "You must enable PHP5 on your site: edit the file. Htaccess at the root of the site to enable the lines corresponding to your accommodation by removing the # at the beginning of the line, or contact your hosting - For hosting by PEEL, contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
+$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "You must enable PHP >= 5.2 on your site: edit the file. Htaccess at the root of the site to enable the lines corresponding to your accommodation by removing the # at the beginning of the line, or contact your hosting - For hosting by PEEL, contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "You will need to manually change the encoding of the site - contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "You will need to manually change the encoding of the site - contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Operation will be normal except that Butterflive module will not function";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: haut.php 37040 2013-05-30 13:17:16Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ $tpl->assign('page_title', str_replace($GLOBALS['site'], '<a href="' . $GLOBALS[
 $tpl->assign('logo_src', $GLOBALS['wwwroot'] . '/images/logo-peel.png');
 $tpl->assign('admin_menu', get_admin_menu());
 $tpl->assign('is_demo_error', a_priv('demo'));
-$tpl->assign('flags', affiche_flags(true));
+$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['admin_lang_codes']));
 $tpl->assign('site', $GLOBALS['site']);
 $tpl->assign('GENERAL_ENCODING', GENERAL_ENCODING);
 $tpl->assign('IN_INSTALLATION', IN_INSTALLATION);
@@ -77,7 +77,7 @@ if(!empty($GLOBALS['load_timepicker'])) {
 			changeYear: true,
 			showTimePicker: true,
 			showSecond: true,
-			timeFormat: "'.str_replace(array('h','%H','%M','%S'), array("'h'",'hh','mm','ss'), $GLOBALS['time_format_long']).'",
+			timeFormat: "'.str_replace(array('h','%H','%M','%S'), array("'h'",'HH','mm','ss'), $GLOBALS['time_format_long']).'",
 			yearRange: "2012:2037"
 		});
 ';

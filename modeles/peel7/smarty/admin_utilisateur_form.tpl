@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: admin_utilisateur_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
 *}<form enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -195,15 +195,15 @@
 		</tr>
 		<tr>
 			<td>{$STR_TELEPHONE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="telephone" style="width:100%" value="{$telephone|str_form_value}" />{$telephone_calllink}</td>
+			<td><input type="tel" name="telephone" style="width:100%" value="{$telephone|str_form_value}" />{$telephone_calllink}</td>
 		</tr>
 		<tr>
 			<td>{$STR_FAX}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="fax" style="width:100%" value="{$fax|str_form_value}" /></td>
+			<td><input type="tel" name="fax" style="width:100%" value="{$fax|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="portable" style="width:100%" value="{$portable|str_form_value}" />{$portable_calllink}</td>
+			<td><input type="tel" name="portable" style="width:100%" value="{$portable|str_form_value}" />{$portable_calllink}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -265,7 +265,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="url" style="width:100%" value="{$url|str_form_value}" /></td>
+			<td><input type="text" name="url" style="width:100%" placeholder="http://" value="{$url|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_WEBSITE_DESCRIPTION}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -303,6 +303,12 @@
 			<td>{$STR_ORIGIN}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>{include file="user_origins.tpl" origin_infos=$origin_infos}{$origin_infos.error_text}</td>
 		</tr>
+		{foreach $specific_fields as $f}
+		<tr>
+			<td>{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{include file="specific_field.tpl" f=$f}{$f.error_text}</td>
+		</tr>
+		{/foreach}
 		<tr>
 			<td>
 				<label>{$STR_LANGUAGE_FOR_AUTOMATIC_EMAILS}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -322,6 +328,14 @@
 		<tr>
 			<td colspan="2">{$STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES}</td>
 		</tr>
+	{if !empty($favorite_category)}
+		<tr>
+			<td>{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				{$favorite_category}
+			</td>
+		</tr>
+	{else}
 		<tr>
 			<td>{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -346,6 +360,7 @@
 				</select>
 			</td>
 		</tr>
+	{/if}
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
@@ -523,8 +538,7 @@
 <br />
 {/if}
 {if isset($phone_event)}
-<a name="phone_event"></a>
-<table class="full_width">
+<table id="phone_event" class="full_width">
 	<tr><td class="entete">{$STR_ADMIN_UTILISATEURS_MANAGE_CALLS}</td></tr>
 	<tr><td>{$phone_event}</td></tr>
 </table>
@@ -537,8 +551,7 @@
 <br />
 {/if}
 {if isset($download_files)}
-<a name="download_files"></a>
-<table class="full_width">
+<table id="download_files" class="full_width">
 	<tr><td>{$download_files}</td></tr>
 </table>
 <br />

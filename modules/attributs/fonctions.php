@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36258 2013-04-06 11:00:04Z gboussin $
+// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -166,9 +166,10 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
  * @param boolean $force_reseller_mode
  * @param boolean $get_attributes_with_multiple_options_only
  * @param boolean $filter_using_show_description
+ * @param boolean $get_attributes_with_single_options_only
  * @return
  */
-function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true, $filter_using_show_description = false)
+function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true, $filter_using_show_description = false, $get_attributes_with_single_options_only = false)
 {
 	$output = '';
 	$GLOBALS['last_calculation_additional_price_ht'] = 0;
@@ -187,7 +188,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 	}
 	// On récupère la liste des attributs qui n'offrent pas juste un choix (auquel cas, ils sont gérés par Product, et ils doivent apparaitre comme partie intégrante de la description d'un produit)
 	// L'ajout à la description est par ailleurs gérée dans la classe Product 
-	$attributs_array = $product_object->get_possible_attributs('rough', ($display_mode == 'selected_text'), 0, true, false, false, false, $get_attributes_with_multiple_options_only, false);
+	$attributs_array = $product_object->get_possible_attributs('rough', ($display_mode == 'selected_text'), 0, true, false, false, false, $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only);
 	if (!empty($attributs_array)) {
 		// On affiche la liste des attributs
 		foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
@@ -527,7 +528,7 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 	$combinaisons_array = array();
 	foreach(array_keys($_FILES) as $this_key) {
 		if(!isset($frm[$this_key]) && String::strpos($this_key, 'attribut') === 0) {
-			$frm[$this_key] = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			$frm[$this_key] = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_key]));
 			if(!empty($_FILES[$this_key]['name']) && $frm[$this_key] === false) {
 				// on signale que l'image n'a pas été chargée correctement
 				$_SESSION["session_display_popup"][$this_key] = false; 

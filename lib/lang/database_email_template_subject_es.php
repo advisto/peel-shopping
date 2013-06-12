@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_es.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: database_email_template_subject_es.php 36927 2013-05-23 16:15:39Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -55,7 +55,10 @@ $peel_email_template["subject"] = array(
   "email_retour_avoir" => "Validación de su devolución de mercancías #[RETURN_ID]",
   "email_reste_avoir_remboursement" => "Reembolso de su crédito #[RETURN_ID]",
   "email_remboursement" => "Validación de su devolución de mercancías #[RETURN_ID]",
-  "email_retour_client" => "Su solicitud de devolución"
+  "email_retour_client" => "Su solicitud de devolución",
+  "cron_order_payment_failure_alerts" => "Ayuda para su pago",
+  "cron_order_not_paid_alerts" => "El pago de su pedido",
+  "cron_update_contact_info" => "La confirmación de la validez de la información"
 );
 
 ?>

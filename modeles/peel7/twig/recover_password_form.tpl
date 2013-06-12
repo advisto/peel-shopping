@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: recover_password_form.tpl 35330 2013-02-16 18:27:13Z gboussin $
+// $Id: recover_password_form.tpl 36927 2013-05-23 16:15:39Z gboussin $
 #}<h1 class="page_title">{{ get_password }}</h1>
 {% if (message) %}
 {{ message }}
@@ -25,7 +25,6 @@
 		<p style="text-justify">{{ pass.msg_insert_new_password|nl2br_if_needed }}{{ STR_BEFORE_TWO_POINTS }}:</p>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="rec_password_once">{{ pass.STR_NEW_PASSWORD }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-
 			<span class="enregistrementdroite"><input type="password" name="password_once" id="rec_password_once" size="25" value="{{ pass.password_once|str_form_value }}" /></span>{{ pass.password_once_error }}
 		</div>
 		 <div class="enregistrement">
@@ -38,7 +37,6 @@
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="rec_password_twice">{{ pass.STR_NEW_PASSWORD_CONFIRM }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-
 			<span class="enregistrementdroite"><input type="password" name="password_twice" id="rec_password_twice" size="25" value="{{ pass.password_twice|str_form_value }}" /></span>	{{ pass.password_twice_error }}
 		</div>
 	{% endif %}

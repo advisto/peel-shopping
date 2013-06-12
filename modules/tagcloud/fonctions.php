@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
 //
 
 if (!defined('IN_PEEL')) {
@@ -27,14 +27,18 @@ function affiche_tagcloud($return_mode = false)
 {
 	// Avec la complicité de 3dvf.fr
 	$output = '';
-	$max = 1;
-
+	$max = 0;
+	if(empty($GLOBALS['site_parameters']['tagcloud_display_count'])) {
+		$limit = 25;
+	} else {
+		$limit = $GLOBALS['site_parameters']['tagcloud_display_count'];
+	}
 	$query = "SELECT tag_name AS tag, nbsearch AS quantity
 		FROM peel_tag_cloud
-		WHERE lang = '" . $_SESSION['session_langue'] . "'
+		WHERE lang = '" . $_SESSION['session_langue'] . "' AND nbsearch>0
 		GROUP BY tag_name
-		ORDER BY RAND()
-		LIMIT 25";
+		ORDER BY RAND()*(10+quantity) DESC
+		LIMIT ". intval($limit);
 
 	$result = query($query);
 	
@@ -42,17 +46,22 @@ function affiche_tagcloud($return_mode = false)
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/tagcloud.tpl');
 		$tpl_tags = array();
 		while ($row = fetch_assoc($result)) {
-			$tags[$row['tag']] = $row['quantity'];
-			if (intval($row['quantity']) > $max) {
-				$max = intval($row['quantity']);
+			$this_quantity = log($row['quantity']);
+			$tags[String::strtolower($row['tag'])] = $this_quantity;
+			if ($this_quantity > $max) {
+				$max = $this_quantity;
+			}
+			if (!isset($min) || $this_quantity < $min) {
+				$min = $this_quantity;
 			}
 		}
+		ksort($tags);
 		foreach ($tags as $key => $value) {
 			$tpl_tags[] = array(
 				'href' => $GLOBALS['wwwroot'] . '/search.php?match=1&search=' . $key,
 				'value' => $value,
 				'key' => $key,
-				'level' => intval($value * 10 / $max)
+				'level' => intval(($value-$min) / ($max-$min) * 10)
 			);
 		}
 		$tpl->assign('tags', $tpl_tags);
@@ -80,9 +89,12 @@ function sql_tagcloud($motclef)
 			FROM peel_tag_cloud
 			WHERE tag_name = "'.nohtml_real_escape_string($motclef).'" AND lang = "'.nohtml_real_escape_string($_SESSION['session_langue']).'"');
 		if ($enr = fetch_assoc($result)) {
-			query('UPDATE `peel_tag_cloud` SET `nbsearch`=nbsearch+1 WHERE `id`="'.intval($enr['id']).'"');
+			query('UPDATE `peel_tag_cloud` 
+				SET `nbsearch`=nbsearch+1 
+				WHERE `id`="'.intval($enr['id']).'"');
 		} else {
-			query('INSERT INTO `peel_tag_cloud` (`tag_name`,`nbsearch`,`lang`) VALUES ("'.nohtml_real_escape_string($motclef).'","1","'.$_SESSION['session_langue'].'")');
+			query('INSERT INTO `peel_tag_cloud` (`tag_name`,`nbsearch`,`lang`) 
+				VALUES ("'.nohtml_real_escape_string($motclef).'","1","'.$_SESSION['session_langue'].'")');
 		}
 	}
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commande_details.php 36261 2013-04-06 11:18:12Z gboussin $
+// $Id: commande_details.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -139,10 +139,10 @@ $tpl->assign('delivery_tracking', vb($commande['delivery_tracking']));
 $tpl->assign('is_icirelais_module_active', is_icirelais_module_active());
 $tpl->assign('is_tnt_module_active', is_tnt_module_active());
 if (is_icirelais_module_active()) {
-	$tpl->assign('STR_MODULE_ICIRELAIS_TRACKING_URL', STR_MODULE_ICIRELAIS_TRACKING_URL);
-	$tpl->assign('STR_MODULE_ICIRELAIS_COMMENT_TRACKING', STR_MODULE_ICIRELAIS_COMMENT_TRACKING);
-	$tpl->assign('STR_MODULE_ICIRELAIS_ERROR_TRACKING', STR_MODULE_ICIRELAIS_ERROR_TRACKING);
-	$tpl->assign('STR_MODULE_ICIRELAIS_CREATE_TRACKING', STR_MODULE_ICIRELAIS_CREATE_TRACKING);
+	$tpl->assign('STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE', $GLOBALS['STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE']);
+	$tpl->assign('STR_MODULE_ICIRELAIS_COMMENT_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_COMMENT_TRACKING']);
+	$tpl->assign('STR_MODULE_ICIRELAIS_ERROR_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_ERROR_TRACKING']);
+	$tpl->assign('STR_MODULE_ICIRELAIS_CREATE_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_CREATE_TRACKING']);
 }
 
 if((!empty($id) && $commande['montant'] > 0) || empty($id)) {
@@ -203,8 +203,12 @@ if (!empty($commande['affilie']) && $commande['affilie'] == 1) {
 	$tpl->assign('is_affilie', false);
 }
 
-$tpl->assign('total_points', vn($commande['total_points']));
-$tpl->assign('points_etat', vn($commande['points_etat']));
+
+$tpl->assign('is_gifts_module_active', is_gifts_module_active());
+if (is_gifts_module_active()) {
+	$tpl->assign('total_points', vn($commande['total_points']));
+	$tpl->assign('points_etat', vn($commande['points_etat']));
+}
 $tpl->assign('commentaires', vb($commande['commentaires']));
 
 $tpl_client_infos = array();

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: enregistrement.php 37156 2013-06-05 12:42:24Z sdelaporte $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -29,15 +29,11 @@ if (is_socolissimo_module_active()) {
 }
 
 if (!empty($frm)) {
-	$form_error_object->valide_form($frm,
-		array('mot_passe' => $GLOBALS['STR_ERR_PASSWORD'],
-			'prenom' => $GLOBALS['STR_ERR_FIRSTNAME'],
-			'nom_famille' => $GLOBALS['STR_ERR_NAME'],
-			'adresse' => $GLOBALS['STR_ERR_ADDRESS'],
-			'code_postal' => $GLOBALS['STR_ERR_ZIP'],
-			'ville' => $GLOBALS['STR_ERR_TOWN'],
-			'pays' => $GLOBALS['STR_ERR_COUNTRY'],
-			'telephone' => $GLOBALS['STR_ERR_TEL']));
+	foreach($GLOBALS['site_parameters']['user_mandatory_fields'] as $this_key => $this_text_key) {
+		$form_error_names[$this_key] = $GLOBALS[$this_text_key];
+	}
+	$form_error_names['mot_passe'] = $GLOBALS['STR_ERR_PASSWORD'];
+	$form_error_object->valide_form($frm, $form_error_names);
 	if (is_destockplus_module_active() || is_algomtl_module_active()) {
 		// Le champ societe est rendu obligatoire
 		if (empty($frm['societe'])) {
@@ -66,8 +62,9 @@ if (!empty($frm)) {
 		if (empty($frm['mot_passe_confirm'])) {
 			$form_error_object->add('mot_passe_confirm', $GLOBALS['STR_ERR_PASSWORD_CONFIRM']);
 		}
-		// Le choix d'une categorie favorite est obligatoire
-		if (empty($frm['id_cat_1'])) {
+		if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_categories']) || count($frm['id_categories']) == 0) {
+			$form_error_object->add('favorite_category_error', $GLOBALS['STR_ERR_FIRST_CHOICE']);
+		} elseif (empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_cat_1'])) {
 			$form_error_object->add('id_cat_1', $GLOBALS['STR_ERR_FIRST_CHOICE']);
 		}
 		$add_pseudo_error = (empty($frm['pseudo']) || searchKeywordFiltersInLogin($frm['pseudo']) || String::strpos($frm['pseudo'], '@') !== false) ;
@@ -105,7 +102,7 @@ if (!empty($frm)) {
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
 		} elseif ((num_rows(query("SELECT 1
 			FROM peel_utilisateurs
-			WHERE email = '" . nohtml_real_escape_string($frm['email']) . "' AND priv!='load'")) > 0)) {
+			WHERE email = '" . nohtml_real_escape_string($frm['email']) . "' AND priv!='load' AND priv!='newsletter'")) > 0)) {
 			// Test de l'unicité de l'email, sauf pour les utilisateurs n'étant pas inscrit via le téléchargement.
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_STILL']);
 		}

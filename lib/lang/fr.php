@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fr.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,7 +168,7 @@ $GLOBALS["STR_DEVISE"] = "Devise";
 $GLOBALS["STR_DISPO"] = "Disponibilité";
 $GLOBALS["STR_DO_NOT_MISS"] = "A ne pas manquer";
 $GLOBALS["STR_DOMICILIATION"] = "Domiciliation";
-$GLOBALS["STR_DONNEZ_AVIS"] = "Donnez votre avis sur ce produit ";
+$GLOBALS["STR_DONNEZ_AVIS"] = "Donnez votre avis.";
 $GLOBALS["STR_DONT_FORGET_COMMENT"] = "N'oubliez pas d'insérer votre commentaire";
 $GLOBALS["STR_DONT_FORGET_NOTE"] = "Vous avez oublié d'ajouter une note à votre commentaire";
 $GLOBALS["STR_DOWNLOAD_AGAIN"] = "Réessayer ultérieurement (serveur indisponible)";
@@ -508,8 +508,8 @@ $GLOBALS["STR_NEWSLETTER"] = "Newsletter";
 $GLOBALS["STR_NEXT_PAGE"] = "Suivant";
 $GLOBALS["STR_NEXT"] = "Suivant";
 $GLOBALS["STR_NO_AVAILABLE"] = "Non disponible";
-$GLOBALS["STR_NO_FIND_ART"] = "<h2>Article non trouvé</h2><blockquote class=\"normal\">Désolé, l'article que vous cherchez n'a pas été trouvé. Consultez nos <a href=\"{$GLOBALS['wwwroot']}/lire/\">informations générales</a> pour faire une nouvelle recherche.</blockquote>";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>Produit non trouvé</h2><blockquote class=\"normal\">Désolé, le produit que vous cherchez n'a pas été trouvé. Visitez notre <a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> pour faire une nouvelle recherche.</blockquote>";
+$GLOBALS["STR_NO_FIND_ART"] = "<h1>Article non trouvé</h1><blockquote class=\"normal\">Désolé, l'article que vous cherchez n'a pas été trouvé. Consultez nos <a href=\"{$GLOBALS['wwwroot']}/lire/\">informations générales</a> pour faire une nouvelle recherche.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Produit non trouvé</h1><blockquote class=\"normal\">Désolé, le produit que vous cherchez n'a pas été trouvé. Visitez notre <a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> pour faire une nouvelle recherche.</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "Aucun produit disponible dans cette catégorie";
 $GLOBALS["STR_NO_ORDER"] = "Aucune commande n'est enregistrée.";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "Vous n'avez pas les autorisations nécessaires pour accéder à l'administration du site.";
@@ -736,7 +736,7 @@ $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "Ce tableau liste les produits stockés d
 $GLOBALS["STR_TABLE_SUMMARY_ORDERS"] = "Ce tableau présente l'historique des commandes";
 $GLOBALS["STR_TALL_LB"] = "Filtrer par : Taille";
 $GLOBALS["STR_TAXE"] = "TVA";
-$GLOBALS["STR_TEL"] = "Tel";
+$GLOBALS["STR_TEL"] = "Tél";
 $GLOBALS["STR_TELEPHONE"] = "Téléphone";
 $GLOBALS["STR_TELL_FRIEND"] = "Envoyez par email à un ami";
 $GLOBALS["STR_TEXT_CONFIG"] = "Le répertoire thumbs contient les miniatures des images téléchargées. Attention : les miniatures sont générées automatiquement lors de la création d'une page, et donc un email de newsletter déjà générée ne pourra plus avoir d'image si vous supprimez le contenu du répertoire thumbnail.";

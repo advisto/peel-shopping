@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: it.php 36927 2013-05-23 16:15:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -489,7 +489,7 @@ $GLOBALS["STR_NEXT_PAGE"] = "Successivo";
 $GLOBALS["STR_NEXT"] = "Successivo";
 $GLOBALS["STR_NO_AVAILABLE"] = "";
 $GLOBALS["STR_NO_FIND_ART"] = "";
-$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h2>PRODOTTO NON RITROVATO</h2><blockquote class=\"normal\">SPIACENTE, IL PRODOTTO DA VOI CERCATO NON ESISTE. VISITATE IL NOSTRO sito <a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> PER EFFETTUARE UNA NUOVA RICERCA.</blockquote>";
+$GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>PRODOTTO NON RITROVATO</h1><blockquote class=\"normal\">SPIACENTE, IL PRODOTTO DA VOI CERCATO NON ESISTE. VISITATE IL NOSTRO sito <a href=\"{$GLOBALS['wwwroot']}/achat/\">catalogue</a> PER EFFETTUARE UNA NUOVA RICERCA.</blockquote>";
 $GLOBALS["STR_NO_INDEX_PRODUCT"] = "";
 $GLOBALS["STR_NO_ORDER"] = "";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36232 2013-04-05 13:16:01Z gboussin $
+// $Id: fonctions.php 37040 2013-05-30 13:17:16Z gboussin $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -38,7 +38,7 @@ function affiche_formulaire_ajout_nom_attribut(&$frm)
 			// NB : On ne préremplit pas par la valeur par défaut utilisée sur le site pour permettre changement général plus facile si on n'a pas de spécificité par produit
 			$frm['type_affichage_attribut'] = 3;
 		}
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
 		}
 	}
@@ -93,7 +93,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('show_description', vb($frm["show_description"]));
 	$tpl->assign('mandatory', vn($frm["mandatory"]));
 	$tpl_langs = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('code' => $lng,
 			'value' => $frm['nom_' . $lng]
 			);
@@ -160,13 +160,13 @@ function insere_nom_attribut($frm)
 			etat
 			, mandatory
 			";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description
 	) VALUES ('" . intval($frm['etat']) . "'
 			, '" . intval($frm['mandatory']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "')";
@@ -193,7 +193,7 @@ function maj_nom_attribut($id, $frm)
 	}
 	$sql = "UPDATE peel_nom_attributs 
 		SET etat='" . intval($frm['etat']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . nohtml_real_escape_string($lng) . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= ", mandatory = '" . intval($frm['mandatory']) . "'
@@ -283,7 +283,7 @@ function affiche_liste_nom_attribut($start)
 function affiche_formulaire_ajout_attribut(&$frm, &$form_error_object)
 {
 	if(empty($frm)) {
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['descriptif_' . $lng] = "";
 		}
 		$frm["image"] = "";
@@ -349,11 +349,11 @@ function insere_attribut($id, $frm)
 	$prix = get_float_from_user_input($frm['prix']);
 	$prix_revendeur = get_float_from_user_input($frm['prix_revendeur']);
 	$sql = "INSERT INTO peel_attributs (id_nom_attribut, image, prix, prix_revendeur, position, mandatory";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng;
 	}
 	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['descriptif_' . $lng]) . "'";
 	}
 	$sql .= ")";
@@ -378,7 +378,7 @@ function maj_attribut($id, $frm)
 		 ,  prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
 		 ,  mandatory = '" . intval($frm['mandatory']) . "'
 		 ,  position = '" . intval($frm['position']) . "'";
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng . " = '" . nohtml_real_escape_string($_POST['descriptif_' . $lng]) . "'";
 	}
 	$sql .= " WHERE id = '" . intval($_POST['id']) . "'";
@@ -395,7 +395,7 @@ function affiche_formulaire_liste_attribut($id, &$frm)
 {
 	/* Valeurs par défaut */
 	$frm = array();
-	foreach ($GLOBALS['lang_codes'] as $lng) {
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$frm['nom_' . $lng] = "";
 	}
 	$frm["nouveau_mode"] = "insere";
@@ -485,7 +485,7 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl->assign('id', vn($_GET['id']));
 		$tpl->assign('nom', $nom_att->nom);
 		$tpl_langs = array();
-		foreach ($GLOBALS['lang_codes'] as $lng) {
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$tpl_langs[] = array('code' => $lng,
 				'descriptif' => vn($frm['descriptif_' . $lng]),
 				'error' => $form_error_object->text('descriptif_' . $lng)
