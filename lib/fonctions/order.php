@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 37236 2013-06-11 19:10:06Z sdelaporte $
+// $Id: order.php 37430 2013-06-27 16:08:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -335,7 +335,6 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	// "nom du champ dans la BDD" => "nom du champ dans $order_infos"
 	$name_compatibility_array = array(
 		"paiement" => "payment_technical_code"
-		, "type" => "typeId"
 		, "zone_tva" => "apply_vat"
 		, "zone_franco" => "zoneFranco"
 		, "produit_id" => "product_id"
