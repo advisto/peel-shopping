@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: rpc_status.php 37904 2013-08-27 21:19:26Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -72,6 +72,10 @@ if (!est_identifie() || empty($_POST)) {
 		$sql = "UPDATE peel_banniere
 			SET etat='%s'
 			WHERE id='%s'";
+		// Suppression des caches de bannières
+		$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+		$this_cache_object->delete_cache_file(true);
+		unset($this_cache_object);
 	}elseif(vb($_POST['mode']) == 'avis' && a_priv("admin_webmastering")) {
 		$sql = "UPDATE peel_avis
 			SET etat='%s'
@@ -135,6 +139,11 @@ if (!est_identifie() || empty($_POST)) {
 	}elseif(vb($_POST['mode']) == 'configuration' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_configuration
 			SET etat='%s'
+			WHERE id='%s'";
+	} elseif(vb($_POST['mode']) == 'abus' && a_priv("admin_moderation")) {
+		$new_status_sql_value = nohtml_real_escape_string($_POST['value']);
+		$sql = "UPDATE peel_abus_comment
+			SET status='%s', id_admin='".intval($_SESSION['session_utilisateur']['id_utilisateur'])."', status_change_date='".date('Y-m-d H:i:s')."'
 			WHERE id='%s'";
 	} else {
 		die('nok2');

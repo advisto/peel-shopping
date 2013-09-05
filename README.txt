@@ -1,14 +1,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an     |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: http://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// | Author: Advisto SAS, RCS 479 205 452, France, http://www.peel.fr/    |
+// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: README.txt 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: README.txt 37904 2013-08-27 21:19:26Z gboussin $
 //
 
 Documentation : http://www.peel.fr/

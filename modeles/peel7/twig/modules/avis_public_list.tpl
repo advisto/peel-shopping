@@ -3,19 +3,39 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_public_list.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: avis_public_list.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}
 <h2>{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h2>
 {% if are_results %}
 	<b>{{ STR_MODULE_AVIS_AVERAGE_RATING_GIVEN }}</b> 
 	{% for foo in 1..avisnote %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}
+	{% if display_nb_vote_graphic_view %}
+		<a href="{{ all_results_url }}">{{ total_vote }} {{ STR_POSTED_OPINIONS|lower }}</a>
+		<table class="notation_tab">
+			{% for notation in notations %}
+			<tr>
+				<td class="bar_contener">
+					<div style="width:100%">
+						<div class="bar" style="width:{{ notation.width }}%;"></div>
+					</div>
+				</td>
+				<td style="width:85px;">
+					{% for foo in 1..notation.note %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}
+				</td>
+				<td>
+					<a href="{{ notation.link}">{{ notation.nb_this_vote }} {% if notation.nb_this_vote>1 %} {{ STR_POSTED_OPINIONS|lower }} {% else %} {{ STR_POSTED_OPINION|lower }} {% endif %}</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
 	<table class="avis_public_list">
 		{% for res in results %}
 		<tr>

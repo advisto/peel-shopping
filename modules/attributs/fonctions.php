@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -556,6 +556,20 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 		// On charge les informations de base de données relative aux attributs choisis par l'utilisateur
 		// On va ainsi pouvoir vérifier que ces attributs sont bien possibles, et par ailleurs que ceux obligatoires sont bien remplis
 		$attributs_array = $product_object->get_possible_attributs('rough', false, 0, true, false, false, false, false, false, null);
+		if (!empty($attributs_array)) {
+			// On affiche la liste des attributs
+			foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
+				foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
+					$attributs_infos = $attributs_array[$this_nom_attribut_id][$this_attribut_id];
+					if (intval($attributs_infos['mandatory']) == 1) {
+						// Attributs obligatoires : on prépare une liste, et on va retirer tout ce qui est valide ensuite
+						// Pour les checkbox et les boutons radio, il n'y aura rien d'envoyé dans le formulaire si pas de sélection utilisateur
+						// Il est donc nécessaire de faire la liste exhaustive des attributs obligatoires, indépendamment du formulaire
+						$GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id] = $attributs_infos['nom'];
+					}
+				}
+			}
+		}
 		if(!empty($frm['attributs_list'])){
 			$attributs_list_array = explode('§', $frm['attributs_list']);
 			foreach($attributs_list_array as  $this_attributs_list) {
@@ -563,6 +577,7 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 				$this_nom_attribut_id = $this_attributs_list_array[0];
 				$this_attribut_id = $this_attributs_list_array[1];
 				if(isset($attributs_array[$this_nom_attribut_id][$this_attribut_id])) {
+					unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					$attributs_infos = $attributs_array[$this_nom_attribut_id][$this_attribut_id];
 					if(!empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']) && !empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$attributs_infos['technical_code']])) {
 						$costly = true;
@@ -603,9 +618,9 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 				}
 				if (String::strpos($this_key, '_texte_libre') !== false) {
 					// attribut au texte libre
-					if (intval($attributs_infos['mandatory']) == 1 && empty($this_value)) {
-						// Attribut obligatoire
-						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
+					if (!empty($this_value)) {
+						// Si cet attribut est obligatoire : c'est OK, pas de problème
+						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}
 					if(!empty($this_value) && String::strpos($attributs_infos['technical_code'], 'date') === 0) {
 						$this_value = get_mysql_date_from_user_input($this_value);
@@ -616,14 +631,13 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 					if (!empty($_SESSION["session_display_popup"][$this_key])) { 
 						// si l'image a été déjà téléchargée
 						$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $_SESSION["session_display_popup"][$this_key];
+						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					} elseif (!empty($this_value)) { 
 						// Cas où on vient de télécharger, ou si on vient de la sauvegarde de panier
 						$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $this_value;
 						// on sauvegarde le nom de l'image en session
 						$_SESSION["session_display_popup"][$this_key] = $this_value;
-					} elseif (intval($attributs_infos['mandatory']) == 1) {
-						// Attribut obligatoire
-						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
+						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}
 				} elseif (empty($temp[1]) || is_numeric($temp[1])) {
 					// Attribut standard au format 'attributN' ou 'attributN_N' si checkbox
@@ -635,14 +649,12 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 							if($value_array[0] == $this_nom_attribut_id && !empty($attribut_infos[$this_nom_attribut_id][$value_array[1]])) {
 								// L'option existe bien pour cet attribut
 								$combinaisons_array[] = $this_combinaison;
+								unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 							}
 						}
 					} else {
 						$combinaisons_array[] = $this_value;
-					}
-					if (intval($attributs_infos['mandatory']) == 1 && empty($this_value)) {
-						// Attribut obligatoire
-						$GLOBALS['error_attribut_mandatory'][] = $attributs_infos['nom'];
+						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}
 				}
 			}

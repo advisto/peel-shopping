@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 //
 
 if (!defined('IN_PEEL')) {
@@ -46,6 +46,7 @@ function affiche_tagcloud($return_mode = false)
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/tagcloud.tpl');
 		$tpl_tags = array();
 		while ($row = fetch_assoc($result)) {
+			$row['quantity'] = max(1, $row['quantity']);
 			$this_quantity = log($row['quantity']);
 			$tags[String::strtolower($row['tag'])] = $this_quantity;
 			if ($this_quantity > $max) {
@@ -61,7 +62,7 @@ function affiche_tagcloud($return_mode = false)
 				'href' => $GLOBALS['wwwroot'] . '/search.php?match=1&search=' . $key,
 				'value' => $value,
 				'key' => $key,
-				'level' => intval(($value-$min) / ($max-$min) * 10)
+				'level' => intval(($value-$min) / max(1, $max-$min) * 10)
 			);
 		}
 		$tpl->assign('tags', $tpl_tags);

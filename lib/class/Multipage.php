@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 36966 2013-05-26 17:10:43Z gboussin $
+// $Id: Multipage.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 36966 2013-05-26 17:10:43Z gboussin $
+ * @version $Id: Multipage.php 37904 2013-08-27 21:19:26Z gboussin $
  * @access public
  */
 class Multipage {
@@ -67,6 +67,7 @@ class Multipage {
 	var $nb2;
 	var $nb3;
 	var $LimitSQL;
+	var $allow_get_sort = true;
 
 	/**
 	 * Constructeur
@@ -189,7 +190,7 @@ class Multipage {
 			$this->LimitSQL .= " LIMIT " . $lines_begin . ", " . $lines_count;
 		}
 		$sql = $this->LimitSQL;
-		if (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || substr_count($sql, 'SELECT')<2)) {
+		if (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || String::substr_count($sql, 'SELECT')<2)) {
 			// Si nécessaire, on rajoute SQL_CALC_FOUND_ROWS
 			// On ne le fait pas pour une requête de type UNION - le test sur la parenthèse est une sécurité qui évite des hacks lors de recherche utilisateur
 			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($sql, 0, 10)) . String::substr($sql, 10);
@@ -378,14 +379,14 @@ class Multipage {
 			} else {
 				$colspan_text = '';
 			}
-			if (!empty($_GET['order']) && $key === $_GET['order']) {
+			if ($this->allow_get_sort && !empty($_GET['order']) && $key === $_GET['order']) {
 				$output .= '
 		<th class="menu center"' . $colspan_text . ' style="background-color:#5C5859">';
 			} else {
 				$output .= '
 		<th class="menu center"' . $colspan_text . '>';
 			}
-			if (!is_numeric($key)) {
+			if (!is_numeric($key) && $this->allow_get_sort) {
 				$link_url = $_SERVER['REQUEST_URI'];
 				if (empty($_GET['order'])) {
 					if (String::strpos($link_url, '?') === false) {
@@ -424,12 +425,15 @@ class Multipage {
 	function getOrderBy()
 	{
 		if ($this->forced_order_by_string === null) {
-			$columns = array_values(explode(',', str_replace(' ', '', vb($_GET['order']) . ',' . $this->OrderDefault)));
+			// Si $this->HeaderTitlesArray est défini avant appel à Query, ça permet de faire un test sur les colonnes de tri autorisées
+			// Sinon, on laisse essayer de faire le tri sur n'importe quelle colonne, ce qui est permet éventuellement un ORDER BY sur colonne qui n'existe pas et une erreur SQL
+			// => il vaut mieux toujours définir $this->HeaderTitlesArray juste après la création d'un objet Multipage
+			$columns = array_values(explode(',', str_replace(' ', '', ($this->allow_get_sort && !empty($_GET['order']) && (!isset($this->HeaderTitlesArray) || isset($this->HeaderTitlesArray[$_GET['order']]))?$_GET['order'] . ',':'') . $this->OrderDefault)));
 			foreach($columns as $this_column) {
 				if (!empty($this_column)) {
 					// En cas d'ambiguïté, l'on peut avoir la form : table.colonne
 					$this_order_by = '`' . str_replace('.', '`.`', word_real_escape_string($this_column)) . '` ';
-					if (!empty($_GET['sort'])) {
+					if (!empty($_GET['sort']) && $this->allow_get_sort) {
 						$this_order_by .= String::substr(String::strtoupper(word_real_escape_string($_GET['sort'])), 0, 4);
 					} elseif (!empty($this->SortDefault)) {
 						$this_order_by .= String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);

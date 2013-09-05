@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_categorie.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_liste_categorie.tpl 37987 2013-09-02 12:18:07Z gboussin $
 #}{% if is_category_promotion_module_active %}
 	{% set colspan = 8 %}
 {% else %}
@@ -38,8 +38,8 @@
 		<td class="menu">{{ STR_ADMIN_ACTION }}</td>
 		<td class="menu">{{ STR_ADMIN_ID }}</td>
 		<td class="menu">{{ STR_ADMIN_IMAGE }}</td>
-		<td class="menu" align="left">{{ STR_ADMIN_CATEGORIES }}</td>
-		<td class="menu" align="left">{{ STR_WEBSITE }}</td>
+		<td class="menu" style="text-align:left">{{ STR_ADMIN_CATEGORIES }}</td>
+		<td class="menu" style="text-align:left">{{ STR_WEBSITE }}</td>
 {% if is_category_promotion_module_active %}
 		<td class="menu">{{ STR_PROMOTION }}</td>
 {% endif %}

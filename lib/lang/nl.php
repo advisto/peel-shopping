@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: nl.php 37913 2013-08-27 22:55:59Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -27,8 +27,8 @@ $GLOBALS["STR_ACTIVITY"] = "Activiteiten";
 $GLOBALS["STR_ADD_CART"] = "Aan mijn winkelwagentje toevoegen";
 $GLOBALS["STR_ADD_LISTE_CADEAU"] = "Aan mijn wenslijstje toevoegen";
 $GLOBALS["STR_ADDRESS"] = "Adres";
-$GLOBALS["STR_ADMIN"] = "de site beheren";
-$GLOBALS["STR_ADMINISTRATION"] = "de site beheren";
+$GLOBALS["STR_ADMIN"] = "De site beheren";
+$GLOBALS["STR_ADMINISTRATION"] = "De site beheren";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Bekijk de op uw site te plaatsen banners";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "U bent als partner geregistreerd op de website {$GLOBALS['site']}.\n\nMomenteel betalen wij u <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> van de totale verkoop die via uw account gegenereerd is.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Produceer een HTML code voor producten van partners";
@@ -44,7 +44,7 @@ $GLOBALS["STR_ALL"] = "Alle";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "Gebruikersbeoordeling informatie";
 $GLOBALS["STR_AND"] = "en";
 $GLOBALS["STR_AMOUNT"] = "Bedrag";
-$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Kies uw 3 favoriete categorieën onder de voorgestelde categorieën. U kunt deze keuze te allen tijde aanpassen ";
+$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Ik heb interesse in de volgende categorieën:";
 $GLOBALS["STR_ARTICLES"] = "artikelen";
 $GLOBALS["STR_ASC"] = "oplopend";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "Verbonden of complementaire produkten";
@@ -127,7 +127,7 @@ $GLOBALS["STR_CONTACT_SELECT1"] = "Informatie";
 $GLOBALS["STR_CONTACT_SELECT2"] = "Suggestie";
 $GLOBALS["STR_CONTACT_SELECT3"] = "Klacht";
 $GLOBALS["STR_CONTACT_SUBJECT"] = "onderwerp van uw aanvraag";
-$GLOBALS["STR_CONTACT_US"] = "Neem contact op";
+$GLOBALS["STR_CONTACT_US"] = "Contact";
 $GLOBALS["STR_CONTACT"] = "Contact";
 $GLOBALS["STR_CONTINUE"] = "Doorgaan";
 $GLOBALS["STR_COOKIES_CHROME"] = "Opties &gt; Geavanceerde opties &gt; Instellingen voor inhoud... &gt; Cookies<br />Selecteer &quot;Opslaan van locale gegevens toestaan&quot;";
@@ -185,7 +185,7 @@ $GLOBALS["STR_EMAIL_FRIEND"] = "E-mail van uw vriend";
 $GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Login";
 $GLOBALS["STR_EMAIL_SENDING_DEACTIVATED"] = "Poging om email te versturen \"%s\"";
 $GLOBALS["STR_EMAIL"] = "Email";
-$GLOBALS["STR_EMPLOYEE"] = "Werknemers / Werkloos";
+$GLOBALS["STR_EMPLOYEE"] = "Werkloos";
 $GLOBALS["STR_EMPTY_CADDIE"] = "Winkelwagentje";
 $GLOBALS["STR_EMPTY_CART"] = "Weet u zeker dat u uw winkelwagentje wilt leegmaken?";
 $GLOBALS["STR_EMPTY_FIELD"] = "Verificatie code is niet ingevuld.";
@@ -262,8 +262,8 @@ $GLOBALS["STR_FILE_EMPTY"] = "Het bestand is leeg";
 $GLOBALS["STR_FIRST_CHOICE"] = "1e keuze";
 $GLOBALS["STR_FIRST_NAME"] = "Voornaam";
 $GLOBALS["STR_FIRST_PAGE"] = "eerste pagina";
-$GLOBALS["STR_FIRST_REGISTER_TEXT"] = "Vul het onderstaande formulier in om een ​​bestelling te plaatsen. Velden gemarkeerd met een sterretje * zijn verplicht. Wij verkopen of staan uw persoonlijke gegevens niet af aan anderen. Voor vragen met betrekking tot de bescherming van de persoonlijke gegevens kunt u ons privacy beleid lezen of neem contact met ons op via het contactformulier <a href='{$GLOBALS['wwwroot']}/utilisateurs/contact.php' title='formulaire de contact'>formulaire de contact</a>.<br /> De login kan worden gebruikt ter identificatie en worden gebruikt voor de indiening van meldingen van het product.";
-$GLOBALS["STR_FIRST_REGISTER_TITLE"] = "Première inscription";
+$GLOBALS["STR_FIRST_REGISTER_TEXT"] = "Vul het onderstaande formulier in om een ​​bestelling te plaatsen. Velden gemarkeerd met een sterretje * zijn verplicht. Wij verkopen of staan uw persoonlijke gegevens niet af aan anderen. Voor vragen met betrekking tot de bescherming van de persoonlijke gegevens kunt u ons privacy beleid lezen of neem contact met ons op via het  <a href='{$GLOBALS['wwwroot']}/utilisateurs/contact.php' title='contactformulier'>contactformulier</a>.<br /> De login kan worden gebruikt ter identificatie en worden gebruikt voor de indiening van meldingen van het product.";
+$GLOBALS["STR_FIRST_REGISTER_TITLE"] = "Registreren";
 $GLOBALS["STR_FLASH_TO"] = "tot";
 $GLOBALS["STR_FLASH"] = "Flash verkoop";
 $GLOBALS["STR_FOLLOWING_ACCOUNT"] = "op de volgende bankrekening";
@@ -286,7 +286,7 @@ $GLOBALS["STR_FTP_GET_FAILED"] = "Bestandsinhoud ophalen mislukt";
 $GLOBALS["STR_FWRITE_FAILED"] = "Kan niet schrijven naar het bestand";
 $GLOBALS["STR_GENDER"] = "Statuut";
 $GLOBALS["STR_GET_MY_POSITION"] = "Herstel mijn positie (vereist voor deze functie)";
-$GLOBALS["STR_GET_PASSWORD"] = "Mijn wachtwoord terugvinden";
+$GLOBALS["STR_GET_PASSWORD"] = "Wachtwoord vergeten?";
 $GLOBALS["STR_GIFT_POINTS"] = "Geschenkpunten";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "Algemene promotie";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Gecomprimeerd bestand openen mislukt";
@@ -308,7 +308,7 @@ $GLOBALS["STR_INCLUDING"] = "waarvan";
 $GLOBALS["STR_INFORMATIONS"] = "Informatie";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Informatie niet beschikbaar";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Een logo invoegen";
-$GLOBALS["STR_INSERT_EMAIL"] = "Geef uw e-mail adres om uw wachtwoord terug te vinden. Door dit formulier geldig te verklaren zult U een e-mail ontvangen met een automatisch vernieuwd wachtwoord.";
+$GLOBALS["STR_INSERT_EMAIL"] = "Vul het e-mailadres in waarmee u geregistreerd staat en u zult per e-mail een nieuw wachtwoord ontvangen.";
 $GLOBALS["STR_INSERT_LOGIN_AND_PASSWORD"] = "Uw gebruikersnaam en wachtwoord invoegen";
 $GLOBALS["STR_INSERT_NEW_PASSWORD"] = "Vul alstublieft onderstaande velden in";
 $GLOBALS["STR_INSERT"] = "Invoegen";
@@ -334,18 +334,18 @@ $GLOBALS["STR_LANGUAGES"] = "Talen";
 $GLOBALS["STR_LATEST_NEWS"] = "Laatste nieuws";
 $GLOBALS["STR_LAST_NAME"] = "Naam";
 $GLOBALS["STR_LAST_PAGE"] = "Laatste pagina";
-$GLOBALS["STR_LEADER"] = "Uitvoerend / Onafhankelijk";
-$GLOBALS['STR_LEGAL_INFORMATION'] = "Juridische informatie";
+$GLOBALS["STR_LEADER"] = "Eigenaar / Manager";
+$GLOBALS['STR_LEGAL_INFORMATION'] = "Algemene voorwaarden";
 $GLOBALS["STR_LEXIQUE"] = "Lexicon";
 $GLOBALS["STR_LIST"] = "Lijst";
 $GLOBALS["STR_LIST_PRODUCT"] = "Lijst van de producten";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Lijst van de onder-rubrieken";
 $GLOBALS["STR_LISTE_CADEAU"] = "Mijn geschenkenlijst";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Log alstublieft in om uw korting te ontvangen";
-$GLOBALS["STR_LOGIN_OK"] = "Wij danken U voor uw vertrouven. \n\nWij danken U uw wachtwoord te willen onthouden en noteren.\n\n Om verder uw bestelling te kunnen uitvoeren, gelieve u <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/membre.php\">inloggen</a>. Uw verbindingsparameters zijn de volgende :";
-$GLOBALS["STR_LOGIN"] = "Zich inloggen";
+$GLOBALS["STR_LOGIN_OK"] = "Wij danken u voor uw vertrouwen.\n\n U heeft een account aangemaakt met de volgende gegevens:";
+$GLOBALS["STR_LOGIN"] = "Inloggen";
 $GLOBALS["STR_LOGO"] = "Logo";
-$GLOBALS["STR_LOGOUT"] = "Zich uitloggen";
+$GLOBALS["STR_LOGOUT"] = "Uitloggen";
 $GLOBALS["STR_M"] = "Dhr.";
 $GLOBALS["STR_MAIL_SENDED"] = "De e-mail met de download link is verstuurd naar";
 $GLOBALS["STR_MANAGER"] = "Manager";
@@ -492,8 +492,8 @@ $GLOBALS["STR_MONTHS"] = "Maanden";
 $GLOBALS["STR_MORE_DETAILS"] = "Meer details";
 $GLOBALS["STR_MORE"] = "meer details";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Het veranderen van de parameters werd uitgevoerd.";
-$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "Gelieve een klantenkonto te openen om op {$GLOBALS['site']}.\n te bestellen. Om een konto te openen, <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">klik hier</a>";
-$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Om tijd te besparen, gelieve U te identificeren.\n Indien U uw wachtwoord vergeten bent, <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/oubli_mot_passe.php\">hier klikken</a>";
+$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Klik hierom naar het aanmeldformulier te gaan</a>.";
+$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Log dan hier in.";
 $GLOBALS["STR_MSG_THANKS"] = "Wij danken U voor uw vertrouwen, uw bestelling is met goed gevolg geregistreerd";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Mijn geschenkpunten";
@@ -513,7 +513,7 @@ $GLOBALS["STR_NEXT"] = "Volgende";
 $GLOBALS["STR_NO_AVAILABLE"] = "Niet beschikbaar";
 $GLOBALS["STR_NO_FIND_ART"] = "<h1>Produkt niet gevonden.</h1><blockquote class=\"normal\">Sorry, het artikel dat u zoekt werd niet gevonden.</blockquote>";
 $GLOBALS["STR_NO_FIND_PRODUCT"] = "<h1>Produkt niet gevonden</h1><blockquote class=\"normal\">Sorry</blockquote>";
-$GLOBALS["STR_NO_INDEX_PRODUCT"] = "Geen beschikbare produkten in deze categorie";
+$GLOBALS["STR_NO_INDEX_PRODUCT"] = "Geen beschikbare producten in deze categorie";
 $GLOBALS["STR_NO_ORDER"] = "Geen bestelling opgenomen";
 $GLOBALS["STR_NO_RIGHTS_TO_ACCESS_ADMIN"] = "U beschikt niet over de noodzakelijke toestemmingen om de administratie van de website te openen.";
 $GLOBALS["STR_NO_RIGHTS"] = "Rechten niet verleend";
@@ -575,7 +575,7 @@ $GLOBALS["STR_PARRAIN_TEXTE"] = "Laat uw vrienden meegenieten en krijgen een teg
 $GLOBALS["STR_PASS_PERDU"] = "<p><a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/oubli_mot_passe.php\">Hier klikken</a> indien U uw paswoord vergeten bent</p>";
 $GLOBALS["STR_PASSWORD_CHANGE"] = "Wachtwoord is veranderd.\n";
 $GLOBALS["STR_PASSWORD_CONFIRMATION"] = "Typ het wachtwoord opnieuw";
-$GLOBALS["STR_PASSWORD_EMAIL"] = "Uw nieuwe wachtwoord werd op uw e-mail verzonden.";
+$GLOBALS["STR_PASSWORD_EMAIL"] = "<span class='bold'>E-mail is verstuurd.</span>\n\n Volg de instructies in de mail.";
 $GLOBALS["STR_PASSWORD_SECURITY"] = "Wachtwoord beveiliging";
 $GLOBALS["STR_PASSWORD"] = "Wachtwoord";
 $GLOBALS["STR_PAYMENT_FAILED"] = "Uw transactie is niet gevalideerd of is afgewezen";
@@ -664,7 +664,7 @@ $GLOBALS["STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE"] = "Op alle producten in
 $GLOBALS["STR_REFERENCE_ON_LINE_SHOP"] = "Referenties webwinkel";
 $GLOBALS["STR_REFERENCE"] = "Referentie";
 $GLOBALS["STR_REFRESH"] = "Bijgewerkt op";
-$GLOBALS["STR_REGISTER"] = "Zich registreren";
+$GLOBALS["STR_REGISTER"] = "Registreren";
 $GLOBALS["STR_REGLEMENT_CARTE_BANCAIRE"] = "Betaling met bankpas";
 $GLOBALS["STR_REMINDING_CHAR"] = "tekens resterend";
 $GLOBALS["STR_REMISE"] = "Korting klant";
@@ -725,14 +725,14 @@ $GLOBALS["STR_STATUS"] = "Staat";
 $GLOBALS["STR_STEP1"] = "STAP 1. UW PERSOONLIJKE GEGEVENS";
 $GLOBALS["STR_STEP2"] = "STAP 2. OVERZICHT VAN UW BESTELLING";
 $GLOBALS["STR_STEP3"] = "STAP 3. ORDERBEVESTIGING";
-$GLOBALS["STR_STILL_CUSTOMER"] = "Al klant";
+$GLOBALS["STR_STILL_CUSTOMER"] = "Bent u al klant?";
 $GLOBALS["STR_STOCK_ATTRIBUTS"] = "Voorraad";
 $GLOBALS["STR_STOCK"] = "Info voorraad.";
 $GLOBALS["STR_STRONG_PASSWORD_NOTIFICATION"] = "Sterke wachtwoorden bevatten 7 tot 16 tekens, bevatten geen woorden of gemeenschappelijke namen en combineren hoofdletters, kleine letters, cijfers en symbolen.";
 $GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "De bijnaam mag het (@) teken niet bevatten";
-$GLOBALS["STR_SUBMIT"] = "Geldig verklaren";
+$GLOBALS["STR_SUBMIT"] = "Bevestigen";
 $GLOBALS["STR_SUGGEST"] = "Uw tegoed laat U toe supplementaire produkten te kopen. Wij raden U aan de volgende <href=\"achat/suggest.php\" class=\"label\">lijst</a> te raadplegen om deze te kiezen.";
-$GLOBALS["STR_SUPPORT"] = "Voor alle verdere vragen, gelieve ons op volgend e-mail adres te schrijven: <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">webmaster</a>";
+$GLOBALS["STR_SUPPORT"] = "Voor alle verdere vragen, neem gerust contact met ons op door middel van ons <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">contactformulier</a>";
 $GLOBALS["STR_SWIFT"] = "BIC";
 $GLOBALS["STR_SYNC_OK"] = "Synchronisatie van de bestanden succesvol afgesloten";
 $GLOBALS["STR_TABLE_SUMMARY_CADDIE"] = "Deze tabel geeft de in het winkelwagentje opgeslagen producten weer";
@@ -753,7 +753,7 @@ $GLOBALS["STR_THE_PRODUCT"] = "Het product";
 $GLOBALS["STR_THEIR_EMAILS"] = "Hun email";
 $GLOBALS["STR_THEIR_NAMES"] = "Hun namen";
 $GLOBALS["STR_THIRD_CHOICE"] = "3e keus";
-$GLOBALS["STR_TICKET_OK"] = "Uw bericht is aangenomen.\n\n Een raadgever zal met U kontakt opnemen.";
+$GLOBALS["STR_TICKET_OK"] = "Uw bericht is in goede orde ontvangen.\n\n Er zal zo spoedig mogelijk contact met uw opgenomen worden.";
 $GLOBALS["STR_TITLE_SUFFIX"] = "{$GLOBALS['site']}";
 $GLOBALS["STR_TO"] = "naar";
 $GLOBALS["STR_TOP"] = "Beste verkopen";
@@ -786,7 +786,7 @@ $GLOBALS["STR_VALIDATE_ORDER"] = "Bestelling bevestigen";
 $GLOBALS["STR_VALIDATION_CODE_COPY"] = "Kopieer de verificatiecode";
 $GLOBALS["STR_VALIDATION_CODE"] = "Verificatiecode";
 $GLOBALS["STR_VALIDATION_DATE"] = "Datum van validering";
-$GLOBALS["STR_VALIDATE"] = "Geldig verklaren";
+$GLOBALS["STR_VALIDATE"] = "Bevestigen";
 $GLOBALS["STR_VALUE"] = "Waarde";
 $GLOBALS["STR_VAT_INTRACOM"] = "Intracommunautaire BTW nummer";
 $GLOBALS["STR_VAT"] = "BTW";

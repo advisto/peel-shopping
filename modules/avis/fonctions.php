@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -163,7 +163,7 @@ function insere_avis($frm)
  * @param mixed $prodid
  * @return
  */
-function render_avis_public_list($prodid, $type)
+function render_avis_public_list($prodid, $type, $display_specific_note = null)
 {
 	$output = '';
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_public_list.tpl');
@@ -172,13 +172,15 @@ function render_avis_public_list($prodid, $type)
 		$urlprod = $product_object->get_product_url();
 		$sqlAvis = "SELECT *
 			FROM peel_avis
-			WHERE id_produit = '" . intval($prodid) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+			WHERE id_produit = '" . intval($prodid) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'
+			ORDER BY note DESC";
 	} elseif ($type == 'annonce') {
 		$annonce_object = new Annonce($prodid);
 		$urlannonce = $annonce_object->get_annonce_url();
 		$sqlAvis = "SELECT *
 			FROM peel_avis
-			WHERE ref = '" . intval($prodid) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+			WHERE ref = '" . intval($prodid) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'
+			ORDER BY note DESC";
 		$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD']);
 		$tpl->assign('STR_MODULE_ANNONCES_BACK_TO_AD', $GLOBALS['STR_MODULE_ANNONCES_BACK_TO_AD']);
 	}
@@ -192,10 +194,11 @@ function render_avis_public_list($prodid, $type)
 	$tpl->assign('STR_ON_DATE_SHORT', $GLOBALS['STR_ON_DATE_SHORT']);
 	$tpl->assign('STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT', $GLOBALS['STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT']);
 	$tpl->assign('STR_BACK_TO_PRODUCT', $GLOBALS['STR_BACK_TO_PRODUCT']);
+	$tpl->assign('STR_POSTED_OPINION', $GLOBALS['STR_POSTED_OPINION']);
+	$tpl->assign('STR_POSTED_OPINIONS', $GLOBALS['STR_POSTED_OPINIONS']);
 
 	if (num_rows($resAvis) > 0) {
 		$tpl->assign('are_results', true);
-
 		$qid = "SELECT AVG(note) AS average_rating
 			FROM peel_avis
 			WHERE";
@@ -213,8 +216,20 @@ function render_avis_public_list($prodid, $type)
 		$tpl->assign('avisnote', $avisnote);
 
 		$tpl_results = array();
+		$tpl_notation = array();
+		$notation_array = array();
 		$i = 0;
 		while ($Avis = fetch_assoc($resAvis)) {
+			// Compte le nombre de vote par note
+			if (!isset($notation_array[$Avis['note']])) {
+				$notation_array[$Avis['note']] = 0;
+			}
+			$notation_array[$Avis['note']]++;
+			
+			if (!empty($display_specific_note) && ($Avis['note'] != $display_specific_note)) {
+				// Permet d'afficher une note seléctionnée en excluant les votes avec une autre note, tout en conservant le comptage du nombre total, et le calcul du nombre de vote par note
+				continue;
+			}
 			if (!empty($Avis['pseudo'])) {
 				$pseudo = String::html_entity_decode_if_needed($Avis['pseudo']);
 			} else {
@@ -228,6 +243,22 @@ function render_avis_public_list($prodid, $type)
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
+		
+		$total_vote = array_sum($notation_array);
+		for($i=5;$i!=0;$i--) {
+			// Affiche les votes par ordre décroissant. Utilisation d'un for et non pas un foreach pour permettre l'affichage des notes sans vote (et donc pas présent dans le tableau notation_array)
+			$width = (vn($notation_array[$i]) / $total_vote) * 100;
+			$tpl_notation[] = array('note' => $i,
+				'nb_this_vote' => vn($notation_array[$i]),
+				'width' => ceil($width),
+				'link' => get_current_url(false) . '?prodid='.$prodid.'&display_specific_note='.$i
+				);
+		}
+		$tpl->assign('notations', $tpl_notation);
+		
+		$tpl->assign('display_nb_vote_graphic_view', vn($GLOBALS['site_parameters']['display_nb_vote_graphic_view']));
+		$tpl->assign('all_results_url', get_current_url(false). '?prodid='.$prodid);
+		$tpl->assign('total_vote', $total_vote);
 	} else {
 		$tpl->assign('are_results', false);
 	}

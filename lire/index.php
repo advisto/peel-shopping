@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: index.php 37912 2013-08-27 22:44:57Z gboussin $
 include("../configuration.inc.php");
 
 define('IN_RUBRIQUE', true);
@@ -34,8 +34,7 @@ if (!empty($rub)) {
 	// Permet de définir l'id de la div principal du site.
 	if ($rub['technical_code'] == 'tradefair' || $rub['technical_code'] == 'tradefaire_home') {
 		$GLOBALS['main_div_id'] = 'tradefair';
-	}
-	if ($rub['technical_code'] == 'tradefloor') {
+	} elseif ($rub['technical_code'] == 'tradefloor') {
 		$GLOBALS['main_div_id'] = 'tradefloor';
 	}
 }
@@ -59,6 +58,7 @@ $tpl->assign('class', $class);
 $tpl->assign('articles_list_brief_html', get_articles_list_brief_html($rubid));
 $output .= $tpl->fetch();
 
+$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['lire_index_page_columns_count'];
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");

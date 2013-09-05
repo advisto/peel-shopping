@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: critere_stock.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: critere_stock.tpl 37904 2013-08-27 21:19:26Z gboussin $
 *}{if $is_form}
 <form enctype="multipart/form-data" method="post" action="{$action|escape:'html'}" id="{$form_id}">
 	<div class="affiche_critere_stock {$update_class}">
@@ -120,10 +120,10 @@
 								<script><!--//--><![CDATA[//><!--
 								function verif_form{$save_suffix_id}(check_color, check_size) {ldelim}
 									if (check_color == 1 && document.getElementById("couleur{$save_suffix_id}").options[document.getElementById("couleur{$save_suffix_id}").selectedIndex].value == 0) {ldelim}
-										alert("{$STR_NONE_COLOR_SELECTED|filtre_javascript:true:false:true}");
+										alert("{$STR_NONE_COLOR_SELECTED|filtre_javascript:true:false:true:false}");
 										return false;
 									{rdelim} else if (check_size == 1 && document.getElementById("taille{$save_suffix_id}").options[document.getElementById("taille{$save_suffix_id}").selectedIndex].value == 0) {ldelim}
-										alert("{$STR_NONE_SIZE_SELECTED|filtre_javascript:true:false:true}");
+										alert("{$STR_NONE_SIZE_SELECTED|filtre_javascript:true:false:true:false}");
 										return false;
 									{rdelim} else {ldelim}
 										return true;

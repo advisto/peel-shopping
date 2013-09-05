@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: index.php 37934 2013-08-28 15:09:20Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -86,7 +86,7 @@ function backoffice_home_block($content_code, $title_bg_color, $return_mode = fa
 	$block_content = get_home_block_content($content_code);
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_backoffice_home_block.tpl');
-	$tpl->assign('bg_src', $GLOBALS['administrer_url'] . '/modeles/images/' . get_block_header_image(strtolower($title_bg_color)));
+	$tpl->assign('bg_src', $GLOBALS['administrer_url'] . '/modeles/images/' . get_block_header_image(String::strtolower($title_bg_color)));
 	$tpl->assign('link', $block_content['link']);
 	$tpl->assign('title', $block_content['title']);
 	$tpl->assign('logo', $block_content['logo']);

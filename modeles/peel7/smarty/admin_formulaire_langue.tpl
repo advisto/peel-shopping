@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_langue.tpl 37039 2013-05-30 13:08:28Z gboussin $
+// $Id: admin_formulaire_langue.tpl 37943 2013-08-29 09:31:55Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -44,13 +44,13 @@
 			<td class="label">{$STR_STATUS}</td>
 			<td>
 				<input type="radio" name="etat" value="1"{if $etat == '1'} checked="checked"{/if} /> {$STR_YES}&nbsp;
-				<input type="radio" name="etat" value="0"{if $etat == '0' OR empty($etat)} checked="checked"{/if} /> {$STR_NO}
-				<input type="radio" name="etat" value="-1"{if $etat == '-1'} checked="checked"{/if} /> {$STR_ADMINISTRATION}&nbsp;
+				<input type="radio" name="etat" value="0"{if $etat == '0' OR empty($etat)} checked="checked"{/if} /> {$STR_NO}&nbsp;
+				<input type="radio" name="etat" value="-1"{if $etat == '-1'} checked="checked"{/if} /> {$STR_ADMINISTRATION}
 			</td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_POSITION}</td>
-			<td><input type="text" name="position" style="width:100%" value="{$position|str_form_value}" /></td>
+			<td><input type="number" name="position" style="width:100%" value="{$position|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_LANGUES_URL_REWRITING}{$STR_BEFORE_TWO_POINTS}:</td>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_pays_fr.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_pays_fr.php 37927 2013-08-28 11:53:31Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -54,7 +54,7 @@ $peel_pays["pays"] = array(
   "32" => "Inde",
   "33" => "Indonésie",
   "34" => "Irlande",
-  "35" => "Isra",
+  "35" => "Israël",
   "36" => "Italie",
   "37" => "Japon",
   "38" => "Jordanie",
@@ -128,7 +128,7 @@ $peel_pays["pays"] = array(
   "106" => "Dominicaine (Rep.)",
   "107" => "Timor oriental",
   "108" => "Guinée Equatoriale",
-  "109" => "Erythr",
+  "109" => "Erythrée",
   "110" => "Estonie",
   "111" => "Ethiopie",
   "112" => "Falkland (Iles Malouines)",
@@ -155,7 +155,7 @@ $peel_pays["pays"] = array(
   "134" => "Islande",
   "135" => "Iran",
   "136" => "Irak",
-  "137" => "Cote d'Ivoire",
+  "137" => "Côte d'Ivoire",
   "138" => "Jamaique",
   "139" => "Kazakhstan",
   "140" => "Kenya",

@@ -3,12 +3,12 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) Butterflive - en collaboration avec contact@peel.fr    |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// $Id: check_website_url.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: check_website_url.php 37904 2013-08-27 21:19:26Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_text_es.php 37989 2013-09-02 13:37:16Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,24 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["text"] = array(
+  "signature_commercial" => "
+Servicio comercial",
+  "signature_comptabilite" => "
+Servicio contabilidad",
+  "signature_referencement" => "
+Servicio toma de referencia",
+  "signature_informatique" => "
+Servicio técnico",
+  "signature_communication" => "
+Servicio comunicación",
+  "signature_marketing" => "
+Servicio marketing",
+  "signature_direction" => "
+La dirección",
+  "signature_externe" => "
+Servicio externo",
+  "signature_support" => "
+Soporte clientela",
   "download_product" => "Hola,
 
 Su pedido [ORDER_ID] ha sido confirmado, le invitamos a descargar su pedido desde el siguiente enlace:
@@ -325,6 +343,7 @@ El siguiente usuario acaba de registrarse:
 
 [link=\"[ADMIN_URL]\"]Dale la cuenta de usuario[/link]
 ",
+  "warn_admin_reve_subscription" => "",
   "email_retour_virement" => "Hola,
 
 Hemos recibido su número de devolución [RETURN_ID].
@@ -410,6 +429,8 @@ Si usted olvida su contraseña, gracias por utilizar la herramienta de recuperac
 
 Por favor, recuerde que la exactitud de esta información es esencial para el buen funcionamiento del sitio y para el éxito de cada negocio. Cualquier información incorrecta o inexacta puede resultar en la cancelación de su cuenta.
 
-Para más información, póngase en contacto con nosotros.");
+Para más información, póngase en contacto con nosotros.",
+"inscription_newsletter" => ""
+);
 
 ?>

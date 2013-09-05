@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_livraison.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: statut_livraison.php 37993 2013-09-02 16:46:19Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -40,6 +40,12 @@ switch (vb($_REQUEST['mode'])) {
 	case "insere" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+		}
+		if ((num_rows(query("SELECT 1
+			FROM peel_statut_livraison
+			WHERE id = '" . nohtml_real_escape_string($frm['new_id']) . "'")) > 0)) {
+			$frm['new_id']='';
+			$form_error_object->add('new_id', $GLOBALS["STR_IS_EMPTY"]);
 		}
 		if (!$form_error_object->count()) {
 			insere_statut($_POST);
@@ -95,8 +101,18 @@ function affiche_formulaire_ajout_statut(&$frm)
 		}
 	}
 	$frm['nouveau_mode'] = "insere";
+	if(empty($frm['new_id'])) {
+		$query = query("SELECT id
+			FROM peel_statut_livraison
+			ORDER BY id DESC
+			LIMIT 1");
+		if($result = fetch_assoc($query)) {
+			$frm['new_id'] = $result['id']+1;
+		} else {
+			$frm['new_id'] = 0;
+		}
+	}
 	$frm['id'] = "";
-	$frm['new_id'] = "";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_CREATE'];
 
 	affiche_formulaire_statut($frm);

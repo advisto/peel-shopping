@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_formulaire_categorie.tpl 37943 2013-08-29 09:31:55Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -47,7 +47,7 @@
 		{/if}
 		<tr>
 			<td>{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input size="1" type="text" name="position" value="{$position|str_form_value}" /></td>
+			<td><input type="number" name="position" value="{$position|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -125,8 +125,8 @@
 		{if $is_category_promotion_module_active}
 		<tr>
 			<td class="label">{$STR_ADMIN_CATEGORIES_DISCOUNT_IN_CATEGORY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="number" name="promotion_devises" value="{$promotion_devises|str_form_value}" /> {$site_symbole} {$STR_TTC}
-				<input style="width:100px" type="number" name="promotion_percent" value="{$promotion_percent|str_form_value}" />%
+			<td><input style="width:100px" type="text" name="promotion_devises" value="{$promotion_devises|str_form_value}" /> {$site_symbole} {$STR_TTC}
+				<input style="width:100px" type="text" name="promotion_percent" value="{$promotion_percent|str_form_value}" />%
 			</td>
 		</tr>
 		<tr>

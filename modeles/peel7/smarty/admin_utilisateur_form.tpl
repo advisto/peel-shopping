@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
 *}<form enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -309,6 +309,7 @@
 			<td>{include file="specific_field.tpl" f=$f}{$f.error_text}</td>
 		</tr>
 		{/foreach}
+		{if $langues|@count>1}
 		<tr>
 			<td>
 				<label>{$STR_LANGUAGE_FOR_AUTOMATIC_EMAILS}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -321,6 +322,7 @@
 				</select>
 			</td>
 		</tr>
+		{/if}
 {if $is_annonce_module_active}
 		<tr>
 			<td colspan="2">&nbsp;</td>
@@ -332,7 +334,9 @@
 		<tr>
 			<td>{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				{$favorite_category}
+				<select id="favorite_category" name="favorite_category">
+					{$favorite_category}
+				</select>
 			</td>
 		</tr>
 	{else}
@@ -376,10 +380,6 @@
 		<tr>
 			<td>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><textarea name="comments" style="width:100%">{$comments}</textarea></td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_DESCRIPTION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><textarea  name="description" style="width:100%" rows="10" cols="54">{$description}</textarea></td>
 		</tr>
 		<tr>
 			<td style="width:40%;">{$STR_LOGO}{$STR_BEFORE_TWO_POINTS}:</td>

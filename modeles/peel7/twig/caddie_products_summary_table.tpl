@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: caddie_products_summary_table.tpl 37904 2013-08-27 21:19:26Z gboussin $
 #}<table class="caddie" cellpadding="2"  summary="{{ STR_TABLE_SUMMARY_CADDIE|str_form_value }}">
 	<tr>
 		<th colspan="3" scope="col">{{ STR_PRODUCT }}</th>
@@ -93,7 +93,7 @@
 		</td>
 		<td class="lignecaddie_quantite" align="center">
 			{% if with_form_fields and p.quantite.value %}
-				<input type="text" size="3" style="width:23px" name="quantite[{{ p.numero_ligne }}]" value="{{ p.quantite.value|str_form_value }}" {% if (p.quantite.message) %} onchange="if(this.value>{{ p.quantite.stock_commandable }}) {ldelim }}this.value='{{ p.quantite.stock_commandable }}'; alert('{{ p.quantite.message|filtre_javascript(true,true,true) }}');{rdelim }}"{% endif %} />
+				<input type="text" size="3" style="width:23px" name="quantite[{{ p.numero_ligne }}]" value="{{ p.quantite.value|str_form_value }}" {% if (p.quantite.message) %} onchange="if(this.value>{{ p.quantite.stock_commandable }}) {ldelim }}this.value='{{ p.quantite.stock_commandable }}'; alert('{{ p.quantite.message|filtre_javascript(true,true,true,false) }}');{rdelim }}"{% endif %} />
 				<input type="submit" value="" name="" class="bouton_ok" />
 			{% else %}
 				{{ p.quantite }}

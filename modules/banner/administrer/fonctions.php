@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -227,6 +227,10 @@ function supprime_banniere($id)
 	/* Efface la banniere */
 	query("DELETE FROM peel_banniere WHERE id='" . intval($id) . "'");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_DELETED_OK"], $prod['description'])))->fetch();
+	// Suppression des caches de bannières
+	$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+	$this_cache_object->delete_cache_file(true);
+	unset($this_cache_object);
 }
 
 /**
@@ -308,6 +312,10 @@ function insere_banniere(&$frm)
 		)";
 		$qid = query($sql);
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"], vb($_POST['description']))))->fetch();
+		// Suppression des caches de bannières
+		$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+		$this_cache_object->delete_cache_file(true);
+		unset($this_cache_object);
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_BANNER_ADMIN_ERROR_INSERTED"]))->fetch();
 	}
@@ -356,6 +364,10 @@ function maj_banniere($id, &$frm)
 		WHERE id = "' . intval($id) . '"';
 	if (query($sql)) {
 		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"], $id)))->fetch();
+		// Suppression des caches de bannières
+		$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+		$this_cache_object->delete_cache_file(true);
+		unset($this_cache_object);
 	} else {
 		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_BANNER_ADMIN_ERR_UPDATED"]))->fetch();
 	}
@@ -436,8 +448,6 @@ function affiche_liste_banniere($inner = '', $cond = '')
 }
 
 /**
- * delete_banner_image()
- *
  * Supprime le produit spécifié par $id. Il faut supprimer le produit
  *
  * @param integer $id
@@ -461,11 +471,13 @@ function delete_banner_image($id, $file)
 	}
 	delete_uploaded_file_and_thumbs($file['image']);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_RUBRIQUES_MSG_DELETED_OK'], $file['image'])))->fetch();
+	// Suppression des caches de bannières
+	$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+	$this_cache_object->delete_cache_file(true);
+	unset($this_cache_object);
 }
 
 /**
- * affiche_filtre_banner
- *
  * Supprime le produit spécifié par $id. Il faut supprimer le produit
  *
  * @param array $frm

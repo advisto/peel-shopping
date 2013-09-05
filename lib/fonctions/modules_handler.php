@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: modules_handler.php 38026 2013-09-04 23:30:43Z gboussin $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -340,7 +340,7 @@ function is_module_marge_active() {
  * @return
  */
 function is_module_forum_active() {
-    if (vn($GLOBALS['site_parameters']['module_forum']) == '1' && file_exists($GLOBALS['dirroot'] . "/modules/forum/lang/".$_SESSION['session_langue'].'.php') && (empty($GLOBALS['forum_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['forum_allowed_langs_array']))) {
+    if (vn($GLOBALS['site_parameters']['module_forum']) == '1' && file_exists($GLOBALS['dirroot'] . "/modules/forum/lang/".$_SESSION['session_langue'].'.php') && (empty($GLOBALS['site_parameters']['forum_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters']['forum_allowed_langs_array']))) {
         // Module présent
         return true;
     } else {
@@ -1090,5 +1090,15 @@ function is_tnt_module_active()
 {
 	return (vn($GLOBALS['site_parameters']['module_tnt']) == 1 && file_exists($GLOBALS['fonctionstnt']));
 }
+
+/**
+ * is_nexway_module_active()
+ *
+ * @return
+ */
+function is_nexway_module_active() {
+    return file_exists($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
+}
+
 
 ?>

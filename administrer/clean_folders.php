@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clean_folders.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: clean_folders.php 37934 2013-08-28 15:09:20Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -70,7 +70,7 @@ if (isset($_POST['file_shortpath']) && isset($_POST['tx_qualite'])) {
 					if ($filename != '.' && $filename != '..' && is_file($chemin_final . '/' . $filename) && filesize($chemin_final . '/' . $filename) >= vn($_POST['size_ko']) * 1024) {
 						$array = explode('.', $filename);
 						$extension = $array[count($array) - 1];
-						if (in_array(strtolower($extension), $accepted_formats['form_image'])) {
+						if (in_array(String::strtolower($extension), $accepted_formats['form_image'])) {
 							echo filesize($chemin_final . '/' . $filename) . ' - ' . $chemin_final . '/' . $filename;
 							image_resize($chemin_final . '/' . $filename, $chemin_final . '/' . $filename, $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], false, true, vn($_POST['size_ko']) * 1024, $_POST['tx_qualite'], (vb($_POST['enlighten']) == 'on'?1.6:1.0));
 							$i++;

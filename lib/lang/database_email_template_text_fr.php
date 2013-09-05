@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_fr.php 37077 2013-05-31 15:39:56Z sdelaporte $
+// $Id: database_email_template_text_fr.php 37989 2013-09-02 13:37:16Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,24 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["text"] = array(
+  "signature_commercial" => "
+Service commercial",
+  "signature_comptabilite" => "
+Service comptabilité",
+  "signature_referencement" => "
+Service référencement",
+  "signature_informatique" => "
+Support technique",
+  "signature_communication" => "
+Service communication",
+  "signature_marketing" => "
+Service marketing",
+  "signature_direction" => "
+La direction",
+  "signature_externe" => "
+Service externe",
+  "signature_support" => "
+Support Clientèle",
   "download_product" => "Bonjour,
 
 Votre commande [ORDER_ID] ayant été validée, nous vous invitons à télécharger votre commande à partir du lien suivant :
@@ -324,7 +342,11 @@ L'utilisateur suivant vient de s'inscrire :
 
 [link=\"[ADMIN_URL]\"]Administrer le compte de cet utilisateur[/link]
 ",
-  "email_retour_virement" => "Bonjour,
+  "warn_admin_reve_subscription" => "Nous vous informons que le revendeur [link=\"[ADMIN_URL]\"][CIVILITE] [PRENOM] [NOM_FAMILLE] [/link] s'est inscrit sur [SITE].
+
+Ce compte est actuellement en statut \"Revendeur en attente\". Ce compte est actif, mais ne bénéficiera des tarifs revendeur que lorsque vous l'aurez passé en statut \"Revendeur\". 
+",
+"email_retour_virement" => "Bonjour,
 
 Nous avons bien reçu votre retour numéro [RETURN_ID].
 Conformément à votre choix, le montant correspondant, soit [MONTANT], vous sera remboursé par virement bancaire dans les plus brefs délais.",
@@ -415,7 +437,12 @@ Si vous avez oubliez votre mot de passe, merci d''utiliser l''outil de récupér
 
 Nous vous rappelons que l''exactitude de ces informations est primordiale pour le bon fonctionnement du site et pour la bonne réussite commerciale de chacun. Toute information inexacte ou erronée peut entraîner l''annulation de votre compte utilisateur.
 
-Pour toute information complémentaire, n''hésitez pas à nous contacter."
+Pour toute information complémentaire, n''hésitez pas à nous contacter.",
+"inscription_newsletter" => "Bonjour,
+
+Merci pour votre inscription à la newsletter de [SITE_NAME]. Vous recevrez une newsletter hebdomadaire à l'adresse [EMAIL].
+
+A bientôt sur [WWWROOT]"
 );
 
 ?>

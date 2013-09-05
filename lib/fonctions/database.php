@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 37247 2013-06-11 22:14:28Z gboussin $
+// $Id: database.php 38022 2013-09-04 22:45:39Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -114,18 +114,21 @@ function select_db($database_name, &$database_object, $continue_if_error = false
 		$selection_de_la_base = mysql_select_db($database_name, $database_object);
 	}
 	if (!$selection_de_la_base && !$continue_if_error) {
-		$sujet_du_mail = "Database selection problem - Problème de sélection de la base de données";
-		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL database " . $database_name;
-		$contenu_du_mail .= "\n\nLa page " . $_SERVER['REQUEST_URI'] . " a provoqué une erreur lors de sa tentative de sélection de la base de données " . $database_name . ".";
+		if(is_object($database_object) && !empty($database_object->error)) {
+			$contenu_display = $database_object->error;
+		} else {
+			$contenu_display = 'MySQL database selection problem: ' . $database_name;
+		}
+		$sujet_du_mail = "Database selection problem";
+		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL database - " . $contenu_display;
 		if (!empty($support)) {
 			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
 		}
-		$contenu_display = 'MySQL database database_object problem';
 		if (!empty($display_warning_if_database_object_problem)) {
 			echo $contenu_display;
 		}
-		trigger_error($contenu_display . ' ' . $database_name, E_USER_NOTICE);
-		die();
+		trigger_error($contenu_display, E_USER_ERROR);
+		// Le script s'arrête sur une fatal error
 	}
 	// Définition des paramètres de connexion à MySQL
 	if (GENERAL_ENCODING == 'utf-8') {
@@ -225,7 +228,8 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 	if (!empty($query_values)) {
 		return $query_values;
 	} else {
-		if (!$silent_if_error) {
+		if (!$silent_if_error || in_array($error_number, array(1118))) {
+			// Si l'erreur est 1118 (Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535.) qui peut arriver lors d'un ALTER TABLE ADD alors on affiche quand même l'erreur pour meilleure gestion par l'administrateur
 			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
 			if (empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 				// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur

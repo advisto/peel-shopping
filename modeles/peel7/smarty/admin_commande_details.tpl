@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_commande_details.tpl 38026 2013-09-04 23:30:43Z gboussin $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -24,13 +24,18 @@
 			<table class="main_table">
 				<tr>
 					<td colspan="2">
-						<p><b>{$STR_INVOICE|upper}{$STR_BEFORE_TWO_POINTS}:</b>
-						<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$facture_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_INVOICE} PDF</a>
-						<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$sendfacture_pdf_href|escape:'html'}" onclick="return confirm('{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM|filtre_javascript:true:true:true}')">{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL}</a>
-					{if $is_module_factures_html_active}
-						- <a href="{$facture_html_href|escape:'html'}">{$STR_INVOICE} HTML</a>
+					{if $allow_display_invoice_link}
+							<p><b>{$STR_INVOICE|upper}{$STR_BEFORE_TWO_POINTS}:</b>
+							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$facture_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_INVOICE} PDF</a>
+							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$sendfacture_pdf_href|escape:'html'}" onclick="return confirm('{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM|filtre_javascript:true:true:true}')">{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL}</a>
+						{if $is_module_factures_html_active}
+							- <a href="{$facture_html_href|escape:'html'}">{$STR_INVOICE} HTML</a>
+						{/if}
+							</p>
+					{else}
+						<div class="global_help">{$STR_ADMIN_CREATE_BILL_NUMBER_BEFORE}</div>
 					{/if}
-						</p>
+					
 						<p><b>{$STR_PROFORMA|upper}{$STR_BEFORE_TWO_POINTS}:</b>
 							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_PROFORMA} PDF</a>
 							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$sendproforma_pdf_href|escape:'html'}" onclick="return confirm('{$STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL_CONFIRM|filtre_javascript:true:true:true}')">{$STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL}</a>
@@ -50,6 +55,9 @@
 							<a id="partial_amount_link" onclick="get_partial_amount_link('{$partial_amount_link_js}');" target="{$partial_amount_link_target}" class="bouton" href="{$partial_amount_link_href|escape:'html'}">{$STR_ADMIN_COMMANDER_OPEN_IN_BROWSER}</a>
 							<input type="submit" name="bdc_sendclient" class="bouton" value="{$STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value}" onclick="return confirm('{$STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|filtre_javascript:true:true:true}');" /></p>
 						</form>
+					{/if}
+					{if $is_duplicate_module_active}
+						<a title="{$STR_ADMIN_ORDER_DUPLICATE|str_form_value}" href="{$dup_href|escape:'html'}"><img src="{$dup_src|escape:'html'}" alt="" /></a> <a href="{$dup_href|escape:'html'}">{$STR_ADMIN_ORDER_DUPLICATE}</a>
 					{/if}
 					</td>
 				</tr>
@@ -82,6 +90,18 @@
 			<td>{$STR_ADMIN_COMMANDER_PAYMENT_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="text" name="a_timestamp" class="datepicker" value="{$date_facture|str_form_value}" />
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_ADMIN_COMMANDER_INVOICE_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="text" name="f_datetime" class="datepicker" value="{$f_datetime|str_form_value}" />
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_ADMIN_COMMANDER_DELIVERY_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="text" name="e_datetime" class="datepicker" value="{$e_datetime|str_form_value}" />
 			</td>
 		</tr>
 		{if !empty($intracom_for_billing)}
@@ -179,11 +199,11 @@
 	{/if}
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_SMALL_ORDERS_OVERCOST}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input type="number" name="small_order_overcost_amount" value="{$small_order_overcost_amount|str_form_value}" /> {$devise} TTC dont TVA <input type="number" name="tva_small_order_overcost" value="{$tva_small_order_overcost|str_form_value}" /> {$devise}</td>
+		<td><input type="text" name="small_order_overcost_amount" value="{$small_order_overcost_amount|str_form_value}" /> {$devise} TTC dont TVA <input type="text" name="tva_small_order_overcost" value="{$tva_small_order_overcost|str_form_value}" /> {$devise}</td>
 	</tr>
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input type="number" name="currency_rate" value="{$currency_rate|str_form_value}" /></td>
+		<td><input type="text" name="currency_rate" value="{$currency_rate|str_form_value}" /></td>
 	</tr>
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_ORDER_TOTAL}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -203,7 +223,7 @@
 	{/if}
 	<tr>
 		<td>{$STR_ADMIN_COMMANDER_INCLUDING_CREDIT_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td><input name="avoir" type="number" value="{$avoir_prix|str_form_value}" /> {$devise}</td>
+		<td><input name="avoir" type="text" value="{$avoir_prix|str_form_value}" /> {$devise}</td>
 	</tr>
 	{if $is_affilie}
 	<tr>
@@ -470,7 +490,7 @@ function order_line_calculate(id, mode){
 		<tr>
 			<td colspan="2">
 				{$STR_ADMIN_COMMANDER_ORDER_EMITTED_BY_GODCHILD} <a href="{$parrainage_form.href|escape:'html'}">{$parrainage_form.email}</a>.<br />
-				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_OF} <input type="number" size="5" maxlength="3" name="avoir" value="{$site_avoir|str_form_value}" /> {$site_symbole} {$STR_TTC}<br />
+				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_OF} <input type="text" size="5" maxlength="3" name="avoir" value="{$site_avoir|str_form_value}" /> {$site_symbole} {$STR_TTC}<br />
 				{$STR_ADMIN_COMMANDER_THANK_SPONSOR_WITH_CREDIT_EXPLAIN}
 			</td>
 		</tr>

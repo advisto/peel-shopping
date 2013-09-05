@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: pt.php 37913 2013-08-27 22:55:59Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -80,7 +80,7 @@ $GLOBALS["STR_CAT_LB"] = "";
 $GLOBALS["STR_CATALOG"] = "Consultar o catálogo";
 $GLOBALS["STR_CATALOGUE"] = "Catálogo";
 $GLOBALS["STR_CATEGORY"] = "Catégorie";
-$GLOBALS["STR_CGV_OK"] = " Tomei conhecimento de os <a href=\"{$GLOBALS['wwwroot']}/cgv.html\" class=\"label\">condições gerais de venda </a> do sítio{$GLOBALS['site']} em vigor à este momento e há sem reserva.";
+$GLOBALS["STR_CGV_OK"] = " Tomei conhecimento de os <a href=\"{$GLOBALS['wwwroot']}/cgv.html\" class=\"label\">condições gerais de venda</a> do sítio {$GLOBALS['site']} em vigor à este momento e há sem reserva.";
 $GLOBALS["STR_CGV_YES"] = "";
 $GLOBALS["STR_CGV"] = " Condições de venda ";
 $GLOBALS["STR_CHANGE_PARAMS_OK"] = "\n\n<li><a href=\"{$GLOBALS['wwwroot']}/compte.php\" class=\"normal\">Pode voltar na Homepage</a>.
@@ -477,7 +477,7 @@ $GLOBALS["STR_MONTHS"] = "";
 $GLOBALS["STR_MORE_DETAILS"] = "";
 $GLOBALS["STR_MORE"] = "+ detalhes";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Os parâmetros foram modificados";
-$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "Deve abrir uma conta cliente para comprar sobre {$GLOBALS['site']}.\nPara abrir a sua encomenda, <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">clique aqui</a>";
+$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Para abrir a sua encomenda, clique aqui</a>?";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identificar-se vous para ganhar tempo.\n";
 $GLOBALS["STR_MSG_THANKS"] = "Obrigado da sua confiança, a sua encomenda foi registrada com sucesso.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "";

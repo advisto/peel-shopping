@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_statut_paiement_fr.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_statut_paiement_fr.php 37904 2013-08-27 21:19:26Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -21,11 +21,11 @@ if (!defined("IN_PEEL")) {
 
 $peel_statut_paiement["nom"] = array(
   "0" => "En cours de discussion",
-  "1" => "En cours de traitement",
+  "1" => "En attente de paiement",
   "2" => "Paiement en cours de vérification",
-  "3" => "Réglée",
-  "6" => "Annulée",
-  "9" => "Remboursée"
+  "3" => "Réglé",
+  "6" => "Annulé",
+  "9" => "Remboursé"
 );
 
 ?>

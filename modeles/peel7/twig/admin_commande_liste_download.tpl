@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste_download.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_commande_liste_download.tpl 37904 2013-08-27 21:19:26Z gboussin $
 #}<table cellpadding="2" class="full_width">
 	<tr>
 		<td class="entete" colspan="11">{{ STR_ADMIN_COMMANDER_DOWNLOADS_LIST_TITLE }}</td>
@@ -28,7 +28,7 @@
 	{{ res.tr_rollover }}
 		<td class="center">
 			<a title="{{ STR_MODIFY|str_form_value }}" href="{{ res.modif_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_MODIFY|str_form_value }}" /></a>
-			{% if allow_delete_order %}<a onclick="return confirm('{{ res.delete_confirm_txt|filtre_javascript(true,true,true) }}');" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" />{% endif %}
+			{% if res.allow_delete_order %}<a onclick="return confirm('{{ res.delete_confirm_txt|filtre_javascript(true,true,true) }}');" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" />{% endif %}
 		</td>
 		<td class="center">{{ res.id }}</td>
 		<td class="center">{{ res.nom_produit }}</td>

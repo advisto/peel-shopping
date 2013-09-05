@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 37204 2013-06-09 22:28:33Z gboussin $
+// $Id: display.php 38068 2013-09-05 13:18:53Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -925,6 +925,10 @@ if (!function_exists('print_compte')) {
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_IMPORTANT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': <a href="' . $GLOBALS['wwwroot'] . '/utilisateurs/change_params.php">' . $email_explain . '</a>'))->fetch();
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('compte.tpl');
+		if (is_download_module_active()) {
+			$tpl->assign('downloadable_file_link_array', get_downloadable_file_link(array('user_id' => $_SESSION['session_utilisateur']['id_utilisateur'])));
+			$tpl->assign('STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD', $GLOBALS['STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD']);
+		}
 		$tpl->assign('compte', $GLOBALS['STR_COMPTE']);
 		$tpl->assign('msg_support', $GLOBALS['STR_SUPPORT']);
 		$est_identifie = est_identifie();
@@ -990,7 +994,7 @@ if (!function_exists('print_compte')) {
 				$tpl->assign('parrainage', array('header' => $GLOBALS['STR_PARRAIN_ENTETE'], 'txt' => sprintf($GLOBALS['STR_PARRAIN_TEXTE'], fprix($GLOBALS['site_parameters']['avoir']), fprix($GLOBALS['site_parameters']['avoir'])), 'href' => $GLOBALS['wwwroot'] . '/modules/parrainage/parrain.php'));
 			}
 			if (is_gifts_module_active()) {
-				$tpl->assign('gift', array('header' => $GLOBALS['STR_MY_GIFT_POINT'], 'txt' => $GLOBALS['STR_MY_GIFT_POINT'], 'href' => $GLOBALS['wwwroot'] . '/achat/index.php?convert_gift_points=1'));
+				$tpl->assign('gift', array('header' => $GLOBALS['STR_MY_GIFT_POINT'], 'txt' => $GLOBALS["STR_LISTE_CADEAU"], 'href' => $GLOBALS['wwwroot'] . '/achat/index.php?convert_gift_points=1'));
 			}
 			// les codes utilisés
 			$code_promo_query = query('SELECT code_promo, valeur_code_promo, percent_code_promo
@@ -1616,6 +1620,17 @@ if (!function_exists('getHTMLHead')) {
    });
 })(jQuery);
 ';
+		if(!empty($GLOBALS['load_nyromodal'])){
+			$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/lib/css/nyroModal.css';
+			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.nyroModal.custom.js';
+		
+			$js_content_array[] = '
+(function($) {
+    $(document).ready(function() {
+ 	 jQuery(".nyroModal").nyroModal();
+   });
+})(jQuery);';
+		}
 		// On met en dernier fichiers CSS du site pour qu'ils aient priorité
 		if(!empty($GLOBALS['site_parameters']['css'])) {
 			foreach (explode(',', $GLOBALS['site_parameters']['css']) as $this_css_filename) {
@@ -1897,7 +1912,7 @@ if (!function_exists('affiche_flags')) {
 					$url = get_current_url_in_other_language($this_lang);
 				}
 				$data[] = array('lang' => $this_lang,
-					'lang_name' => $GLOBALS['lang_names'][$this_lang],
+					'lang_name' => (!empty($GLOBALS['lang_names'][$this_lang])?$GLOBALS['lang_names'][$this_lang]:$this_lang),
 					'href' => $url,
 					'src' => ((String::strpos($GLOBALS['lang_flags'][$this_lang], '/') !== false) ? $GLOBALS['lang_flags'][$this_lang] : $GLOBALS['wwwroot'] . '/lib/flag/' . $GLOBALS['lang_flags'][$this_lang]),
 					'selected' => ($_SESSION['session_langue'] == $this_lang && empty($forced_destination_url)),
@@ -1912,6 +1927,25 @@ if (!function_exists('affiche_flags')) {
 		} else {
 			echo $tpl->fetch();
 		}
+	}
+}
+
+if (!function_exists('getFlag')) {
+	/**
+	 * getFlag()
+	 *
+	 * @param string $country_code
+	 * @param string $country_name
+	 * @return
+	 */
+	function getFlag($country_code, $country_name)
+	{
+		if (!empty($country_code)) {
+			$flag = '<img src="' . $GLOBALS['wwwroot'] . '/lib/flag/' . strtolower($country_code) . '.gif" width="18" height="12" alt="" title="' . String::str_form_value($country_name) . '" /> ';
+		} else {
+			$flag = '';
+		}
+		return $flag;
 	}
 }
 
@@ -2037,12 +2071,11 @@ if (!function_exists('print_delete_installation_folder')) {
 		// Tout ce qui est ci-dessous ne peut pas aller chercher d'informations en base de données car logiciel non installé
 		$title = $GLOBALS['STR_INSTALLATION'];
 		// Gestion de l'affichage des drapeaux lors de l'installation
-		@include($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$_SESSION['session_langue'].'.php');
-		foreach(array('fr', 'en', 'es', 'de', 'it', 'nl') as $this_lang) {
-			$GLOBALS['lang_flags'][$this_lang] = $GLOBALS['wwwroot'] . '/images/'.$this_lang.'.png';
-		}
-		if(!empty($peel_langues['nom'])) {
-			$GLOBALS['lang_names'] = $peel_langues['nom'];
+		foreach($GLOBALS['lang_codes'] as $this_lang) {
+			// Remplacement de petits drapeaux par gros drapeaux
+			if(file_exists($GLOBALS['dirroot'] . '/images/'.$this_lang.'.png')) {
+				$GLOBALS['lang_flags'][$this_lang] = $GLOBALS['wwwroot'] . '/images/'.$this_lang.'.png';
+			}
 		}
 		if (!is_writable($GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile")) {
 			$body = sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], "/lib/templateEngines/smarty/compile");
@@ -2355,4 +2388,60 @@ if (!function_exists('get_user_picture')) {
 		return $output_array;
 	}
 }
+
+if (!function_exists('get_diaporama')) {
+	/**
+	 * get_diaporama()
+	 *
+	 * @return
+	 */
+	function get_diaporama($mode, $id)
+	{
+		if(empty($id)) {
+			// Erreur de paramétrage
+			return false;
+		}
+		if ($mode == 'content_category') {
+			$id_field = 'id_rubrique';
+		} else {
+			// Erreur de paramétrage
+			return false;
+		}
+
+		$GLOBALS['load_nyromodal']=true;
+		$tpl = $GLOBALS['tplEngine']->createTemplate('diaporama.tpl');
+		$nb_colonnes = 3;
+		$j = 0;
+		$diapo = array();
+		$q = query("SELECT `image`
+			FROM `peel_diaporama`
+			WHERE `" . $id_field . "`=" . intval($id));
+		$total_img = num_rows($q);
+		while($img_diapo = fetch_assoc($q)) {
+			$tmpdiapo['j'] =  $j;
+			$tmpdiapo['image'] =  $GLOBALS['repertoire_upload'] .  '/' . $img_diapo["image"];
+			$tmpdiapo['thumbs'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($img_diapo["image"], 175, 275, "fit");
+			$tmpdiapo['is_row'] = ($j % $nb_colonnes == 0);
+			$j++;
+	
+			if ($j % $nb_colonnes == 0 || $j == $total_img) {
+				$tmpdiapo['empty_cells'] = 0;
+				if($j > $nb_colonnes) {
+					// On a déjà une ligne pleine => il faut compléter la dernière ligne pour du XTML bien structuré
+					while ($j % $nb_colonnes != 0) {
+						$tmpdiapo['empty_cells']++;
+						$j++;
+					}
+				} else {
+					// Une seule ligne => on ajuste le nombre de colonnes à la réalité de ce qu'on a affiché
+					$nb_colonnes = $j;
+				}
+			}
+			$diapo[] = $tmpdiapo;
+		}
+		$tpl->assign('diaporama', $diapo);
+		return $tpl->fetch();
+	}
+}
+
 ?>

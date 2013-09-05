@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: ipn.php 37904 2013-08-27 21:19:26Z gboussin $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -36,15 +36,18 @@ $q = query('SELECT id, montant
 if ($r = fetch_assoc($q)) {
 	if (round($r['montant'] * 100) == round($_POST['mc_gross'] * 100)) {
 		// post back to PayPal system to validate
-		$header = "POST /cgi-bin/webscr HTTP/1.0\r\n";
+		$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
 		$header .= "Host: " . $paypal_domain . ":443\r\n";
 		$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-		$header .= "Content-Length: " . String::strlen($req) . "\r\n\r\n";
+		$header .= "Content-Length: " . String::strlen($req) . "\r\n";
+		$header .= "Connection: close\r\n\r\n";
 		$fp = fsockopen ('ssl://' . $paypal_domain, 443, $errno, $errstr, 30);
 		if (!$fp) {
-			$header = "POST /cgi-bin/webscr HTTP/1.0\r\n";
+			$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
+			$header .= "Host: " . str_replace('ipnpb', 'www', $paypal_domain) . "\r\n";
 			$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-			$header .= "Content-Length: " . String::strlen($req) . "\r\n\r\n";
+			$header .= "Content-Length: " . String::strlen($req) . "\r\n";
+			$header .= "Connection: close\r\n\r\n";
 			// On essaie sans SSL si l'hébergement ne le permet pas
 			$fp = fsockopen (str_replace('ipnpb', 'www', $paypal_domain), 80, $errno, $errstr, 30);
 		}

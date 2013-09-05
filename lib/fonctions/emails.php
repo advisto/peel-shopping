@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: emails.php 37972 2013-08-30 14:35:54Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -60,8 +60,15 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			if (empty($mail_content)) {
 				$mail_content = $template_infos['text'];
 			}
+			
 			if (!empty($mail_content)) {
-				$signature_infos = getTextAndTitleFromEmailTemplateLang('signature', $lang);
+				if (!empty($template_infos["default_signature_code"])) {
+					// Récupération du technical code de la signature associé au template
+					$signature = $template_infos["default_signature_code"];
+				} else {
+					$signature = 'signature';
+				}
+				$signature_infos = getTextAndTitleFromEmailTemplateLang($signature, $lang);
 				if (!empty($signature_infos)) {
 					$mail_content .= $signature_infos['text'];
 				}
@@ -266,7 +273,7 @@ function getTextAndTitleFromEmailTemplateLang($template_technical_code, $templat
 {
 	// Dans le cas de la newsletter, le titre ne doit pas être celui du template, mais le titre renseigné dans la liste des newsletters.
 	if (!empty($template_technical_code) && $template_technical_code=='template_newsletter') {
-		$sql ='SELECT pet.id, pet.technical_code, pet.name as name_template, pet.subject, pet.text, pet.lang, pet.active, pet.id_cat, pn.sujet_fr as name
+		$sql ='SELECT pet.default_signature_code, pet.id, pet.technical_code, pet.name as name_template, pet.subject, pet.text, pet.lang, pet.active, pet.id_cat, pn.sujet_fr as name
 			FROM peel_email_template pet
 			LEFT JOIN peel_newsletter pn ON pet.technical_code = pn.template_technical_code
 			WHERE pet.active="TRUE" AND pet.technical_code="'.real_escape_string($template_technical_code).'" AND pet.lang="'.real_escape_string($template_lang).'"

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_commande_liste.tpl 37953 2013-08-29 14:19:34Z sdelaporte $
 *}<table class="full_width">
 	<tr>
 		<td class="entete">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}{$STR_BEFORE_TWO_POINTS}: {$links_nbRecord}</td>
@@ -67,7 +67,13 @@
 	{$form_token}
 {if isset($results)}
 	<div class="global_help"><img src="{$update_src|escape:'html'}" alt="" /> {$STR_ADMIN_COMMANDER_CLIENT_UPDATED_ICON_EXPLAIN|str_form_value}</div>
+
 	<table class="full_width">
+	{if $is_duplicate_module_active}
+		<tr>
+			<td colspan="13"><b>{$STR_NOTA_BENE}{$STR_BEFORE_TWO_POINTS}:</b> {$STR_ADMIN_ORDER_DUPLICATE_WARNING}</td>
+		</tr>
+	{/if}
 		<tr>
 			<td class="right">
 				<input type="hidden" name="mode" value="maj_statut" />
@@ -77,6 +83,9 @@
 					{$res.tr_rollover}
 						<td class="center">
 							<a href="commander.php?mode=modif&amp;commandeid={$res.order_id}">{$STR_MODIFY}</a><br />
+						{if $is_duplicate_module_active}
+							<a title="{$STR_ADMIN_ORDER_DUPLICATE|str_form_value}" href="{$res.dup_href|escape:'html'}"><img src="{$res.dup_src|escape:'html'}" alt="" /></a>
+						{/if}
 						</td>
 						<td class="center">{$res.order_id}</td>
 						<td class="center">{$res.numero|default:'&nbsp;'}</td>

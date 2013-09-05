@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
 #}<form enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -195,15 +195,15 @@
 		</tr>
 		<tr>
 			<td>{{ STR_TELEPHONE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="telephone" style="width:100%" value="{{ telephone|str_form_value }}" />{{ telephone_calllink }}</td>
+			<td><input type="tel" name="telephone" style="width:100%" value="{{ telephone|str_form_value }}" />{{ telephone_calllink }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="fax" style="width:100%" value="{{ fax|str_form_value }}" /></td>
+			<td><input type="tel" name="fax" style="width:100%" value="{{ fax|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_PORTABLE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="portable" style="width:100%" value="{{ portable|str_form_value }}" />{{ portable_calllink }}</td>
+			<td><input type="tel" name="portable" style="width:100%" value="{{ portable|str_form_value }}" />{{ portable_calllink }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADDRESS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -303,6 +303,13 @@
 			<td>{{ STR_ORIGIN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</td>
 		</tr>
+		{% for f in specific_fields %}
+		<tr>
+			<td>{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
+		</tr>
+		{% endfor %}
+		{% if langues|length>1 %}
 		<tr>
 			<td>
 				<label>{{ STR_LANGUAGE_FOR_AUTOMATIC_EMAILS }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -315,6 +322,7 @@
 				</select>
 			</td>
 		</tr>
+		{% endif %}
 {% if is_annonce_module_active %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
@@ -326,7 +334,9 @@
 		<tr>
 			<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				{{ favorite_category }}
+				<select id="favorite_category" name="favorite_category">
+					{{ favorite_category }}
+				</select>
 			</td>
 		</tr>
 	{% else %}
@@ -370,10 +380,6 @@
 		<tr>
 			<td>{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><textarea name="comments" style="width:100%">{{ comments }}</textarea></td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_DESCRIPTION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><textarea  name="description" style="width:100%" rows="10" cols="54">{{ description }}</textarea></td>
 		</tr>
 		<tr>
 			<td style="width:40%;">{{ STR_LOGO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -532,8 +538,7 @@
 <br />
 {% endif %}
 {% if (phone_event) %}
-<a name="phone_event"></a>
-<table class="full_width">
+<table id="phone_event" class="full_width">
 	<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_MANAGE_CALLS }}</td></tr>
 	<tr><td>{{ phone_event }}</td></tr>
 </table>
@@ -546,8 +551,7 @@
 <br />
 {% endif %}
 {% if (download_files) %}
-<a name="download_files"></a>
-<table class="full_width">
+<table id="download_files" class="full_width">
 	<tr><td>{{ download_files }}</td></tr>
 </table>
 <br />

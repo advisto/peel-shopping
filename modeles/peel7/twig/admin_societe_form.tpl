@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_societe_form.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_societe_form.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -36,11 +36,11 @@
 		</tr>
 		<tr>
 			<td>{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
+			<td><input type="email" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="siteweb" style="width:100%" value="{{ siteweb|str_form_value }}" /></td>
+			<td><input type="url" name="siteweb" placeholder="http://" style="width:100%" value="{{ siteweb|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_SIREN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -72,11 +72,11 @@
 		</tr>
 		<tr>
 			<td>{{ STR_TELEPHONE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="tel" style="width:100%" value="{{ tel|str_form_value }}" /></td>
+			<td><input type="tel" name="tel" style="width:100%" value="{{ tel|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="fax" style="width:100%" value="{{ fax|str_form_value }}" /></td>
+			<td><input type="tel" name="fax" style="width:100%" value="{{ fax|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_BANK_ACCOUNT_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -131,11 +131,11 @@
 		</tr>
 		<tr>
 			<td>{{ STR_TELEPHONE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="tel2" style="width:100%" value="{{ tel2|str_form_value }}" /></td>
+			<td><input type="tel" name="tel2" style="width:100%" value="{{ tel2|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="fax2" style="width:100%" value="{{ fax2|str_form_value }}" /></td>
+			<td><input type="tel" name="fax2" style="width:100%" value="{{ fax2|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="center"><p><input class="bouton" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>

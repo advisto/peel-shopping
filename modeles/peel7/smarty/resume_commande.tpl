@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: resume_commande.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: resume_commande.tpl 37904 2013-08-27 21:19:26Z gboussin $
 *}<h2>{$STR_ORDER_DETAIL}</h2>
 <table class="full_width" cellpadding="3">
 	<caption></caption>
@@ -70,7 +70,7 @@
 {if $is_payment_delivery_status}
 	<tr>
 		<td>{$STR_ORDER_STATUT_PAIEMENT}{$STR_BEFORE_TWO_POINTS}:</td>
-		<td>{$order_statut_paiement_name}</td>
+		<td>{$order_statut_paiement_name}{if isset($payment_form)}<hr />{$payment_form}{/if}</td>
 	</tr>
 	<tr>
 		<td>{$STR_ORDER_STATUT_LIVRAISON}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -128,6 +128,17 @@
 				</tr>
 				{/foreach}
 			</table>
+				{if isset($downloadable_file_link_array)}
+			<table>
+					{foreach $downloadable_file_link_array as $item}
+				<tr>
+					<td class="lignecaddie" align="center">
+						 <a href="{$item.link}">{$item.date} - {$item.name} - {$STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD}</a>
+					</td>
+				</tr>
+					{/foreach}
+			</table>
+				{/if}
 		</td>
 	</tr>
 </table>

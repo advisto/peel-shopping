@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: compte.tpl 37959 2013-08-29 16:26:51Z gboussin $
 #}<h1 class="page_title">{{ compte }}</h1>
 <div class="page_content">
 <p>{{ msg_support }}</p>
@@ -108,6 +108,12 @@
 		<br />- {{ avoir.label }}: {{ avoir.value }}<br />
 		{% endif %}
 		
+		{% if (gift) %}
+		<br />
+		<h3>{{ gift.header }}</h3>
+		- <a href="{{ gift.href|escape('html') }}">{{ gift.txt }}</a><br />
+		{% endif %}
+		
 		{% if (affiliate) %}
 		<br />
 		<h3>{{ affiliate.account }}</h3>
@@ -145,5 +151,16 @@
 	{% else %}
 		- <a href="{{ login_href|escape('html') }}">{{ login }}</a><br />
 		- <a href="{{ register_href|escape('html') }}">{{ register }}</a><br />
+	{% endif %}
+	{% if (downloadable_file_link_array) %}
+		<table class="full_width">
+		{% for item in downloadable_file_link_array %}
+			<tr>
+				<td align="center">
+					<a href="{{ item.link }}">{{ item.date }} - {{ item.name }} - {{ STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD }}</a>
+				</td>
+			</tr>
+		{% endfor %}
+		</table>
 	{% endif %}
 </div>

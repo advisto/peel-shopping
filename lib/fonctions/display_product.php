@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 37032 2013-05-29 22:21:19Z gboussin $
+// $Id: display_product.php 38045 2013-09-05 09:11:49Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -264,12 +264,12 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$tpl->assign('qrcode_image_src', $product_object->qrcode_image_src());
 			}
 			$tpl->assign('extra_link', $product_object->extra_link);
-			
+
 			if (is_lot_module_active()) {
 				include ($GLOBALS['fonctionslot']);
 				$tpl->assign('explanation_table', get_lot_explanation_table($product_id, $product_object->categorie_id));
 			}
-			
+
 			if (!empty($product_object->on_check) && is_module_gift_checks_active()) {
 				$tpl->assign('check', affiche_check($product_id, 'cheque', null, true));
 			} else {
@@ -287,7 +287,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					));
 				}
 			}
-			
+
 			if (!empty($product_object->display_tab)) {
 				// Onglets
 				$sql = 'SELECT
@@ -339,6 +339,8 @@ WHERE id="' . $product_object->id . '"';
 				$nb_colonnes = vn($GLOBALS['site_parameters']['associated_products_columns_default']);
 			}
 			// Charge les produits associés
+			
+			$tpl->assign('display_share_tools_on_product_pages', !empty($GLOBALS['site_parameters']['display_share_tools_on_product_pages']));
 			$tpl->assign('associated_products', affiche_produits(null, null, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], vb($GLOBALS['site_parameters']['associated_products_display_mode']), true, $product_id, $nb_colonnes, false, false));
 			$output = $tpl->fetch();
 		}
@@ -414,11 +416,11 @@ if (!function_exists('get_products_list_brief_html')) {
 			$nb_colonnes = 1;
 		} else {
 			$products_display_mode = 'column';
-			$nb_colonnes = 3;
+			$nb_colonnes = $GLOBALS['site_parameters']['product_category_pages_nb_column'];
 		}
 		if (!empty($display_subcategories)) {
 			// Affichage des sous-catégories
-			$subcategories_table = get_subcategories_table($catid, 5, true);
+			$subcategories_table = get_subcategories_table($catid, $GLOBALS['site_parameters']['subcategorie_nb_column'], true);
 			if (!empty($subcategories_table)) {
 				$tpl->assign('subcategories', $subcategories_table);
 			}
@@ -794,7 +796,7 @@ if (!function_exists('affiche_critere_stock')) {
 			}
 		}
 		$urlprod_with_cid = $product_object->get_product_url(true, true) . 'cId=';
-		$urlcat_with_cid = get_current_url(false) . '?catid=' . vn($_GET['catid']) . '&pId=' . vn($product_object->id) . '&cId=';
+		$urlcat_with_cid = get_current_url(false) . '?'. (!empty($_GET['catid'])?'catid='. $_GET['catid'] .'&':'') . 'pId=' . vn($product_object->id) . '&cId=';
 		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('critere_stock.tpl');
 		

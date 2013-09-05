@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: webmailAdmin_form.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: webmailAdmin_form.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_MODULE_WEBMAIL_ADMIN_CLIENT_INFORMATION }}</td>
@@ -201,7 +201,7 @@
 		<tr>
 			<th>{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE }}</th>
 			<td>
-				<select name="function" id="function" onchange="mail_signature('{{ nom_famille|str_form_value }}', '{{ prenom|str_form_value }}', '{{ site|str_form_value }}', '[link=&#34;http://www.{{ HTTP_HOST }}/&#34;]www.{{ HTTP_HOST }}[/link]', '');">
+				<select name="function" id="function" onchange="mail_signature('{{ nom_famille|str_form_value }}', '{{ prenom|str_form_value }}', '{{ site|str_form_value }}', '[link=&#34;{{ wwwroot }}&#34;]{{ wwwroot }}[/link]', '');">
 					<option value="none">{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_NONE }}</option>
 					<option value="">{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE }}</option>
 					<option value="support">{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_CLIENT_SERVICE }}</option>
@@ -214,7 +214,7 @@
 					<option value="direction">{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_DIRECTION }}</option>
 					<option value="externe">{{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_EXTERNAL }}</option>
 				</select>
-				<input type="checkbox" name="signature_with_name" id="signature_with_name" value="1" onclick="mail_signature('{{ nom_famille|str_form_value }}', '{{ prenom|str_form_value }}', '{{ site|str_form_value }}', '[link=&#34;http://www.{{ HTTP_HOST }}/&#34;]www.{{ HTTP_HOST }}[/link]', '');" /> {{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_ADD_NAME }}
+				<input type="checkbox" name="signature_with_name" id="signature_with_name" value="1" onclick="mail_signature('{{ nom_famille|str_form_value }}', '{{ prenom|str_form_value }}', '{{ site|str_form_value }}', '[link=&#34;{{ wwwroot }}&#34;]{{ wwwroot }}[/link]', '');" /> {{ STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_ADD_NAME }}
 			</td>
 		</tr>
 		<tr>
@@ -255,4 +255,8 @@ window.onload = (function(){
 	})
 .change();
 });
+//--><!]]></script>
+
+<script><!--//--><![CDATA[//><!--
+mail_signature('{{ nom_famille|str_form_value }}', '{{ prenom|str_form_value }}', '{{ site|str_form_value }}', '[link="{{ wwwroot }}"]{{ wwwroot }}[/link]', '');
 //--><!]]></script>

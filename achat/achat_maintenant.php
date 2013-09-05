@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: achat_maintenant.php 37975 2013-08-30 16:24:12Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -46,9 +46,6 @@ if (is_socolissimo_module_active() && !empty($_REQUEST) && !empty($_REQUEST['PUD
 		$check_fields['adresse2'] = $GLOBALS['STR_ERR_ADDRESS'];
 		$check_fields['code_postal2'] = $GLOBALS['STR_ERR_ZIP'];
 		$check_fields['ville2'] = $GLOBALS['STR_ERR_TOWN'];
-	}
-	$form_error_object->valide_form($_SESSION['session_commande'], $check_fields);
-	if(!empty($GLOBALS['site_parameters']['mode_transport'])) {
 		$q_check_country_to_zone = query('SELECT zone
 			FROM peel_pays
 			WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '"');
@@ -58,6 +55,7 @@ if (is_socolissimo_module_active() && !empty($_REQUEST) && !empty($_REQUEST['PUD
 			}
 		}
 	}
+	$form_error_object->valide_form($_SESSION['session_commande'], $check_fields);
 	$_SESSION['session_caddie']->set_paiement($_POST['payment_technical_code']);
 	$_SESSION['session_caddie']->update();
 
@@ -153,7 +151,26 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 		define("IN_STEP1", true);
 	}
 	include($GLOBALS['repertoire_modele'] . "/haut.php");
-	if (!defined('IN_STEP2')) {
+	if (!empty($GLOBALS['site_parameters']['short_order_process'])) {
+		// Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l'absence de paiement et de validation des CGV => Utile pour des demandes de devis
+		$utilisateur = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
+		$frm['societe1'] = $utilisateur['societe'];
+		$frm['nom1'] = $utilisateur['nom_famille'];
+		$frm['prenom1'] = $utilisateur['prenom'];
+		$frm['email1'] = $utilisateur['email'];
+		$frm['contact1'] = $utilisateur['telephone'];
+		$frm['adresse1'] = $utilisateur['adresse'];
+		$frm['code_postal1'] = $utilisateur['code_postal'];
+		$frm['ville1'] = $utilisateur['ville'];
+		$frm['pays1'] = get_country_name($utilisateur['pays']);
+		put_session_commande($frm);
+		$commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
+		send_mail_order_admin($commandeid);
+		/* Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire */
+		$_SESSION['session_caddie']->init();
+		unset($_SESSION['session_commande']);
+		affiche_contenu_html('end_process_order');
+	} elseif (!defined('IN_STEP2')) {
 		if (is_socolissimo_module_active() && !empty($_SESSION['session_commande']['is_socolissimo_order']) && PEEL_SOCOLISSIMO_IFRAME && empty($_REQUEST['PUDOFOID']) && empty($_SESSION['session_commande']['client2'])) {
 			// On a le module So Colissimo activé, et la commande est liée auprocess SoColissimo
 			// On est en mode iframe pour SO Colissimo

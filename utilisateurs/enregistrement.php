@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: enregistrement.php 37904 2013-08-27 21:19:26Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -62,7 +62,7 @@ if (!empty($frm)) {
 		if (empty($frm['mot_passe_confirm'])) {
 			$form_error_object->add('mot_passe_confirm', $GLOBALS['STR_ERR_PASSWORD_CONFIRM']);
 		}
-		if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_categories']) || count($frm['id_categories']) == 0) {
+		if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && (empty($frm['id_categories']) || count($frm['id_categories']) == 0)) {
 			$form_error_object->add('favorite_category_error', $GLOBALS['STR_ERR_FIRST_CHOICE']);
 		} elseif (empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_cat_1'])) {
 			$form_error_object->add('id_cat_1', $GLOBALS['STR_ERR_FIRST_CHOICE']);

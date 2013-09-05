@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: user_register_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
 *}<h1 class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form">
 	<p>{$STR_FIRST_REGISTER_TEXT}</p>
@@ -60,7 +60,7 @@
 				<input type="radio" name="civilite" value="Mlle"{if $civilite_mlle_issel} checked="checked"{/if} />{$STR_MLLE}
 				<input type="radio" name="civilite" value="Mme"{if $civilite_mme_issel} checked="checked"{/if} />{$STR_MME}
 				<input type="radio" name="civilite" value="M."{if $civilite_m_issel} checked="checked"{/if} />{$STR_M}
-			</span>
+			</span>{$gender_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="prenom">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -177,12 +177,14 @@
 		{if !empty($favorite_category)}
 			<span class="enregistrementgauche"><label for="favorite_category">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				{$favorite_category}
+				<select id="favorite_category" name="favorite_category">
+					{$favorite_category}
+				</select>
 			</span>
 			{$favorite_category_error}
 		{else}
 			<span class="enregistrementgauche">
-			<label for="id_cat_1">{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
+			<label for="id_cat_1">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
 				<select id="id_cat_1" name="id_cat_1">
 					{$favorite_category_1}

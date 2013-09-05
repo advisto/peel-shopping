@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: haut.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -174,6 +174,7 @@ $js_content_array[] = '
 })(jQuery);
 '.implode(' ', $js_array).'
 ';
+$tpl->assign('error_text_to_display', vb($GLOBALS['error_text_to_display']));
 $tpl->assign('css_files', array_unique($GLOBALS['css_files']));
 // L'ordre des fichiers js doit être respecté ensuite dans le template
 $tpl->assign('js_files', array_unique($GLOBALS['js_files']));

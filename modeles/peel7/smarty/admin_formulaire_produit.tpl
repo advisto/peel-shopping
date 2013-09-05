@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_formulaire_produit.tpl 38014 2013-09-04 16:24:45Z sdelaporte $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -120,17 +120,17 @@
 	{/foreach}
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_PRICE_IN} <b>{$site_symbole} {$ttc_ht}</b>{$STR_BEFORE_TWO_POINTS}:</td>
-			<td class="left"><input style="width:150px" type="number" name="prix" value="{$prix|str_form_value}" /></td>
+			<td class="left"><input style="width:150px" type="text" name="prix" value="{$prix|str_form_value}" /></td>
 		</tr>
 	{if $is_reseller_module_active}
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_RESELLER_PRICE_IN} <b>{$site_symbole} {$reseller_price_taxes_txt}</b>{$STR_BEFORE_TWO_POINTS}:</td>
-			<td class="left"><input style="width:150px" type="number" name="prix_revendeur" value="{$prix_revendeur|str_form_value}" /></td>
+			<td class="left"><input style="width:150px" type="text" name="prix_revendeur" value="{$prix_revendeur|str_form_value}" /></td>
 		</tr>
 	{/if}
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_PURCHASE_PRICE_IN} <b>{$site_symbole} {$STR_HT}</b>{$STR_BEFORE_TWO_POINTS}:</td>
-			<td class="left"><input style="width:150px" type="number" name="prix_achat" value="{$prix_achat|str_form_value}" /></td>
+			<td class="left"><input style="width:150px" type="text" name="prix_achat" value="{$prix_achat|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_VAT_PERCENTAGE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -159,15 +159,15 @@
 	{/if}
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_DISCOUNT_PERCENTAGE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="number" name="promotion" value="{$promotion|str_form_value}" style="width:150px" /> % {$STR_ADMIN_PRODUITS_DISCOUNT_PERCENTAGE_OVER_LISTED_PRICE}</td>
+			<td><input type="text" name="promotion" value="{$promotion|str_form_value}" style="width:150px" /> % {$STR_ADMIN_PRODUITS_DISCOUNT_PERCENTAGE_OVER_LISTED_PRICE}</td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_WEIGHT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="number" name="poids" value="{$poids|str_form_value}" style="width:150px" /> {$STR_ADMIN_PRODUITS_WEIGHT_UNIT}</td>
+			<td><input type="text" name="poids" value="{$poids|str_form_value}" style="width:150px" /> {$STR_ADMIN_PRODUITS_WEIGHT_UNIT}</td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_VOLUME}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="number" name="volume" value="{$volume|str_form_value}" style="width:150px" /> {$STR_ADMIN_PRODUITS_WEIGHT_UNIT}</td>
+			<td><input type="text" name="volume" value="{$volume|str_form_value}" style="width:150px" /> {$STR_ADMIN_PRODUITS_VOLUME}</td>
 		</tr>
 		<tr>
 			<td class="label">{$STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -468,7 +468,7 @@
 	{/if}
 	{if $is_gifts_module_active}
 		<tr><td class="bloc" colspan="2">{$STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER}</td></tr><tr>
-			<td colspan="2"><p>{$STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN}</p></td>
+			<td colspan="2"><div class="global_help">{$STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN}</div></td>
 		</tr>
 		<tr>
 			<td class="top label">{$STR_ADMIN_PRODUITS_IS_ON_GIFT}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -489,7 +489,7 @@
 				function verif_form() {
 					// Pas de catégorie sélectionnée, pourtant obligatoire.
 					if (document.getElementById('categories').selectedIndex < 0) {
-						alert("{$STR_ERR_CAT|filtre_javascript:true:false:true}");
+						alert("{$STR_ERR_CAT|filtre_javascript:true:false:true:false}");
 						return false;
 					} else {
 						return true;

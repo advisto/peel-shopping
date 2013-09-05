@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: configuration.inc.php 37993 2013-09-02 16:46:19Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -80,7 +80,7 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.0.3');
+define('PEEL_VERSION', '7.0.4');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -233,17 +233,17 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/format.php");
 
 // A partir de cette ligne vous n'avez a priori pas de variable à modifier.
 if (!IN_INSTALLATION) {
-	if (empty($_POST) && String::substr_count($GLOBALS['wwwroot'], '/') == 2) {
+	if (empty($_POST)) {
 		if (String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
-			// Dans le cas où un site est accesible via un domaine directement (pas via un répertoire) :
+			// Dans le cas où un site est accessible via un domaine directement
 			// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
-			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plsu complexes de configuration avec plusieurs chemins serveurs)
+			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plus complexes de configuration avec plusieurs chemins serveurs)
 			// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
-			redirect_and_die($GLOBALS['wwwroot'] . $_SERVER['REQUEST_URI'], true);
+			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
 		}
 		if (String::strpos(String::strtolower(rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), 'www.' . str_replace(array('http://', 'https://'), '', String::strtolower(rawurldecode($GLOBALS['wwwroot'])))) === 0) {
 			// Si on a www. en trop par rapport à ce qui est prévu dans wwwroot, on retire le www.
-			redirect_and_die($GLOBALS['wwwroot'] . $_SERVER['REQUEST_URI'], true);
+			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
 		}
 	}
 	if (empty($GLOBALS['installation_folder_active'])) {
@@ -364,10 +364,12 @@ if (((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($_GET['devise']
 	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre')), true);
 }
 if (IN_INSTALLATION >= 4) {
-	// Pour l'installation, la connexion à la BDD ne peut avoir lieu qu'après avoir chargé les sesssions
-	$GLOBALS['serveur_mysql'] = $_SESSION['session_install_serveur'];
-	$GLOBALS['utilisateur_mysql'] = $_SESSION['session_install_utilisateur'];
-	$GLOBALS['mot_de_passe_mysql'] = $_SESSION['session_install_motdepasse'];
+	if(!empty($_SESSION['session_install_utilisateur'])) {
+		// Pour l'installation, la connexion à la BDD ne peut avoir lieu qu'après avoir chargé les sesssions
+		$GLOBALS['serveur_mysql'] = $_SESSION['session_install_serveur'];
+		$GLOBALS['utilisateur_mysql'] = $_SESSION['session_install_utilisateur'];
+		$GLOBALS['mot_de_passe_mysql'] = $_SESSION['session_install_motdepasse'];
+	}
 	db_connect($GLOBALS['database_object'], false);
 	if (!$GLOBALS['database_object']) {
 		redirect_and_die("bdd.php?err=1");
@@ -477,7 +479,17 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 					} else {
 						$GLOBALS['lang_flags'][$lng] = $lng . '.gif';
 					}
-					$GLOBALS['lang_names'][$lng] = $lng;
+					if(file_exists($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$lng.'.php')) {
+						include($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$lng.'.php');
+					} else {
+						include($GLOBALS['dirroot'] . '/lib/lang/database_langues_en.php');
+					}
+					if(!empty($peel_langues['nom']) && !empty($peel_langues['nom'][$lng])) {
+						// Variable locale et non pas globale pour peel_langues car issue de @include($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$_SESSION['session_langue'].'.php');
+						$GLOBALS['lang_names'][$lng] = $peel_langues['nom'][$lng];
+					} else {
+						$GLOBALS['lang_names'][$lng] = $lng;
+					}
 					$GLOBALS['lang_etat'][$lng] = 1;
 					$GLOBALS['lang_url_rewriting'][$lng] = '';
 				}elseif (substr($file, 2) == '.php') {
@@ -569,7 +581,6 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 	$_SESSION['session_devise']['symbole'] = ' €';
 	$_SESSION['session_devise']['conversion'] = 1;
 	$_SESSION['session_devise']['symbole_place'] = 1;
-	require($GLOBALS['dirroot'] . "/lib/lang/admin_install_" . $_SESSION['session_langue'] . ".php");
 }
 if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
 	$modeles_dir = $GLOBALS['dirroot'] . "/modeles";

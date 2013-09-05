@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_en.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_name_en.php 37972 2013-08-30 14:35:54Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,15 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["name"] = array(
+  "signature_commercial" => "Commercial department signature",
+  "signature_comptabilite" => "Accounting department signature",
+  "signature_referencement" => "Referencing department signature",
+  "signature_informatique" => "Technical department signature",
+  "signature_communication" => "Communication department signature",
+  "signature_marketing" => "Marketing department signature",
+  "signature_direction" => "The direction signature",
+  "signature_externe" => "External department signature",
+  "signature_support" => "Support customers signature",
   "download_product" => "Download your order",
   "commande_parrain_avoir" => "Your credit following the order of your contact",
   "envoie_client_code_promo" => "In appreciation for your loyalty",
@@ -47,10 +56,11 @@ $peel_email_template["name"] = array(
   "parrainage" => "[PSEUDO] wishes to sponsor you",
   "email_alerte" => "Product in stock on [SITE]",
   "decremente_stock" => "Alert notification STOCK",
-  "signature" => "Automatic emails signature",
   "admin_login" => "Administrator login information",
+  "signature" => "Automatic emails signature",
   "cree_cheque_cadeau_client_type1" => "[FRIEND] offers you a voucher",
   "warn_admin_user_subscription" => "User registration warning",
+  "warn_admin_reve_subscription" => "User reseller warning",
   "email_retour_virement" => "Validation of your return number [RETURN_ID]",
   "email_retour_avoir" => "Validation of your return number [RETURN_ID]",
   "email_reste_avoir_remboursement" => "Repayment of your credit number [RETURN_ID]",
@@ -58,7 +68,8 @@ $peel_email_template["name"] = array(
   "email_retour_client" => "Your return request",
   "cron_order_payment_failure_alerts" => "Help for your payment",
   "cron_order_not_paid_alerts" => "Payment of your order",
-  "cron_update_contact_info" => "Confirmation of the validity of your information"
+  "cron_update_contact_info" => "Confirmation of the validity of your information",
+  "inscription_newsletter" => "Subscribe to the newsletter on [SITE]"
 );
 
 ?>

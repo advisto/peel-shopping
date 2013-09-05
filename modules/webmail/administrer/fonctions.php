@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: fonctions.php 38063 2013-09-05 13:00:38Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -133,11 +133,27 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	}
 	$tpl->assign('options', $tpl_options);
 	$tpl->assign('email_template_options', get_email_template_options('id', vn($frm['id_cat']), vb($frm['lang_mail'])));
+	
+	// Sélection de la signature par défaut (support_clientèle)
+	$q = query('SELECT id 
+		FROM peel_email_template
+		WHERE lang="' . nohtml_real_escape_string(!empty($frm['lang_mail'])? $frm['lang_mail']:$_SESSION['session_langue']) . '" AND technical_code = "signature_support"');
+	if($default_signature = fetch_assoc($q)) {
+		$default_signature_id = $default_signature['id'];	
+	} else {
+		// Il n'y a pas forcement de résultat pour la requête
+		$default_signature_id = null;
+	}
+	
+	$tpl->assign('signature_template_options', get_email_template_options('id', null, $frm['lang_mail'], $default_signature_id, true));
 	$langs_array = $GLOBALS['admin_lang_codes'];
 	foreach ($langs_array as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'issel' => !empty($frm['lang_mail']) && $frm['lang_mail'] == $lng
 			);
+		if(!empty($frm['lang_mail']) && $frm['lang_mail'] == $lng) {
+			$tpl->assign('selected_lang', $lng);
+		}
 	}
 	$tpl->assign('langs', $tpl_langs);
 	if (!empty($_GET['email_all_hash']) && !empty($_SESSION['count_from_send_email_all'][$_GET['email_all_hash']])) {
@@ -234,7 +250,8 @@ function send_mail_admin($frm)
 			return $tplEngine->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ERR_SENT_NO_EMAIL"]))->fetch();
 		}
 		$mail_subject = vb($frm['subject']);
-		$mail_content = vb($frm['message']);
+		// Utilisation de \r\n. Ce sera transformé si nécessaire en <br /> par la fonction send_email
+		$mail_content = vb($frm['message']) . "\r\n" . vb($frm['signature']);
 		$template_id = vn($frm['template']);
 		if (!empty($frm['email_from']) && !empty($GLOBALS['site_parameters'][$frm['email_from']])) {
 			// On envoie à partir de l'email choisi parmi ceux configurés dans la gestion du site
@@ -340,9 +357,9 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 		WHERE ac.action="SEND_EMAIL" ' . (!empty($sql_cond)? implode(' ', $sql_cond):'') . '
 		ORDER BY ac.date DESC';
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
-	$result = $Links->Query();
 	$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ADMINISTRATOR"], $GLOBALS['STR_DATE'], $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_EMAIL_SENT"], $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"], $GLOBALS["STR_ADMIN_USER"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$result = $Links->Query();
 	$output .= '
 		<form method="post" action=""' . get_current_url(false) . '"">
 			<table class="affiche_list_send_mail">
@@ -503,9 +520,9 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 		" . (!empty($sql_cond)?'WHERE ' . implode(' AND ', $sql_cond):'') . "
 		ORDER BY w.Date DESC, w.Heure DESC";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
-	$result = $Links->Query();
 	$HeaderTitlesArray = array(' ', $GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], $GLOBALS['STR_MESSAGE'], 'IP');
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$result = $Links->Query();
 
 	$output .= '
 <form method="post" action=""' . get_current_url(false) . '"">
@@ -646,7 +663,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 							<b>' . String::strtoupper(vb($message['titre'])) . '</b><br /><span style="color:' . ($message['read'] == 'NO'?'Red':($message['read'] == 'SEND'?'Green':'Black')) . '">[' . $read_title_array[$message['read']] . ']</span><br /><br /><a style="' . ($message['read'] == 'NO'?'font-size:13px; color:Red':($message['read'] == 'SEND'?'color:Green':'color:Black')) . '" href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_webmail=' . intval(vn($message['id'])) . '">' . sprintf(($message['read'] == 'SEND'?$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"]:$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"]), $message['email']) . '</a>
 						</td>
 						<td class="center" style="width:20%">
-							'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
+							'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
 						</td>
 						<td class="center" style="width:40%">
 							<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(trim($message['message'])) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1">Voir message(s) envoyé(s) par nous à ' . vb($message['email']) . '</a></p>':'') . '
@@ -730,9 +747,9 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 			WHERE id_user="' . intval(vn($id_utilisateur)) . '"
 			ORDER BY date DESC, heure DESC';
 		$Links_formulaire = new Multipage($sql_formulaire, 'affiche_liste_mail_annonce', '*');
-		$result_formulaire = $Links_formulaire->Query();
 		$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_MESSAGE'], $GLOBALS['STR_DATE'], $GLOBALS['STR_ADMIN_INFO']);
 		$Links_formulaire->HeaderTitlesArray = $HeaderTitlesArray;
+		$result_formulaire = $Links_formulaire->Query();
 
 		if (is_vitrine_module_active()) {
 			$sql_vitrine = 'SELECT uc.*
@@ -740,9 +757,9 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 				WHERE uc.user_id="' . intval(vn($id_utilisateur)) . '" AND uc.annonce_id = 0
 				ORDER BY uc.date DESC';
 			$Links_vitrine = new Multipage($sql_vitrine, 'affiche_liste_mail_vitrine', '*');
-			$result_vitrine = $Links_vitrine->Query();
 			$HeaderTitlesArray = array('Date', 'Message');
 			$Links_vitrine->HeaderTitlesArray = $HeaderTitlesArray;
+			$result_vitrine = $Links_vitrine->Query();
 
 			$output .= '
 				<table class="full_width">
@@ -781,9 +798,10 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 				WHERE uc.user_id = "' . intval(vn($id_utilisateur)) . '"
 				ORDER BY date DESC';
 			$Links_annonce = new Multipage($sql_annonce, 'affiche_liste_mail_annonce');
-			$result_annonce_query = $Links_annonce->Query();
 			$HeaderTitlesArray = array($GLOBALS["STR_DATE"], $GLOBALS["STR_MODULE_ANNONCES_AD"], $GLOBALS["STR_MESSAGE"]);
 			$Links_annonce->HeaderTitlesArray = $HeaderTitlesArray;
+			$Links_annonce->allow_get_sort = false;
+			$result_annonce_query = $Links_annonce->Query();
 			$output .= '
 				<table class="full_width">
 					<tr>
@@ -861,38 +879,6 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 	} else {
 		return false;
 	}
-}
-
-/**
- * Fonction affichant la liste d'emails sur le compte utilisateur
- *
- * @return
- */
-function get_email_template_options($option_id_nature = 'id', $category_id = null, $lang = null, $value_select = null)
-{
-	$output = '
-	<option value="">'.$GLOBALS['STR_CHOOSE'].'...</option>';
-	// Récupération des template email en fonction de la catégorie
-	$result = query('SELECT id, technical_code, name, lang
-		FROM peel_email_template
-		WHERE active = "TRUE"' . (!empty($category_id)?' AND id_cat="' . intval($category_id) . '"':'') . (!empty($lang)?' AND (lang="' . vb($lang) . '" OR lang="")':'') . '
-		ORDER BY technical_code, lang, name');
-	while ($row_template = fetch_assoc($result)) {
-		if ($option_id_nature == 'id') {
-			$this_value = vn($row_template['id']);
-			if (!empty($value_select)) {
-				$this_select = frmvalide(vn($value_select) == $this_value, 'selected="selected"');
-			}
-		} elseif ($option_id_nature == 'technical_code') {
-			$this_value = vb($row_template['technical_code']);
-			if (!empty($value_select)) {
-				$this_select = frmvalide(vb($value_select) == $this_value, 'selected="selected"');
-			}
-		}
-		$output .= '
-	<option value="' . $this_value . '" ' . (!empty($this_select)?$this_select:'') . '>' . '[' . String::strtoupper(vb($row_template['lang'])) . '] - ' . String::str_form_value(vb($row_template['name'])) . '</option>';
-	}
-	return $output;
 }
 
 ?>

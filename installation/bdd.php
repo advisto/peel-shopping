@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bdd.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: bdd.php 37925 2013-08-28 10:14:26Z gboussin $
 define('IN_INSTALLATION', 2);
 include("../configuration.inc.php");
 
@@ -26,10 +26,12 @@ if(vb($_GET['err']) == '1') {
 if(vb($_GET['err']) == 'empty') {
 	$confirm_message .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERR_FILL_IN_ALL']))->fetch();
 }
-include ($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$_SESSION['session_langue'].'.php');
+@include ($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$_SESSION['session_langue'].'.php');
 foreach($GLOBALS['available_languages'] as $this_lang){
 	if(!empty($peel_langues["nom"][$this_lang])) {
 		$GLOBALS['select_languages'][$this_lang] = $peel_langues["nom"][$this_lang];
+	} elseif(!empty($GLOBALS['lang_names'][$this_lang])) {
+		$GLOBALS['select_languages'][$this_lang] = $GLOBALS['lang_names'][$this_lang];
 	} else {
 		$GLOBALS['select_languages'][$this_lang] = $this_lang;
 	}

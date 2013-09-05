@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37098 2013-06-01 22:27:03Z gboussin $
+// $Id: fonctions.php 37970 2013-08-30 13:06:21Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -114,13 +114,13 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 		if($return_array_with_raw_information){
 			$disable_cache = true;
 		}
-		$sql_where = "WHERE etat='1' " . (!empty($position) && is_numeric($position)?" AND position='" . intval($position) . "'":"") . $sql_cond . " AND (lang='" . nohtml_real_escape_string($lang) . "' OR lang='')";
+		$sql_where = "WHERE etat='1' " . (!empty($position) && is_numeric($position) ?" AND position='" . intval($position) . "'":"") . $sql_cond . " AND (lang='" . nohtml_real_escape_string($lang) . "' OR lang='')";
 
 		if(!$disable_cache) {
 			$cache_id = md5($sql_where);
 			$this_cache_object = new Cache($cache_id, array('group' => 'affiche_banner_data'));
 		}
-		if (!empty($this_cache_object) && $this_cache_object->testTime(1800, true)) {
+		if (!empty($this_cache_object) && $this_cache_object->testTime(15*24*3600, true)) {
 			// On récupère le contenu du cache avec d'abord les id des bannières espacées par des virgules, et ensuite le contenu HTML
 			$temp = explode('{'.$cache_id.'}',$this_cache_object->get());
 			if(!empty($temp[1])){
@@ -163,7 +163,35 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 					} else {
 						$url = 'null';
 					}
-					$mobile_application_output_array[] = array("url_img" => $GLOBALS['repertoire_upload'] . '/' . $banner['image'], "url" => $url , "html"=> vb($banner['tag_html']), "position" => $banner_position);
+					if(strpos($banner['tag_html'],'[ADSENSE_MOBILE=') !== false) {
+						$tag_infos = explode(',', str_replace(array('[ADSENSE_MOBILE=', ']'), '', $banner['tag_html']));
+						$banner['tag_html'] = '';
+						$GLOBALS['google']['client']=$tag_infos[0];
+						$GLOBALS['google']['https']=read_global('HTTPS');
+						$GLOBALS['google']['ip']=read_global('REMOTE_ADDR');
+						$GLOBALS['google']['markup']='xhtml';
+						$GLOBALS['google']['output']='xhtml';
+						$GLOBALS['google']['ref']=read_global('HTTP_REFERER');
+						// $GLOBALS['google']['ref']=read_global('HTTP_HOST') . '/';
+						$GLOBALS['google']['slotname']=$tag_infos[1];
+						// $GLOBALS['google']['url']=read_global('HTTP_HOST') . read_global('REQUEST_URI');
+						$GLOBALS['google']['url']=read_global('HTTP_HOST') . '/';
+						// $GLOBALS['google']['useragent']=read_global('HTTP_USER_AGENT');
+						$GLOBALS['google']['useragent']='iPhone - Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en)';
+						$GLOBALS['google_dt'] = time();
+						google_set_screen_res();
+						google_set_muid();
+						google_set_via_and_accept();
+						$google_ad_handle = @fopen(google_get_ad_url(), 'r');
+						if ($google_ad_handle) {
+							while (!feof($google_ad_handle)) {
+								$banner['tag_html'] .= fread($google_ad_handle, 8192);
+							}
+							//trigger_error(String::convert_accents(print_r($banner['tag_html'], true).print_r(google_get_ad_url(), true)), E_USER_NOTICE);
+							fclose($google_ad_handle);
+						}
+					}
+					$mobile_application_output_array[] = array("url_img" => (!empty($banner['image'])?$GLOBALS['repertoire_upload'] . '/' . $banner['image']:''), "url" => $url , "html"=> vb($banner['tag_html']), "position" => $banner_position);
 				} elseif (!isset($last_rang) || $banner['rang'] != $last_rang) {
 					// On affiche une seule bannière par rang
 					// Nous récuperons la dimension de la bannière souhaitée et appliquons les limites initialiséss plus haut
@@ -192,7 +220,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							if (empty($height)){
 								$height = '300';
 							}
-							$banner_html = getFlashBannerHTML($GLOBALS['repertoire_upload'] . '/' . $banner['image'], $width, $height);
+							$banner_html = getFlashBannerHTML($GLOBALS['repertoire_upload'] . '/' . $banner['image'], $width, $height, true);
 						} else {
 							// Si la taille de la bannière est définie, alors nous appliquons le style de la banniere
 							$style_banner = '';
@@ -242,17 +270,20 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 					// Sécurité - Normalement on ne passe jamais ici car si $disable_cache === true, alors on n'a pas mis de flash volontairement.
 					$output = '';
 				}
-			} else {
-				if(String::strpos($output, 'googlesyndication')!==false && (String::strpos($output, 'x90')===false && String::strpos($output, 'x15')===false)) {
-					if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
-						// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
-						$output='';
-					} else {
-						$GLOBALS['google_pub_count']++;
-					}
-				}
-				$output = template_tags_replace($output, array(), false, 'html');
 			}
+			if(String::strpos($output, 'googlesyndication')!==false && (String::strpos($output, 'x90')===false && String::strpos($output, 'x15')===false)) {
+				if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
+					// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
+					$output='';
+				} else {
+					$GLOBALS['google_pub_count']++;
+				}
+			} elseif(String::strpos($output, 'googlesyndication')!==false && !empty($GLOBALS['disable_google_ads'])) {
+				// On ne doit pas afficher de bannière adsense x90 ou x15 si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure définis par la fonction is_adsense_compliant
+				$output='';
+			}
+			// Remplacement dans le code HTML de la bannière des tags par défaut tels que wwwroot
+			$output = template_tags_replace($output, array(), false, 'html');
 		}
 	}
 
@@ -331,4 +362,87 @@ function update_viewed_banners()
 	}
 }
 
+function read_global($var) {
+  return isset($_SERVER[$var]) ? $_SERVER[$var]: '';
+}
+
+function google_append_url(&$url, $param, $value) {
+  $url .= '&' . $param . '=' . urlencode($value);
+}
+
+function google_append_globals(&$url, $param) {
+  google_append_url($url, $param, $GLOBALS['google'][$param]);
+}
+
+function google_append_color(&$url, $param) {
+  global $google_dt;
+  $color_array = explode(',', $GLOBALS['google'][$param]);
+  google_append_url($url, $param,
+                    $color_array[$google_dt % count($color_array)]);
+}
+
+function google_set_screen_res() {
+  $screen_res = read_global('HTTP_UA_PIXELS');
+  if ($screen_res == '') {
+    $screen_res = read_global('HTTP_X_UP_DEVCAP_SCREENPIXELS');
+  }
+  if ($screen_res == '') {
+    $screen_res = read_global('HTTP_X_JPHONE_DISPLAY');
+  }
+  $res_array = preg_split('/[x,*]/', $screen_res);
+  if (count($res_array) == 2) {
+    $GLOBALS['google']['u_w']=$res_array[0];
+    $GLOBALS['google']['u_h']=$res_array[1];
+  }
+}
+
+function google_set_muid() {
+  $muid = read_global('HTTP_X_DCMGUID');
+  if ($muid != '') {
+    $GLOBALS['google']['muid']=$muid;
+     return;
+  }
+  $muid = read_global('HTTP_X_UP_SUBNO');
+  if ($muid != '') {
+    $GLOBALS['google']['muid']=$muid;
+     return;
+  }
+  $muid = read_global('HTTP_X_JPHONE_UID');
+  if ($muid != '') {
+    $GLOBALS['google']['muid']=$muid;
+     return;
+  }
+  $muid = read_global('HTTP_X_EM_UID');
+  if ($muid != '') {
+    $GLOBALS['google']['muid']=$muid;
+     return;
+  }
+}
+
+function google_set_via_and_accept() {
+  $ua = read_global('HTTP_USER_AGENT');
+  if ($ua == '') {
+    $GLOBALS['google']['via']=read_global('HTTP_VIA');
+    $GLOBALS['google']['accept']=read_global('HTTP_ACCEPT');
+  }
+}
+
+function google_get_ad_url() {
+  $google_ad_url = 'http://pagead2.googlesyndication.com/pagead/ads?';
+  google_append_url($google_ad_url, 'dt',
+                    round(1000 * array_sum(explode(' ', microtime()))));
+  foreach ($GLOBALS['google'] as $param => $value) {
+    if (strpos($param, 'color_') === 0) {
+      google_append_color($google_ad_url, $param);
+    } else if (strpos($param, 'url') === 0) {
+      $google_scheme = ($GLOBALS['google']['https'] == 'on')
+          ? 'https://' : 'http://';
+      google_append_url($google_ad_url, $param,
+                        $google_scheme . $GLOBALS['google'][$param]);
+    } else {
+      google_append_globals($google_ad_url, $param);
+    }
+  }
+  return $google_ad_url;
+}
 ?>

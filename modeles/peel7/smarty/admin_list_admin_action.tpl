@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_list_admin_action.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_list_admin_action.tpl 37904 2013-08-27 21:19:26Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	<table class="full_width" cellpadding="2" >
 		<tr>
@@ -101,11 +101,13 @@
 							<input name="form_delete[]" type="checkbox" value="{$res.id|str_form_value}" id="cbx_{$res.id}" />
 						</td>
 						<td class="center">
-							{$res.date}<br />
-							{$res.action}
+							{$res.date}
 						</td>
 						<td class="center">
 							<a href="{$res.modif_admin_href|escape:'html'}">{$res.admin}</a>
+						</td>
+						<td class="center">
+							{$res.action}
 						</td>
 						<td class="center">
 						{if $res.is_membre}
@@ -119,7 +121,7 @@
 							{if $res.action == 'SEND_EMAIL'}
 							<b>{$STR_ADMIN_ADMIN_ACTIONS_TEMPLATE}{$STR_BEFORE_TWO_POINTS}:</b> {$res.tpl_technical_code} - {$res.tpl_lang|upper}<br />
 							{else}
-							<b>{$STR_ADMIN_ADMIN_ACTIONS_DATA}{$STR_BEFORE_TWO_POINTS}:</b> {$res.data}<br />
+							{$res.data}<br />
 							{/if}
 						{/if}
 						{if !empty($res.raison)}

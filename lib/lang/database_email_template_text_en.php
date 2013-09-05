@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_en.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_text_en.php 37989 2013-09-02 13:37:16Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,24 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template['text'] = array(
+  "signature_commercial" => "
+Commercial department",
+  "signature_comptabilite" => "
+Accounting department",
+  "signature_referencement" => "
+Referencing department",
+  "signature_informatique" => "
+Technical department",
+  "signature_communication" => "
+Communication department",
+  "signature_marketing" => "
+Marketing department",
+  "signature_direction" => "
+The direction",
+  "signature_externe" => "
+External department",
+  "signature_support" => "
+Support customers",
   "download_product" => "Hello,
 
 Your order #[ORDER_ID] has been validated. We invite you to download your order from the link below:
@@ -309,6 +327,10 @@ The following user just opened an account:
 
 [link=\"[ADMIN_URL]\"]Administrate this user account[/link]
 ",
+  "warn_admin_reve_subscription" => "We inform you that the reseller [link=\"[ADMIN_URL]\"] [CIVILITE] [PRENOM] [NOM_FAMILLE] [/link] is registered on [SITE].
+
+This account is currently in status \"Reseller waiting \". This account is active but does benefit from reseller prices when you have spent in status \"reseller\"
+",
   "email_retour_virement" => "Hello,
 
 We have received your return number [RETURN_ID].
@@ -394,7 +416,12 @@ If you have forgotten your password, please go to: [WWWROOT]/utilisateurs/oubli_
 Please remember that having correct contact information for your ads is important for your prospects and your company''s image.
 Any wrong information may oblige us to close your account.
 
-For any further information, please contact us."
+For any further information, please contact us.",
+"inscription_newsletter" => "Hello,
+
+Thank you for signing up for the newsletter [SITE_NAME]. You will receive a weekly newsletter to [EMAIL].
+
+Soon on [WWWROOT]"
 );
 
 ?>

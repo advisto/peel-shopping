@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37263 2013-06-12 13:45:31Z gboussin $
+// $Id: fonctions.php 37949 2013-08-29 13:14:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -217,7 +217,11 @@ function calcul_nbarti_parrub($rub)
 function fprix($price, $display_currency = false, $currency_code_or_default = null, $convertion_needed_into_currency = true, $currency_rate = null, $display_iso_currency_code = false, $format = true, $format_separator = ',', $add_rdfa_properties = false, $round_even_if_no_format = false)
 {
 	static $currency_infos_by_code;
-	$prices_precision = 2;
+	if(isset($GLOBALS['site_parameters']['prices_precision'])) {
+		$prices_precision = $GLOBALS['site_parameters']['prices_precision'];
+	} else {
+		$prices_precision = 2;
+	}
 	if (!empty($currency_code_or_default)) {
 		if (!isset($currency_infos_by_code[$currency_code_or_default])) {
 			// Si on a récupéré une le symbole d'un devise alors on va chercher le taux de conversion associé
@@ -967,17 +971,18 @@ function set_paiement(&$frm)
 function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false)
 {
 	$output = '';
+	$where = 'WHERE 1';
 	$payment_complement_informations = '';
 
 	if (is_payment_by_product_module_active ()) {
-		$res_paiement = select_payment_by_product();
-	} else {
-		$sql_paiement = 'SELECT p.*
-			FROM peel_paiement p
-			WHERE 1
-			ORDER BY p.position';
-		$res_paiement = query($sql_paiement);
+		$where = payment_by_product_condition();
 	}
+	
+	$sql_paiement = 'SELECT p.*
+		FROM peel_paiement p
+		' . $where . '
+		ORDER BY p.position';
+	$res_paiement = query($sql_paiement);
 	$results_count = num_rows($res_paiement);
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
 		if((empty($tab_paiement['etat']) || empty($tab_paiement['nom_' . $_SESSION['session_langue']])) && (!$show_selected_even_if_not_available || $tab_paiement['technical_code'] != $selected_payment_technical_code)){
@@ -1116,6 +1121,7 @@ function necessite_identification()
 
 /**
  * On identifie la langue utilisée, et on redirige si cette langue n'est pas activée
+ * Pour qu'une langue xx soit autorisée, il est nécessaire d'avoir créé un fichier lib/lang/xx.php
  *
  * @param array $langs_array
  * @return Langue identifiée automatiquement pour l'utilisateur
@@ -1466,6 +1472,9 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 					include($GLOBALS['dirroot'] . "/lib/lang/admin_" . $this_lang . ".php");
 				}
 			}
+			if(IN_INSTALLATION || !empty($GLOBALS['installation_folder_active'])) {
+				include($GLOBALS['dirroot'] . "/lib/lang/admin_install_" . $this_lang . ".php");
+			}
 			if($load_modules_files && !empty($GLOBALS['modules_lang_directory_array'])){
 				// Les variables de langue dans les modules sont plus prioritaires que celles de lib/lang/
 				// => la surcharge des valeurs par défaut est possible
@@ -1793,6 +1802,8 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 
 	if ($type != 'save_cart') {
 		$sql .= ' GROUP BY p.id';
+	} else {
+		$sql .= ' GROUP BY save_cart_id';
 	}
 	if (!empty($additionnal_sql_having)) {
 		$sql .= ' ' . $additionnal_sql_having;
@@ -1904,7 +1915,7 @@ function is_user_bot()
 		$result = false;
 		$lower_user_agent = String::strtolower($_SERVER['HTTP_USER_AGENT']);
 		if(!empty($_SERVER['HTTP_USER_AGENT'])) {
-			foreach(array('mediapartners-google', 'googlebot', 'feedfetcher', 'slurp', 'bingbot', 'msnbot', 'voilabot', 'baiduspider', 'genieo', 'ahrefsbot', 'yandex', 'spider', 'robot', '/bot') as $this_name) {
+			foreach(array('mediapartners-google', 'googlebot', 'feedfetcher', 'slurp', 'bingbot', 'msnbot', 'voilabot', 'baiduspider', 'genieo', 'sindup', 'ahrefsbot', 'yandex', 'spider', 'robot', '/bot', 'crawler', 'netvibes') as $this_name) {
 				$result = $result || String::strpos($lower_user_agent, $this_name) !== false;
 			}
 		}
@@ -2097,6 +2108,9 @@ function get_upload_errors_text($file_infos, $file_kind = 'image')
  */
 function upload($field_name, $rename_file = true, $file_kind = null, $image_max_width = null, $image_max_height = null, $path = null, $new_file_name_without_extension = null, $default_return_value = null)
 {
+	if (empty($path)) {
+		$path = $GLOBALS['uploaddir'] . '/';
+	}
 	if (is_array($field_name)) {
 		// Compatibilité anciennes versions PEEL < 7.0
 		if (!empty($field_name)) {
@@ -2112,9 +2126,9 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 			// Fichier temporaire stocké dans le cache, on le déplace dans upload/
 			// Si il est déjà déplacé (car on revalide une seconde fois le formulaire, on s'arrange pour que ça marche aussi
 			if(file_exists($GLOBALS['dirroot'].$_REQUEST[$field_name])) {
-				rename($GLOBALS['dirroot'].$_REQUEST[$field_name], $GLOBALS['uploaddir'].'/'.basename($_REQUEST[$field_name]));
+				rename($GLOBALS['dirroot'].$_REQUEST[$field_name], $path . basename($_REQUEST[$field_name]));
 			}
-			if(file_exists($GLOBALS['uploaddir'].'/'.basename($_REQUEST[$field_name]))) {
+			if(file_exists($path . basename($_REQUEST[$field_name]))) {
 				$_REQUEST[$field_name] = basename($_REQUEST[$field_name]);
 			} else {
 				// Fichier inexistant ou échec du déplacement => on annule le souvenir de ce fichier
@@ -2133,9 +2147,6 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 	}
 	if (empty($error) && !empty($file_infos['name'])) {
 		// Upload OK
-		if (empty($path)) {
-			$path = $GLOBALS['uploaddir'] . '/';
-		}
 		// Extension du fichier téléchargé
 		$extension = String::strtolower(pathinfo($file_infos['name'], PATHINFO_EXTENSION));
 		if (empty($new_file_name_without_extension)) {
@@ -2164,7 +2175,7 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 				return $the_new_file_name;
 			}
 		} else {
-			$tpl->assign('message', $GLOBALS['STR_ERROR_SOMETHING_PICTURE'] . $GLOBALS['uploaddir']);
+			$tpl->assign('message', $GLOBALS['STR_ERROR_SOMETHING_PICTURE'] . ' ' .$path);
 			$error = $tpl->fetch();
 		}
 	}
@@ -2552,7 +2563,7 @@ function close_page_generation($html_page = true)
 		$var_cookie=10000000+(hexdec(session_id())%89999999); // rand(10000000,99999999);//random cookie number
 		$var_random=rand(1000000000,2147483647); //number under 2147483647
 		$var_today=time(); //today
-		$visitorId = '';
+		$visitorId = '0x' . substr (md5($_SERVER["REMOTE_ADDR"]),0,16);
 		$var_uservar='-'; //enter your own user defined variable
 		if(!empty($_COOKIE['__utma'])) {
 			$utma = $_COOKIE['__utma'];
@@ -2586,15 +2597,16 @@ function close_page_generation($html_page = true)
 		$utm_get[] = "utmhn=" . urlencode(get_site_domain(true));
 		$utm_get[] = "utmr=" . urlencode(vb($_SERVER['HTTP_REFERER']));
 		$utm_get[] = "utmp=" . urlencode($_SERVER['REQUEST_URI']);
-		$utm_get[] = "utmac=" . urlencode($GLOBALS['site_parameters']['google_analytics_site_code_for_nohtml_pages']);
+		$utm_get[] = "utmac=" . urlencode(str_replace('UA-', 'MO-', $GLOBALS['site_parameters']['google_analytics_site_code_for_nohtml_pages']));
 		$utm_get[] = "utmcc=__utma%3D" . urlencode($utma) . '%3B%2B__utmb%3D' . urlencode($utmb) . '%3B%2B__utmc%3D' . urlencode($utmc) . '%3B%2B__utmz%3D' . $utmz . '%3B%2B__utmv%3D' . urlencode($utmv) . "%3B";
 		$utm_get[] = "utmvid=" . urlencode(isset($_COOKIE['__utmvid'])?$_COOKIE['__utmvid']:$visitorId);
-		$utm_get[] = "utmip=" . urlencode(vb($_SERVER["REMOTE_ADDR"]));
+		$utm_get[] = "utmip=" . urlencode(substr(vb($_SERVER["REMOTE_ADDR"]), 0, strrpos(vb($_SERVER["REMOTE_ADDR"]), '.')).'.0');
 		$utm_get[] = "utmsr=" . urlencode(isset($_COOKIE['__utmsr'])?$_COOKIE['__utmsr']:'-');
 		$utm_get[] = "utmsc=" . urlencode(isset($_COOKIE['__utmsc'])?$_COOKIE['__utmsc']:'-');
 		$utm_get[] = "utmul=" . urlencode(isset($_COOKIE['__utmul'])?$_COOKIE['__utmul']:'-');
 		$utm_get[] = "utmje=" . urlencode(isset($_COOKIE['__utmje'])?$_COOKIE['__utmje']:'0');
 		$utm_get[] = "utmfl=" . urlencode(isset($_COOKIE['__utmfl'])?$_COOKIE['__utmfl']:'-');
+		$utm_get[] = "guid=on";
 		$utm_get[] = "utmdt=" . urlencode(isset($GLOBALS['meta_title'])?$GLOBALS['meta_title']:'-');
 		$handle = fopen ('http://www.google-analytics.com/__utm.gif?'.implode('&', $utm_get), "r");
 		$test = fgets($handle);
@@ -2624,9 +2636,10 @@ function optimize_Tables()
  * Suppression des anciens fichiers de cache
  *
  * @param integer $days_max
+ * @param string $filename_beginning
  * @return
  */
-function clean_Cache($days_max = 15)
+function clean_Cache($days_max = 15, $filename_beginning = null)
 {
 	if (a_priv('demo')) {
 		return false;
@@ -2636,7 +2649,7 @@ function clean_Cache($days_max = 15)
 	if ($handle = opendir($dir)) {
 		while ($file = readdir($handle)) {
 			// On supprime les anciens fichiers de plus de 15 jours
-			if ($file != '.' && $file != '..' && $file[0] != '.' && filemtime($dir . $file) < time() - (3600 * 24 * $days_max)) {
+			if ($file != '.' && $file != '..' && $file[0] != '.' && filemtime($dir . $file) <= time() - (3600 * 24 * $days_max) && (empty($filename_beginning) || strpos($file, $filename_beginning) === 0)) {
 				@unlink($dir . $file);
 				$i++;
 			}
@@ -2971,7 +2984,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 					$symlinks = array();
 					$docroot = $GLOBALS['dirroot'];
 					if(String::strlen($GLOBALS['apparent_folder'])>1) {
-						$this_wwwroot = substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1);
+						$this_wwwroot = String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1);
 					} else {
 						$this_wwwroot = $GLOBALS['wwwroot'];
 					}

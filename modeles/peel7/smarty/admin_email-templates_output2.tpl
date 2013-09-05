@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_output2.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_email-templates_output2.tpl 37972 2013-08-30 14:35:54Z sdelaporte $
 *}{$action_html}
 <center>
 	<form action="email-templates.php" method="post" name="form_ajout">
@@ -30,6 +30,14 @@
 							<td>{$categories_list}</td>
 						</tr>
 						<tr>
+						<tr>
+							<td width="100">{$STR_SIGNATURE}{$STR_BEFORE_TWO_POINTS}:</td>
+							<td>
+								<select name="default_signature_code">
+									{$signature_template_options}
+								</select>
+							</td>
+						</tr>
 							<td>{$STR_ADMIN_TECHNICAL_CODE}</td>
 							<td><input name="form_technical_code" size="60" type="text" id="technical_code" value="{$form_technical_code|str_form_value}" /></td>
 						</tr>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 37007 2013-05-28 22:07:04Z gboussin $
+// $Id: admin_en.php 38026 2013-09-04 23:30:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -26,7 +26,7 @@ $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CALLS_EXPLAIN"] = "The management of calls inc
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CALLS_LIST"] = "List of phone calls";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CONCERNED_ACCOUNT"] = "Account concerned";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATA"] = "Data / Reason / Note";
-$GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE"] = "Date / Action type ";
+$GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE"] = "Action type";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DELETE_ACTION"] = "Delete actions";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_MODERATOR"] = "Moderator";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_MSG_DELETED_OK"] = "The action of moderation has been deleted.";
@@ -191,6 +191,8 @@ $GLOBALS["STR_ADMIN_COMMANDER_ORDERED_PRODUCT"] = "Product ordered";
 $GLOBALS["STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST"] = "List of products ordered";
 $GLOBALS["STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT"] = "Number of orders found";
 $GLOBALS["STR_ADMIN_COMMANDER_PAYMENT_DATE"] = "Date of payment of the invoice (MM-DD-YYYY)";
+$GLOBALS["STR_ADMIN_COMMANDER_DELIVERY_DATE"] = "Date of delivery of the order (MM-DD-YYYY)";
+$GLOBALS["STR_ADMIN_COMMANDER_INVOICE_DATE"] = "Date of the invoice";
 $GLOBALS["STR_ADMIN_COMMANDER_PAYMENT_MEAN_EXPLAIN"] = "The payment methods are unavailable for this order, because the amount is zero";
 $GLOBALS["STR_ADMIN_COMMANDER_PRICES_MUST_BE_IN_ORDER_CURRENCY"] = "The prices must be quoted in the currency selected.";
 $GLOBALS["STR_ADMIN_COMMANDER_PRODUCT_LISTED_PRICE"] = "Price before discount";
@@ -255,7 +257,9 @@ $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "The color <b>%s</b> has been
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_DELETED"] = "The color <b>%s</b> has been deleted.";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_UPDATED"] = "Changes the color %s have been taken into account.";
 $GLOBALS["STR_ADMIN_COULEURS_NO_COLOR_FOUND"] = "No color stored in the database.";
+$GLOBALS["STR_ADMIN_CREATE_BILL_NUMBER_BEFORE"] = "Links to invoices will be available after the issue of an invoice number for this order.";
 $GLOBALS["STR_ADMIN_CREATION_DATE"] = "Creation date";
+$GLOBALS["STR_ADMIN_ORDER_CREATION_DATE"] = "Creation date of the order";
 $GLOBALS["STR_ADMIN_CUSTOM_ATTRIBUTES"] = "Custom Attributes";
 $GLOBALS["STR_ADMIN_CUSTOMIZE_APPEARANCE"] = "CUSTOM APPEARANCE";
 $GLOBALS["STR_ADMIN_DATE"] = "Date (MM-DD-YYYY)";
@@ -278,6 +282,7 @@ $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "DEMONSTRATION: Sending emails i
 $GLOBALS["STR_ADMIN_DEMO_WARNING"] = "DEMONSTRATION: You are logged in as Administrator demonstration, you can see the data but not change";
 $GLOBALS["STR_ADMIN_DESCRIPTION"] = "Description";
 $GLOBALS["STR_ADMIN_DETECTED"] = "Detected";
+$GLOBALS["STR_ADMIN_DIAPORAMA_MSG_DELETED_OK"] = "L'image du diaporama : <b>%s</b>a été effacé du serveur avec succès.";
 $GLOBALS["STR_ADMIN_DIRECTORY"] = "Folder";
 $GLOBALS["STR_ADMIN_DISCONNECT"] = "Logout";
 $GLOBALS["STR_ADMIN_DISCOUNT"] = "Save";
@@ -476,7 +481,7 @@ $GLOBALS["STR_ADMIN_LEGAL_TITLE"] = "Manage Legal information";
 $GLOBALS["STR_ADMIN_LESS_THAN"] = "Less than";
 $GLOBALS["STR_ADMIN_LEVEL"] = "Level";
 $GLOBALS["STR_ADMIN_LINK"] = "Link (http://www.exemple.com)";
-$GLOBALS["STR_ADMIN_LIVRAISONS_EXCEL_EXPORT"] = "Export order details in EXCEL format";
+$GLOBALS["STR_ADMIN_LIVRAISONS_EXCEL_EXPORT"] = "Export order details in CSV format";
 $GLOBALS["STR_ADMIN_LIVRAISONS_EXPLAIN"] = "The %s symbol shows the orders for which the account has been updated since the order creation";
 $GLOBALS["STR_ADMIN_LIVRAISONS_FORMAT_EXPLAIN"] = "The exported file is encoded as %s and values ​​are separated by tabs";
 $GLOBALS["STR_ADMIN_LIVRAISONS_NO_ORDER_FOUND"] = "No order found during this period for the requested status.";
@@ -505,6 +510,7 @@ $GLOBALS["STR_ADMIN_META_PAGE_TITLE"] = "Metas management";
 $GLOBALS["STR_ADMIN_META_TITLE_EXPLAIN"] = "Your title will appear in the top bar of your browser.";
 $GLOBALS["STR_ADMIN_META_TITLE"] = "Meta tag for SEO - Title of the page";
 $GLOBALS["STR_ADMIN_META_UPDATE"] = "Edit this meta";
+$GLOBALS["STR_ADMIN_MENU_GLOBAL_PROMOTION_PERCENT_BY_THRESHOLD"] = "Manage global promotions threshold";
 $GLOBALS["STR_ADMIN_MENU_HOME_BACK"] = "Administration Home";
 $GLOBALS["STR_ADMIN_MENU_HOME_FRONT"] = "Home Front-office";
 $GLOBALS["STR_ADMIN_MENU_HOME_TITLE"] = "Home Administration";
@@ -697,10 +703,14 @@ $GLOBALS["STR_ADMIN_NOTA_BENE"] = "NB";
 $GLOBALS["STR_ADMIN_NOTE"] = "Note";
 $GLOBALS["STR_ADMIN_OFFLINE"] = "Pending";
 $GLOBALS["STR_ADMIN_ONLINE"] = "Online";
+$GLOBALS['STR_ADMIN_ORDER_DUPLICATE'] = "Duplicate the order";
+$GLOBALS['STR_ADMIN_ORDER_DUPLICATE_WARNING'] = "When duplicating order, the stock is not taken into account.";
+$GLOBALS["STR_ADMIN_ORDER_DATE_FIELD_FILTER"] = "Date on which to apply the filter";
 $GLOBALS["STR_ADMIN_OUR_SELECTION"] = "Our Selection";
 $GLOBALS["STR_ADMIN_OVER_TITLE"] = "On title (displayed above the title in normal font)";
 $GLOBALS["STR_ADMIN_PAIEMENT_ADD_PAYMENT_MEAN"] = "Add a payment";
 $GLOBALS["STR_ADMIN_PAIEMENT_ALLOW_REIMBURSMENTS"] = "Allow for refunds";
+$GLOBALS["STR_ADMIN_PAIEMENT_DATE"] = "Payment date";
 $GLOBALS["STR_ADMIN_PAIEMENT_EXPLAIN"] = "PayPal and Moneybookers will actually be activated only if the email account is entered on the merchant <a href=\"{$GLOBALS['administrer_url']}/sites.php\"> page site configuration</a> ";
 $GLOBALS["STR_ADMIN_PAIEMENT_FORM_TITLE"] = "Add or edit a means of payment";
 $GLOBALS["STR_ADMIN_PAIEMENT_MSG_DELETED_OK"] = "The method of payment <b>%s</b> has been deleted.";
@@ -810,7 +820,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO"] = "Display the price per k
 $GLOBALS["STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER"] = "Display the price per liter";
 $GLOBALS["STR_ADMIN_PRODUITS_DOWNLOAD_PRODUCTS_HEADER"] = "PRODUCTS SOLD TO DOWNLOAD";
 $GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE_WARNING"] = "When duplicating products, the stock is not taken into account.";
-$GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE"] = "Duplicate product";
+$GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE"] = "Duplicate the product";
 $GLOBALS["STR_ADMIN_PRODUITS_EAN_CODE"] = "Code EAN 8/13, or UPC code";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY"] = "You must select at least one category for your product.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_NAME"] = "You must enter a product name.";
@@ -825,7 +835,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_FLASH_PRICE"] = "Flash Sale Price";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_SALE_EXPLAIN"] = "The price flash is activated if a positive price and an end date in the future are identified. Prices flash are not affected by promotions. The configuration will be considered only if the module is enabled in the configuration of the site.";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_SALE"] = "FLASH SALE";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_START_DATE"] = "Start selling flash";
-$GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN"] = "This feature allows us to offer this product to customers if they have the number of points defined in the field below.<br />This product is available to the user via the link \"Gifts catalog\" in section \"My Account\".";
+$GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN"] = "This feature allows us to offer this product to customers if they have the number of points defined in the field \"Points required to buy this gift\" below.<br />This product is available to the user via the link \"My gift list\" in section \"My Account\".";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER"] = "PRODUCT GIFT";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED"] = "Points required to buy this gift";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED_SHORT"] = "Points needed";
@@ -1355,7 +1365,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_DISPLAY_IMAGE_IN_PHOTODESK"] = "Show the image 
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_TITLE"] = "Edit a User Account";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_USER"] = "Edition of account #%s";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION"] = "Event description";
-$GLOBALS["STR_ADMIN_UTILISATEURS_EXCEL_EXPORT"] = "Export all users in Excel";
+$GLOBALS["STR_ADMIN_UTILISATEURS_EXCEL_EXPORT"] = "Export all users to Excel";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILER_EXPLAIN"] = "The filter on the user's language is compulsory for sending multiple";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILTER_MIN_SPENDING"] = "Min total revenues excl. VAT";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILTER_MAX_SPENDING"] = "Max total revenues excl. VAT";
@@ -1473,7 +1483,8 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "Individual";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "No information";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "OTHER INFORMATION";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "VAT rate";
-$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Export order details in EXCEL format with one line per product ordered";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Export order details in CSV format with one line per product ordered";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Export order details in CSV format with one line per order";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Note: Default rates are displayed in the currency in which the order was made.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "No order found during this period for the requested status.";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "SUMMARY OF SALES / PAYMENT STATUS";
@@ -1772,7 +1783,7 @@ $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_DELETED_OK"] = "The group has been deleted
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MAIN_TITLE"] = "Groups management";
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_CREATED_OK"] = "The group <b>%s</b> has been created.";
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_UPDATED_OK"] = "Changes to group %s has been taken into account.";
-$GLOBALS["STR_MODULE_KEKOLI_ADMIN_EXPORT_EXCEL"] = "Export order details in EXCEL format for KEKOLI";
+$GLOBALS["STR_MODULE_KEKOLI_ADMIN_EXPORT_EXCEL"] = "Export order details in CSV format for KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_RESULTS_TITLE"] = "Export Sales / KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_TITLE"] = "Export Sales / KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_ONLY_DELIVERED"] = "Delivery method other than \"Withdrawal at shop\"";

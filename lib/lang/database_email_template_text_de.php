@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_de.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_text_de.php 37972 2013-08-30 14:35:54Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,14 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["text"] = array(
+  "signature_commercial" => "",
+  "signature_comptabilite" => "",
+  "signature_referencement" => "",
+  "signature_informatique" => "",
+  "signature_communication" => "",
+  "signature_marketing" => "",
+  "signature_direction" => "",
+  "signature_externe" => "",
   "download_product" => "Guten Tag,
 
 Ihre Bestellung [ORDER_ID] ist bestätigt. Sie können sie über folgenden Link laden:
@@ -323,6 +331,7 @@ hat sich folgender Nutzer angemeldet:
 
 [link=\"[ADMIN_URL]\"]Verwalten Sie das Konto dieses Nutzers[/link]
 ",
+  "warn_admin_reve_subscription" => "",
   "email_retour_virement" => "Guten Tag,
 
 Ihre Rücksendung mit der Nummer [RETURN_ID] ist in bester Ordnung bei uns eingegangen.

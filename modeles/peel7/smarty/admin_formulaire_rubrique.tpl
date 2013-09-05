@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_rubrique.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_formulaire_rubrique.tpl 37993 2013-09-02 16:46:19Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -37,7 +37,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input size="1" type="text" name="position" value="{$position|html_entity_decode_if_needed|str_form_value}" /></td>
+			<td><input type="number" name="position" value="{$position|html_entity_decode_if_needed|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -50,6 +50,23 @@
 			<td>{$STR_ADMIN_TECHNICAL_CODE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" name="technical_code" value="{$technical_code|html_entity_decode_if_needed|str_form_value}" /></td>
 		</tr>
+		<tr>
+			<td>Image{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+			{if isset($image)}
+				{$STR_ADMIN_FILE_NAME}{$STR_BEFORE_TWO_POINTS}:{$image.name}&nbsp;
+				<a href="{$image.sup_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_IMAGE}</a>
+				<input type="hidden" name="image" value="{$image.name|str_form_value}" />
+			{else}
+				<input style="width: 100%" name="image" type="file" value="" />
+			{/if}
+			</td>
+		</tr>
+		{if isset($image)}
+		<tr>
+			<td colspan="2" class="center"><img src="{$image.src|escape:'html'}" /></td>
+		</tr>
+		{/if}
 	{foreach $langs as $l}
 		<tr><td  class="bloc" colspan="2">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
 		<tr>
@@ -82,23 +99,25 @@
 			<td colspan="2"><textarea name="meta_desc_{$l.lng}" style="width:100%" rows="3" cols="54">{$l.meta_desc|nl2br_if_needed|html_entity_decode_if_needed|strip_tags}</textarea></td>
 		</tr>
 	{/foreach}
+		{if isset($diapo)}
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
+			{foreach $diapo as $i => $f}
+				{if !empty($f)}
+				<tr>
+					<td class="label">{if $f.type == 'img'}{$STR_ADMIN_IMAGE} {else}{$STR_ADMIN_FILE} {/if}{$i}{$STR_BEFORE_TWO_POINTS}:</td>
+					<td>{include file="uploaded_file.tpl" f=$f STR_DELETE=$STR_ADMIN_DELETE_THIS_FILE}</td>
+				</tr>
+				{/if}
+			{/foreach}
 		<tr>
-			<td>Image{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-			{if isset($image)}
-				{$STR_ADMIN_FILE_NAME}{$STR_BEFORE_TWO_POINTS}:{$image.name}&nbsp;
-				<a href="{$image.sup_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_IMAGE}</a>
-				<input type="hidden" name="image" value="{$image.name|str_form_value}" />
-			{else}
-				<input style="width: 100%" name="image" type="file" value="" />
-			{/if}
-			</td>
+			<td colspan="2">&nbsp;</td>
 		</tr>
-		{if isset($image)}
-		<tr>
-			<td colspan="2" class="center"><img src="{$image.src|escape:'html'}" /></td>
-		</tr>
+			{for $i=1 to 5}
+				<tr>
+					<td class="label">{$STR_ADMIN_FILE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
+					<td><input style="width:250px" name="image{$i}" type="file" value="" /></td>
+				</tr>
+			{/for}
 		{/if}
 		<tr>
 			<td colspan="2" class="center"><p><input class="bouton" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>

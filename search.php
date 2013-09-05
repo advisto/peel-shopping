@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: search.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -52,6 +52,9 @@ if (is_annonce_module_active()) {
 // Si vous mettez plusieurs multipage sur la page, on ne doit pas considérer que chacun connait le nombre de pages
 // => dans ce cas, repassez à false avant le dernier Multipage et pas avant
 $GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
+if (!empty($GLOBALS['site_parameters']['twenga_ads_account_url'])) {
+	$GLOBALS['integrate_twenga_ads'] = true;
+}
 
 $output = '';
 $output_result = '';
@@ -107,6 +110,7 @@ $search_attribute_tab = array('marque' => array('table' => 'marques', 'join' => 
 	);
 
 $tpl_f = $GLOBALS['tplEngine']->createTemplate('search_form.tpl');
+$tpl_f->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 $tpl_f->assign('action', $GLOBALS['wwwroot']. '/search.php');
 $tpl_f->assign('value', $search);
 $tpl_f->assign('match', $match);
@@ -219,6 +223,7 @@ $bbcode = array('[tagsearch]', '[/tagsearch]');
 $replace_bbcode = array('<span class="search_tag">', '</span>');
 
 $tpl_r = $GLOBALS['tplEngine']->createTemplate('search_result.tpl');
+$tpl_r->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 $tpl_r->assign('STR_SEARCH_RESULT_PRODUCT', $GLOBALS['STR_SEARCH_RESULT_PRODUCT']);
 $tpl_r->assign('STR_SEARCH_NO_RESULT_PRODUCT', $GLOBALS['STR_SEARCH_NO_RESULT_PRODUCT']);
 $tpl_r->assign('STR_RESULT_SEARCH', $GLOBALS['STR_RESULT_SEARCH']);
@@ -477,6 +482,7 @@ $tpl->assign('search', $real_search);
 $tpl->assign('result', vb($result));
 $tpl->assign('page', vn($_GET['page']));
 $tpl->assign('STR_SEARCH_HELP', $GLOBALS['STR_SEARCH_HELP']);
+$tpl->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 $output .= $tpl->fetch();
 
 include($GLOBALS['repertoire_modele'] . '/haut.php');

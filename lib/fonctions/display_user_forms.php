@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: display_user_forms.php 37979 2013-08-30 16:31:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -89,7 +89,8 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('civilite_mlle_issel', (vb($frm['civilite']) == "Mlle"));
 		$tpl->assign('civilite_mme_issel', (vb($frm['civilite']) == "Mme"));
 		$tpl->assign('civilite_m_issel', (vb($frm['civilite']) == "M."));
-		$tpl->assign('pseudo', vb($frm['pseudo']));
+		$tpl->assign('gender_error', $form_error_object->text('civilite'));
+		$tpl->assign('pseudo', (isset($frm['pseudo'])?vb($frm['pseudo']):$_SESSION['session_utilisateur']['pseudo']));
 		$tpl->assign('pseudo_error', $form_error_object->text('pseudo'));
 		$tpl->assign('first_name', vb($frm['prenom']));
 		$tpl->assign('first_name_error', $form_error_object->text('prenom'));
@@ -282,6 +283,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('civilite_mlle_issel', (vb($frm['civilite']) == "Mlle"));
 		$tpl->assign('civilite_mme_issel', (vb($frm['civilite']) == "Mme"));
 		$tpl->assign('civilite_m_issel', (vb($frm['civilite']) == "M."));
+		$tpl->assign('gender_error', $form_error_object->text('civilite'));
 		$tpl->assign('first_name', vb($frm['prenom']));
 		$tpl->assign('first_name_error', $form_error_object->text('prenom'));
 		$tpl->assign('name', vb($frm['nom_famille']));
@@ -339,6 +341,7 @@ if (!function_exists('get_user_register_form')) {
 			$tpl->assign('STR_FIRST_CHOICE', $GLOBALS['STR_FIRST_CHOICE']);
 			$tpl->assign('STR_SECOND_CHOICE', $GLOBALS['STR_SECOND_CHOICE']);
 			$tpl->assign('STR_THIRD_CHOICE', $GLOBALS['STR_THIRD_CHOICE']);
+			$tpl->assign('STR_LANGUAGE_FOR_AUTOMATIC_EMAILS', $GLOBALS['STR_LANGUAGE_FOR_AUTOMATIC_EMAILS']);
 		}
 		$tpl_origin_options = array();
 		$i = 1;

@@ -902,7 +902,7 @@ div.enregistrement span.enregistrementdroite {
 	margin: 0px;
 	width: 300px;
 }
-.entryform input[type="text"], .entryform input[type="tel"], .entryform input[type="number"], .entryform input[type="email"], .entryform input[type="url"], .entryform input[type="password"], .entryform textarea{
+.entryform input[type="text"], .entryform input[type="tel"], .entryform input[type="number"], .entryform input[type="email"], .entryform input[type="url"], .entryform input[type="password"], .entryform input[type="search"], .entryform textarea{
 	width: 250px; 
 }
 .entryform fieldset {
@@ -2188,6 +2188,7 @@ td.tab_content a {
 	float: right;
 	margin-right: 10px;
 	text-align: right;
+	white-space: nowrap;
 }
 .price_in_product_title del {
 	margin-right: 10px;
@@ -2512,4 +2513,21 @@ span.fcb {
 }
 .description {
 	margin-bottom: 10px;
+}
+.notation_tab{
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.notation_tab td{
+	padding:0px;
+}
+.notation_tab td .bar{
+	height:30px;
+	background-color:#FFCC66;
+}
+.notation_tab .bar_contener{
+	background-color:#EEEECC;
+	border:1px solid #FFFFFF;
+	width:150px;
 }

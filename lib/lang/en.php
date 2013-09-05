@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 36971 2013-05-26 21:58:44Z gboussin $
+// $Id: en.php 37913 2013-08-27 22:55:59Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ $GLOBALS["STR_ALL"] = "All";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "User rating detail";
 $GLOBALS["STR_AND"] = "and";
 $GLOBALS["STR_AMOUNT"] = "Amount";
-$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Choose your 3 favorite categories among those proposed by {$GLOBALS['site']}. You can edit the choice of your categories anytime you want to";
+$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "I am interested in the following sectors";
 $GLOBALS["STR_ARTICLES"] = "articles";
 $GLOBALS["STR_ASC"] = "ascending";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "Associated or complementary products";
@@ -255,6 +255,7 @@ $GLOBALS["STR_ERREUR_TYPE"] = "We can currently not deliver this order in this d
 $GLOBALS["STR_ERROR_DECOD_PICTURE"] = "Error in the decoding of the image. Make sure the image is valid.";
 $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Something does not work: Check the directory permissions";
 $GLOBALS["STR_ETAPE_SUIVANTE"] = "Next step";
+$GLOBALS["STR_EXPEDITION_DATE"] = "Expedition date";
 $GLOBALS["STR_FAQ_TITLE"] = "FAQ";
 $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Facebook logout";
@@ -286,7 +287,7 @@ $GLOBALS["STR_FTP_GET_FAILED"] = "Get file content failed";
 $GLOBALS["STR_FWRITE_FAILED"] = "File writing failed";
 $GLOBALS["STR_GENDER"] = "Title";
 $GLOBALS["STR_GET_MY_POSITION"] = "Get my position (mandatory for this query)";
-$GLOBALS["STR_GET_PASSWORD"] = "Get a new password";
+$GLOBALS["STR_GET_PASSWORD"] = "Forgot password?";
 $GLOBALS["STR_GIFT_POINTS"] = "Gift points";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "General promotion";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Compressed file opening failed";
@@ -308,7 +309,7 @@ $GLOBALS["STR_INCLUDING"] = "including";
 $GLOBALS["STR_INFORMATIONS"] = "Informations";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Information non disponible";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Insert a Logo";
-$GLOBALS["STR_INSERT_EMAIL"] = "Enter your email address to initiate the procedure to renew your password.\r\n\r\nAfter completing this form, an email will be sent automatically.\r\nClick on the link in this email to access the password renewal form.";
+$GLOBALS["STR_INSERT_EMAIL"] = "Please fill in the e-mail address you used for registration and you will receive a new password by e-mail.";
 $GLOBALS["STR_INSERT_LOGIN_AND_PASSWORD"] = "Insert your login and password.";
 $GLOBALS["STR_INSERT_NEW_PASSWORD"] = "Please fill in the fields below";
 $GLOBALS["STR_INSERT"] = "Insert";
@@ -367,7 +368,7 @@ $GLOBALS["STR_MODIFY_CONTENT_CATEGORY"] = "[ADMINISTRATOR: EDIT THE CONTENT CATE
 $GLOBALS["STR_MODIFY_PRODUCT"] = "[ADMINISTRATOR: EDIT THE PRODUCT]";
 $GLOBALS["STR_MODIFY"] = "Modify";
 $GLOBALS["STR_MODULE_ACCOUNTING_OK"] = "OK";
-$GLOBALS["STR_MODULE_ARIANE_PANIER_SOMMARY"] = "Sommary";
+$GLOBALS["STR_MODULE_ARIANE_PANIER_SOMMARY"] = "Summary";
 $GLOBALS["STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS"] = "Options";
 $GLOBALS["STR_MODULE_AVIS_AVERAGE_RATING_GIVEN"] = "Global average rating for this product:";
 $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "No opinion has been posted about this product";
@@ -489,8 +490,8 @@ $GLOBALS["STR_MONTHS"] = "months";
 $GLOBALS["STR_MORE_DETAILS"] = "More details";
 $GLOBALS["STR_MORE"] = "Buy";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "The change of the parameters was carried out.";
-$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "You need to open an account to purchase from the {$GLOBALS['site']} webstore.\n<a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Click here to open an account.</a>";
-$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Log in to speed up your transaction.";
+$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Click here to open an account</a>.";
+$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Sign in.";
 $GLOBALS["STR_MSG_THANKS"] = "Thank you for your order. It has been successful.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
 $GLOBALS["STR_MY_GIFT_POINT"] = "My gift points";
@@ -572,7 +573,7 @@ $GLOBALS["STR_PARRAIN_TEXTE"] = "Sponsor your friends and make their profit from
 $GLOBALS["STR_PASS_PERDU"] = "Click here if you lost your password.";
 $GLOBALS["STR_PASSWORD_CHANGE"] = "The password was changeds.\n";
 $GLOBALS["STR_PASSWORD_CONFIRMATION"] = "Retype the password";
-$GLOBALS["STR_PASSWORD_EMAIL"] = "An email has been sent..\n\nPlease check your email and follow the instructions in this email\n\n";
+$GLOBALS["STR_PASSWORD_EMAIL"] = "<span class='bold'>E-mail has been sent</span>\n\nPlease follow the instructions in this email.\n\n";
 $GLOBALS["STR_PASSWORD_SECURITY"] = "Password security";
 $GLOBALS["STR_PASSWORD"] = "Password";
 $GLOBALS["STR_PAYMENT_FAILED"] = "Your transaction could not be validated or has been refused";

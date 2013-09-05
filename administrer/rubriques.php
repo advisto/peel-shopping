@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: rubriques.php 37983 2013-09-02 09:04:37Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -34,6 +34,11 @@ switch (vb($_REQUEST['mode'])) {
 	case "suppr" :
 		supprime_rubrique(vn($_REQUEST['id']));
 		affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+		break;
+
+	case "supprdiapo" :
+		supprime_fichier_diaporama(vn($_REQUEST['diapoid']), $_GET['file']);
+		affiche_formulaire_modif_rubrique(vn($_REQUEST['id']), $frm);
 		break;
 
 	case "supprfile" :
@@ -65,6 +70,10 @@ switch (vb($_REQUEST['mode'])) {
 		if (!$form_error_object->count()) {
 			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 			maj_rubrique(vn($_REQUEST['id']), $frm);
+
+			if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
+				upload_rubrique_diaporama(vn($_REQUEST['id']), $_FILES); // ajout des images du diaporama
+			}
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_UPDATED_OK'], vn($_REQUEST['id']))))->fetch();
 			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
 		} else {
@@ -123,8 +132,15 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 
 	while ($rub = fetch_assoc($qid)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_arbo_rubrique.tpl');
-		$tpl->assign('image', $rub['image']);
-		$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($rub['image'], 80, 50, 'fit'));
+		if (!empty($rub['image'])) {
+			if (pathinfo($rub['image'], PATHINFO_EXTENSION) == 'pdf') {
+				$this_thumb = thumbs('logoPDF_small.png', 80, 50, 'fit', $GLOBALS['dirroot'] .'/images/');
+			} else {
+				$this_thumb = thumbs($rub['image'], 80, 50, 'fit');
+			}
+		}
+		$tpl->assign('image', vb($rub['image']));
+		$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 		$tpl->assign('tr_rollover', tr_rollover($first_line, true));
 		$tpl->assign('ajout_rub_href', get_current_url(false) . '?mode=ajout&id=' . $rub['id']);
 		$tpl->assign('rubrique_src', $GLOBALS['administrer_url'] . '/images/rubrique-24.gif');
@@ -427,7 +443,47 @@ function affiche_formulaire_rubrique(&$frm)
 				'sup_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'
 				));
 	}
+	if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
+		$tpl_diapo = array();
+		$i = 1;
+		if (!empty($frm['id'])) {
+			$sql = query("SELECT `id`, `image`
+				FROM `peel_diaporama`
+				WHERE `id_rubrique`=" . intval($frm['id']));
+			while ($diaporama = fetch_assoc($sql)) {
+				if (!empty($diaporama["image"])) {
+					if (String::strtolower(String::substr($diaporama['image'], strrpos($diaporama['image'], ".") + 1)) == 'pdf') {
+						$type = 'pdf';
+					} else {
+						$type = 'img';
+					}
+					if(strpos($diaporama['image'], '/' . $GLOBALS['site_parameters']['cache_folder']) === 0) {
+						$this_url = $GLOBALS['wwwroot'] . $diaporama['image'];
+					} else {
+						$this_url = $GLOBALS['repertoire_upload'] . '/' . $diaporama['image'];
+					}
+					$tpl_diapo[$i] = array('name' => basename($diaporama['image']),
+						'form_value' => $diaporama['image'],
+						'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
+						'drop_href' => get_current_url(false) . '?mode=supprdiapo&id='.$frm['id'].'&diapoid=' . vb($diaporama['id']) . '&file=' . $diaporama['image'],
+						'url' => $this_url,
+						'type' => $type,
+						'pdf_logo_src' => $GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png'
+						);
+				} else {
+					$tpl_diapo[$i] = array();
+				}
+				$i++;
+			}
+		}
+		$tpl->assign('diapo', $tpl_diapo);
+	}
+
+
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
+	$tpl->assign('STR_ADMIN_FILE', $GLOBALS['STR_ADMIN_FILE']);
+	$tpl->assign('STR_ADMIN_IMAGE', $GLOBALS['STR_ADMIN_IMAGE']);
+	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_RUBRIQUES_UPDATE', $GLOBALS['STR_ADMIN_RUBRIQUES_UPDATE']);
 	$tpl->assign('STR_ADMIN_SEE_RESULT_IN_REAL', $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL']);
@@ -481,5 +537,37 @@ function supprime_fichier_rubrique($id, $file)
 	delete_uploaded_file_and_thumbs($file['image']);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_RUBRIQUES_MSG_DELETED_OK'], $file['image'])))->fetch();
 }
+/**
+ * supprime_fichier_diaporama()
+ *
+ * Supprime l'image de la rubrique spécificiée par $id
+ *
+ * @param mixed $id
+ * @param mixed $file
+ * @return
+ */
+function supprime_fichier_diaporama($id, $file)
+{
+	/* Charge les infos du produit. */
+	query("DELETE FROM `peel_diaporama` WHERE id = '" . intval($id) . "'");
+	delete_uploaded_file_and_thumbs($file);
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DIAPORAMA_MSG_DELETED_OK'], $file)))->fetch();
+}
 
+
+/*
+* ajoute des images du diaporama
+*@param mixed $id
+*/
+function upload_rubrique_diaporama($id_rubrique, $frm)
+{
+	for($i = 1;$i < 6;$i++) {
+		if (!empty($frm['image' . $i]['name'])) {
+			$img = upload('image' . $i, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image' . $i]));
+			if (!empty($img) && !empty($id_rubrique)) {
+				query('INSERT INTO `peel_diaporama` VALUES(null,' . $id_rubrique . ',"' . nohtml_real_escape_string($img) . '")');
+			}
+		}
+	}
+}
 ?>

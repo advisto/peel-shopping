@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: produit_details_html.tpl 37959 2013-08-29 16:26:51Z gboussin $
 #}
 <div typeof="Product">
 	{% if (global_error) %}
@@ -78,6 +78,7 @@
 							</ul>
 						{% endif %}
 						<br />
+						{% if display_share_tools_on_product_pages %}
 						<table id="product_link_to_modules_container">
 							<tr>
 								<td>
@@ -143,6 +144,7 @@
 								</td>
 							</tr>
 						</table>
+						{% endif %}
 						{{ javascript }}
 					</div>
 					<h1 class="titre_produit">{{ product_name }}</h1>
@@ -210,7 +212,7 @@
 			{% endfor %}
 		</tr>
 		<tr>
-			<td class="tab_content" colspan="{count(tabs) %}">
+			<td class="tab_content" colspan="{{ tabs|length }}">
 			{% for tab in tabs %}
 				<div style="display: {% if tab.is_current %}block{% else %}none{% endif %};" id="tab_{{ tab.index }}">{{ tab.content }}</div>
 			{% endfor %}

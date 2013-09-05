@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: user_change_params_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
 #}<h1 class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform" method="post" action="{{ action|escape('html') }}">
@@ -18,7 +18,7 @@
 	{% if (verified_account_info) %}{{ verified_account_info }}{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label>{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input class="champtexte" type="text" name="email" id="email" value="{{ email|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ email_error }}<br />{{ email_explain }}
+		<span class="enregistrementdroite"><input class="champtexte" type="email" name="email" id="email" value="{{ email|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ email_error }}<br />{{ email_explain }}
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label>{{ STR_GENDER }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -26,11 +26,11 @@
 			<input type="radio" name="civilite" value="Mlle"{% if civilite_mlle_issel %} checked="checked"{% endif %} />{{ STR_MLLE }}
 			<input type="radio" name="civilite" value="Mme"{% if civilite_mme_issel %} checked="checked"{% endif %} />{{ STR_MME }}
 			<input type="radio" name="civilite" value="M."{% if civilite_m_issel %} checked="checked"{% endif %} />{{ STR_M }}
-		</span>
+		</span>{{ gender_error }}
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="pseudo">{{ STR_PSEUDO }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite">{% if is_annonce_module_active %}<b>{{ pseudo|html_entity_decode_if_needed }}</b></span><input type="hidden" name="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" />{% else %}<input class="champtexte" type="text" name="pseudo" id="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} />{% endif %}</span>{{ pseudo_error }}
+		<span class="enregistrementdroite">{% if is_annonce_module_active %}<b>{{ pseudo|html_entity_decode_if_needed }}</b></span>{% else %}<input class="champtexte" type="text" name="pseudo" id="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} />{% endif %}</span>{{ pseudo_error }}
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="prenom">{{ STR_FIRST_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -47,7 +47,7 @@
 {% if is_destockplus_module_active or is_algomtl_module_active }}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="champtexte" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
+		<span class="enregistrementdroite"><input type="url" class="champtexte" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="type">{{ STR_YOU_ARE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -99,15 +99,15 @@
 {% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input class="champtexte" type="text" name="telephone" id="telephone" value="{{ telephone|str_form_value }}" {{ content_rows_info }} /></span>{{ telephone_error }}
+		<span class="enregistrementdroite"><input class="champtexte" type="tel" name="telephone" id="telephone" value="{{ telephone|str_form_value }}" {{ content_rows_info }} /></span>{{ telephone_error }}
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="portable">{{ STR_PORTABLE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input class="champtexte" type="text" name="portable" id="portable" value="{{ portable|str_form_value }}" {{ content_rows_info }} /></span>
+		<span class="enregistrementdroite"><input class="champtexte" type="tel" name="portable" id="portable" value="{{ portable|str_form_value }}" {{ content_rows_info }} /></span>
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="fax">{{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input class="champtexte" type="text" name="fax" id="fax" value="{{ fax|str_form_value }}" {{ content_rows_info }} /></span>
+		<span class="enregistrementdroite"><input class="champtexte" type="tel" name="fax" id="fax" value="{{ fax|str_form_value }}" {{ content_rows_info }} /></span>
 	</div>
 {% if (birthday_show) %}
 	<div class="enregistrement">
@@ -188,18 +188,26 @@
 {% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="origin">{{ STR_USER_ORIGIN }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} }}{{ origin_infos.error_text }}</span>
+		<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</span>
 	</div>
+	{% for f in specific_fields %}
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
+	</div>
+	{% endfor %}
+	{% if language_for_automatic_emails_options|length>1 %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label >{{ STR_LANGUAGE_FOR_AUTOMATIC_EMAILS }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select id="lang" name="lang">
 			{% for key in language_for_automatic_emails_options|keys %}
-				<option value="{{ key|str_form_value }}"{% if key=language_for_automatic_emails_selected %} selected="selected"{% endif %}>{{ options.key }}</option>
+				<option value="{{ key|str_form_value }}"{% if key==language_for_automatic_emails_selected %} selected="selected"{% endif %}>{{ language_for_automatic_emails_options.key }}</option>
 			{% endfor %}
 			</select>
 		</span>
 	</div>
+	{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="newsletter" value="1"{% if newsletter_issel %} checked="checked"{% endif %} />{{ STR_NEWSLETTER_YES }}</span>
 	</div>

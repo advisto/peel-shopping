@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 37007 2013-05-28 22:07:04Z gboussin $
+// $Id: Invoice.php 38007 2013-09-03 21:16:29Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 37007 2013-05-28 22:07:04Z gboussin $
+ * @version $Id: Invoice.php 38007 2013-09-03 21:16:29Z gboussin $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -800,7 +800,7 @@ class Invoice extends TCPDF {
 	 * Cette fonction génère :
 	 * - une facture pdf avec $code_facture
 	 * - ou une compilation de factures avec ($date_debut, $date_fin) ou ($id_debut et $id_fin) et $user_id.
-	 * Le paramètre $file_name defini la direction de sortie du pdf => Il faut mettre FALSE pour l'affichage à l'écran ou le chemin du dossier de stockage pour l'enregistrement.
+	 * Le paramètre $folder definit la direction de sortie du pdf => Il faut mettre false pour l'affichage à l'écran ou le chemin du dossier de stockage pour l'enregistrement.
 	 *
 	 * @param string $code_facture
 	 * @param string $date_debut
@@ -810,10 +810,10 @@ class Invoice extends TCPDF {
 	 * @param integer $user_id
 	 * @param integer $id_statut_paiement_filter
 	 * @param string $bill_mode
-	 * @param mixed $file_name
+	 * @param mixed $folder
 	 * @return
 	 */
-	function FillDocument($code_facture = null, $date_debut = null, $date_fin = null, $id_debut = null, $id_fin = null, $user_id = null, $id_statut_paiement_filter = null, $bill_mode = 'standard', $file_name = false)
+	function FillDocument($code_facture = null, $date_debut = null, $date_fin = null, $id_debut = null, $id_fin = null, $user_id = null, $id_statut_paiement_filter = null, $bill_mode = 'standard', $folder = false)
 	{
 		if (!is_micro_entreprise_module_active()) {
 			$column_sizes = array($GLOBALS['STR_PDF_REFERENCE'] => 22,
@@ -857,14 +857,18 @@ class Invoice extends TCPDF {
 		if (is_numeric($id_statut_paiement_filter)) {
 			$sql_cond_array[] = "id_statut_paiement = '" . intval($id_statut_paiement_filter) . "'";
 		}
+		if ($bill_mode == 'standard' || $bill_mode == 'facture') {
+			// Un numéro doit être obligatoirement renseigné dans la facture
+			$sql_cond_array[] = "numero != ''";
+		}
 		if (empty($sql_cond_array)) {
 			return null;
 		}
-		$sql = "SELECT *
+		$sql_bills = "SELECT *
 			FROM peel_commandes
 			WHERE " . implode(' AND ', $sql_cond_array) . '
 			ORDER BY o_timestamp ASC';
-		$qid_commande = query($sql);
+		$qid_commande = query($sql_bills);
 		$i = 0;
 		while ($commande = fetch_object($qid_commande)) {
 			$_SESSION['session_last_bill_viewed'] = $commande->id;
@@ -974,16 +978,26 @@ class Invoice extends TCPDF {
 			$this->addCadreTva();
 			$this->addTVAs($order_infos['tva_infos_array']);
 			$this->addInfoTVA($commande->total_tva, $bill_mode);
+			if(empty($file_name)) {
+				if(!empty($commande->a_timestamp) && substr($commande->a_timestamp, 0, 10) != '0000-00-00') {
+					$file_name = str_replace(array('/', ' '), '-', get_formatted_date($commande->a_timestamp)) . '_F' . $commande->id . '.pdf';
+				}else{
+					$file_name = 'F' . $commande->id . '.pdf';
+				}
+			} else {
+				// Plusieurs factures
+				$file_name = 'F-' . md5($sql) . '.pdf';
+			}
 			$i++;
 		}
 		if (!empty($i)) {
 			$this->lastPage();
-			if ($file_name === false) {
-				$this->Output();
+			if ($folder === false) {
+				$this->Output($file_name);
 			} else {
-				$this->Output($file_name, "F");
+				$this->Output($folder . $file_name, "F");
 			}
-			return true;
+			return $file_name;
 		} else {
 			return false;
 		}

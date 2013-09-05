@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_list_contact.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: commercialeAdmin_list_contact.tpl 37904 2013-08-27 21:19:26Z gboussin $
 *}<form method="get" action="{$action|escape:'html'}">
 	<table class="full_width">
 		<tr>
@@ -141,7 +141,7 @@
 					
 					<td class="center">
 						{$STR_ADMIN_NAME} : {$res.contact_name|escape:'html'}<br />{$STR_FIRST_NAME} : {$res.contact_firstname|escape:'html'}<br />
-						{$STR_LOGIN} : {$res.contact_login|escape:'html'}
+						{$STR_ADMIN_LOGIN} : {$res.contact_login|escape:'html'}
 						<br /><a href="{$res.edit_href|escape:'html'}">{$STR_MODULE_COMMERCIAL_ADMIN_EDIT_ACCOUNT} {$STR_NUMBER}{$res.contact_id}</a>
 					</td>
 					<td class="center">{$res.reason}</td>

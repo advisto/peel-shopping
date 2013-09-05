@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: Product.php 37981 2013-08-30 16:39:16Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 36927 2013-05-23 16:15:39Z gboussin $
+ * @version $Id: Product.php 37981 2013-08-30 16:39:16Z gboussin $
  * @access public
  */
 class Product {
@@ -137,77 +137,84 @@ class Product {
 			}
 		}
 		if (!$user_only_product_infos) {
-			$sql = "SELECT
-					 p.id
-					, p.technical_code
-					, p.reference
-					, p.ean_code
-					, p.nom_" . $_SESSION['session_langue'] . " AS name
-					, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
-					, p.description_" . $_SESSION['session_langue'] . " AS description
-					, p.meta_titre_" . $_SESSION['session_langue'] . " AS meta_titre
-					, p.meta_desc_" . $_SESSION['session_langue'] . " AS meta_desc
-					, p.meta_key_" . $_SESSION['session_langue'] . " AS meta_key
-					, p.on_estimate
-					, p.prix
-					, p.prix_achat
-					, p.prix_revendeur
-					, p.tva
-					, p.etat
-					, p.promotion
-					, p.points
-					, p.default_image
-					, p.image1
-					, p.image2
-					, p.image3
-					, p.image4
-					, p.image5
-					, p.image6
-					, p.image7
-					, p.image8
-					, p.image9
-					, p.image10
-					, p.zip
-                    , p.id_utilisateur
-					, p.youtube_code
-					, p.on_stock
-					, p.comments
-					, p.delai_stock
-					, p.etat_stock
-					, p.affiche_stock
-					, p.on_special
-					, p.on_gift
-					, p.on_gift_points
-					, p.on_rupture
-					, p.on_flash
-					, p.flash_start
-					, p.flash_end
-					, p.prix_flash
-					, p.extrait
-					, p.on_download
-					, p.on_check
-					, p.id_marque
-					, p.default_color_id
-					, p.display_price_by_weight
-					, p.id_ecotaxe
-					, p.display_tab
-					, p.poids
-					, p.volume
-					, p.position
-					, p.extra_link
-					, c.id AS categorie_id
-					, c.nom_" . $_SESSION['session_langue'] . " AS categorie";
-			if (is_conditionnement_module_active()) {
-				$sql .= ", p.conditionnement";
+			if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
+				$sql = "SELECT
+						 p.id
+						, p.technical_code
+						, p.reference
+						, p.ean_code
+						, p.nom_" . $_SESSION['session_langue'] . " AS name
+						, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
+						, p.description_" . $_SESSION['session_langue'] . " AS description
+						, p.meta_titre_" . $_SESSION['session_langue'] . " AS meta_titre
+						, p.meta_desc_" . $_SESSION['session_langue'] . " AS meta_desc
+						, p.meta_key_" . $_SESSION['session_langue'] . " AS meta_key
+						, p.on_estimate
+						, p.prix
+						, p.prix_achat
+						, p.prix_revendeur
+						, p.tva
+						, p.etat
+						, p.promotion
+						, p.points
+						, p.default_image
+						, p.image1
+						, p.image2
+						, p.image3
+						, p.image4
+						, p.image5
+						, p.image6
+						, p.image7
+						, p.image8
+						, p.image9
+						, p.image10
+						, p.zip
+						, p.id_utilisateur
+						, p.youtube_code
+						, p.on_stock
+						, p.comments
+						, p.delai_stock
+						, p.etat_stock
+						, p.affiche_stock
+						, p.on_special
+						, p.on_gift
+						, p.on_gift_points
+						, p.on_rupture
+						, p.on_flash
+						, p.flash_start
+						, p.flash_end
+						, p.prix_flash
+						, p.extrait
+						, p.on_download
+						, p.on_check
+						, p.id_marque
+						, p.default_color_id
+						, p.display_price_by_weight
+						, p.id_ecotaxe
+						, p.display_tab
+						, p.poids
+						, p.volume
+						, p.position
+						, p.extra_link
+						, c.id AS categorie_id
+						, c.nom_" . $_SESSION['session_langue'] . " AS categorie";
+				if (is_conditionnement_module_active()) {
+					$sql .= ", p.conditionnement";
+				}
+				$sql .= " FROM peel_produits p
+					INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
+					INNER JOIN peel_categories c ON c.id = pc.categorie_id
+					WHERE p.id = '" . intval($id) . "' " . ($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') . "
+					LIMIT 1";
+				// Le limit 1 est nécessaire car le produit peut être associé à plusieurs catégories => on ne récupère que la première catégorie trouvée
+				$query = query($sql);
+				$product_infos = fetch_assoc($query);
+			} else {
+				$ad_object = new Annonce($id);
+				$product_infos = $ad_object->get_product_infos_object();
+				unset($ad_object);
 			}
-			$sql .= " FROM peel_produits p
-				INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-				INNER JOIN peel_categories c ON c.id = pc.categorie_id
-				WHERE p.id = '" . intval($id) . "' " . ($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') . "
-				LIMIT 1";
-			// Le limit 1 est nécessaire car le produit peut être associé à plusieurs catégories => on ne récupère que la première catégorie trouvée
-			$query = query($sql);
-			if ($product_infos = fetch_assoc($query)) {
+			if (!empty($product_infos)) {
 				foreach($product_infos as $this_item => $this_value) {
 					if ($this->$this_item === null) {
 						$this->$this_item = $this_value;
@@ -329,22 +336,29 @@ class Product {
 	 */
 	function get_product_url($add_get_suffixe = false, $html_encode = false)
 	{
-		if (empty($this->categorie_id) || empty($this->categorie)) {
-			$query = query("SELECT p.nom_" . $_SESSION['session_langue'] . ", pc.categorie_id, r.nom_" . $_SESSION['session_langue'] . " AS categorie
-				FROM peel_produits p
-				INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-				INNER JOIN peel_categories r ON r.id = pc.categorie_id
-				WHERE p.id ='" . intval($this->id) . "'");
-			if ($prod = fetch_assoc($query)) {
-				$this->categorie_id = $prod['categorie_id'];
-				$this->categorie = $prod['categorie'];
-				$this->name = $prod['nom_' . $_SESSION['session_langue']];
+		if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
+			if (empty($this->categorie_id) || empty($this->categorie)) {
+				$query = query("SELECT p.nom_" . $_SESSION['session_langue'] . ", pc.categorie_id, r.nom_" . $_SESSION['session_langue'] . " AS categorie
+					FROM peel_produits p
+					INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
+					INNER JOIN peel_categories r ON r.id = pc.categorie_id
+					WHERE p.id ='" . intval($this->id) . "'");
+				if ($prod = fetch_assoc($query)) {
+					$this->categorie_id = $prod['categorie_id'];
+					$this->categorie = $prod['categorie'];
+					$this->name = $prod['nom_' . $_SESSION['session_langue']];
+				}
 			}
-		}
-		if (!empty($this->categorie_id)) {
-			return get_product_url($this->id, $this->name, $this->categorie_id, $this->categorie, $add_get_suffixe, $html_encode);
+			if (!empty($this->categorie_id)) {
+				return get_product_url($this->id, $this->name, $this->categorie_id, $this->categorie, $add_get_suffixe, $html_encode);
+			} else {
+				return null;
+			}
 		} else {
-			return null;
+			$ad_object = new Annonce($this->id);
+			$url = $ad_object->get_annonce_url();
+			unset($ad_object);
+			return $url;
 		}
 	}
 
@@ -583,44 +597,50 @@ class Product {
 	 */
 	function get_product_pictures($display_pdf = false, $force_id_couleur = null, $only_return_first_picture = false)
 	{
-		if (!empty($force_id_couleur)) {
-			$sql_condition = ' AND couleur_id="' . intval($force_id_couleur) . '"';
-		} elseif (!empty($this->configuration_color_id)) {
-			$sql_condition = ' AND couleur_id="' . intval($this->configuration_color_id) . '"';
+		if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
+			if (!empty($force_id_couleur)) {
+				$sql_condition = ' AND couleur_id="' . intval($force_id_couleur) . '"';
+			} elseif (!empty($this->configuration_color_id)) {
+				$sql_condition = ' AND couleur_id="' . intval($this->configuration_color_id) . '"';
+			} else {
+				// Si il n'y a pas de couleur choisie, on sélectionne la couleur par défaut choisie par l'admin
+				$sql_condition = ' AND couleur_id="' . intval($this->default_color_id) . '"';
+			}
+			$sql = 'SELECT *
+				FROM peel_produits_couleurs
+				WHERE produit_id="' . intval($this->id) . '" ' . $sql_condition . '
+				LIMIT 1';
+			$q = query($sql);
+			if ($result = fetch_assoc($q)) {
+				// On commence par l'image par défaut pour que ce soit le premier élément du tableau
+				if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
+					$product_images[] = $result['image' . $result['default_image']];
+				}
+				for($i = 1;$i <= 5;$i++) {
+					if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
+						$product_images[] = $result['image' . $i];
+					}
+				}
+			}
+			$sql = 'SELECT default_image, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10
+				FROM peel_produits
+				WHERE id=' . intval($this->id);
+			$q = query($sql);
+			if ($result = fetch_assoc($q)) {
+				// On commence par l'image par défaut pour que ce soit le premier élément du tableau
+				if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
+					$product_images[] = $result['image' . $result['default_image']];
+				}
+				for($i = 1;$i <= 10;$i++) {
+					if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
+						$product_images[] = $result['image' . $i];
+					}
+				}
+			}
 		} else {
-			// Si il n'y a pas de couleur choisie, on sélectionne la couleur par défaut choisie par l'admin
-			$sql_condition = ' AND couleur_id="' . intval($this->default_color_id) . '"';
-		}
-		$sql = 'SELECT *
-			FROM peel_produits_couleurs
-			WHERE produit_id="' . intval($this->id) . '" ' . $sql_condition . '
-			LIMIT 1';
-		$q = query($sql);
-		if ($result = fetch_assoc($q)) {
-			// On commence par l'image par défaut pour que ce soit le premier élément du tableau
-			if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
-				$product_images[] = $result['image' . $result['default_image']];
-			}
-			for($i = 1;$i <= 5;$i++) {
-				if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
-					$product_images[] = $result['image' . $i];
-				}
-			}
-		}
-		$sql = 'SELECT default_image, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10
-			FROM peel_produits
-			WHERE id=' . intval($this->id);
-		$q = query($sql);
-		if ($result = fetch_assoc($q)) {
-			// On commence par l'image par défaut pour que ce soit le premier élément du tableau
-			if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
-				$product_images[] = $result['image' . $result['default_image']];
-			}
-			for($i = 1;$i <= 10;$i++) {
-				if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
-					$product_images[] = $result['image' . $i];
-				}
-			}
+			$ad_object = new Annonce($this->id);
+			$product_images[] = $ad_object->get_annonce_picture();
+			unset($ad_object);
 		}
 		if (!empty($product_images)) {
 			return $product_images;

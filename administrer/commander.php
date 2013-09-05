@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 37236 2013-06-11 19:10:06Z sdelaporte $
+// $Id: commander.php 38039 2013-09-05 08:22:59Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -33,6 +33,7 @@ switch (vb($_REQUEST['mode'])) {
         if (is_duplicate_module_active() && isset($_GET['id'])) {
             include($fonctionsduplicate);
             duplicate_order(intval($_GET['id']));
+			unset($_GET['id']);
         }
 		affiche_liste_commandes_admin();
 		break;
@@ -63,9 +64,8 @@ switch (vb($_REQUEST['mode'])) {
 			if (empty($frm['id'])) {
 				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
 			} else {
-				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER'].' : ' . intval(vn($frm['id'])));
+				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'].' : ' . intval(vn($frm['id'])));
 			}
-
 		}
 		// Si il n'y a pas de POST, cela signifie que l'on veut uniquement afficher le détail de la commande a modifier.
 		if (empty($_POST)) {
@@ -76,7 +76,7 @@ switch (vb($_REQUEST['mode'])) {
 	case "affi" :
 		if (is_affiliate_module_active()) {
 			include($GLOBALS['dirroot'] . "/modules/affiliation/administrer/fonctions.php");
-			affiche_liste_commandes_affilies();
+			affiche_liste_commandes_admin(array('affi'=>1));
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_AFFILIATION_MODULE_MISSING']))->fetch();
 			affiche_liste_commandes_admin();
@@ -116,7 +116,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 	// Recherche de commande
 	case "recherche" :
-		affiche_recherche_commandes($_GET);
+		affiche_liste_commandes_admin($_GET);
 		break;
 	// commande de produit en téléchargement
 	case "download" :

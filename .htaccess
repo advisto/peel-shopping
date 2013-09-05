@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 36927 2013-05-23 16:15:39Z gboussin $
+# $Id: .htaccess 37904 2013-08-27 21:19:26Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -140,7 +140,10 @@ AddDefaultCharset UTF-8
 
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$
+	# Suivant les hébergements, il faut ou non laisser un / devant $2 dans la ligne suivante (bug apache sur certaines versions ?)
+	# => A changer si vous modifiez RewriteBase ci-dessus, ou si vous avez un problème d'URL rewriting sur les répertoires virtuels de langue
 	RewriteRule ^([a-z]{2})/(.*)$ /$2?langue=$1 [QSA,L]
+	# RewriteRule ^([a-z]{2})/(.*)$ $2?langue=$1 [QSA,L]
 
 	# Navigation sur RSS
 	RewriteRule ^rss\.php$ modules/rss/rss.php [QSA,L]

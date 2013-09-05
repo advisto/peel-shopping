@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: email-templates.php 37972 2013-08-30 14:35:54Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -53,18 +53,19 @@ if (!empty($_GET['id'])) {
 			$ok = false;
 		} else {
 			query('UPDATE peel_email_template SET
-					technical_code="' . trim(real_escape_string($_POST['form_technical_code'])) . '",
-					name="' . trim(real_escape_string($_POST['form_name'])) . '",
+					technical_code="' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
+					name="' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
 					subject="' . trim(real_escape_string($_POST['form_subject'])) . '",
 					text="' . real_escape_string($_POST['form_text']) . '",
-					id_cat="' . $_POST['form_id_cat'] . '",
-					lang="' . $_POST['form_lang'] . '"
-				WHERE id="' . $_GET['id'] . '"');
+					id_cat="' .intval($_POST['form_id_cat']) . '",
+					lang="' . trim(nohtml_real_escape_string($_POST['form_lang'])) . '",
+					default_signature_code ="' . nohtml_real_escape_string($_POST['default_signature_code']) . '"
+				WHERE id="' . intval($_GET['id']) . '"');
 			$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_MSG_UPDATED"]))->fetch();
 		}
 	}
 
-	$query_update = query('SELECT id, technical_code, name, subject, text, lang, id_cat
+	$query_update = query('SELECT id, technical_code, name, subject, text, lang, id_cat, default_signature_code
 		FROM peel_email_template
 		WHERE id="' . intval($_GET['id']) . '"
 		LIMIT 1');
@@ -95,6 +96,7 @@ if (!empty($_GET['id'])) {
 	$tpl->assign('name', (isset($_POST['form_name']) ? $_POST['form_name'] : vb($template_infos['name'])));
 	$tpl->assign('subject', vb($template_infos['subject']));
 	$tpl->assign('text', vb($template_infos['text']));
+	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, $template_infos['lang'], $template_infos['default_signature_code'], true));
 
 	$tpl_langs = array();
 	$langs_array = $GLOBALS['admin_lang_codes'];
@@ -120,6 +122,7 @@ if (!empty($_GET['id'])) {
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
+	$tpl->assign('STR_SIGNATURE', $GLOBALS['STR_SIGNATURE']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_WARNING', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_WARNING']);
 	$output .= $tpl->fetch();
 }
@@ -138,13 +141,14 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 		formErrorPush ($reportError, 'form_text');
 	}
 	if (!count($reportError)) {
-		query('INSERT INTO peel_email_template (technical_code, name, subject, text, lang, id_cat) VALUES(
-			"' . trim(real_escape_string($_POST['form_technical_code'])) . '",
-			"' . trim(real_escape_string($_POST['form_name'])) . '",
+		query('INSERT INTO peel_email_template (technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
+			"' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
+			"' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
 			"' . trim(real_escape_string($_POST['form_subject'])) . '",
 			"' . trim(real_escape_string($_POST['form_text'])) . '",
-			"' . trim(real_escape_string($_POST['form_lang'])) . '",
-			"' . $_POST['form_id_cat'] . '")');
+			"' . trim(nohtml_real_escape_string($_POST['form_lang'])) . '",
+			"' . intval($_POST['form_id_cat']) . '",
+			"' . trim(nohtml_real_escape_string($_POST['default_signature_code'])) . '")');
 		$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_MSG_TEMPLATE_CREATED']))->fetch();
 	}
 }
@@ -183,6 +187,7 @@ if (empty($_GET['id'])) {
 			'issel' => vb($_POST['form_lang']) == $lng
 			);
 	}
+	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, null, null, true));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('emailLinksExplanations', emailLinksExplanations());
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE']);
@@ -194,6 +199,7 @@ if (empty($_GET['id'])) {
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TEMPLATE_NAME']);
 	$tpl->assign('STR_ADMIN_SUBJECT', $GLOBALS['STR_ADMIN_SUBJECT']);
 	$tpl->assign('STR_TEXT', $GLOBALS['STR_TEXT']);
+	$tpl->assign('STR_SIGNATURE', $GLOBALS['STR_SIGNATURE']);
 	$tpl->assign('STR_ADMIN_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUAGE']);
 	
 	$output .= $tpl->fetch();

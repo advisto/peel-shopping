@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_nl.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_text_nl.php 37972 2013-08-30 14:35:54Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,15 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["text"] = array(
+  "signature_commercial" => "",
+  "signature_comptabilite" => "",
+  "signature_referencement" => "",
+  "signature_informatique" => "",
+  "signature_communication" => "",
+  "signature_marketing" => "",
+  "signature_direction" => "",
+  "signature_externe" => "",
+  "signature_support" => "",
   "download_product" => "Hallo,
 
 uw bestelling [ORDER_ID] is bevestigd, wij nodigen u uit om uw bestelling te downloaden via de volgende link: 
@@ -234,21 +243,21 @@ uw vriend [PRENOM] [NOM_FAMILLE] wil u een cadeau geven op de website [SITE].
 
 Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
 
-U ontvangt dan een korting van [PRIX] inclusief BTW op uw bestelling.⏎
+U ontvangt dan een korting van [PRIX] inclusief BTW op uw bestelling.
 ",
   "cree_cheque_cadeau_admin" => "Hallo,
 
-een promotiecode [CODE] via de module CADEAU is net aangemaakt op [SITE].⏎
+een promotiecode [CODE] via de module CADEAU is net aangemaakt op [SITE].
 ",
   "cree_cheque_cadeau_client_type2" => "Hallo,
 
 [SITE] biedt u een 30 dagen geldige tegoedbon voor een bedrag van [MONTANT].
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].⏎
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
 ",
   "cree_cheque_cadeau_client_admin" => "Hallo,
 
-de promotiecode [CODE] is aangemaakt via de module sponsoring [SITE].⏎
+de promotiecode [CODE] is aangemaakt via de module sponsoring [SITE].
 ",
   "gift_list" => "Hallo,
 
@@ -284,7 +293,7 @@ Uw wachtwoord : [MDP]⏎
 ",
   "email_alerte" => "Hallo,
 
-het volgende product [NOM_PRODUIT] is momenteel op voorraad. Klik hier om het te ontdekken : [URLPROD]⏎
+het volgende product [NOM_PRODUIT] is momenteel op voorraad. Klik hier om het te ontdekken : [URLPROD]
 ",
   "decremente_stock" => "Hallo,
 
@@ -310,7 +319,7 @@ Klantenservice
 
 [SITE] biedt u een 30 dagen geldige tegoedbon voor een bedrag van [PERCENT].
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].⏎
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
 ",
   "warn_admin_user_subscription" => "Op [DATE], 
 
@@ -322,8 +331,8 @@ heeft de volgende gebruiker zich geregistreerd:
 [TELEPHONE]
 [PRIV]
 
-[link=\"[ADMIN_URL]\"]Beheer deze gebruiker [/link]⏎
-",
+[link=\"[ADMIN_URL]\"]Beheer deze gebruiker [/link]",
+  "warn_admin_reve_subscription" => "",
   "email_retour_virement" => "Hallo,
 
 we hebben uw retournummer ontvangen [RETURN_ID].

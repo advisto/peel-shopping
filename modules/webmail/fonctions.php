@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,57 +24,54 @@ if (!defined('IN_PEEL')) {
 function getFAI($ip)
 {
 	$host = @gethostbyaddr($ip);
-	$tmp = explode(".", $host);
-	$serv = '(www.' . ((!empty($tmp[sizeof($tmp) - 2]))?($tmp[sizeof($tmp) - 2] . '.'):'') . $tmp[sizeof($tmp) - 1] . ')';
 	if (String::strpos("aol", $host)) {
 		$fai = "AOL";
 	} elseif (String::strpos("bluewin", $host)) {
-		$fai = "Bluewin $serv";
+		$fai = "Bluewin";
 	} elseif (String::strpos("cablecom", $host)) {
-		$fai = "Cablecom - swissonline $serv";
+		$fai = "Cablecom - swissonline";
 	} elseif (String::strpos("hispeed", $host)) {
-		$fai = "Cablecom - swissonline $serv";
+		$fai = "Cablecom - swissonline";
 	} elseif (String::strpos("coltfrance", $host)) {
-		$fai = "COLT France $serv";
+		$fai = "COLT France";
 	} elseif (String::strpos("club-internet", $host)) {
-		$fai = "Club Internet $serv";
+		$fai = "Club Internet";
 	} elseif (String::strpos("proxad", $host)) {
-		$fai = "Free $serv";
+		$fai = "Free";
 	} elseif (String::strpos("intergga", $host)) {
-		$fai = "InterGGA $serv";
+		$fai = "InterGGA";
 	} elseif (String::strpos("noos", $host)) {
-		$fai = "Noos $serv";
+		$fai = "Noos";
 	} elseif (String::strpos("securepop", $host)) {
-		$fai = "SecurePoP $serv";
+		$fai = "SecurePoP";
 	} elseif (String::strpos("adslplus", $host)) {
-		$fai = "Sunrise $serv";
+		$fai = "Sunrise";
 	} elseif (String::strpos("freesurf", $host)) {
-		$fai = "Sunrise $serv";
+		$fai = "Sunrise";
 	} elseif (String::strpos("tiscali.fr", $host)) {
-		$fai = "Tiscali France $serv";
+		$fai = "Tiscali France";
 	} elseif (String::strpos("tiscali.ch", $host)) {
-		$fai = "Tiscali Suisse $serv";
+		$fai = "Tiscali Suisse";
 	} elseif (String::strpos("tele2.fr", $host)) {
-		$fai = "Tele2 France $serv";
+		$fai = "Tele2 France";
 	} elseif (String::strpos("videotron", $host)) {
-		$fai = "Vidéotron $serv";
+		$fai = "Vidéotron";
 	} elseif (String::strpos("sympatico", $host)) {
-		$fai = "Sympatico $serv";
+		$fai = "Sympatico";
 	} elseif (String::strpos("vtx", $host)) {
-		$fai = "VTX $serv";
+		$fai = "VTX";
 	} elseif (String::strpos("wanadoo", $host)) {
-		$fai = "Wanadoo $serv";
+		$fai = "Wanadoo";
+	} elseif (String::strpos("proxad", $host)) {
+		$fai = "Free";
+	}
+	if(!empty($fai)) {
+		return $host . ' (' . $fai.')';
 	} else {
-		$fai = 'www.' . ((!empty($tmp[sizeof($tmp) - 2]))?($tmp[sizeof($tmp) - 2] . '.'):'') . $tmp[sizeof($tmp) - 1];
+		return $host;
 	}
-	if ($fai == "www.proxad.net") {
-		$fai = "www.free.fr";
-	}
-	if ($fai == "") {
-		$fai = "Identification ";
-	}
-	return $fai;
 }
+	
 
 /**
  * Cette fonction permet de sauvegarder les emails du formulaire de contact du site en basse de donnée dans la table webmail
@@ -85,10 +82,10 @@ function getFAI($ip)
 function save_mail_db($frm)
 {
 	$ip = ipGet();
-	$Ipclient = "'" . getFAI($ip) . " / IP : " . $ip . " / " . date('d M Y H:i:s') . "'";
+	$Ipclient = $ip . " / " . getFAI($ip);
 	$sql = 'INSERT INTO peel_webmail SET
 		Titre = "' . nohtml_real_escape_string(vb($frm['sujet'])) . '"
-		, Message = "' . nohtml_real_escape_string(str_replace(array("\r\n", "\n", "\r"), "<br/>", vb($frm['texte']))) . '"
+		, Message = "' . nohtml_real_escape_string(vb($frm['texte']) . "\n" . vb($frm['adresse']) . ' ' . vb($frm['code_postal']) . ' ' . vb($frm['ville']) . ' ' . vb($frm['pays'])) . '"
 		, Nom = "' . nohtml_real_escape_string(vb($frm['nom']) . (!empty($frm['societe']) ? ' / ' . vb($frm['societe']) : '')) . '"
 		, Prenom = "' . nohtml_real_escape_string(vb($frm['prenom'])) . '"
 		, telephone = "' . nohtml_real_escape_string(vb($frm['telephone'])) . '"

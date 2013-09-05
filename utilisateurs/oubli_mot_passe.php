@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: oubli_mot_passe.php 37904 2013-08-27 21:19:26Z gboussin $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
@@ -61,7 +61,7 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
 		} elseif ((num_rows(query("SELECT 1
 				FROM peel_utilisateurs
-				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "'")) == 0)) {
+				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "' AND priv!='newsletter' ")) == 0)) {
 			$form_error_object->add('email', $GLOBALS['STR_ERR_NOEMAIL']);
 		}
 	}

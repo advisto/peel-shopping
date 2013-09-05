@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36966 2013-05-26 17:10:43Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -35,6 +35,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 	if (empty($image)) {
 		return false;
 	}
+	$GLOBALS['error_text_to_display'] = '';
 	if ($path === null) {
 		if(strpos($image, '://') !== false || strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
 			$path = $GLOBALS['uploaddir'];
@@ -64,7 +65,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 		// L'image est en local et pourtant il n'est pas possible d'avoir sa date de mise à jour
 		// Donc c'est a priori qu'elle n'existe pas, et on l'a vérifié tout de même
 		if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE'] .' '. $imageFile))->fetch();
+			$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE'] .' '. $imageFile))->fetch();
 		}
 		return false;
 	}
@@ -103,7 +104,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 			if(empty($imgInfo)){
 				// L'image ne semble pas valide
 				if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
-					echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
+					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
 				}
 				$skip_creation = true;
 			}
@@ -167,7 +168,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 					break;
 				default:
 					if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
-						echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
+						$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
 					}
 					return false;
 			}
@@ -190,7 +191,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 			}
 			if (empty($res)) {
 				if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
-					echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
+					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
 				}
 				if(empty($cachedThumbFile_filemtime)){
 					return false;

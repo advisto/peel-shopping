@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: es.php 37913 2013-08-27 22:55:59Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -38,13 +38,13 @@ $GLOBALS["STR_AFFILIATE_ACCOUNT"] = "Mi espacio de afiliado";
 $GLOBALS["STR_AFFILIATE_STATUT"] = "Estatus";
 $GLOBALS["STR_AFFILIATE"] = "Programa de afiliación";
 $GLOBALS["STR_AFFILIATION"] = "Afiliación";
-$GLOBALS["STR_AJOUT_PENSE_BETE"] = "Agregar al recordatorio";
+$GLOBALS["STR_AJOUT_PENSE_BETE"] = "Añadir al carrito";
 $GLOBALS["STR_ALL_BRAND"] = "Todas las marcas";
 $GLOBALS["STR_ALL"] = "Todos";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "Detalle de la nota del vendedor";
 $GLOBALS["STR_AND"] = "y";
 $GLOBALS["STR_AMOUNT"] = "Importe";
-$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Elige tu favorito entre las tres categorías propuestas categorías Siempre se puede cambiar su elección de la clase preferente.";
+$GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Estoy interesado en las siguientes categorías :";
 $GLOBALS["STR_ARTICLES"] = "artículos";
 $GLOBALS["STR_ASC"] = "creciente";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "Los clientes han aprecioda este articulo tambien han comprado ...";
@@ -255,6 +255,7 @@ $GLOBALS["STR_ERREUR_TYPE"] = "No podemos entregar esta orden en la zona de entr
 $GLOBALS["STR_ERROR_DECOD_PICTURE"] = "Error en la decodificación de la imagen. Asegúrese de que la imagen es válida.";
 $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Algo no funciona: Compruebe los permisos del directorio";
 $GLOBALS["STR_ETAPE_SUIVANTE"] = "Siguiente paso";
+$GLOBALS["STR_EXPEDITION_DATE"] = "Fecha de envío";
 $GLOBALS["STR_FAQ_TITLE"] = "Preguntas frecuentes";
 $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Desconexión de Facebook";
@@ -401,7 +402,7 @@ $GLOBALS["STR_MODULE_MULTISITE_PARTENAIRES"] = "Partners";
 $GLOBALS["STR_MODULE_PAGES-ORIENTALES_MSG_ERR_CUSTOMER"] = "No me has dicho tu nombre.\n";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_ERR_CATEGORY_PARTNER"] = "Ninguna categoría de socio disponibles.";
 $GLOBALS["STR_MODULE_PAYBOX_DEVISE"] = "Moneda";
-$GLOBALS["STR_MODULE_PAYPAL_BOUTON"] = "https://www.paypal.com/fr_FR/i/btn/x-click-but23.gif";
+$GLOBALS["STR_MODULE_PAYPAL_BOUTON"] = "https://www.paypal.com/es_ES/i/btn/x-click-but23.gif";
 $GLOBALS["STR_MODULE_PAYPAL_BUTTON_ALT"] = "Haga los pagos con PayPal es rápido, gratis y seguro!";
 $GLOBALS["STR_MODULE_PENSEBETE_HAS_BEEN_ADD_REMINDER"] = "ha sido añadido a su recuerdo";
 $GLOBALS["STR_MODULE_PENSEBETE_NO_PRODUCT_IN_REMINDER"] = "Su recuerdo no tiene ningún productos.";
@@ -492,7 +493,7 @@ $GLOBALS["STR_MONTHS"] = "meses";
 $GLOBALS["STR_MORE_DETAILS"] = "más detalles";
 $GLOBALS["STR_MORE"] = "Comprar";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "El cambio de los parámetros ha sido realizado.";
-$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "Debe abrir una cuenta para comprar {$GLOBALS['site']}.\n<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/mi-espacio/inscripcion.php\">Para abrir una cuenta, clic aquí</a>";
+$GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/mi-espacio/inscripcion.php\">Para abrir una cuenta, clic aquí</a>.";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Iniciar sesión para ganar tiempo.";
 $GLOBALS["STR_MSG_THANKS"] = "Gracias por su confianza, su pedido ha sido registrado con éxito. ";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;";

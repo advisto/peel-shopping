@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 37040 2013-05-30 13:17:16Z gboussin $
+// $Id: produits.php 37993 2013-09-02 16:46:19Z gboussin $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -18,10 +18,10 @@ necessite_identification();
 necessite_priv("admin_products");
 
 if (is_stock_advanced_module_active ()) {
-	include($fonctionsstock_advanced_admin);
+	include_once($GLOBALS['fonctionsstock_advanced_admin']);
 }
 if (is_payment_by_product_module_active ()) {
-	include($fonctionspaymentbyproduct_admin);
+	include($GLOBALS['fonctionspaymentbyproduct_admin']);
 }
 $DOC_TITLE = $GLOBALS['STR_ADMIN_PRODUITS_TITLE'];
 define('ON_PRODUCT_PAGE', true);
@@ -57,7 +57,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "ajout" :
-		$output .= affiche_formulaire_ajout_produit(vn($_REQUEST['categorie_id']), $frm, $form_error_object);
+		$output .= affiche_formulaire_ajout_produit(vn($_REQUEST['categories']), $frm, $form_error_object);
 		break;
 
 	case "stock" :
@@ -131,12 +131,12 @@ switch (vb($_REQUEST['mode'])) {
 			} else {
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_ERR_FORM_INCOMPLETE']))->fetch();
 			}
-			if (!isset($categorie_id)) {
+			if (!isset($frm['categories'])) {
 				$categorie_id = 0;
 			} else {
 				$categorie_id = $frm['categories'];
 			}
-			$output .= affiche_formulaire_controle_produit(0, $frm, $form_error_object);
+			$output .= affiche_formulaire_controle_produit($categorie_id, $frm, $form_error_object);
 		}
 		break;
 
@@ -253,7 +253,11 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 			$frm['flash_end'] = "";
 		}
 	}
-	$frm['categories'] = array($categorie_id);
+	if (is_array($categorie_id)) {
+		$frm['categories'] = $categorie_id;
+	} else {
+		$frm['categories'] = array($categorie_id);
+	}
 	$frm['references'] = array();
 	$frm['couleurs'] = array();
 	$frm['tailles'] = array();
@@ -372,7 +376,7 @@ function affiche_formulaire_modif_produit($id, &$frm)
  *
  * @param array $frm Array with all fields data
  * @param class $form_error_object
- * @param boolean $create_product_process Cette variable est utilisé pour savoir si la fonction affiche_formulaire_produit est utilisé lors de la création d'un produit ou pour une modification de produit.
+ * @param boolean $create_product_process Cette variable définit si la fonction affiche_formulaire_produit est utilisée lors de la création d'un produit ou pour une modification de produit.
  * @return
  */
 function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_process = false)
@@ -559,7 +563,9 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				} else {
 					$type = 'img';
 				}
-				if(strpos($frm['image' . $i], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
+				if(strpos($frm['image' . $i], '://') !== false) {
+					$this_url = $frm['image' . $i];
+				} elseif(strpos($frm['image' . $i], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
 					$this_url = $GLOBALS['wwwroot'] . $frm['image' . $i];
 				} else {
 					$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image' . $i];
@@ -766,7 +772,6 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT_UNIT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_VOLUME', $GLOBALS['STR_ADMIN_PRODUITS_VOLUME']);
-		$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT_UNIT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_NO_PRICE_PER_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_NO_PRICE_PER_UNIT']);

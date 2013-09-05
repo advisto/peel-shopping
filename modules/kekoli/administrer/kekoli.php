@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: kekoli.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: kekoli.php 38007 2013-09-03 21:16:29Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -34,11 +34,19 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 	if (empty($check_admin_date_data)) {
 		$dateAdded1 = $_GET['an1'] . '-' . str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
 		$dateAdded2 = $_GET['an2'] . '-' . str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour2'], 2, 0, STR_PAD_LEFT) . " 23:59:59";
-
+		if (vb($_GET['order_date_field_filter']) == 'a_timestamp') {
+			$date_field = "a_timestamp";
+		} elseif (vb($_GET['order_date_field_filter']) == 'e_datetime') {
+			$date_field = "e_datetime";
+		} elseif (vb($_GET['order_date_field_filter']) == 'f_datetime') {
+			$date_field = "f_datetime";
+		} else {
+			$date_field = "o_timestamp";
+		}
 		$sql = "SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
 			FROM peel_commandes c
 			LEFT JOIN peel_statut_paiement sp ON c.id_statut_paiement=sp.id
-			WHERE c.id_ecom='" . intval($GLOBALS['site_parameters']['id']) . "' AND type != '4' AND c.o_timestamp>='" . nohtml_real_escape_string($dateAdded1) . "' AND c.o_timestamp<='" . nohtml_real_escape_string($dateAdded2) . "'";
+			WHERE c.id_ecom='" . intval($GLOBALS['site_parameters']['id']) . "' AND type != '4' AND c." . $date_field . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . $date_field . "<='" . nohtml_real_escape_string($dateAdded2) . "'";
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$sql .= " AND c.id_statut_paiement = '" . intval($_GET['statut']) . "'";
 			$extra_csv_param = "&id_statut_paiement=" . intval($_GET['statut']);
@@ -46,7 +54,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$extra_csv_param = '';
 		}
 		$sql .= "
-				ORDER BY o_timestamp";
+				ORDER BY " . $date_field;
 		$query = query($sql);
 
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_ventes.tpl');
@@ -134,7 +142,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 		$tpl->assign('STR_ADMIN_VENTES_FORM_EXPLAIN', $GLOBALS['STR_ADMIN_VENTES_FORM_EXPLAIN']);
 		$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
-		$tpl->assign('STR_ORDER', $GLOBALS['STR_ORDER']);
+		$tpl->assign('STR_ORDER_NAME', $GLOBALS['STR_ORDER_NAME']);
 		$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 		$tpl->assign('STR_EMAIL', $GLOBALS['STR_EMAIL']);
 		$tpl->assign('STR_AMOUNT', $GLOBALS['STR_AMOUNT']);

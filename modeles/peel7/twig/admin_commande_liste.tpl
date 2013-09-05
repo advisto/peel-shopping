@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_commande_liste.tpl 38026 2013-09-04 23:30:43Z gboussin $
 #}<table class="full_width">
 	<tr>
 		<td class="entete">{{ STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ links_nbRecord }}</td>
@@ -28,9 +28,9 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td><input type="text" name="id" value="{{ id|str_form_value }}" /></td>
+						<td><input type="number" name="id" value="{{ id|str_form_value }}" /></td>
 						<td><input type="text" name="client_info" value="{{ client_info|str_form_value }}" /></td>
-						<td><input type="text" name="searchProd" value="{{ searchProd|str_form_value }}" /></td>
+						<td><input type="search" name="searchProd" value="{{ searchProd|str_form_value }}" /></td>
 						<td>
 							<select name="statut_paiement">
 								<option value="">{{ STR_ADMIN_ALL_ORDERS }}</option>
@@ -68,6 +68,11 @@
 {% if (results) %}
 	<div class="global_help"><img src="{{ update_src|escape('html') }}" alt="" /> {{ STR_ADMIN_COMMANDER_CLIENT_UPDATED_ICON_EXPLAIN|str_form_value }}</div>
 	<table class="full_width">
+	{% if is_duplicate_module_active %}
+		<tr>
+			<td colspan="13"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_ORDER_DUPLICATE_WARNING }}</td>
+		</tr>
+	{% endif %}
 		<tr>
 			<td class="right">
 				<input type="hidden" name="mode" value="maj_statut" />

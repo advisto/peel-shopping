@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: list_admin_actions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: list_admin_actions.php 37904 2013-08-27 21:19:26Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -188,12 +188,12 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 		LEFT JOIN peel_utilisateurs pu2 ON pu2.id_utilisateur = paa.id_membre
 		' . (!empty($search_array)?'WHERE ' . implode(' AND ', $search_array):'');
 	$Links = new Multipage($sql, 'affiche_liste_action_moderation', 50);
+	$HeaderTitlesArray = array('', 'date' => $GLOBALS['STR_DATE'], 'id_user' => $GLOBALS['STR_BY'], 'action' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE'], 'id_membre' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_CONCERNED_ACCOUNT'], $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATA']);
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
 	$Links->OrderDefault = 'paa.date';
 	$Links->SortDefault = 'DESC';
 	$results_array = $Links->Query();
 	if (!empty($results_array)) {
-		$HeaderTitlesArray = array('', 'date' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE'], 'id_user' => $GLOBALS['STR_BY'], 'id_membre' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_CONCERNED_ACCOUNT'], $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATA']);
-		$Links->HeaderTitlesArray = $HeaderTitlesArray;
 		$tpl->assign('links_multipage', $Links->GetMultipage());
 		$tpl->assign('links_header_row', $Links->getHeaderRow());
 

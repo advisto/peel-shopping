@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: historique_commandes.php 37904 2013-08-27 21:19:26Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -28,9 +28,9 @@ switch (vb($_REQUEST['mode'])) {
 			FROM peel_commandes
 			WHERE id = '" . intval($_GET['id']) . "' AND id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND o_timestamp = '" . nohtml_real_escape_string(vb($_GET['timestamp'])) . "'";
 		$qid_commande = query($sql);
-		if (num_rows($qid_commande) > 0) {
+		if ($this_order = fetch_assoc($qid_commande)) {
 			// On a bien rentré une URL qui est complète pour voir cette commande
-			$output .= affiche_resume_commande(intval($_GET['id']), true, true);
+			$output .= affiche_resume_commande(intval($_GET['id']), true, true, !in_array($this_order['id_statut_paiement'], array(2,3)));
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
 			$tpl->assign('message', $GLOBALS['STR_AUTH_DENIAL']);

@@ -3,21 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_liste.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: bannerAdmin_liste.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="11">{{ STR_MODULE_BANNER_ADMIN_LIST_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="8">
-		<img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_MODULE_BANNER_ADMIN_CREATE }}</a></td>
+		<td colspan="11"><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_MODULE_BANNER_ADMIN_CREATE }}</a></td>
 	</tr>
 	{% if (results) %}
 	<tr>
@@ -57,7 +56,7 @@
 	</tr>
 	{% endfor %}
 	{% else %}
-		<tr><td><p class="global_error">{{ STR_MODULE_BANNER_ADMIN_NOTHING_FOUND }}</p></td></tr>
+		<tr><td colspan="11"><p class="global_error">{{ STR_MODULE_BANNER_ADMIN_NOTHING_FOUND }}</p></td></tr>
 	{% endif %}
-	<tr><td colspan="8" align="center">{{ links_multipage }}</td></tr>
+	<tr><td colspan="11" align="center">{{ links_multipage }}</td></tr>
 </table>

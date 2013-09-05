@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details_html.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: article_details_html.tpl 37904 2013-08-27 21:19:26Z gboussin $
 *}{if !$is_article}
 	{$STR_NO_FIND_ART}
 {else}
@@ -20,8 +20,12 @@
 		<p style="color: red;">{$STR_OFFLINE_ART}</p>
 		{/if}
 		<div style="padding-top:5px;">
-		{if isset($image_src)}
-			<p class="center"><img src="{$image_src|escape:'html'}" alt="{$titre}" /></p>
+		{if isset($main_image)}
+			{if $main_image.is_pdf}
+				<a style="margin: 5px;" href="{$main_image.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$wwwroot}/images/logoPDF_small.png" alt="{$titre}" /></a>
+			{else}
+				<p><img style="margin: 5px;" src="{$main_image.href|escape:'html'}" alt="{$titre}" /></p>
+			{/if}
 		{/if}
 			<div style="text-align:justify;">{$chapo|html_entity_decode_if_needed|nl2br_if_needed}</div>
 			<div style="text-align:justify;">{$texte|html_entity_decode_if_needed|nl2br_if_needed}</div>

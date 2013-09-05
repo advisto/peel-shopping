@@ -3,18 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_connexion_user_liste.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_connexion_user_liste.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="11">{{ STR_ADMIN_CONNEXION_USER_TITLE }}</td>
 	</tr>
+	{% if display_search_form %}
 	<tr>
 		<td colspan="11">
 			<form method="get" action="{{ action|escape('html') }}">
@@ -36,6 +37,7 @@
 			</form>
 		</td>
 	</tr>
+	{% endif %}
 </table>
 <br /><br />
 <form method="post" action="{{ action_maj|escape('html') }}">
@@ -52,6 +54,9 @@
 					<td class="center">{{ res.id }}</td>
 					<td class="center">{{ res.date }}</td>
 					<td class="center">{{ res.ip }}</td>
+					{% if res.country_ip %}<td class="center">{{ res.country_ip }}</td>{% endif %}
+					{% if res.country_account %}<td class="center">{{ res.country_account }}</td>{% endif %}
+					{% if res.active_ads_count %}<td class="center">{{ res.active_ads_count }}</td>{% endif %}
 					<td class="center">{{ res.user_login_displayed }}</td>
 					<td class="center">{{ res.user_id }}</td>
 				</tr>

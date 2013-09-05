@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_nl.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_subject_nl.php 37972 2013-08-30 14:35:54Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,15 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["subject"] = array(
+  "signature_commercial" => "",
+  "signature_comptabilite" => "",
+  "signature_referencement" => "",
+  "signature_informatique" => "",
+  "signature_communication" => "",
+  "signature_marketing" => "",
+  "signature_direction" => "",
+  "signature_externe" => "",
+  "signature_support" => "",
   "download_product" => "Download uw bestelling [ORDER_ID]",
   "commande_parrain_avoir" => "Uw tegoed voor de bestelling van uw contact",
   "envoie_client_code_promo" => "Als beloning voor uw loyaliteit",
@@ -51,11 +60,15 @@ $peel_email_template["subject"] = array(
   "signature" => "Automatische e-mail handtekening",
   "cree_cheque_cadeau_client_type1" => "[FRIEND] biedt u een cadeaubon aan",
   "warn_admin_user_subscription" => "[CIVILITE] [PRENOM] [NOM_FAMILLE] heeft zich ingeschreven op [SITE_NAME]",
+  "warn_admin_reve_subscription" => "",
   "email_retour_virement" => "Validatie van uw retour nummer [RETURN_ID]",
   "email_retour_avoir" => "Validatie van uw retour nummer [RETURN_ID]",
   "email_reste_avoir_remboursement" => "Terugbetaling van uw retour nummer [RETURN_ID]",
   "email_remboursement" => "Terugbetaling van uw retour nummer [RETURN_ID]",
-  "email_retour_client" => "Uw retour aanvraag"
+  "email_retour_client" => "Uw retour aanvraag",
+  "cron_order_payment_failure_alerts" => "Help voor uw betaling",
+  "cron_order_not_paid_alerts" => "Betaling van uw bestelling",
+  "cron_update_contact_info" => "Bevestiging van de geldigheid van uw informatie"
 );
 
 ?>

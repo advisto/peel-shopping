@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: contact_form.tpl 37960 2013-08-29 16:47:44Z gboussin $
 #}<h1 class="page_title">{{ STR_CONTACT }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <div id="contact">
@@ -19,9 +19,9 @@
 		<div class="contact_intro">{{ STR_CONTACT_INTRO }}</div>
 		<form class="entryform" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
 			{{ extra_field }}
-			<table cellpadding="3" class="full_width">
+			<table class="contact_form_table">
 				<tr>
-					<td {% if is_advistofr_module_active %} colspan="2"{% endif %}><label for="sujet">{{ STR_CONTACT_SUBJECT }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">(*)</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
+					<td {% if is_advistofr_module_active %} colspan="2"{% endif %}><label for="sujet">{{ STR_CONTACT_SUBJECT }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
 		{% if is_advistofr_module_active %}
 						<br />
 		{% else %}
@@ -30,7 +30,7 @@
 		{% endif %}
 					<select id="sujet" name="sujet" style="">
 					{% for key in sujet_options|keys %}
-						<option value="{{ key|str_form_value }}"{% if key=sujet_options_selected %} selected="selected"{% endif %}>{{ options.key }}</option>
+						<option value="{{ key|str_form_value }}"{% if key==sujet_options_selected %} selected="selected"{% endif %}>{{ sujet_options[key] }}</option>
 					{% endfor %}
 					</select>
 					{{ sujet_error }}
@@ -91,9 +91,9 @@
 					</td>
 				</tr>
 				<tr>
-					<td><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">(*)</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
+					<td><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="telephone" name="telephone" value="{{ telephone_value|str_form_value }}" />{{ telephone_error }}
+						<input class="form" type="tel" id="telephone" name="telephone" rows="10" value="{{ telephone_value|str_form_value }}" />{{ telephone_error }}
 					</td>
 				</tr>
 				{% if is_advistofr_module_active %}
@@ -103,7 +103,7 @@
 				{% endif %}
 				<tr>
 					<td><label for="texte">{{ STR_TEXT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
-					<td>{{ texte_error }}<textarea id="texte" name="texte" rows="10">{{ texte_value }}</textarea></td>
+					<td><textarea id="texte" name="texte" rows="10">{{ texte_value }}</textarea>{{ texte_error }}</td>
 				</tr>
 				<tr>
 					<td><label for="dispo">{{ STR_DISPO }}{{ STR_BEFORE_TWO_POINTS }}:</label></td>

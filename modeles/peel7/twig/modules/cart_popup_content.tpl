@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: cart_popup_content.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: cart_popup_content.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<div class="popup_cart_top" style="background:url({{ header_src }}) no-repeat scroll left top transparent;">
 	<div class="popup_cart_top_left">{{ STR_MODULE_CART_POPUP_PRODUCT_ADDED }}</div>
 	<div class="popup_cart_top_right">
@@ -21,7 +21,7 @@
 <div class="popup_cart_middle" >
 	<div class="popup_cart_title">{{ STR_CADDIE }}</div>
 	<div class="popup_cart_content">
-		<table cellpadding="5" width="60%" style="color:#6c6c6c;">
+		<table cellpadding="5" style="width:60%; color:#6c6c6c;">
 			<tr>
 				<td class="left">{{ STR_QUANTITY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 				<td class="center">{{ count_products }}</td>

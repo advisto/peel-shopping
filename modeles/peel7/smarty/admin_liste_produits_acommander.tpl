@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_produits_acommander.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_liste_produits_acommander.tpl 38007 2013-09-03 21:16:29Z gboussin $
 *}{if $is_empty}
 <p>{$STR_ADMIN_PRODUITS_NO_PRODUCT_TO_ORDER}</p>
 {else}
@@ -29,7 +29,7 @@
 		<td class="label center"><a href="{$p.stock_href|escape:'html'}"><img src="{$p.stock_src|escape:'html'}" alt="" /></a></td>
 		<td class="label"><a href="{$p.modif_href|escape:'html'}">{$p.nom|html_entity_decode_if_needed}</a><br />{$STR_COLOR}{$STR_BEFORE_TWO_POINTS}: {$p.couleur}<br />{$STR_SIZE}{$STR_BEFORE_TWO_POINTS}: {$p.taille}<br />{$STR_ADMIN_PRODUITS_SUPPLY_FORECASTED}{$STR_BEFORE_TWO_POINTS}: {$p.delai_stock}</td>
 		<td class="label center">{$p.order_stock}</td>
-		<td class="center"><a href="{$p.commander_href|escape:'html'}">{$STR_ORDER} {$p.commande_id}</a></td>
+		<td class="center"><a href="{$p.commander_href|escape:'html'}">{$STR_ORDER_NAME} {$p.commande_id}</a></td>
 	</tr>
 	{/foreach}
 	<tr><td class="center" colspan="4">{$Multipage}</td></tr>

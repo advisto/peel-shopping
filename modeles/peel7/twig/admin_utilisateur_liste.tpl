@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<form method="get" action="{{ action|escape('html') }}">
 	<table class="full_width" cellpadding="2">
 		<tr>
@@ -262,37 +262,37 @@
 					</tr>
 					{% if is_annonce_module_active %}
 					<tr>
-						<td colspan="2">{{STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES}}</td>
+						<td colspan="2">{{ STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES }}</td>
 					</tr>
-				{% if !empty(favorite_category) %}
+				{% if favorite_category %}
 					<tr>
-						<td>{{STR_FIRST_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>{{STR_FIRST_CHOICE}}{{STR_BEFORE_TWO_POINTS }}:</td>
 						<td>
-							{{favorite_category}}
+							{{ favorite_category }}
 						</td>
 					</tr>
 				{% else %}
 					<tr>
-						<td>{{STR_FIRST_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 						<td>
 							<select id="id_cat_1" name="id_cat_1">
-								{{favorite_category_1}}
+								{{ favorite_category_1 }}
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<td>{{STR_SECOND_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>{{ STR_SECOND_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 						<td>
 							<select id="id_cat_2" name="id_cat_2">
-								{{favorite_category_2}}
+								{{ favorite_category_2 }}
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<td>{{STR_THIRD_CHOICE}}{{STR_BEFORE_TWO_POINTS}}:</td>
+						<td>{{ STR_THIRD_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 						<td>
 							<select id="id_cat_3" name="id_cat_3">
-								{{favorite_category_3}}
+								{{ favorite_category_3 }}
 							</select>
 						</td>
 					</tr>
@@ -327,7 +327,7 @@
 					<tr>
 						<td>{{ STR_MODULE_ANNONCES_ADMIN_ADS_AVAILABLE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 						<td>
-							<select name="list_annonce" id="list_annonce" style="width: 200px;>
+							<select name="list_annonce" id="list_annonce" style="width: 200px;">
 								<option value="">{{ STR_CHOOSE }}...</option>
 								{% for o in annonces_options %}
 								<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
@@ -439,21 +439,16 @@ display_input2_element('date_contact_prevu');
 			<td style="width:70px">
 				<table>
 					<tr>
-						<td>
-							<td class="center"><input name="user_ids[]" type="checkbox" value="{{ res.id_utilisateur|str_form_value }}" id="{{ res.id_utilisateur }}" /></td>
-						</td>
-						<td>
-							<a onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.email }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ administrer_url }}/images/b_drop.png" alt="" /></a>
-						</td>
-						<td>
-							<a onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD_CONFIRM }}');" title="{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD|str_form_value }} {{ res.email }}" href="{{ res.init_href|escape('html') }}"><img src="{{ administrer_url }}/images/password-24.gif" alt="" /></a>
-						</td>
-						<td>
-							<a title="{{ STR_ADMIN_UTILISATEURS_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}"><img src="{{ administrer_url }}/images/b_edit.png" width="17" height="17" alt="" /></a>
-						</td>
-						<td>
-							<a {% if (res.etat) %} onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_DEACTIVATE_USER }}');"{% endif %} title="{{ STR_ADMIN_UTILISATEURS_UPDATE_STATUS|str_form_value }}" href="{{ res.modif_etat_href|escape('html') }}"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" /></a>
-						</td>
+						<td><input name="user_ids[]" type="checkbox" value="{{ res.id_utilisateur|str_form_value }}" id="{{ res.id_utilisateur }}" /></td>
+						<td><a onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD_CONFIRM }}');" title="{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD|str_form_value }} {{ res.email }}" href="{{ res.init_href|escape('html') }}"><img src="{{ administrer_url }}/images/password-24.gif" alt="" /></a></td>
+						<td><a title="{{ STR_ADMIN_UTILISATEURS_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}"><img src="{{ administrer_url }}/images/b_edit.png" width="17" height="17" alt="" /></a></td>
+						<td><a {% if (res.etat) %} onclick="return confirm('{{ STR_ADMIN_UTILISATEURS_DEACTIVATE_USER }}');"{% endif %} title="{{ STR_ADMIN_UTILISATEURS_UPDATE_STATUS|str_form_value }}" href="{{ res.modif_etat_href|escape('html') }}"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" /></a></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><a href="{{ administrer_url }}/codes_promos.php?mode=code_pour_client&amp;id_utilisateur={{ res.id_utilisateur }}" title="{{ STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL_SUBTITLE|str_form_value }}"><img src="{{ wwwroot_in_admin }}/icones/cheque.gif" width="25" height="25" alt="{{ STR_ADMIN_UTILISATEURS_GIFT_CHECK|str_form_value }}" /></a></td>
+						<td><a href="{{ administrer_url }}/commander.php?mode=ajout&amp;id_utilisateur={{ res.id_utilisateur }}" title="{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER|str_form_value }}"><img src="{{ wwwroot_in_admin }}/icones/proforma.gif" width="25" height="25" alt="{{ STR_ORDER_FORM|str_form_value }}" /></a></td>
+						<td><a onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.email }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ administrer_url }}/images/b_drop.png" alt="" /></a></td>
 					</tr>
 				</table>
 			</td>
@@ -481,18 +476,14 @@ display_input2_element('date_contact_prevu');
 			</td>
 			{% endif %}
 			<td class="center">{{ res.date_insert }}</td>
+			<td class="center">{% if res.count_ordered %}<a href="{{ administrer_url }}/commander.php?mode=recherche&amp;client_info={{ res.email }}" title="{{ STR_ADMIN_UTILISATEURS_ORDERS_LIST|str_form_value }}">{{ res.total_ordered }} ({{ res.count_ordered }})</a>{% else %}-{% endif %}</td>
 			<td class="center">{{ res.remise_percent }} %</td>
-			{% if is_parrainage_module_active %}
-			<td class="center">{{ res.calculer_avoir_client_prix }}</td>
-			{% endif %}
 			<td class="center">{{ res.avoir_prix }}</td>
 			<td class="center">{{ res.points }}</td>
 			{% if is_parrainage_module_active %}
 			<td class="center">{{ res.compter_nb_commandes_parrainees }}</td>
 			<td class="center">{{ res.recuperer_parrain }}</td>
 			{% endif %}
-			<td class="center"><a href="{{ administrer_url }}/codes_promos.php?mode=code_pour_client&amp;id_utilisateur={{ res.id_utilisateur }}"><img src="{{ wwwroot_in_admin }}/icones/cheque.gif" width="25" height="25" alt="{{ STR_ADMIN_UTILISATEURS_GIFT_CHECK|str_form_value }}" /></a></td>
-			<td class="center"><a href="{{ administrer_url }}/commander.php?mode=ajout&amp;id_utilisateur={{ res.id_utilisateur }}"><img src="{{ wwwroot_in_admin }}/icones/proforma.gif" width="25" height="25" alt="{{ STR_ORDER_FORM|str_form_value }}" /></a></td>
 		</tr>
 		{% endfor %}
 		<tr><td colspan="{{ count_HeaderTitlesArray }}" align="center">{{ link_multipage }}</td></tr>

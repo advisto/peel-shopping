@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 37226 2013-06-11 14:53:03Z sdelaporte $
+// $Id: user.php 37993 2013-09-02 16:46:19Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -118,7 +118,6 @@ function a_priv($requested_priv, $demo_allowed = false)
  */
 function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false)
 {
-
 	if (!empty($frm['priv'])) {
 		if(is_array($frm['priv'])) {
 			$frm['priv'] = implode('+', $frm['priv']);
@@ -198,9 +197,14 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
 		// Paramètre lié à la fonction get_specific_field_infos.
 		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
-			$user_specific_field[] = $this_field;
-			$user_specific_field_values[] = nohtml_real_escape_string($frm[$this_field]);
+			if (isset($frm[$this_field])) {
+				$user_specific_field[] = $this_field;
+				$user_specific_field_values[] = nohtml_real_escape_string($frm[$this_field]);
+			}
 		}
+	}
+	if(empty($frm['lang'])) {
+		$frm['lang'] = $_SESSION['session_langue'];
 	}
 	$qid = query("INSERT INTO peel_utilisateurs (
 		date_insert
@@ -311,7 +315,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . nohtml_real_escape_string(vn($frm['id_groupe'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['origin'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['origin_other'])) . "'
-		, '" . nohtml_real_escape_string(vb($_SESSION['session_langue'])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['lang'])) . "'
 		, '" . intval(vn($frm['on_vacances'])) . "'
 		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['on_vacances_date']))) . "'
 		, '" . nohtml_real_escape_string(vb($frm['promo_code'])) . "'
@@ -372,7 +376,12 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$custom_template_tags['TELEPHONE'] = $frm['telephone'];
 		$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $clientid . '&start=0';
 
-		send_email($GLOBALS['support_sav_client'], '', '', 'warn_admin_user_subscription', $custom_template_tags, 'html', $GLOBALS['support_sav_client']);
+		if ($frm['priv'] == 'stop') {
+			$template_technical_code = 'warn_admin_reve_subscription';
+		} else {
+			$template_technical_code = 'warn_admin_user_subscription';
+		}
+		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, 'html', $GLOBALS['support_sav_client']);
 	}
 
 	return $clientid;
@@ -403,10 +412,14 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$user_specific_field[] = $this_field . ' = "' . nohtml_real_escape_string($frm[$this_field]) . '"';
 		}
 	}
+	if(empty($frm['lang'])) {
+		$frm['lang'] = $_SESSION['session_langue'];
+	}
+	// MAJ du pseudo interdite pour les sites d'annonces, pour éviter problèmes de traçabilité d'utilisateurs
 	query("UPDATE peel_utilisateurs SET
 			civilite = '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
 			, prenom = '" . nohtml_real_escape_string($frm['prenom']) . "'
-			, pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'
+			" . (isset($frm['pseudo']) && !is_annonce_module_active()?", pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'":"") . "
 			, nom_famille = '" . nohtml_real_escape_string($frm['nom_famille']) . "'
 			, societe = '" . nohtml_real_escape_string($frm['societe']) . "'
 			, intracom_for_billing  = '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
@@ -478,22 +491,28 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'");
 	if ($update_current_session) {
 		// Mise à jour de la session en cours
-		$_SESSION['session_utilisateur']['pays'] = $frm['pays'];
-		$_SESSION['session_utilisateur']['civilite'] = vb($frm['civilite']);
-		$_SESSION['session_utilisateur']['prenom'] = $frm['prenom'];
-		$_SESSION['session_utilisateur']['pseudo'] = $frm['pseudo'];
-		$_SESSION['session_utilisateur']['nom_famille'] = $frm['nom_famille'];
-		$_SESSION['session_utilisateur']['societe'] = $frm['societe'];
-		$_SESSION['session_utilisateur']['intracom_for_billing'] = String::strtoupper(vb($frm['intracom_for_billing']));
-		$_SESSION['session_utilisateur']['telephone'] = $frm['telephone'];
-		$_SESSION['session_utilisateur']['fax'] = $frm['fax'];
-		$_SESSION['session_utilisateur']['portable'] = $frm['portable'];
-		$_SESSION['session_utilisateur']['adresse'] = $frm['adresse'];
-		$_SESSION['session_utilisateur']['code_postal'] = $frm['code_postal'];
-		$_SESSION['session_utilisateur']['ville'] = $frm['ville'];
-		$_SESSION['session_utilisateur']['newsletter'] = intval(vn($frm['newsletter']));
-		$_SESSION['session_utilisateur']['commercial'] = intval(vn($frm['commercial']));
+		$requete = "SELECT *
+			FROM peel_utilisateurs
+			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
+		$qid = query($requete);
+		if($user_infos = fetch_assoc($qid)) {
+			$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
+			$_SESSION['session_utilisateur']['civilite'] = vb($user_infos['civilite']);
+			$_SESSION['session_utilisateur']['prenom'] = $user_infos['prenom'];
+			$_SESSION['session_utilisateur']['pseudo'] = $user_infos['pseudo'];
+			$_SESSION['session_utilisateur']['nom_famille'] = $user_infos['nom_famille'];
+			$_SESSION['session_utilisateur']['societe'] = $user_infos['societe'];
+			$_SESSION['session_utilisateur']['intracom_for_billing'] = String::strtoupper(vb($user_infos['intracom_for_billing']));
+			$_SESSION['session_utilisateur']['telephone'] = $user_infos['telephone'];
+			$_SESSION['session_utilisateur']['fax'] = $user_infos['fax'];
+			$_SESSION['session_utilisateur']['portable'] = $user_infos['portable'];
+			$_SESSION['session_utilisateur']['adresse'] = $user_infos['adresse'];
+			$_SESSION['session_utilisateur']['code_postal'] = $user_infos['code_postal'];
+			$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
+			$_SESSION['session_utilisateur']['newsletter'] = intval(vn($user_infos['newsletter']));
+			$_SESSION['session_utilisateur']['commercial'] = intval(vn($user_infos['commercial']));
 		$_SESSION['session_utilisateur']['format'] = 'html';
+	}
 	}
 	if (!empty($frm['email'])) {
 		if (file_exists($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php")) {
@@ -659,7 +678,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 {
 	$requete = "SELECT *
 		FROM peel_utilisateurs
-		WHERE etat=1 AND ";
+		WHERE etat=1 AND priv!='newsletter' AND ";
 	if (!empty($email_or_pseudo)) {
 		$requete .= "(email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
 	} else {
@@ -759,9 +778,10 @@ function getUsername($user_id)
  * Chargement des détails de l'utilisateur
  *
  * @param integer $user_id Si vide, alors on renvoie les informations de l'utilisateur connecté
+ * @param boolean $get_full_infos
  * @return
  */
-function get_user_information($user_id = null)
+function get_user_information($user_id = null, $get_full_infos = false)
 {
 	static $result_array;
 	$sql_cond = '';
@@ -777,6 +797,19 @@ function get_user_information($user_id = null)
 				FROM peel_utilisateurs
 				WHERE id_utilisateur = '" . intval($user_id) . "'" . $sql_cond);
 			$result_array[$user_id] = fetch_assoc($qid);
+			if($get_full_infos && is_annonce_module_active()) {
+				if($result_array[$user_id]['etat']) {
+					$sqlCount = 'SELECT COUNT(*) AS this_count
+						FROM peel_lot_vente plv
+						WHERE id_personne = "' . intval($user_id) . '" AND enligne="OK"';
+					$resCount = query($sqlCount);
+					if ($Count = fetch_assoc($resCount)) {
+						$result_array[$user_id]['active_ads_count'] = $Count['this_count'];
+					}
+				} else {
+					$result_array[$user_id]['active_ads_count'] = 0;
+				}
+			}
 		}
 		return $result_array[$user_id];
 	} else {

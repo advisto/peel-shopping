@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: images.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: images.php 37934 2013-08-28 15:09:20Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,9 +33,9 @@ if (!defined('IN_PEEL')) {
 function image_resize($origin_filename_with_path, $new_filename_with_path, $destinationW = null, $destinationH = null, $resize_even_if_smaller = false, $allow_keep_origin_file_if_resize_not_needed = true, $filesize_limit_keep_origin_file = 102400, $jpeg_quality = 85, $gammacorrect = 1.0)
 {
 	$origin_file_extension = pathinfo($origin_filename_with_path, PATHINFO_EXTENSION);
-	if (strtolower($origin_file_extension) === 'png' && function_exists('imagecreatefrompng')) {
+	if (String::strtolower($origin_file_extension) === 'png' && function_exists('imagecreatefrompng')) {
 		$source = @imagecreatefrompng($origin_filename_with_path);
-	} elseif (strtolower($origin_file_extension) === 'gif' && function_exists('imagecreatefromgif')) {
+	} elseif (String::strtolower($origin_file_extension) === 'gif' && function_exists('imagecreatefromgif')) {
 		$source = @imagecreatefromgif($origin_filename_with_path);
 	}
 	if (empty($source) && function_exists('imagecreatefromjpeg')) {

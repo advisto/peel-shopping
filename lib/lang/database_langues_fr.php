@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_langues_fr.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_langues_fr.php 37950 2013-08-29 13:14:25Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -34,8 +34,9 @@ $peel_langues["nom"] = array(
 	"cy" => "Gallois",
 	"da" => "Danois",
 	"de" => "Allemand",
-	"el" => "Frec",
+	"el" => "Grec",
 	"en" => "Anglais",
+	"eo" => "Espéranto",
 	"es" => "Espagnol (castillan)",
 	"et" => "Estonien",
 	"eu" => "Basque",
@@ -94,7 +95,7 @@ $peel_langues["nom"] = array(
 	"ss" => "Swazi (siswati)",
 	"su" => "Soudanais",
 	"sv" => "Suédois",
-	"sw" => "Souahéli",
+	"sw" => "Swahili",
 	"ta" => "Tamoul",
 	"tg" => "Tadjik",
 	"th" => "Thaï",

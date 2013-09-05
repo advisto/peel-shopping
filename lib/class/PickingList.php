@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: PickingList.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: PickingList.php 38007 2013-09-03 21:16:29Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require_once($GLOBALS['dirroot'] . "/lib/class/pdf/tcpdf.php");
  * @package PEEL
  * @author oodorizzi
  * @copyright Copyright (c) 2010
- * @version $Id: PickingList.php 36927 2013-05-23 16:15:39Z gboussin $
+ * @version $Id: PickingList.php 38007 2013-09-03 21:16:29Z gboussin $
  * @access public
  */
 class PickingList extends TCPDF {
@@ -146,7 +146,7 @@ class PickingList extends TCPDF {
 			$this->SetTextColor(0, 0, 0); #Noir*/
 			$this->SetFont("Helvetica", "B", 10);
 			$this->SetXY($x1 + 2, $y1 + 1.5);
-			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$id."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
+			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER_NAME"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$id."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
 
 			$y1 = $y1 + 11;
 			$this->SetXY($x1 + 2, $y1);

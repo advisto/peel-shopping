@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: webmailAdmin_form.tpl 37077 2013-05-31 15:39:56Z sdelaporte $
+// $Id: webmailAdmin_form.tpl 37984 2013-09-02 09:54:37Z sdelaporte $
 *}
 <table class="full_width">
 	<tr>
@@ -202,21 +202,14 @@
 		<tr>
 			<th>{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE}</th>
 			<td>
-				<select name="function" id="function" onchange="mail_signature('{$nom_famille|str_form_value}', '{$prenom|str_form_value}', '{$site|str_form_value}', '[link=&#34;{$wwwroot}&#34;]{$wwwroot}[/link]', '');">
-					<option value="none">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_NONE}</option>
-					<option value="">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE}</option>
-					<option value="support">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_CLIENT_SERVICE}</option>
-					<option value="commercial">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_SALES}</option>
-					<option value="comptabilite">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_ACCOUNTING}</option>
-					<option value="referencement">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_SEO}</option>
-					<option selected="selected" value="informatique">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_TECHNICAL}</option>
-					<option value="communication">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_COMMUNICATION}</option>
-					<option value="marketing">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_MARKETING}</option>
-					<option value="direction">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_DIRECTION}</option>
-					<option value="externe">{$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_EXTERNAL}</option>
+				<select name="signature_template_options" id="signature_template_options">
+					{$signature_template_options}
 				</select>
-				<input type="checkbox" name="signature_with_name" id="signature_with_name" value="1" onclick="mail_signature('{$nom_famille|str_form_value}', '{$prenom|str_form_value}', '{$site|str_form_value}', '[link=&#34;http://www.{$HTTP_HOST}/&#34;]www.{$HTTP_HOST}[/link]', '');" /> {$STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_ADD_NAME}
 			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><textarea name="signature" style="height:200px;width:600px;" rows="2" cols="30" id="signature" ></textarea></td>
 		</tr>
 		<tr>
 			<th>{$STR_MODULE_WEBMAIL_ADMIN_SENDER_EMAIL}</th>
@@ -248,6 +241,11 @@
 {literal}
 <script><!--//--><![CDATA[//><!--
 window.onload = (function(){
+	jQuery("#signature_template_options").change(function () {
+{/literal}
+		form_template_content_add("signature_template_options", "signature", "message", "{$wwwroot}");
+{literal}
+	}).change();
 	jQuery("#template").change(function () {
 {/literal}
 		form_template_content_add("template", "message", "message", "{$wwwroot}");
@@ -259,7 +257,3 @@ window.onload = (function(){
 });
 //--><!]]></script>
 {/literal}
-
-<script><!--//--><![CDATA[//><!--
-mail_signature('{$nom_famille|str_form_value}', '{$prenom|str_form_value}', '{$site|str_form_value}', '[link="{$wwwroot}"]{$wwwroot}[/link]', '');
-//--><!]]></script>

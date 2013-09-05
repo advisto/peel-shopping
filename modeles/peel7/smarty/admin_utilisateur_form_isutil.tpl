@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form_isutil.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_utilisateur_form_isutil.tpl 38009 2013-09-03 21:36:26Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}">
 	<input name="mode" type="hidden" value="event_comment" />
 	<center>
@@ -37,6 +37,18 @@
 		</table>
 	</center>
 </form>
+<table class="full_width">
+	<tr>
+		<td>{$affiche_recherche_connexion_user}</td>
+	</tr>
+</table>
+{if !empty($affiche_liste_abus)}
+<table class="full_width">
+	<tr>
+		<td>{$affiche_liste_abus}</td>
+	</tr>
+</table>
+{/if}
 <table class="full_width" >
 	<tr>
 		<td class="entete">{$STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT}</td>
@@ -53,7 +65,7 @@
 	{if isset($results)}
 	<tr>
 		<td class="menu">{$STR_ADMIN_ACTION}</td>
-		<td class="menu center">{$STR_ORDER}</td>
+		<td class="menu center">{$STR_ORDER_NAME}</td>
 		<td class="menu center">{$STR_DATE}</td>
 		<td class="menu center">{$STR_TOTAL} {$STR_TTC}</td>
 		{if $is_parrainage_module_active}
@@ -73,7 +85,7 @@
 		<td class="center">{$res.date}</td>
 		<td class="center">{$res.prix}</td>
 		{if $is_parrainage_module_active}
-		<td class="center">{$res.recuperer_avoir_commande}{$site_symbole}</td>
+		<td class="center">{$res.recuperer_avoir_commande}</td>
 		{/if}
 		<td class="center">{$res.ordered_products}</td>
 		<td class="center">{$res.payment_name}</td>

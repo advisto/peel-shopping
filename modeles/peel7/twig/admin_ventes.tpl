@@ -3,27 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_ventes.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_ventes.tpl 38007 2013-09-03 21:16:29Z gboussin $
 #}{% if (results) %}
 <br />{{ STR_ADMIN_VENTES_FORM_EXPLAIN }}<br />
 <p class="label center">{{ period_text }}</p>
 <table class="main_table">
 	<tr>
-		<td class="center menu"><b>{{ STR_DATE }}</b></td>
-		<td class="center menu"><b>{{ STR_ORDER }}</b></td>
-		<td class="center menu"><b>{{ STR_STATUS }}</b></td>
-		<td class="center menu"><b>{{ STR_EMAIL }}</b></td>
-		<td class="center menu"><b>{{ STR_AMOUNT }} {{ STR_HT }}</b></td>
-		<td class="center menu"><b>{{ STR_VAT }}</b></td>
-		<td class="center menu"><b>{{ STR_AMOUNT }} {{ STR_TTC }}</b></td>
-		<td class="center menu"><b>{{ STR_ADMIN_INCLUDING_DELIVERY_COST }}</b></td>
+		<td class="center menu">{{ STR_DATE }}</td>
+		<td class="center menu">{{ STR_ORDER_NAME }}</td>
+		<td class="center menu">{{ STR_STATUS }}</td>
+		<td class="center menu">{{ STR_EMAIL }}</td>
+		<td class="center menu">{{ STR_AMOUNT }} {{ STR_HT }}</td>
+		<td class="center menu">{{ STR_VAT }}</td>
+		<td class="center menu">{{ STR_AMOUNT }} {{ STR_TTC }}</td>
+		<td class="center menu">{{ STR_ADMIN_INCLUDING_DELIVERY_COST }}</td>
 	</tr>
 	{% for res in results %}
 	{{ res.tr_rollover }}
@@ -62,7 +62,10 @@
 	<p class="label center"><font size="+1" color="green">{{ STR_MODULE_KEKOLI_ADMIN_ONLY_DELIVERED }}</font></p>
 	{% endif %}
 	{% if is_module_export_ventes_active %}
-		<td colspan="4" class="label" align="right" style="padding-bottom:15px"><a href="{{ export_href|escape('html') }}" class="label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL }}</a></td>
+		<td colspan="4" class="label" align="right" style="padding-bottom:15px">
+			<a href="{{ export_href|escape('html') }}" class="label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL }}</a><br/>
+			<a href="{{ export_href_one_line_per_order|escape('html') }}" class="label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER }}</a>
+		</td>
 		<td colspan="2" class="label">&nbsp;</td>
 	{% else %}
 		<td colspan="6" class="label">&nbsp;</td>

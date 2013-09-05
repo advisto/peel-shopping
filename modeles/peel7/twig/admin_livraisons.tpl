@@ -3,29 +3,29 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_livraisons.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: admin_livraisons.tpl 37987 2013-09-02 12:18:07Z gboussin $
 #}{% if (results) %}
 <p class="label center">{{ period_text }}</p>
 <div class="global_help">{{ STR_ADMIN_LIVRAISONS_EXPLAIN }}</div>
 <table cellpadding="2" class="main_table">
 	<tr>
-		<td class="center menu"><b>{{ STR_DATE }}</b></td>
-		<td class="center menu"><b>{{ STR_ORDER_NAME }}</b></td>
-		<td class="center menu"><b>{{ STR_AMOUNT }} {{ ttc_ht }}</b></td>
-		<td class="center menu"><b>{{ STR_FIRST_NAME }}</b></td>
-		<td class="center menu"><b>{{ STR_LAST_NAME }}</b></td>
-		<td class="center menu"><b>{{ STR_SHIP_ADDRESS }}</b></td>
-		<td class="center menu"><b>{{ STR_ZIP }}</b></td>
-		<td class="center menu"><b>{{ STR_TOWN }}</b></td>
-		<td class="center menu"><b>{{ STR_TELEPHONE }}</b></td>
-		<td class="center menu"><b>{{ STR_EMAIL }}</b></td>
+		<td class="center menu">{{ STR_DATE }}</td>
+		<td class="center menu">{{ STR_ORDER_NAME }}</td>
+		<td class="center menu">{{ STR_AMOUNT }} {{ ttc_ht }}</td>
+		<td class="center menu">{{ STR_FIRST_NAME }}</td>
+		<td class="center menu">{{ STR_LAST_NAME }}</td>
+		<td class="center menu">{{ STR_SHIP_ADDRESS }}</td>
+		<td class="center menu">{{ STR_ZIP }}</td>
+		<td class="center menu">{{ STR_TOWN }}</td>
+		<td class="center menu">{{ STR_TELEPHONE }}</td>
+		<td class="center menu">{{ STR_EMAIL }}</td>
 	</tr>
 	{% for res in results %}
 	{{ res.tr_rollover }}

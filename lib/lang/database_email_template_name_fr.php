@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_fr.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: database_email_template_name_fr.php 37972 2013-08-30 14:35:54Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,6 +20,15 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["name"] = array(
+  "signature_commercial" => "Signature service commercial",
+  "signature_comptabilite" => "Signature service comptabilité",
+  "signature_referencement" => "Signature service référencement",
+  "signature_informatique" => "Signature support technique",
+  "signature_communication" => "Signature service communication",
+  "signature_marketing" => "Signature service marketing",
+  "signature_direction" => "Signature la direction",
+  "signature_externe" => "Signature service externe",
+  "signature_support" => "Signature support Clientèle",
   "download_product" => "Téléchargement de votre commande",
   "commande_parrain_avoir" => "Votre avoir suite à la commande de votre filleul",
   "envoie_client_code_promo" => "En remerciement de votre fidélité",
@@ -51,6 +60,7 @@ $peel_email_template["name"] = array(
   "signature" => "Signature emails automatiques",
   "cree_cheque_cadeau_client_type1" => "[FRIEND] vous offre un chèque cadeau (pourcentage)",
   "warn_admin_user_subscription" => "Avertissement de l'inscription d'un utilisateur",
+  "warn_admin_reve_subscription" => "Avertissement de l'inscription d'un revendeur",
   "email_retour_virement" => "Validation de votre retour [RETURN_ID]",
   "email_retour_avoir" => "Validation de votre retour [RETURN_ID]",
   "email_reste_avoir_remboursement" => "Remboursement de votre avoir [RETURN_ID]",
@@ -58,7 +68,8 @@ $peel_email_template["name"] = array(
   "email_retour_client" => "Votre demande de retour",
   "cron_order_payment_failure_alerts" => "Aide pour votre paiement",
   "cron_order_not_paid_alerts" => "Paiement de votre commande",
-  "cron_update_contact_info" => "Confirmation de la validité de vos coordonnées"
+  "cron_update_contact_info" => "Confirmation de la validité de vos coordonnées",
+  "inscription_newsletter" => "Inscription à la newsletter sur [SITE]"
 );
 
 ?>

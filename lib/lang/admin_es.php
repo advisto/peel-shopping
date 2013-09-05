@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 37007 2013-05-28 22:07:04Z gboussin $
+// $Id: admin_es.php 38026 2013-09-04 23:30:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -26,7 +26,7 @@ $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CALLS_EXPLAIN"] = "La gestión de las llamadas
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CALLS_LIST"] = "Lista de llamadas";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CONCERNED_ACCOUNT"] = "Cuenta de que se trate";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATA"] = "Data / razón / Note";
-$GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE"] = "Fecha / Tipo de acción";
+$GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE"] = "Tipo de acción";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_DELETE_ACTION"] = "Borrar acciones";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_MODERATOR"] = "Moderador";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_MSG_DELETED_OK"] = "La acción de la moderación ha sido eliminado.";
@@ -191,6 +191,8 @@ $GLOBALS["STR_ADMIN_COMMANDER_ORDERED_PRODUCT"] = "Producto solicitado";
 $GLOBALS["STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST"] = "Lista de productos encargados";
 $GLOBALS["STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT"] = "Número de órdenes encontradas";
 $GLOBALS["STR_ADMIN_COMMANDER_PAYMENT_DATE"] = "Fecha de pago de la factura (DD/MM/AAAA)";
+$GLOBALS["STR_ADMIN_COMMANDER_DELIVERY_DATE"] = "Fecha de entrega de la orden (MM-DD-AAAA)";
+$GLOBALS["STR_ADMIN_COMMANDER_INVOICE_DATE"] = "fecha de la factura ";
 $GLOBALS["STR_ADMIN_COMMANDER_PAYMENT_MEAN_EXPLAIN"] = "Los métodos de pago están disponibles para este comando, porque la cantidad es cero";
 $GLOBALS["STR_ADMIN_COMMANDER_PRICES_MUST_BE_IN_ORDER_CURRENCY"] = "Los precios deben ser cotizados en la moneda seleccionada.";
 $GLOBALS["STR_ADMIN_COMMANDER_PRODUCT_LISTED_PRICE"] = "Precio sin descuentos";
@@ -256,7 +258,9 @@ $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "El color <b>%s</b> se ha cre
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_DELETED"] = "El color <b>%s</b> ha sido eliminado.";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_UPDATED"] = "Cambia el color %s se han tenido en cuenta.";
 $GLOBALS["STR_ADMIN_COULEURS_NO_COLOR_FOUND"] = "No hay color almacenada en la base de datos.";
+$GLOBALS["STR_ADMIN_CREATE_BILL_NUMBER_BEFORE"] = "Enlaces a las facturas estarán disponibles después de la escritura de un número de factura para este pedido.";
 $GLOBALS["STR_ADMIN_CREATION_DATE"] = "Fecha de creación";
+$GLOBALS["STR_ADMIN_ORDER_CREATION_DATE"] = "Fecha de creación de la orden";
 $GLOBALS["STR_ADMIN_CUSTOM_ATTRIBUTES"] = "Atributos personalizados";
 $GLOBALS["STR_ADMIN_CUSTOMIZE_APPEARANCE"] = "ASPECTO PERSONAL";
 $GLOBALS["STR_ADMIN_DATE"] = "Fecha (DD/MM/AAAA)";
@@ -279,6 +283,7 @@ $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "DEMOSTRACION: Envío de mensaje
 $GLOBALS["STR_ADMIN_DEMO_WARNING"] = "DEMOSTRACION: Usted está conectado como Administrador de demostración, se puede ver los datos, pero no cambiar";
 $GLOBALS["STR_ADMIN_DESCRIPTION"] = "Descripción";
 $GLOBALS["STR_ADMIN_DETECTED"] = "Se ha detectado";
+$GLOBALS["STR_ADMIN_DIAPORAMA_MSG_DELETED_OK"] = "L'image du diaporama : <b>%s</b>a été effacé du serveur avec succès.";
 $GLOBALS["STR_ADMIN_DIRECTORY"] = "Carpeta";
 $GLOBALS["STR_ADMIN_DISCONNECT"] = "Cerrar sesión";
 $GLOBALS["STR_ADMIN_DISCOUNT"] = "Descuento";
@@ -477,7 +482,7 @@ $GLOBALS["STR_ADMIN_LEGAL_TITLE"] = "Administrar Información legal";
 $GLOBALS["STR_ADMIN_LESS_THAN"] = "Abajo";
 $GLOBALS["STR_ADMIN_LEVEL"] = "Level";
 $GLOBALS["STR_ADMIN_LINK"] = "Link (http://www.exemple.com)";
-$GLOBALS["STR_ADMIN_LIVRAISONS_EXCEL_EXPORT"] = "Detalles de pedidos de exportación en formato Excel";
+$GLOBALS["STR_ADMIN_LIVRAISONS_EXCEL_EXPORT"] = "Detalles de pedidos de exportación en formato CSV";
 $GLOBALS["STR_ADMIN_LIVRAISONS_EXPLAIN"] = "El símbolo %s muestra los comandos para que la cuenta ha sido actualizado desde la fecha de la orden";
 $GLOBALS["STR_ADMIN_LIVRAISONS_FORMAT_EXPLAIN"] = "El archivo exportado se codifica como %s y los valores están separados por pestañas";
 $GLOBALS["STR_ADMIN_LIVRAISONS_NO_ORDER_FOUND"] = "No hay pedidos para este período de MET.";
@@ -506,6 +511,7 @@ $GLOBALS["STR_ADMIN_META_PAGE_TITLE"] = "Administración de metástasis";
 $GLOBALS["STR_ADMIN_META_TITLE_EXPLAIN"] = "Su título aparecerá en la barra superior del navegador.";
 $GLOBALS["STR_ADMIN_META_TITLE"] = "Meta para SEO - Título de la página";
 $GLOBALS["STR_ADMIN_META_UPDATE"] = "Editar esta meta";
+$GLOBALS["STR_ADMIN_MENU_GLOBAL_PROMOTION_PERCENT_BY_THRESHOLD"] = "Gestione umbral promociones global";
 $GLOBALS["STR_ADMIN_MENU_HOME_BACK"] = "Home Administration";
 $GLOBALS["STR_ADMIN_MENU_HOME_FRONT"] = "Home Store";
 $GLOBALS["STR_ADMIN_MENU_HOME_TITLE"] = "Home Administration";
@@ -698,10 +704,14 @@ $GLOBALS["STR_ADMIN_NOTA_BENE"] = "NB";
 $GLOBALS["STR_ADMIN_NOTE"] = "Nota";
 $GLOBALS["STR_ADMIN_OFFLINE"] = "Pendiente";
 $GLOBALS["STR_ADMIN_ONLINE"] = "Online";
+$GLOBALS['STR_ADMIN_ORDER_DUPLICATE'] = "Duplicar el orden";
+$GLOBALS['STR_ADMIN_ORDER_DUPLICATE_WARNING'] = "Cuando la duplicación de Orden, la acción no se toma en cuenta.";
+$GLOBALS["STR_ADMIN_ORDER_DATE_FIELD_FILTER"] = "Fecha en la que aplicar el filtro";
 $GLOBALS["STR_ADMIN_OUR_SELECTION"] = "Nuestra Selección";
 $GLOBALS["STR_ADMIN_OVER_TITLE"] = "El título (que aparece por encima del título en caracteres normales)";
 $GLOBALS["STR_ADMIN_PAIEMENT_ADD_PAYMENT_MEAN"] = "Añadir un pago";
 $GLOBALS["STR_ADMIN_PAIEMENT_ALLOW_REIMBURSMENTS"] = "Permitir a las restituciones";
+$GLOBALS["STR_ADMIN_PAIEMENT_DATE"] = "Fecha del pago";
 $GLOBALS["STR_ADMIN_PAIEMENT_EXPLAIN"] = "PayPal y Moneybookers en realidad sólo se activará si la cuenta de correo electrónico está introducido en la página comerciante href=\"{$GLOBALS['administrer_url']}/sites.php\"> <a configuración del sitio</a> ";
 $GLOBALS["STR_ADMIN_PAIEMENT_FORM_TITLE"] = "Agregar o editar un medio de pago";
 $GLOBALS["STR_ADMIN_PAIEMENT_MSG_DELETED_OK"] = "El método de pago <b> %s</b> ha sido eliminado.";
@@ -811,7 +821,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO"] = "Mostrar el precio por k
 $GLOBALS["STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER"] = "Mostrar el precio por litro";
 $GLOBALS["STR_ADMIN_PRODUITS_DOWNLOAD_PRODUCTS_HEADER"] = "PRODUCTOS VENDIDOS PARA DESCARGAR";
 $GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE_WARNING"] = "Cuando la duplicación de productos, la acción no se toma en cuenta.";
-$GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE"] = "Duplicar producto";
+$GLOBALS["STR_ADMIN_PRODUITS_DUPLICATE"] = "Duplicar el producto";
 $GLOBALS["STR_ADMIN_PRODUITS_EAN_CODE"] = "Código EAN 8/13, o el código UPC";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY"] = "Debe seleccionar al menos una categoría para su producto.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_NAME"] = "Debe introducir un nombre de producto.";
@@ -826,7 +836,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_FLASH_PRICE"] = "Precio de Venta Flash";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_SALE_EXPLAIN"] = "El flash se activa si los precios un precio positivo y una fecha de finalización en el futuro se identifican. Destello precios no se ven afectados por las promociones. La configuración será considerada sólo si el módulo está habilitado en la configuración del sitio.";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_SALE"] = "VENTA FLASH";
 $GLOBALS["STR_ADMIN_PRODUITS_FLASH_START_DATE"] = "Empezar a vender flash";
-$GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN"] = "Esta opción nos permite ofrecer este producto a los clientes si tienen el número de puntos definidos en el campo de abajo.<br />Este producto está disponible para el usuario a través de la enlace \"Catálogo de Regalos \" en la sección \"Mi cuenta \".";
+$GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN"] = "Esta opción nos permite ofrecer este producto a los clientes si tienen el número de puntos definidos en el campo \"Puntos necesarios para comprar este regalo\" de abajo.<br />Este producto está disponible para el usuario a través de la enlace \"Mi lista de regalos\" en la sección \"Mi cuenta \".";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER"] = "REGALO DE PRODUCTOS";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED"] = "Puntos necesarios para comprar este regalo";
 $GLOBALS["STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED_SHORT"] = "Puntos";
@@ -966,7 +976,7 @@ $GLOBALS["STR_ADMIN_SITES_CATEGORY_COUNT_INDIVIDUAL"] = "individuales (una clase
 $GLOBALS["STR_ADMIN_SITES_CATEGORY_COUNT_METHOD"] = "Método para el recuento y la presentación de productos en una categoría Este parámetro también se aplica a los elementos y objetos.";
 $GLOBALS["STR_ADMIN_SITES_CENTER_BOTTOM"] = "medio-bajo";
 $GLOBALS["STR_ADMIN_SITES_CENTER_MIDDLE_HOME"] = "Home Environment Center";
-$GLOBALS["STR_ADMIN_SITES_CENTER_MIDDLE"] = "Media Center";
+$GLOBALS["STR_ADMIN_SITES_CENTER_MIDDLE"] = "Media center";
 $GLOBALS["STR_ADMIN_SITES_CENTER_TOP"] = "Media alta";
 $GLOBALS["STR_ADMIN_SITES_CLOUD_ZOOM"] = "Cloud Zoom (requiere jQuery)";
 $GLOBALS["STR_ADMIN_SITES_COMPARATOR_EXPLAIN"] = "Exportar a una comparación";
@@ -1356,7 +1366,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_DISPLAY_IMAGE_IN_PHOTODESK"] = "Mostrar la imag
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_TITLE"] = "Editar una cuenta de usuario";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_USER"] = "Editar Cuenta #%s";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION"] = "Descripción del evento";
-$GLOBALS["STR_ADMIN_UTILISATEURS_EXCEL_EXPORT"] = "Exportar todos los usuarios de Excel";
+$GLOBALS["STR_ADMIN_UTILISATEURS_EXCEL_EXPORT"] = "Exportar todos los usuarios por Excel";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILER_EXPLAIN"] = "El filtro en el idioma del usuario es obligatoria para el envío de múltiples";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILTER_MIN_SPENDING"] = "CA mínima total HT";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILTER_MAX_SPENDING"] = "CA total de HT máximo";
@@ -1474,9 +1484,10 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "Privado";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "No hay información";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "INFORMACIÓN ADICIONAL";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "IVA";
-$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato Excel con una línea por cada producto solicitado";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato CSV con una línea por cada producto solicitado";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exportar detalles de la orden en formato CSV con una línea por orden";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Nota:. Las tasas de incumplimiento se muestran en la moneda en que se efectuó la orden";
-$GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "No hay pedidos durante este período de MET.";
+$GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "No hay pedidos durante este período.";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "RESUMEN DE VENTAS / estado de pago";
 $GLOBALS["STR_ADMIN_VENTES_TITLE"] = "Informe de ventas";
 $GLOBALS["STR_ADMIN_VERSION"] = "Versión";
@@ -1773,7 +1784,7 @@ $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_DELETED_OK"] = "El grupo ha sido eliminado
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MAIN_TITLE"] = "Gestión de grupos";
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_CREATED_OK"] = "El grupo <b>%s</b> se ha creado.";
 $GLOBALS["STR_MODULE_GROUPS_ADMIN_MSG_UPDATED_OK"] = "Los cambios en grupo %s se ha tenido en cuenta.";
-$GLOBALS["STR_MODULE_KEKOLI_ADMIN_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato Excel para KEKOLI";
+$GLOBALS["STR_MODULE_KEKOLI_ADMIN_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato CSV para KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_RESULTS_TITLE"] = "Las ventas de exportación / KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_TITLE"] = "Las ventas de exportación / KEKOLI";
 $GLOBALS["STR_MODULE_KEKOLI_ADMIN_ONLY_DELIVERED"] = "Método de entrega diferente de \"shop Retiro\"";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: user_register_form.tpl 37979 2013-08-30 16:31:42Z gboussin $
 #}<h1 class="page_title">{{ STR_FIRST_REGISTER_TITLE }}</h1>
 <div class="user_register_form">
 	<p>{{ STR_FIRST_REGISTER_TEXT }}</p>
@@ -60,7 +60,7 @@
 				<input type="radio" name="civilite" value="Mlle"{% if civilite_mlle_issel %} checked="checked"{% endif %} />{{ STR_MLLE }}
 				<input type="radio" name="civilite" value="Mme"{% if civilite_mme_issel %} checked="checked"{% endif %} />{{ STR_MME }}
 				<input type="radio" name="civilite" value="M."{% if civilite_m_issel %} checked="checked"{% endif %} />{{ STR_M }}
-			</span>
+			</span>{{ gender_error }}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="prenom">{{ STR_FIRST_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -77,7 +77,7 @@
 {% if is_destockplus_module_active or is_algomtl_module_active %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
+			<span class="enregistrementdroite"><input type="url" class="champtexte" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="type">{{ STR_YOU_ARE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -133,16 +133,16 @@
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="telephone" name="telephone" value="{{ telephone|str_form_value }}" /></span>{{ telephone_error }}
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="telephone" name="telephone" value="{{ telephone|str_form_value }}" /></span>{{ telephone_error }}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="portable">{{ STR_PORTABLE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="portable" name="portable" value="{{ portable|str_form_value }}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="portable" name="portable" value="{{ portable|str_form_value }}" /></span>
 		</div>
 		{% if is_annonce_module_active %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="user_fax">{{ STR_FAX }} <span class="etoile"></span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="user_fax" name="user_fax" value="{{ fax|html_entity_decode_if_needed|str_form_value }}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="user_fax" name="user_fax" value="{{ fax|html_entity_decode_if_needed|str_form_value }}" /></span>
 		</div>
 		{% endif %}
 		<div class="enregistrement">
@@ -175,12 +175,11 @@
 		</div>
 		<div class="enregistrement">
 			{% if favorite_category %}
-			<span class="enregistrementgauche">
-			<label for="id_cat_1">{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementgauche"><label for="favorite_category">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite">
-					{{ favorite_category }}
-				{{ favorite_category_error }}
+				{{ favorite_category }}
 			</span>
+			{{ favorite_category_error }}
 			{% else %}
 			<span class="enregistrementgauche">
 			<label for="id_cat_1">{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -203,13 +202,19 @@
 					{{ favorite_category_3 }}
 				</select> {{ id_cat_3_error }}
 			</span>
-		</div>
 			{% endif %}
+		</div>
 		{% endif %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="origin">{{ STR_USER_ORIGIN }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} }}{{ origin_infos.error_text }}</span>
+			<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</span>
 		</div>
+		{% for f in specific_fields %}
+		<div class="enregistrement">
+			<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
+		</div>
+		{% endfor %}
 		{% if (captcha) %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>

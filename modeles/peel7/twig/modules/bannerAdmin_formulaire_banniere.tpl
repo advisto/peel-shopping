@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_formulaire_banniere.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: bannerAdmin_formulaire_banniere.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
@@ -31,7 +31,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_LINK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="lien" style="width:100%" value="{{ lien|str_form_value }}" /></td>
+			<td><input type="url" name="lien" style="width:100%" value="{{ lien|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT }}{{ STR_BEFORE_TWO_POINTS }}: <br /></td>
@@ -58,7 +58,7 @@
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_PLACE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="position" style="width:150px" value="{{ position|str_form_value }}" />
+				<input type="number" name="position" style="width:150px" value="{{ position|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
@@ -82,13 +82,13 @@
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_AD_PLACE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="annonce_number" style="width:150px" value="{{ annonce_number|str_form_value }}" />
+				<input type="number" name="annonce_number" style="width:150px" value="{{ annonce_number|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_AD_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="list_id" style="width:150px" value="{{ list_id }}" />
+				<input type="number" name="list_id" style="width:150px" value="{{ list_id }}" />
 			</td>
 		</tr>
 		<tr>
@@ -201,11 +201,11 @@
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_WIDTH }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="width" style="width:150px" value="{{ width|str_form_value }}" /></td>
+			<td><input type="number" name="width" style="width:150px" value="{{ width|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_HEIGHT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="height" style="width:150px" value="{{ height|str_form_value }}" /></td>
+			<td><input type="number" name="height" style="width:150px" value="{{ height|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td colspan="2">

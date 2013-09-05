@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 37236 2013-06-11 19:10:06Z sdelaporte $
+// $Id: display_caddie.php 37904 2013-08-27 21:19:26Z gboussin $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -392,9 +392,10 @@ if (!function_exists('affiche_resume_commande')) {
 	 * @param integer $id
 	 * @param boolean $affiche_statut
 	 * @param boolean $show_only_owned_by_current_user
+	 * @param boolean $show_payment_form
 	 * @return
 	 */
-	function affiche_resume_commande($id, $affiche_statut, $show_only_owned_by_current_user = true)
+	function affiche_resume_commande($id, $affiche_statut, $show_only_owned_by_current_user = true, $show_payment_form = false)
 	{
 		if(!empty($_SESSION['session_last_bill_viewed']) && $id == $_SESSION['session_last_bill_viewed']){
 			// L'utilisateur a payé une commande sans s'être connecté à son compte. On l'autorise à voir le résumé de sa commande
@@ -416,6 +417,7 @@ if (!function_exists('affiche_resume_commande')) {
 			$order_infos = get_order_infos_array($commande);
 			$tpl = $GLOBALS['tplEngine']->createTemplate('resume_commande.tpl');
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD', $GLOBALS['STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD']);
 			$tpl->assign('STR_ORDER_DETAIL', $GLOBALS['STR_ORDER_DETAIL']);
 			$tpl->assign('STR_ORDER_NUMBER', $GLOBALS['STR_ORDER_NUMBER']);
 			$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
@@ -528,6 +530,9 @@ if (!function_exists('affiche_resume_commande')) {
 				}
 			}
 			$tpl->assign('is_conditionnement_module_active', is_conditionnement_module_active());
+			if (is_download_module_active()) {
+				$tpl->assign('downloadable_file_link_array', get_downloadable_file_link(array('order_id' => $id)));
+			}
 			$products_data = array();
 			$product_infos_array = get_product_infos_array_in_order($id, $commande->devise, $commande->currency_rate);
 			foreach ($product_infos_array as $this_ordered_product) {
@@ -538,7 +543,7 @@ if (!function_exists('affiche_resume_commande')) {
 					// Les produits sont conditionnés sous forme de lot
 					if(!empty($this_ordered_product['conditionnement'])){
 						$qte_total = intval($this_ordered_product['quantite']) * $this_ordered_product['conditionnement'];
-					}else{
+					} else {
 						$qte_total = $this_ordered_product['quantite'];
 					}
 				}
@@ -546,7 +551,7 @@ if (!function_exists('affiche_resume_commande')) {
 					'reference' => $this_ordered_product['reference'],
 					'product_text' => str_replace("\n", '<br />', $this_ordered_product["product_text"]),
 					'prix' => fprix($this_ordered_product['prix'], true, $commande->devise, true, $commande->currency_rate),
-					'conditionnement' => (!empty($product_object->conditionnement)?$product_object->conditionnement:'-'),
+					'conditionnement' => (!empty($this_ordered_product['conditionnement'])?$this_ordered_product['conditionnement']:'-'),
 					'conditionnement_qty' => vb($qte_total),
 					'quantite' => $this_ordered_product['quantite'],
 					'total_prix' => fprix($this_ordered_product['total_prix'], true, $commande->devise, true, $commande->currency_rate),
@@ -566,6 +571,9 @@ if (!function_exists('affiche_resume_commande')) {
 				);
 			}
 			$tpl->assign('products_data', $products_data);
+			if($show_payment_form) {
+				$tpl->assign('payment_form', get_payment_form($id), $commande->paiement);
+			}
 			$tpl->assign('STR_LIST_PRODUCT', $GLOBALS['STR_LIST_PRODUCT']);
 			$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
 			$tpl->assign('STR_PRODUCT', $GLOBALS['STR_PRODUCT']);
@@ -592,7 +600,7 @@ if (!function_exists('affiche_liste_commandes')) {
 	{
 		$nb = 30;
 		$output = '';
-		// Charge la liste des commandes et les affiche.
+		// Charge la liste des commandes avec un numéro de commande et les affiche.
 		$sql = "SELECT *
 			FROM peel_commandes
 			WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'
@@ -616,12 +624,13 @@ if (!function_exists('affiche_liste_commandes')) {
 					'href' =>  get_current_url(false) . '?mode=details&id=' . $order['id'] . '&timestamp=' . urlencode($order['o_timestamp']),
 					'info_src' => $GLOBALS['wwwroot'] . '/icones/info.gif',
 					'pdf_src' => $GLOBALS['wwwroot'] . '/images/view_pdf.gif',
-					'facture_href' => $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . $order['code_facture'] . '&mode=facture',
-					'id' => $order['id'],
+					'facture_href' => (!empty($order['numero'])? $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . $order['code_facture'] . '&mode=facture':''),
+					'numero' => $order['numero'],
 					'date' => get_formatted_date($order['o_timestamp']),
 					'payment_status_name' => get_payment_status_name($order['id_statut_paiement']),
 					'delivery_status_name' => get_delivery_status_name($order['id_statut_livraison']),
 					'prix' => fprix($order['montant'], true, $order['devise'], true, $order['currency_rate']),
+					'paid' => in_array($order['id_statut_paiement'], array(2,3))
 				);
 			}
 			$tpl->assign('orders', $orders);
@@ -690,7 +699,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('caddie_products_summary_table.tpl');
 		$tpl->assign('taxes_displayed', $taxes_displayed);
-		$tpl->assign('suppression_src', $GLOBALS['wwwroot'] . '/images/suppression.png');
+		$tpl->assign('suppression_src', $GLOBALS['repertoire_images'] . '/suppression.png');
 		$tpl->assign('no_photo_src', $GLOBALS['repertoire_upload'] . '/' . $GLOBALS['site_parameters']['default_picture']);
 		$tpl->assign('with_form_fields', $with_form_fields);
 		$tpl->assign('is_conditionnement_module_active', is_conditionnement_module_active());

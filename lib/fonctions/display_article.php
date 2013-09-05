@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: display_article.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -35,12 +35,19 @@ if (!function_exists('get_article_details_html')) {
 			$tpl->assign('titre', $article['titre']);
 			$tpl->assign('is_offline', ($article['etat'] == 0));
 			$tpl->assign('STR_OFFLINE_ART', $GLOBALS['STR_OFFLINE_ART']);
-			
-			if (!empty($article['image1'])){
-				$this_thumb = thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-				$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
+
+			if (!empty($article['image1'])) {
+				if (pathinfo($article['image1'], PATHINFO_EXTENSION) == 'pdf') {
+					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
+				} else {
+					$this_thumb = thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
+				}
+				$tpl->assign('main_image', array(
+					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($article['image1']),
+					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
+					'is_pdf' => !(pathinfo($article['image1'], PATHINFO_EXTENSION) != 'pdf')
+				));
 			}
-			
 			$tpl->assign('chapo', $article['chapo']);
 			$tpl->assign('texte', $article['texte']);
 			
@@ -189,8 +196,16 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('offline_rub_txt', $GLOBALS['STR_OFFLINE_RUB']);
 			}
 			if (!empty($rowrub['image'])) {
-				$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-				$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
+				if (pathinfo($rowrub['image'], PATHINFO_EXTENSION) == 'pdf') {
+					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
+				} else {
+					$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
+				}
+				$tpl->assign('main_image', array(
+					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($rowrub['image']),
+					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
+					'is_pdf' => !(pathinfo($rowrub['image'], PATHINFO_EXTENSION) != 'pdf')
+				));
 			}
 			$tpl->assign('description', $rowrub['description']);
 			if($rowrub['technical_code'] == 'clients' && is_clients_module_active()) {
@@ -209,6 +224,9 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('user_picture', get_user_picture('exhibitors'));
 				$tpl->assign('articles_html', get_articles_html($result_articles_home_tradefaire['id']));
 			}
+		}
+		if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
+			$tpl->assign('diaporama', get_diaporama('content_category', $rubid));
 		}
 		if ($GLOBALS['site_parameters']['category_count_method'] == 'global' || (empty($rubid) && empty($rowrub))) {
 			$tpl->assign('rubriques_sons_html', get_rubriques_sons_html($rubid));

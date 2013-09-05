@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an		|
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: commande_html.php 37904 2013-08-27 21:19:26Z gboussin $
 include("../../configuration.inc.php");
 
 if (!is_module_factures_html_active() || is_user_bot()) {
@@ -204,32 +204,12 @@ if ($commande = fetch_object($qid_commande)) {
 			$output .= '
 				<p><b>' . $GLOBALS['STR_MODULE_FACTURES_WARNING_PARTIAL_PAYMENT'] . ' ' . fprix($amount_to_pay, true, vb($commande->devise), true, get_float_from_user_input(vn($commande->currency_rate))) . ' ' . $GLOBALS['STR_TTC'] . '</p>';
 		}
+		// Affichage du mode de paiement défini pour cette commande, ou de tous les modes de paiement si aucun défini (seulement si commande passée dans l'administration)
 		$output .= '
 				<table class="full_width" cellpadding="10">
-';
-		if (!empty($commande->paiement)) {
-			// Affichage du mode de paiement défini pour cette commande
-			$output .= '
 					<tr>
 						<td colspan="2">' . get_payment_form($commande->id, $commande->paiement, false, $amount_to_pay, false) . '</td>
-					</tr>';
-		} else {
-			$sql_paiement = 'SELECT p.technical_code
-				FROM peel_paiement p
-				WHERE p.etat = "1"
-				ORDER BY p.position';
-			$res_paiement = query($sql_paiement);
-			while ($tab_paiement = fetch_assoc($res_paiement)) {
-				if (!empty($tab_paiement['technical_code'])) {
-					// Attention, l'url du formulaire de paiement par CB doit être spécifié dans le back office de certain systeme de paiement, notamment ogone.
-					$output .= '
-					<tr>
-						<td colspan="2"><hr />' . get_payment_form($commande->id, $tab_paiement['technical_code'], false, $amount_to_pay, false) . '</td>
-					</tr>';
-				}
-			}
-		}
-		$output .= '
+					</tr>
 				</table>
 ';
 	}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 37007 2013-05-28 22:07:04Z gboussin $
+// $Id: format.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -223,9 +223,10 @@ function get_float_from_user_input($string, $from_currency_rate = 1)
  * @param boolean $addslashes
  * @param boolean $allow_escape_single_quote
  * @param boolean $allow_escape_double_quote
+ * @param boolean $skip_endline
  * @return
  */
-function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true)
+function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true, $skip_endline = true)
 {
 	if ($addslashes) {
 		$string = addslashes($string);
@@ -238,7 +239,12 @@ function filtre_javascript($string, $addslashes = true, $allow_escape_single_quo
 			$string = str_replace('\"', '&quot;', $string);
 		}
 	}
-	$string = str_replace(array("\t", "\r\n", "\n"), array(" ", " ", " "), $string);
+	if($skip_endline) {
+		$string = str_replace(array("\t", "\r\n", "\n"), array(" ", " ", " "), $string);
+	} else {
+		// Exécution des sauts de lignes dans alert() par exemple
+		$string = str_replace(array("\t", "\r\n", "\n"), array(" ", '\n', '\n'), $string);
+	}
 	return $string;
 }
 
@@ -573,7 +579,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		// On rajoute les tags génériques au site
 		$template_tags['SITE'] = $GLOBALS['site'];
 		$template_tags['SITE_NAME'] = $GLOBALS['site'];
-		$template_tags['WWWROOT'] = $GLOBALS['wwwroot'];
+		$template_tags['WWWROOT'] = $GLOBALS['wwwroot'].'/';
 		$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
 		$template_tags['CURRENT_URL'] = get_current_url(false);
 		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
@@ -612,20 +618,18 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			}
 			$template_tags['AD_CATEGORIES_OPTIONS'] = $tag_replace;
 		}
-		if(is_annonce_module_active()) {
-			$tag_begin = -1;
-			while (String::strpos($text, '[RSS=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[RSS=', $tag_begin + 1)) !== false) {
-				// Traitement pour chaque tag RSS
-				// Il y a au moins un bon quote à remplacer
-				// on se positionne sur la dernière imbrication
-				$tag_replace = '';
-				$tag_begin = String::strpos($text, '[RSS=', $tag_begin + 1);
-				$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
-				$tag_name_array = explode('=', $this_tag, 2);
-				// On remplace par le contenu du flux
-				if(!empty($tag_name_array[1])){
-					$template_tags[$this_tag] = get_rss_feed_content($tag_name_array[1]);
-				}
+		$tag_begin = -1;
+		while (String::strpos($text, '[RSS=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[RSS=', $tag_begin + 1)) !== false) {
+			// Traitement pour chaque tag RSS
+			// Il y a au moins un bon quote à remplacer
+			// on se positionne sur la dernière imbrication
+			$tag_replace = '';
+			$tag_begin = String::strpos($text, '[RSS=', $tag_begin + 1);
+			$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
+			$tag_name_array = explode('=', $this_tag, 2);
+			// On remplace par le contenu du flux
+			if(!empty($tag_name_array[1])){
+				$template_tags[$this_tag] = get_rss_feed_content($tag_name_array[1]);
 			}
 		}
 	}

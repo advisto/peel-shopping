@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_form_contact_user.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: commercialeAdmin_form_contact_user.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}">
 	<table class="full_width">
 		<tr>
@@ -86,35 +86,28 @@
 </form>
 {% endif %}
 {% if are_results %}
-<form method="post" action="{{ modif_action }}">
-	<table class="full_width">
+<form id="contact_planified" method="post" action="{{ modif_action }}">
+	<table id="tablesForm" class="full_width">
+		{{ links_header_row }}
+		{% for res in results %}
+		{{ res.tr_rollover }}
+			<td style="width:30px; text-align:center;">
+				<input type="hidden" name="mode" value="suppr_contact_planified" />
+				<input name="form_delete_admins_contacts[]" type="checkbox" value="{{ res.id|str_form_value }}" id="cbx_{{ res.id }}" />
+				<a href="{{ res.href|escape('html') }}"><img alt="edit" src="{{ edit_src|escape('html') }}" /></a>
+			</td>
+			<td style="width:100px;text-align:center;">{{ res.pseudo }}</td>
+			<td style="width:100px;text-align:center;">{{ res.date }}</td>
+			<td style="width:100px;text-align:center;">{{ res.reason }}</td>
+			<td style="width:200px;text-align:center;">{{ res.comments }}</td>
+		</tr>
+		{% endfor %}
 		<tr>
-			<td colspan="2">
-				<a name="contact_planified"></a>
-				<table id="tablesForm" class="full_width">
-					{{ links_header_row }}
-					{% for res in results %}
-					{{ res.tr_rollover }}
-						<td style="width:30px; text-align:center;">
-							<input type="hidden" name="mode" value="suppr_contact_planified" />
-							<input name="form_delete_admins_contacts[]" type="checkbox" value="{{ res.id|str_form_value }}" id="cbx_{{ res.id }}" />
-							<a href="{{ res.href|escape('html') }}"><img alt="edit" src="{{ edit_src|escape('html') }}" /></a>
-						</td>
-						<td style="width:100px;text-align:center;">{{ res.pseudo }}</td>
-						<td style="width:100px;text-align:center;">{{ res.date }}</td>
-						<td style="width:100px;text-align:center;">{{ res.reason }}</td>
-						<td style="width:200px;text-align:center;">{{ res.comments }}</td>
-					</tr>
-					{% endfor %}
-					<tr>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td colspan="5" class="center">
-							<input name="contact_planified_delete" style="width:80px" type="submit" value="{{ STR_DELETE|str_form_value }}" class="bouton" />
-						</td>
-					</tr>
-				</table>
+			<td colspan="5">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="5" class="center">
+				<input name="contact_planified_delete" style="width:80px" type="submit" value="{{ STR_DELETE|str_form_value }}" class="bouton" />
 			</td>
 		</tr>
 	</table>

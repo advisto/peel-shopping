@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_filtre.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: bannerAdmin_filtre.tpl 37960 2013-08-29 16:47:44Z gboussin $
 #}<form method="post" action="{{ action|escape('html') }}">
 	<table class="full_width">
 		<tr>
-			<td class="entete" colspan="11">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</td>
+			<td class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</td>
 		</tr>
 		<tr>
-			<td colspan="11" class="input_search">
+			<td class="input_search">
 				<table class="full_width" class="center">
 					<tr>
 						<td>{{ STR_ADMIN_SEARCH_IN_TITLE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -42,7 +42,7 @@
 						<td><input type="text" class="datepicker" name="filter_date_fin" id="filter_date_fin" value="{{ filter_date_fin|str_form_value }}" /></td>
 						<td>
 							<select name="filter_etat">
-								<option value="-"{% if filter_etat == "-" }} selected="selected"{% endif %}>{{ STR_MODULE_BANNER_ADMIN_ALL }}</option>
+								<option value="-"{% if filter_etat == "-" %} selected="selected"{% endif %}>{{ STR_MODULE_BANNER_ADMIN_ALL }}</option>
 								<option value="1"{% if filter_etat == "1" %} selected="selected"{% endif %}>{{ STR_ADMIN_ONLINE }}</option>
 								<option value="0"{% if filter_etat == "0" %} selected="selected"{% endif %}>{{ STR_ADMIN_OFFLINE }}</option>
 							</select>
@@ -52,7 +52,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="4" align="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="bouton" value="{{ STR_SEARCH|str_form_value }}" /></p></td>
+			<td align="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="bouton" value="{{ STR_SEARCH|str_form_value }}" /></p></td>
 		</tr>
 	</table>
 </form>

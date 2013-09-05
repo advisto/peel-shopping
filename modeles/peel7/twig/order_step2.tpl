@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step2.tpl 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: order_step2.tpl 37943 2013-08-29 09:31:55Z gboussin $
 #}<h2 class="order_step2">&nbsp;{{ STR_STEP2 }}</h2>
 <div class="totalcaddie">
 	<p>{{ STR_DATE }}{{ STR_BEFORE_TWO_POINTS }}: {{ date }}</p>
@@ -64,7 +64,7 @@
 		{% endif %}
 		{{ caddie_products_summary_table }}
 		<div id="center">
-		<input type="submit" value="{{ STR_ORDER|str_form_value }}" class="clicbouton" />
+		<input type="submit" value="{{ STR_ORDER|str_form_value }}" class="bouton_order" />
 		</div>
 	</form>
 </div>

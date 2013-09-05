@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 36927 2013-05-23 16:15:39Z gboussin $
+// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -49,7 +49,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 
 		if (!empty($recherche['ad_date'])) {
 			// Gestion en fonction de la date
-			$sql_cond[] = ' timestamp LIKE "' . get_mysql_date_from_user_input(vb($recherche['ad_date'])) . '%" ';
+			$sql_cond[] = ' timestamp LIKE "' . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($recherche['ad_date']))) . '%" ';
 		}
 
 		if (!empty($recherche['form_contact_planified_reason'])) {
@@ -70,9 +70,9 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 		' . (!empty($sql_cond)?'WHERE ' . implode(' AND ', $sql_cond):'');
 
 	$Links = new Multipage($query_contact, 'liste_contact');
-	$results_array = $Links->Query();
 	$HeaderTitlesArray = array(' ', $GLOBALS["STR_BY"], $GLOBALS["STR_MODULE_COMMERCIAL_ADMIN_FORECASTED_DATE"], $GLOBALS["STR_MODULE_COMMERCIAL_ADMIN_LAST_CONTACT"], $GLOBALS["STR_MODULE_COMMERCIAL_ADMIN_PERSON_TO_CONTACT"], $GLOBALS["STR_ADMIN_REASON"], $GLOBALS["STR_STATUS"], $GLOBALS["STR_COMMENTS"], $GLOBALS["STR_MODULE_COMMERCIAL_ADMIN_TAKE_CONTACT"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$results_array = $Links->Query();
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/commercialeAdmin_list_contact.tpl');
 	$tpl->assign('action', get_current_url(false));
@@ -95,7 +95,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl_admin_options = array();
 	$sql = "SELECT *
 		FROM peel_utilisateurs
-		WHERE priv='admin'";
+		WHERE priv LIKE 'admin%'";
 	$res = query($sql);
 	// Recherche des profils administrateur
 	while ($account_admin = fetch_assoc($res)) {
@@ -187,7 +187,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl->assign('STR_MODULE_COMMERCIAL_ADMIN_NO_CONTACT', $GLOBALS['STR_MODULE_COMMERCIAL_ADMIN_NO_CONTACT']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 	$tpl->assign('STR_FIRST_NAME', $GLOBALS['STR_FIRST_NAME']);
-	$tpl->assign('STR_LOGIN', $GLOBALS['STR_LOGIN']);
+	$tpl->assign('STR_ADMIN_LOGIN', $GLOBALS['STR_ADMIN_LOGIN']);
 	$tpl->assign('STR_MODULE_COMMERCIAL_ADMIN_EDIT_ACCOUNT', $GLOBALS['STR_MODULE_COMMERCIAL_ADMIN_EDIT_ACCOUNT']);
 	$tpl->assign('STR_NUMBER', $GLOBALS['STR_NUMBER']);
 	$tpl->assign('STR_ADMIN_UTILISATEURS_SEND_EMAIL', $GLOBALS['STR_ADMIN_UTILISATEURS_SEND_EMAIL']);
@@ -255,12 +255,14 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	$query_contact = 'SELECT acp.*, u.pseudo, u.id_utilisateur
 		FROM peel_admins_contacts_planified acp
 		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = acp.admin_id
-		WHERE user_id="' . intval(vn($id_user)) . '"
-		ORDER BY timestamp ASC';
+		WHERE user_id="' . intval(vn($id_user)) . '"';
 	$Links = new Multipage($query_contact, 'liste_contact');
-	$results_array = $Links->Query();
 	$HeaderTitlesArray = array(' ', $GLOBALS["STR_ADMIN_ADMINISTRATOR"], $GLOBALS["STR_DATE"], $GLOBALS["STR_ADMIN_REASON"], $GLOBALS["STR_COMMENTS"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = 'timestamp';
+	$Links->SortDefault = 'ASC';
+	$Links->allow_get_sort = false;
+	$results_array = $Links->Query();
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/commercialeAdmin_form_contact_user.tpl');
 	$tpl->assign('action', get_current_url(false));

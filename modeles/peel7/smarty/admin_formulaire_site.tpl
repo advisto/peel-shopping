@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 37098 2013-06-01 22:27:03Z gboussin $
+// $Id: admin_formulaire_site.tpl 37943 2013-08-29 09:31:55Z gboussin $
 *}<form method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<table class="main_table">
@@ -297,7 +297,7 @@
 		</tr>
 		<tr>
 			<td style="width:25%">{$STR_ADMIN_SITES_GLOBAL_DISCOUNT_PERCENTAGE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" maxlength="8" type="number" name="global_remise_percent" value="{$global_remise_percent|str_form_value}" /> % </td>
+			<td><input style="width:100px" maxlength="8" type="text" name="global_remise_percent" value="{$global_remise_percent|str_form_value}" /> % </td>
    	 	</tr>
 
 		<tr>
@@ -378,11 +378,11 @@
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="number" name="seuil_total" value="{$seuil_total|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
+			<td><input style="width:100px" type="text" name="seuil_total" value="{$seuil_total|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_RESELLER_FRANCO_LIMIT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:100px" type="number" name="seuil_total_reve" value="{$seuil_total_reve|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
+			<td><input style="width:100px" type="text" name="seuil_total_reve" value="{$seuil_total_reve|str_form_value}" /> {$site_symbole} {$STR_TTC} - {$STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_COST_METHOD}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -1053,7 +1053,7 @@
 			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="module_conditionnement" value="1" {if $module_conditionnement == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_conditionnement" value="0" {if $module_conditionnement == 1} checked="checked"{/if} /> {$STR_NO}
+				<input type="radio" name="module_conditionnement" value="0" {if $module_conditionnement == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
 		{else}
@@ -1089,7 +1089,7 @@
 			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="sign_in_twitter" value="1" {if $sign_in_twitter == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="sign_in_twitter" value="0" {if $sign_in_twitter == 1} checked="checked"{/if} /> {$STR_NO}
+				<input type="radio" name="sign_in_twitter" value="0" {if $sign_in_twitter == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
 		<tr>

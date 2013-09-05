@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 37156 2013-06-05 12:42:24Z sdelaporte $
+// $Id: change_params.php 37995 2013-09-02 17:55:15Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -41,7 +41,7 @@ if (!empty($_POST)) {
 			WHERE id_utilisateur!='" . intval($frm['id_utilisateur']) . "' AND email = '" . nohtml_real_escape_string($frm['email']) . "'")) > 0)) {
 		$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_STILL']);
 	}
-	if ((num_rows(query("SELECT 1
+	if (isset($frm['pseudo']) && (num_rows(query("SELECT 1
 			FROM peel_utilisateurs
 			WHERE id_utilisateur!='" . intval($frm['id_utilisateur']) . "' AND pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'")) > 0)) {
 		$form_error_object->add('pseudo', $GLOBALS['STR_ERR_NICKNAME_STILL']);
@@ -53,7 +53,8 @@ if (!empty($_POST)) {
 	if (isset($frm['siret']) && vb($frm['pays']) == 1 && !preg_match("#([0-9]){9,14}#", str_replace(array(' ', '.'), '', $frm['siret']))) {
 		$form_error_object->add('siret', $GLOBALS['STR_ERR_SIREN']);
 	}
-	if (empty($frm['lang'])) {
+	if (empty($frm['lang']) && isset($frm['lang'])) {
+		// Ce champ n'est défini que si le site est en plusieurs langues
 		$form_error_object->add('lang', $GLOBALS['STR_EMPTY_FIELD']);
 	}
 	if (is_destockplus_module_active() || is_algomtl_module_active()) {
@@ -72,12 +73,12 @@ if (!empty($_POST)) {
 	}
 	if (is_annonce_module_active()) {
 		// Le choix d'une categorie favorite est obligatoire
-		if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_categories']) || count($frm['id_categories']) == 0) {
+		if (!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && (empty($frm['id_categories']) || count($frm['id_categories']) == 0)) {
 			$form_error_object->add('favorite_category_error', $GLOBALS['STR_ERR_FIRST_CHOICE']);
 		} elseif (empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) && empty($frm['id_cat_1'])) {
 			$form_error_object->add('id_cat_1', $GLOBALS['STR_ERR_FIRST_CHOICE']);
 		}
-		$add_pseudo_error = (empty($frm['pseudo']) || searchKeywordFiltersInLogin($frm['pseudo']) || String::strpos($frm['pseudo'], '@') !== false) ;
+		$add_pseudo_error = (isset($frm['pseudo']) && (empty($frm['pseudo']) || searchKeywordFiltersInLogin($frm['pseudo']) || String::strpos($frm['pseudo'], '@') !== false));
 		$add_mail_error = (empty($frm['email']) || searchKeywordFiltersInMail($frm['email'])) ;
 	} else {
 		$add_pseudo_error = (empty($frm['pseudo']) || String::strpos($frm['pseudo'], '@') !== false);
