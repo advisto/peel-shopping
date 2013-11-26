@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: get_sitemap.php 39030 2013-11-26 08:59:31Z gboussin $
+// $Id: get_sitemap.php 39033 2013-11-26 09:38:30Z gboussin $
 
 define('LOAD_NO_OPTIONAL_MODULE', true);
 include("configuration.inc.php");
@@ -22,13 +22,15 @@ $sitemap_filename = $GLOBALS['dirroot'] . "/sitemap_" . substr(md5(get_site_doma
 // retourne le fichier sitemap correspondant au sous-domaine/domaine utilisé.
 if (!empty($_GET['file']) && $_GET['file'] == 'sitemap' && file_exists($sitemap_filename)) {
 	$filename = $sitemap_filename;
+	$content_type = 'application/xml';
 } elseif (!empty($_GET['file']) && $_GET['file'] == 'urllist' && file_exists($urrlist_filename)) {
 	$filename = $urrlist_filename;
+	$content_type = 'text/plain';
 } else {
 	// appel incorrect ou fichier inexistant
 	die();
 }
 
-output_xml_http_export_header($_GET['file'], 'utf-8', 'application/xml');
+output_xml_http_export_header($_GET['file'], 'utf-8', $content_type);
 echo file_get_contents($filename);
 ?>
