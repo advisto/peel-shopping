@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: pays.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -80,9 +80,9 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -316,9 +316,10 @@ function affiche_liste_pays()
 	}
 	$tpl->assign('options', $tpl_options);
 
-	$result = query("SELECT *
-		FROM peel_pays
-		ORDER BY position ASC, pays_" . $_SESSION['session_langue'] . " ASC");
+	$result = query("SELECT p.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
+		FROM peel_pays p
+		LEFT JOIN peel_zones z ON z.id=p.zone
+		ORDER BY p.position ASC, p.pays_" . $_SESSION['session_langue'] . " ASC");
 
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
@@ -326,16 +327,13 @@ function affiche_liste_pays()
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
-			$res_zone = query("SELECT nom_" . $_SESSION['session_langue'] . " AS nom
-				FROM peel_zones
-				WHERE id = '" . intval($ligne['zone']) . "'");
-			$obj_zone = fetch_assoc($res_zone);
-			$zone = String::html_entity_decode_if_needed($obj_zone['nom']);
+			$zone = String::html_entity_decode_if_needed($ligne['zone_name']);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => $ligne['pays_' . $_SESSION['session_langue']],
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'pays' => $ligne['pays_' . $_SESSION['session_langue']],
+				'flag' => getFlag($ligne['iso'], $ligne['pays_' . $_SESSION['session_langue']]),
 				'zone' => vb($zone),
 				'position' => $ligne['position'],
 				'etat_onclick' => 'change_status("countries", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',

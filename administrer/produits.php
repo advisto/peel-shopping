@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 37993 2013-09-02 16:46:19Z gboussin $
+// $Id: produits.php 38695 2013-11-14 14:20:16Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -177,9 +177,9 @@ switch (vb($_REQUEST['mode'])) {
 		$output .= affiche_liste_produits($_GET);
 		break;
 }
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -274,7 +274,7 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 	/* Construit la liste des catégories, présélectionne la catégorie racine */
 	construit_arbo_categorie($GLOBALS['categorie_options'], $frm['categories']);
 
-	return affiche_formulaire_produit($frm, $form_error_object);
+	return affiche_formulaire_produit($frm, $form_error_object, true);
 }
 
 /**
@@ -342,7 +342,9 @@ function affiche_formulaire_modif_produit($id, &$frm)
 		FROM peel_produits_references
 		WHERE produit_id = '" . intval($id) . "'");
 	$frm['references'] = array();
+	$frm['nb_produits'] = 0;
 	while ($ref = fetch_assoc($references)) {
+		$frm['nb_produits']++;
 		$frm['references'][] = $ref['reference_id'];
 	}
 	/* Charge les couleurs du produit */
@@ -385,6 +387,9 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	$GLOBALS['load_timepicker']=true;
 	if (empty($frm['default_image'])) {
 		$frm['default_image'] = 1;
+	}
+	if (empty($frm['nb_produits'])) {
+		$frm['nb_produits'] = 5;
 	}
 	if ($frm['nouveau_mode'] == "maj") {
 		if (display_prices_with_taxes_in_admin ()) {
@@ -439,21 +444,23 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('id', intval(vb($frm['id'])));
 		$tpl->assign('reseller_price_taxes_txt', (display_prices_with_taxes_in_admin() && empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes'])? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 		$tpl->assign('get_mode', vb($_GET['mode']));
-		if (!$create_product_process && !empty($frm['categories'])) {
-			$tpl->assign('create_product_process', true);
+		$tpl->assign('create_product_process', $create_product_process);
+		if (!$create_product_process) {
 			$tpl->assign('nom', vn($frm['nom_' . $_SESSION['session_langue']]));
-			if (vb($_GET['mode']) == "modif") {
-				$tpl->assign('prod_href', get_product_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], $frm['categories'][0], $GLOBALS['categorie_names_by_id'][$frm['categories'][0]]));
+			if (!empty($frm['categories'])) {
+				$prod_href = get_product_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], $frm['categories'][0], $GLOBALS['categorie_names_by_id'][$frm['categories'][0]]);
 			} else {
-				$tpl->assign('prod_href', '');
+				$prod_href = '';
 			}
 			$sql_nb_view = query("SELECT nb_view
 				FROM peel_produits
 				WHERE id = " . intval($frm['id']) . "");
 			$prod = fetch_assoc($sql_nb_view);
+			$tpl->assign('prod_href', $prod_href);
 			$tpl->assign('nb_view', $prod['nb_view']);
+			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_UPDATE'] . ' "' .  vb($frm['nom_' . $_SESSION['session_langue']]) . '" - <a href="' . $prod_href . '" onclick="return(window.open(this.href)?false:true);">' . $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL'] . '</a> - ' . $GLOBALS['STR_ADMIN_PRODUITS_VIEWS_COUNT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $prod['nb_view'];
 		} else {
-			$tpl->assign('create_product_process', false);
+			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_ADD'];		
 		}
 		$tpl->assign('categorie_options', $GLOBALS['categorie_options']);
 		$tpl->assign('categorie_error', $form_error_object->text('categories'));
@@ -490,7 +497,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				'nom_error' => $form_error_object->text('nom_' . $lng),
 				'modif_tab_href' => $GLOBALS['administrer_url'] . '/produits.php?mode=modif_tab&id=' . $frm['id'] . '&tab_lang=' . $lng,
 				'descriptif' => vb($frm['descriptif_' . $lng]),
-				'description_te' => getTextEditor('description_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+				'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 				'meta_titre' => vb($frm['meta_titre_' . $lng]),
 				'meta_key' => $frm['meta_key_' . $lng],
 				'meta_desc' => $frm['meta_desc_' . $lng]
@@ -672,20 +679,25 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		}
 
 		$tpl_produits_options = array();
-		$select = query("SELECT id, reference, nom_" . $_SESSION['session_langue'] . "
-			FROM peel_produits
+		$select = query("SELECT pr.reference_id, p.reference, p.nom_" . $_SESSION['session_langue'] . "
+			FROM peel_produits p
+			LEFT JOIN peel_produits_references pr ON pr.reference_id = p.id
+			WHERE produit_id = ".intval($frm['id'])."
 			ORDER BY reference ASC");
+		$i=1;
 		while ($nom = fetch_assoc($select)) {
-			$tpl_produits_options[] = array('value' => intval($nom['id']),
-				'issel' => in_array($nom['id'], vb($frm['references'])),
+			$tpl_produits_options[] = array('value' => intval($nom['reference_id']),
 				'reference' => $nom['reference'],
 				'name' => $nom['nom_' . $_SESSION['session_langue']],
-				);
+				'i' => $i,
+			);
+			$i++;
 		}
+		$tpl->assign('nb_produits', $frm['nb_produits']);
 		$tpl->assign('produits_options', $tpl_produits_options);
-
 		$tpl->assign('is_on_ref_produit', vn($frm['on_ref_produit']) == 1);
 		$tpl->assign('nb_ref_produits', intval(vn($frm['nb_ref_produits'])));
+		$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 
 		$tpl->assign('is_attributes_module_active', is_attributes_module_active());
 		if (is_attributes_module_active()) {
@@ -735,6 +747,11 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+		$tpl->assign('STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER', $GLOBALS['STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER']);
+		$tpl->assign('STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH', $GLOBALS['STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH']);
+		$tpl->assign('STR_ADMIN_ADD_EMPTY_LINE', $GLOBALS['STR_ADMIN_ADD_EMPTY_LINE']);
+		$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM', $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"]);
+		$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE', $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]);
 		$tpl->assign('STR_ADMIN_PRODUITS_UPDATE', $GLOBALS['STR_ADMIN_PRODUITS_UPDATE']);
 		$tpl->assign('STR_ADMIN_SEE_RESULT_IN_REAL', $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL']);
 		$tpl->assign('STR_ADMIN_PRODUITS_ADD', $GLOBALS['STR_ADMIN_PRODUITS_ADD']);
@@ -772,6 +789,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT_UNIT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_VOLUME', $GLOBALS['STR_ADMIN_PRODUITS_VOLUME']);
+		$tpl->assign('STR_ADMIN_PRODUITS_VOLUME_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_VOLUME_UNIT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_KILO']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_PRICE_PER_LITER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DISPLAY_NO_PRICE_PER_UNIT', $GLOBALS['STR_ADMIN_PRODUITS_DISPLAY_NO_PRICE_PER_UNIT']);
@@ -838,6 +856,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT', $GLOBALS['STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT']);
+		$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 		$output .= $tpl->fetch();
 	}
 	return $output;
@@ -1589,17 +1608,17 @@ function affiche_formulaire_tab(&$frm, &$form_error_object, $product_name, $lng)
 	$tpl->assign('product_name', $product_name);
 	$tpl->assign('display_tab', vb($frm['display_tab']));
 	$tpl->assign('tab1_title', vb($frm['tab1_title_' . $lng]));
-	$tpl->assign('tab1_html_te', getTextEditor('tab1_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab1_html_' . $lng]))));
+	$tpl->assign('tab1_html_te', getTextEditor('tab1_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab1_html_' . $lng]))));
 	$tpl->assign('tab2_title', vb($frm['tab2_title_' . $lng]));
-	$tpl->assign('tab2_html_te', getTextEditor('tab2_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab2_html_' . $lng]))));
+	$tpl->assign('tab2_html_te', getTextEditor('tab2_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab2_html_' . $lng]))));
 	$tpl->assign('tab3_title', vb($frm['tab3_title_' . $lng]));
-	$tpl->assign('tab3_html_te', getTextEditor('tab3_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab3_html_' . $lng]))));
+	$tpl->assign('tab3_html_te', getTextEditor('tab3_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab3_html_' . $lng]))));
 	$tpl->assign('tab4_title', vb($frm['tab4_title_' . $lng]));
-	$tpl->assign('tab4_html_te', getTextEditor('tab4_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab4_html_' . $lng]))));
+	$tpl->assign('tab4_html_te', getTextEditor('tab4_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab4_html_' . $lng]))));
 	$tpl->assign('tab5_title', vb($frm['tab5_title_' . $lng]));
-	$tpl->assign('tab5_html_te', getTextEditor('tab5_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab5_html_' . $lng]))));
+	$tpl->assign('tab5_html_te', getTextEditor('tab5_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab5_html_' . $lng]))));
 	$tpl->assign('tab6_title', vb($frm['tab6_title_' . $lng]));
-	$tpl->assign('tab6_html_te', getTextEditor('tab6_html_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['tab6_html_' . $lng]))));
+	$tpl->assign('tab6_html_te', getTextEditor('tab6_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab6_html_' . $lng]))));
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT', $GLOBALS['STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT']);

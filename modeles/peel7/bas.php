@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: bas.php 39020 2013-11-26 00:36:36Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ if ($GLOBALS['page_columns_count'] == 3) {
 	if(is_annonce_module_active()) {
 		$modules_right .= get_modules('right_annonce', true, null, vn($_GET['catid'])); 
 	}
-	$modules_right .= get_modules('right', true, null, vn($_GET['catid']));
+	$modules_right .= get_modules('below_middle', true, null, vn($_GET['catid']));
 	$tpl->assign('MODULES_RIGHT', $modules_right);
 }
 $tpl->assign('IN_HOME', defined('IN_HOME'));
@@ -33,10 +33,14 @@ if (defined('IN_HOME')) {
 $tpl->assign('CONTENT_FOOTER', affiche_contenu_html("footer", true));
 $tpl->assign('MODULES_FOOTER', get_modules('footer', true, null, vn($_GET['catid'])));
 $tpl->assign('FOOTER', affiche_footer(true));
-// Dévelopement de la popup affichant les détail de l'ajout au caddie (si la quantité demandée est supérieure à la quantité disponible en stock) et suppression de la variable de session
+$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], true, 26));
+if (is_devises_module_active()) {
+	$tpl->assign('module_devise', affiche_module_devise(true));
+}
+
 if (!empty($_SESSION['session_display_popup']['error_text'])) {
-	// $tpl->assign('add_cart_alert', filtre_javascript($_SESSION['session_display_popup']['add_cart'], true, true, false));
-	$tpl->assign('add_cart_alert', $_SESSION['session_display_popup']['error_text']);
+	// Dévelopement de la popup affichant les détails de l'ajout au caddie (si la quantité demandée est supérieure à la quantité disponible en stock) et suppression de la variable de session
+	$GLOBALS['js_content_array'][] = "bootbox.alert('".filtre_javascript($_SESSION['session_display_popup']['error_text'],true,true,false) ."')";
 	unset($_SESSION['session_display_popup']['error_text']);
 }
 // Message d'alerte de problème de téléchargement d'image
@@ -62,8 +66,13 @@ if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
 }
 $tpl->assign('DEBUG_TEMPLATES', DEBUG_TEMPLATES);
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+// Si js_files pas mis dans haut.php (chargement asynchrone ou demandés entre temps dans la génération PHP)
 // Au cas où on veuille mettre les javascript en pied de <body> au lieu de head, pour plus de vitesse (mais moins conforme aux usages)
-$tpl->assign('js_files', $GLOBALS['js_files']);
+$tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']), !empty($GLOBALS['site_parameters']['minify_js'])));
+
+$tpl->assign('rss', affiche_rss(true));
+$tpl->assign('footer_link', affiche_contenu_html("footer_link", true));
+
 echo $tpl->fetch();
 
 // Clôture de la génération de page - affiche des informations de debug si mode debug activé

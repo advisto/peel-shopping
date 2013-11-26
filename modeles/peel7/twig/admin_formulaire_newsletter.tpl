@@ -3,25 +3,25 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_newsletter.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}">
+// $Id: admin_formulaire_newsletter.tpl 39008 2013-11-25 19:24:22Z gboussin $
+#}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
-	<table cellpadding="5" class="full_width">
+	<table class="full_width">
 		<tr>
 			<td class="entete">{{ STR_ADMIN_NEWSLETTERS_FORM_TITLE }}</td>
 		</tr>
 		<tr>
 			<td>
-				<div class="global_help">{{ STR_ADMIN_NEWSLETTERS_WARNING }}</div>
+				<div class="alert alert-info">{{ STR_ADMIN_NEWSLETTERS_WARNING }}</div>
 			</td>
 		</tr>
 		<tr>
@@ -29,7 +29,7 @@
 		</tr>
 		<tr>
 			<td>
-				<select name="template_technical_code" id="template_technical_code">
+				<select class="form-control" name="template_technical_code" id="template_technical_code">
 					{{ template_technical_code_options }}
 				</select>
 			</td>
@@ -39,7 +39,7 @@
 			<td>{{ STR_ADMIN_SUBJECT }} {{ l.lng }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
-			<td><input type="text" name="sujet_{{ l.lng }}" style="width:100%" value="{{ l.sujet|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="sujet_{{ l.lng }}" style="width:100%" value="{{ l.sujet|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MESSAGE }} {{ l.lng }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -49,7 +49,7 @@
 		</tr>
 		{% endfor %}
 		<tr>
-			<td class="center"><p><input class="bouton" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
+			<td class="center"><p><input class="btn btn-primary" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
 		</tr>
 	</table>
 </form>

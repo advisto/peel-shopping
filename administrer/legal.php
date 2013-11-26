@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: legal.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: legal.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_content");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_LEGAL_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $id = intval(vn($_REQUEST['id']));
 
@@ -54,7 +54,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -102,7 +102,7 @@ function affiche_formulaire_affiliation(&$frm, &$form_error_object)
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('titre_' . $lng),
 			'titre' => vb($frm['titre_' . $lng]),
-			'texte_te' => getTextEditor('texte_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng])))
+			'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng])))
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);

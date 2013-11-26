@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_formulaire.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: avis_formulaire.tpl 38773 2013-11-17 21:01:09Z gboussin $
 *}<h2>{$STR_DONNEZ_AVIS}</h2>
-<form class="entryform" method="post" action="{$action|escape:'html'}">
+<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<table class="avis_formulaire">
 		<tr>
 			<td colspan="2" class="entete">
@@ -24,21 +24,21 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="label top"> {$STR_YOU_ARE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="title_label top"> {$STR_YOU_ARE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>{$prenom} {$nom_famille}</td>
 		</tr>
 		<tr>
-			<td class="label top"> {$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="pseudo" value="{if empty($pseudo)}{$pseudo_ses}{else}{$pseudo|str_form_value}{/if}" maxlength="50" /></td>
+			<td class="title_label top"> {$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="pseudo" value="{if empty($pseudo)}{$pseudo_ses}{else}{$pseudo|str_form_value}{/if}" maxlength="50" /></td>
 		</tr>
 		<tr>
 			<td class="top">
 				<b>{$STR_YOUR_OPINION} <span class="etoile">*</span></b>{$STR_BEFORE_TWO_POINTS}:
-				<br /><input type="text" name="compteur" size="4" onfocus="blur()" value="255" /> <span style="margin-left:5px;"> {$STR_REMINDING_CHAR}</span>
+				<br /><input type="text" class="form-control compteur" name="compteur" size="4" onfocus="blur()" value="255" /> <span style="margin-left:5px;"> {$STR_REMINDING_CHAR}</span>
 				<br />{$error_avis}
 			</td>
 			<td>
-				<textarea name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur, false)" onkeypress="Compter(this,255,compteur, false)" onkeyup="Compter(this,255,compteur, false)" onblur="Compter(this,255,compteur, false)">{$avis|html_entity_decode_if_needed}</textarea>
+				<textarea class="form-control" name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur, false)" onkeypress="Compter(this,255,compteur, false)" onkeyup="Compter(this,255,compteur, false)" onblur="Compter(this,255,compteur, false)">{$avis|html_entity_decode_if_needed}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -69,7 +69,7 @@
 				<input type="hidden" name="type" value="{$type|str_form_value}" />
 				<input type="hidden" name="mode" value="insere" />
 				<input type="hidden" name="langue" value="{$langue|str_form_value}" />
-				<input class="clicbouton" type="submit" value="{$STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value}" name="validate" />
+				<input class="btn btn-primary" type="submit" value="{$STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value}" name="validate" />
 			</td>
 		</tr>
 		<tr>

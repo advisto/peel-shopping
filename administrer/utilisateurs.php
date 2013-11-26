@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 38007 2013-09-03 21:16:29Z gboussin $
+// $Id: utilisateurs.php 38734 2013-11-15 19:47:31Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -28,6 +28,7 @@ $id = intval(vn($_REQUEST['id']));
 $id_utilisateur = intval(vn($_REQUEST['id_utilisateur']));
 $frm = $_POST;
 $form_error_object = new FormError();
+$output = '';
 
 $priv = vb($_GET['priv']);
 $cle = trim(vb($_GET['cle']));
@@ -41,15 +42,14 @@ if (!empty($_POST['print_all_bill'])) {
 	}
 	if (!$form_error_object->count()) {
 		$is_pdf_generated = $invoice_pdf->FillDocument(null, null, null, null, null, $user_id, null, 'standard', false);
-		die();
+		if($is_pdf_generated) {
+			die();
+		}
 	} else {
-		include("modeles/haut.php");
 		if ($form_error_object->has_error('token')) {
-			echo $form_error_object->text('token');
+			$output .= $form_error_object->text('token');
 		}
 	}
-} else {
-	include("modeles/haut.php");
 }
 
 switch (vb($_REQUEST['mode'])) {
@@ -74,33 +74,33 @@ switch (vb($_REQUEST['mode'])) {
 		} else {
 			$message = $GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : '');
 		}
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($message, vb($utilisateur['email']))))->fetch();
-		afficher_liste_utilisateurs($priv, $cle);
+		$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($message, vb($utilisateur['email']))))->fetch();
+		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
+		
 	case "ajout" :
-		afficher_formulaire_ajout_utilisateur();
+		$output .= afficher_formulaire_ajout_utilisateur();
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
 
 	case "suppr" :
 		$utilisateur = get_user_information($id_utilisateur);
-		efface_utilisateur($id_utilisateur);
+		$output .= efface_utilisateur($id_utilisateur);
 		$annonce_active = false;
 		if (is_annonce_module_active()) {
-			delete_user_ads($id_utilisateur);
+			$output .= delete_user_ads($id_utilisateur);
 			$annonce_active = true;
 		}
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $utilisateur['email'])))->fetch();
-		afficher_liste_utilisateurs($priv, $cle);
+		$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $utilisateur['email'])))->fetch();
+		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
 
 	case "supprlogo" :
-		supprime_logo($id_utilisateur);
-
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= supprime_logo($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
 
 	case "insere" :
@@ -127,23 +127,23 @@ switch (vb($_REQUEST['mode'])) {
 			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
 			$frm['mot_passe'] = (!empty($frm['mot_passe']))?$frm['mot_passe']:MDP();
 			if (insere_utilisateur($frm, false, false, false)) {
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_CREATED_OK'], vb($frm['email']), $frm['mot_passe'])))->fetch();
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_CREATED_OK'], vb($frm['email']), $frm['mot_passe'])))->fetch();
 			}
 			// Envoi de l'e-mail
 			if (isset($frm['notify'])) {
-				send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']));
+				$output .= send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']));
 			}
-			afficher_liste_utilisateurs($priv, $cle);
+			$output .= afficher_liste_utilisateurs($priv, $cle);
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .=  $form_error_object->text('token');
 			} elseif ($form_error_object->has_error('email')) {
-				echo $form_error_object->text('email');
+				$output .=  $form_error_object->text('email');
 			}
 			if ($form_error_object->has_error('pseudo')) {
-				echo $form_error_object->text('pseudo');
+				$output .=  $form_error_object->text('pseudo');
 			}
-			afficher_formulaire_ajout_utilisateur();
+			$output .= afficher_formulaire_ajout_utilisateur();
 		}
 		break;
 
@@ -170,24 +170,24 @@ switch (vb($_REQUEST['mode'])) {
 				delete_uploaded_file_and_thumbs($frm['old_document']);
 			}
 			maj_utilisateur($frm, false);
-			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_PROFIL', 'Compte : ' . vb($frm['email']));
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_UPDATED_OK'], vb($frm['email']))))->fetch();
-			affiche_formulaire_modif_utilisateur($id_utilisateur);
+			$output .= tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_PROFIL', 'Compte : ' . vb($frm['email']));
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_UPDATED_OK'], vb($frm['email']))))->fetch();
+			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .=  $form_error_object->text('token');
 			} elseif ($form_error_object->has_error('email')) {
-				echo $form_error_object->text('email');
+				$output .=  $form_error_object->text('email');
 			}
 			if ($form_error_object->has_error('pseudo')) {
-				echo $form_error_object->text('pseudo');
+				$output .=  $form_error_object->text('pseudo');
 			}
-			affiche_formulaire_modif_utilisateur($id_utilisateur);
+			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		}
 		break;
 
 	case "liste" :
-		afficher_liste_utilisateurs($priv, $cle);
+		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
 
 	case "cheque" :
@@ -195,31 +195,31 @@ switch (vb($_REQUEST['mode'])) {
 			include($fonctionsgiftcheck);
 			// L'administrateur a validé l'envoi d'un chèque cadeau à l'utilisateur
 			cree_cheque_cadeau_client(vn($id_utilisateur), "CHQ", $GLOBALS['site_parameters']['avoir'], 2);
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_GIFT_CHECK_SENT']))->fetch();
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_GIFT_CHECK_SENT']))->fetch();
 		}
-		afficher_liste_utilisateurs($priv, $cle);
+		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
 
 	case "init_mdp" :
-		initialise_mot_passe($_REQUEST['email']);
-
+		$output .= initialise_mot_passe($_REQUEST['email']);
 		$qid = query("SELECT email
 			FROM peel_utilisateurs
 			WHERE email = '" . nohtml_real_escape_string($_REQUEST['email']) . "'");
 		if ($user = fetch_object($qid)) {
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_NEW_PASSWORD_SENT'], vb($user->email))))->fetch();
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_NEW_PASSWORD_SENT'], vb($user->email))))->fetch();
 		}
-		afficher_liste_utilisateurs($priv, $cle);
+		$output .= afficher_liste_utilisateurs($priv, $cle);
 
 		break;
 
 	case "enligne_liste_annonce" :
 	case "update_list_annonce" :
 		if (is_annonce_module_active()) {
-			echo annonce_manipulation($form_error_object, 'users');
+			$output .=  annonce_manipulation($form_error_object, 'users');
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
+		
 	case "phone_call" :
 		if ((!empty($_POST['phone_emitted_submit']) || !empty($_GET['phone_emitted_submit']))) {
 			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'PHONE_EMITTED', 'NOT_ENDED_CALL', nohtml_real_escape_string((!empty($_POST['form_phone_comment'])?$_POST['form_phone_comment']:'')));
@@ -231,7 +231,7 @@ switch (vb($_REQUEST['mode'])) {
 					// Déclenchement de l'appel
 					$makecall = file('https://ssl.keyyo.com/makecall.html?ACCOUNT=' . getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true) . '&CALLEE=' . $_GET['callee'] . '&CALLEE_NAME=' . $_GET['callee_name']);
 					if (!empty($makecall)) {
-						echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_CALL_INITIATED_KEYYO'], getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true), $_GET['callee_name'], $_GET['callee'], implode(' - ', $makecall))))->fetch();
+						$output .=$GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_CALL_INITIATED_KEYYO'], getCleanInternationalTelephone($admin_infos['telephone'], $admin_infos['pays'], true), $_GET['callee_name'], $_GET['callee'], implode(' - ', $makecall))))->fetch();
 					}
 				}
 			}
@@ -247,82 +247,91 @@ switch (vb($_REQUEST['mode'])) {
 					data="' . date('Y-m-d H:i:s', time()) . '"
 				WHERE id_user="' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . '" AND id_membre="' . intval($_REQUEST['id_utilisateur']) . '" AND ((action = "PHONE_EMITTED") OR (action = "PHONE_RECEIVED")) AND data="NOT_ENDED_CALL"');
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
+		
 	case "event_comment":
 		if (!empty($_POST['form_event_comment'])) {
 			// On n'enregistre que les événements avec du texte
 			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'EVENT', '', (!empty($_POST['form_event_comment'])?$_POST['form_event_comment']:''));
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Ajoute un credit gold
+		
 	case "add_credit_gold" :
+		// Ajoute un credit gold
 		if (!empty($_POST['id_utilisateur']) && !empty($_POST['add_gold_ad']) && is_annonce_module_active()) {
-			add_credit_gold_user ($_POST['id_utilisateur'], $_POST['add_gold_ad']);
+			$output .= add_credit_gold_user ($_POST['id_utilisateur'], $_POST['add_gold_ad']);
 			tracert_history_admin($_POST['id_utilisateur'], 'CREATE_ORDER', 'Ajout de credit gold');
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Supprime le credit gold
+		
 	case "suppr_credit_gold" :
+		// Supprime le credit gold
 		if (!empty($_GET['id_utilisateur']) && !empty($_GET['id_gold']) && is_annonce_module_active()) {
-			suppr_credit_gold_user ($_GET['id_utilisateur'], $_GET['id_gold']);
+			$output .= suppr_credit_gold_user ($_GET['id_utilisateur'], $_GET['id_gold']);
 			tracert_history_admin($_GET['id_utilisateur'], 'SUP_ORDER', $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_GOLD_CREDIT_DELETED'] . ' ' . intval(vn($_GET['id_gold'])));
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Mise à jour de l'abonnement platinium si le module abonnement existe
+		
 	case "maj_abo_platinum":
+		// Mise à jour de l'abonnement platinium si le module abonnement existe
 		if (!empty($_POST['id_utilisateur']) && is_abonnement_module_active()) {
-			maj_abonnement_admin($_POST);
+			$output .= maj_abonnement_admin($_POST);
 			tracert_history_admin($_POST['id_utilisateur'], 'EDIT_ORDER', $GLOBALS['STR_MODULE_ABONNEMENT_ADMIN_MSG_PLATINUM_UPDATED_OK']);
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Mise à jour de l'abonnement diamond si le module abonnement existe
+		
 	case "maj_abo_diamond":
+		// Mise à jour de l'abonnement diamond si le module abonnement existe
 		if (!empty($_POST['id_utilisateur']) && is_abonnement_module_active()) {
-			maj_abonnement_admin($_POST);
+			$output .= maj_abonnement_admin($_POST);
 			tracert_history_admin($_POST['id_utilisateur'], 'EDIT_ORDER', $GLOBALS['STR_MODULE_ABONNEMENT_ADMIN_MSG_DIAMOND_UPDATED_OK']);
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Convertion d'un abonement en un autre si le module abonnement existe
+		
 	case "convert_abo":
+		// Convertion d'un abonement en un autre si le module abonnement existe
 		if (!empty($_POST['id_utilisateur']) && is_abonnement_module_active()) {
 			if (!empty($_POST['convert_diamond_to_platinum'])) {
-				userConvertSubscription($_POST['id_utilisateur'], 'diamond', 'platinum');
+				$output .= userConvertSubscription($_POST['id_utilisateur'], 'diamond', 'platinum');
 				tracert_history_admin($_POST['id_utilisateur'], 'EDIT_ORDER', $GLOBALS['STR_MODULE_ABONNEMENT_ADMIN_MSG_DIAMOND_CONVERTED_TO_PLATINUM_OK']);
 			} elseif (!empty($_POST['convert_platinum_to_diamond'])) {
-				userConvertSubscription($_POST['id_utilisateur'], 'platinum', 'diamond');
+				$output .= userConvertSubscription($_POST['id_utilisateur'], 'platinum', 'diamond');
 				tracert_history_admin($_POST['id_utilisateur'], 'EDIT_ORDER', $GLOBALS['STR_MODULE_ABONNEMENT_ADMIN_MSG_PLATINUM_CONVERTED_TO_DIAMOND_OK']);
 			}
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Ajout d'une planification de contact
+
 	case "add_contact_planified":
+		// Ajout d'une planification de contact
 		if (!empty($_POST['form_edit_contact_user_id']) && is_commerciale_module_active()) {
-			create_or_update_contact_planified($_POST);
+			$output .= create_or_update_contact_planified($_POST);
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Mise à jour d'une planification de contact
+		
 	case "update_contact_planified":
+		// Mise à jour d'une planification de contact
 		if (!empty($_POST['form_edit_contact_planified_id']) && is_commerciale_module_active()) {
 			create_or_update_contact_planified($_POST);
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
-	// Supression d'une planification de contact
+		
 	case "suppr_contact_planified":
+		// Supression d'une planification de contact
 		if (!empty($_POST['form_delete_admins_contacts']) && is_commerciale_module_active()) {
 			foreach($_POST['form_delete_admins_contacts'] as $form_edit_contact_planified_id) {
-				delete_contact_planified($form_edit_contact_planified_id);
+				$output .= delete_contact_planified($form_edit_contact_planified_id);
 			}
 		}
-		affiche_formulaire_modif_utilisateur($id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
 	case "search" :
 		// recupération des informations client du critère de recherche sous forme de tableau, afin de les envoyés en paramètre dans la fonction tracert.
@@ -385,16 +394,17 @@ switch (vb($_REQUEST['mode'])) {
 			$user_info [] = 'activity : ' . $_GET['activity'];
 		}
 		tracert_history_admin(0, 'SEARCH_USER', implode(' | ', $user_info));
-		afficher_liste_utilisateurs($priv, $cle, $_GET);
+		$output .= afficher_liste_utilisateurs($priv, $cle, $_GET);
 		break;
-	case "phone" :
+		
+	case "phone":
 		if (!empty($_POST)) {
 			if (!empty($_POST['phone_emitted_submit'])) {
 				tracert_history_admin($_POST['id_utilisateur'], 'PHONE_EMITTED', 'NOT_ENDED_CALL', $_POST['form_phone_comment']);
-				affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
+				$output .= affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
 			} elseif (!empty($_POST['phone_received_submit'])) {
 				tracert_history_admin($_POST['id_utilisateur'], 'PHONE_RECEIVED', 'NOT_ENDED_CALL', $_POST['form_phone_comment']);
-				affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
+				$output .= affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
 			} elseif (!empty($_POST['turn_off_phone'])) {
 				$q = query('UPDATE peel_admins_actions
 						SET raison="",
@@ -402,24 +412,35 @@ switch (vb($_REQUEST['mode'])) {
 							data="' . date('Y-m-d H:i:s', time()) . '"
 						WHERE id_user="' . $_SESSION['session_utilisateur']['id_utilisateur'] . '" AND id_membre="' . $_POST['id_utilisateur'] . '" AND ((action = "PHONE_EMITTED") OR (action = "PHONE_RECEIVED")) AND data="NOT_ENDED_CALL"
 						');
-				affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
+				$output .= affiche_formulaire_modif_utilisateur($_POST['id_utilisateur']);
 			}
 		}
 		break;
+		
 	default :
 		if (!empty($_GET['commercial_contact_id']) && is_commerciale_module_active()) {
-			afficher_liste_utilisateurs($priv, $cle, null, 'date_insert', $_GET['commercial_contact_id']);
+			$output .= afficher_liste_utilisateurs($priv, $cle, null, 'date_insert', $_GET['commercial_contact_id']);
 		} else {
-			afficher_liste_utilisateurs($priv, $cle);
+			$output .= afficher_liste_utilisateurs($priv, $cle);
 			if (is_chart_module_active() && empty($_GET['page'])) {
-				include($GLOBALS['dirroot'] . '/modules/chart/open_flash_chart_object.php');
-				echo '<div class="center">' . open_flash_chart_object_str(1000, 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', true, $GLOBALS['wwwroot'] . '/modules/chart/') . '</div>';
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					include($GLOBALS['dirroot'] . '/modules/chart/flot.php');
+				} else {
+					include($GLOBALS['dirroot'] . '/modules/chart/open_flash_chart_object.php');
+				}
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					$output .=  '<div class="center">' . get_flot_chart('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', 'line', $GLOBALS['wwwroot'] . '/modules/chart/', 'date_format_veryshort') . '</div>';
+				} else {
+					$output .=  '<div class="center">' . open_flash_chart_object_str('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', true, $GLOBALS['wwwroot'] . '/modules/chart/') . '</div>';
+				}
 			}
 		}
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
+echo $output;
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -495,7 +516,7 @@ function afficher_formulaire_ajout_utilisateur()
 	$frm['nouveau_mode'] = "insere";
 	$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_UTILISATEURS_CREATE'];
 
-	echo afficher_formulaire_utilisateur($frm);
+	return afficher_formulaire_utilisateur($frm);
 }
 
 /**
@@ -506,6 +527,7 @@ function afficher_formulaire_ajout_utilisateur()
  */
 function affiche_formulaire_modif_utilisateur($id_utilisateur)
 {
+	$output = '';
 	$frm = get_user_information($id_utilisateur);
 	$qcomments = query("SELECT comments
 		FROM peel_admins_comments
@@ -529,11 +551,11 @@ function affiche_formulaire_modif_utilisateur($id_utilisateur)
 	if (!empty($frm)) {
 		$frm['nouveau_mode'] = "maj";
 		$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-		echo afficher_formulaire_utilisateur($frm);
+		$output .= afficher_formulaire_utilisateur($frm);
 	} else {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NOT_FOUND']))->fetch();
-		return false;
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NOT_FOUND']))->fetch();
 	}
+	return $output;
 }
 
 /**
@@ -544,6 +566,7 @@ function affiche_formulaire_modif_utilisateur($id_utilisateur)
  */
 function afficher_formulaire_utilisateur(&$frm)
 {
+	$output = '';
 	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form.tpl');
 	$tpl->assign('action', get_current_url(false) . '?start=' . (isset($_GET['start']) ? $_GET['start'] : 0));
@@ -1016,6 +1039,7 @@ function afficher_formulaire_utilisateur(&$frm)
  */
 function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_insert', $allow_message_no_result = false)
 {
+	$output = '';
 	$sql_inner_array = array();
 	$sql_having_array = array();
 	$sql_columns_array = array('u.*');
@@ -1023,6 +1047,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	$sql_group_by = '';
 	$sql_having = '';
 	$sql = "";
+	/* Recherche de base */
 	if (!empty($frm['client_info'])) {
 		$sql_where_array[] = '(u.nom_famille LIKE "%' . nohtml_real_escape_string(trim($frm['client_info'])) . '%" OR u.prenom LIKE "%' . nohtml_real_escape_string(trim($frm['client_info'])) . '%")';
 	}
@@ -1035,10 +1060,15 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	if (!empty($frm['societe'])) {
 		$sql_where_array[] = '(u.societe LIKE "%' . nohtml_real_escape_string(trim($frm['societe'])) . '%" OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(u.siret,")",""),"(",""), ".",""), "-",""), " ","") LIKE "%' . nohtml_real_escape_string(str_replace(array('(', ')', '.', '-', ' '), '', trim($frm['societe']))) . '%" OR u.url LIKE "%' . nohtml_real_escape_string(trim($frm['societe'])) . '%")';
 	}
-
 	if (!empty($frm['ville_cp'])) {
 		$sql_where_array[] = '(u.ville LIKE "%' . nohtml_real_escape_string(trim($frm['ville_cp'])) . '%" OR u.code_postal LIKE "' . nohtml_real_escape_string(trim($frm['ville_cp'])) . '%")';
 	}
+	if (a_priv('demo')) {
+		$sql_where_array[] = "u.priv NOT LIKE ('" . nohtml_real_escape_string('admin') . "%')";
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NO_ADMIN_RIGHT_TO_LIST']))->fetch();
+	}	
+	$basic_search_where_count = count($sql_where_array);
+	/* Recherche avancée */
 	if (!empty($frm['type'])) {
 		$sql_where_array[] = 'u.type = "' . nohtml_real_escape_string($frm['type']) . '"';
 	}
@@ -1081,8 +1111,8 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			// On considère l'antarctique comme faisant partie de l'océanie
 			$frm['continent'][] = 6;
 		}
-		$sql_where_array[] = 'p.continent_id IN ("' . implode('","', nohtml_real_escape_string($frm['continent'])) . '")';
-		$sql_inner_array['peel_pays'] = 'INNER JOIN peel_pays p ON p.id=u.pays';
+		$sql_where_array[] = 'pays.continent_id IN ("' . implode('","', nohtml_real_escape_string($frm['continent'])) . '")';
+		$sql_inner_array['peel_pays'] = 'INNER JOIN peel_pays pays ON pays.id=u.pays';
 	}
 	if (!empty($frm['seg_who']) && $frm['seg_who'] != '0') {
 		$sql_where_array[] = 'u.seg_who = "' . nohtml_real_escape_string($frm['seg_who']) . '"';
@@ -1125,19 +1155,24 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$sql_where_array[] = 'u.lang ="' . nohtml_real_escape_string($frm['user_lang']) . '"';
 	}
 	if (!empty($frm['list_produit'])) {
-		$sql_inner_array['peel_commandes_articles'] = 'INNER JOIN peel_commandes_articles pca ON pca.commande_id= c.id';
-
-		$sql_where_array[] = 'pca.produit_id="' . nohtml_real_escape_string($frm['list_produit']) . '"';
-		$sql_columns_array[] = 'SUM(pca.quantite) AS this_quantite_sum';
-		if (!empty($frm['nombre_produit']) && $frm['nombre_produit'] != "no_info") {
-			if ($frm['nombre_produit'] == -1) {
-				$sql_having_array[] = 'this_quantite_sum=0';
+		// On récupère d'abord l'id produit pour éviter de surcharger la requête SQL générale par des jointures diverses
+		$product_id = get_product_id_by_name($frm['list_produit'], true);
+		if(!empty($product_id)) {
+			$sql_inner_array['peel_commandes_articles'] = 'INNER JOIN peel_commandes_articles pca ON pca.commande_id= c.id';
+			$sql_where_array[] = 'pca.produit_id="' . nohtml_real_escape_string($product_id) . '"';
+			$sql_columns_array[] = 'SUM(pca.quantite) AS this_quantite_sum';
+			if (!empty($frm['nombre_produit']) && $frm['nombre_produit'] != "no_info") {
+				if ($frm['nombre_produit'] == -1) {
+					$sql_having_array[] = 'this_quantite_sum=0';
+				} else {
+					$sql_having_array[] = 'this_quantite_sum>="' . intval($frm['nombre_produit']) . '"';
+				}
 			} else {
-				$sql_having_array[] = 'this_quantite_sum>="' . intval($frm['nombre_produit']) . '"';
+				// Par défaut : produit acheté une fois au moins
+				$sql_having_array[] = 'this_quantite_sum>0';
 			}
 		} else {
-			// Par défaut : produit acheté une fois au moins
-			$sql_having_array[] = 'this_quantite_sum>0';
+			$sql_where_array[] = '0';
 		}
 	}
 
@@ -1178,13 +1213,14 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	}
 	foreach(array('ads_count' => 'ads_count', 'date_last_paiement' => 'date_last_paiement', 'date_derniere_connexion' => 'date', 'date_insert' => 'u.date_insert', 'date_statut_commande' => 'c.o_timestamp', 'date_contact_prevu' => 'pacp.timestamp') as $this_get => $this_sql_field) {
 		if (!empty($frm[$this_get])) {
-			if (substr($this_get, 0, 5) == 'date_') {
-				$first_value = get_mysql_date_from_user_input($frm[$this_get . '_input1']);
-				if ($frm[$this_get] == '4') {
-					// Avant le
-					// Date vide ou incomprise : on ne met pas de borne supérieure
-					$first_value = '2030-12-31';
+			if (substr($this_get, 0, 5) == 'date_') {				
+				if(vb($frm[$this_get . '_input1'])=='') {
+					continue;
 				}
+				if(vb($frm[$this_get . '_input1'])=='') {
+					continue;
+				}
+				$first_value = get_mysql_date_from_user_input($frm[$this_get . '_input1']);
 				if ($frm[$this_get] == '1') {
 					// Une valeur cherchée uniquement : le X
 					$last_value = $first_value . ' 23:59:59';
@@ -1196,16 +1232,16 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 					$last_value = str_replace('0000-00-00', '2030-12-31', get_mysql_date_from_user_input($frm[$this_get . '_input2']));
 					if ((!empty($frm['actual_time'])) && ($frm['actual_time'] == 1)) {
 						$last_value .= ' ' . date('H:i:s', (time()));
-						// echo $last_value;
+						// $output .=$last_value;
 					} else {
 						$last_value .= ' 23:59:59';
 					}
 				} elseif ($frm[$this_get] == '4') {
-					// Avant le
-					$last_value = $first_value;
-					$first_value = '0000-00-00 00:00:00';
+					 // Avant le
+					 $last_value =  str_replace('0000-00-00', '2030-12-31', $first_value);
+					 $first_value = '0000-00-00 00:00:00';
 				} else {
-					echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CASE_NOT_FORECASTED'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': %s', $frm[$this_get])))->fetch();
+					$output .=$GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CASE_NOT_FORECASTED'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': %s', $frm[$this_get])))->fetch();
 				}
 			} else {
 				$first_value = vb($frm[$this_get . '_input1']);
@@ -1307,16 +1343,11 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	} elseif (!empty($priv)) {
 		$sql_where_array[] = "u.priv = '" . nohtml_real_escape_string($priv) . "'";
 	}
-	if (a_priv('demo')) {
-		$sql_where_array[] = "u.priv NOT LIKE ('" . nohtml_real_escape_string('admin') . "%')";
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NO_ADMIN_RIGHT_TO_LIST']))->fetch();
-	}
-
 	$sql = "SELECT " . implode(', ', $sql_columns_array) . ", p.name_".$_SESSION['session_langue']." AS profil_name, SUM(".(display_prices_with_taxes_active()?'montant':'montant_ht').") AS total_ordered, COUNT(c.id) AS count_ordered
 		FROM peel_utilisateurs u
-		" . implode(' ', $sql_inner_array) . "
 		LEFT JOIN peel_profil p ON p.priv=u.priv
 		LEFT JOIN peel_commandes c ON c.id_utilisateur=u.id_utilisateur AND c.id_statut_paiement NOT IN (6)
+		" . implode(' ', $sql_inner_array) . "
 		WHERE " . implode(' AND ', $sql_where_array) . '
 		GROUP BY u.id_utilisateur
 		';
@@ -1344,7 +1375,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	$Links->SortDefault = 'DESC';
 	$results_array = $Links->Query();
 	if(empty($results_array) && $allow_message_no_result) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_SEARCH_NO_RESULT']))->fetch();
+		$output .=$GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_SEARCH_NO_RESULT']))->fetch();
 	} else {
 		$select_search_array['date_insert'] = array(1 => $GLOBALS["STR_ADMIN_UTILISATEURS_SUBSCRIBED"].' ' . $GLOBALS["STR_ADMIN_DATE_ON"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 2 => $GLOBALS["STR_ADMIN_UTILISATEURS_SUBSCRIBED"].' '.$GLOBALS["STR_ADMIN_DATE_AFTER"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 3 => $GLOBALS["STR_ADMIN_UTILISATEURS_SUBSCRIBED"].' ' . $GLOBALS["STR_ADMIN_DATE_BETWEEN_START"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 4 => $GLOBALS["STR_ADMIN_UTILISATEURS_SUBSCRIBED"] . ' '.$GLOBALS["STR_ADMIN_DATE_BEFORE"]. $GLOBALS['STR_BEFORE_TWO_POINTS'].':');
 		$select_search_array['date_last_paiement'] = array(1 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_PAYMENT"].' ' . $GLOBALS["STR_ADMIN_DATE_ON"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 2 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_PAYMENT"].' '.$GLOBALS["STR_ADMIN_DATE_AFTER"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 3 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_PAYMENT"].' '.$GLOBALS["STR_ADMIN_DATE_BETWEEN_START"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 4 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_PAYMENT"].' '.$GLOBALS["STR_ADMIN_DATE_BEFORE"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
@@ -1354,11 +1385,31 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$select_search_array['ads_count'] = array(1 => $GLOBALS["STR_ADMIN_COMPARE_EQUALS"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 2 => $GLOBALS["STR_ADMIN_MORE_THAN"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 3 => $GLOBALS["STR_ADMIN_COMPARE_BETWEEN"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' , 4 => $GLOBALS["STR_ADMIN_LESS_THAN"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
 		$select_search_array['abonne'] = array(1 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_SUBSCRIPTION_NEVER"], 2 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_SUBSCRIPTION_NOT_NOW"], 3 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_SUBSCRIPTION_NOT_NOW_BUT_EARLIER"], 4 => $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_SUBSCRIPTION_ALL"]);
 		$select_search_array['nombre_produit'] = tab_followed_nombre_produit();
+		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_liste.tpl');
+		$GLOBALS['js_ready_content_array'][] = '
+			display_input2_element("search_date_insert");
+			display_input2_element("search_date_last_paiement");
+			display_input2_element("search_date_statut_commande");
+			display_input2_element("search_date_contact_prevu");
+			display_input2_element("search_date_derniere_connexion");
+			display_input2_element("search_ads_count");
+
+			$("#search_details").on("hide.bs.collapse", function () {
+				$("#search_icon").removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-right");
+				// $("#search_col").removeClass("col-md-12").removeClass("col-sm-12").addClass("col-md-9").addClass("col-sm-4");
+			});
+			$("#search_details").on("show.bs.collapse", function () {
+				$("#search_icon").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
+				// $("#search_col").removeClass("col-md-9").removeClass("col-sm-4").addClass("col-md-12").addClass("col-sm-12");
+			});
+		';
+
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('profil_select_options', get_profil_select_options(vb($_GET['priv'])));
 		$tpl->assign('newsletter_options', formSelect('newsletter', tab_followed_newsletter(), vb($_GET['newsletter'])));
 		$tpl->assign('offre_commercial_options', formSelect('offre_commercial', tab_followed_newsletter(), vb($_GET['offre_commercial'])));
+		$tpl->assign('is_advanced_search', (count($sql_where_array) - $basic_search_where_count) > 0);
 
 		// sélection des commerciaux
 		$comm_query = query('SELECT u.id_utilisateur, u.prenom, u.nom_famille
@@ -1454,7 +1505,8 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl_produits_opts = array();
 		$prod_query = query('SELECT id, nom_' . $_SESSION['session_langue'] . '
 			FROM peel_produits
-			ORDER BY nom_' . $_SESSION['session_langue']);
+			ORDER BY nom_' . $_SESSION['session_langue'] .'
+			LIMIT 200');
 		while ($this_product = fetch_assoc($prod_query)) {
 			$tpl_produits_opts[] = array('value' => $this_product['id'],
 				'issel' => String::str_form_value(vb($_GET['list_produit'])) == $this_product['id'],
@@ -1613,6 +1665,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl->assign('date_last_paiement_input2', vb($_GET['date_last_paiement_input2']));
 		$tpl->assign('date_statut_commande_input1', vb($_GET['date_statut_commande_input1']));
 		$tpl->assign('date_statut_commande_input2', vb($_GET['date_statut_commande_input2']));
+		$tpl->assign('list_produit', vb($_GET['list_produit']));
 		$tpl->assign('etat', vb($_GET['etat']));
 		$tpl->assign('ads_count_input1', vb($_GET['ads_count_input1']));
 		$tpl->assign('ads_count_input2', vb($_GET['ads_count_input2']));
@@ -1681,6 +1734,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
 		$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
 		$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
+		$tpl->assign('STR_CONTINENT', $GLOBALS['STR_CONTINENT']);
 		$tpl->assign('STR_ADMIN_UTILISATEURS_ORDER_STATUS_DATE', $GLOBALS['STR_ADMIN_UTILISATEURS_ORDER_STATUS_DATE']);
 		$tpl->assign('STR_SEARCH', $GLOBALS['STR_SEARCH']);
 		$tpl->assign('STR_ADMIN_CHECK_ALL', $GLOBALS['STR_ADMIN_CHECK_ALL']);
@@ -1736,13 +1790,15 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl->assign('STR_ADMIN_UTILISATEURS_FILER_EXPLAIN', $GLOBALS['STR_ADMIN_UTILISATEURS_FILER_EXPLAIN']);
 		$tpl->assign('STR_ORDER_FORM', $GLOBALS['STR_ORDER_FORM']);
 		$tpl->assign('STR_ADMIN_UTILISATEURS_GIFT_CHECK', $GLOBALS['STR_ADMIN_UTILISATEURS_GIFT_CHECK']);
+		$tpl->assign('STR_MORE_DETAILS', $GLOBALS['STR_MORE_DETAILS']);
 
 		if (is_crons_module_active() && is_webmail_module_active()) {
 			$tpl->assign('send_email_all_form', get_send_email_all_form($Links, $sql));
 		}
 
-		echo $tpl->fetch();
+		$output .=$tpl->fetch();
 	}
+	return $output;
 }
 
 
@@ -1778,6 +1834,7 @@ function create_or_update_comments($frm)
  */
 function supprime_logo ($id)
 {
+	$output = '';
 	$sql = "SELECT logo
 		FROM peel_utilisateurs
 		WHERE id_utilisateur='" . intval($id) . "'";
@@ -1788,9 +1845,10 @@ function supprime_logo ($id)
 			WHERE id_utilisateur='" . intval($id) . "'");
 
 		if (!empty($logo_info) && delete_uploaded_file_and_thumbs($logo_info['logo'])) {
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_LOGO_DELETED']))->fetch();
+			$output .=$GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_LOGO_DELETED']))->fetch();
 		}
 	}
+	return $output;
 }
 
 ?>

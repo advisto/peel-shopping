@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: codes_promos.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_sales,admin_users");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_CODES_PROMOS_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $mode = vb($_REQUEST['mode']);
 $frm = $_POST;
@@ -104,7 +104,7 @@ switch ($mode) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -189,7 +189,9 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('nb_used_per_client', vb($frm["nb_used_per_client"]));
 	$tpl->assign('etat', vn($frm['etat']));
 	$tpl->assign('titre_bouton', vn($frm['titre_bouton']));
-	$tpl->assign('STR_ADMIN_CODES_PROMOS_ALREADY_USED', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ALREADY_USED'], vn($frm['compteur_utilisation'])));
+	if($frm["nouveau_mode"] != "insere") {
+		$tpl->assign('STR_ADMIN_CODES_PROMOS_ALREADY_USED', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ALREADY_USED'], vn($frm['compteur_utilisation'])));
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
 	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);

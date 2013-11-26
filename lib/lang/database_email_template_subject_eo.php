@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_eo.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: database_email_template_subject_eo.php 38682 2013-11-13 11:35:48Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -62,13 +62,13 @@ $peel_email_template["subject"] = array(
   "warn_admin_user_subscription" => "[CIVILITE] [PRENOM] [NOM_FAMILLE] ĵus aliĝis ĉe [SITE_NAME]",
   "warn_admin_reve_subscription" => "",
   "email_retour_virement" => "Validigo de via returno n-o [RETURN_ID]",
-  "email_retour_avoir" => "Validigo de via returno n-o [RETURN_ID]",
+  "email_retour_avoir" => "Validigo de via returno n-o [RETURN_ID] - Kreado de kredito",
   "email_reste_avoir_remboursement" => "Repago de via kredito n-o [RETURN_ID]",
   "email_remboursement" => "Repago de via returno [Return_ID]",
   "email_retour_client" => "Via peto pri returno",
   "cron_order_payment_failure_alerts" => "Helpo pri pago",
   "cron_order_not_paid_alerts" => "Pago de via mendo",
-  "cron_update_contact_info" => "Konfirmo pri valido de viaj adresoj"
+  "cron_update_contact_info" => "Konfirmo pri valido de viaj kontaktinformoj"
 );
 
 ?>

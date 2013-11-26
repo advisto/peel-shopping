@@ -183,9 +183,10 @@ class Minify_CSS_UriRewriter {
 	{
 		$uri = str_replace('/./', '/', $uri);
 		// inspired by patch from Oleg Cherniy
+		$i=0;
 		do {
 			$uri = preg_replace('@/[^/]+/\\.\\./@', '/', $uri, 1, $changed);
-		} while ($changed);
+		} while ($changed && $i++<100);
 		return $uri;
 	}
 	

@@ -197,7 +197,7 @@ function smarty_function_html_checkboxes_output($name, $value, $output, $selecte
             $_id = smarty_function_escape_special_chars(preg_replace('![^\w\-\.]!' . Smarty::$_UTF8_MODIFIER, '_', $name . '_' . $value));
             $_output .= '<label for="' . $_id . '">';
         } else {
-            $_output .= '<label>';
+            $_output .= '<label class="label_checkbox">';
         } 
     }
     
@@ -221,7 +221,7 @@ function smarty_function_html_checkboxes_output($name, $value, $output, $selecte
         $_output .= ' checked="checked"';
     }
     
-    $_output .= $extra . ' />' . $output;
+    $_output .= $extra . ' /> ' . $output;
     if ($labels) {
         $_output .= '</label>';
     }

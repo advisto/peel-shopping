@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: caddie_ajout.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -39,7 +39,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	}
 	$attributs_array = array();
 	if (is_attributes_module_active ()) {
-		// L'appel à get_attribut_list_from_post_data rempli également $_SESSION["session_display_popup"] en cas d'erreur de téléchargement
+		// L'appel à get_attribut_list_from_post_data remplit également $_SESSION["session_display_popup"] en cas d'erreur de téléchargement
 		$attribut_list = get_attribut_list_from_post_data($product_object, $_POST);
 		if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
 			if (!empty($_SERVER['HTTP_REFERER'])) {

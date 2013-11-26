@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_mot_passe.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: change_mot_passe.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -36,7 +36,7 @@ if (!empty($_POST)) {
 	if (!$form_error_object->has_error('nouveau_mot_passe') && !$form_error_object->has_error('nouveau_mot_passe2') && $frm["nouveau_mot_passe"] != $frm["nouveau_mot_passe2"]) {
 		$form_error_object->add('nouveau_mot_passe', $GLOBALS['STR_ERR_TWOPASS']);
 	}
-	if (!verify_token('change_password', 60, false)) {
+	if (!verify_token('change_password', 120, false)) {
 		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	}
 	if (!$form_error_object->count()) {

@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avisAdmin_formulaire.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
+// $Id: avisAdmin_formulaire.tpl 38980 2013-11-24 23:42:47Z gboussin $
+#}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
 	<table class="main_table" width="760">
@@ -34,23 +34,23 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="label">{{ STR_ADMIN_AVIS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td colspan="2" class="title_label">{{ STR_ADMIN_AVIS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
-			<td colspan="2"><textarea style="width: 100%" name="avis" cols="50" rows="5">{{ avis }}</textarea></td>
+			<td colspan="2"><textarea class="form-control" style="width: 100%" name="avis" cols="50" rows="5">{{ avis }}</textarea></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="label">{{ STR_ADMIN_NOTE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td colspan="2" class="title_label">{{ STR_ADMIN_NOTE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				{% for this_note in range(note_max, 1, -1) }}
+				{% for this_note in range(note_max, 1, -1) %}
 				<input type="radio" name="note" value="{{ this_note }}"{% if note == this_note %} checked="checked"{% endif %} />{% for i in 1..this_note %}<img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" />{% endfor %}<br />
 				{% endfor %}
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><p><input class="bouton" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>
+			<td colspan="2" class="center"><p><input class="btn btn-primary" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>
 		</tr>
 	</table>
 </form>

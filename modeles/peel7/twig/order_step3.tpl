@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step3.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<h2 class="order_step3">&nbsp;{{ STR_STEP3 }}</h2>
+// $Id: order_step3.tpl 38971 2013-11-24 19:14:28Z gboussin $
+#}<h1 class="order_step3">{{ STR_STEP3 }}</h1>
 <p>{{ STR_MSG_THANKS }}</p>
 {{ payment_form }}<br />
 <fieldset>

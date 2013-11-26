@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.1.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 38045 2013-09-05 09:11:49Z gboussin $
+# $Id: peel.sql 39020 2013-11-26 00:36:36Z gboussin $
 #
 
 --
@@ -204,8 +204,9 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `on_home_page` tinyint(1) NOT NULL DEFAULT '0',
   `on_other_page_category` tinyint(1) NOT NULL DEFAULT '0',
   `on_first_page_category` tinyint(1) NOT NULL DEFAULT '0',
+  `on_announcement_creation_page` tinyint(1) NOT NULL DEFAULT '0',
   `on_other_page` tinyint(1) NOT NULL DEFAULT '0',
-  `on_search_engine_page` mediumtext NOT NULL,
+  `on_search_engine_page` tinyint(1) NOT NULL DEFAULT '0',
   `keywords` mediumtext NOT NULL,
   `list_id` varchar(255) NOT NULL DEFAULT '',
   `pages_allowed` enum('all','odd','even') NOT NULL DEFAULT 'all',
@@ -414,7 +415,7 @@ CREATE TABLE IF NOT EXISTS `peel_commandes` (
   `tva_total_option` float(15,5) NOT NULL DEFAULT '0.00000',
   `tva_total_remise` float(15,5) NOT NULL DEFAULT '0.00000',
   `tva_total_ecotaxe` float(15,5) NOT NULL DEFAULT '0.00000',
-  `code_facture` varchar(10) NOT NULL DEFAULT '',
+  `code_facture` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   `id_ecom` int(11) NOT NULL DEFAULT '0',
   `small_order_overcost_amount` FLOAT(15,5) NOT NULL DEFAULT '0.00000',
   `tva_small_order_overcost` FLOAT(15,5) NOT NULL DEFAULT '0.00000',
@@ -426,7 +427,8 @@ CREATE TABLE IF NOT EXISTS `peel_commandes` (
   PRIMARY KEY  (`id`),
   KEY `id_utilisateur` (`id_utilisateur`),
   KEY `email` (`email`),
-  KEY `id_statut_paiement` (`id_statut_paiement`)
+  KEY `id_statut_paiement` (`id_statut_paiement`),
+  KEY `code_facture` (`code_facture`(2))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 
@@ -455,7 +457,7 @@ CREATE TABLE IF NOT EXISTS `peel_commandes_articles` (
   `total_prix` float(15,5) NOT NULL DEFAULT '0.00000',
   `total_prix_ht` float(15,5) NOT NULL DEFAULT '0.00000',
   `quantite` int(11) NOT NULL DEFAULT '0',
-  `percent_remise_produit` float(10,2) NOT NULL DEFAULT '0.00',
+  `percent_remise_produit` float(5,2) NOT NULL DEFAULT '0.00',
   `remise` float(15,5) NOT NULL DEFAULT '0.00000',
   `remise_ht` float(15,5) NOT NULL DEFAULT '0.00000',
   `tva` float(15,5) NOT NULL DEFAULT '0.00000',
@@ -477,8 +479,8 @@ CREATE TABLE IF NOT EXISTS `peel_commandes_articles` (
   `nb_envoi` int(11) NOT NULL DEFAULT '0',
   `nb_download` int(11) NOT NULL DEFAULT '0',
   `date_download` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `ecotaxe_ttc` float(10,5) NOT NULL DEFAULT '0.00000',
-  `ecotaxe_ht` float(10,5) NOT NULL DEFAULT '0.00000',
+  `ecotaxe_ttc` float(15,5) NOT NULL DEFAULT '0.00000',
+  `ecotaxe_ht` float(15,5) NOT NULL DEFAULT '0.00000',
   `attributs_list` MEDIUMTEXT NOT NULL,
   `nom_attribut` MEDIUMTEXT NOT NULL,
   `total_prix_attribut` float(15,5) NOT NULL DEFAULT '0.00000',
@@ -534,7 +536,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (15, 'delivery_cost_calculation_mode', 'core', 'string', 'cheapest', '', '2013-01-01 12:00:00', 'Par défaut : on prend les frais de port les moins chers qui correspondent aux contraintes poids / montant du caddie', 1),
 (16, 'force_sessions_for_subdomains', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Par défaut les cookies ne sont valables que pour un sous-domaine donné (exemple : www). C''est bien de faire cela par défaut car parfois cookie_domain bloque le déclenchement des sessions chez certains hébergeurs comme 1and1. Pour rendre disponible les cookies pour tous les sous-domaines mettez à true\r\n', 1),
 (17, 'admin_fill_empty_bill_number_by_number_format', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', 'Dans l''édition de facture, si numéro de facture vide, on remplit par défaut automatiquement format de numéro à générer', 1),
-(18, 'payment_status_create_bill', 'core', 'string', '1,2,3', '', '2013-01-01 12:00:00', 'Dès qu''une commande est dans le statut $payment_status_create_bill, son numéro de facture est créé', 1),
+(18, 'payment_status_create_bill', 'core', 'string', '2,3', '', '2013-01-01 12:00:00', 'Dès qu''une commande est dans le statut $payment_status_create_bill, son numéro de facture est créé', 1),
 (19, 'smarty_avoid_check_template_files_update', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Passer à true si vous voulez accélérer un site en production. Attention : si true, alors les modifications que vous ferez sur les templates nécessiteront MAJ manuelle du cache', 1),
 (20, 'use_database_permanent_connection', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Valeurs possibles / Possible values : true, ''local'', ''no'' / false', 1),
 (21, 'allow_w3c_validator_access_admin', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'ATTENTION SECURITE : cette valeur doit rester à false sauf cas exceptionnel de test technique de l''administration / SECURITY WARNING: this value must stay set to false, unless for administration technical tests', 1),
@@ -546,7 +548,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (27, 'avoir', 'core', 'integer', '10', '', '2013-01-01 12:00:00', '', 1),
 (28, 'commission_affilie', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (29, 'id', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
-(30, 'css', 'core', 'string', 'screen.css,menu.css', '', '2013-01-01 12:00:00', '', 1),
+(30, 'css', 'core', 'string', 'screen.css', '', '2013-01-01 12:00:00', 'List of css file names inside /modeles/.../css/ separated by a coma', 1),
 (31, 'template_directory', 'core', 'string', 'peel7', '', '2013-01-01 12:00:00', '', 1),
 (32, 'template_multipage', 'core', 'string', 'default_1', '', '2013-01-01 12:00:00', '', 1),
 (33, 'email_paypal', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
@@ -614,7 +616,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (95, 'format_numero_facture', 'core', 'string', '[id]', '', '2013-01-01 12:00:00', '', 1),
 (96, 'default_country_id', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
 (97, 'nb_product', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
-(98, 'nb_on_top', 'core', 'integer', '5', '', '2013-01-01 12:00:00', '', 1),
+(98, 'nb_on_top', 'core', 'integer', '12', '', '2013-01-01 12:00:00', '', 1),
 (99, 'nb_last_views', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (100, 'auto_promo', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (101, 'act_on_top', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
@@ -633,10 +635,10 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (114, 'category_count_method', 'core', 'string', 'individual', '', '2013-01-01 12:00:00', '', 1),
 (115, 'partner_count_method', 'core', 'string', 'individual', '', '2013-01-01 12:00:00', '', 1),
 (116, 'admin_force_ssl', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
-(117, 'anim_prod', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
+(117, 'anim_prod', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
 (118, 'export_encoding', 'core', 'string', 'utf-8', '', '2013-01-01 12:00:00', '', 1),
 (119, 'zoom', 'core', 'string', 'jqzoom', '', '2013-01-01 12:00:00', '', 1),
-(120, 'enable_prototype', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
+(120, 'enable_prototype', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (121, 'enable_jquery', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
 (122, 'send_email_active', 'core', 'integer', '1', '', '2013-01-01 12:00:00', '', 1),
 (123, 'minimal_amount_to_order', 'core', 'string', '0.00000', '', '2013-01-01 12:00:00', '', 1),
@@ -650,7 +652,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (131, 'popup_width', 'core', 'integer', '310', '', '2013-01-01 12:00:00', '', 1),
 (132, 'popup_height', 'core', 'integer', '160', '', '2013-01-01 12:00:00', '', 1),
 (133, 'in_category', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
-(134, 'facebook_connect', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
+(134, 'facebook_connect', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (135, 'fb_appid', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
 (136, 'fb_secret', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
 (137, 'fb_baseurl', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
@@ -658,8 +660,8 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (139, 'keep_old_orders_intact', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (140, 'default_picture', 'core', 'string', 'image_defaut_peel.png', '', '2013-01-01 12:00:00', '', 1),
 (149, 'module_tnt', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
-(150, 'sign_in_twitter', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
-(151, 'googlefriendconnect', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
+(150, 'sign_in_twitter', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
+(151, 'googlefriendconnect', 'core', 'integer', '0', '', '2013-01-01 12:00:00', '', 1),
 (152, 'session_save_path', 'core', 'string', '', '', '2013-01-01 12:00:00', 'Répertoire sur le disque pour stocker les sessions. Exemple : /home/example/sessions . Attention : ce répertoire en doit pas être accessible par http => il ne doit pas être à l''intérieur de votre répertoire peel. Laisser vide si on veut le répertoire défini par défaut dans php.ini du serveur', 1),
 (153, 'general_print_image', 'core', 'string', '{$GLOBALS[''repertoire_images'']}/imprimer.jpg', '', '2013-01-01 12:00:00', '', 1),
 (154, 'general_home_image1', 'core', 'string', '', '', '2013-01-01 12:00:00', '', 1),
@@ -671,7 +673,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (160, 'general_add_notepad_image', 'core', 'string', '{$GLOBALS[''repertoire_images'']}/ajout_pense_bete.jpg', '', '2013-01-01 12:00:00', '', 1),
 (161, 'check_allowed_types', 'auto', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Vous pouvez activer une vérification du type MIME des fichiers téléchargés. Cela pose de nombreux problèmes car cette information n''est pas fiable et des navigateurs envoient des types MIME parfois imprévus => cette vérification est désactivée par défaut', 1),
 (162, 'allowed_types', 'auto', 'array', '"image/gif" => ".gif", "image/pjpeg" => ".jpg, .jpeg", "image/jpeg" => ".jpg, .jpeg", "image/x-png" => ".png", "image/png" => ".png", "text/plain" => ".html, .php, .txt, .inc, .csv", "text/comma-separated-values" => ".csv", "application/comma-separated-values" => ".csv", "text/csv" => ".csv", "application/vnd.ms-excel" => ".csv", "application/csv-tab-delimited-table" => ".csv", "application/octet-stream" => "", "application/pdf" => ".pdf", "application/force-download" => "", "application/x-shockwave-flash" => ".swf", "application/x-download" => "', '', '2013-01-01 12:00:00', 'Cette variable est utilisée si check_allowed_types = true', 1),
-(163, 'extensions_valides_any', 'auto', 'array', '"jpg", "jpeg", "gif", "png", "csv", "txt", "pdf", "zip"', '', '2013-01-01 12:00:00', 'Vérification en fonction des extensions des fichiers téléchargés', 1),
+(163, 'extensions_valides_any', 'auto', 'array', '"jpg", "jpeg", "gif", "png", "ico", "csv", "txt", "pdf", "zip"', '', '2013-01-01 12:00:00', 'Vérification en fonction des extensions des fichiers téléchargés', 1),
 (164, 'extensions_valides_data', 'auto', 'array', '"csv", "txt"', '', '2013-01-01 12:00:00', 'Vérification en fonction des extensions des fichiers téléchargés', 1),
 (165, 'extensions_valides_image_or_pdf', 'auto', 'array', '"jpg", "jpeg", "gif", "png", "pdf"', '', '2013-01-01 12:00:00', 'Vérification en fonction des extensions des fichiers téléchargés', 1),
 (166, 'extensions_valides_image', 'auto', 'array', '"jpg", "jpeg", "gif", "png"', '', '2013-01-01 12:00:00', 'Vérification en fonction des extensions des fichiers téléchargés', 1),
@@ -693,11 +695,11 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (182, 'achat_index_page_columns_count', 'core', 'integer', '2', '', '2013-01-01 12:00:00', '', 1),
 (183, 'edit_prices_on_products_list', 'core', 'string', 'edit', '', '2013-01-01 12:00:00', '', 1),
 (184, 'show_qrcode_on_product_pages', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
-(185, 'minify_css', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Concatenation automatique des fichiers CSS pour plus de rapidité du site - ATTENTION : nécessite suppression du cache manuellement en cas de modification des fichiers CSS / Automatic merge of CSS files in order to speed up pages loading - NOTICE : it is mandatory to delete cache files manually after any CSS file modification', 1),
-(186, 'minify_js', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Concatenation automatique des fichiers JS pour plus de rapidité du site, sauf pour jquery à cause de problèmes de compatiblité - ATTENTION : nécessite suppression du cache manuellement en cas de modification des fichiers JS / Automatic merge of JS files in order to speed up pages loading, excepted for jquery files due to compatibility problems - NOTICE : it is mandatory to delete cache files manually after any JS file modification', 1),
+(185, 'minify_css', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', 'Concatenation automatique des fichiers CSS pour plus de rapidité du site - ATTENTION : nécessite suppression du cache manuellement en cas de modification des fichiers CSS / Automatic merge of CSS files in order to speed up pages loading - NOTICE : it is mandatory to delete cache files manually after any CSS file modification', 1),
+(186, 'minify_js', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', 'Concatenation automatique des fichiers JS pour plus de rapidité du site, sauf pour jquery à cause de problèmes de compatiblité - ATTENTION : nécessite suppression du cache manuellement en cas de modification des fichiers JS / Automatic merge of JS files in order to speed up pages loading, excepted for jquery files due to compatibility problems - NOTICE : it is mandatory to delete cache files manually after any JS file modification', 1),
 (187, 'product_categories_depth_in_menu', 'core', 'integer', '1', '', '2013-01-01 12:00:00', 'Profondeur du menu de catégories de produits. NB : Seules les catégories de produits avec position>0 s''afficheront, ce qui permet d''en exclure du menu en les mettant à position=0', 1),
 (188, 'content_categories_depth_in_menu', 'core', 'integer', '1', '', '2013-01-01 12:00:00', 'Profondeur du menu de rubriques de contenu. NB : Seules les rubriques de contenu avec position>0 s''afficheront, ce qui permet d''en exclure du menu en les mettant à position=0', 1),
-(189, 'main_menu_items_if_available', 'core', 'array', '"home", "catalog", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "admin"', '', '2013-01-01 12:00:00', 'Liste à définir dans l''ordre d''affichage parmi : "home", "catalog", "content", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "promotions", "admin"', 1),
+(189, 'main_menu_items_if_available', 'core', 'array', '"home", "cat_*", "annonces", "vitrine", "other"', '', '2013-01-01 12:00:00', 'Liste à définir dans l''ordre d''affichage parmi : "home", "catalog", "content", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "promotions", "admin", "cat_*"', 1),
 (190, 'template_engine', 'core', 'string', 'smarty', '', '2013-01-01 12:00:00', 'Par défaut : smarty - Existe aussi en version de test : twig', 1),
 (191, 'catalog_products_columns_default', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
 (192, 'associated_products_columns_default', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
@@ -715,7 +717,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (223, 'categories_side_menu_item_max_length', 'core', 'integer', '28', '', '2013-05-01 12:00:00', '', 1),
 (224, 'phone_cti_primary_site_list_calls_url', 'core', 'string', '', '', '2013-05-01 12:00:00', '', 1),
 (225, 'email_accounts_for_bounces_handling', 'core', 'array', '', '', '2013-05-01 12:00:00', 'Format : ''email'' => ''password''', 1),
-(226, 'tagcloud_display_count', 'core', 'integer', '12', '', '2013-05-01 12:00:00', '', 1),
+(226, 'tagcloud_display_count', 'core', 'integer', '16', '', '2013-05-01 12:00:00', '', 1),
 (229, 'filter_stop_words', 'core', 'string', 'afin aie aient aies ailleurs ainsi ait alentour alias allaient allais allait allez allons alors apres aprs assez attendu aucun aucune aucuns audit aujourd aujourdhui auparavant auprs auquel aura aurai auraient aurais aurait auras aurez auriez aurions aurons auront aussi aussitot autant autour autre autrefois autres autrui aux auxdites auxdits auxquelles auxquels avaient avais avait avant avec avez aviez avions avoir avons ayant ayez ayons bah banco bas beaucoup ben bien bientot bis bon caha cahin car ceans ceci cela celle celles celui cent cents cependant certain certaine certaines certains certes ces cet cette ceux cgr chacun chacune champ chaque cher chez cinq cinquante combien comme comment contrario contre crescendo dabord daccord daffilee dailleurs dans daprs darrache davantage debout debut dedans dehors deja dela demain demblee depuis derechef derriere des desdites desdits desormais desquelles desquels dessous dessus deux devant devers devrait die differentes differents dire dis disent dit dito divers diverses dix doit donc dont dorenavant dos douze droite dudit duquel durant elle elles encore enfin ensemble ensuite entre envers environ essai est et etaient etais etait etant etat etc ete etes etiez etions etre eue eues euh eûmes eurent eus eusse eussent eusses eussiez eussions eut eutes eux expres extenso extremis facto faire fais faisaient faisais faisait faisons fait faites fallait faudrait faut flac fois font force fors fort forte fortiori frais fumes fur furent fus fusse fussent fusses fussiez fussions fut futes ghz grosso gure han haut hein hem heu hier hola hop hormis hors hui huit hum ibidem ici idem illico ils ipso item jadis jamais jusqu jusqua jusquau jusquaux jusque juste km² laquelle lautre lequel les lesquelles lesquels leur leurs lez loin lon longtemps lors lorsqu lorsque lot lots lui lun lune maint mainte maintenant maintes maints mais mal malgre meme memes mes mgr mhz mieux mil mille milliards millions mine minima mm² modo moi moins mon mot moult moyennant naguere neanmoins neuf nommes non nonante nonobstant nos notre nous nouveau nouveaux nouvelle nouvelles nul nulle octante ont onze ouais ou oui outre par parbleu parce parfois parmi parole partout pas passe passim pendant personne personnes petto peu peut peuvent peux piece pied pis plupart plus plusieurs plutot point posteriori pour pourquoi pourtant prealable presqu presque primo priori prix prou prs puis puisqu puisque quand quarante quasi quatorze quatre que quel quelle quelles quelqu quelque quelquefois quelques quelquun quelquune quels qui quiconque quinze quoi quoiqu quoique ref refs revoici revoila rien sans sauf secundo seize selon sensu sept septante sera serai seraient serais serait seras serez seriez serions serons seront ses seulement sic sien sine sinon sitot situ six soi soient soixante sommes son sont soudain sous souvent soyez soyons stricto suis sujet sur surtout sus tandis tant tantot tard tel telle tellement telles tels temps ter tes toi ton tot toujours tous tout toute toutefois toutes treize trente tres trois trop trs une unes uns usd vais valeur vas vends vers versa veut veux via vice vingt vingts vingt vis vite vitro vivo voici voie voient voila voire volontiers vont vos votre vous zero', 'fr', '2013-05-01 12:00:00', 'Liste de mots sans accents, de 3 lettres et plus (les mots de moins de 3 lettres sont considérés dans tous les cas comme non significatifs) séparés par des espaces. Cette liste permet de filtrer une chaine pour trouver des mots clés significatifs.', 1),
 (230, 'filter_stop_words', 'core', 'string', 'a able about above abst accordance according accordingly across act actually added adj affected affecting affects after afterwards again against ah all almost alone along already also although always am among amongst an and announce another any anybody anyhow anymore anyone anything anyway anyways anywhere apparently approximately are aren arent arise around as aside ask asking at auth available away awfully b back be became because become becomes becoming been before beforehand begin beginning beginnings begins behind being believe below beside besides between beyond biol both brief briefly but by c ca came can cannot can''t cause causes certain certainly co com come comes contain containing contains could couldnt d date did didn''t different do does doesn''t doing done don''t down downwards due during e each ed edu effect eg eight eighty either else elsewhere end ending enough especially et et-al etc even ever every everybody everyone everything everywhere ex except f far few ff fifth first five fix followed following follows for former formerly forth found four from further furthermore g gave get gets getting give given gives giving go goes gone got gotten h had happens hardly has hasn''t have haven''t having he hed hence her here hereafter hereby herein heres hereupon hers herself hes hi hid him himself his hither home how howbeit however hundred i id ie if i''ll im immediate immediately importance important in inc indeed index information instead into invention inward is isn''t it itd it''ll its itself i''ve j just k keep 	keeps kept kg km know known knows l largely last lately later latter latterly least less lest let lets like liked likely line little ''ll look looking looks ltd m made mainly make makes many may maybe me mean means meantime meanwhile merely mg might million miss ml more moreover most mostly mr mrs much mug must my myself n na name namely nay nd near nearly necessarily necessary need needs neither never nevertheless new next nine ninety no nobody non none nonetheless noone nor normally nos not noted nothing now nowhere o obtain obtained obviously of off often oh ok okay old omitted on once one ones only onto or ord other others otherwise ought our ours ourselves out outside over overall owing own p page pages part particular particularly past per perhaps placed please plus poorly possible possibly potentially pp predominantly present previously primarily probably promptly proud provides put q que quickly quite qv r ran rather rd re readily really recent recently ref refs regarding regardless regards related relatively research respectively resulted resulting results right run s said same saw say saying says sec section see seeing seem seemed seeming seems seen self selves sent seven several shall she shed she''ll shes should shouldn''t show showed shown showns shows significant significantly similar similarly since six slightly so some somebody somehow someone somethan something sometime sometimes somewhat somewhere soon sorry specifically specified specify specifying still stop strongly sub substantially successfully such sufficiently suggest sup sure 	t take taken taking tell tends th than thank thanks thanx that that''ll thats that''ve the their theirs them themselves then thence there thereafter thereby thered therefore therein there''ll thereof therere theres thereto thereupon there''ve these they theyd they''ll theyre they''ve think this those thou though thoughh thousand throug through throughout thru thus til tip to together too took toward towards tried tries truly try trying ts twice two u un under unfortunately unless unlike unlikely until unto up upon ups us use used useful usefully usefulness uses using usually v value various ''ve very via viz vol vols vs w want wants was wasn''t way we wed welcome we''ll went were weren''t we''ve what whatever what''ll whats when whence whenever where whereafter whereas whereby wherein wheres whereupon wherever whether which while whim whither who whod whoever whole who''ll whom whomever whos whose why widely willing wish with within without won''t words world would wouldn''t www x y yes yet you youd you''ll your youre yours yourself yourselves you''ve z zero', 'en', '2013-05-01 12:00:00', 'Liste de mots sans accents, de 3 lettres et plus (les mots de moins de 3 lettres sont considérés dans tous les cas comme non significatifs) séparés par des espaces. Cette liste permet de filtrer une chaine pour trouver des mots clés significatifs.', 1),
 (231, 'filter_stop_words', 'core', 'string', 'ab aber abgerufen abgerufene abgerufener abgerufenes acht ahnlich alle allein allem allen aller allerdings allerlei alles allgemein allmahlich allzu als alsbald also am an ander andere anderem anderen anderer andererseits anderes anderm andern andernfalls anders anerkannt anerkannte anerkannter anerkanntes anfangen anfing angefangen angesetze angesetzt angesetzten angesetzter ansetzen anstatt arbeiten auch auf aufgehort aufgrund aufhoren aufhorte aufzusuchen aus ausdrucken ausdruckt ausdruckte ausgenommen außen ausser außer ausserdem außerdem außerhalb author autor bald bearbeite bearbeiten bearbeitete bearbeiteten bedarf bedurfen bedurfte befragen befragte befragten befragter begann beginnen begonnen behalten behielt bei beide beiden beiderlei beides beim beinahe beitragen beitrugen bekannt bekannte bekannter bekennen benutzt bereits berichten berichtet berichtete berichteten besonders besser bestehen besteht betrachtlich bevor bezuglich bietet bin bis bis bisher bislang bist bleiben blieb bloss bloß boden brachte brachten brauchen braucht brauchte bringen bsp bzw ca da dabei dadurch dafur dagegen daher dahin damals damit danach daneben dank danke danken dann dannen daran darauf daraus darf darfst darin daruber daruberhinaus darum darunter das dass daß dasselbe davon davor dazu dein deine deinem deinen deiner deines dem demnach demselben den denen denn dennoch denselben der derart derartig derem deren derer derjenige derjenigen derselbe derselben derzeit des deshalb desselben dessen desto deswegen dich die diejenige dies diese dieselbe dieselben diesem diesen dieser dieses diesseits dinge dir direkt direkte direkten direkter doch doppelt dort dorther dorthin drauf drei dreißig drin dritte druber drunter du dunklen durch durchaus durfen durfte durfte durften eben ebenfalls ebenso ehe eher eigenen eigenes eigentlich ein einbaun eine einem einen einer einerseits eines einfach einfuhren einfuhrte einfuhrten eingesetzt einig einige einigem einigen einiger einigermaßen einiges einmal eins einseitig einseitige einseitigen einseitiger einst einstmals einzig ende entsprechend entweder er erganze erganzen erganzte erganzten erhalt erhalten erhielt erhielten erneut eroffne eroffnen eroffnet eroffnete eroffnetes erst erste ersten erster es etc etliche etwa etwas euch euer eure eurem euren eurer eures fall falls fand fast ferner finden findest findet folgende folgenden folgender folgendes folglich fordern fordert forderte forderten fortsetzen fortsetzt fortsetzte fortsetzten fragte frau frei freie freier freies fuer funf fur gab gangig gangige gangigen gangiger gangiges ganz ganze ganzem ganzen ganzer ganzes ganzlich gar gbr geb geben geblieben gebracht gedurft geehrt geehrte geehrten geehrter gefallen gefalligst gefallt gefiel gegeben gegen gehabt gehen geht gekommen gekonnt gemacht gemass gemocht genommen genug gern gesagt gesehen gestern gestrige getan geteilt geteilte getragen gewesen gewissermaßen gewollt geworden ggf gib gibt gleich gleichwohl gleichzeitig glucklicherweise gmbh gratulieren gratuliert gratulierte gute guten hab habe haben haette halb hallo hast hat hatt hatte hatte hatten hatten hattest hattet hen heraus herein heute heutige hier hiermit hiesige hin hinein hinten hinter hinterher hoch hochstens hundert ich igitt ihm ihn ihnen ihr ihre ihrem ihren ihrer ihres im immer immerhin important in indem indessen info infolge innen innerhalb ins insofern inzwischen irgend irgendeine irgendwas irgendwen irgendwer irgendwie irgendwo ist ja jahrig jahrige jahrigen jahriges je jede jedem jeden jedenfalls jeder jederlei jedes jedoch jemand jene jenem jenen jener jenes jenseits jetzt kam kann kannst kaum kein keine keinem keinen keiner keinerlei keines keines keineswegs klar klare klaren klares klein kleinen kleiner kleines koennen koennt koennte koennten komme kommen kommt konkret konkrete konkreten konkreter konkretes konn konnen konnt konnte konnte konnten konnten kunftig lag lagen langsam langst langstens lassen laut lediglich leer legen legte legten leicht leider lesen letze letzten letztendlich letztens letztes letztlich lichten liegt liest links mache machen machst macht machte machten mag magst mal man manche manchem manchen mancher mancherorts manches manchmal mann margin mehr mehrere mein meine meinem meinen meiner meines meist meiste meisten meta mich mindestens mir mit mithin mochte mochte mochten mochtest mogen moglich mogliche moglichen moglicher moglicherweise morgen morgige muessen muesst muesste muss muß mussen musst mußt mußt musste musste mußte mussten mussten nach nachdem nacher nachhinein nachste nacht nahm namlich naturlich neben nebenan nehmen nein neu neue neuem neuen neuer neues neun nicht nichts nie niemals niemand nimm nimmer nimmt nirgends nirgendwo noch notigenfalls nun nur nutzen nutzt nutzt nutzung ob oben oberhalb obgleich obschon obwohl oder oft ohne per pfui plotzlich pro reagiere reagieren reagiert reagierte rechts regelmaßig rief rund sage sagen sagt sagte sagten sagtest samtliche sang sangen schatzen schatzt schatzte schatzten schlechter schließlich schnell schon schreibe schreiben schreibens schreiber schwierig sechs sect sehe sehen sehr sehrwohl seht sei seid sein seine seinem seinen seiner seines seit seitdem seite seiten seither selber selbst senke senken senkt senkte senkten setzen setzt setzte setzten sich sicher sicherlich sie sieben siebte siehe sieht sind singen singt so sobald sodaß soeben sofern sofort sog sogar solange solc solch solche solchem solchen solcher solches soll sollen sollst sollt sollte sollten solltest somit sondern sonst sonstwo sooft soviel soweit sowie sowohl spater spielen startet startete starteten statt stattdessen steht steige steigen steigt stets stieg stiegen such suchen tages tat tat tatsachlich tatsachlichen tatsachlicher tatsachliches tausend teile teilen teilte teilten titel total trage tragen tragt trotzdem trug tun tust tut txt ubel uber uberall uberallhin uberdies ubermorgen ubrig ubrigens ueber um umso unbedingt und ungefahr unmoglich unmogliche unmoglichen unmoglicher unnotig uns unse unsem unsen unser unser unsere unserem unseren unserer unseres unserm unses unten unter unterbrach unterbrechen unterhalb unwichtig usw vergangen vergangene vergangener vergangenes vermag vermogen vermutlich veroffentlichen veroffentlicher veroffentlicht veroffentlichte veroffentlichten veroffentlichtes verrate verraten verriet verrieten version versorge versorgen versorgt versorgte versorgten versorgtes viel viele vielen vieler vieles vielleicht vielmals vier vollig vollstandig vom von vor voran vorbei vorgestern vorher vorne voruber wachen waere wahrend wahrend wahrenddessen wann war war ware waren waren warst warum was weder weg wegen weil weiß weiter weitere weiterem weiteren weiterer weiteres weiterhin welche welchem welchen welcher welches wem wen wenig wenige weniger wenigstens wenn wenngleich wer werde werden werdet weshalb wessen wichtig wie wieder wieso wieviel wiewohl will willst wir wird wirklich wirst wo wodurch wogegen woher wohin wohingegen wohl wohlweislich wolle wollen wollt wollte wollten wolltest wolltet womit woraufhin woraus worin wurde wurde wurden wurden zahlreich zB zehn zeitweise ziehen zieht zog zogen zu zudem zuerst zufolge zugleich zuletzt zum zumal zur zuruck zusammen zuviel zwanzig zwar zwei zwischen zwolf', 'de', '2013-05-01 12:00:00', 'Liste de mots sans accents, de 3 lettres et plus (les mots de moins de 3 lettres sont considérés dans tous les cas comme non significatifs) séparés par des espaces. Cette liste permet de filtrer une chaine pour trouver des mots clés significatifs.', 1),
@@ -731,13 +733,23 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (246, 'site_index_page_columns_count', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
 (247, 'display_nb_vote_graphic_view', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
 (248, 'display_content_category_diaporama', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
-(249, 'subcategorie_nb_column', 'core', 'integer', '5', '', '2013-01-01 12:00:00', '', 1),
+(249, 'subcategorie_nb_column', 'core', 'integer', '4', '', '2013-01-01 12:00:00', '', 1),
 (250, 'product_category_pages_nb_column', 'core', 'integer', '3', '', '2013-01-01 12:00:00', '', 1),
 (251, 'display_share_tools_on_product_pages', 'core', 'boolean', 'true', '', '2013-01-01 12:00:00', '', 1),
 (252, 'prices_precision', 'core', 'integer', '2', '', '2013-01-01 12:00:00', 'Nombre de décimales pour l''affichage des prix / Decimal count for prices display', 1),
 (253, 'short_order_process', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l''absence de paiement et de validation des CGV => Utile pour des demandes de devis', 1),
 (254, 'use_ads_as_products', 'core', 'boolean', 'false', '', '2013-01-01 12:00:00', 'Permet d''ajouter des annonces au panier (nécessite le module d''annonce)', 1),
-(255, 'tva_annonce', 'core', 'string', '19.6', '', '2013-01-01 12:00:00', 'Spécifie le taux de TVA à appliquer aux annonces lors de leur ajout au panier (fonctionne avec le paramètre use_ads_as_product).', 1);
+(255, 'tva_annonce', 'core', 'float', '19.6', '', '2013-01-01 12:00:00', 'Spécifie le taux de TVA à appliquer aux annonces lors de leur ajout au panier (fonctionne avec le paramètre use_ads_as_product).', 1),
+(256, 'used_uploader', 'core', 'boolean', 'fineuploader', '', '2013-01-01 12:00:00', 'Définit quelle technologie d''upload utiliser / Defines which upload technology to use - possible values = standard, fineuploader', 1),
+(257, 'chart_product', 'core', 'string', 'flot', '', '2013-09-01 12:00:00', '', 1),
+(258, 'insert_product_categories_in_menu', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', '', 1),
+(259, 'enable_gzhandler', 'core', 'boolean', 'false', '', '2013-09-01 12:00:00', 'Si true : force PHP à compresser ses sorties HTTP', 1),
+(260, 'load_javascript_async', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Si true : force les fichiers js en fin de page HTML', 1),
+(261, 'global_promotion_percent_by_threshold', 'core', 'array', '', '', '2013-09-01 12:00:00', '', 1),
+(262, 'minify_id_increment', 'core', 'integer', '0', '', '2013-09-01 12:00:00', 'Sert pour générer un nom de fichier différent après chaque ?update=1 forcé par un administrateur', 1),
+(263, 'bootstrap_enabled', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Activer ou non Bootstrap en front-office', 1),
+(264, 'disable_add_to_cart_section_if_null_base_price_and_no_option', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Désactive l''affichage du bouton d''ajout au caddie si le produit est gratuit et sans option - Mettez à false si vous voulez gérer des processus de commande malgré l''absence de prix', 1),
+(265, 'paypal_additional_fields', 'core', 'string', '<input name="solution_type" value="Sole" type="hidden"><input name="landing_page" value="Billing" type="hidden">', '', '2013-09-01 12:00:00', 'Permet d''ajouter des champs hidden au formulaire de communication à Paypal - par exemple : <input name="solution_type" value="Sole" type="hidden"><input name="landing_page" value="Billing" type="hidden">', 1);
 
 -- --------------------------------------------------------
 
@@ -801,7 +813,7 @@ CREATE TABLE IF NOT EXISTS `peel_couleurs` (
 CREATE TABLE IF NOT EXISTS `peel_devises` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `devise` varchar(50) NOT NULL DEFAULT '',
-  `conversion` float(10,5) NOT NULL DEFAULT '0.00000',
+  `conversion` float(15,5) NOT NULL DEFAULT '1.00000',
   `symbole` varchar(10) NOT NULL DEFAULT '',
   `symbole_place` tinyint(1) NOT NULL DEFAULT '1',
   `code` varchar(3) NOT NULL DEFAULT '',
@@ -905,6 +917,7 @@ CREATE TABLE IF NOT EXISTS `peel_email_template` (
   `lang` varchar(2) NOT NULL DEFAULT '',
   `active` enum('TRUE','FALSE') NOT NULL DEFAULT 'TRUE',
   `id_cat` int(11) NOT NULL DEFAULT '1',
+  `default_signature_code` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -954,19 +967,17 @@ CREATE TABLE IF NOT EXISTS `peel_html` (
 --
 
 INSERT INTO peel_html (id, lang, contenu_html, etat, titre, o_timestamp, a_timestamp, emplacement) VALUES
-(1, 'fr', '<div class="header_few_words_center">[SITE]</div>\r\n<div class="header_few_words_right">Open eCommerce</div>', 1, 'En-tête du site', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'header'),
+(1, 'fr', '', 0, 'En-tête du site', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'header'),
 (2, 'fr', '<p>Bas de page du site personnalisable dans lequel on peut insérer des liens vers les partenaires</p>', 1, 'Bas de page du site', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'footer'),
 (3, 'fr', '<p>Contenu personnalisable dans lequel on peut insérer des images, du texte HTML et des bannières publicitaires</p>', 1, 'Contenu d''accueil du site', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'home'),
 (4, 'fr', '<p>Interstitiel de publicité</p>', 0, 'Publicité', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'interstitiel'),
 (5, 'fr', '<p>Introduction personnalisable</p>', 0, 'Devenir revendeur', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'devenir_revendeur'),
-(6, 'en', '<div class="header_few_words_center">[SITE]</div>\r\n<div class="header_few_words_right">Open eCommerce</div>', 1, 'En-tête de la boutique', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'header'),
-(7, 'fr','<h2>La page demandée n''est pas disponible</h2><br />', 1, 'Page d''erreur 404', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'error404'),
-(8, 'en','<h2>This page is not found</h2><br />', 1, 'Error 404 page content', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'error404'),
-(9, 'fr','<p style="text-align: center;">Bas de page du site personnalisable dans lequel on peut insérer des liens (footer_link)</p>', 1, 'Liens du footer', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'footer_link'),
-(10, 'en','Refer your friends to let them receive a credit of € 10.00 on their first order.
-By inserting their email, your friends will receive five email a request for registration to validate their account. After validation of their account, they will each receive a credit of € 10.00.', 1, 'Introduction à la page parrainage', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'intro_parrainage'),
-(11, 'fr','Parrainez vos amis pour leur faire bénéficier d''un avoir de 10,00 € sur leur première commande.
-En insérant leurs emails, vos 5 amis recevront par email une demande d''inscription leur permettant de valider leur compte client. Après validation de leur compte, ils bénéficieront chacun d''un avoir de 10,00 €.', 1, 'Introduction à la page parrainage', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'intro_parrainage'),
+(6, 'en', '', 0, 'En-tête du site', '2012-05-01 12:00:00', '2012-05-01 12:00:00', 'header'),
+(7, 'fr','<h1>La page demandée n''est pas disponible</h1>', 1, 'Page d''erreur 404', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'error404'),
+(8, 'en','<h1>This page is not found</h1>', 1, 'Error 404 page content', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'error404'),
+(9, 'fr','<p style="text-align: center;">Bas de page du site personnalisable dans lequel on peut insérer des liens (footer_link)</p>', 0, 'Liens du footer', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'footer_link'),
+(10, 'en','Refer your friends to let them receive a credit of € 10.00 on their first order. By inserting their email, your friends will receive five email a request for registration to validate their account. After validation of their account, they will each receive a credit of € 10.00.', 1, 'Introduction à la page parrainage', '2012-05-01 11:53:04', '2012-05-01 12:00:28', 'intro_parrainage'),
+(11, 'fr','Parrainez vos amis pour leur faire bénéficier d''un avoir de 10,00 € sur leur première commande. En insérant leurs emails, vos 5 amis recevront par email une demande d''inscription leur permettant de valider leur compte client. Après validation de leur compte, ils bénéficieront chacun d''un avoir de 10,00 €.', 1, 'Introduction à la page parrainage', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'intro_parrainage'),
 (12, 'fr','Merci de votre confiance, votre commande a été enregistrée avec succès.', 1, 'Fin du process de command court', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'end_process_order'),
 (13, 'en','Thank you for your order. It has been successful.', 1, 'End of short order process', '2012-05-01 12:53:04', '2012-05-01 12:00:28', 'end_process_order');
 
@@ -1122,25 +1133,25 @@ CREATE TABLE IF NOT EXISTS `peel_modules` (
 --
 
 INSERT INTO `peel_modules` (`id`, `technical_code`, `location`, `display_mode`, `position`, `etat`) VALUES
-(1, 'catalogue', 'left', 'sideblocktitle', 1, 1),
-(2, 'tagcloud', 'left', 'sideblocktitle', 2, 1),
+(1, 'catalogue', 'footer', 'sideblock', 1, 0),
+(2, 'tagcloud', 'below_middle', 'sideblocktitle', 2, 1),
 (3, 'search', 'header', '', 3, 1),
-(4, 'guide', 'left', 'sideblocktitle', 4, 1),
-(5, 'caddie', 'right', 'sideblocktitle', 1, 1),
-(6, 'account', 'right', 'sideblocktitle', 2, 1),
-(7, 'best_seller', 'right', 'sideblocktitle', 3, 1),
-(8, 'news', 'right', 'sideblocktitle', 4, 1),
-(9, 'advertising', 'right', 'sideblock', 5, 0),
+(4, 'guide', 'footer', 'sideblock', 4, 1),
+(5, 'caddie', 'header', '', 1, 1),
+(6, 'account', 'below_middle', 'sideblocktitle', 2, 0),
+(7, 'best_seller', 'bottom_middle', '', 3, 1),
+(8, 'news', 'below_middle', 'sideblocktitle', 4, 1),
+(9, 'advertising', 'below_middle', 'sideblock', 5, 0),
 (10, 'menu', 'header', '', 4, 1),
 (11, 'ariane', 'header', '', 5, 0),
-(12, 'advertising1', 'right', 'sideblock', 10, 0),
-(13, 'advertising2', 'right', 'sideblock', 11, 0),
-(14, 'advertising3', 'left', 'sideblock', 12, 0),
-(15, 'advertising4', 'right', 'sideblock', 10, 0),
-(16, 'advertising5', 'right', 'sideblock', 11, 0),
-(17, 'last_views',  'left',  'sideblocktitle', 2, 1),
-(18, 'brand', 'left', 'sideblocktitle', 13, 1),
-(19, 'paiement_secu',  'left',  'sideblocktitle', 2, 0);
+(12, 'advertising1', 'below_middle', 'sideblock', 10, 0),
+(13, 'advertising2', 'below_middle', 'sideblock', 11, 0),
+(14, 'advertising3', 'below_middle', 'sideblock', 12, 0),
+(15, 'advertising4', 'below_middle', 'sideblock', 10, 0),
+(16, 'advertising5', 'below_middle', 'sideblock', 11, 0),
+(17, 'last_views',  'below_middle',  'sideblocktitle', 2, 1),
+(18, 'brand', 'footer', 'sideblock', 13, 1),
+(19, 'paiement_secu', 'below_middle',  'sideblocktitle', 2, 0);
 
 -- --------------------------------------------------------
 
@@ -1196,10 +1207,12 @@ CREATE TABLE IF NOT EXISTS `peel_paiement` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `technical_code` varchar(255) NOT NULL DEFAULT '',
   `position` int(11) NOT NULL DEFAULT '0',
-  `tarif` float(13,5) NOT NULL DEFAULT '0.00000',
+  `tarif` float(15,5) NOT NULL DEFAULT '0.00000',
   `tarif_percent` float(5,2) NOT NULL DEFAULT '0.00',
   `tva` float(5,2) NOT NULL DEFAULT '0.00',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
+  `totalmin` float(15,5) NOT NULL DEFAULT '0.00000',
+  `totalmax` float(15,5) NOT NULL DEFAULT '0.00000',
   PRIMARY KEY  (`id`),
   KEY `technical_code` (`technical_code`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -1534,7 +1547,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   `points` int(11) NOT NULL DEFAULT '0',
   `date_insere` date NOT NULL DEFAULT '0000-00-00',
   `date_maj` date NOT NULL DEFAULT '0000-00-00',
-  `promotion` float(15,2) NOT NULL DEFAULT '0.00',
+  `promotion` float(5,2) NOT NULL DEFAULT '0.00',
   `tva` float(5,2) NOT NULL DEFAULT '0.00',
   `etat` int(1) NOT NULL DEFAULT '0',
   `on_stock` tinyint(1) NOT NULL DEFAULT '0',
@@ -1562,7 +1575,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   `etat_stock` tinyint(1) NOT NULL DEFAULT '0',
   `on_rupture` tinyint(1) NOT NULL DEFAULT '0',
   `lang` varchar(2) NOT NULL DEFAULT '',
-  `prix_promo` float(15,2) NOT NULL DEFAULT '0.00',
+  `prix_promo` float(15,5) NOT NULL DEFAULT '0.00000',
   `paiement` varchar(255) NOT NULL DEFAULT '',
   `type_prix` varchar(255) NOT NULL DEFAULT '',
   `on_check` tinyint(1) NOT NULL DEFAULT '0',
@@ -1582,7 +1595,8 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   KEY `position` (`position`),
   KEY `on_rollover` (`on_rollover`),
   KEY `on_special` (`on_special`),
-  KEY `on_top` (`on_top`)
+  KEY `on_top` (`on_top`),
+  KEY `reference` (`reference` (2)) 
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 --
@@ -1901,12 +1915,12 @@ CREATE TABLE IF NOT EXISTS `peel_tarifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `poidsmin` float(10,2) NOT NULL DEFAULT '0.00',
   `poidsmax` float(10,2) NOT NULL DEFAULT '0.00',
-  `totalmin` float(10,2) NOT NULL DEFAULT '0.00',
-  `totalmax` float(10,2) NOT NULL DEFAULT '0.00',
+  `totalmin` float(15,5) NOT NULL DEFAULT '0.00000',
+  `totalmax` float(15,5) NOT NULL DEFAULT '0.00000',
   `tarif` float(10,2) NOT NULL DEFAULT '0.00',
   `type` tinyint(1) NOT NULL DEFAULT '0',
   `zone` int(11) NOT NULL DEFAULT '0',
-  `tva` float(7,2) NOT NULL DEFAULT '0.00',
+  `tva` float(5,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 

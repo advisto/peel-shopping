@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: FormError.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: FormError.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: FormError.php 37904 2013-08-27 21:19:26Z gboussin $
+ * @version $Id: FormError.php 38682 2013-11-13 11:35:48Z gboussin $
  * @access public
  */
 class FormError {
@@ -49,14 +49,14 @@ class FormError {
 	function text($name = null)
 	{
 		if (!empty($name) && isset($this->error[$name])) {
-			$output = ((!empty($this->error[$name])) ? $this->error[$name] : $GLOBALS['strEmptyField']);
+			$output = ((!empty($this->error[$name])) ? $this->error[$name] : $GLOBALS['STR_EMPTY_FIELD']);
 		} elseif (empty($name) && $this->count()) {
 			$output = '';
 			foreach($this->error as $this_name => $this_value) {
 				if (!empty($this->error[$this_name])) {
 					$output .= $this->error[$this_name];
 				} else {
-					$output .= '[' . $this_name . ']' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $GLOBALS['strEmptyField'];
+					$output .= '[' . $this_name . ']' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $GLOBALS['STR_EMPTY_FIELD'];
 				}
 				$output .= '<br />';
 			}

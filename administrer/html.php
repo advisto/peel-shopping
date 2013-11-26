@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: html.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: html.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -18,7 +18,7 @@ necessite_priv("admin_content");
 $id = vn($_GET['id']);
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_HTML_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
 $form_error_object = new FormError();
@@ -74,7 +74,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -162,7 +162,7 @@ function affiche_formulaire_home(&$frm)
 	$tpl->assign('is_annonce_allowed', file_exists($GLOBALS['fonctionsannonces']));
 	$tpl->assign('is_parrain_allowed', file_exists($GLOBALS['fonctionsparrain']));
 	$tpl->assign('titre', vb($frm['titre']));
-	$tpl->assign('contenu_html_te', getTextEditor('contenu_html', 760, 500, String::html_entity_decode_if_needed(vb($frm['contenu_html']))));
+	$tpl->assign('contenu_html_te', getTextEditor('contenu_html', '100%', 500, String::html_entity_decode_if_needed(vb($frm['contenu_html']))));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_HTML_FORM_TITLE', $GLOBALS['STR_ADMIN_HTML_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUAGE']);

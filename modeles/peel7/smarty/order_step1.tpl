@@ -3,139 +3,142 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: order_step1.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
-<h2 class="order_step1">&nbsp;{$STR_STEP1}</h2>
-<form id="entryformstep" method="post" action="{$action|escape:'html'}">
-	<div class="stepgauche">
-		<fieldset>
-			<legend>{$STR_INVOICE_ADDRESS}{$STR_BEFORE_TWO_POINTS}: </legend>
-			<p class="right">
-				<label for="societe1">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="societe1" id="societe1" size="32" value="{$societe1|str_form_value}" />
-			</p>
-			{$nom1_error}
-			<p class="right">
-				<label for="nom1">{$STR_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="nom1" id="nom1" size="32" value="{$nom1|str_form_value}" />
-			</p>
-			{$prenom1_error}
-			<p class="right">
-				<label for="prenom1">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="prenom1" id="prenom1" size="32" value="{$prenom1|str_form_value}" />
-			</p>
-			{$email1_error}
-			<p class="right">
-				<label for="email1">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="email" name="email1" id="email1" size="32" value="{$email1|str_form_value}" />
-			</p>
-			{$contact1_error}
-			<p class="right">
-				<label for="contact1">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="tel" name="contact1" id="contact1" size="32" value="{$contact1|str_form_value}" />
-			</p>
-			{$adresse1_error}
-			<p class="right">
-				<label for="adresse1">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<textarea cols="50" rows="3" name="adresse1" id="adresse1" class="formulaire-achat textarea-formulaire">{$adresse1}</textarea>
-			</p>
-			{$code_postal1_error}
-			<p class="right">
-				<label for="code_postal1">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="code_postal1" id="code_postal1" size="32" value="{$code_postal1|str_form_value}" />
-			</p>
-			{$ville1_error}
-			<p class="right">
-				<label for="ville1">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="ville1" id="ville1" size="32" value="{$ville1|str_form_value}" />
-			</p>
-			{$pays1_error}
-			<p class="right">
-				<label for="pays1">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<select class="formulaire-achat" name="pays1" id="pays1">
-					{$pays1_options}
-				</select>
-			</p>
-		</fieldset>
-	</div>
-	{if $is_mode_transport}
-	<div class="stepdroite">
-		<fieldset>
-			<legend>{$STR_SHIP_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</legend>
-			{if isset($text_temp_STR_ADDRESS)}{$text_temp_STR_ADDRESS}{/if}
-			
-			<p class="right">
-				<label for="societe2">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="societe2" id="societe2" size="32" value="{$societe2|str_form_value}" />
-			</p>
-			{$nom2_error}
-			<p class="right">
-				<label for="nom2">{$STR_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="nom2" id="nom2" size="32" value="{$nom2|str_form_value}" />
-			</p>
-			{$prenom2_error}
-			<p class="right">
-				<label for="prenom2">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="prenom2" id="prenom2" size="32" value="{$prenom2|str_form_value}" />
-			</p>
-			{$email2_error}
-			<p class="right">
-				<label for="email2">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="email" name="email2" id="email2" size="32" value="{$email2|str_form_value}" />
-			</p>
-			{$contact2_error}
-			<p class="right">
-				<label for="contact2">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="tel" name="contact2" id="contact2" size="32" value="{$contact2|str_form_value}" />
-			</p>
-			{$adresse2_error}
-			<p class="right">
-				<label for="adresse2">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<textarea cols="50" rows="3" class="formulaire-achat textarea-formulaire" name="adresse2" id="adresse2">{$adresse2}</textarea>
-			</p>
-			{$code_postal2_error}
-			<p class="right">
-				<label for="code_postal2">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="code_postal2" id="code_postal2" size="32" value="{$code_postal2|str_form_value}" />
-			</p>
-			{$ville2_error}
-			<p class="right">
-				<label for="ville2">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<input class="formulaire-achat" type="text" name="ville2" id="ville2" size="32" value="{$ville2|str_form_value}" />
-			</p>
-			{$pays2_error}
-			<p class="right">
-				<label for="pays2">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-				<select class="formulaire-achat" name="pays2" id="pays2">
-					{$pays2_options}
-				</select>
-			</p>
-		</fieldset>
-	</div>
-	{/if}
-	<div style="float:left;">
-		{if $is_payment_cgv}
-		<fieldset>
-			<legend>{$STR_PAYMENT}{$STR_BEFORE_TWO_POINTS}: </legend>{if isset($STR_ERR_PAYMENT)}<p class="global_error">{$STR_ERR_PAYMENT}</p>{/if}
-			<p>{$payment_error}{$payment_select}</p>
-		</fieldset>
+<h1 class="order_step1">{$STR_STEP1}</h1>
+<form class="entryform form-inline order_step1_form" role="form" id="entryformstep" method="post" action="{$action|escape:'html'}">
+	<div class="row formulaire-achat">
+		<div class="col-sm-6">
+			<fieldset>
+				<legend>{$STR_INVOICE_ADDRESS}{$STR_BEFORE_TWO_POINTS}: </legend>
+				<div>
+					<label for="societe1">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="societe1" id="societe1" size="32" value="{$societe1|str_form_value}" />
+				</div>
+				<div>
+					<label for="nom1">{$STR_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="nom1" id="nom1" size="32" value="{$nom1|str_form_value}" />
+					{$nom1_error}
+				</div>
+				<div>
+					<label for="prenom1">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="prenom1" id="prenom1" size="32" value="{$prenom1|str_form_value}" />
+					{$prenom1_error}
+				</div>
+				<div>
+					<label for="email1">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="email" name="email1" id="email1" size="32" value="{$email1|str_form_value}" />
+					{$email1_error}
+				</div>
+				<div>
+					<label for="contact1">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="tel" name="contact1" id="contact1" size="32" value="{$contact1|str_form_value}" />
+					{$contact1_error}
+				</div>
+				<div>
+					<label for="adresse1">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<textarea class="form-control" cols="50" rows="3" name="adresse1" id="adresse1">{$adresse1}</textarea>
+					{$adresse1_error}
+				</div>
+				<div>
+					<label for="code_postal1">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="code_postal1" id="code_postal1" size="32" value="{$code_postal1|str_form_value}" />
+					{$code_postal1_error}
+				</div>
+				<div>
+					<label for="ville1">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="ville1" id="ville1" size="32" value="{$ville1|str_form_value}" />
+					{$ville1_error}
+				</div>
+				<div>
+					<label for="pays1">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<select class="form-control" name="pays1" id="pays1">
+						{$pays1_options}
+					</select>
+					{$pays1_error}
+				</div>
+			</fieldset>
+		</div>
+		{if $is_mode_transport}
+		<div class="col-sm-6">
+			<fieldset>
+				<legend>{$STR_SHIP_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</legend>
+				{if isset($text_temp_STR_ADDRESS)}{$text_temp_STR_ADDRESS}{/if}
+				<div>
+					<label for="societe2">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="societe2" id="societe2" size="32" value="{$societe2|str_form_value}" />
+				</div>
+				<div>
+					<label for="nom2">{$STR_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="nom2" id="nom2" size="32" value="{$nom2|str_form_value}" />
+					{$nom2_error}
+				</div>
+				<div>
+					<label for="prenom2">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="prenom2" id="prenom2" size="32" value="{$prenom2|str_form_value}" />
+					{$prenom2_error}
+				</div>
+				<div>
+					<label for="email2">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="email" name="email2" id="email2" size="32" value="{$email2|str_form_value}" />
+					{$email2_error}
+				</div>
+				<div>
+					<label for="contact2">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="tel" name="contact2" id="contact2" size="32" value="{$contact2|str_form_value}" />
+					{$contact2_error}
+				</div>
+				<div>
+					<label for="adresse2">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<textarea class="form-control" cols="50" rows="3" name="adresse2" id="adresse2">{$adresse2}</textarea>
+					{$adresse2_error}
+				</div>
+				<div>
+					<label for="code_postal2">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="code_postal2" id="code_postal2" size="32" value="{$code_postal2|str_form_value}" />
+					{$code_postal2_error}
+				</div>
+				<div>
+					<label for="ville2">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="ville2" id="ville2" size="32" value="{$ville2|str_form_value}" />
+					{$ville2_error}
+				</div>
+				<div>
+					<label for="pays2">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+					<select class="form-control" name="pays2" id="pays2">
+						{$pays2_options}
+					</select>
+					{$pays2_error}
+				</div>
+			</fieldset>
+		</div>
 		{/if}
-		<fieldset>
-			<legend>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}: </legend>
-			<p><textarea class="formulaire-achat" name="commentaires" cols="54" rows="5">{$commentaires}</textarea></p>
-		</fieldset>
-		<div class="center">
-			<p><input type="checkbox" name="cgv" value="1" />{$STR_CGV_OK}</p>
-			<input type="submit" value="{$STR_ETAPE_SUIVANTE|str_form_value}" class="clicbouton" />
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			{if $is_payment_cgv}
+			<fieldset>
+				<legend>{$STR_PAYMENT}{$STR_BEFORE_TWO_POINTS}: </legend>{if isset($STR_ERR_PAYMENT)}<p class="alert alert-danger">{$STR_ERR_PAYMENT}</p>{/if}
+				<div>{$payment_error}{$payment_select}</div>
+			</fieldset>
+			{/if}
+			<fieldset>
+				<legend>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}: </legend>
+				<div><textarea class="form-control" name="commentaires" cols="54" rows="5">{$commentaires}</textarea></div>
+			</fieldset>
+			<p><input type="checkbox" name="cgv" value="1" /> {$STR_CGV_OK}</p>
+			<div class="center">
+				<input type="submit" value="{$STR_ETAPE_SUIVANTE|str_form_value}" class="btn btn-lg btn-primary" />
+			</div>
 		</div>
 	</div>
 </form>

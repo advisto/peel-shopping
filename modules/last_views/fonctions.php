@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 39002 2013-11-25 16:38:09Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -30,8 +30,9 @@ if (!empty($GLOBALS['site_parameters']['nb_last_views'])) {
 function add_product_to_last_views_cookie($product_id)
 {
 	if (isset($_COOKIE['last_views'])) {
-		$tab_last_views = unserialize($_COOKIE['last_views']);
-	} else {
+		$tab_last_views = @unserialize($_COOKIE['last_views']);
+	}
+	if(empty($tab_last_views) || !is_array($tab_last_views)) {
 		$tab_last_views = array();
 	}
 	if (!in_array($product_id, $tab_last_views)) {
@@ -55,29 +56,31 @@ function add_product_to_last_views_cookie($product_id)
 /**
  * Affiche la liste des produits déjà consultés par le client en cours
  *
+ * @param string $location
  * @return
  */
-function affiche_last_views()
+function affiche_last_views($location)
 {
 	$output = '';
 	$products_html_array = array();
 	if (!empty($_COOKIE['last_views'])) {
-		$this_tab_last_views = unserialize($_COOKIE['last_views']);
+		$this_tab_last_views = @unserialize($_COOKIE['last_views']);
 		$tab_last_views =array();
-		// On reforme le tableau, cela permet de mettre à jour le nombre de produit sauvegardé dans le cookie, si la configuration du site a changé.
-		foreach ($this_tab_last_views as $product_id) {
-			if($GLOBALS['nb_last_views'] == count($tab_last_views)  ) {
-				break;
+		if(is_array($this_tab_last_views)) {
+			// On reforme le tableau, cela permet de mettre à jour le nombre de produit sauvegardé dans le cookie, si la configuration du site a changé.
+			foreach ($this_tab_last_views as $product_id) {
+				if($GLOBALS['nb_last_views'] == count($tab_last_views)  ) {
+					break;
+				}
+				$tab_last_views[] = $product_id;
 			}
-			$tab_last_views[] = $product_id;
 		}
-		
 		for ($i = count($tab_last_views) - 1; $i >= 0; $i--) {
 			$product_object = new Product($tab_last_views[$i], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-			$product_html = get_product_in_container_html($product_object, true);
+			$product_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 			if (!empty($product_html) && $product_object->on_gift == 0) {
 				// si le produit existe et est activé (en ligne)
-				$products_html_array[] = get_product_in_container_html($product_object, true);
+				$products_html_array[] = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 			} else {
 				unset($tab_last_views[$i]); // on supprime une fois ce produit de la liste
 				// et on met à jour la liste dans le cookie

@@ -3,22 +3,32 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_google_sitemap.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_google_sitemap.tpl 38975 2013-11-24 21:57:43Z gboussin $
 #}<?xml version="1.0" encoding="{{ GENERAL_ENCODING|upper }}"?>
 <urlset xmlns="http://www.google.com/schemas/sitemap/0.84">
+{% for wwwroot in wwwroot_array %}
 <url><loc>{{ wwwroot }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{{ wwwroot }}/achat/</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{{ wwwroot }}/lire/</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
 <url><loc>{{ wwwroot }}/membre.php</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{{ wwwroot }}/compte.php</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{{ url_enregistrement }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{% endfor %}
+{% for product_category_url in product_category_url_array %}
+<url><loc>{{ product_category_url }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{% endfor %}
+{% for content_category_url in content_category_url_array %}
+<url><loc>{{ content_category_url }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{% endfor %}
+{% for account_register_url in account_register_url_array %}
+<url><loc>{{ account_register_url }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{% endfor %}
+{% for account_url in account_url_array %}
+<url><loc>{{ account_url }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{% endfor %}
 {% for p in products %}
 <url><loc>{{ p }}</loc><lastmod>{{ date }}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
 {% endfor %}

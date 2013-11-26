@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: caddie_affichage.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_caddie.php");
 
@@ -85,7 +85,7 @@ if ($mode) {
 					} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone = '" . intval($_SESSION['session_caddie']->zoneId) . "'")) == 0) {
 						// Ici on teste la cohérence entre le type et la zone
 						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
-					} else {
+					} elseif(!count($_SESSION['session_caddie']->message_caddie)) {
 						$redirect_next_step = true;
 					}
 				} else {
@@ -96,6 +96,7 @@ if ($mode) {
 			break;
 	}
 }
+
 if (!empty($redirect_next_step)) {
 	if (!est_identifie()) {
 		$_SESSION['session_redirect_after_login'] = get_current_url(true);

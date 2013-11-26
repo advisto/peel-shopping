@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: kekoli.php 38007 2013-09-03 21:16:29Z gboussin $
+// $Id: kekoli.php 38682 2013-11-13 11:35:48Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -129,6 +129,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$tpl->assign('vats', $tpl_vats);
 			$tpl->assign('is_module_export_ventes_active', is_kekoli_module_active());
 			$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/kekoli/administrer/export_kekoli.php?dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
+			$tpl->assign('export_href_one_line_per_order', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_kekoli.php?mode=one_line_per_order&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
 
 			if (!empty($_GET['statut'])) {
@@ -152,6 +153,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_ADMIN_BILL_TOTALS', $GLOBALS['STR_ADMIN_BILL_TOTALS']);
 		$tpl->assign('STR_ADMIN_TOTAL_VAT', $GLOBALS['STR_ADMIN_TOTAL_VAT']);
 		$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL', $GLOBALS['STR_MODULE_KEKOLI_ADMIN_EXPORT_EXCEL']);
+		$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER', $GLOBALS['STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER']);
 		$tpl->assign('STR_ADMIN_ASKED_STATUS', $GLOBALS['STR_ADMIN_ASKED_STATUS']);
 		$tpl->assign('STR_ADMIN_ALL_ORDERS', $GLOBALS['STR_ADMIN_ALL_ORDERS']);
 		$tpl->assign('STR_ADMIN_VENTES_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_VENTES_NO_ORDER_FOUND']);
@@ -162,8 +164,8 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$output .= $check_admin_date_data;
 	}
 }
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

@@ -3,15 +3,17 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: produit_details.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
+
+$output = '';
 if (empty($_GET['id'])) {
 	// Si aucun produit n'est spécifié, retour à la page d'accueil
 	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
@@ -76,19 +78,19 @@ if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
 define('IN_CATALOGUE_PRODUIT', true);
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_page_columns_count'];
 
-include($GLOBALS['repertoire_modele'] . "/haut.php");
-
 if ($form_error_object->count() > 0) {
 	foreach ($form_error_object->error as $key => $error) {
 		if ($key == "confirm_ok") {
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $error))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $error))->fetch();
 		} else {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
 		}
 	}
 }
-echo get_produit_details_html(intval($_GET['id']), intval(vb($_GET['cId'])));
+$output .= get_produit_details_html(intval($_GET['id']), intval(vb($_GET['cId'])));
 
+include($GLOBALS['repertoire_modele'] . "/haut.php");
+echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
 ?>

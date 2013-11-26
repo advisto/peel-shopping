@@ -3,25 +3,25 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_custom_attribute.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: search_custom_attribute.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}{foreach $attributes as $att_id => $att}
 	<li class="attribute_{$att_id}" >
 {if !empty($att.options)}
-		<select name="custom_attribut[{$att_id}]" >
+		<select class="form-control" name="custom_attribut[{$att_id}]" >
 			<option value="">{$select_attrib_txt} {$att.name}</option>
 			{foreach $att.options as $o}
 			<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
 			{/foreach}
 		</select>
 {else}
-		<input type="text" name="custom_attribut[{$att_id}]" />
+		<input type="text" class="form-control"  name="custom_attribut[{$att_id}]" />
 {/if}
 	</li>
 {/foreach}

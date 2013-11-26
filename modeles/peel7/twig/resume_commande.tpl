@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: resume_commande.tpl 37943 2013-08-29 09:31:55Z gboussin $
+// $Id: resume_commande.tpl 38974 2013-11-24 21:18:46Z gboussin $
 #}<h2>{{ STR_ORDER_DETAIL }}</h2>
 <table class="full_width" cellpadding="3">
 	<caption></caption>
@@ -88,51 +88,57 @@
 	</tr>
 	<tr>
 		<td colspan="2">
-			<table class="caddie">
-				<tr>
-					<th>{{ STR_REFERENCE }}</th>
-					<th>{{ STR_PRODUCT }}</th>
-					<th>{{ STR_SOLD_PRICE }}</th>
-					<th>{{ STR_QUANTITY }}</th>
-					{% if is_conditionnement_module_active %}<th>{{ STR_CONDITIONNEMENT }}</td><td class="center">{{ STR_CONDITIONNEMENT_QTY }}</th>{% endif %}
-					<th>{{ STR_TOTAL_TTC }}</th>
-					{% if (STR_MODULE_PAYBACK_RETURN_REQUEST) %}<th>{{ STR_MODULE_PAYBACK_RETURN_REQUEST }}</th>{% endif %}
-				</tr>
-				{% for pd in products_data %}
-				<tr>
-					<td class="lignecaddie" align="center">{{ pd.reference }}</td>
-					<td class="lignecaddie" align="center">{{ pd.product_text }}</td>
-					<td class="lignecaddie" align="center">{{ pd.prix }}</td>
-					<td class="lignecaddie" align="center">{{ pd.quantite }}</td>
-					{% if is_conditionnement_module_active %}<td class="lignecaddie" align="center">{{ pd.conditionnement }}</td><td class="lignecaddie" align="center">{{ pd.conditionnement_qty }}</td>{% endif %}
-					<td class="lignecaddie" align="center" style="width:71px;">{{ pd.total_prix }}</td>
-					{% if pd.is_form_retour %}
-					<td class="lignecaddie" align="center">
-						<form method="post" action="{{ pd.action }}">
-							<input type="hidden" name="commandeid" value="{{ pd.commandeid|intval }}" />
-							<input type="hidden" name="utilisateurid" value="{{ pd.utilisateurid|intval }}" />
-							<input type="hidden" name="paiement" value="{{ pd.paiement|str_form_value }}" />
-							<input type="hidden" name="langue" value="{{ pd.langue|str_form_value }}" />
-							<input type="hidden" name="nom_produit" value="{{ pd.nom_produit|str_form_value }}" />
-							<input type="hidden" name="qte_produit" value="{{ pd.quantite|str_form_value }}" />
-							<input type="hidden" name="taille_produit" value="{{ pd.taille_produit|str_form_value }}" />
-							<input type="hidden" name="couleur_produit" value="{{ pd.couleur_produit|str_form_value }}" />
-							<input type="hidden" name="id_produit" value="{{ pd.id_produit|intval }}" />
-							<input type="hidden" name="prix_ht_produit" value="{{ pd.prix_ht_produit|str_form_value }}" />
-							<input type="hidden" name="prix_ttc_produit" value="{{ pd.prix_ttc_produit|str_form_value }}" />
-							<input type="hidden" name="tva_produit" value="{{ pd.tva_produit|str_form_value }}" />
-							<input type="submit" class="clicbouton" value="{{ return_this_product_txt|str_form_value }}" />
-						</form>
-					</td>
-					{% endif %}
-				</tr>
+			<div class="table-responsive">
+			<table class="table caddie table-striped table-hover">
+				<thead>
+					<tr>
+						<th>{{ STR_REFERENCE }}</th>
+						<th>{{ STR_PRODUCT }}</th>
+						<th>{{ STR_SOLD_PRICE }}</th>
+						<th>{{ STR_QUANTITY }}</th>
+						{% if is_conditionnement_module_active %}<th>{{ STR_CONDITIONNEMENT }}</td><td class="center">{{ STR_CONDITIONNEMENT_QTY }}</th>{% endif %}
+						<th>{{ STR_TOTAL_TTC }}</th>
+						{% if (STR_MODULE_PAYBACK_RETURN_REQUEST) %}<th>{{ STR_MODULE_PAYBACK_RETURN_REQUEST }}</th>{% endif %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for pd in products_data %}
+					<tr>
+						<td class="lignecaddie" align="center">{{ pd.reference }}</td>
+						<td class="lignecaddie" align="center">{{ pd.product_text }}</td>
+						<td class="lignecaddie" align="center">{{ pd.prix }}</td>
+						<td class="lignecaddie" align="center">{{ pd.quantite }}</td>
+						{% if is_conditionnement_module_active %}<td class="lignecaddie" align="center">{{ pd.conditionnement }}</td><td class="lignecaddie" align="center">{{ pd.conditionnement_qty }}</td>{% endif %}
+						<td class="lignecaddie" align="center" style="width:71px;">{{ pd.total_prix }}</td>
+						{% if pd.is_form_retour %}
+						<td class="lignecaddie" align="center">
+							<form class="entryform form-inline" role="form" method="post" action="{{ pd.action }}">
+								<input type="hidden" name="commandeid" value="{{ pd.commandeid|intval }}" />
+								<input type="hidden" name="utilisateurid" value="{{ pd.utilisateurid|intval }}" />
+								<input type="hidden" name="paiement" value="{{ pd.paiement|str_form_value }}" />
+								<input type="hidden" name="langue" value="{{ pd.langue|str_form_value }}" />
+								<input type="hidden" name="nom_produit" value="{{ pd.nom_produit|str_form_value }}" />
+								<input type="hidden" name="qte_produit" value="{{ pd.quantite|str_form_value }}" />
+								<input type="hidden" name="taille_produit" value="{{ pd.taille_produit|str_form_value }}" />
+								<input type="hidden" name="couleur_produit" value="{{ pd.couleur_produit|str_form_value }}" />
+								<input type="hidden" name="id_produit" value="{{ pd.id_produit|intval }}" />
+								<input type="hidden" name="prix_ht_produit" value="{{ pd.prix_ht_produit|str_form_value }}" />
+								<input type="hidden" name="prix_ttc_produit" value="{{ pd.prix_ttc_produit|str_form_value }}" />
+								<input type="hidden" name="tva_produit" value="{{ pd.tva_produit|str_form_value }}" />
+								<input type="submit" class="btn btn-primary" value="{{ return_this_product_txt|str_form_value }}" />
+							</form>
+						</td>
+						{% endif %}
+					</tr>
 				{% endfor %}
+				</tbody>
 			</table>
+			</div>
 				{% if downloadable_file_link_array %}
 			<table>
 					{% for item in downloadable_file_link_array %}
 				<tr>
-					<td class="lignecaddie" align="center">
+					<td class="lignecaddie center">
 						 <a href="{{ item.link }}">{{ item.date }} - {{ item.name }} - {{ STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD }}</a>
 					</td>
 				</tr>

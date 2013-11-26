@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
-// | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
+// | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
+// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_eo.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: database_email_template_text_eo.php 38682 2013-11-13 11:35:48Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,7 +20,6 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template["text"] = array(
-  "signature_support" => "",
   "signature_commercial" => "",
   "signature_comptabilite" => "",
   "signature_referencement" => "",
@@ -29,6 +28,7 @@ $peel_email_template["text"] = array(
   "signature_marketing" => "",
   "signature_direction" => "",
   "signature_externe" => "",
+  "signature_support" => "",
   "download_product" => "Saluton,
 
 Via mendo [ORDER_ID] estis validigita, do ni petas vin elŝuti ĝin pere de la sekva ligilo:
@@ -210,7 +210,7 @@ Pri la varo: [NOM_PRODUIT]
 
 Komento publikigota: [AVIS]
 
-Por konfirmi publikigon, vizitu la administran paĝon kaj agordu la statuton ĉe rubriko Retestrejo > Merkatado > Komentoj de vizitantoj.",
+Por konfirmi publikigon, vizitu la administran paĝon kaj agordu la staton ĉe rubriko Retestrejo > Merkatado > Komentoj de vizitantoj.",
   "bons_anniversaires" => "Saluton [CIVILITE] [PRENOM] [NOM_FAMILLE],
 
 Okaze de via naskiĝ-datreveno, ni donacas al vi ĉi rabat-kodon: [NOM_CODE_PROMO].
@@ -334,7 +334,7 @@ La sekva uzanto ĵus aliĝis:
 [link=\"[ADMIN_URL]\"]Administri ĉi klientan konton[/link]
 ",
   "warn_admin_reve_subscription" => "",
-  "email_retour_virement" => "Saluton,
+"email_retour_virement" => "Saluton,
 
 Ni bone ricevis vian returnaĵon n-o [RETURN_ID].
 Konforme vian elekton, la kongrua monsumo [MONTANT] estos repagita pere de banka ĝiro kiel eble plej baldaŭ.",
@@ -358,7 +358,79 @@ Nun, bonvolu sendi la varojn al la sekva adreso:
 RETURNO-NUMERO [RETURN_ID].
 
 Memoru ke la returnitaj varoj estu bonstataj kaj pakitaj en la origina pakaĵo.
-Tuj post ricevi la varojn, ni konfirmos ties repagon."
+Tuj post ricevi la varojn, ni konfirmos ties repagon.",
+  "cron_order_payment_failure_alerts" => "Saluton [PRENOM] [NOM],
+
+Notu: se vi jam pagis kaj ricevis konfirmon, bonvolu ne kalkuli pri ĉi mesaĝon, ĉar vian pagon ni baldaŭ mane validigos.
+
+Ĉi mesaĝo temas pri la mendo, kiun vi antaŭ nelonge provis fari ĉe [WWWROOT]
+
+Mendaĵo: [PRODUCT_NAME]
+Entuta monsumo de via mendo: [TOTAL_AMOUNT]
+Pagmaniero kiun vi elektis: [PAYMENT_MEAN]
+
+Nia aŭtomata mendo-sistemo ankoraŭ ne ricevis konfirmon pri via pago.
+Kiun problemon vi renkontis?
+
+Ni atentas pri vi koncerne vian mendon pere de alia pagmaniero.
+
+Ni disponigas nin por alporti al vi ĉiajn pliajn informojn.
+Dum ni atendas vian respondon, ni deziras al vi plej bonan tagon.
+
+Ĝis baldaŭ ĉe [WWWROOT]
+La skipo de [SITE_NAME]
+
+Notu: ĉi mesaĝo estis aŭtomate sendita. Ni pardonpetas se vi jam provis nin kontakti, kaj ĉi kaze bonvolu ne kalkuli pri ĉi mesaĝo.",
+  "cron_order_not_paid_alerts" => "Saluton [PRENOM] [NOM],
+
+Ni skribas ĉi mesaĝon koncerne vian mendon farita antaŭ [DAYS_SINCE] tagoj ĉe [SITE_NAME].
+
+Mendaĵo: [PRODUCT_NAME]
+Entuta monsumo de via mendo: [TOTAL_AMOUNT]
+Pagmaniero kiun vi elektis: [PAYMENT_MEAN]
+
+Ni ankoraŭ ne ricevis vian pagon, ĉu vi bezonas pliajn informojn tiurilate, por efektivigi vian pagon?
+
+Ni disponigas nin por alporti al vi ĉiajn pliajn informojn.
+
+Dum ni atendas vian respondon, ni deziras al vi plej bonan tagon.
+
+Notu: ĉi mesaĝo estis aŭtomate sendita. Ni pardonpetas se vi jam provis nin kontakti, kaj ĉi kaze bonvolu ne kalkuli pri ĉi mesaĝo.",
+  "cron_update_contact_info" => "Saluton [CIVILITE] [NOM],
+
+Cele al konservi ĝisdatigitajn informojn pri via klienta konto, ni petas vin kontroli la detalojn de ĉi informoj.
+
+Detaloj pri viaj kontaj informoj:
+
+Retpoŝtadreso: [EMAIL]
+Ĝentileco: [CIVILITE]
+Kromnomo: [PSEUDO]
+Antaŭnomo: [PRENOM]
+Familinomo: [NOM]
+Entrepreno: [SOCIETE]
+\"Intracom\" valoraldona-impost-kodo : [TVA_INTRA]
+Telefonnumero: [TELEPHONE]
+Poŝtelefonnumero: [PORTABLE]
+Faksilnumero: [FAX]
+Naskiĝdato: [NAISSANCE]
+Adreso: [ADRESSE]
+Poŝtkodo: [CODE_POSTAL]
+Urbo: [VILLE]
+lando: [PAYS]
+Retejo-adreso: [SITE_WEB]
+
+Kaze de misinformo, ni petas vin ĝisdatigi la informojn rekte ĉe via uzanto-paĝo, ĉe paĝo [WWWROOT]/utilisateurs/change_params.php
+
+Kaze de perdo de via pasvorto, eblas uzi la pasvortilon ĉe paĝo [WWWROOT]/utilisateurs/oubli_mot_passe.php
+
+Gravas memorigi, ke ĝusteco de tiuj informoj nepras por bona funkciado de la retejo kaj por ĉies komerca sukceso. Ĉiu misinformo povas okazigi la nuligon de via uzanto-konto.
+
+Ni disponigas nin por alporti al vi ĉiajn pliajn informojn.",
+"inscription_newsletter" => "Saluton,
+
+Dankon pri via aliĝo al la novaĵ-bulteno de [SITE_NAME]. Vi de nun ricevos ĉiun semajnon la bultenon ĉe vian retpoŝtan keston [EMAIL].
+
+Ĝis baldaŭ ĉe [WWWROOT]"
 );
 
 ?>

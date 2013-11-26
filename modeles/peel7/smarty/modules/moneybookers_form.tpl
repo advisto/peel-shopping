@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: moneybookers_form.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<form id="MoneyBookersForm" action="https://www.moneybookers.com/app/payment.pl" method="post">
+// $Id: moneybookers_form.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<form class="entryform form-inline" role="form" id="MoneyBookersForm" action="https://www.moneybookers.com/app/payment.pl" method="post">
 	<input type="hidden" name="pay_to_email" value="{$pay_to_email|str_form_value}" />
 	<input type="hidden" name="transaction_id" value="{$order_id|str_form_value}TRY{$try|str_form_value}" />
 	<input type="hidden" name="return_url" value="{$return_url|str_form_value}" />
@@ -49,5 +49,5 @@
 	{if $is_hide_login}
 	<input type="hidden" name="hide_login" value="1" />
 	{/if}
-	<input type="submit" value="{$STR_MODULE_MONEYBOOKERS_SUBMIT_BUTTON|str_form_value}" class="clicbouton" />
+	<input type="submit" value="{$STR_MODULE_MONEYBOOKERS_SUBMIT_BUTTON|str_form_value}" class="btn btn-primary" />
 </form>

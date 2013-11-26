@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: http://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, http://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_nl.php 38026 2013-09-04 23:30:43Z gboussin $
+// $Id: admin_nl.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1582,6 +1582,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_ODD_EVEN_ALL"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ODD_EVEN_EVEN"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ODD_EVEN_ODD"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_AD_PAGE_DETAILS"] = "";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_ON_ANNOUNCEMENT_CREATION_PAGE"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_FIRST_PAGE_CATEGORY"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_HOME_PAGE"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ON_OTHER_PAGE_CATEGORY"] = "";

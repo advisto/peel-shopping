@@ -3,52 +3,42 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
+// $Id: user_register_form.tpl 38762 2013-11-16 23:22:31Z gboussin $
 *}<h1 class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form">
 	<p>{$STR_FIRST_REGISTER_TEXT}</p>
-	<table class="partner-list">
-		<tr>
-			<td class="title">
-				<h3 style="padding-left:0;">{$STR_OPEN_ACCOUNT}</h3>
-			</td>
-		</tr>
-	</table>
-	<form class="entryform" method="post" action="{$action|escape:'html'}">
+	<h2>{$STR_OPEN_ACCOUNT}</h2>
+	<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<div class="inscription_form">
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="email">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input class="champtexte" type="email" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
+			<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="pseudo">{$STR_PSEUDO} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input class="champtexte" type="text" id="pseudo" name="pseudo" value="{$pseudo|html_entity_decode_if_needed|str_form_value}" /></span>{$pseudo_error}<br />
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="pseudo" name="pseudo" value="{$pseudo|html_entity_decode_if_needed|str_form_value}" /></span>{$pseudo_error}<br />
 			<span class="enregistrementgauche">&nbsp;</span>
 			<span>{$STR_STRONG_PSEUDO_NOTIFICATION}</span>
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="mot_passe">{$STR_PASSWORD} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input class="champtexte" type="password" id="mot_passe" name="mot_passe" /></span>{$password_error}
+			<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" /></span>{$password_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="pwd_level">{$STR_PASSWORD_SECURITY}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite" id="pwd_level_image"></span>
-		</div>
-		<div class="enregistrement">
-			<span class="enregistrementgauche">&nbsp;</span>
-			<span class="enregistrementdroite">{$STR_STRONG_PASSWORD_NOTIFICATION} </span>
+			<span class="enregistrementdroite"><div id="pwd_level_image"></div><span class="enregistrementdroite">{$STR_STRONG_PASSWORD_NOTIFICATION} </span></span>
 		</div>
 		{if $is_annonce_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="mot_passe_confirm">{$STR_PASSWORD_CONFIRMATION} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input class="champtexte" type="password" id="mot_passe_confirm" name="mot_passe_confirm" /></span>
+			<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" /></span>
 			{$password_confirmation_error}
 		</div>
 		{/if}
@@ -57,32 +47,32 @@
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label>{$STR_GENDER}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<input type="radio" name="civilite" value="Mlle"{if $civilite_mlle_issel} checked="checked"{/if} />{$STR_MLLE}
-				<input type="radio" name="civilite" value="Mme"{if $civilite_mme_issel} checked="checked"{/if} />{$STR_MME}
-				<input type="radio" name="civilite" value="M."{if $civilite_m_issel} checked="checked"{/if} />{$STR_M}
+				<input type="radio" name="civilite" value="Mlle"{if $civilite_mlle_issel} checked="checked"{/if} /> {$STR_MLLE} &nbsp;
+				<input type="radio" name="civilite" value="Mme"{if $civilite_mme_issel} checked="checked"{/if} /> {$STR_MME} &nbsp;
+				<input type="radio" name="civilite" value="M."{if $civilite_m_issel} checked="checked"{/if} /> {$STR_M}
 			</span>{$gender_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="prenom">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="prenom" name="prenom" value="{$first_name|html_entity_decode_if_needed|str_form_value}" /></span>{$first_name_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="{$first_name|html_entity_decode_if_needed|str_form_value}" /></span>{$first_name_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="nom_famille">{$STR_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="nom_famille" name="nom_famille" value="{$name|html_entity_decode_if_needed|str_form_value}" /></span>{$name_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="{$name|html_entity_decode_if_needed|str_form_value}" /></span>{$name_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="societe">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}{if $is_societe_mandatory}<span class="etoile">*</span>{/if}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="societe" name="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" /></span>{$societe_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" /></span>{$societe_error}
 		</div>
 {if $is_destockplus_module_active || $is_algomtl_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="url">{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="url" class="champtexte" id="url" name="url" placeholder="http://" value="{$url|html_entity_decode_if_needed|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{$url|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="type">{$STR_YOU_ARE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="type" name="type">
+				<select class="form-control" id="type" name="type">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{$STR_BUYERS}{$STR_BEFORE_TWO_POINTS}:</option>
 					<option value="importers_exporters"{if $type=='importers_exporters'} selected="selected"{/if}>{$STR_IMPORTERS_EXPORTERS}</option>
@@ -98,7 +88,7 @@
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="activity">{$STR_ACTIVITY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="activity" name="activity">
+				<select class="form-control" id="activity" name="activity">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="punctual" {if $activity=='punctual'} selected="selected"{/if}>{$STR_PUNCTUAL}</option>
 					<option value="recurrent" {if $activity=='recurrent'} selected="selected"{/if}>{$STR_RECURRENT}</option>
@@ -109,7 +99,7 @@
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="fonction">{$STR_FONCTION}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite">
-					<select id="fonction" name="fonction">
+					<select class="form-control" id="fonction" name="fonction">
 						<option value="">{$STR_CHOOSE}...</option>
 						<option value="leader" {if $fonction=='leader'} selected="selected"{/if}>{$STR_LEADER}</option>
 						<option value="manager" {if $fonction=='manager'} selected="selected"{/if}>{$STR_MANAGER}</option>
@@ -119,48 +109,48 @@
 			</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="intracom_for_billing">{$STR_INTRACOM_FORM}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="intracom_for_billing" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" /></span>{$intracom_form_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" /></span>{$intracom_form_error}
 		</div>
 {if $is_annonce_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="siret">{$siret_txt} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span> {$siret_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span> {$siret_error}
 		</div>
 {/if}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="naissance">{$STR_NAISSANCE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input name="naissance" class="champtexte datepicker" type="text" id="naissance" size="10" maxlength="10" value="{$naissance|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input name="naissance" class="form-control datepicker" type="text" id="naissance" size="10" maxlength="10" value="{$naissance|str_form_value}" /></span>
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="telephone">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="telephone" name="telephone" value="{$telephone|str_form_value}" /></span>{$telephone_error}
+			<span class="enregistrementdroite"><input type="tel" class="form-control" id="telephone" name="telephone" value="{$telephone|str_form_value}" /></span>{$telephone_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="portable">{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="portable" name="portable" value="{$portable|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="form-control" id="portable" name="portable" value="{$portable|str_form_value}" /></span>
 		</div>
 		{if $is_annonce_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="user_fax">{$STR_FAX} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="tel" class="champtexte" id="user_fax" name="user_fax" value="{$fax|html_entity_decode_if_needed|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="tel" class="form-control" id="user_fax" name="user_fax" value="{$fax|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
 		{/if}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="adresse">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><textarea rows="3" cols="54" class="textarea-formulaire mono-colonne" id="adresse" name="adresse">{$adresse|html_entity_decode_if_needed}</textarea></span>{$adresse_error}
+			<span class="enregistrementdroite"><textarea class="form-control mono-colonne" rows="3" cols="54" id="adresse" name="adresse">{$adresse|html_entity_decode_if_needed}</textarea></span>{$adresse_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code_postal">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="code_postal" name="code_postal" value="{$zip|str_form_value}" /></span>{$zip_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="{$zip|str_form_value}" /></span>{$zip_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="ville">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="ville" name="ville" value="{$town|html_entity_decode_if_needed|str_form_value}" /></span>{$town_error}
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="{$town|html_entity_decode_if_needed|str_form_value}" /></span>{$town_error}
 		</div>
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="pays">{$STR_COUNTRY}{$STR_BEFORE_TWO_POINTS}<span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="pays" name="pays">
+				<select class="form-control" id="pays" name="pays">
 					{$country_options}
 				</select>
 			</span>
@@ -168,7 +158,7 @@
 		{if $is_annonce_module_active}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="promo_code">{$STR_PROMO_CODE} <span class="etoile"></span>{$STR_BEFORE_TWO_POINTS}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="champtexte" id="promo_code" name="promo_code" value="{$promo_code|html_entity_decode_if_needed|str_form_value}" /></span>
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="promo_code" name="promo_code" value="{$promo_code|html_entity_decode_if_needed|str_form_value}" /></span>
 		</div>
 		<div class="enregistrement">
 			<span>{$STR_ANNOUNCEMENT_INDICATION}</span>
@@ -177,7 +167,7 @@
 		{if !empty($favorite_category)}
 			<span class="enregistrementgauche"><label for="favorite_category">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="favorite_category" name="favorite_category">
+				<select class="form-control" id="favorite_category" name="favorite_category">
 					{$favorite_category}
 				</select>
 			</span>
@@ -186,21 +176,21 @@
 			<span class="enregistrementgauche">
 			<label for="id_cat_1">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="id_cat_1" name="id_cat_1">
+				<select class="form-control" id="id_cat_1" name="id_cat_1">
 					{$favorite_category_1}
 				</select> {$id_cat_1_error}
 			</span>
 			<span class="enregistrementgauche">
 			<label for="id_cat_2">{$STR_SECOND_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="id_cat_2" name="id_cat_2">
+				<select class="form-control" id="id_cat_2" name="id_cat_2">
 					{$favorite_category_2}
 				</select> {$id_cat_2_error}
 			</span>
 			<span class="enregistrementgauche">
 			<label for="id_cat_3">{$STR_THIRD_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<select id="id_cat_3" name="id_cat_3">
+				<select class="form-control" id="id_cat_3" name="id_cat_3">
 					{$favorite_category_3}
 				</select> {$id_cat_3_error}
 			</span>
@@ -227,7 +217,7 @@
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code">{$captcha.validation_code_copy_txt} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite">
-				<input name="code" size="5" maxlength="5" type="text" id="code" value="{$captcha.value|str_form_value}" />
+				<input name="code" size="5" maxlength="5" type="text" class="form-control" id="code" value="{$captcha.value|str_form_value}" />
 			</span>{$captcha.error}
 		</div>
 		{/if}
@@ -248,20 +238,17 @@
 		<tr>
 			<td colspan="2">
 				<div>
-					<span><input type="checkbox" id="newsletter" name="newsletter" value="1"{if $newsletter_issel} checked="checked"{/if} />
+					<input type="checkbox" id="newsletter" name="newsletter" value="1"{if $newsletter_issel} checked="checked"{/if} />
 					<label for="newsletter">{$STR_NEWSLETTER_YES}</label>
-					</span>
 				</div>
 			</td>
 		</tr>
 		<tr>
 			<td colspan="2">
 				<div>
-					<span>
-						<input type="checkbox" id="commercial" name="commercial" value="1"{if $commercial_issel} checked="checked"{/if} />
-						<label for="commercial">{$STR_COMMERCIAL_YES}</label>
-					</span>
-					<p class="center">{$token}<input class="clicbouton" type="submit" value="{$STR_OPEN_ACCOUNT|str_form_value}" /></p>
+					<input type="checkbox" id="commercial" name="commercial" value="1"{if $commercial_issel} checked="checked"{/if} />
+					<label for="commercial">{$STR_COMMERCIAL_YES}</label>
+					<p class="center">{$token}<input class="btn btn-primary" type="submit" value="{$STR_OPEN_ACCOUNT|str_form_value}" /></p>
 					<p>{$cnil_txt}</p>
 				</div>
 			</td>

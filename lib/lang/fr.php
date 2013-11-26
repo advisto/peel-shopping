@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 37993 2013-09-02 16:46:19Z gboussin $
+// $Id: fr.php 38786 2013-11-18 09:50:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -54,7 +54,7 @@ $GLOBALS["STR_AVOIR"] = "Avoir";
 $GLOBALS["STR_BACK"] = "Retour";
 $GLOBALS["STR_BACK_HOME"] = "<a href=\"{$GLOBALS['wwwroot']}/\" class=\"normal\">Retour vers la page d'accueil</a>";
 $GLOBALS["STR_BACK_TO_PRODUCT"] = " << Revenir à la fiche produit";
-$GLOBALS["STR_BACK_TO_CADDIE_TXT"] = " <ul> <li>Si une erreur concernant vos informations personnelles figure sur cette page, <a href=\"{$GLOBALS['wwwroot']}/achat/achat_maintenant.php\" class=\"text11\">cliquez ici</a>.<br /><br /></li><li>Si une erreur concernant votre commande figure sur cette page, <a href=\"{$GLOBALS['wwwroot']}/achat/caddie_affichage.php\" class=\"text11\">cliquez ici</a>.</li> </ul>";
+$GLOBALS["STR_BACK_TO_CADDIE_TXT"] = " <ul> <li>Si une erreur concernant vos informations personnelles figure sur cette page, <a href=\"{$GLOBALS['wwwroot']}/achat/achat_maintenant.php\" class=\"alert-link\">cliquez ici</a>.</li><li>Si une erreur concernant votre commande figure sur cette page, <a href=\"{$GLOBALS['wwwroot']}/achat/caddie_affichage.php\" class=\"alert-link\">cliquez ici</a>.</li> </ul>";
 $GLOBALS["STR_BAD_INSCRIPTION"] = "Un problème est intervenu lors de votre inscription";
 $GLOBALS["STR_BANK_ACCOUNT_CODE"] = "Code banque";
 $GLOBALS["STR_BANK_ACCOUNT_COUNTER"] = "Code guichet";
@@ -81,7 +81,7 @@ $GLOBALS["STR_CAT_LB"] = "Filtrer par : Catégorie";
 $GLOBALS["STR_CATALOG"] = "Notre catalogue";
 $GLOBALS["STR_CATALOGUE"] = "Catalogue";
 $GLOBALS["STR_CATEGORY"] = "Catégorie";
-$GLOBALS["STR_CGV_OK"] = "J'ai pris connaissance des <a href=\"{$GLOBALS['wwwroot']}/cgv.php\" class=\"label\" onclick=\"return(window.open(this.href)?false:true);\">conditions générales de vente</a> du site {$GLOBALS['site']} en vigueur à cet instant et j'y adhère sans réserve.";
+$GLOBALS["STR_CGV_OK"] = "J'ai pris connaissance des <a href=\"{$GLOBALS['wwwroot']}/cgv.php\" onclick=\"return(window.open(this.href)?false:true);\">conditions générales de vente</a> du site {$GLOBALS['site']} en vigueur à cet instant et j'y adhère sans réserve.";
 $GLOBALS["STR_CGV_YES"] = "<a href=\"{$GLOBALS['wwwroot']}/cgv.php\" >En validant ce formulaire, je déclare avoir lu et accepté les conditions générales.</a>";
 $GLOBALS["STR_CGV"] = "Conditions de vente";
 $GLOBALS["STR_CHANGE_PARAMS_OK"] = "<li><a href=\"{$GLOBALS['wwwroot']}/compte.php\">Vous pouvez revenir à la page mon compte</a>.</li><li><a href=\"{$GLOBALS['wwwroot']}/utilisateurs/change_params.php\">Vous pouvez revenir à la page de modification des paramètres</a>.</li><li><a href=\"{$GLOBALS['wwwroot']}/\" >Vous pouvez revenir à la page d'accueil</a>.</li>";
@@ -121,7 +121,7 @@ $GLOBALS["STR_CONDITIONNEMENT_QTY"] = "Quantité totale";
 $GLOBALS["STR_CONDITIONNEMENT"] = "Conditionnement";
 $GLOBALS["STR_CONFIRMATION"] = "Confirmation";
 $GLOBALS["STR_CONTACT_INFO"] = "Coordonnées";
-$GLOBALS["STR_CONTACT_INTRO"] = "Un renseignement ? <br/>Des questions ? <br/>Une demande particulière ? <br/>Contactez-nous !";
+$GLOBALS["STR_CONTACT_INTRO"] = "Un renseignement ? Des questions ? Une demande particulière ? Contactez-nous !";
 $GLOBALS["STR_CONTACT_LB"] = "Sélectionner l'objet de votre demande";
 $GLOBALS["STR_CONTACT_SELECT1"] = "Renseignement";
 $GLOBALS["STR_CONTACT_SELECT2"] = "Suggestion";
@@ -130,6 +130,7 @@ $GLOBALS["STR_CONTACT_SUBJECT"] = "Votre question concerne";
 $GLOBALS["STR_CONTACT_US"] = "Nous contacter";
 $GLOBALS["STR_CONTACT"] = "Contact";
 $GLOBALS["STR_CONTINUE"] = "Continuer";
+$GLOBALS["STR_CONTINENT"] = "Continent";
 $GLOBALS["STR_COOKIES_CHROME"] = "Options &gt; Options avancées &gt; Paramètres de contenu... &gt; Cookies<br />Choisir &quot;Autoriser le stockage des données locales&quot;";
 $GLOBALS["STR_COOKIES_HOWTO"] = "Pour vérifier si votre navigateur accepte les cookies :";
 $GLOBALS["STR_COOKIES_IE"] = "Menu Outils &gt; Options Internet <br />Onglet Confidentialité &gt; Avancé <br />Cocher la case &quot;Ignorer la gestion automatique des cookies&quot; et &quot;Toujours autoriser les cookies de la session&quot;<br />";
@@ -168,7 +169,7 @@ $GLOBALS["STR_DEVISE"] = "Devise";
 $GLOBALS["STR_DISPO"] = "Disponibilité";
 $GLOBALS["STR_DO_NOT_MISS"] = "A ne pas manquer";
 $GLOBALS["STR_DOMICILIATION"] = "Domiciliation";
-$GLOBALS["STR_DONNEZ_AVIS"] = "Donnez votre avis.";
+$GLOBALS["STR_DONNEZ_AVIS"] = "Donnez votre avis";
 $GLOBALS["STR_DONT_FORGET_COMMENT"] = "N'oubliez pas d'insérer votre commentaire";
 $GLOBALS["STR_DONT_FORGET_NOTE"] = "Vous avez oublié d'ajouter une note à votre commentaire";
 $GLOBALS["STR_DOWNLOAD_AGAIN"] = "Réessayer ultérieurement (serveur indisponible)";
@@ -182,7 +183,7 @@ $GLOBALS["STR_EDITED"] = "édité le";
 $GLOBALS["STR_EMAIL_ABSENT"] = "Cette adresse email n'existe pas";
 $GLOBALS["STR_EMAIL_BOUNCE_REPLACE"] = "Le serveur %s a envoyé une erreur définitive %s lors d'un envoi précédent à %s. Veuillez rentrer un email valide dans les paramètres de votre compte.";
 $GLOBALS["STR_EMAIL_FRIEND"] = "Email de votre ami";
-$GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Identifiant / pseudo";
+$GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Email / pseudo";
 $GLOBALS["STR_EMAIL_SENDING_DEACTIVATED"] = "Tentative d'envoi de l'email \"%s\" - envoi désactivé";
 $GLOBALS["STR_EMAIL"] = "Email";
 $GLOBALS["STR_EMPLOYEE"] = "Employé / Sans emploi";
@@ -324,6 +325,7 @@ $GLOBALS["STR_INVALID_TOKEN"] = "Token invalide : traitement déjà réalisé ou
 $GLOBALS["STR_INVOICE_ADDRESS"] = "Adresse de facturation";
 $GLOBALS["STR_INVOICE_BOTTOM_TEXT"] = "Pénalité de retard au taux annuel de : 9% - Pas d'escompte en cas de paiement anticipé";
 $GLOBALS["STR_INVOICE_BOTTOM_TEXT1"] = "Ce devis est valable pour une durée de {$GLOBALS['site_parameters']['quotation_delay']}";
+$GLOBALS["STR_INVOICE_BOTTOM_TEXT2"] = "TVA à la charge du preneur";
 $GLOBALS["STR_INVOICE"] = "Facture";
 $GLOBALS["STR_IS_EMPTY"] = "Ce champ doit être rempli";
 $GLOBALS["STR_IS_TOO_SHORT"] = " est trop court";
@@ -343,7 +345,7 @@ $GLOBALS["STR_LIST_PRODUCT"] = "Liste des produits";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Liste des sous-rubriques";
 $GLOBALS["STR_LISTE_CADEAU"] = "Ma liste de cadeaux";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Identifiez-vous pour bénéficier de votre réduction";
-$GLOBALS["STR_LOGIN_OK"] = "Merci de votre confiance.\n\nMerci de noter et conserver votre identifiant et votre mot de passe secret.\n\nVos paramètres de connexion sont les suivants :";
+$GLOBALS["STR_LOGIN_OK"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVos paramètres de connexion sont les suivants :";
 $GLOBALS["STR_LOGIN"] = "S'identifier";
 $GLOBALS["STR_LOGO"] = "Logo";
 $GLOBALS["STR_LOGOUT"] = "Se déconnecter";
@@ -386,7 +388,7 @@ $GLOBALS["STR_MODULE_DEVISES_CHOISIR_DEVISE"] = "Devise :";
 $GLOBALS["STR_MODULE_DIREAUNAMI_BACK_REFERER"] = "Retour vers l'article référé.";
 $GLOBALS["STR_MODULE_DIREAUNAMI_MSG_ERR_FRIEND"] = "Une erreur est survenue (email invalide ou champs manquants).\nCliquez sur 'Retour' dans votre navigateur, puis complétez les champs requis pour renvoyer votre recommandation.";
 $GLOBALS["STR_MODULE_DIREAUNAMI_MSG_FRIEND_SEND"] = "Votre recommandation a bien été envoyée.";
-$GLOBALS["STR_MODULE_DIREAUNAMI_MSG_TELL_FRIEND"] = "<b>La page que vous venez de consulter a retenu votre attention, alors permettez aussi à vos amis de la consulter.</b>\n Pour envoyer votre recommandation, indiquez simplement le nom et l'adresse email de vos amis.\n Indiquez aussi votre nom et votre email pour que vos amis puissent savoir de qui provient ce message, et cliquez sur le bouton \"Envoyer\".\n Vous pouvez aussi, si vous le désirez, leur adresser un message qui sera inclus dans l'email.";
+$GLOBALS["STR_MODULE_DIREAUNAMI_MSG_TELL_FRIEND"] = "<b>La page que vous venez de consulter a retenu votre attention, alors permettez aussi à vos amis de la consulter.</b>\nPour envoyer votre recommandation, indiquez simplement le nom et l'adresse email de vos amis.\nIndiquez aussi votre nom et votre email pour que vos amis puissent savoir de qui provient ce message, et cliquez sur le bouton \"Envoyer\".\nVous pouvez aussi, si vous le désirez, leur adresser un message qui sera inclus dans l'email.";
 $GLOBALS["STR_MODULE_EXPEDITOR_SHIPPING_WARNING_SENT_TO"] = "L'avis d'expédition a été envoyé à";
 $GLOBALS["STR_MODULE_FACEBOOK_JOIN_ON_FACEBOOK"] = "Rejoignez nous sur ";
 $GLOBALS["STR_MODULE_FACTURES_CATALOGUE_PRICE"] = "Prix catalogue";
@@ -406,9 +408,9 @@ $GLOBALS["STR_MODULE_PENSEBETE_NO_PRODUCT_IN_REMINDER"] = "Votre pense-bête ne 
 $GLOBALS["STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP"] = "de notre site";
 $GLOBALS["STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT"] = "Mon pense-bête de produits";
 $GLOBALS["STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB"] = "Votre pense-bête se trouve dans la rubrique";
-$GLOBALS["STR_MODULE_PREMIUM_ACCUEIL_AFFILIATION"] = "Nous rémunérons nos affiliés à hauteur de {$GLOBALS['site_parameters']['commission_affilie']} % sur les ventes générées sur {$GLOBALS['site']} par les visiteurs provenant de votre site.\r\n Pour cela il suffira d'intégrer un lien vers les produits de votre choix ou une bannière sur votre site Web.\r\n Une fois vos identifiants (email + mot de passe) validés par notre webmaster, vous pourrez accéder dans la rubrique \"Mon compte\" à l'ensemble des codes HTML spécifiques à votre compte qu'il vous suffira de coller sur votre site Web.\r\n Pour adhérer à notre programme d'affiliation, <a href=\"{$GLOBALS['wwwroot']}/modules/affiliation/conditions.php\">lisez les conditions d'affiliation </a> et remplissez le formulaire ci-dessous.";
+$GLOBALS["STR_MODULE_PREMIUM_ACCUEIL_AFFILIATION"] = "Nous rémunérons nos affiliés à hauteur de {$GLOBALS['site_parameters']['commission_affilie']} % sur les ventes générées sur {$GLOBALS['site']} par les visiteurs provenant de votre site.\r\nPour cela il suffira d'intégrer un lien vers les produits de votre choix ou une bannière sur votre site Web.\r\nUne fois vos identifiants (email + mot de passe) validés par notre webmaster, vous pourrez accéder dans la rubrique \"Mon compte\" à l'ensemble des codes HTML spécifiques à votre compte qu'il vous suffira de coller sur votre site Web.\r\nPour adhérer à notre programme d'affiliation, <a href=\"{$GLOBALS['wwwroot']}/modules/affiliation/conditions.php\">lisez les conditions d'affiliation </a> et remplissez le formulaire ci-dessous.";
 $GLOBALS["STR_MODULE_PREMIUM_APE"] = "Code APE";
-$GLOBALS["STR_MODULE_PREMIUM_BAREME"] = "Votre barême dégressif";
+$GLOBALS["STR_MODULE_PREMIUM_BAREME"] = "Votre tarif dégressif";
 $GLOBALS["STR_MODULE_PREMIUM_BECOME_PARTNER"] = "Devenir partenaire";
 $GLOBALS["STR_MODULE_PREMIUM_COME_FROM"] = "Originaire de";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_CONTACT"] = "Nous signaler l'erreur via ce <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">formulaire</a>";
@@ -425,17 +427,17 @@ $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "Pour télécharger le fi
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Générer le code HTML";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Liste des mots";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "L'adresse email est obligatoire.";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Merci de votre confiance.\n\nMerci de noter et conserver votre identifiant et votre mot de passe secret.\n\nVous pourrez accéder à votre espace affilié dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.\n\nVos paramètres de connexion sont les suivants :";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez accéder à votre espace affilié dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.\n\nVos paramètres de connexion sont les suivants :";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "n'est pas en stock aujourd'hui.\nNous vous préviendrons par email dès qu'il sera disponible :";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Nous vous remercions pour votre confiance. Vous êtes maintenant inscrit à notre programme de parrainage et vous pouvez bénéficer de votre avoir de %s dès votre première commande.\r\n A bientôt sur {$GLOBALS['site']}.\r\n";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Merci de votre confiance.\n\nMerci de noter et conserver votre identifiant et votre mot de passe secret.\n\nVous pourrez bénéficier des prix revendeurs dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.\n\nVos paramètres de connexion sont les suivants :";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Nous vous remercions pour votre confiance. Vous êtes maintenant inscrit à notre programme de parrainage et vous pouvez bénéficer de votre avoir de %s dès votre première commande.\r\nA bientôt sur {$GLOBALS['site']}.\r\n";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez bénéficier des prix revendeurs dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.\n\nVos paramètres de connexion sont les suivants :";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "En cliquant sur le bouton ci-dessous, vous envoyez votre inscription au Programme Partenaires du site {$GLOBALS['site']}. Votre inscription terminée, vous serez tenu de respecter les conditions détaillées dans les conditions générales d'adhésion que vous recevrez en 2 exemplaires par courrier à nous retourner signé.";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Cet article n'est pas disponible aujourd'hui mais nous pouvons vous avertir par email dès qu'il est à nouveau en stock.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Cliquez ici pour revenir à votre compte.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Cet email ne peut plus être parrainé car il figure déjà dans notre base de données";
-$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Merci de remplir les champs obligatoires pour parrainer vos amis.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\" class=\"label\">Cliquez ici pour revenir à la page précédente</a>.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Merci de remplir les champs obligatoires pour parrainer vos amis.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Cliquez ici pour revenir à la page précédente</a>.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Vos amis ont reçu leur demande de parrainage. Dès validation de leur compte client, vous pourrez bénéficier d'un avoir de %s sur leur première commande. Ils pourront, eux-aussi bénéficier de leur avoir de %s à valoir sur leur première commande.";
-$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Merci de confirmer votre inscription avec les identifiants qui vous ont été transmis par email ! En confirmant votre inscription avec les identifiants qui vous ont été transmis par email, vous pourrez bénéficier d'un avoir de %s à valoir sur votre première commande sur notre site internet.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Merci de confirmer votre inscription avec les identifiants qui vous ont été transmis par email ! En confirmant votre inscription avec ces identifiants, vous pourrez bénéficier d'un avoir de %s à valoir sur votre première commande sur notre site internet.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmation d'inscription au programme de parrainage du site {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "TOTAL TTC :";
 $GLOBALS["STR_MODULE_PREMIUM_PRODUCT_UNIT"] = "unité";
@@ -496,7 +498,7 @@ $GLOBALS["STR_MSG_THANKS"] = "Merci de votre confiance, votre commande a été e
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Mes points cadeaux";
 $GLOBALS["STR_MY_ORDER"] = "Mes commandes";
-$GLOBALS["STR_NAISSANCE"] = "Date de naissance (JJ/MM/AAAA)";
+$GLOBALS["STR_NAISSANCE"] = "Date de naissance";
 $GLOBALS["STR_NAME"] = "Nom";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "A moins de %s km par rapport à votre position";
 $GLOBALS["STR_NET"] = "Net à payer";
@@ -697,7 +699,7 @@ $GLOBALS["STR_SEARCH"] = "Rechercher";
 $GLOBALS["STR_SECOND_CHOICE"] = "2ème choix";
 $GLOBALS["STR_SEE_YOU_SOON"] = "A bientôt sur";
 $GLOBALS["STR_SEND_CHECK"] = "Envoyez votre règlement à";
-$GLOBALS["STR_SEND_TRANSFER"] = "Effectuez votre règlement sur le compte bancaire suivant";
+$GLOBALS["STR_SEND_TRANSFER"] = "Effectuez votre règlement d'un montant de";
 $GLOBALS["STR_SEND"] = "Envoyer";
 $GLOBALS["STR_SHIP_ADDRESS"] = "Adresse de livraison";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Choisissez votre type d'expédition";
@@ -727,9 +729,9 @@ $GLOBALS["STR_STILL_CUSTOMER"] = "Déjà client ?";
 $GLOBALS["STR_STOCK_ATTRIBUTS"] = "Stock";
 $GLOBALS["STR_STOCK"] = "Info stock";
 $GLOBALS["STR_STRONG_PASSWORD_NOTIFICATION"] = "Les mots de passe forts contiennent de 7 à 16 caractères, ne comportent pas de mots ni de noms courants et associent majuscules, minuscules, chiffres et symboles.";
-$GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "Le pseudo ne doit pas contenir le signe d'arobase(@)";
+$GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "Le pseudo ne doit pas contenir le signe d'arobase (@)";
 $GLOBALS["STR_SUBMIT"] = "Valider";
-$GLOBALS["STR_SUGGEST"] = "Votre avoir vous permet d'obternir des produits complémentaires. <a href=\"achat/suggest.php\" class=\"label\">Nous vous invitons à consulter la liste de nos suggestions pour compléter votre achat</a>.";
+$GLOBALS["STR_SUGGEST"] = "Votre avoir vous permet d'obtenir des produits complémentaires. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">Nous vous invitons à consulter la liste de nos suggestions pour compléter votre achat</a>.";
 $GLOBALS["STR_SUPPORT"] = "Pour toutes vos demandes d'informations, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">vous pouvez nous contacter via ce formulaire</a>.";
 $GLOBALS["STR_SWIFT"] = "SWIFT / BIC";
 $GLOBALS["STR_SYNC_OK"] = "La synchronisation des fichiers s'est achevée avec succès";

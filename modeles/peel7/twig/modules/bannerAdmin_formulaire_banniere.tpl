@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_formulaire_banniere.tpl 37943 2013-08-29 09:31:55Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
+// $Id: bannerAdmin_formulaire_banniere.tpl 38970 2013-11-24 18:53:25Z gboussin $
+#}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
 	<table class="main_table">
@@ -27,27 +27,27 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_DESCRIPTION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="description" style="width:100%" value="{{ description|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="description" style="width:100%" value="{{ description|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_LINK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="url" name="lien" style="width:100%" value="{{ lien|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="lien" style="width:100%" value="{{ lien|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT }}{{ STR_BEFORE_TWO_POINTS }}: <br /></td>
-			<td><textarea name="extra_javascript" style="width:60%" rows="10" cols="54">{{ extra_javascript }}</textarea></td>
+			<td><textarea class="form-control" name="extra_javascript" style="width:60%" rows="10" cols="54">{{ extra_javascript }}</textarea></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_TAG_HTML }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><textarea name="tag_html" style="width:60%" rows="10" cols="54">{{ tag_html }}</textarea></td>
+			<td><textarea class="form-control" name="tag_html" style="width:60%" rows="10" cols="54">{{ tag_html }}</textarea></td>
 		</tr>
 		<tr>
-			<td colspan="2"><div class="global_help">{{ STR_MODULE_BANNER_ADMIN_TAG_HTML_EXPLAIN }}</div></td>
+			<td colspan="2"><div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_TAG_HTML_EXPLAIN }}</div></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_TARGET }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select name="target">
+				<select class="form-control" name="target">
 					<option value="_self"{% if target == "_self" %} selected="selected"{% endif %}>{{ STR_MODULE_BANNER_ADMIN_TARGET_SELF }}</option>
 					<option value="_blank"{% if target == "_blank" %} selected="selected"{% endif %}>{{ STR_MODULE_BANNER_ADMIN_TARGET_BLANK }}</option>
 					<option value="_top"{% if target == "_top" %} selected="selected"{% endif %}>{{ STR_MODULE_BANNER_ADMIN_TARGET_TOP }}</option>
@@ -58,37 +58,37 @@
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_PLACE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="number" name="position" style="width:150px" value="{{ position|str_form_value }}" />
+				<input type="number" class="form-control" name="position" style="width:150px" value="{{ position|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				<div class="global_help">{{ STR_MODULE_BANNER_ADMIN_PLACE_EXPLAIN }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_PLACE_EXPLAIN }}</div>
 				{{ banner_help }}
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="rang" style="width:150px" value="{{ rang|str_form_value }}" />
+				<input type="text" class="form-control" name="rang" style="width:150px" value="{{ rang|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				<div class="global_help">{{ STR_MODULE_BANNER_ADMIN_POSITION_EXPLAIN }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_POSITION_EXPLAIN }}</div>
 			</td>
 		</tr>
 	{% if is_annonce_module_active %}
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_AD_PLACE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="number" name="annonce_number" style="width:150px" value="{{ annonce_number|str_form_value }}" />
+				<input type="number" class="form-control" name="annonce_number" style="width:150px" value="{{ annonce_number|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_AD_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="number" name="list_id" style="width:150px" value="{{ list_id }}" />
+				<input type="number" class="form-control" name="list_id" style="width:150px" value="{{ list_id }}" />
 			</td>
 		</tr>
 		<tr>
@@ -112,23 +112,23 @@
 	{% endif %}
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_START_PUBLICATION_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="date_debut" style="width:150px" class="datepicker" value="{{ date_debut|str_form_value }}" /></td>
+			<td><input type="text" class="form-control datepicker" name="date_debut" style="width:150px" value="{{ date_debut|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_END_PUBLICATION_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="date_fin" style="width:150px" class="datepicker" value="{{ date_fin|str_form_value }}" />
+				<input type="text" class="form-control datepicker" name="date_fin" style="width:150px" value="{{ date_fin|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				<div class="global_help">{{ STR_MODULE_BANNER_ADMIN_DATES_EXPLAIN }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_DATES_EXPLAIN }}</div>
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_CATEGORY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select name="id_categorie">
+				<select class="form-control" name="id_categorie">
 					<option value="">{{ STR_CHOOSE }}...</option>
 					{% for o in cat_options %}
 					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
@@ -138,7 +138,7 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				<div class="global_help">{{ STR_MODULE_BANNER_ADMIN_SPACE_EXPLAIN }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_SPACE_EXPLAIN }}</div>
 			</td>
 		</tr>
 	{% if is_annonce_module_active %}
@@ -153,6 +153,12 @@
 			<td>{{ STR_MODULE_BANNER_ADMIN_ON_FIRST_PAGE_CATEGORY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input type="checkbox" name="on_first_page_category" value="1" {% if on_first_page_category %} checked="checked"{% endif %} />
+			</td>
+		</tr>
+		<tr>
+			<td>{{ STR_MODULE_BANNER_ADMIN_ON_ANNOUNCEMENT_CREATION_PAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="checkbox" name="on_ad_creation_page" value="1" {% if on_ad_creation_page %} checked="checked"{% endif %} />
 			</td>
 		</tr>
 		<tr>
@@ -191,33 +197,33 @@
 					<img src="{{ image.src|escape('html') }}" />
 				{% endif %}
 				<br />
-				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}:{{ image.nom }}&nbsp;
+				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ image.nom }}&nbsp;
 				<a href="{{ image.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_ADMIN_DELETE_IMAGE }}</a>
 				<input type="hidden" name="image" value="{{ image.nom|str_form_value }}" />
 			{% else %}
-				<input style="width: 100%" name="image" type="file" value="" />
+				<input name="image" type="file" value="" />
 			{% endif %}
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_WIDTH }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="number" name="width" style="width:150px" value="{{ width|str_form_value }}" /></td>
+			<td><input type="number" class="form-control" name="width" style="width:150px" value="{{ width|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_HEIGHT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="number" name="height" style="width:150px" value="{{ height|str_form_value }}" /></td>
+			<td><input type="number" class="form-control" name="height" style="width:150px" value="{{ height|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				<div class="global_help">{{ STR_MODULE_BANNER_ADMIN_SIZE_EXPLAIN }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_BANNER_ADMIN_SIZE_EXPLAIN }}</div>
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_LANGUAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="lang" style="width:100%" value="{{ lang|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="lang" style="width:100%" value="{{ lang|str_form_value }}" /></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><p><input class="bouton" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
+			<td colspan="2" class="center"><p><input class="btn btn-primary" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
 		</tr>
 	</table>
 </form>

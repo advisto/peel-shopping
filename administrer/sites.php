@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: sites.php 39007 2013-11-25 18:20:02Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -103,9 +103,9 @@ switch (vb($_GET['mode'])) {
 		break;
 }
 
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -301,7 +301,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('site_suspended', vb($frm['site_suspended']));
 
-	$tpl->assign('membre_admin_href', $GLOBALS['wwwroot_in_admin'] . '/membre.php');
+	$tpl->assign('membre_admin_href', $GLOBALS['wwwroot'] . '/membre.php');
 
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -408,13 +408,13 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			'etat' => $this_module_infos['etat'],
 			'in_home' => $this_module_infos['in_home'],
 			'position' => $this_module_infos['position'],
-			'is_left_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
-			'is_right_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
-			'is_footer_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
-			'is_header_off' => in_array($this_module_infos['technical_code'], array('advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5')),
+			'is_above_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
+			'is_below_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
+			'is_footer_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'caddie', 'account', 'last_views', 'paiement_secu')),
+			'is_header_off' => in_array($this_module_infos['technical_code'], array('advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'catalogue', 'last_views', 'paiement_secu', 'news')),
 			'is_top_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
-			'is_center_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
-			'is_center_middle_home_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
+			'is_center_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
+			'is_center_middle_home_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
 			'is_bottom_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
 			'is_top_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
 			'is_bottom_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
@@ -721,6 +721,8 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_DISPLAY_MODE', $GLOBALS['STR_ADMIN_DISPLAY_MODE']);
 	$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl->assign('STR_ADMIN_PLACE', $GLOBALS['STR_ADMIN_PLACE']);
+	$tpl->assign('STR_ADMIN_SITES_ABOVE_MIDDLE', $GLOBALS['STR_ADMIN_SITES_ABOVE_MIDDLE']);
+	$tpl->assign('STR_ADMIN_SITES_BELOW_MIDDLE', $GLOBALS['STR_ADMIN_SITES_BELOW_MIDDLE']);
 	$tpl->assign('STR_ADMIN_SITES_LEFT', $GLOBALS['STR_ADMIN_SITES_LEFT']);
 	$tpl->assign('STR_ADMIN_SITES_RIGHT', $GLOBALS['STR_ADMIN_SITES_RIGHT']);
 	$tpl->assign('STR_ADMIN_SITES_BOTTOM', $GLOBALS['STR_ADMIN_SITES_BOTTOM']);
@@ -882,7 +884,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
  *
  * @param integer $id
  * @return
- *
+ */
 function supprime_site($id)
 {
 	$qid = query("SELECT string AS nom
@@ -895,7 +897,6 @@ function supprime_site($id)
 
 	// Efface ce site de la table produits_site
 	query("DELETE FROM peel_commandes WHERE ecom_id='" . intval($id) . "'");
-	query("DELETE FROM peel_commandes_cadeaux WHERE site_id='" . intval($id) . "'");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_OK'], String::html_entity_decode_if_needed($col['nom']))))->fetch();
 }
 
@@ -982,7 +983,7 @@ function affiche_liste_site()
 		foreach ($all_site_names as $id => $nom) {
 			$output .= tr_rollover($i, true) . '
 		<td class="center"><a title="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" href="' . get_current_url(false) . '?mode=modif&id=' . $id . '"><img src="' . $GLOBALS['administrer_url'] . '/images/b_edit.png" alt="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" /></a></td>
-		<td class="label center">' . $id . '</td>
+		<td class="title_label center">' . $id . '</td>
 		<td style="padding-left:10px">' . $nom . '</td>
 		<td class="left" style="padding-left:10px">' . vb($url) . '</td>
 	</tr>';

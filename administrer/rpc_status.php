@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: rpc_status.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -27,7 +27,7 @@ $output = '';
 if (!est_identifie() || empty($_POST)) {
 	$output .= 'nok';
 } else {
-	header('Content-type: text/html; charset=' . $page_encoding);
+	output_general_http_header($page_encoding);
 	// On fait les tests de droits une bonne fois pour toutes
 	if(vb($_POST['mode']) == 'langues') {
 		$new_status = ($_POST['current_status']+2)%3-1;

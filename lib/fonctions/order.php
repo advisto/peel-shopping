@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 38026 2013-09-04 23:30:43Z gboussin $
+// $Id: order.php 39005 2013-11-25 17:27:35Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -131,13 +131,12 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	} else {
 		$id_statut_paiement = null;
 	}
-	$select = "SELECT *
+	$sql = "SELECT *
 		FROM peel_commandes
 		WHERE id='" . intval($order_id) . "'";
-	$query = query($select) ;
+	$query = query($sql) ;
 	// On vérifie si la commande existe déjà
-	if (!empty($query)) {
-		$commande = fetch_assoc($query);
+	if ($commande = fetch_assoc($query)) {
 		$id_statut_paiement_ex = vb($commande['id_statut_paiement']);
 		$id_statut_livraison_ex = vb($commande['id_statut_livraison']);
 		if (empty($GLOBALS['site_parameters']['payment_status_create_bill']) || in_array($id_statut_paiement, explode(',', $GLOBALS['site_parameters']['payment_status_create_bill']))) {
@@ -218,6 +217,8 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		if ($delivery_tracking !==null) {
 			// Attention, il faut pouvoir forcer la mise à "" => ne pas faire de test !empty
 			$sql_set_array[] = "delivery_tracking='" . nohtml_real_escape_string($delivery_tracking) . "'";
+		} elseif(!empty($commande['delivery_tracking'])) {
+			$delivery_tracking = $commande['delivery_tracking'];
 		}
 		if (!empty($sql_set_array)) {
 			query('UPDATE peel_commandes
@@ -1186,7 +1187,7 @@ function get_order_infos_array($order_object)
 			FROM peel_commandes pc
 			WHERE code_promo="' . nohtml_real_escape_string($order_object->code_promo) . '"');
 		if ($cp = fetch_assoc($code_promo_query)) {
-			$order_infos['code_promo_text'] .= ' - ' . get_discount_text($cp['valeur_code_promo'], $cp['percent_code_promo'], display_prices_with_taxes_active()) . '';
+			$order_infos['code_promo_text'] .= ' - ' . get_discount_text($cp['valeur_code_promo'], $cp['percent_code_promo'], true) . '';
 		}
 	} else {
 		$order_infos['code_promo_text'] = '';
@@ -1239,7 +1240,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		// - Dans $prod['percent_remise_produit'] il y a l'ensemble des pourcentages de remise qui est indiqué, que ce soit liés au produit ou à l'utilisateur, ce qui a un intérêt technique et de déboguage.
 		// Ce pourcentage ne prend pas en considération des réductions par montant effectuées, donc ça n'est pas le total de réduction en pourcentage
 		// - $prod['remise'] est quant à lui la remise totale effectuée, donc c'est une information compréhensible par l'utilisateur.
-		$remise_text = ($prod['remise'] > 0 ? "\r\n" . $GLOBALS['STR_PROMOTION_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . get_discount_text($prod['remise'], $prod['percent_remise_produit'] , display_prices_with_taxes_active()) : "");
+		$remise_text = ($prod['remise'] > 0 ? "\r\n" . $GLOBALS['STR_PROMOTION_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . get_discount_text((display_prices_with_taxes_active()?$prod['remise']:$prod['remise_ht']), $prod['percent_remise_produit'] , display_prices_with_taxes_active()) : "");
 		if (is_module_ecotaxe_active()) {
 			// On affiche le montant de l'écotaxe dans la colonne dénomination du produit et non pas prix pour des raisons de largeur de colonne
 			$ecotaxe_text = ($prod['ecotaxe_ttc'] > 0) ? "\r\n" . $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ttc'], true, $devise, true, $currency_rate) : "";
@@ -1282,6 +1283,23 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// In $com->payment_technical_code is stored the "technical_code" found in peel_paiement
 		$type = $com->paiement;
 	}
+	if (empty($type)) {
+		// Affichage de tous les modes de paiement si aucun défini (seulement si commande passée dans l'administration)
+		$sql_paiement = 'SELECT p.technical_code
+			FROM peel_paiement p
+			WHERE p.etat = "1"
+			ORDER BY p.position';
+		$res_paiement = query($sql_paiement);
+		while ($tab_paiement = fetch_assoc($res_paiement)) {
+			if (!empty($tab_paiement['technical_code'])) {
+				$this_output = get_payment_form($order_id, $tab_paiement['technical_code'], $send_admin_email, $amount_to_pay, $allow_autosend);
+				if(!empty($this_output)) {
+					$output_array[] = $this_output;
+				}
+			}
+		}
+		return implode('<hr />', $output_array);
+	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('payment_form.tpl');
 	$tpl->assign('type', $type);
 	$tpl->assign('commande_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
@@ -1306,7 +1324,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'cmcic' :
 			if (file_exists($GLOBALS['fonctionscmcic'])) {
 				require_once($GLOBALS['fonctionscmcic']);
-				$tpl->assign('js_action', 'document.getElementById("PaymentRequest").submit()');
+				$js_action = 'document.getElementById("PaymentRequest").submit()';
 				$tpl->assign('form', getCMCICForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, ''));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1315,7 +1333,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'cmcic_by_3' :
 			if (file_exists($GLOBALS['fonctionscmcic'])) {
 				require_once($GLOBALS['fonctionscmcic']);
-				$tpl->assign('js_action', 'document.getElementById("PaymentRequest").submit()');
+				$js_action = 'document.getElementById("PaymentRequest").submit()';
 				$tpl->assign('form', getCMCICForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, ''));
 				$send_admin_template_email = 'admin_info_payment_credit_card_3_times';
 			}
@@ -1325,7 +1343,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			if (file_exists($GLOBALS['fonctionsatos'])) {
 				require_once($GLOBALS['fonctionsatos']);
 				// la validation automatique ne fonctionne pas avec atos.
-				$tpl->assign('form', getATOSForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, ''));
+				$tpl->assign('form', getATOSForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $GLOBALS['site_parameters']['atos_solution_name']['atos']));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
 			break;
@@ -1334,7 +1352,16 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			if (file_exists($GLOBALS['fonctionsatos'])) {
 				require_once($GLOBALS['fonctionsatos']);
 				// la validation automatique ne fonctionne pas avec atos.
-				$tpl->assign('form', getATOSForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, ''));
+				$tpl->assign('form', getATOSForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, '', $GLOBALS['site_parameters']['atos_solution_name']['atos_by_3']));
+				$send_admin_template_email = 'admin_info_payment_credit_card_3_times';
+			}
+			break;
+
+		case 'cetelem' :
+			if (file_exists($GLOBALS['fonctionsatos'])) {
+				require_once($GLOBALS['fonctionsatos']);
+				// la validation automatique ne fonctionne pas avec atos.
+				$tpl->assign('form', getATOSForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $GLOBALS['site_parameters']['atos_solution_name']['cetelem']));
 				$send_admin_template_email = 'admin_info_payment_credit_card_3_times';
 			}
 			break;
@@ -1342,7 +1369,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'systempay' :
 			if (file_exists($GLOBALS['fonctionssystempay'])) {
 				require_once($GLOBALS['fonctionssystempay']);
-				$tpl->assign('js_action', 'document.getElementById("SystempayForm").submit()');
+				$js_action = 'document.getElementById("SystempayForm").submit()';
 				$tpl->assign('form', getSystempayForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, $com->id_utilisateur, $com->nom_bill, $com->prenom_bill, $com->telephone_bill));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1351,7 +1378,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'systempay_3x' :
 			if (file_exists($GLOBALS['fonctionssystempay'])) {
 				require_once($GLOBALS['fonctionssystempay']);
-				$tpl->assign('js_action', 'document.getElementById("SystempayForm").submit()');
+				$js_action = 'document.getElementById("SystempayForm").submit()';
 				$tpl->assign('form', getSystempayForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, '', $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, $com->id_utilisateur, $com->nom_bill, $com->prenom_bill, $com->telephone_bill));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1370,7 +1397,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'paybox' :
 			if (file_exists($GLOBALS['fonctionspaybox'])) {
 				require_once($GLOBALS['fonctionspaybox']);
-				$tpl->assign('js_action', 'document.TheForm.submit()');
+				$js_action = 'document.TheForm.submit()';
 				$tpl->assign('form', givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1379,7 +1406,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'bluepaid' :
 			if (file_exists($GLOBALS['fonctionsbluepaid'])) {
 				require_once($GLOBALS['fonctionsbluepaid']);
-				$tpl->assign('js_action', 'document.TheForm.submit()');
+				$js_action = 'document.TheForm.submit()';
 				$tpl->assign('form', getBluepaidForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->id_utilisateur, $com->pays_bill));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1388,7 +1415,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'bluepaid_abonnement' :
 			if (file_exists($GLOBALS['fonctionsbluepaid'])) {
 				require_once($GLOBALS['fonctionsbluepaid']);
-				$tpl->assign('js_action', 'document.TheForm.submit()');
+				$js_action = 'document.TheForm.submit()';
 				$tpl->assign('form', getBluepaidForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->id_utilisateur, $com->pays_bill, true));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1427,7 +1454,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'ogone' :
 			if (file_exists($GLOBALS['fonctionsogone'])) {
 				require_once($GLOBALS['fonctionsogone']);
-				$tpl->assign('js_action', 'document.getElementById("ogoneForm").submit()');
+				$js_action = 'document.getElementById("ogoneForm").submit()';
 				$tpl->assign('form', giveOgoneForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, $com->prenom_bill . ' ' . $com->nom_bill, $com->telephone_bill));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1436,7 +1463,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'omnikassa' :
 			if (file_exists($GLOBALS['fonctionsomnikassa'])) {
 				require_once($GLOBALS['fonctionsomnikassa']);
-				$tpl->assign('js_action', 'document.getElementById("omnikassaForm").submit()');
+				$js_action = 'document.getElementById("omnikassaForm").submit()';
 				$tpl->assign('form', giveOmnikassaForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, $com->prenom_bill . ' ' . $com->nom_bill, $com->telephone_bill));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1445,7 +1472,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'moneybookers' :
 			if (file_exists($GLOBALS['fonctionsmoneybookers']) && !empty($GLOBALS['site_parameters']['email_moneybookers'])) {
 				require_once($GLOBALS['fonctionsmoneybookers']);
-				$tpl->assign('js_action', 'document.getElementById("MoneyBookersForm").submit()');
+				$js_action = 'document.getElementById("MoneyBookersForm").submit()';
 				$tpl->assign('form', getMoneyBookersForm(vb($GLOBALS['site_parameters']['email_moneybookers']), $order_id, $_SESSION['session_langue'], $com->id_utilisateur, $com->email, fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->prenom_bill, $com->nom_bill, $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, fprix($com->total_tva, false, $com->devise, true, $com->currency_rate, false, false), $com->moneybookers_payment_methods));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
@@ -1454,7 +1481,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		case 'paypal':
 			if (file_exists($GLOBALS['fonctionspaypal']) && !empty($GLOBALS['site_parameters']['email_paypal'])) {
 				require_once($GLOBALS['fonctionspaypal']);
-				$tpl->assign('js_action', 'document.getElementById("paypalForm").submit()');
+				$js_action = 'document.getElementById("paypalForm").submit()';
 				$tpl->assign('form', getPaypalForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 1, '', $com->id_utilisateur, $com->prenom_ship, $com->nom_ship, $com->adresse_ship, $com->zip_ship, $com->ville_ship, $com->pays_ship, $com->telephone_ship, $com->prenom_bill, $com->nom_bill, $com->adresse_bill, $com->zip_bill, $com->ville_bill, $com->pays_bill, $com->telephone_bill));
 				$tpl->assign('STR_FOR_A_PAYPAL_PAYMENT', $GLOBALS['STR_FOR_A_PAYPAL_PAYMENT']);
 				$tpl->assign('paypal_img_html', $GLOBALS['STR_PAYPAL_IMG']);
@@ -1470,9 +1497,10 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		$custom_template_tags['ORDER_ID'] = $order_id;
 		send_email($GLOBALS['support'], '', '', $send_admin_template_email, $custom_template_tags, 'html', $GLOBALS['support']);
 	}
-
-	if ($allow_autosend && !empty($js_action) && !empty($GLOBALS['site_parameters']['module_autosend_delay']) && is_autosend_module_active()) {
-		$tpl->assign('autosend_delay', ($GLOBALS['site_parameters']['module_autosend_delay'] * 1000));
+	if($allow_autosend && !empty($js_action) && is_autosend_module_active()) {
+		$GLOBALS['js_content_array'][] = '
+		setTimeout("' . filtre_javascript($js_action, true, false, true) . '", ' . vn($GLOBALS['site_parameters']['module_autosend_delay']) * 1000 . ');
+';
 	}
 	$output .= $tpl->fetch();
 	return $output;

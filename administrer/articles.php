@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: articles.php 39015 2013-11-25 22:20:07Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv('admin_content');
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_ARTICLES_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $id = intval(vn($_REQUEST['id']));
 $rubrique_options = '';
@@ -50,8 +50,7 @@ switch (vb($_REQUEST['mode'])) {
 			$frm = $_POST;
 		}
 		$form_error_object->valide_form($frm,
-			array('rubriques' => $GLOBALS['STR_ADMIN_ARTICLES_ERR_CHOOSE_ONE_CATEGORIE'],
-				'titre_' . $_SESSION['session_langue'] => $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE']));
+			array('rubriques' => $GLOBALS['STR_ADMIN_ARTICLES_ERR_CHOOSE_ONE_CATEGORIE']));
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			if(!empty($frm['titre_' . $lng])) {
 				$title_not_empty=true;
@@ -82,7 +81,7 @@ switch (vb($_REQUEST['mode'])) {
 			if (!isset($rubrique_id)) {
 				$rubrique_id = 0;
 			}
-			affiche_formulaire_ajout_article($id, $frm, $form_error_object);
+			affiche_formulaire_ajout_article(vn($_REQUEST['rubriques']), $frm, $form_error_object);
 		}
 		break;
 
@@ -127,7 +126,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -136,12 +135,12 @@ include("modeles/bas.php");
 /**
  * Affiche un formulaire vierge pour ajouter un article
  *
- * @param integer $rubrique_id
+ * @param integer $rubriques
  * @param array $frm Array with all fields data
  * @param class $form_error_object
  * @return
  */
-function affiche_formulaire_ajout_article($rubrique_id = 0, &$frm, &$form_error_object)
+function affiche_formulaire_ajout_article($rubriques = 0, &$frm, &$form_error_object)
 {
 	/* Valeurs par défaut */
 	if(empty($frm)) {
@@ -162,7 +161,11 @@ function affiche_formulaire_ajout_article($rubrique_id = 0, &$frm, &$form_error_
 		$frm['image1'] = "";
 		$frm['position'] = "";
 	}
-	$frm['rubriques'] = array($rubrique_id);
+	if(!is_array($rubriques)) {
+		$frm['rubriques'] = array($rubriques);
+	} else {
+		$frm['rubriques'] = $rubriques;
+	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
 	$frm['lang'] = $_SESSION['session_langue'];
@@ -256,6 +259,7 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	if (!empty($GLOBALS['rubrique_options'])) {
+		$tpl->assign('pdf_logo_src',$GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 		$tpl->assign('action', get_current_url(false) . '?start=0');
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 		$tpl->assign('mode', $frm['nouveau_mode']);
@@ -276,8 +280,8 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 			$tpl_langs[] = array('lng' => $lng,
 				'error' => $form_error_object->text('titre_' . $lng),
 				'titre' => $frm['titre_' . $lng],
-				'chapo_te' => getTextEditor('chapo_' . $lng, 760, 300, String::html_entity_decode_if_needed(vb($frm['chapo_' . $lng]))),
-				'texte_te' => getTextEditor('texte_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng]))),
+				'chapo_te' => getTextEditor('chapo_' . $lng, '100%', 300, String::html_entity_decode_if_needed(vb($frm['chapo_' . $lng]))),
+				'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng]))),
 				'meta_titre' => vb($frm['meta_titre_' . $lng]),
 				'meta_key' => $frm['meta_key_' . $lng],
 				'meta_desc' => $frm['meta_desc_' . $lng]
@@ -287,7 +291,20 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		if (!empty($frm["image1"])) {
-			$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image1"],
+			if (String::strtolower(String::substr($frm['image1'], strrpos($frm['image1'], ".") + 1)) == 'pdf') {
+				$type = 'pdf';
+			} else {
+				$type = 'img';
+			}
+			if(strpos($frm['image1'], '://') !== false) {
+				$this_url = $frm['image1'];
+			} elseif(strpos($frm['image1'], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
+				$this_url = $GLOBALS['wwwroot'] . $frm['image1'];
+			} else {
+				$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image1'];
+			}
+			$tpl->assign('image', array('src' => $this_url,
+					'type' => $type,
 					'nom' => $frm["image1"],
 					'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image1',
 					));

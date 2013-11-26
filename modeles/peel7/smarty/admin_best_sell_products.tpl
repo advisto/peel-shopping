@@ -3,36 +3,30 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_best_sell_products.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<table class="main_table">
-	<tr>
-		<td class="entete">{$STR_ADMIN_PRODUITS_ACHETES_MOST_WANTED}</td>
-	</tr>
-	<tr>
-		<td>
-			<table class="admin_best_sell_products">
-				<tr>
-					<th class="menu">{$STR_PRODUCT}</th>
-					<th class="menu">{$STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED}</th>
-					<th class="menu" style="width:120px">{$STR_QUANTITY}</th>
-					<th class="menu" style="width:120px">{$STR_AMOUNT}</th>
-				</tr>
-			{foreach $prods as $p}
-				{$p.tr_rollover}
-					<td>{$p.lien}</td>
-					<td class="center">{$p.nombre}</td>
-					<td class="right">{$p.quantite_totale}</td>
-					<td class="right">{$p.prix}</td>
-				</tr>
-			{/foreach}
-			</table>
-		</td>
-	</tr>
-</table>
+// $Id: admin_best_sell_products.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<div class="entete">{$STR_ADMIN_PRODUITS_ACHETES_MOST_WANTED}</div>
+<div class="table-responsive">
+	<table class="table admin_best_sell_products">
+		<tr>
+			<th class="menu">{$STR_PRODUCT}</th>
+			<th class="menu">{$STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED}</th>
+			<th class="menu" style="width:120px">{$STR_QUANTITY}</th>
+			<th class="menu" style="width:120px">{$STR_AMOUNT}</th>
+		</tr>
+	{foreach $prods as $p}
+		{$p.tr_rollover}
+			<td>{$p.lien}</td>
+			<td class="center">{$p.nombre}</td>
+			<td class="right">{$p.quantite_totale}</td>
+			<td class="right">{$p.prix}</td>
+		</tr>
+	{/foreach}
+	</table>
+</div>

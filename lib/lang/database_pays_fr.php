@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_pays_fr.php 37927 2013-08-28 11:53:31Z gboussin $
+// $Id: database_pays_fr.php 38833 2013-11-19 12:05:30Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -147,7 +147,7 @@ $peel_pays["pays"] = array(
   "125" => "France - Guadeloupe",
   "126" => "Guam",
   "127" => "Guatemala",
-  "128" => "Guin",
+  "128" => "Guinée",
   "129" => "Guinée-Bissau",
   "131" => "Haiti",
   "132" => "Australie - Heard et McDonald (Iles)",

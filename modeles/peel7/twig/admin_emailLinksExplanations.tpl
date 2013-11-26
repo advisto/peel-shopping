@@ -3,17 +3,17 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_emailLinksExplanations.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_emailLinksExplanations.tpl 38952 2013-11-23 12:07:36Z gboussin $
 #}<p class="center"><b>{{ STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE }}{{ STR_BEFORE_TWO_POINTS }}:</b></p>
-<p class="center">{{ STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN }}</p>
-<table width="350">
+<div class="alert alert-info"><p>{{ STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN }}</p></div>
+<table>
 	<tr>
 		<td>[SITE] ou [SITE_NAME]{{ STR_BEFORE_TWO_POINTS }}:</td>
 	</tr>
@@ -106,9 +106,20 @@
 	</tr>
 {% endif %}
 	<tr>
-		<td colspan="2">[link="$link"]{{ STR_ADMIN_EMAIL_TEMPLATES_TAG_LINK_EXAMPLE }}[/link]<br />({{ STR_ADMIN_EMAIL_TEMPLATES_TAG_LINK_EXPLAIN }})</td>
+		<td>&nbsp;</td>
 	</tr>
 	<tr>
-		<td colspan="2">{{ STR_ADMIN_EMAIL_TEMPLATES_TAG_OTHER_AVAILABLE }}</td>
+		<td>
+			[link="$link"]{{ STR_ADMIN_EMAIL_TEMPLATES_TAG_LINK_EXAMPLE }}[/link]
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>{{ STR_ADMIN_EMAIL_TEMPLATES_TAG_LINK_EXPLAIN }}</p>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
 	</tr>
 </table>
+<div class="alert alert-info"><p>{{ STR_ADMIN_EMAIL_TEMPLATES_TAG_OTHER_AVAILABLE }}</p></div>

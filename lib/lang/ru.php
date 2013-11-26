@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ru.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: ru.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,6 +127,7 @@ $GLOBALS["STR_CONTACT_SUBJECT"] = "";
 $GLOBALS["STR_CONTACT_US"] = "свяжитесь с нами";
 $GLOBALS["STR_CONTACT"] = "контакт";
 $GLOBALS["STR_CONTINUE"] = "";
+$GLOBALS["STR_CONTINENT"] = "";
 $GLOBALS["STR_COOKIES_CHROME"] = "опции расширенные параметры:рассылка выбрать разрешить доступ";
 $GLOBALS["STR_COOKIES_HOWTO"] = "узнать поддерживается ли рассылка";
 $GLOBALS["STR_COOKIES_IE"] = "меню предметы  опции  защита  расширенный  касса отказать в рассылке  всегда разрешать рассылку";
@@ -282,7 +283,7 @@ $GLOBALS["STR_FWRITE_FAILED"] = "";
 $GLOBALS["STR_GENDER"] = "вежливость";
 $GLOBALS["STR_GET_MY_POSITION"] = "";
 $GLOBALS["STR_GET_PASSWORD"] = "показать пароль";
-$GLOBALS["STR_GIFT_POINTS"] = "подарочные баллы";
+$GLOBALS["STR_GIFT_POINTS"] = "Подарочные баллы";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "";
 $GLOBALS["STR_HALF_WHOLESALER"] = "";
@@ -529,7 +530,7 @@ $GLOBALS["STR_ORDER_FORM"] = "заказ";
 $GLOBALS["STR_ORDER_HISTORY"] = "история заказов";
 $GLOBALS["STR_ORDER_NAME"] = "Commande";
 $GLOBALS["STR_ORDER_NUMBER"] = "номер";
-$GLOBALS["STR_ORDER_POINT"] = "подарочные баллы";
+$GLOBALS["STR_ORDER_POINT"] = "Подарочные баллы";
 $GLOBALS["STR_ORDER_PROCESS_CONTINUE"] = "нажмите чтобы продолжить покупки";
 $GLOBALS["STR_ORDER_RENEW_INVITE"] = "обновите ваш заказ";
 $GLOBALS["STR_ORDER_RESULTS_BY"] = "расположить результаты по";
@@ -660,7 +661,7 @@ $GLOBALS["STR_SEARCH_ANY_WORDS"] = "любое слово";
 $GLOBALS["STR_SEARCH_BRAND"] = "Поиск по марке";
 $GLOBALS["STR_SEARCH_CATEGORY"] = "Поиск по категории";
 $GLOBALS["STR_SEARCH_EXACT_SENTENCE"] = "точная фраза";
-$GLOBALS["STR_SEARCH_HELP"] = "<b class=\"label\">Поиск Справка</b><br />
+$GLOBALS["STR_SEARCH_HELP"] = "<b>Поиск Справка</b><br />
 <span class=\"normal\"><br />
 И по умолчанию. В этом случае поиск для собак и кошек возвращает все сообщения, которые содержат эти слова, где-то.<br />
 Кавычки (\") позволяют ищет фразы. В этом случае для поиска\" собака кошка \"возвращается
@@ -678,9 +679,9 @@ $GLOBALS["STR_SEARCH_RESULT_PRODUCT"] = "";
 $GLOBALS["STR_SEARCH"] = "Найти";
 $GLOBALS["STR_SECOND_CHOICE"] = "";
 $GLOBALS["STR_SEE_YOU_SOON"] = "до скорого на";
-$GLOBALS["STR_SEND_CHECK"] = "отправить оплату в";
-$GLOBALS["STR_SEND_TRANSFER"] = "осуществить оплату с банковского счета";
-$GLOBALS["STR_SEND"] = "отправить";
+$GLOBALS["STR_SEND_CHECK"] = "Отправить оплату в";
+$GLOBALS["STR_SEND_TRANSFER"] = "Осуществить оплату с банковского счета";
+$GLOBALS["STR_SEND"] = "Отправить";
 $GLOBALS["STR_SHIP_ADDRESS"] = "адрес доставки";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "выберите тип отправки";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Choisissez votre zone d'expédition";

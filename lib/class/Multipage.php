@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: Multipage.php 38983 2013-11-25 09:01:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 37904 2013-08-27 21:19:26Z gboussin $
+ * @version $Id: Multipage.php 38983 2013-11-25 09:01:28Z gboussin $
  * @access public
  */
 class Multipage {
@@ -62,12 +62,18 @@ class Multipage {
 	var $OrderDefault;
 	var $SortDefault;
 	var $forced_order_by_string = null;
+	var $forced_second_order_by_string = null;
+	var $forced_before_first_order_by_string = null;
 	var $nombre_session_var_name;
 	var $nb1;
 	var $nb2;
 	var $nb3;
 	var $LimitSQL;
+	var $first_link_page = true;
 	var $allow_get_sort = true;
+	var $sort_get_variable = 'sort';
+	var $order_get_variable = 'order';
+	var $order_sql_prefix = null;
 
 	/**
 	 * Constructeur
@@ -75,8 +81,13 @@ class Multipage {
 	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null)
 	{
 		if (empty($template_name)) {
-			// Si aucun template n'est précisé spécifiquement lors de l'appel de la fonction, la sélection en back office est utilisée
-			$template_name = vb($GLOBALS['site_parameters']['template_multipage']);
+			if(defined('IN_PEEL_ADMIN')) {
+				// Apparence de l'administration non altérée par l'intégration graphique en front-office
+				$template_name = 'default_admin';
+			} else {
+				// Si aucun template n'est précisé spécifiquement lors de l'appel de la fonction, la sélection en back office est utilisée
+				$template_name = vb($GLOBALS['site_parameters']['template_multipage']);
+			}
 		}
 		$this->tpl_name = $template_name;
 		$this->sqlRequest = $sqlRequest;
@@ -317,22 +328,21 @@ class Multipage {
 			$this->first_link_page = max(1, min($this->page - ceil($this->LinkPerPage / 2) + 1, $this->pages_count - $this->LinkPerPage + 1));
 			for ($this_page = $this->first_link_page; $this_page <= min($this->first_link_page + $this->LinkPerPage - 1, $this->pages_count) ;$this_page++) {
 				$page = '';
-				if ($this_page != $this->first_link_page) {
-					$page .= $GLOBALS['STR_MULTIPAGE_SEPARATOR'];
-				}
 				if ($this_page == $this->page) {
-					$page .= '<b class="current_page_number">' . $this_page . '</b>';
+					$page .= '<span class="current_page_number">' . $this_page . '</span>';
 				} else {
 					$page .= '<a href="' . String::str_form_value($this->getPageURL($this_page)) . '">' . $this_page . '</a>';
 				}
-				$liens[]['page'] = $page;
+				$liens[] = array('i' => $this_page, 'page' => $page);
 			}
 		} elseif($show_page_if_only_one) {
 			// Si il n'y a pas plus d'une page, alors on affiche uniquement la page 1 en current non cliquable
-			$liens[]['page'] = '<b class="current_page_number">1</b>';
+			$this->first_link_page = 1;
+			$liens[]['page'] = array('i' => 1, 'page' => '<span class="current_page_number">1</span>');
 		}
-		// Si la requête ne donne pas lieu à plusieurs liens
+		$tpl->assign('first_link_page', $this->first_link_page);
 		$tpl->assign('loop', $liens);
+		$tpl->assign('STR_MULTIPAGE_SEPARATOR', $GLOBALS['STR_MULTIPAGE_SEPARATOR']);
 		$this->tpl_data = $tpl->fetch();
 	}
 
@@ -379,7 +389,7 @@ class Multipage {
 			} else {
 				$colspan_text = '';
 			}
-			if ($this->allow_get_sort && !empty($_GET['order']) && $key === $_GET['order']) {
+			if ($this->allow_get_sort && !empty($_GET[$this->order_get_variable]) && $key === $_GET[$this->order_get_variable]) {
 				$output .= '
 		<th class="menu center"' . $colspan_text . ' style="background-color:#5C5859">';
 			} else {
@@ -388,23 +398,23 @@ class Multipage {
 			}
 			if (!is_numeric($key) && $this->allow_get_sort) {
 				$link_url = $_SERVER['REQUEST_URI'];
-				if (empty($_GET['order'])) {
+				if (empty($_GET[$this->order_get_variable])) {
 					if (String::strpos($link_url, '?') === false) {
 						$link_url .= '?';
 					} else {
 						$link_url .= '&amp;';
 					}
-					$link_url .= 'order=' . $key;
+					$link_url .= $this->order_get_variable.'=' . $key;
 				} else {
-					$link_url = str_replace('order=' . $_GET['order'], 'order=' . $key, $link_url);
+					$link_url = str_replace($this->order_get_variable.'=' . $_GET[$this->order_get_variable], $this->order_get_variable.'=' . $key, $link_url);
 				}
-				if (!isset($_GET['sort'])) {
-					$url_desc = $link_url . '&amp;sort=desc';
-					$url_asc = $link_url . '&amp;sort=asc';
+				if (!isset($_GET[$this->sort_get_variable])) {
+					$url_desc = $link_url . '&amp;'.$this->sort_get_variable.'=desc';
+					$url_asc = $link_url . '&amp;'.$this->sort_get_variable.'=asc';
 				} else {
 					// The following code can be easily changed to be compatible with some simple URL Rewriting
-					$url_desc = str_replace('sort=' . $_GET['sort'], 'sort=desc', $link_url);
-					$url_asc = str_replace('sort=' . $_GET['sort'], 'sort=asc', $link_url);
+					$url_desc = str_replace($this->sort_get_variable.'=' . $_GET[$this->sort_get_variable], $this->sort_get_variable.'=desc', $link_url);
+					$url_asc = str_replace($this->sort_get_variable.'=' . $_GET[$this->sort_get_variable], $this->sort_get_variable.'=asc', $link_url);
 				}
 				$output .= '<a href="' . $url_desc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/desc.gif" width="7" height="7" alt="-" /></a> ' . $this_title . ' <a href="' . $url_asc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/up.gif" width="7" height="7" alt="+" /></a>';
 			} else {
@@ -424,32 +434,42 @@ class Multipage {
 	 */
 	function getOrderBy()
 	{
+		if (!empty($this->forced_before_first_order_by_string)) {
+			$order_by[] = $this->forced_before_first_order_by_string;
+		}
 		if ($this->forced_order_by_string === null) {
 			// Si $this->HeaderTitlesArray est défini avant appel à Query, ça permet de faire un test sur les colonnes de tri autorisées
 			// Sinon, on laisse essayer de faire le tri sur n'importe quelle colonne, ce qui est permet éventuellement un ORDER BY sur colonne qui n'existe pas et une erreur SQL
 			// => il vaut mieux toujours définir $this->HeaderTitlesArray juste après la création d'un objet Multipage
-			$columns = array_values(explode(',', str_replace(' ', '', ($this->allow_get_sort && !empty($_GET['order']) && (!isset($this->HeaderTitlesArray) || isset($this->HeaderTitlesArray[$_GET['order']]))?$_GET['order'] . ',':'') . $this->OrderDefault)));
+			$columns = array_values(explode(',', str_replace(' ', '', ($this->allow_get_sort && !empty($_GET[$this->order_get_variable]) && (!isset($this->HeaderTitlesArray) || isset($this->HeaderTitlesArray[$_GET[$this->order_get_variable]]))?$_GET[$this->order_get_variable] . ',':'') . $this->OrderDefault)));
 			foreach($columns as $this_column) {
 				if (!empty($this_column)) {
-					// En cas d'ambiguïté, l'on peut avoir la form : table.colonne
-					$this_order_by = '`' . str_replace('.', '`.`', word_real_escape_string($this_column)) . '` ';
-					if (!empty($_GET['sort']) && $this->allow_get_sort) {
-						$this_order_by .= String::substr(String::strtoupper(word_real_escape_string($_GET['sort'])), 0, 4);
+					// En cas d'ambiguïté, l'on peut avoir la forme : table.colonne
+					$this_order_by = '`' . str_replace('.', '`.`', word_real_escape_string($this_column)) . '`';
+					if(!empty($this->order_sql_prefix) && String::strpos($this_column, '.') === false) {
+						$this_order_by = word_real_escape_string($this->order_sql_prefix) . '.' . $this_order_by;
+					}
+					if (!empty($_GET[$this->sort_get_variable]) && $this->allow_get_sort) {
+						$this_sort = String::substr(String::strtoupper(word_real_escape_string($_GET[$this->sort_get_variable])), 0, 4);
 					} elseif (!empty($this->SortDefault)) {
-						$this_order_by .= String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
+						$this_sort = String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
 					} else {
-						$this_order_by .= 'ASC';
+						$this_sort = 'ASC';
+					}
+					if(in_array(String::strtolower($this_sort), array('asc', 'desc'))) {
+						$this_order_by .= ' ' . $this_sort;
 					}
 					$order_by[] = $this_order_by;
 				}
 			}
-			if (empty($order_by)) {
-				return null;
-			} else {
-				return 'ORDER BY ' . implode(', ', $order_by);
-			}
 		} elseif (!empty($this->forced_order_by_string)) {
-			return 'ORDER BY ' . $this->forced_order_by_string;
+			$order_by[] = $this->forced_order_by_string;
+		}
+		if (!empty($this->forced_second_order_by_string)) {
+			$order_by[] = $this->forced_second_order_by_string;
+		}
+		if (!empty($order_by)) {
+			return 'ORDER BY ' . implode(', ', $order_by);
 		} else {
 			return null;
 		}

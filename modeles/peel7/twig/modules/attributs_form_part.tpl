@@ -3,18 +3,17 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributs_form_part.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: attributs_form_part.tpl 38970 2013-11-24 18:53:25Z gboussin $
 #}
 {# On renvoie le formulaire sous forme de table ou de HTML simple #}
 {% if display_mode=='table' %}
-<p style="font-weight:bold; margin:2px">{{ STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS }}{{ STR_BEFORE_TWO_POINTS }}:</p>
 <table class="attributs_form_part">
 {% endif %}
 {% for a in attributes_text_array %}
@@ -30,16 +29,16 @@
 	<tr>
 		<td class="attribut-cell">
 		{% endif %}
-		{{ a.name }}{{ STR_BEFORE_TWO_POINTS }}:
+		<label for="{% if a.input_type=='radio' or a.input_type=='checkbox' %}{{ o.id }}{% else %}{{ a.input_id }}{% endif %}">{{ a.name }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 		{% if a.input_type=='select' %}
-			<select id="{{ a.input_id }}" name="{{ a.input_name }}" onchange="{{ a.onchange }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %}>
+			<select class="form-control" id="{{ a.input_id }}" name="{{ a.input_name }}" onchange="{{ a.onchange }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %}>
 			{% for o in a.options %}	
 				<option value="{{ o.value }}" {% if o.issel %} selected="selected"{% endif %}>{{ o.text }}</option>
 			{% endfor %}
 			</select>
 		{% elseif a.input_type=='radio' or a.input_type=='checkbox' %}
 			{% for o in a.options %}
-			<br /><input type="{{ a.input_type }}" value="{{ o.value }}" id="{{ o.id }}" name="{{ o.name }}" {% if o.issel %} checked="checked"{% endif %} onclick="{{ o.onclick }}" /><label for="{{ o.id }}">{{ o.text }}</label>
+			{% if a.max_label_length>=5 %}<br />{% endif %}<input type="{{ a.input_type }}" value="{{ o.value }}" id="{{ o.id }}" name="{{ o.name }}" {% if o.issel %} checked="checked"{% endif %} onclick="{{ o.onclick }}" /><label for="{{ o.id }}">{{ o.text }}</label>
 			{% endfor %}
 		{% elseif a.input_type %}
 			<input id="{{ a.input_id }}" type="{{ a.input_type }}" name="{{ a.input_name }}" value="{{ a.input_value }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %} />

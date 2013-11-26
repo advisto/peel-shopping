@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: oubli_mot_passe.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
@@ -24,7 +24,7 @@ $output = '';
 $mode = 'filing_email';
 
 if (!empty($_POST['token'])) {
-	if (!verify_token('oubli_mot_passe', 60, false)) {
+	if (!verify_token('oubli_mot_passe', 120, false)) {
 		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	}
 	// vérification de la présence de l'email dans le formulaire de demande de renouvellement.

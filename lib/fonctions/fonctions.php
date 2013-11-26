@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37949 2013-08-29 13:14:10Z gboussin $
+// $Id: fonctions.php 39009 2013-11-25 19:48:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -322,10 +322,10 @@ function charge_article($id, $show_all_etat_if_admin = true)
  *
  * @param float $remise_valeur
  * @param float $remise_percent
- * @param boolean $with_taxes
+ * @param boolean $is_remise_valeur_including_taxe
  * @return
  */
-function get_discount_text($remise_valeur, $remise_percent, $with_taxes)
+function get_discount_text($remise_valeur, $remise_percent, $is_remise_valeur_including_taxe)
 {
 	$remise_displayed = array();
 	$remise_valeur = floatval($remise_valeur);
@@ -334,10 +334,10 @@ function get_discount_text($remise_valeur, $remise_percent, $with_taxes)
 		$remise_displayed[] = fprix($remise_valeur, true, $GLOBALS['site_parameters']['code'], false);
 	}
 	if (!empty($remise_percent)) {
-		$remise_displayed[] = sprintf("%0.2f", $remise_percent) . '% ' . ($with_taxes ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']);
+		$remise_displayed[] = sprintf("%0.2f", $remise_percent) . '% ' . ($is_remise_valeur_including_taxe ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']);
 	}
 
-	return implode(' - ', $remise_displayed);
+	return implode(' / ', $remise_displayed);
 }
 
 /**
@@ -352,29 +352,6 @@ function get_tag_analytics()
 	} else {
 		return false;
 	}
-}
-
-/**
- * Détecte si le client est un robot 'autorisé'
- *
- * @param array $ip IP public sous la forme 127000000000
- * @return boolean oui ou non robot
- */
-function isSearchBot($ip)
-{
-	// Pour pouvoir comparer les chaines de caractères avec le résultat de getPublicAndPrivateIP() au format : 127000000001,
-	// mettre les IP avec des 0 pour compléter si <100 ou <10 !!
-	$good_bots = array('193.218.115.006', '195.101.094.   ', '204.095.098.   ', '209.249.067.1  ', '209.073.164.050', '210.059.144.149',
-		'212.127.141.180', '213.073.184.0  ', '216.239.046.0  ', '216.243.113.001', '216.039.048.164', '216.039.048.058',
-		'216.039.048.082', '216.039.050.   ', '217.205.060.225', '218.145.025.   ', ' 62.119.021.157', ' 62.212.117.198',
-		' 64.241.242.177', ' 64.241.243.065', ' 64.068.082.0  ', ' 64.068.084.0  ', ' 64.068.085.0  ', ' 65.214.036.   ',
-		' 65.214.038.010', ' 65.054.188.   ', ' 66.196.072.   ', ' 66.196.072.   ', ' 66.196.090.   ', ' 66.237.060.022');
-	foreach ($good_bots as $bot_ip) {
-		if (String::strpos($ip, str_replace(array(' ', '.00', '.0'), array('', '.', '.'), $bot_ip)) !== false) {
-			return true;
-		}
-	}
-	return false;
 }
 
 /**
@@ -398,16 +375,16 @@ function get_modules_array($only_active = false, $location = null, $technical_co
 		$modules = array();
 		$sql = 'SELECT *
 			FROM peel_modules
-			WHERE ' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?'(':'') . '(1' . ($technical_code ? ' AND technical_code="' . nohtml_real_escape_string($technical_code) . '"' : '') . ($location ? ' AND location="' . nohtml_real_escape_string($location) . '" AND technical_code!="ariane"' : '') . ')' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ? ' OR (technical_code="caddie" AND location="right")' : '') . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?')':'') . ($only_active ? ' AND etat="1"' : '') . '
+			WHERE ' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?'(':'') . '(1' . ($technical_code ? ' AND technical_code="' . nohtml_real_escape_string($technical_code) . '"' : '') . ($location ? ' AND location="' . nohtml_real_escape_string($location) . '" AND technical_code!="ariane"' : '') . ')' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ? ' OR (technical_code="caddie" AND location="below_middle")' : '') . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?')':'') . ($only_active ? ' AND etat="1"' : '') . '
 			ORDER BY position, id';
 
 		$query = query($sql);
 		while ($this_module = fetch_assoc($query)) {
 			// Traitement spécifique
 			if (vn($GLOBALS['page_columns_count']) == 2 && $this_module['technical_code'] == 'caddie') {
-				if ($this_module['location'] == 'right') {
+				if ($this_module['location'] == 'below_middle') {
 					// On déplace le module de droite vers le haut pour l'afficher quand même
-					if (empty($location) || $location == 'header') {
+					if ((empty($location) || $location == 'header') && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 						$this_module['location'] = 'header';
 						$this_module['display_mode'] = '';
 					} else {
@@ -487,17 +464,17 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				// Le caddie est affiché en mode condensé si dans le header, ou détaillé sinon
 				$this_module_output = affiche_mini_caddie($this_module['location'] != 'header', true);
 			} elseif ($this_module['technical_code'] == 'account') {
-				$this_module_output = affiche_compte(true);
+				$this_module_output = affiche_compte(true, $this_module['location']);
 			} elseif ($this_module['technical_code'] == 'best_seller') {
 				if (is_best_seller_module_active ()) {
-					$this_module_output = affiche_best_seller_produit_colonne(true);
+					$this_module_output = affiche_best_seller_produit_colonne(true, $this_module['location']);
 				}
 			} elseif ($this_module['technical_code'] == 'brand') {
 				// affiche du block marque
-				$this_module_output = get_brand_link_html(null, true, true);
+				$this_module_output = get_brand_link_html(null, true, true, $this_module['location']);
 			} elseif ($this_module['technical_code'] == 'last_views') {
 				if (is_last_views_module_active ()) {
-					$this_module_output = affiche_last_views(true);
+					$this_module_output = affiche_last_views($this_module['location']);
 				}
 			} elseif ($this_module['technical_code'] == 'quick_access') {
 				if (function_exists('get_quick_access')) {
@@ -525,6 +502,8 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					$page_type = 'ad_page_details';
 				} elseif (defined('IN_SEARCH')) {
 					$page_type = 'search_engine_page';
+				} elseif (defined('IN_AD_CREATION')) {
+					$page_type = 'ad_creation_page';
 				} else {
 					$page_type = 'other_page';
 				}
@@ -535,7 +514,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'menu') {
 				$this_block_style = ' ';
 				foreach ($modules_array as $this_module2) {
-					if (!is_peelfr_module_active() && $this_module2['technical_code'] == 'caddie' && $this_module['location'] == 'header') {
+					if (!is_peelfr_module_active() && $this_module2['technical_code'] == 'caddie' && $this_module['location'] == 'header' && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 						$this_block_style = ' style="width:80%"';
 					}
 				}
@@ -588,7 +567,11 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					if (!empty($this_module['sliding_mode'])) {
 						$output .= affiche_block($this_module['display_mode'], $this_module['location'], $this_module['technical_code'], vb($this_module['title_' . $_SESSION['session_langue']]), $this_module_output, $this_module['display_mode'] . '_' . $this_module['technical_code'], $this_block_style, true, true);
 					} else {
-						$output .= '<div class="' . $this_module['display_mode'] . ' ' . $this_module['location'] . '_basicblock ' . $this_module['location'] . '_' . $this_module['technical_code'] . '  ' . $this_module['technical_code'] . '_' . $_SESSION['session_langue'] . '"' . $this_block_style . '>' . $this_module_output . '</div>';
+						$this_class = $this_module['display_mode'] . ' ' . $this_module['location'] . '_basicblock ' . $this_module['location'] . '_' . $this_module['technical_code'] . '  ' . $this_module['technical_code'] . '_' . $_SESSION['session_langue'];
+						if (($this_module['display_mode'] == 'sideblocktitle' || $this_module['display_mode'] == 'sideblock') && $this_module['location'] == 'footer') {
+							$this_class .= ' col-sm-4 col-md-3 footer_col';
+						}
+						$output .= '<div class="' . $this_class . '"' . $this_block_style . '>' . $this_module_output . '</div>';
 					}
 				}
 			}
@@ -971,7 +954,7 @@ function set_paiement(&$frm)
 function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false)
 {
 	$output = '';
-	$where = 'WHERE 1';
+	$where = 'WHERE (totalmin<=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmin=0) AND (totalmax>=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmax=0)';
 	$payment_complement_informations = '';
 
 	if (is_payment_by_product_module_active ()) {
@@ -1067,6 +1050,211 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 	$tpl->assign('options', $tpl_options);
 	$output .= $tpl->fetch();
 	return $output;
+}
+
+/**
+ * Chargement du chargement des scripts.
+ * Possibilités de la mise en chargement des fichiers javascripts dans le code : $GLOBALS['xxx'][] = 'filename.js'  avec xxx dans la liste suivante :
+ * - 'js_files' : sera minifié (si autorisé par $minify = true) avec les autres fichiers du tableau, dans l'ordre des clés du tableau + chargé en asynchrone (si autorisé par $async = true) 
+ * - 'js_files_pageonly' : sera minifié (si autorisé par $minify = true) si autorisé avec les autres fichiers du tableau, dans l'ordre des clés du tableau (si autorisé par $async = true)
+ *   => cela permet d'avoir un minified général pour le site, et un minified pour la page => évite de recharger deux fois ce qui est général au site
+ * - 'js_files_nominify' : le fichier ne sera pas fusionné avec d'autres, mais pourra être chargé en asynchrone (si autorisé par $async = true) 
+ * - 'js_files_noasync' : sera minifié (si autorisé par $minify = true) avec les autres fichiers du tableau, dans l'ordre des clés du tableau, mais pas chargé en asynchrone
+ * - 'js_files_nominify_noasync' : ne sera ni minifié, ni chargé en asyncrone = balise script normale sans modification
+ * NB : Pour le chargement asynchrone des javascripts, contrairement à ce qui est proposé par Google, on n'attend pas le onload mais le DOM loaded de sorte qu'une iframe qui tarde à charger n'empêche pas le chargement des scripts
+ *
+ * @param boolean $async
+ * @param boolean $minify
+ * @param boolean $output_only_script_loading
+ * @param array $js_filenames_array
+ * @return
+ */
+function get_javascript_output($async = false, $minify = false, $output_only_script_loading = false, $js_filenames_array = array('js_files', 'js_files_pageonly', 'js_files_nominify', 'js_files_noasync', 'js_files_nominify_noasync'))
+{
+	static $already_loaded = false;
+	if($already_loaded) {
+		// Si on affiche du javascript en haut de page, et qu'il y a quand même des scripts pour le bas de page, on ne minify pas le bas de page
+		$minify = false;	
+	}
+	$already_loaded = true;
+	$js_content = '';
+	$output = '';
+	foreach($js_filenames_array as $this_js_array_name) {
+		if(!empty($GLOBALS[$this_js_array_name])) {
+			ksort($GLOBALS[$this_js_array_name]);
+			if(count($GLOBALS[$this_js_array_name])>1 && $minify && String::strpos($this_js_array_name, 'nominify') === false) {
+				$GLOBALS[$this_js_array_name] = get_minified_src($GLOBALS[$this_js_array_name], 'js', 10800);
+			}elseif(!empty($_GET['update']) && $_GET['update'] == 1) {
+				foreach($GLOBALS[$this_js_array_name] as $this_key => $this_js_file) {
+					$GLOBALS[$this_js_array_name][$this_key] = $this_js_file . (String::strpos($this_js_file, '?')!==false?'&':'?') . time();
+				}
+			}
+		}
+	}
+	if(!empty($GLOBALS['js_ready_content_array'])) {
+		if(!$async) {
+			$GLOBALS['js_content_array'][] = '
+	(function($) {
+		$(document).ready(function() {
+			' . implode("\n", $GLOBALS['js_ready_content_array']) . '
+		});
+	})(jQuery);
+	';
+		} else {
+			// On a déjà attendu le DOM loaded avant, pas besoin de réattendre le ready (qui se produit au onload dans Firefox)
+			$GLOBALS['js_content_array'][] = '
+	(function($) {
+			' . implode("\n", $GLOBALS['js_ready_content_array']) . '
+	})(jQuery);
+	';
+		}
+	}
+	if(!empty($GLOBALS['js_content_array'])) {
+		$js_content .= implode("\n", $GLOBALS['js_content_array']);
+	}
+	if(!$async) {
+		$noasync_js_filenames_array = $js_filenames_array;
+	} else {
+		foreach($js_filenames_array as $this_key => $this_js_array_name) {
+			if(!empty($GLOBALS[$this_js_array_name]) && String::strpos($this_js_array_name, 'noasync') !== false) {
+				$noasync_js_filenames_array[] = $this_js_array_name;
+				unset($js_filenames_array[$this_key]);
+			}
+		}
+	}
+	if(!empty($noasync_js_filenames_array)) {
+		foreach($noasync_js_filenames_array as $this_js_array_name) {
+			if(!empty($GLOBALS[$this_js_array_name])) {
+				foreach($GLOBALS[$this_js_array_name] as $js_href) {
+					$output .= '<script src="' . String::str_form_value($js_href) . '"></script>
+';
+				}
+			}
+			if($output_only_script_loading) {
+				$GLOBALS[$this_js_array_name] = array();
+			}
+		}
+	}
+	if(!$async) {
+		if($output_only_script_loading) {
+			return $output;
+		}
+	}
+	if($async) {
+		krsort($js_filenames_array);
+		foreach($js_filenames_array as $this_js_array_name) {
+			if(!empty($GLOBALS[$this_js_array_name])) {
+				krsort($GLOBALS[$this_js_array_name]);
+				foreach($GLOBALS[$this_js_array_name] as $this_filename) {
+					// On appelle le javascript de manière récursive, si plusieurs fichiers doivent être chargés avant l'exécution du script en ligne
+					if(String::substr($this_filename, 0, 2) == '//') {
+						// Gestion des chemins de fichiers http/https automatiques
+						if(strpos($GLOBALS['wwwroot'], 'https') === 0) {
+							$this_filename = 'https:'.$this_filename;
+						} else {
+							$this_filename = 'http:'.$this_filename;
+						}
+					}
+					$js_content = '
+		loadScript("'.String::html_entity_decode($this_filename).'", function(){
+				'.$js_content.'
+			});
+';
+				}
+			}
+		}
+		$js_content = '
+	function loadScript(url,callback){
+		var script = document.createElement("script");
+		if(typeof document.attachEvent === "object"){
+			// IE<=8
+			script.onreadystatechange = function(){
+				//once the script is loaded, run the callback
+				if (script.readyState === "loaded" || script.readyState=="complete"){
+					script.onreadystatechange = null;
+					if (callback){callback()};
+				};
+			};  
+		} else {
+			// All other browsers
+			script.onload = function(){
+				//once the script is loaded, run the callback
+				script.onload = null;
+				if (callback){callback()};
+			};
+		};
+		script.src = url;
+		document.getElementsByTagName("head")[0].appendChild(script);
+	};
+	function downloadJSAtOnload() {
+		if(async_launched) {
+			return false;
+		}
+		async_launched = true;
+		' . $js_content . '
+	}
+	// Different browsers
+	var async_launched = false;
+	if(document.addEventListener) document.addEventListener("DOMContentLoaded", downloadJSAtOnload, false);
+	else if (window.addEventListener) window.addEventListener("load", downloadJSAtOnload, false);
+	else if (window.attachEvent) window.attachEvent("onload", downloadJSAtOnload);
+	else window.onload = downloadJSAtOnload;
+	// Si onload trop retardé par chargement d\'un site extérieur
+	setTimeout(downloadJSAtOnload, 10000);
+	';
+	}
+	if(!empty($js_content)) {
+		$output .= '
+		<script><!--//--><![CDATA[//><!--
+			' . $js_content . '
+		//--><!]]></script>
+';
+	}
+	foreach($js_filenames_array as $this_js_array_name) {
+		$GLOBALS[$this_js_array_name] = array();
+	}
+	$GLOBALS['js_content_array'] = array();
+	$GLOBALS['js_ready_content_array'] = array();
+	return $output;
+}
+
+/**
+ * get_css_files_to_load()
+ *
+ * @param boolean $minify
+ * @return
+ */
+function get_css_files_to_load($minify = false)
+{
+	ksort($GLOBALS['css_files']);
+	$GLOBALS['css_files'] = array_unique($GLOBALS['css_files']);
+	if($minify) {
+		$GLOBALS['css_files'] = get_minified_src($GLOBALS['css_files'], 'css', 10800);
+	} elseif(!empty($_GET['update']) && $_GET['update'] == 1) {
+		foreach($GLOBALS['css_files'] as $this_key => $this_css_file) {
+			$GLOBALS['css_files'][$this_key] = $this_css_file . (String::strpos($this_css_file, '?')!==false?'&':'?') . time();
+		}
+	}
+	$temp = $GLOBALS['css_files'];
+	$GLOBALS['css_files'] = array();
+	return $temp;
+}
+
+/**
+ * Envoie les headers avant l'envoi du HTML
+ *
+ * @param string $page_encoding
+ * @return
+ */
+function output_general_http_header($page_encoding = null) {
+	if(empty($page_encoding)) {
+		$page_encoding = GENERAL_ENCODING;
+	}
+	header('Content-type: text/html; charset=' . $page_encoding);
+	if (!empty($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')!== false) {
+		// Demande à IE de ne pas se mettre dans un mode de compatibilité => permet de bénéficier des dernières avancées de la version utilisée
+		header('X-UA-Compatible: IE=edge,chrome=1');
+	}
 }
 
 /**
@@ -1326,12 +1514,6 @@ function get_current_generic_url()
 				// Page de boutique non verified
 				$excluded_get[] = 'bt';
 				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.String::rawurlencode(vn($_GET['page'])), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-[PAGE]', $uri);
-			} elseif (is_annonce_module_active() && (String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/' . $GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'] . '-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html') || String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/' . $GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'] . '-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(urlencode(vb($_GET['search']))) . '.html'))) {
-				$excluded_get[] = 'search';
-				// Si l'URL contient un +, pas encodé ou encodé en %2B, il faut le gérer quoiqu'il arrive => on a deux possibilités dans le str_replace
-				// La troisième est là pour couvrir des URL du type : /acheter/recherche-fournisseur-54-pc+.html?search=pc+
-				// Rappel : dans une URL réécrite, la partie en dehors du GET est gérée du type String::rawurlencode (et + vaut normalement %2B), et la partie GET est gérée par urlencode (et espace vaut +)
-				$uri = str_replace(array('-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html', '-' . vn($_GET['page']) . '-' . vb($_GET['search']) . '.html', '-' . vn($_GET['page']) . '-' . urlencode(vb($_GET['search'])) . '.html'), '-[PAGE]-' . String::rawurlencode(vb($_GET['search'])) . '.html', $uri);
 			} elseif (String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/produits/' . String::rawurlencode(vb($_GET['search'])) . '.html')) {
 				$excluded_get[] = 'search';
 				$uri = str_replace('.html', '-[PAGE].html', $uri);
@@ -1341,6 +1523,19 @@ function get_current_generic_url()
 			} elseif (is_annonce_module_active() && !empty($_GET['country']) && strpos(get_current_url(false, true),'-' . String::rawurlencode(vb($_GET['country'])) . '.html') !== false) {
 				// Page de liste des vitrines
 				$excluded_get[] = 'country';
+			}
+			if (is_annonce_module_active()) {
+				foreach(array('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', '/kopen/supplier-research-', '/kaufen/supplier-research-', '/buy/supplier-research-', '/buy/supplier-research-', '/acheter/recherche-fournisseur-', '/comprar/busqueda-proveedor-') as $this_url_rewriting_main_expression) {
+					if(    String::rawurldecode(get_current_url(false, true)) == String::rawurldecode($this_url_rewriting_main_expression . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html')
+						|| String::rawurldecode(get_current_url(false, true)) == String::rawurldecode($this_url_rewriting_main_expression . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(urlencode(vb($_GET['search']))) . '.html')) {
+						$excluded_get[] = 'search';
+						// Si l'URL contient un +, pas encodé ou encodé en %2B, il faut le gérer quoiqu'il arrive => on a deux possibilités dans le str_replace
+						// La troisième est là pour couvrir des URL du type : /acheter/recherche-fournisseur-54-pc+.html?search=pc+
+						// Rappel : dans une URL réécrite, la partie en dehors du GET est gérée du type String::rawurlencode (et + vaut normalement %2B), et la partie GET est gérée par urlencode (et espace vaut +)
+						$uri = str_replace($this_url_rewriting_main_expression, '/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', str_replace(array('-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html', '-' . vn($_GET['page']) . '-' . vb($_GET['search']) . '.html', '-' . vn($_GET['page']) . '-' . urlencode(vb($_GET['search'])) . '.html'), '-[PAGE]-' . String::rawurlencode(vb($_GET['search'])) . '.html', $uri));
+						break;
+					}
+				}
 			}
 			// Compatibilité anciennes URL
 			$excluded_get[] = 'subdomain';
@@ -1431,11 +1626,12 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 			$GLOBALS['wwwroot_in_admin'] = $GLOBALS['wwwroot'];
 		}
 		$GLOBALS['administrer_url'] = $GLOBALS['wwwroot_in_admin'] . "/" . vb($GLOBALS['site_parameters']['backoffice_directory_name']);
-		$GLOBALS['repertoire_css'] = $GLOBALS['wwwroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . "/css";
-		$GLOBALS['repertoire_images'] = $GLOBALS['wwwroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . "/images";
-		$GLOBALS['repertoire_upload'] = $GLOBALS['wwwroot'] . "/upload";
-		$GLOBALS['repertoire_mp3'] = $GLOBALS['wwwroot'] . "/mp3";
-		$GLOBALS['repertoire_mp3_extrait'] = $GLOBALS['wwwroot'] . "/mp3_extrait";
+		// Attention : $GLOBALS['repertoire_modele'] est avec dirroot et non pas wwwroot, n'est pas forcément encore défini quand on passe ici, il ne faut donc pas l'utiliser
+		$GLOBALS['repertoire_css'] = get_wwwroot_cdn('repertoire_css') . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . "/css";
+		$GLOBALS['repertoire_images'] = get_wwwroot_cdn('repertoire_images') . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . "/images";
+		$GLOBALS['repertoire_upload'] = get_wwwroot_cdn('repertoire_upload') . "/upload";
+		$GLOBALS['repertoire_mp3'] = get_wwwroot_cdn('repertoire_mp3') . "/mp3";
+		$GLOBALS['repertoire_mp3_extrait'] = get_wwwroot_cdn('repertoire_mp3_extrait') . "/mp3_extrait";
 		// Paramétrage des formats de date pour les fonctions strftime()
 		setlocale(LC_TIME, String::strtolower($lang) . '_' . String::strtoupper($lang) . '.UTF8', String::strtolower($lang) . '.UTF8', String::strtolower($lang) . '_' . String::strtoupper($lang), String::strtolower($lang));
 		// Déclaration du nom de la boutique
@@ -1533,6 +1729,29 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 				'pays' => 'STR_ERR_COUNTRY',
 				'telephone' => 'STR_ERR_TEL');
 		}
+		if (preg_match('/msie 6./i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 7./i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8./i', $_SERVER['HTTP_USER_AGENT'])) {
+			$GLOBALS['site_parameters']['used_uploader'] = 'html';
+		}
+		if (preg_match('/msie 6./i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 7./i', $_SERVER['HTTP_USER_AGENT'])) {
+			// NB : aucun support de IE6 ou 7, mais ça permet tout de même d'accéder à la homepage de l'administration sans bug javascript
+			$GLOBALS['site_parameters']['chart_product'] = 'flash';
+		}
+	}
+}
+
+/**
+ * Renvoyer un CDN si défini, ou à défaut wwwroot
+ *
+ * @param string $subject
+ * @return
+ */
+function get_wwwroot_cdn($subject) {
+	if(!empty($GLOBALS['site_parameters']['cdn_specific_domains_array']) && !empty($GLOBALS['site_parameters']['cdn_specific_domains_array'][$subject])) {
+		return $GLOBALS['site_parameters']['cdn_specific_domains_array'][$subject];
+	} else	if(!empty($GLOBALS['site_parameters']['cdn_generic_domain'])) {
+		return $GLOBALS['site_parameters']['cdn_generic_domain'];
+	} else {
+		return $GLOBALS['wwwroot'];
 	}
 }
 
@@ -1608,6 +1827,9 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 			}
 		}
 	}
+	if ((defined('IN_PEEL_ADMIN') || IN_INSTALLATION) && !empty($GLOBALS['site_parameters']['template_directory_forced_in_admin'])) {
+		$GLOBALS['site_parameters']['template_directory'] = $GLOBALS['site_parameters']['template_directory_forced_in_admin'];
+	}
 }
 
 /**
@@ -1653,7 +1875,6 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 {
 	$sql_cond_array = array();
 	$titre = '';
-	$limit = '';
 	$affiche_filtre = '';
 	$sql_inner = '';
 	$params_list = array();
@@ -1716,7 +1937,6 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	} elseif ($type == 'special') {
 		$sql_cond_array[] = "p.on_special='1'";
 		$titre = $GLOBALS['STR_SPECIAL'];
-		$display_multipage_template_name = 'light';
 	} elseif ($type == 'suggest') {
 		$sql_cond_array[] = "p.prix>='" . nohtml_real_escape_string($condition_value1) . "'";
 		$titre = $GLOBALS['STR_OUR_SUGGEST'];
@@ -1739,6 +1959,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$sql_cond_array[] = "p.on_check='1'";
 		$titre = $GLOBALS['STR_CHEQUE_CADEAU'];
 	} elseif ($type == 'associated_product') {
+		$nb_par_page = '*';
 		$infos = array();
 		$commande_id_array = array();
 		// On vérifie si la case remontée de produit a été cochée et qu'un nombre de produits à afficher a bien été saisi
@@ -1760,7 +1981,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 				$sql_inner .= " INNER JOIN peel_commandes_articles pca ON pca.produit_id = p.id";
 				$sql_cond_array[] = "pca.commande_id IN ('" . implode("','", nohtml_real_escape_string($commande_id_array)) . "')";
 				$sql_cond_array[] = "p.id!=" . intval($reference_id);
-				$limit = "LIMIT 0, " . intval($infos['nb_ref_produits']);
+				$nb_par_page = intval($infos['nb_ref_produits']);
 			} else { 
 				// Dans le cas contraire, on affiche les références produit associées
 				$sql_cond_array[] = "pr.produit_id = '" . intval($reference_id) . "'";
@@ -1808,36 +2029,33 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	if (!empty($additionnal_sql_having)) {
 		$sql .= ' ' . $additionnal_sql_having;
 	}
-	$sql .= '
-		ORDER BY ';
-	if (vb($GLOBALS['site_parameters']['category_count_method']) == 'global' && !empty($condition_value1)) {
-		$sql .= 'IF(pc.categorie_id="'.intval($condition_value1).'", 1, 0) DESC, ';
-	}
-	if ($type == 'save_cart') {
-		$sql .= 'save_cart_id DESC, ';
-	}
-	$sql .= 'p.`';
-	if (isset($_GET['tri'])) {
-		if (!in_array($_GET['tri'], array('nom_' . $_SESSION['session_langue'], 'prix'))) {
-			$_GET['tri'] = 'nom_' . $_SESSION['session_langue'];
-		}
-		$sql .= word_real_escape_string($_GET['tri']) . '` ' ;
-	} else {
-		$sql .= 'position` ' ;
-	}
-	if (isset($_GET['sort'])) {
-		$sql .= word_real_escape_string($_GET['sort']);
-	} else {
-		$sql .= 'ASC';
-	}
-	$sql .= ', p.id DESC ' . $limit;
+
 	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
 	if ($type == 'special') {
 		$Links = new Multipage($sql, 'home', $nb_par_page, 7, 0, $always_show_multipage_footer);
 	} elseif ($type == 'associated_product') {
-		$Links = new Multipage($sql, 'affiche_produits_reference', '*', 7, 0, $always_show_multipage_footer);
+		$Links = new Multipage($sql, 'affiche_produits_reference', $nb_par_page, 7, 0, $always_show_multipage_footer);
 	} else {
 		$Links = new Multipage($sql, 'affiche_produits', $nb_par_page, 7, 0, $always_show_multipage_footer, $display_multipage_template_name);
+	}
+	if (!empty($_GET['tri']) && !in_array($_GET['tri'], array('nom_' . $_SESSION['session_langue'], 'prix'))) {
+		// Filtrage des colonnes de tri possibles
+		$_GET['tri'] = 'nom_' . $_SESSION['session_langue'];
+	}
+	$Links->order_get_variable = 'tri';
+	$Links->sort_get_variable = 'sort';
+	$Links->OrderDefault = 'position';
+	$Links->SortDefault = 'ASC';
+	$Links->forced_second_order_by_string = 'p.id DESC';
+	$Links->forced_before_first_order_by_string = null;
+	if (vb($GLOBALS['site_parameters']['category_count_method']) == 'global' && !empty($condition_value1)) {
+		$Links->forced_before_first_order_by_string .= 'IF(pc.categorie_id="'.intval($condition_value1).'", 1, 0) DESC';
+	}
+	if ($type == 'save_cart') {
+		if(!empty($Links->forced_before_first_order_by_string)) {
+			$Links->forced_before_first_order_by_string .= ', ';
+		}
+		$Links->forced_before_first_order_by_string .= 'save_cart_id DESC';
 	}
 	$params_list['nb_colonnes'] = $nb_colonnes;
 	$params_list['Links'] = $Links;
@@ -1905,24 +2123,30 @@ if (!function_exists('isPublicIP')) {
 /**
  * Renvoie si le visiteur est un robot ou non. Cette fonction n'a pas pour vocation à être exhaustive mais à couvrir les cas les plus courants
  *
+ * @param mixed $ip
  * @return
  */
-function is_user_bot()
+function is_user_bot($ip = null, $user_agent = null)
 {
 	static $result;
+	if($ip === null) {
+		$ip = vb($_SERVER['REMOTE_ADDR']);
+	}
+	if($user_agent === null) {
+		$user_agent = vb($_SERVER['HTTP_USER_AGENT']);
+	}
 	if(!isset($result)){
 		// Premier test rapide sur user_agent
 		$result = false;
-		$lower_user_agent = String::strtolower($_SERVER['HTTP_USER_AGENT']);
-		if(!empty($_SERVER['HTTP_USER_AGENT'])) {
-			foreach(array('mediapartners-google', 'googlebot', 'feedfetcher', 'slurp', 'bingbot', 'msnbot', 'voilabot', 'baiduspider', 'genieo', 'sindup', 'ahrefsbot', 'yandex', 'spider', 'robot', '/bot', 'crawler', 'netvibes') as $this_name) {
+		$lower_user_agent = String::strtolower($user_agent);
+		if(!empty($user_agent)) {
+			foreach(array('mediapartners-google', 'googlebot', 'google page speed', 'feedfetcher', 'slurp', 'bingbot', 'msnbot', 'voilabot', 'baiduspider', 'genieo', 'sindup', 'ahrefsbot', 'yandex', 'spider', 'robot', '/bot', 'crawler', 'netvibes') as $this_name) {
 				$result = $result || String::strpos($lower_user_agent, $this_name) !== false;
 			}
 		}
 		if(!$result) {
 			// Second test un peu plus lent sur IP
 			// Cette liste d'IP n'est pas exhaustive et reprséente des IP de moteurs de recherche
-			$ip = vb($_SERVER['REMOTE_ADDR']);
 			$good_bots = array('62.119.21.157',
 				'62.212.117.198',
 				'64.4.8.', '64.62.0.', '64.68.82.', '64.68.84.', '64.68.85.',
@@ -2158,13 +2382,13 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 
 		if (move_uploaded_file($file_infos['tmp_name'], $path . $the_new_file_name)) {
 			// Le fichier est maintenant dans le répertoire des téléchargements
-			//  @chmod ($path . '/' . $the_new_file_name, 0644);
+			//  @chmod ($path . $the_new_file_name, 0644);
 			if (!empty($GLOBALS['site_parameters']['extensions_valides_image']) && in_array($extension, $GLOBALS['site_parameters']['extensions_valides_image']) && !empty($image_max_width) && !empty($image_max_height)) {
 				// Les fichiers image sont convertis en jpg uniquement si nécessaire - sinon on garde le fichier d'origine
 				$the_new_jpg_name = $new_file_name_without_extension . '.jpg';
 				// On charge l'image, et si sa taille est supérieure à $destinationW ou $destinationH, ou si elle fait plus de $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'] octets, on doit la régénèrer (sinon on la garde telle qu'elle était)
 				// Si on est dans le cas où on la regénère, on la convertit en JPEG à qualité $GLOBALS['site_parameters']['jpeg_quality'] % (par défaut dans PHP c'est 75%, et dans PEEL on utilise 88% par défaut) et on la sauvegarde sous son nouveau nom
-				$result = image_resize($path . '/' . $the_new_file_name, $path . '/' . $the_new_jpg_name, $image_max_width, $image_max_height, false, true, $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'], $GLOBALS['site_parameters']['jpeg_quality']);
+				$result = image_resize($path . $the_new_file_name, $path . $the_new_jpg_name, $image_max_width, $image_max_height, false, true, $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'], $GLOBALS['site_parameters']['jpeg_quality']);
 				if (!empty($result)) {
 					return basename($result);
 				} else {
@@ -2327,19 +2551,30 @@ function http_download_and_die($filename_with_realpath, $serve_download_with_php
  * @param boolean $return_only_domains
  * @return
  */
-function get_site_domain($return_only_domains = false)
+function get_site_domain($return_only_domains = false, $domain = null, $strip_subdomain = true)
 {
-	$temp = explode('.', $_SERVER["HTTP_HOST"]);
-	if(count($temp)>1 && (count($temp)!=4 || !is_numeric(str_replace('.','',$_SERVER["HTTP_HOST"])))) {
+	if (empty($domain)) {
+		$domain = $_SERVER["HTTP_HOST"];
+	} else {
+		$domain = str_replace(array('http://', 'https://', '://', '//'), '', $domain);
+		$temp = explode('/', $domain, 2);
+		$domain = $temp[0];
+	}
+	$temp = explode('.', $domain);
+	if(count($temp)>1 && (count($temp)!=4 || !is_numeric(str_replace('.','',$domain)))) {
 		// Ce n'est pas une IP, ni localhost ou un nom de machine => c'est un domaine avec potentiellement un (sous-)sous-domaine
 		if(in_array($temp[count($temp)-2], array('com', 'org', 'co'))) {
 			// Domaine en .co.uk, .com.sb, .org.uk, etc.
 			$temp[count($temp)-2] = $temp[count($temp)-2] . '.' . $temp[count($temp)-1];
 			unset($temp[count($temp)-1]);
 		}
-		return $temp[count($temp)-2].'.'.$temp[count($temp)-1];
+		if ($strip_subdomain) {
+			return $temp[count($temp)-2].'.'.$temp[count($temp)-1];
+		} else {
+			return $temp[count($temp)-3].'.'.$temp[count($temp)-2].'.'.$temp[count($temp)-1];
+		}
 	} elseif(!$return_only_domains) {
-		return $_SERVER["HTTP_HOST"];
+		return $domain;
 	} else {
 		return false;
 	}
@@ -2512,6 +2747,7 @@ if (!function_exists('desinscription_newsletter')) {
 function close_page_generation($html_page = true)
 {
 	$output = '';
+
 	if (is_module_banner_active()) {
 		update_viewed_banners();
 	}
@@ -2523,8 +2759,7 @@ function close_page_generation($html_page = true)
 		efface_stock_perime();
 	}
 	// Si on veut forcer à chaque chargement de page la mise à jour des droits des utilisateurs, décommenter la suite
-	/*
-	if(est_identifie()) {
+	if(!empty($GLOBALS['site_parameters']['force_systematic_user_session_reload']) && est_identifie()) {
 		$q=query('SELECT priv
 			FROM peel_utilisateurs
 			WHERE id_utilisateur = "'.intval($_SESSION['session_utilisateur']['id_utilisateur']).'"');
@@ -2533,7 +2768,6 @@ function close_page_generation($html_page = true)
 			$_SESSION['session_utilisateur']['priv']='util';
 		}
 	}
-	*/
 	// Evite de devoir lancer un cron pour optimisations et nettoyages divers
 	// On fait des tests séparés pour ne pas tout lancer d'un coup, mais répartir au mieux
 	$GLOBALS['contentMail'] = '';
@@ -2756,9 +2990,10 @@ function getTextEditor($instance_name, $width, $height, $default_text, $default_
 {
 	$output = '';
 	if (is_numeric($width)) {
-		$width .= 'px';
+		$width_css = $width . 'px';
 		$cols = $width / 12;
 	} else {
+		$width_css = $width;
 		$cols = 50;
 	}
 	if (!empty($type_html_editor)) {
@@ -2772,17 +3007,19 @@ function getTextEditor($instance_name, $width, $height, $default_text, $default_
 		// Editeur nicEditor
 		if(empty($GLOBALS['html_editor_loaded'])) {
 			$GLOBALS['html_editor_loaded'] = true;
-			$output .= '
-<script src="' . $GLOBALS['wwwroot'] . '/lib/nicEditor/nicEdit.js"></script>
-';
+			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/lib/nicEditor/nicEdit.js';
 		}
-		$output .= '
-<script><!--//--><![CDATA[//><!--
+		$GLOBALS['js_ready_content_array'][] = '
 bkLib.onDomLoaded(function() {
 	new nicEditor({iconsPath : \'' . $GLOBALS['wwwroot'] . '/lib/nicEditor/nicEditorIcons.gif\',fullPanel : true}).panelInstance(\'' . $instance_name . '\');
 });
-//--><!]]></script>
-<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+';
+		$output .= '
+<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+	<div style="min-width:200px">
+		<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+	</div>
+</div>
 ';
 	} elseif ($this_html_editor == '0') {
 		$default_text = String::nl2br_if_needed($default_text);
@@ -2793,7 +3030,13 @@ bkLib.onDomLoaded(function() {
 		$oFCKeditor->Value = String::htmlspecialchars_decode($default_text, ENT_QUOTES);
 		$oFCKeditor->Height = $height;
 		$oFCKeditor->Width = $width;
-		$output .= $oFCKeditor->CreateHtml();
+		$output .= '
+<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+	<div style="min-width:550px">
+		'.$oFCKeditor->CreateHtml().'
+	</div>
+</div>
+';
 	} elseif ($this_html_editor == '3') {
 		$default_text = String::nl2br_if_needed($default_text);
 		// Editeur CKeditor
@@ -2801,23 +3044,31 @@ bkLib.onDomLoaded(function() {
 		$config = array('width' => $width, 'height' => $height);
 		$CKEditor = new CKEditor($GLOBALS['wwwroot'] . '/lib/ckeditor/');
 		$CKEditor->returnOutput = true;
-		$output .= $CKEditor->editor($instance_name, String::htmlspecialchars_decode($default_text, ENT_QUOTES), $config);
+		$output .= '
+<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+	<div style="min-width:270px">
+		'.$CKEditor->editor($instance_name, String::htmlspecialchars_decode($default_text, ENT_QUOTES), $config).'
+	</div>
+</div>
+';
 	} elseif ($this_html_editor == '4') {
 		$default_text = String::nl2br_if_needed($default_text);
 		// Editeur TinyMCE
 		if(empty($GLOBALS['html_editor_loaded'])) {
 			$GLOBALS['html_editor_loaded'] = true;
 			$css_files = array();
+			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+				$css_files[] = $GLOBALS['wwwroot'] . '/lib/css/bootstrap.css';
+			}
 			if(!empty($GLOBALS['site_parameters']['css'])) {
 				foreach (explode(',', $GLOBALS['site_parameters']['css']) as $this_css_filename) {
-					$css_files[] = $GLOBALS['repertoire_css'] . '/' . trim($this_css_filename); // .'?'.time()
+					if(file_exists($GLOBALS['repertoire_modele'] . '/css/' . trim($this_css_filename))) {
+						$css_files[] = $GLOBALS['repertoire_css'] . '/' . trim($this_css_filename); // .'?'.time()
+					}
 				}
 			}
-			$output .= '
-<script src="' . $GLOBALS['wwwroot'] . '/lib/tiny_mce/jquery.tinymce.js"></script>
-<script><!--//--><![CDATA[//><!--
-(function($) {
-   $(document).ready(function() {
+			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/lib/tiny_mce/jquery.tinymce.js';
+			$GLOBALS['js_ready_content_array'][] = '
 		$("textarea.tinymce").tinymce({
 			// Location of TinyMCE script
 			script_url : "' . $GLOBALS['wwwroot'] . '/lib/tiny_mce/tiny_mce.js",
@@ -2835,28 +3086,31 @@ bkLib.onDomLoaded(function() {
 			theme_advanced_toolbar_align : "left",
 			theme_advanced_statusbar_location : "bottom",
 			theme_advanced_resizing : true,
+			width: \''.$width.'\',
+			height: \''.$height.'\',
 
 			// Example content CSS (should be your site CSS)
 			content_css : "'.implode(',', $css_files).'",
-		})
-	});
-})(jQuery);
-//--><!]]></script>
+		});
 ';
 		}
 		$output .= '
-			<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width . 'px; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . ($width / 12) . '">' . String::htmlentities($default_text) . '</textarea>
+<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+	<div style="min-width:600px">
+		<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+	</div>
+</div>
 ';
 	} elseif($this_html_editor == '5') {
 		// Champ textarea de base + Compteur de caractères
 		$output .= '
-			<textarea placeholder="'. $placeholder.'" name="' . $instance_name . '" cols="' . ($width / 12) . '" rows="' . ($height / 12) . '" onfocus="Compter(this,'.$compter_char_max.',compteur, true)" onkeypress="Compter(this,'.$compter_char_max.',compteur, true)" onkeyup="Compter(this,'.$compter_char_max.',compteur, true)" onblur="Compter(this,'.$compter_char_max.',compteur, true)">' . String::htmlentities($default_text) . '</textarea><br />
-			<div class="compteur_contener"><span style="margin:5px;">'.$GLOBALS['STR_REMINDING_CHAR'].'</span><input class="compteur" type="number" name="compteur" size="4" onfocus="blur()" value="0" /></div>
+			<textarea class="form-control" placeholder="'. $placeholder.'" name="' . $instance_name . '" cols="' . $cols . '" rows="' . ($height / 12) . '" onfocus="Compter(this,'.$compter_char_max.',compteur, true)" onkeypress="Compter(this,'.$compter_char_max.',compteur, true)" onkeyup="Compter(this,'.$compter_char_max.',compteur, true)" onblur="Compter(this,'.$compter_char_max.',compteur, true)">' . String::htmlentities($default_text) . '</textarea><br />
+			<div class="compteur_contener"><span style="margin:5px;">'.$GLOBALS['STR_REMINDING_CHAR'].'</span><input class="form-control compteur" type="number" name="compteur" size="4" onfocus="blur()" value="0" /></div>
 ';
 	} else {
 		// Champ textarea de base
 		$output .= '
-			<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width . 'px; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . ($width / 12) . '">' . String::htmlentities($default_text) . '</textarea>
+			<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
 ';
 	}
 	return $output;
@@ -2934,14 +3188,35 @@ function update_configuration_variable($id_or_technical_code, $frm)
 function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 	if($files_type == 'js') {
 		// Pour des raisons de compatibilité, on n'applique pas de minified sur les fichiers contenant ces chaines de caractères
-		$excluded_files = array('jquery', 'prototype.js', 'controls.js', 'effects.js');
+		$excluded_files = array('prototype.js', 'controls.js', 'effects.js');
+		$included_files = array('datepicker');
 	}
 	foreach($files_array as $this_key => $this_file) {
+		if(String::substr($this_file, 0, 2) == '//') {
+			// Gestion des chemins de fichiers http/https automatiques
+			$this_file = 'http:' . $this_file;
+		} elseif(String::strpos($this_file, '//') === false && String::substr($this_file, 0, 1) == '/') {
+			// Chemin absolu
+			$this_file = $GLOBALS['wwwroot'] . $this_file;
+		} elseif(String::strpos($this_file, '//') === false) {
+			// Chemin relatif
+			$this_file = dirname(get_current_url(false)) . $this_file;
+		} 
+		$files_array[$this_key] = $this_file = String::html_entity_decode($this_file);
 		unset($skip);
 		if(!empty($excluded_files)) {
 			foreach($excluded_files as $this_excluded_file) {
 				if(strpos($this_file, $this_excluded_file) !==false) {
-					$skip = true;
+					$avoid_skip = false;
+					foreach($included_files as $this_included_file) {
+						if(strpos($this_file, $this_included_file) !== false) {
+							$avoid_skip = true;
+						}
+					}
+					if(!$avoid_skip) {
+						$skip = true;
+						break;
+					}
 				}
 			}
 		}
@@ -2950,7 +3225,11 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 			unset($files_array[$this_key]);
 		}
 	}
-	$cache_id = md5(implode(',', $files_array));
+	if(!empty($_GET['update']) && $_GET['update'] == 1 && empty($GLOBALS['already_updated_minify_id_increment'])) {
+		$GLOBALS['site_parameters']['minify_id_increment'] = intval($GLOBALS['site_parameters']['minify_id_increment'])+1;
+		$GLOBALS['already_updated_minify_id_increment'] = true;
+	}
+	$cache_id = md5(implode(',', $files_to_minify_array) . ','. vb($GLOBALS['site_parameters']['minify_id_increment']));
 	$file_name = $files_type . '_minified_' . substr($cache_id, 0, 8).'.'.$files_type;
 	$minified_doc_root = $GLOBALS['dirroot'] . '/'.$GLOBALS['site_parameters']['cache_folder'].'/';
 	$file_path = $minified_doc_root . $file_name;
@@ -2989,7 +3268,13 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 						$this_wwwroot = $GLOBALS['wwwroot'];
 					}
 					$options = array('currentDir' => str_replace($this_wwwroot, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
-					$output .= "\n\n\n".Minify_CSS::minify(file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file)), $options);
+					$css_content = file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
+					if(strlen($css_content)/substr_count($css_content, "\n")>50) {
+						// Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
+						// Néanmoins on appelle quand même la classe minify qui va corriger les chemins des URL appelées dans le fichier
+						$options['do_compress'] = false;
+					}
+					$output .= "\n\n\n".Minify_CSS::minify($css_content, $options);
 				} elseif($files_type == 'js') {
 					$output .= "\n\n\n".file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
 				} else {
@@ -3011,6 +3296,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				$write_result = fwrite($fp, $output, strlen($output));
 				@flock($fp, LOCK_UN);
 				fclose($fp);
+				set_configuration_variable(array('technical_code' => 'minify_id_increment', 'string' => $GLOBALS['site_parameters']['minify_id_increment'], 'origin' => 'auto '.date('Y-m-d')), true);
 			}
 			if(!$write_result) {
 				return false;
@@ -3037,15 +3323,73 @@ function get_load_facebook_sdk_script($facebook_api_id = null) {
 		$sdk_loaded = true;
 		$output .= '
 <div id="fb-root"></div>
-<script>(function(d, s, id) {
+';
+		$GLOBALS['js_content_array']['facebook_sdk'] = '
+(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
   js = d.createElement(s); js.id = id;
   js.src = "//connect.facebook.net/fr_FR/all.js#xfbml=1'.(!empty($facebook_api_id)?'&appId='.$facebook_api_id:'').'";
   fjs.parentNode.insertBefore(js, fjs);
-}(document, \'script\', \'facebook-jssdk\'));</script>';
+}(document, \'script\', \'facebook-jssdk\'));';
 	}
 	return $output;
 }
 
+/**
+ * get_quick_search_results()
+ *
+ * @param string $search
+ * @param integer $maxRows
+ * @param boolean $active
+ * @param integer $search_category
+ * @return
+ */
+function get_quick_search_results($search, $maxRows, $active_only = false, $search_category = null) {
+	$queries_results_array = array();
+	$sql_additional_cond = '';
+	$sql_additional_join = '';
+	// Pour optimiser, on segmente la recherche en plusieurs requêtes courtes
+	if($active_only) {
+		$sql_additional_cond .= " AND etat='1'";
+	}
+	if(is_numeric($search)) {
+		$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
+			FROM peel_produits p
+			WHERE p.id='" . nohtml_real_escape_string($search) . "'" . $sql_additional_cond . "
+			LIMIT 1";
+	}
+	if(!empty($search_category)) {
+		$sql_additional_cond .= " AND pc.categorie_id IN ('" . implode("','", get_category_tree_and_itself(intval($search_category), 'sons', 'categories')) . "')";
+		$sql_additional_join .= 'INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id';
+	}
+	$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
+		FROM peel_produits p
+		".$sql_additional_join."
+		WHERE p.nom_" . $_SESSION['session_langue'] . " LIKE '" . nohtml_real_escape_string($search) . "%'" . $sql_additional_cond . "
+		ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
+	$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
+		FROM peel_produits p
+		".$sql_additional_join."
+		WHERE p.reference LIKE '" . nohtml_real_escape_string($search) . "%' AND p.nom_" . $_SESSION['session_langue'] . "!=''" . $sql_additional_cond . "
+		ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
+	$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
+		FROM peel_produits p
+		".$sql_additional_join."
+		WHERE (p.nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($search) . "%' AND p.nom_" . $_SESSION['session_langue'] . "!=''))" . $sql_additional_cond . "
+		ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
+	foreach($queries_sql_array as $this_query_sql) {
+		if(String::strpos($this_query_sql, 'LIMIT') === false) {
+			$this_query_sql .= ' LIMIT '.intval($maxRows);
+		}
+		$query = query($this_query_sql);
+		while ($result = fetch_object($query)) {
+			$queries_results_array[$result->id] = $result;
+		}
+		if(count($queries_results_array) >= $maxRows) {
+			break;
+		}
+	}
+	return $queries_results_array;
+}
 ?>

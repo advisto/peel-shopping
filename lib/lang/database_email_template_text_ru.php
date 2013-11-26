@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_ru.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: database_email_template_text_ru.php 38739 2013-11-15 23:07:41Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -71,7 +71,7 @@ IP: [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hello,
 
-The order associated with the following number [ORDER_ID] has just been recorded on [WWWROOT]/lib/fonctions/display_caddie.php",
+The order associated with the following number [ORDER_ID] has just been recorded on [WWWROOT]",
   "admin_info_payment_credit_card_3_times" => "Hello,
 
 The order associated with the following number [ORDER_ID] has just been recorded on [SITE]

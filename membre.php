@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: membre.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: membre.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_ACCES_ACCOUNT', true);
 include("configuration.inc.php");
 
@@ -27,7 +27,7 @@ if (!empty($_POST)) {
 	$_POST['mot_passe'] = trim(vb($_POST['mot_passe']));
 	// On ne garde que l'email pour préremplir le formulaire si une erreur intervient
 	$frm['email'] = $_POST['email'];
-	if (!verify_token('membre.php', 60, false)) {
+	if (!verify_token('membre.php', 120, false)) {
 		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	}
 	if (empty($_POST['email'])) {

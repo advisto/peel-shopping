@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37933 2013-08-28 15:06:31Z sdelaporte $
+// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -137,8 +137,7 @@ function supprime_nom_attribut($id)
 	$col = fetch_assoc($qid);
 	query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id  = '" . intval($id) . "'");
 	query("DELETE FROM peel_nom_attributs WHERE id='" . intval($id) . "'");
-
-	echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'L\'attribut <b>' . String::html_entity_decode_if_needed($col['nom_' . $_SESSION['session_langue']]) . '</b> a été effacé.'))->fetch();
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_MSG_DELETED_OK'], String::html_entity_decode_if_needed($col['nom_' . $_SESSION['session_langue']]))))->fetch();
 }
 
 /**

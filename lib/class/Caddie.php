@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 38013 2013-09-04 16:23:59Z sdelaporte $
+// $Id: Caddie.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 38013 2013-09-04 16:23:59Z sdelaporte $
+ * @version $Id: Caddie.php 38682 2013-11-13 11:35:48Z gboussin $
  * @access public
  */
 class Caddie {
@@ -932,7 +932,7 @@ class Caddie {
 		}
 		
 		// ETAPE 3 : On gère des éventuels frais supplémentaires si la commande est trop petite
-		if ($this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= vn($GLOBALS['site_parameters']['minimal_amount_to_order'])) {
+		if (count($this->articles) && $this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= vn($GLOBALS['site_parameters']['minimal_amount_to_order'])) {
 			$this->small_order_overcost_amount_ht = $GLOBALS['site_parameters']['small_order_overcost_amount'] / (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));
 			if ($this->apply_vat) {
 				$this->small_order_overcost_amount = $this->small_order_overcost_amount_ht * (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));

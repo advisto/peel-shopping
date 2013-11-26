@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: newsletter.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -20,7 +20,7 @@ if (is_webmail_module_active()) {
 	include($GLOBALS['dirroot'] . "/modules/webmail/administrer/fonctions.php");
 }
 $DOC_TITLE = $GLOBALS['STR_ADMIN_NEWSLETTERS_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
 $form_error_object = new FormError();
@@ -93,7 +93,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -164,7 +164,7 @@ function affiche_formulaire_newsletter(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$tpl_langs[] = array('lng' => $this_lang,
 			'sujet' => vb($frm['sujet_' . $this_lang]),
-			'message_te' => getTextEditor('message_' . $this_lang, 760, 500, vb($frm['message_' . $this_lang]))
+			'message_te' => getTextEditor('message_' . $this_lang, '100%', 500, vb($frm['message_' . $this_lang]))
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
@@ -243,7 +243,6 @@ function maj_newsletter($id, $frm)
  * @param integer $id
  * @param mixed $debut
  * @param mixed $limit
- * @param mixed $subscribers_number
  * @return
  */
 function send_newsletter($id, $debut, $limit, $test = false)

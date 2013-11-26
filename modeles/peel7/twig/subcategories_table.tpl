@@ -3,33 +3,30 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: subcategories_table.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<table class="sub_category">
+// $Id: subcategories_table.tpl 38978 2013-11-24 23:18:34Z gboussin $
+#}<div class="sub_category row">
 {% for cat in cats %}
-	{% if cat.row_start %}
-		<tr>
-	{% endif %}
-	{% if (cat.href) %}
-		<td class="center" style="width:{{ cat.width }}%">
+	{% if cat.href %}
+		<div class="center col-md-{{ (12 // nb_col_md) }} col-sm-{{ (12 // nb_col_sm) }}">
 			{% if (cat.src) %}
 				<a href="{{ cat.href|escape('html') }}"><img src="{{ cat.src|escape('html') }}" alt="{{ cat.name|html_entity_decode_if_needed }}" /></a>
 				<br />
 			{% endif %}
-			<a href="{{ cat.href|escape('html') }}">{{ cat.name|html_entity_decode_if_needed }}</a>
-		</td>
+			<a href="{{ cat.href|escape('html') }}" class="sub_category_title">{{ cat.name|html_entity_decode_if_needed }}</a>
+		</div>
 	{% endif %}
-	{% if cat.row_end %}
-		{% for var in 1..cat.empty_cells %}
-			<td></td>
-		{% endfor %}
-		</tr>
+	{% if cat.i%nb_col_md==0 %}
+	<div class="clearfix visible-md visible-lg"></div>
+	{% endif %}
+	{% if cat.i%nb_col_sm==0 %}
+	<div class="clearfix visible-sm"></div>
 	{% endif %}
 {% endfor %}
-</table>
+</div>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ProductsBought.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: ProductsBought.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: ProductsBought.php 37904 2013-08-27 21:19:26Z gboussin $
+ * @version $Id: ProductsBought.php 38682 2013-11-13 11:35:48Z gboussin $
  * @access public
  */
 class ProductsBought {
@@ -55,9 +55,10 @@ class ProductsBought {
 	 * ProductsBought::_sql_de_base()
 	 *
 	 * @param string $id
+	 * @param integer $limit
 	 * @return string SQL
 	 */
-	function _sql_de_base($id = null)
+	function _sql_de_base($id = null, $limit = 500)
 	{
 		$sql = "SELECT ca.produit_id,
 			ca.commande_id,
@@ -76,7 +77,7 @@ class ProductsBought {
 			" . (!empty($id)?" AND ca.produit_id='" . intval($id) . "'":"") . "
 		GROUP BY IF(ca.produit_id>0,ca.produit_id,ca.nom_produit), ca.couleur, ca.taille
 		ORDER BY quantite_totale DESC
-		LIMIT 500";
+		LIMIT " . $limit;
 		return $sql;
 	}
 
@@ -103,12 +104,13 @@ class ProductsBought {
 	/**
 	 * ProductsBought::find_all()
 	 *
+	 * @param integer $limit
 	 * @return array
 	 */
-	function find_all()
+	function find_all($limit = 500)
 	{
 		$ret = array();
-		$req = query(ProductsBought::_sql_de_base());
+		$req = query(ProductsBought::_sql_de_base(null, $limit));
 		while ($tmp = fetch_object($req)) {
 			$ret[] = new ProductsBought($tmp);
 		}

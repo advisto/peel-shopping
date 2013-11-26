@@ -3,31 +3,29 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38765 2013-11-17 00:29:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
-/**
- * get_cart_popup_script()
- *
- * @return
- */
-function get_cart_popup_script()
-{
-	$output = '';
-	// Gestion de l'interstitiel de publicité
-	$output .= '
-	<script src="' . $GLOBALS['wwwroot'] . '/lib/js/interstitiel.js"></script>
-';
-	return $output;
+if (!function_exists('get_cart_popup_script')) {
+	/**
+	 * get_cart_popup_script()
+	 *
+	 * @return
+	 */
+	function get_cart_popup_script()
+	{
+		$output = '';
+		return $output;
+	}
 }
 
 if (!function_exists('get_cart_popup_div')) {
@@ -58,11 +56,22 @@ if (!function_exists('get_cart_popup_div')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/cart_popup_div.tpl');
 		$tpl->assign('width', $GLOBALS['site_parameters']['popup_width']);
 		$tpl->assign('height', $GLOBALS['site_parameters']['popup_height']);
-		$tpl->assign('html_js_var', str_replace(array("\n", "\r"), '', str_replace('"', '\"', $tpl_content->fetch())));
+		$tpl->assign('html_var', $tpl_content->fetch());
+		$tpl->assign('STR_MODULE_CART_POPUP_PRODUCT_ADDED', $GLOBALS['STR_MODULE_CART_POPUP_PRODUCT_ADDED']);
+		$tpl->assign('STR_CADDIE', $GLOBALS['STR_CADDIE']);
+		$tpl->assign('STR_QUANTITY', $GLOBALS['STR_QUANTITY']);
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_AMOUNT', $GLOBALS['STR_AMOUNT']);
+		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
+		$tpl->assign('STR_SHOPPING', $GLOBALS['STR_SHOPPING']);
+		$tpl->assign('count_products', $_SESSION['session_caddie']->count_products());
+		$tpl->assign('caddie_href', $GLOBALS['wwwroot'] . '/achat/caddie_affichage.php');
+		$tpl->assign('header_src', $GLOBALS['repertoire_images'].'/popup_cart_top1_'.$_SESSION['session_langue'].'.png');
 
-		$output .= $tpl->fetch();
-
-		return $output;
+		// On ne met pas le script en HTML directement, mais on laisse le CMS optimiser sa gestion
+		$GLOBALS['js_ready_content_array'][] = $tpl->fetch();
+		return null;
 	}
 }
 ?>

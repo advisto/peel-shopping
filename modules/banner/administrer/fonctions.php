@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 39000 2013-11-25 15:29:17Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,6 +44,7 @@ function affiche_formulaire_ajout_banniere($categorie_id = 0, &$frm)
 		$frm['height'] = "";
 		$frm["annonce_number"] = "";
 		$frm["on_home_page"] = "";
+		$frm["on_ad_creation_page"] = "";
 		$frm["on_first_page_category"] = "";
 		$frm["on_other_page_category"] = "";
 		$frm["on_ad_page_details"] = "";
@@ -119,6 +120,7 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('on_first_page_category', vb($frm["on_first_page_category"]));
 
 	if (is_annonce_module_active()) {
+		$tpl->assign('on_ad_creation_page', vb($frm["on_ad_creation_page"]));
 		$tpl->assign('on_ad_page_details', vb($frm["on_ad_page_details"]));
 		$tpl->assign('list_id', vb($frm["list_id"]));
 		$tpl->assign('annonce_number', vb($frm["annonce_number"]));
@@ -131,7 +133,7 @@ function affiche_formulaire_banniere(&$frm)
 		// Charge les informations sur les catégorie présentes en base de donnée.
 		$qid = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
 			FROM peel_categories");
-	} 
+	}
 	$tpl_cat_opts = array();
 	while ($cat = fetch_assoc($qid)) {
 		$tpl_cat_opts[] = array(
@@ -142,7 +144,6 @@ function affiche_formulaire_banniere(&$frm)
 	}
 	$tpl->assign('cat_options', $tpl_cat_opts);
 	$tpl->assign('conf_site_href', $GLOBALS['administrer_url'] . '/sites.php?mode=modif&id=1');
-	$tpl->assign('appearance', vb($frm["appearance"]));
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 
 	if (!empty($frm["image"])) {
@@ -192,6 +193,7 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_SPACE_EXPLAIN', $GLOBALS['STR_MODULE_BANNER_ADMIN_SPACE_EXPLAIN']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_AD_PAGE_DETAILS', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_AD_PAGE_DETAILS']);
+	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_ANNOUNCEMENT_CREATION_PAGE', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_ANNOUNCEMENT_CREATION_PAGE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_FIRST_PAGE_CATEGORY', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_FIRST_PAGE_CATEGORY']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_OTHER_PAGE_CATEGORY', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_OTHER_PAGE_CATEGORY']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_ON_HOME_PAGE', $GLOBALS['STR_MODULE_BANNER_ADMIN_ON_HOME_PAGE']);
@@ -259,7 +261,8 @@ function insere_banniere(&$frm)
 			, list_id
 			, do_not_display_on_pages_related_to_user_ids_list
 			, annonce_number
-			, on_ad_page_details";
+			, on_ad_page_details
+			, on_ad_creation_page";
 		}
 		$sql .= "
 			, on_first_page_category
@@ -290,7 +293,8 @@ function insere_banniere(&$frm)
 			, '" . nohtml_real_escape_string(vn($frm['list_id'])) . "'
 			, '" . nohtml_real_escape_string(vb($frm['do_not_display_on_pages_related_to_user_ids_list'])) . "'
 			, '" . intval(vn($frm['annonce_number'])) . "'
-			, '" . intval(vn($frm['on_ad_page_details'])) . "'";
+			, '" . intval(vn($frm['on_ad_page_details'])) . "'
+			, '" . intval(vn($frm['on_ad_creation_page'])) . "'";
 		}
 		$sql .= "
 			, '" . intval(vn($frm['on_first_page_category'])) . "'
@@ -342,7 +346,8 @@ function maj_banniere($id, &$frm)
 		, annonce_number = "' . intval(vn($frm['annonce_number'])) . '"
 		, pages_allowed = "' . nohtml_real_escape_string(vb($frm['pages_allowed'])) . '"
 		, list_id = "' . nohtml_real_escape_string(vn($frm['list_id'])) . '"
-		, on_ad_page_details = "' . intval(vn($frm['on_ad_page_details'])) . '"';
+		, on_ad_page_details = "' . intval(vn($frm['on_ad_page_details'])) . '"
+		, on_ad_creation_page = "' . intval(vn($frm['on_ad_creation_page'])) . '"';
 	}
 	$sql .= '
 		, on_other_page_category = "' . intval(vn($frm['on_other_page_category'])) . '"

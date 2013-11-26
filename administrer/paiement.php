@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paiement.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: paiement.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -73,9 +73,9 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -101,6 +101,8 @@ function affiche_formulaire_ajout_paiement(&$frm)
 		$frm['tva'] = 0;
 		$frm['technical_code'] = '';
 		$frm['retour_possible'] = 1;
+		$frm['totalmin'] = 0;
+		$frm['totalmax'] = 0;
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
@@ -159,6 +161,8 @@ function affiche_formulaire_paiement(&$frm)
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('tarif', vb($frm["tarif"]));
 	$tpl->assign('tarif_percent', vb($frm["tarif_percent"]));
+	$tpl->assign('totalmin', vb($frm["totalmin"]));
+	$tpl->assign('totalmax', vb($frm["totalmax"]));
 	$tpl->assign('tva', get_vat_select_options(vb($frm['tva'])));
 	$tpl->assign('position', vb($frm["position"]));
 	$tpl->assign('is_payback_module_active', is_payback_module_active());
@@ -183,6 +187,10 @@ function affiche_formulaire_paiement(&$frm)
 	$tpl->assign('STR_ADMIN_PAIEMENT_ALLOW_REIMBURSMENTS', $GLOBALS['STR_ADMIN_PAIEMENT_ALLOW_REIMBURSMENTS']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
+	$tpl->assign('STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN', $GLOBALS['STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_TARIFS_MINIMAL_TOTAL', $GLOBALS['STR_ADMIN_TARIFS_MINIMAL_TOTAL']);
+	$tpl->assign('STR_ADMIN_TARIFS_MAXIMAL_TOTAL', $GLOBALS['STR_ADMIN_TARIFS_MAXIMAL_TOTAL']);
+	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	return $tpl->fetch();
 }
 
@@ -223,8 +231,9 @@ function insere_paiement(&$frm)
 	}
 	$sql .= ", tarif";
 	$sql .= ", tarif_percent";
-	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$sql .= ", nom_" . $lng;
+	$sql .= ", totalmin";
+	$sql .= ", totalmax";
+	foreach ($GLOBALS['admin_lang_codes'] as $lng) {		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
 	) VALUES (
@@ -236,9 +245,10 @@ function insere_paiement(&$frm)
 		$sql .= ", '" . intval($frm['retour_possible']) . "'";
 	}
 	$sql .= "
-		,'" . nohtml_real_escape_string($frm['tarif']) . "'";
-	$sql .= "
-		,'" . nohtml_real_escape_string($frm['tarif_percent']) . "'";
+		,'" . nohtml_real_escape_string($frm['tarif']) . "'
+		,'" . nohtml_real_escape_string($frm['tarif_percent']) . "'
+		,'" . nohtml_real_escape_string($frm['totalmin']) . "'
+		,'" . nohtml_real_escape_string($frm['totalmax']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -269,6 +279,8 @@ function maj_paiement($id, $frm)
 	}
 
 	$sql .= ", tarif = '" . nohtml_real_escape_string($frm['tarif']) . "'";
+	$sql .= ", totalmin = '" . nohtml_real_escape_string($frm['totalmin']) . "'";
+	$sql .= ", totalmax = '" . nohtml_real_escape_string($frm['totalmax']) . "'";
 	$sql .= ", tarif_percent = '" . nohtml_real_escape_string($frm['tarif_percent']) . "'
 		WHERE id = '" . intval($id) . "'";
 
@@ -324,7 +336,6 @@ function affiche_liste_paiement()
 	$tpl->assign('STR_ADMIN_PAIEMENT_EXPLAIN', $GLOBALS['STR_ADMIN_PAIEMENT_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_NOTA_BENE', $GLOBALS['STR_ADMIN_NOTA_BENE']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_TECHNICAL_CODE_EXPLAIN', $GLOBALS['STR_ADMIN_PAIEMENT_TECHNICAL_CODE_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN', $GLOBALS['STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_ADD_PAYMENT_MEAN', $GLOBALS['STR_ADMIN_PAIEMENT_ADD_PAYMENT_MEAN']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
@@ -336,6 +347,9 @@ function affiche_liste_paiement()
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_UPDATE', $GLOBALS['STR_ADMIN_PAIEMENT_UPDATE']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_NO_PAYMENT_MEAN_FOUND', $GLOBALS['STR_ADMIN_PAIEMENT_NO_PAYMENT_MEAN_FOUND']);
+	$tpl->assign('STR_ADMIN_TARIFS_MINIMAL_TOTAL', $GLOBALS['STR_ADMIN_TARIFS_MINIMAL_TOTAL']);
+	$tpl->assign('STR_ADMIN_TARIFS_MAXIMAL_TOTAL', $GLOBALS['STR_ADMIN_TARIFS_MAXIMAL_TOTAL']);
+	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	return $tpl->fetch();
 }
 

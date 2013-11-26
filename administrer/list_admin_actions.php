@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: list_admin_actions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: list_admin_actions.php 38734 2013-11-15 19:47:31Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_users,admin_moderation");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $id = intval(vn($_REQUEST['id']));
 $rubrique_options = '';
@@ -32,21 +32,20 @@ switch (vb($_REQUEST['mode'])) {
 			foreach($_POST['form_delete'] as $action_id) {
 				delete_admin_action($action_id);
 			}
-			echo affiche_list_admin_action(null, true);
 		}
+		echo affiche_list_admin_action(null, true);
 		break;
 
 	case "recherche":
-		if (!empty($_POST)) {
-			echo affiche_list_admin_action($_POST, true);
-		}
+		echo affiche_list_admin_action($_POST, true);
 		break;
+
 	default :
 		echo affiche_list_admin_action(null, true);
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * Affiche la liste des actions de moderation
@@ -124,6 +123,9 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 	}
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_list_admin_action.tpl');
+	$GLOBALS['js_ready_content_array'][] = '
+			display_input2_element("date");
+';
 	$tpl->assign('action', get_current_url(false));
 	$tpl->assign('title', $title);
 	$q = query('SELECT id_utilisateur, pseudo, email

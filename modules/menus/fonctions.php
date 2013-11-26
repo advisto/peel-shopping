@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38894 2013-11-21 11:07:14Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,12 +34,11 @@ function affiche_menu_deroulant_1($div_id, $items_html_array)
 			$fcontent[] = 'scrollercontent[\'' . $div_id . '\'][' . ($i++) . ']=\'' . str_replace(array('   ', '  ', "\t"), ' ', filtre_javascript($this_item_html, true, true, false)) . '\';' . "\r\n";
 		}
 		if (empty($GLOBALS['scroller_1_already_initialized'])) {
-			$output .= '
-<script src="' . $GLOBALS['wwwroot'] . '/modules/menus/scroller.js"></script>
-<script><!--//--><![CDATA[//><!--
+			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/scroller.js';
+			$GLOBALS['js_content_array'][] = '
 	var delay = 3000; //set delay between message change (in miliseconds)
-	var maxsteps=10; // number of steps to take to change from start color to endcolor
-	var stepdelay=50; // time in miliseconds of a single step
+	var maxsteps=20; // number of steps to take to change from start color to endcolor
+	var stepdelay=25; // time in miliseconds of a single step
 	var startcolor= new Array(255,255,255); // start color (red, green, blue)
 	var endcolor=new Array(0,0,0); // end color (red, green, blue)
 	var begintag=\'<div>\';
@@ -51,19 +50,20 @@ function affiche_menu_deroulant_1($div_id, $items_html_array)
 	var scrollercontent=new Array();
 	var index_max = new Array();
 	var index = new Array();
-//--><!]]></script>';
+';
 			$GLOBALS['scroller_1_already_initialized'] = true;
 		}
-		$output .= '
-<div id="' . $div_id . '"></div>
-<script><!--//--><![CDATA[//><!--
-
+		$GLOBALS['js_content_array'][] = '
 	index[\'' . $div_id . '\'] = 0;
 	index_max[\'' . $div_id . '\'] =' . $i . ';
 	scrollercontent[\'' . $div_id . '\']=new Array();
 	' . implode('', $fcontent) . '
+';
+		$GLOBALS['js_ready_content_array'][] = '
 	changecontent(\'' . $div_id . '\');
-//--><!]]></script>
+';
+		$output .= '
+<div id="' . $div_id . '"></div>
 ';
 	}
 	return $output;
@@ -90,15 +90,18 @@ function affiche_menu_deroulant_2($div_id, $items_html_array)
 			$pausecontent[] = $div_id . '_content[' . ($i++) . ']=\'' . str_replace(array('   ', '  ', "\t"), ' ', filtre_javascript($this_item_html, true, true, false)) . '\';' . "\r\n";
 		}
 		if (empty($GLOBALS['scroller_2_already_initialized'])) {
-			$output .= '
-<script src="' . $GLOBALS['wwwroot'] . '/modules/menus/pausescroller.js"></script>';
+			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/pausescroller.js';
 			$GLOBALS['scroller_2_already_initialized'] = true;
 		}
-		$output .= '<script><!--//--><![CDATA[//><!--
+		$GLOBALS['js_content_array'][] = '
 var ' . $div_id . '_content=new Array();
 ' . implode('', $pausecontent) . '
-new pausescroller(' . $div_id . '_content, "' . $div_id . '", "' . $div_id . '_class", 3000);
-//--><!]]></script>
+';
+		$GLOBALS['js_ready_content_array'][] = '
+new pausescroller(' . $div_id . '_content, "' . $div_id . '", 3000);
+';
+		$output .= '
+<div id="' . $div_id . '" class="' . $div_id . '_class pausescroller_container"></div>
 ';
 	}
 	return $output;
@@ -124,7 +127,7 @@ function get_on_rollover_products_html()
 	$i = 0;
 	while ($prod = fetch_assoc($query)) {
 		$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-		$product_html = get_product_in_container_html($product_object, true);
+		$product_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 		unset($product_object);
 		if (!empty($product_html)) {
 			$items[] = $product_html;

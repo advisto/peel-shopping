@@ -3,22 +3,32 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_google_sitemap.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_google_sitemap.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}<?xml version="1.0" encoding="{$GENERAL_ENCODING|upper}"?>
 <urlset xmlns="http://www.google.com/schemas/sitemap/0.84">
+{foreach $wwwroot_array as $wwwroot}
 <url><loc>{$wwwroot}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{$wwwroot}/achat/</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{$wwwroot}/lire/</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
 <url><loc>{$wwwroot}/membre.php</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{$wwwroot}/compte.php</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>{$url_enregistrement}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{/foreach}
+{foreach $product_category_url_array as $product_category_url}
+<url><loc>{$product_category_url}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{/foreach}
+{foreach $content_category_url_array as $content_category_url}
+<url><loc>{$content_category_url}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{/foreach}
+{foreach $account_register_url_array as $account_register_url}
+<url><loc>{$account_register_url}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{/foreach}
+{foreach $account_url_array as $account_url}
+<url><loc>{$account_url}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+{/foreach}
 {foreach $products as $p}
 <url><loc>{$p}</loc><lastmod>{$date}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
 {/foreach}

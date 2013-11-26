@@ -3,26 +3,26 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: brand_description_html.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: brand_description_html.tpl 39013 2013-11-25 21:39:43Z gboussin $
 *}{if $is_error}
-<h2 class="brand_description_html">{$error_header}</h2>
-<p class="global_error">{$error_content}</p>
+<h1 class="brand_description_html">{$error_header}</h1>
+<p class="alert alert-danger">{$error_content}</p>
 {else}
 	{foreach $data as $item}
-<h2 class="brand_description_html">{$item.nom|html_entity_decode_if_needed}</h2>
+<h{if count($data)==1}1{else}2{/if} class="brand_description_html">{$item.nom|html_entity_decode_if_needed}</h{if count($data)==1}1{else}2{/if}>
 <table>
 	<tr>
 		<td class="top" style="width:50%; padding:10px;">
 			{if $item.display_brand}
 				{if $item.admin_content}
-					<p class="center"><a href="{$item.admin_link.href|escape:'html'}" class="label">{$item.admin_link.name}</a></p>
+					<p class="center"><a href="{$item.admin_link.href|escape:'html'}" class="title_label">{$item.admin_link.name}</a></p>
 				{/if}
 				<table class="full_width">
 					<tr>

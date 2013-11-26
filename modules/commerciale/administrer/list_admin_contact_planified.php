@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: list_admin_contact_planified.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: list_admin_contact_planified.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -21,7 +21,7 @@ $DOC_TITLE = $GLOBALS["STR_MODULE_COMMERCIAL_ADMIN_PLANIFIED_TITLE"];
 
 $form_error_object = new FormError();
 
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 switch (vb($_REQUEST['mode'])) {
 	// Filtre de recherche
 	case 'search':
@@ -48,6 +48,6 @@ switch (vb($_REQUEST['mode'])) {
 		affiche_list_admin_contact(false);
 		break;
 }
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

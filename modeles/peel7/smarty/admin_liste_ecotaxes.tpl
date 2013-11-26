@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_ecotaxes.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_liste_ecotaxes.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="5">{$STR_ADMIN_ECOTAXES_TITLE}</td>
 	</tr>
 	<tr>
-		<td colspan="5"><div class="global_help">{$STR_ADMIN_ECOTAXES_EXPLAIN}</div></td>
+		<td colspan="5"><div class="alert alert-info">{$STR_ADMIN_ECOTAXES_EXPLAIN}</div></td>
 	</tr>
 	<tr>
 		<td colspan="5">
@@ -39,7 +39,7 @@
 	{foreach $results as $res}
 	{$res.tr_rollover}
 	
-		<td class="center"><a onclick="return confirm('{$STR_ADMIN_DELETE_WARNING|filtre_javascript:true:true:true}');" title="{$STR_DELETE|str_form_value} {$res.nom|str_form_value}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> &nbsp; &nbsp; <a title="{$STR_ADMIN_ECOTAXES_MODIFY_ECOTAX|str_form_value}" href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" width="16" height="16" alt="" /></a></td>
+		<td class="center"><a data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}" title="{$STR_DELETE|str_form_value} {$res.nom|str_form_value}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> &nbsp; &nbsp; <a title="{$STR_ADMIN_ECOTAXES_MODIFY_ECOTAX|str_form_value}" href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" width="16" height="16" alt="" /></a></td>
 		<td class="center">{$res.code}</td>
 		<td><a title="{$STR_ADMIN_ECOTAXES_MODIFY_ECOTAX|str_form_value}" href="{$res.edit_href|escape:'html'}">{$res.nom|str_shorten:100:'':'...'}</a></td>
 		<td class="center">{$res.prix_ht}</td>

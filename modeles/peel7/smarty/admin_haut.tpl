@@ -3,19 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_haut.tpl 38734 2013-11-15 19:47:31Z gboussin $
 *}<!DOCTYPE html>
-<html lang="fr">
+<html lang="{$lang}" dir="ltr">
 <head>
-	<meta charset="{$GENERAL_ENCODING}" />
+	{if !empty($GENERAL_ENCODING)}<meta charset="{$GENERAL_ENCODING}" />{/if}
+	<meta name="generator" content="{$generator|str_form_value}" />
 	<meta name="robots" content="noindex,nofollow" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>{$doc_title}</title>
 	{if isset($favicon_href)}<link rel="icon" type="image/x-icon" href="{$favicon_href}" />
 	<link rel="shortcut icon" type="image/x-icon" href="{$favicon_href}" />{/if}
@@ -29,31 +31,56 @@
 	<script src="{$js_href|escape:'html'}"></script>
 	{/foreach}
 {/if}
-{if $js_content}
+{if !empty($js_content)}
 	<script><!--//--><![CDATA[//><!--
 		{$js_content}
 	//--><!]]></script>
 {/if}
+	<!--[if lt IE 9]>
+	<script src="{$wwwroot}/lib/js/html5shiv.js"></script>
+	<script src="{$wwwroot}/lib/js/respond.js"></script>
+	<![endif]-->
 </head>
 <body>
 	<!-- Début Total -->
 	<div id="total">
+		<div class="navbar navbar-inverse navbar-static-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<a href="{$administrer_url}/" class="navbar-brand"><img src="{$logo_src|escape:'html'}" alt="{$site}" /></a>
+					</div>
+					<div class="navbar-collapse collapse">
+						<nav>
+							<ul id="menu1" class="nav navbar-nav">
+								{$admin_menu}
+							</ul>
+							<ul class="nav nav-pills pull-right">
+								<li style="margin-top: 8px; margin-bottom: 3px">{*' &nbsp;'|implode:$flags_links_array*}{$flags}</li>
+								<li><a href="{$sortie_href|escape:'html'}" title="{$STR_ADMIN_DISCONNECT|str_form_value}"><span class="glyphicon glyphicon-off"></span></a></li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="main_header_wide">
-			<div class="main_header">
-				<div id="flags">{*' &nbsp;'|implode:$flags_links_array*}{$flags}</div>
-				<div id="page_title">{$page_title}</div>
-				<div class="main_logo"><a href="{$administrer_url}/"><img src="{$logo_src|escape:'html'}" alt="{$site}" /></a></div>
-				<div class="header_few_words_center">{$admin_welcome}</div>
-				<div class="header_few_words_right">{$STR_ADMINISTRATION}</div>
+			<div class="main_header container">
+				<header>
+					<div class="row">
+						<div id="page_title" class="col-md-12"><h1>{$page_title}</h1></div>
+					</div>
+				</header>
 			</div>
 		</div>
-		<div class="main_menu_wide">
-			<div class="main_menu">
-				{$admin_menu}
-			</div>
-		</div>
-		<div class="main_content">
-{$error_text_to_display}
+		<div class="container">
+			<div class="main_content row">
+				<div class="col-md-12">
 {if $is_demo_error}
-		<p class="global_error">{$STR_ADMIN_DEMO_WARNING}</p>
-{/if}	
+					<p class="alert alert-danger fade in">{$STR_ADMIN_DEMO_WARNING} <button class="close remember-close" aria-hidden="true" data-dismiss="alert" type="button" id="demo_warning_close">×</button></p>
+{/if}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 38039 2013-09-05 08:22:59Z sdelaporte $
+// $Id: commander.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -19,47 +19,50 @@ necessite_priv("admin_sales");
 if (is_fianet_sac_module_active()) {
 	require_once($GLOBALS['fonctionsfianet_sac']);
 }
-$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/haut.php");
 
 $form_error_object = new FormError();
 $frm = $_POST;
+$DOC_TITLE = $GLOBALS["STR_ADMIN_INDEX_ORDERS_LIST"];
+$output = '';
 
 if (!empty($_GET['commandeid'])) {
 	$frm['commandeid'] = $_GET['commandeid'];
 }
 switch (vb($_REQUEST['mode'])) {
     case "duplicate" :
+		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
         if (is_duplicate_module_active() && isset($_GET['id'])) {
             include($fonctionsduplicate);
             duplicate_order(intval($_GET['id']));
 			unset($_GET['id']);
         }
-		affiche_liste_commandes_admin();
+		$output .= affiche_liste_commandes_admin();
 		break;
 
 	case "ajout" :
+		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
 		// Affiche le formulaire d'ajout de commande à partir d'un utilisateur
 		if (!empty($_GET['id_utilisateur'])) {
 			$user_id = intval($_GET['id_utilisateur']);
 		} else {
 			$user_id = 0;
 		}
-		affiche_details_commande(null, $_GET['mode'], $user_id);
+		$output .= affiche_details_commande(null, $_GET['mode'], $user_id);
 		break;
 	// Affiche le formulaire de la commande à modifier
 	case "modif" :
+		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"];
 		if (!empty($_POST['bdc_code_facture']) && !empty($_POST['bdc_sendclient'])) {
 			sendclient($_POST['bdc_id'], 'html', 'bdc', $_POST['bdc_partial']);
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
 		} elseif (!empty($_POST)) {	
 			// Ajout d'une commande en db + affichage du détail de la commande
 			$order_id = save_commande_in_database($frm);
 			if (!empty($frm['commandeid'])) {
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (is_stock_advanced_module_active() ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
-				affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (is_stock_advanced_module_active() ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
+				$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
 			} else {
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
 			}
 			if (empty($frm['id'])) {
 				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
@@ -69,17 +72,17 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		// Si il n'y a pas de POST, cela signifie que l'on veut uniquement afficher le détail de la commande a modifier.
 		if (empty($_POST)) {
-			affiche_details_commande($_GET['commandeid'], $_GET['mode'], null);
+			$output .= affiche_details_commande($_GET['commandeid'], $_GET['mode'], null);
 		}
 		break;
 
 	case "affi" :
 		if (is_affiliate_module_active()) {
 			include($GLOBALS['dirroot'] . "/modules/affiliation/administrer/fonctions.php");
-			affiche_liste_commandes_admin(array('affi'=>1));
+			$output .= affiche_liste_commandes_admin(array('affi'=>1));
 		} else {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_AFFILIATION_MODULE_MISSING']))->fetch();
-			affiche_liste_commandes_admin();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_AFFILIATION_MODULE_MISSING']))->fetch();
+			$output .= affiche_liste_commandes_admin();
 		}
 		break;
 	// Met à jour le statut du paiement et de l'envoi de la commande, lorsque l'on est en liste de commande
@@ -91,11 +94,11 @@ switch (vb($_REQUEST['mode'])) {
 						update_order_payment_status($frm['id'][$i], vb($frm['statut_paiement']), true, vb($frm['statut_livraison']));
 					}
 				}
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_STATUS_UPDATED']))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_STATUS_UPDATED']))->fetch();
 			}
 		}
 		// Affiche la liste des commandes
-		affiche_liste_commandes_admin();
+		$output .= affiche_liste_commandes_admin();
 		break;
 
 	case "parrain" :
@@ -105,45 +108,46 @@ switch (vb($_REQUEST['mode'])) {
 		$custom_template_tags['AVOIR'] = fprix(vn($_POST['avoir']), true, $GLOBALS['site_parameters']['code'], false);
 		send_email($_POST['email_parrain'], '', '', 'commande_parrain_avoir', $custom_template_tags, 'html', $GLOBALS['support']);
 
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMANDER_MSG_AVOIR_SENT_BY_EMAIL_OK'], $custom_template_tags['AVOIR'], $_POST['email_parrain'])))->fetch();
-		affiche_details_commande(intval($_POST['id']), $_POST['mode'], null);
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMANDER_MSG_AVOIR_SENT_BY_EMAIL_OK'], $custom_template_tags['AVOIR'], $_POST['email_parrain'])))->fetch();
+		$output .= affiche_details_commande(intval($_POST['id']), $_POST['mode'], null);
 		break;
 	// Envoie par email la facture pdf de la commande à l'utilisateur
 	case "sendfacturepdf" :
-		send_facture_pdf_commandes($_GET);
+		$output .= send_facture_pdf_commandes($_GET);
 		// Affichage des commandes en liste
-		affiche_details_commande($_GET['id'], 'modif', null);
+		$output .= affiche_details_commande($_GET['id'], 'modif', null);
 		break;
 	// Recherche de commande
 	case "recherche" :
-		affiche_liste_commandes_admin($_GET);
+		$output .= affiche_liste_commandes_admin($_GET);
 		break;
 	// commande de produit en téléchargement
 	case "download" :
-		affiche_liste_commandes_download();
+		$output .= affiche_liste_commandes_download();
 		break;
 	// efface les fichiers en téléchargement
 	case "efface_download" :
 		if (is_download_module_active()) {
-			echo efface_download();
-			affiche_liste_commandes_download();
+			$output .=  efface_download();
+			$output .= affiche_liste_commandes_download();
 		}
 		break;
 	// envoi le lien de téléchargement par email
 	case "send_download" :
 		if (is_download_module_active()) {
-			echo efface_download();
+			$output .=  efface_download();
 			send_mail_product_download(vn($_GET['commandeid']));
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MAIL_SENDED'] . " " . $_GET['email']))->fetch();
-			affiche_liste_commandes_download();
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MAIL_SENDED'] . " " . $_GET['email']))->fetch();
+			$output .= affiche_liste_commandes_download();
 		}
 		break;
 	// Par défaut, affichage la liste des commandes
 	default :
-		affiche_liste_commandes_admin();
+		$output .= affiche_liste_commandes_admin();
 		break;
 }
-
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
+echo $output;
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

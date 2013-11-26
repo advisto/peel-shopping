@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 37993 2013-09-02 16:46:19Z gboussin $
+// $Id: configuration.inc.php 38999 2013-11-25 15:23:25Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -36,6 +36,9 @@ if (function_exists('ini_set')) {
 	// Cette valeur est ensuite modifiée quand on accède à la base de données suivant la configuration du site
 	@ini_set('display_errors', 1);
 }
+// Initialisation de variable de gestion des erreurs
+$GLOBALS['display_errors'] = 0;
+
 if (!function_exists('ini_get') || @ini_get('register_globals')) {
 	// Code à laisser absolument en début de fichier
 	// Protection si register_globals est à ON
@@ -53,6 +56,7 @@ if (!function_exists('ini_get') || @ini_get('register_globals')) {
 		unset($value);
 	}
 }
+
 // ***********************************
 // * DEBUT CONFIGURATION PAR DEFAUT  *
 // Les valeurs ci-dessous sont ensuite remplacées après l'installation par les valeurs contenues dans la table peel_configuration
@@ -60,11 +64,14 @@ if (!function_exists('ini_get') || @ini_get('register_globals')) {
 $GLOBALS['site_parameters']['mysql_extension'] = 'mysqli'; // Mettre "mysqli" (par défaut, à laisser dans 99% des cas) ou "mysql". Si mysqli n'est pas disponible, mysql sera utilisé à la place
 $GLOBALS['site_parameters']['backoffice_directory_name'] = 'administrer'; // VOIR DANS FORCE SITE_PARAMETERS
 $GLOBALS['site_parameters']['cache_folder'] = 'cache';
-$GLOBALS['site_parameters']['css'] = 'screen.css,menu.css';
+$GLOBALS['site_parameters']['css'] = 'screen.css';
 $GLOBALS['site_parameters']['sha256_encoding_salt'] = "k)I8#;z=TIxnXmIPdW2TRzt4Ov89|#V~cU@]";
 $GLOBALS['site_parameters']['id'] = '1';
 $GLOBALS['site_parameters']['complete_lang_files'] = array('fr', 'en', 'es');
 $GLOBALS['site_parameters']['display_warning_if_connection_problem'] = true;
+$GLOBALS['site_parameters']['session_cookie_basename'] = 'sid'; // Valeur par défaut pour que l'installation ait bien le même nom de session que par la suite
+$GLOBALS['site_parameters']['bootstrap_enabled'] = true;
+$GLOBALS['site_parameters']['only_show_products_with_picture_in_containers'] = true;
 
 // Ci-dessous :
 // Valeurs par défaut de variables servant dans le processus installation car nécessaires dans les fichiers de langues 
@@ -80,12 +87,13 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.0.4');
+define('PEEL_VERSION', '7.1.0');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
 		define('PEEL_DEBUG', true);
 		define('DEBUG_TEMPLATES', true);
+		$GLOBALS['display_errors'] = 1;
 		break;
 	}
 }
@@ -176,8 +184,7 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/database.php");
 if (!IN_INSTALLATION && is_dir($GLOBALS['dirroot'] . '/installation')) {
 	// Le site est configuré mais a toujours le répertoire d'installation présent
 	$GLOBALS['installation_folder_active'] = true;
-}
-if (empty($GLOBALS['installation_folder_active']) || IN_INSTALLATION > 5) {
+} elseif (!IN_INSTALLATION) {
 	// Chargement des variables de connexion à la BDD et de la configuration wwwroot
 	require($GLOBALS['dirroot'] . "/lib/setup/info.inc.php");
 }
@@ -262,7 +269,6 @@ if (!IN_INSTALLATION) {
 // $GLOBALS['site_parameters']['site_suspended'] = true;
 // * FIN SITE_PARAMETERS *
 // ***********************************
-$GLOBALS['display_errors'] = 0;
 if (!isset($GLOBALS['site_parameters']['display_errors_for_ips'])) {
 	$GLOBALS['display_errors'] = 1;
 } elseif (!empty($GLOBALS['site_parameters']['display_errors_for_ips'])) {
@@ -287,6 +293,10 @@ if (function_exists('ini_set')) {
 	@ini_set("gd.jpeg_ignore_warning", 1); // Ignore les alertes créées par la fonction jpeg2wbmp() et la fonction imagecreatefromjpeg()
 	@ini_set('display_errors', $GLOBALS['display_errors']);
 }
+if (!empty($GLOBALS['site_parameters']['enable_gzhandler'])) {
+	ob_start('ob_gzhandler');
+}
+
 /*
  * Déclaration des sessions
  *
@@ -344,6 +354,19 @@ if (isset($_SESSION['session_user_agent'])) {
 if (!isset($_SESSION)) {
 	$_SESSION = array();
 }
+
+if(!empty($_SERVER['RAW_HTTP_COOKIE'])){
+	// On complète les informations de cookie si le serveur envoie les cookies encryptés, et donc refuse les cookies provenant du navigateur par sécurité
+	foreach(explode(';', $_SERVER['RAW_HTTP_COOKIE']) as $this_cookie){
+		if(strpos($this_cookie, '=') !== false){
+			list($key,$value) = explode('=', $this_cookie, 2);
+			$key = rawurldecode(trim($key));
+			if(!array_key_exists($key, $_COOKIE)){
+				$_COOKIE[$key] = rawurldecode(trim($value));
+			}
+		}
+	}
+}
 $GLOBALS['google_pub_count'] = 0;
 // Nettoyage des données et suppressions des magic_quotes si nécessaire
 // Doit être fait après l'ouverture de la session car ça retire le HTML des données si on n'est pas administrateur
@@ -359,11 +382,12 @@ if (function_exists('array_walk_recursive')) {
 	$_COOKIE = array_map('cleanDataDeep', $_COOKIE);
 	$_REQUEST = array_map('cleanDataDeep', $_REQUEST);
 }
-if (((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($_GET['devise']) || !empty($_GET['nombre'])) && is_user_bot()) {
+if (((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($_GET['devise']) || !empty($_GET['nombre'])) && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) {
 	// Page de MAJ du cache : les moteurs ne doivent pas pouvoir activer ou référencer ces pages => redirection 301
 	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre')), true);
 }
-if (IN_INSTALLATION >= 4) {
+
+if (IN_INSTALLATION >= 4 && empty($_SESSION['session_install_finished'])) {
 	if(!empty($_SESSION['session_install_utilisateur'])) {
 		// Pour l'installation, la connexion à la BDD ne peut avoir lieu qu'après avoir chargé les sesssions
 		$GLOBALS['serveur_mysql'] = $_SESSION['session_install_serveur'];
@@ -375,7 +399,10 @@ if (IN_INSTALLATION >= 4) {
 		redirect_and_die("bdd.php?err=1");
 	}
 	if (IN_INSTALLATION >= 5) {
-		if (!select_db($_SESSION['session_install_choixbase'], $GLOBALS['database_object'], true)) {
+		if(!empty($_SESSION['session_install_choixbase'])) {
+			$GLOBALS['nom_de_la_base'] = $_SESSION['session_install_choixbase'];
+		}
+		if (!select_db(vb($GLOBALS['nom_de_la_base']), $GLOBALS['database_object'], true)) {
 			redirect_and_die("choixbase.php?err=1");
 		}
 	}
@@ -423,6 +450,21 @@ if (is_module_url_rewriting_active()) {
 	require($rewritefile);
 }
 require($GLOBALS['dirroot'] . "/lib/fonctions/url_standard.php");
+
+if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
+	$modeles_dir = $GLOBALS['dirroot'] . "/modeles";
+	if ($handle = opendir($modeles_dir)) {
+		while ($file = readdir($handle)) {
+			if ($file != "." && $file != ".." && is_dir($modeles_dir . '/' . $file)) {
+				if(empty($GLOBALS['repertoire_modele']) || substr($GLOBALS['repertoire_modele'], 0, 4)!='peel') {
+					// On prend de préférence un répertoire de nom différent de peelXXX
+					$GLOBALS['site_parameters']['template_directory'] = $file;
+				}
+			}
+		}
+	}
+}
+$GLOBALS['repertoire_modele'] = $GLOBALS['dirroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']);
 
 $GLOBALS['lang_codes'] = array(); // Variable de session récuperant les codes Langue
 $GLOBALS['admin_lang_codes'] = array(); // Variable de session récuperant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
@@ -501,12 +543,20 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 		}
 	}
 }
+sort($GLOBALS['admin_lang_codes']);
+foreach($GLOBALS['lang_codes'] as $this_lang) {
+	// Ajout des gros drapeaux
+	if(file_exists($GLOBALS['dirroot'] . '/images/'.$this_lang.'.png')) {
+		$GLOBALS['lang_flags_big'][$this_lang] = $GLOBALS['wwwroot'] . '/images/'.$this_lang.'.png';
+	}
+}
 
 if(defined('IN_PEEL_ADMIN') || IN_INSTALLATION) {
 	// Chargement des fonctions d'administration
 	include($GLOBALS['dirroot'] . "/lib/fonctions/fonctions_admin.php");
 	$GLOBALS['load_admin_lang'] = true;
 }
+
 // Si nécessaire dans get_identified_lang, on redirige si langue pas définie
 $_SESSION['session_langue'] = get_identified_lang((defined('IN_PEEL_ADMIN')?$GLOBALS['admin_lang_codes']:$GLOBALS['lang_codes']));
 // On est maintenant sûr que la langue est correctement définie et que le fichier de langue associé existe
@@ -582,26 +632,23 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 	$_SESSION['session_devise']['conversion'] = 1;
 	$_SESSION['session_devise']['symbole_place'] = 1;
 }
-if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
-	$modeles_dir = $GLOBALS['dirroot'] . "/modeles";
-	if ($handle = opendir($modeles_dir)) {
-		while ($file = readdir($handle)) {
-			if ($file != "." && $file != ".." && is_dir($modeles_dir . '/' . $file)) {
-				if(empty($GLOBALS['repertoire_modele']) || substr($GLOBALS['repertoire_modele'], 0, 4)!='peel') {
-					// On prend de préférence un répertoire de nom différent de peelXXX
-					$GLOBALS['repertoire_modele'] = $modeles_dir . '/' . $file;
-				}
-			}
-		}
-	}
-} else {
-	$GLOBALS['repertoire_modele'] = $GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'];
-}
 
 if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
 	redirect_and_die(str_replace('http://', 'https://', get_current_url()), true);
+}
+
+// Si allow_w3c_validator_access_admin est défini à true (ce qui n'est pas le cas par défaut par sécurité), alors le moteur de validation W3C est autorisé pour accéder dans l'administration, en mode démo (limite les risques de faille de sécurité de le mettre en démo)
+$GLOBALS['force_demo_rights'] = (vb($GLOBALS['site_parameters']['allow_w3c_validator_access_admin']) && strpos($_SERVER['REMOTE_ADDR'], '128.30.52.') === 0 && substr(vb($_SERVER['HTTP_USER_AGENT']),0, 3) == 'W3C');
+if($GLOBALS['force_demo_rights']) {
+	// Emulation mode demo pour un utilisateur précis
+	$_SESSION['session_utilisateur']['priv'] = 'demo';
+	$_SESSION['session_utilisateur']['id_utilisateur'] = 9999999999999999999;
+	$_SESSION['session_utilisateur']['email'] = 'demo@demo.fr';
+	$_SESSION['session_utilisateur']['prenom'] = 'demo';
+	$_SESSION['session_utilisateur']['nom_famille'] = 'demo';
+	$_SESSION['session_utilisateur']['pseudo'] = 'demo';
 }
 
 // Chargement du moteur de template : Smarty ou Twig
@@ -632,17 +679,6 @@ include($GLOBALS['dirroot'] . "/lib/fonctions/display_user_forms.php");
 include($GLOBALS['dirroot'] . "/lib/fonctions/display_product.php");
 include($GLOBALS['dirroot'] . "/lib/fonctions/display_article.php");
 
-// Le moteur de validation W3C est autorisé pour accéder dans l'administration, en mode démo (limite les risques de faille de sécurité de le mettre en démo)
-$GLOBALS['force_demo_rights'] = (vb($GLOBALS['site_parameters']['allow_w3c_validator_access_admin']) && strpos($_SERVER['REMOTE_ADDR'], '128.30.52.') === 0 && substr(vb($_SERVER['HTTP_USER_AGENT']),0, 3) == 'W3C');
-if($GLOBALS['force_demo_rights']) {
-	// Emulation mode demo pour un utilisateur précis
-	$_SESSION['session_utilisateur']['priv'] = 'demo';
-	$_SESSION['session_utilisateur']['id_utilisateur'] = 9999999999999999999;
-	$_SESSION['session_utilisateur']['email'] = 'demo@demo.fr';
-	$_SESSION['session_utilisateur']['prenom'] = 'demo';
-	$_SESSION['session_utilisateur']['nom_famille'] = 'demo';
-	$_SESSION['session_utilisateur']['pseudo'] = 'demo';
-}
 if (defined('IN_PEEL_ADMIN')) {
 	// Protection de l'administration, qui vient en doublon de vérification en haut de chaque fichier d'admin
 	// pour plus de sécurité
@@ -659,7 +695,7 @@ if (defined('IN_PEEL_ADMIN')) {
 
 if (!IN_INSTALLATION) {
 	if (!defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && vb($GLOBALS['site_parameters']['site_suspended']) && !a_priv('admin*', false)) {
-		echo '<div align="center" style="font-size:14px;font-weight:bold;"><br /><br />' . $GLOBALS['STR_UPDATE_WEBSITE'] . '<br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
+		echo '<div class="center" style="font-size:14px; font-weight:bold;"><br /><br />' . $GLOBALS['STR_UPDATE_WEBSITE'] . '<br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
 		die();
 	}
 	// DEBUT DES MODULES OPTIONNELS :
@@ -733,7 +769,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Fonctions Thumbs
 	$GLOBALS['fonctionsthumbs'] = $GLOBALS['dirroot'] . "/modules/thumbs/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_thumbs_module_active()) {
+	if (is_thumbs_module_active()) {
 		include($GLOBALS['fonctionsthumbs']);
 	}
 	// Module de recherche par catégorie
@@ -1095,8 +1131,8 @@ if (!IN_INSTALLATION) {
 	if (!isset($_SESSION['session_ariane_panier']) || empty($_SESSION['session_ariane_panier'])) {
 		$_SESSION['session_ariane_panier'] = array('in_caddie' => false, 'in_step1' => false, 'in_step2' => false, 'in_step3' => false);
 	}
-	// suppression de la session session_redirect_after_login si un utilisateur sort de la page membre.php apr&ès une redirection sans s'être connecté
-	if ((!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'membre') !== false) && !empty($_SESSION['session_redirect_after_login']) && !est_identifie() && !defined('LOAD_NO_OPTIONAL_MODULE') && !defined('IN_ACCES_ACCOUNT')) {
+	// Suppression de la session session_redirect_after_login si un utilisateur sort de la page membre.php après une redirection sans s'être connecté
+	if ((!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'membre') !== false) && !empty($_SESSION['session_redirect_after_login']) && !est_identifie() && !defined('LOAD_NO_OPTIONAL_MODULE') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD')) {
 		unset($_SESSION['session_redirect_after_login']);
 	}
 }

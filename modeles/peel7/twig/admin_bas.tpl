@@ -3,22 +3,32 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_bas.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}</div>
-		<div class="main_footer_wide"><div class="main_footer"><a href="{{ site_href|escape('html') }}" style="margin-right:70px;">{{ site }}</a> <a href="{{ peel_website_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_PEEL_SOFTWARE }}</a> - {{ STR_ADMIN_VERSION }} {{ PEEL_VERSION }} - <a href="{{ sortie_href|escape('html') }}">{{ STR_ADMIN_DISCONNECT }}</a></div></div>
-		<div class="under_footer">{{ STR_ADMIN_SUPPORT }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ peel_website_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_CONTACT_PEEL }}</a> - {{ STR_ADMIN_CONTACT_PEEL_ADDRESS }}</div>
+// $Id: admin_bas.tpl 38980 2013-11-24 23:42:47Z gboussin $
+#}				</div>
+			</div>
+		</div>
+		<div class="push"></div>
+	</div>
+	<div id="footer">
+		<div class="container">
+			<footer class="footer">
+				<div class="main_footer_wide"><div class="main_footer">{% if (site) %}<a href="{{ site_href|escape('html') }}">{{ site }}</a> - {% endif %}<a href="{{ peel_website_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_PEEL_SOFTWARE }}</a> - {{ STR_ADMIN_VERSION }} {{ PEEL_VERSION }}</div></div>
+				<div class="under_footer">{{ STR_ADMIN_SUPPORT }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ peel_website_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_CONTACT_PEEL }}</a> - {{ STR_ADMIN_CONTACT_PEEL_ADDRESS }}</div>
+			</footer>
+		</div>
 	</div>
 	<!-- Fin Total -->
+	{{ js_output }}
 	{% if (peel_debug) %}
-		{% for key in peel_debug|keys %}
-			<span {% if peel_debug.key.duration<0.010 %}style="color:grey"{% else %}{% if peel_debug.key.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ peel_debug.key.duration*1000 }} ms - {% if (peel_debug.key.sql) %}{{ peel_debug.key.sql }}{% endif %} {% if (peel_debug.key.template) %}{{ peel_debug.key.template }}{% endif %}</span><br />
+		{% for key,value in peel_debug %}
+			<span {% if value.duration<0.010 %}style="color:grey"{% else %}{% if value.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ (value.duration*1000)|number_format(2) }} ms - {% if (value.sql) %}{{ value.sql }}{% endif %} {% if (value.template) %}{{ value.template }}{% endif %}</span><br />
 		{% endfor %}
 	{% endif %}
 </body>

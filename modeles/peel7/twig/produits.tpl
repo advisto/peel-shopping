@@ -3,45 +3,41 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: produits.tpl 38978 2013-11-24 23:18:34Z gboussin $
 #}{% if is_associated_product %}
 	<div class="associated_product">
 {% endif %}
 {% if (titre_mode) %}
 	{% if titre_mode == 'associated' %}
-		<h3 class="other_product_buy_title">{{ titre }}</h3>
+		<h{{ title_level }} class="other_product_buy_title">{{ titre }}</h{{ title_level }}>
 	{% elseif titre_mode == 'home' %}
-		<h2 class="home_title">{{ titre }}</h2>
+		<h{{ title_level }} class="home_title">{{ titre }}</h{{ title_level }}>
 	{% elseif titre_mode == 'category' %}
-		<table class="product_title"><tr><td><h2>{{ titre }}</h2></td><td class="right" style="padding-right: 10px;">{{ filtre }}</td></tr></table>
+		<h{{ title_level }} class="products_title">{{ titre }}</h{{ title_level }}><div class="pull-right">{{ filtre }}</div><div class="clearfix"></div>
 	{% elseif titre_mode == 'default' %}
-		<h2>{{ titre }}</h2>
+		<h{{ title_level }} class="products_title">{{ titre }}</h{{ title_level }}>
 	{% endif %}
 {% endif %}
 {% if no_results %}{% if (no_results_msg) %}<p>{{ no_results_msg }}</p>{% endif %}
 {% else %}
-	<table class="produits {% if allow_order %}allow_order{% endif %}">
+	<div class="produits row {% if allow_order %}allow_order{% endif %}">
 	{% for prod in products %}
 		{% if prods_line_mode %}
-		<tr>
-			<td{% if (titre_mode) and titre_mode == 'associated' %} property="isRelatedTo"{% endif %} typeof="product">
+		<div{% if (titre_mode) and titre_mode == 'associated' %} property="isRelatedTo"{% endif %} typeof="product" class="{% if prod.display_border %} bordure{% endif %} col-sm-12 center">
 		{% else %}
-			{% if prod.is_row %}
-		<tr>
-			{% endif %}
-			<td{% if (titre_mode) and titre_mode == 'associated' %} property="isRelatedTo"{% endif %} typeof="product" class="produit_col{% if prod.display_border %} bordure{% endif %}">
+		<div{% if (titre_mode) and titre_mode == 'associated' %} property="isRelatedTo"{% endif %} typeof="product" class="produit_col{% if prod.display_border %} bordure{% endif %} col-sm-{{ (12 // nb_col_sm) }} col-md-{{ (12 // nb_col_md) }} center">
 		{% endif %}
 		{% if (prod.save_cart) %}
 				<div class="save_cart_individual_action">
 					<img src="{{ prod.save_cart.src|escape('html') }}" width="8" height="11" alt="" />
-					<a href="{{ prod.save_cart.href|escape('html') }}" onclick="return confirm('{{ prod.save_cart.confirm_msg|filtre_javascript(true,true,true) }}');" title="{{ prod.save_cart.title }}">{{ prod.save_cart.label }}</a>
+					<a href="{{ prod.save_cart.href|escape('html') }}" data-confirm="{{ prod.save_cart.confirm_msg|str_form_value }}" title="{{ prod.save_cart.title }}">{{ prod.save_cart.label }}</a>
 				</div>
 		{% endif %}
 		{% if prods_line_mode %}
@@ -55,33 +51,31 @@
 			{% endif %}
 					<tr>
 						<td class="col_image">
-							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
+							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width|str_form_value }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height|str_form_value }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>
 						</td>
 						<td class="col_product_description">
 							<table>
 								<tr>
-									<td><a property="url" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}"><span property="name">{{ prod.name }}</span></a></td>
+									<td class="fc_titre_produit"><a property="url" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}"><span property="name">{{ prod.name }}</span></a></td>
 								</tr>
 								<tr>
-									<td><p style="text-align:justify;color:#9D9D9D;">{{ prod.description }}</p></td>
+									<td><p><a href="{{ prod.href|escape('html') }}" class="col_description">{{ prod.description }}</a></p></td>
 								</tr>
 							</table>
 						</td>
-						<td style="text-align:center; width:12%;">
+						<td style="text-align:center; width:22%;">
 			{% if (prod.on_estimate) %}
 							{{ prod.on_estimate }}
 			{% endif %}
 						</td>
-						<td style="text-align:center; width:10%;">
-			{% if (prod.stock_state) %}
-								{{ prod.stock_state }}
-			{% endif %}
-						</td>
 						<td class="col_zoom" style="width:10%;">
 			{% if (prod.image.zoom) %}
-							<a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
+							<a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox" onclick="return false;"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
 			{% endif %} <br />
 							<p class="col_detail"><a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}">{{ details_text }}</a></p>
+			{% if (prod.stock_state) %}
+							{{ prod.stock_state }}
+			{% endif %}
 						</td>
 			{% if (prod.check_critere_stock) %}
 						<td class="fc_add_to_cart">
@@ -92,45 +86,35 @@
 					</tr>
 			{% if (prod.admin) %}
 					<tr>
-						<td colspan="6"><a href="{{ prod.admin.href|escape('html') }}" class="label">{{ prod.admin.label }}</a></td>
+						<td colspan="6"><a href="{{ prod.admin.href|escape('html') }}" class="title_label">{{ prod.admin.label }}</a></td>
 					</tr>
 			{% endif %}
 				</table><hr />
 		{% else %}
 				<table class="{{ cartridge_product_css_class }}">
-			{% if (prod.flash) %}
 					<tr>
-						<td colspan="2" class="fc_flash">{{ prod.flash }}</td>
-					</tr>
-			{% endif %}
-					<tr>
-						<td colspan="2" class="fc_titre_produit">
+						<td class="fc_titre_produit">
 							<a property="url" title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><span property="name">{{ prod.name }}</span></a>
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" class="fc_image center middle" style="width:{{ small_width }}px; height:{{ small_height }}px;">
-							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
+						<td class="fc_image center middle" style="width:{{ small_width }}px; height:{{ small_height }}px;">
+							<span class="image_zoom">
+								<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
+								{% if (prod.image.zoom) %}<span class="fc_zoom"><a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox" onclick="return false;"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>{% endif %}
+							</span>
 						</td>
 					</tr>
-					{% if (details_text) %}
 					<tr>
-						<td colspan="2" class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% endif %}</td>
-					</tr>
-					{% endif %}
-					<tr>
-						<td class="fc_zoom">
-							{% if (prod.image.zoom) %}
-							<a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
-							{% elseif details_text=='' %}
-							<a href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}">{{ prod.image.zoom.label }}</a>
+						<td>
+							{% if (prod.description) %}
+							<div class="description_text"><a href="{{ prod.href|escape('html') }}">{{ prod.description }}</a></div>
 							{% endif %}
+							{% if (prod.flash) %}
+							<div class="alert alert-warning">{{ prod.flash }}</div>
+							{% endif %}
+							{% if (prod.on_estimate) %}<div class="fc_prix">{{ prod.on_estimate }}</div>{% endif %}							
 						</td>
-						{% if (details_text) %}
-						<td class="fc_detail"><a class="plus_detail" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}">{{ details_text }}</a></td>
-						{% else %}
-						<td class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% endif %}</td>
-						{% endif %}
 					</tr>
 			{% if (prod.check_critere_stock) %}
 					<tr>
@@ -142,18 +126,17 @@
 			{% endif %}
 				</table>
 		{% endif %}
-			</td>
-		{% if (prod.empty_cells) %}
-			{% for var in 1..prod.empty_cells %}
-			<td></td>
-			{% endfor %}
-		</tr>
+		</div>
+		{% if prod.i%nb_col_md==0 %}
+		<div class="clearfix visible-md visible-lg"></div>
+		{% endif %}
+		{% if prod.i%nb_col_sm==0 %}
+		<div class="clearfix visible-sm"></div>
 		{% endif %}
 	{% endfor %}
-		<tr>
-			<td class="center" colspan="{{ n_columns }}">{{ multipage }}</td>
-		</tr>
-	</table>
+	</div>
+	<div class="clearfix"></div>
+	<div class="center">{{ multipage }}</div>
 {% endif %}
 {% if is_associated_product %}
 </div>

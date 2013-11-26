@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: emails.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -83,12 +83,12 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	if (!empty($from)) {
 		// Au cas où $from ait plusieurs adresses emails (variable support par exemple)
 		if ($from == $GLOBALS['support']) {
-			$nom_expediteur = vb($GLOBALS['site_parameters']['nom_expediteur']);
+			$nom_expediteur = trim(vb($GLOBALS['site_parameters']['nom_expediteur']));
 		} else {
 			$nom_expediteur = '';
 		}
 		$from_array = explode(',', str_replace(';', ',', $from));
-		$from = $from_array[0];
+		$from = trim($from_array[0]);
 		// création du header de l'email
 		if (!empty($nom_expediteur)) {
 			$mail_header .= "From: " . $nom_expediteur . ' <' . $from . '>' . $eol;
@@ -98,7 +98,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		if (!empty($reply_to)) {
 			// Au cas où $reply_to ait plusieurs adresses emails (variable support par exemple)
 			$reply_to_array = explode(',', str_replace(';', ',', $reply_to));
-			$reply_to = $reply_to_array[0];
+			$reply_to = trim($reply_to_array[0]);
 			$mail_header .= "Reply-To: " . $reply_to . "" . $eol;
 		} else {
 			$mail_header .= "Reply-To: " . $from . "" . $eol;
@@ -189,6 +189,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$result = false;
 	$i = 0;
 	foreach($to_array as $this_email) {
+		$this_email = trim($this_email);
 		if (empty($this_email) || $i > 10) {
 			// Limitation à 10 destinataires en même temps par sécurité
 			continue;

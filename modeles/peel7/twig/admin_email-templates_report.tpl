@@ -3,24 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_report.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_email-templates_report.tpl 38952 2013-11-23 12:07:36Z gboussin $
 #}{% if (results) %}
 <br />
-<center>
-	<table class="full_width" style="margin-bottom:5px" border="1" cellpadding="5">
-		<tr>
-			<td class="entete" colspan="9">{{ STR_ADMIN_EMAIL_TEMPLATES_TITLE }}</th>
-		</tr>
-		<tr>
-			<th colspan="9">{{ links_multipage }}</th>
-		</tr>
+<div class="entete">{{ STR_ADMIN_EMAIL_TEMPLATES_TITLE }}</div>
+<div>{{ links_multipage }}</div>
+<div class="table-responsive email_templates_report">
+	<table class="table">
 		<tr>
 			<th class="menu">{{ STR_ADMIN_ID }}</th>
 			<th class="menu">{{ STR_ADMIN_TECHNICAL_CODE }}</th>
@@ -45,7 +41,7 @@
 			<td class="center"><a href="{{ res.edit_href|escape('html') }}">{{ STR_MODIFY }}</a></td>
 		</tr>
 		{% endfor %}
-{% endif %}
 	</table>
-</center>
-{{ links_multipage }}
+</div>
+<div>{{ links_multipage }}</div>
+{% endif %}

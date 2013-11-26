@@ -3,37 +3,37 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: langues.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: langues.php 38906 2013-11-21 14:50:54Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_LANGUES_TITLE'];
-include("modeles/haut.php");
 
 $frm = $_POST;
 $form_error_object = new FormError();
+$output =  '';
 
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :
-		affiche_formulaire_ajout_langue($frm);
+		$output .= affiche_formulaire_ajout_langue($frm);
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_langue($_GET['id'], $frm);
+		$output .= affiche_formulaire_modif_langue($_GET['id'], $frm);
 		break;
 
 	case "suppr" :
-		supprime_langue($_GET['id']);
-		affiche_liste_langue();
+		$output .= supprime_langue($_GET['id']);
+		$output .= affiche_liste_langue();
 		break;
 
 	case "insere" :
@@ -41,13 +41,13 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			echo insere_langue($_POST);
-			affiche_liste_langue();
+			$output .= insere_langue($_POST);
+			$output .= affiche_liste_langue();
 		} else {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
 			}
-			affiche_formulaire_ajout_langue($frm);
+			$output .= affiche_formulaire_ajout_langue($frm);
 		}
 		break;
 
@@ -56,30 +56,32 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			maj_langue($_POST['id'], $_POST);
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_LANGUES_MSG_UPDATE_OK'], vn($_POST['id']))))->fetch();
-			affiche_liste_langue();
+			$output .= maj_langue($_POST['id'], $_POST);
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_LANGUES_MSG_UPDATE_OK'], vn($_POST['id']))))->fetch();
+			$output .= affiche_liste_langue();
 		} else {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
 			}
-			affiche_formulaire_modif_langue($_POST['id'], $frm);
+			$output .= affiche_formulaire_modif_langue($_POST['id'], $frm);
 		}
 		break;
 
 	case "repair" :
 		foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-			echo insere_langue(array('lang' => $this_lang), true, vb($_GET['full']));
+			$output .= insere_langue(array('lang' => $this_lang), true, vb($_GET['full']));
 		}
-		affiche_liste_langue();
+		$output .= affiche_liste_langue();
 		break;
 
 	default :
-		affiche_liste_langue();
+		$output .= affiche_liste_langue();
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
+echo $output;
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -109,7 +111,7 @@ function affiche_formulaire_ajout_langue(&$frm)
 	$frm['lang'] = "";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_LANGUES_ADD_LANGUAGE'];
 
-	affiche_formulaire_langue($frm);
+	return affiche_formulaire_langue($frm);
 }
 
 /**
@@ -129,14 +131,13 @@ function affiche_formulaire_modif_langue($id, &$frm)
 			WHERE id = " . intval($id));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_ERR_LANGUAGE_NOT_FOUND']))->fetch();
-			return false;
+			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_ERR_LANGUAGE_NOT_FOUND']))->fetch();
 		}
 	}
 	$frm['id'] = $id;
 	$frm["nouveau_mode"] = "maj";
 	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-	affiche_formulaire_langue($frm);
+	return affiche_formulaire_langue($frm);
 }
 
 /**
@@ -180,7 +181,7 @@ function affiche_formulaire_langue(&$frm)
 	$tpl->assign('STR_ADMIN_LANGUES_URL_REWRITING', $GLOBALS['STR_ADMIN_LANGUES_URL_REWRITING']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }
 
 /**
@@ -199,7 +200,7 @@ function supprime_langue($id)
 	/* Efface la langue */
 	query("DELETE FROM peel_langues
 		WHERE id = " . intval($id));
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_LANGUES_MSG_LANGUAGE_DELETED'], $l['nom'])))->fetch();
+	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_LANGUES_MSG_LANGUAGE_DELETED'], $l['nom'])))->fetch();
 }
 
 /**
@@ -212,8 +213,7 @@ function supprime_langue($id)
 function maj_langue($id, $frm)
 {
 	if (empty($frm['lang']) || String::strlen($frm['lang']) != 2) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_FORMAT_EXPLAIN']))->fetch();
-		return false;
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_FORMAT_EXPLAIN']))->fetch();
 	}
 	/* Met à jour la table langue */
 
@@ -240,8 +240,9 @@ function maj_langue($id, $frm)
  */
 function affiche_liste_langue()
 {
+	$output = '';
 	if (is_annonce_module_active()) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_WARNING']))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_WARNING']))->fetch();
 	}
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_langue.tpl');
@@ -256,7 +257,7 @@ function affiche_liste_langue()
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'lang' => $ligne['lang'],
@@ -270,6 +271,7 @@ function affiche_liste_langue()
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=langues';
 	$tpl->assign('STR_ADMIN_LANGUES_TITLE', $GLOBALS['STR_ADMIN_LANGUES_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUES_ADD_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUES_ADD_LANGUAGE']);
 	$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
@@ -288,7 +290,8 @@ function affiche_liste_langue()
 	$tpl->assign('STR_ADMIN_URL_REWRITING', $GLOBALS['STR_ADMIN_URL_REWRITING']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_ADMIN_LANGUES_REPAIR_LINK', $GLOBALS['STR_ADMIN_LANGUES_REPAIR_LINK']);
-	echo $tpl->fetch();
+	$output .= $tpl->fetch();
+	return $output;
 }
 
 ?>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: meta.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: meta.php 38919 2013-11-21 23:14:41Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -18,7 +18,7 @@ necessite_identification();
 necessite_priv("admin_content,admin_webmastering");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_META_PAGE_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $id = vb($_REQUEST['id']);
 
@@ -27,13 +27,19 @@ $frm = $_POST;
 
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :
-		affiche_formulaire_ajout_meta();
+		affiche_formulaire_ajout_meta($frm);
 		break;
 
 	case "modif" :
 		affiche_formulaire_modif_meta($id, $frm);
 		break;
 
+	case "suppr" :
+		supprime_meta($id);
+		affiche_liste_meta();
+		break;
+
+	case "insere" :
 	case "maj" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
@@ -45,7 +51,11 @@ switch (vb($_REQUEST['mode'])) {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
 			}
-			affiche_formulaire_modif_meta($_GET['id'], $frm);
+			if(!empty($_GET['id'])) {
+				affiche_formulaire_modif_meta($_GET['id'], $frm);
+			} else {
+				affiche_formulaire_ajout_meta($frm);
+			}
 		}
 		break;
 
@@ -54,7 +64,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -84,6 +94,26 @@ function affiche_formulaire_modif_meta($id, &$frm)
 }
 
 /**
+ * Affiche un formulaire vierge pour ajouter une information de meta
+ *
+ * @param array $frm Array with all fields data
+ * @return
+ */
+function affiche_formulaire_ajout_meta(&$frm)
+{
+	/* Valeurs par défaut */
+	if(empty($frm)) {
+		$frm = array();
+		$frm['technical_code'] = "";
+	}
+	$frm['nouveau_mode'] = "insere";
+	$frm['id'] = "";
+	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_ADD'];
+
+	affiche_formulaire_meta($frm);
+}
+
+/**
  * affiche_formulaire_meta()
  *
  * @param array $frm Array with all fields data
@@ -99,15 +129,16 @@ function affiche_formulaire_meta(&$frm)
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
-			'meta_titre' => $frm['meta_titre_' . $lng],
-			'meta_key' => $frm['meta_key_' . $lng],
-			'meta_desc' => $frm['meta_desc_' . $lng],
+			'meta_titre' => vb($frm['meta_titre_' . $lng]),
+			'meta_key' => vb($frm['meta_key_' . $lng]),
+			'meta_desc' => vb($frm['meta_desc_' . $lng]),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
-	$tpl->assign('technical_code', $frm['technical_code']);
+	$tpl->assign('technical_code', vb($frm['technical_code']));
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_OR', $GLOBALS['STR_OR']);
 	$tpl->assign('STR_ADMIN_META_PAGE_TITLE', $GLOBALS['STR_ADMIN_META_PAGE_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_META_TITLE', $GLOBALS['STR_ADMIN_META_TITLE']);
@@ -141,17 +172,23 @@ function supprime_meta($id)
  */
 function maj_meta($id, $frm)
 {
-	$sql = 'UPDATE peel_meta SET
-		technical_code = "' . word_real_escape_string($frm['technical_code']) . '"';
+	if(empty($id)) {
+		$sql = 'INSERT INTO';
+	} else {
+		$sql = 'UPDATE';
+	}
+	$sql .= ' peel_meta SET
+			technical_code = "' . word_real_escape_string($frm['technical_code']) . '"';
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= '
-		, meta_titre_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . '"
-		, meta_key_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_key_' . $lng]) . '"
-		, meta_desc_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . '"';
+			, meta_titre_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . '"
+			, meta_key_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_key_' . $lng]) . '"
+			, meta_desc_' . $lng . ' = "' . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . '"';
 	}
-	$sql .= '
+	if(!empty($id)) {
+		$sql .= '
 		WHERE id = ' . intval($id);
-
+	}
 	/* Met à jour la table meta */
 	$qid = query($sql);
 }
@@ -170,11 +207,12 @@ function affiche_liste_meta()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		while ($ligne = fetch_assoc($result)) {
-			// On génère le lien vers les méta ici :
-			// - si le titre est vide, on se sert de la description, sinon des mots clé
+			// On génère le lien vers les métas ici :
+			// - si le titre est vide, on se sert de la description, sinon des mots clés
 			$meta_titre = String::html_entity_decode_if_needed(trim($ligne['meta_titre_' . $_SESSION['session_langue']]));
 			$meta_desc = String::html_entity_decode_if_needed(trim($ligne['meta_desc_' . $_SESSION['session_langue']]));
 			$meta_key = String::html_entity_decode_if_needed(trim($ligne['meta_key_' . $_SESSION['session_langue']]));
+			$anchor= '';
 			if (!empty($meta_titre)) {
 				$anchor = $meta_titre;
 			} elseif (!empty($meta_desc)) {
@@ -186,13 +224,20 @@ function affiche_liste_meta()
 				}
 				$anchor .= ' ...';
 			}
+			if(empty($anchor)) {
+				$anchor .= '['.$ligne['id'].']';
+			}
 			$tpl_results[] = array('href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'technical_code' => $ligne['technical_code'],
-				'anchor' => $anchor
+				'anchor' => $anchor,
+				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id']
 				);
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
+	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
+	$tpl->assign('STR_ADMIN_ADD', $GLOBALS['STR_ADMIN_ADD']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_META_PAGE_TITLE', $GLOBALS['STR_ADMIN_META_PAGE_TITLE']);
 	$tpl->assign('STR_ADMIN_META_UPDATE', $GLOBALS['STR_ADMIN_META_UPDATE']);

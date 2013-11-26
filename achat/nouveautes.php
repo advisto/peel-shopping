@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nouveautes.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: nouveautes.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 
 define("IN_NOUVEAUTES", true);
 $page_name = 'nouveautes';
 
-$output = affiche_produits(null, null, "nouveaute", vn($GLOBALS['site_parameters']['nb_produit_page']), 'general', true);
+$output = affiche_produits(null, 1, "nouveaute", vn($GLOBALS['site_parameters']['nb_produit_page']), 'general', true);
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;

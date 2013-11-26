@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 37934 2013-08-28 15:09:20Z sdelaporte $
+// $Id: index.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,7 +21,11 @@ if (file_exists($GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['backoff
 }
 
 if (is_chart_module_active()) {
-	include('../modules/chart/open_flash_chart_object.php');
+	if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+		include($GLOBALS['dirroot'] . '/modules/chart/flot.php');
+	} else {
+		include($GLOBALS['dirroot'] . '/modules/chart/open_flash_chart_object.php');
+	}
 }
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_INDEX_TITLE'];
@@ -69,9 +73,9 @@ $tpl->assign('example_href', $GLOBALS['wwwroot'] . '/import/exemple_prod.csv');
 $tpl->assign('STR_ADMIN_INDEX_SECURITY_WARNING', $GLOBALS['STR_ADMIN_INDEX_SECURITY_WARNING']);
 $output .= $tpl->fetch();
 
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * backoffice_home_block()
@@ -86,7 +90,8 @@ function backoffice_home_block($content_code, $title_bg_color, $return_mode = fa
 	$block_content = get_home_block_content($content_code);
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_backoffice_home_block.tpl');
-	$tpl->assign('bg_src', $GLOBALS['administrer_url'] . '/modeles/images/' . get_block_header_image(String::strtolower($title_bg_color)));
+	$tpl->assign('bg_src', $GLOBALS['repertoire_images'] .'/'. get_block_header_image(String::strtolower($title_bg_color)));
+	$tpl->assign('title_bg_color', $title_bg_color);
 	$tpl->assign('link', $block_content['link']);
 	$tpl->assign('title', $block_content['title']);
 	$tpl->assign('logo', $block_content['logo']);
@@ -126,11 +131,11 @@ function get_home_block_content($content_code)
 	switch ($content_code) {
 		case 'orders':
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_ORDERS_LIST'];
-			$block_content['logo'] = $GLOBALS['administrer_url'] . '/modeles/images/orders.jpg';
+			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/orders.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/commander.php';
 			
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_orders_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('link', $block_content['link']);
 			$tpl1->assign('STR_ADMIN_INDEX_ORDERS_DESC1', $GLOBALS['STR_ADMIN_INDEX_ORDERS_DESC1']);
 			$tpl1->assign('STR_ADMIN_INDEX_SHOW_ORDERS', $GLOBALS['STR_ADMIN_INDEX_SHOW_ORDERS']);
@@ -184,11 +189,11 @@ function get_home_block_content($content_code)
 
 		case 'sales':
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_SALES_REPORT'];
-			$block_content['logo'] = $GLOBALS['administrer_url'] . '/modeles/images/sales.jpg';
+			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/sales.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/ventes.php';
 			
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_sales_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('link', $block_content['link']);
 			$tpl1->assign('STR_ADMIN_INDEX_SALES_DESC1', $GLOBALS["STR_ADMIN_INDEX_SALES_DESC1"]);
 			$tpl1->assign('STR_ADMIN_INDEX_SALES_LINK', $GLOBALS["STR_ADMIN_INDEX_SALES_LINK"]);
@@ -196,7 +201,11 @@ function get_home_block_content($content_code)
 
 			if (is_chart_module_active()) {
 				$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_home_sales_desc2.tpl');
-				$tpl2->assign('flash_chart', open_flash_chart_object_str(288, 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=sales&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					$tpl2->assign('flash_chart', get_flot_chart('100%', 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=sales&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', 'bar', $GLOBALS['wwwroot'] . '/modules/chart/', 'date_format_veryshort'));
+				} else {
+					$tpl2->assign('flash_chart', open_flash_chart_object_str('100%', 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=sales&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				}
 				$tpl2->assign('STR_ADMIN_INDEX_LAST_SALES', $GLOBALS['STR_ADMIN_INDEX_LAST_SALES']);
 				$tpl2->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 				$block_content['description2'] = $tpl2->fetch();
@@ -205,18 +214,22 @@ function get_home_block_content($content_code)
 
 		case 'products':
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_PRODUCTS_REPORT'];
-			$block_content['logo'] = $GLOBALS['administrer_url'] . '/modeles/images/products.jpg';
+			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/products.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/produits.php';
 			
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_products_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('link', $block_content['link']);
 			$tpl1->assign('STR_ADMIN_INDEX_PRODUCTS_REPORT', $GLOBALS["STR_ADMIN_INDEX_PRODUCTS_REPORT"]);
 			$tpl1->assign('STR_ADMIN_INDEX_PRODUCTS_DESC1', $GLOBALS["STR_ADMIN_INDEX_PRODUCTS_DESC1"]);
 			$block_content['description1'] = $tpl1->fetch();
 			if (is_chart_module_active()) {
 				$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_home_products_desc2.tpl');
-				$tpl2->assign('flash_chart', open_flash_chart_object_str(288, 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=product-categories&date1=' . date('Y-m-d', time() - 3600 * 24 * 7) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					$tpl2->assign('flash_chart', get_flot_chart('100%', 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=product-categories&date1=' . date('Y-m-d', time() - 3600 * 24 * 7) . '&date2=' . date('Y-m-d', time()) . '&width=288', 'pie', $GLOBALS['wwwroot'] . '/modules/chart/'));
+				} else {
+					$tpl2->assign('flash_chart', open_flash_chart_object_str('100%', 190, $GLOBALS['administrer_url'] . '/chart-data.php?type=product-categories&date1=' . date('Y-m-d', time() - 3600 * 24 * 7) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				}
 				$tpl2->assign('STR_ADMIN_PRODUCTS_CATEGORY', $GLOBALS['STR_ADMIN_PRODUCTS_CATEGORY']);
 				$tpl2->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 				$block_content['description2'] = $tpl2->fetch();
@@ -225,11 +238,11 @@ function get_home_block_content($content_code)
 
 		case 'delivery':
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_DELIVERY_REPORT'];
-			$block_content['logo'] = $GLOBALS['administrer_url'] . '/modeles/images/delivery.jpg';
+			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/delivery.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/livraisons.php';
 			
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_delivery_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('link', $block_content['link']);
 			$tpl1->assign('STR_ADMIN_INDEX_DELIVERY_DESC1', $GLOBALS['STR_ADMIN_INDEX_DELIVERY_DESC1']);
 			$tpl1->assign('STR_ADMIN_INDEX_GENERATE_REPORT', $GLOBALS['STR_ADMIN_INDEX_GENERATE_REPORT']);
@@ -267,17 +280,21 @@ function get_home_block_content($content_code)
 
 		case 'users':
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_USERS_LIST'];
-			$block_content['logo'] = $GLOBALS['administrer_url'] . '/modeles/images/users.jpg';
+			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/users.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/utilisateurs.php';
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_users_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('link', $block_content['link']);
 			$tpl1->assign('STR_ADMIN_INDEX_USERS_DESC1', $GLOBALS["STR_ADMIN_INDEX_USERS_DESC1"]);
 			$tpl1->assign('STR_ADMIN_INDEX_USERS_LINK', $GLOBALS["STR_ADMIN_INDEX_USERS_LINK"]);
 			$block_content['description1'] = $tpl1->fetch();
 			if (is_chart_module_active()) {
 				$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_home_users_desc2.tpl');
-				$tpl2->assign('flash_chart', open_flash_chart_object_str(288, 170, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					$tpl2->assign('flash_chart', get_flot_chart('100%', 170, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', 'line', $GLOBALS['wwwroot'] . '/modules/chart/', 'date_format_veryshort'));
+				} else {
+					$tpl2->assign('flash_chart', open_flash_chart_object_str('100%', 170, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time() - 3600 * 24 * 30) . '&date2=' . date('Y-m-d', time()) . '&width=288', true, $GLOBALS['wwwroot'] . '/modules/chart/'));
+				}
 				$tpl2->assign('STR_ADMIN_INDEX_LAST_USERS', $GLOBALS['STR_ADMIN_INDEX_LAST_USERS']);
 				$tpl2->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 				$block_content['description2'] = $tpl2->fetch();
@@ -289,7 +306,7 @@ function get_home_block_content($content_code)
 			$block_content['logo'] = '';
 			$block_content['link'] = 'https://www.peel.fr/';
 			$tpl1 = $GLOBALS['tplEngine']->createTemplate('admin_home_peel_desc1.tpl');
-			$tpl1->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/arrow_right.jpg');
+			$tpl1->assign('src', $GLOBALS['repertoire_images'] . '/arrow_right.jpg');
 			$tpl1->assign('STR_ADMIN_INDEX_PEEL_DESC1', $GLOBALS['STR_ADMIN_INDEX_PEEL_DESC1']);
 			$tpl1->assign('STR_ADMIN_INDEX_PEEL_LAST_OFFERS', $GLOBALS['STR_ADMIN_INDEX_PEEL_LAST_OFFERS']);
 			$tpl1->assign('last_offers_href', 'https://www.peel.fr/solution-e-commerce-1/peel-premium-1.html');
@@ -301,7 +318,7 @@ function get_home_block_content($content_code)
 
 			$tpl2 = $GLOBALS['tplEngine']->createTemplate('admin_home_peel_desc2.tpl');
 			$tpl2->assign('link', $block_content['link']);
-			$tpl2->assign('src', $GLOBALS['administrer_url'] . '/modeles/images/peel.jpg');
+			$tpl2->assign('src', $GLOBALS['repertoire_images'] . '/peel.jpg');
 			$block_content['description2'] = $tpl2->fetch();
 			break;
 		default:

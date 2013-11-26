@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: display_caddie.php 38908 2013-11-21 16:22:31Z gboussin $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -29,7 +29,7 @@ if (!function_exists('get_caddie_content_html')) {
 	{
 		$output = '';
 		$listcadeaux_owner = '';
-		// vérifie pour offrir les frais de port que le seuil d'offre ou le nombre de produits sont différents de 0
+		// Vérifie pour offrir les frais de port que le seuil d'offre ou le nombre de produits sont différents de 0
 		// si différent de 0, on 'construit' le message à afficher
 		// Attention : un test !empty ne marche pas sur seuil_total_used car au format "0.00"
 		$seuil_total_used = (is_reseller_module_active() && is_reseller()) ? $GLOBALS['site_parameters']['seuil_total_reve'] : $GLOBALS['site_parameters']['seuil_total'];
@@ -45,7 +45,7 @@ if (!function_exists('get_caddie_content_html')) {
 		}
 		if (round($seuil_total_used, 2) > 0 || !empty($GLOBALS['site_parameters']['nb_product']) || (!empty($on_franco_amount) && round($on_franco_amount, 2) > 0) || (!empty($on_franco_nb_products) && $on_franco_nb_products > 0)) {
 			$shipping_text .= $GLOBALS['STR_SHIPPING_COST'] . ' (' . $GLOBALS['STR_OFFERED'] . ' ';
-			// Le seuil d'exonération des frais de port pour une zone est prioritaire sur le seuil d'exonération des frais de port de la configuration général de la boutique
+			// Le seuil d'exonération des frais de port pour une zone est prioritaire sur le seuil d'exonération des frais de port de la configuration générale de la boutique
 			if((!empty($on_franco_amount) && round($on_franco_amount, 2) > 0) || (!empty($on_franco_nb_products) && $on_franco_nb_products > 0)) {
 				$shipping_text .= !empty($on_franco_amount)? $GLOBALS['STR_FROM'] . ' ' . fprix($on_franco_amount, true) . ' ' . $GLOBALS['STR_TTC'] : '';
 				if(!empty($on_franco_nb_products)) {
@@ -65,7 +65,6 @@ if (!function_exists('get_caddie_content_html')) {
 		
 		if(!($_SESSION['session_caddie']->count_products() == 0)){
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-			
 			if (is_module_vacances_active() && get_vacances_type() == 1) {
 				$tpl->assign('global_error', vb($GLOBALS['site_parameters']['module_vacances_client_msg_' . $_SESSION['session_langue']]));
 			}
@@ -510,7 +509,8 @@ if (!function_exists('affiche_resume_commande')) {
 				$tpl->assign('STR_ORDER_STATUT_PAIEMENT', $GLOBALS['STR_ORDER_STATUT_PAIEMENT']);
 				$tpl->assign('STR_ORDER_STATUT_LIVRAISON', $GLOBALS['STR_ORDER_STATUT_LIVRAISON']);
 				$tpl->assign('order_statut_livraison_name', get_delivery_status_name($commande->id_statut_livraison));
-				if (in_array($commande->id_statut_paiement, array(2,3))) {
+				if (!empty($commande->numero)) {
+					// Si le numéro de facture a été créé (ce moment est paramétrable dans la page de configuration du site), alors on transmet l'information sur la facture
 					$tpl->assign('STR_INVOICE', $GLOBALS['STR_INVOICE']);
 					$tpl->assign('STR_PRINT_YOUR_BILL', $GLOBALS['STR_PRINT_YOUR_BILL']);
 					$tpl->assign('invoice', array(
@@ -620,11 +620,13 @@ if (!function_exists('affiche_liste_commandes')) {
 			$tpl->assign('STR_PDF_BILL', $GLOBALS['STR_PDF_BILL']);
 			$orders = array();
 			foreach ($results_array as $order) {
+				// Si le numéro de facture a été créé (ce moment est paramétrable dans la page de configuration du site), alors on transmet l'information sur la facture
 				$orders[] = array(
 					'href' =>  get_current_url(false) . '?mode=details&id=' . $order['id'] . '&timestamp=' . urlencode($order['o_timestamp']),
 					'info_src' => $GLOBALS['wwwroot'] . '/icones/info.gif',
 					'pdf_src' => $GLOBALS['wwwroot'] . '/images/view_pdf.gif',
 					'facture_href' => (!empty($order['numero'])? $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . $order['code_facture'] . '&mode=facture':''),
+					'id' => $order['id'],
 					'numero' => $order['numero'],
 					'date' => get_formatted_date($order['o_timestamp']),
 					'payment_status_name' => get_payment_status_name($order['id_statut_paiement']),
@@ -779,6 +781,9 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					$prix_cat_displayed = $prix_cat_ht;
 					$prix_avant_code_promo_sans_option_displayed = $_SESSION['session_caddie']->prix_ht_avant_code_promo[$numero_ligne] - $_SESSION['session_caddie']->option_ht[$numero_ligne] * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100);
 					$total_prix_displayed = $total_prix_ht;
+				}
+				if (is_attributes_module_active() && !empty($product_object->configuration_attributs_description)) {
+					$product_object->configuration_attributs_description = display_option_image($product_object->configuration_attributs_description, true);
 				}
 				$tmpProd = array(
 					'delete_href' => $GLOBALS['wwwroot'] . '/achat/caddie_affichage.php?func=enleve&ligne=' . $numero_ligne . '&id=' . $product_object->id,

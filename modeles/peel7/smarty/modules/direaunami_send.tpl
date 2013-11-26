@@ -3,24 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: direaunami_send.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<table class="direaunami_send">
-	<tr>
-		<td>
-			<h2>{$STR_TELL_FRIEND}</h2>
-			{if $is_error}
-				<div class="global_error">{$STR_MODULE_DIREAUNAMI_MSG_ERR_FRIEND|nl2br_if_needed}</div>
-			{else}
-				<div class="global_success">{$STR_MODULE_DIREAUNAMI_MSG_FRIEND_SEND}</div>
-				<p><a href="{$referer}">{$STR_MODULE_DIREAUNAMI_BACK_REFERER}</a></p>
-			{/if}
-		</td>
-	</tr>
-</table>
+// $Id: direaunami_send.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<h1>{$STR_TELL_FRIEND}</h1>
+{if $is_error}
+	<div class="alert alert-danger">{$STR_MODULE_DIREAUNAMI_MSG_ERR_FRIEND|nl2br_if_needed}</div>
+{else}
+	<div class="alert alert-success">{$STR_MODULE_DIREAUNAMI_MSG_FRIEND_SEND}</div>
+	<p><a href="{$referer}">{$STR_MODULE_DIREAUNAMI_BACK_REFERER}</a></p>
+{/if}

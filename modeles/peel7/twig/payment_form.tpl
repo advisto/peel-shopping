@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: payment_form.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: payment_form.tpl 38971 2013-11-24 19:14:28Z gboussin $
 #}{% if type == 'check' or type == 'transfer' %}
 <p><b>{{ STR_FOR_A_CHECK_PAYMENT }}</b></p>
 <p>- <a href="{{ commande_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_PRINT_PROFORMA }}</a></p>
@@ -28,9 +28,4 @@
 	</div>
 {% elseif (form) %}
 	<div class="center">{{ form }}</div>
-{% endif %}
-{% if (js_action) and (autosend_delay) %}
-<script><!--//--><![CDATA[//><!--
-	setTimeout ('{{ js_action }}', {{ autosend_delay }});
-//--><!]]></script>
 {% endif %}

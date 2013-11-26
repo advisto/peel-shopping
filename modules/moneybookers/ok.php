@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ok.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: ok.php 38875 2013-11-20 23:58:43Z gboussin $
 //
 
 include("../../configuration.inc.php");
@@ -41,13 +41,14 @@ unset($_SESSION['session_commande']);
 if(!empty($session_utilisateur_id) || !empty($_SESSION['session_last_bill_viewed'])){
 	$sql = 'SELECT id
 		FROM peel_commandes
-		WHERE o_timestamp >= "' . date('Y-m-d H:i:s', (time())-1800) . '"
-		LIMIT 1';
+		WHERE o_timestamp >= "' . date('Y-m-d H:i:s', (time())-1800) . '"';
 	if(!empty($session_utilisateur_id)){
 		$sql .= ' AND id_utilisateur = "' . intval($session_utilisateur_id) . '"';
 	}else{
 		$sql .= ' AND id="' . intval($_SESSION['session_last_bill_viewed']) . '"';
 	}
+	$sql .= '
+		LIMIT 1';
 	$q = query($sql);
 	$r = fetch_assoc($q);
 }

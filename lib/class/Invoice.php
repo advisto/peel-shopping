@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 38007 2013-09-03 21:16:29Z gboussin $
+// $Id: Invoice.php 38908 2013-11-21 16:22:31Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 38007 2013-09-03 21:16:29Z gboussin $
+ * @version $Id: Invoice.php 38908 2013-11-21 16:22:31Z gboussin $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -306,7 +306,9 @@ class Invoice extends TCPDF {
 		$y1 = $this->h-25;
 
 		$text1 = ($mode != 'devis'?$GLOBALS['STR_INVOICE_BOTTOM_TEXT']:$GLOBALS['STR_INVOICE_BOTTOM_TEXT1']);
-
+		if (empty($tva)) {
+			$text1 .= ' - ' . $GLOBALS['STR_INVOICE_BOTTOM_TEXT2'];
+		}
 		$this->SetXY($r1, $y1);
 		$this->SetFont("Helvetica", "", 8);
 		$this->Cell(30, 4, $text1, 0, 0, "C");
@@ -838,7 +840,8 @@ class Invoice extends TCPDF {
 		}
 		$societeInfoText = $this->getSocieteInfoText();
 		if (!empty($code_facture)) {
-			$sql_cond_array[] = "HEX(code_facture) = HEX('" . nohtml_real_escape_string($code_facture) . "')";
+			// La collation sur la colonne code_facture est fixée à utf8_bin et non plus utf8_general, donc on peut faire une comparaison avec = qui va utiliser l'INDEX plutôt que de passer par HEX(code_facture) = HEX('" . nohtml_real_escape_string($code_facture) . "')
+			$sql_cond_array[] = "code_facture = '" . nohtml_real_escape_string($code_facture) . "'";
 		}
 		if (!empty($date_debut)) {
 			$sql_cond_array[] = "a_timestamp >= '" . nohtml_real_escape_string($date_debut) . "'";
@@ -900,8 +903,7 @@ class Invoice extends TCPDF {
 						$this->backgoundBigWatermark($GLOBALS['STR_ORDER_FORM'], 25, 190);
 					} elseif ($bill_mode == "proforma") {
 						$this->fact_dev(String::strtoupper($GLOBALS['STR_PROFORMA']) . " ", intval($commande->id));
-						// À décommenter pour afficher le filigrane
-						// $this->backgoundBigWatermark($GLOBALS['STR_PROFORMA'], 40, 190);
+						$this->backgoundBigWatermark($GLOBALS['STR_PROFORMA'], 40, 190);
 					} elseif ($bill_mode == "devis") {
 						$this->fact_dev(String::strtoupper($GLOBALS['STR_PDF_QUOTATION']) . " ", intval($commande->id));
 						$this->backgoundBigWatermark($GLOBALS['STR_PDF_QUOTATION'], 80, 200);
@@ -909,6 +911,9 @@ class Invoice extends TCPDF {
 						$this->fact_dev(String::strtoupper($GLOBALS['STR_INVOICE']), $commande->numero);
 						// À décommenter pour afficher le filigrane
 						// $this->backgoundBigWatermark($GLOBALS['STR_INVOICE'], 80, 200);
+					}
+					if($commande->id_statut_paiement == 6) {
+						$this->backgoundBigWatermark(get_payment_status_name($commande->id_statut_paiement), 65, 470); 
 					}
 					$this->addDate(get_formatted_date($commande->o_timestamp, 'short', 'long'), $order_infos['displayed_paiement_date']);
 					$this->addReglement(String::str_shorten(get_payment_name($commande->paiement), 30) . ' - ' . $commande->devise);
@@ -986,7 +991,7 @@ class Invoice extends TCPDF {
 				}
 			} else {
 				// Plusieurs factures
-				$file_name = 'F-' . md5($sql) . '.pdf';
+				$file_name = 'F-' . md5($sql_bills) . '.pdf';
 			}
 			$i++;
 		}

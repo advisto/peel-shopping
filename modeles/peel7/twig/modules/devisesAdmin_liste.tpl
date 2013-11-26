@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: devisesAdmin_liste.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: devisesAdmin_liste.tpl 38969 2013-11-24 18:40:24Z gboussin $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="6">{{ STR_MODULE_DEVISES_ADMIN_LIST_TITLE }}</td>
@@ -29,7 +29,7 @@
 		</tr>
 		{% for res in results %}
 		{{ res.tr_rollover }}
-			<td class="center"><a onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.devise }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> &nbsp; <a title="{{ STR_MODULE_DEVISES_ADMIN_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" width="16" height="16" alt="" /></a></td>
+			<td class="center"><a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.devise }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> &nbsp; <a title="{{ STR_MODULE_DEVISES_ADMIN_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" width="16" height="16" alt="" /></a></td>
 			<td class="center"><a title="{{ STR_MODULE_DEVISES_ADMIN_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}">{{ res.devise|html_entity_decode_if_needed }}</a></td>
 			<td class="center">{{ res.symbole|html_entity_decode_if_needed }}</td>
 			<td class="center">{{ res.conversion }}</td>
@@ -42,4 +42,4 @@
 	{% endif %}
 </table><br />
 <a href="{{ modif_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY }}</a><br />
-{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN }}
+<div class="alert alert-info">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN }}</div>

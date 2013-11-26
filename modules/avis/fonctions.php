@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -138,7 +138,7 @@ function insere_avis($frm)
 		$custom_template_tags['NOM_PRODUIT'] = String::html_entity_decode_if_needed($frm['nom_produit']);
 		$tpl->assign('STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT', $GLOBALS['STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT']);
 	} elseif ($frm['type'] == 'annonce') {
-		$custom_template_tags['TITRE_ANNONCE'] = String::html_entity_decode_if_needed($frm['titre_annonce']);
+		$custom_template_tags['NOM_PRODUIT'] = String::html_entity_decode_if_needed($frm['titre_annonce']);
 		$tpl->assign('STR_MODULE_ANNONCES_AVIS_YOUR_COMMENT_ON_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_YOUR_COMMENT_ON_AD']);
 	}
 	$custom_template_tags['AVIS'] = $frm['avis'];

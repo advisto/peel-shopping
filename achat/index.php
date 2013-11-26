@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: index.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 
 if (isset($_GET['catid']) && empty($_GET['catid'])) {
@@ -46,6 +46,8 @@ if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
 	unset($_SESSION["session_display_popup"]["upload_error_text"]);
 }
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['achat_index_page_columns_count'];
+
+// Une redirection est susceptible d'être faite dans la fonction get_products_list_brief_html, il faut donc l'appeler avant include($GLOBALS['repertoire_modele'] . "/haut.php").
 $output = get_products_list_brief_html($catid, empty($_GET['convert_gift_points']), (empty($_GET['convert_gift_points'])?'category':'convert_gift_points'));
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");

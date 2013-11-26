@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: search.php 39023 2013-11-26 00:43:48Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -20,10 +20,17 @@ if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	}
 	define('IN_404_ERROR_PAGE', true);
 	$page_name = 'error404';
-	// On va présenter des résultats par défaut => on met comme URL de référence search.php pour le multipage, sinon cela créerait des liens vers des pages inexistantes
-	$_SERVER['REQUEST_URI'] = '/search.php';
+	if(in_array(substr($_SERVER['REQUEST_URI'],-4), array('.css', '.png', '.jpg', '.gif', '.txt', '.xml'))) {
+		// Fichier CSS demandé : aucun contenu envoyé
+		// En effet, si le dossier n'existe pas, on peut arriver ici malgré le .htaccess <FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">	ErrorDocument 404 default </FilesMatch>
+		die();
+	}
 }
 include("configuration.inc.php");
+if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
+	// On va présenter des résultats par défaut => on met comme URL de référence search.php pour le multipage, sinon cela créerait des liens vers des pages inexistantes
+	$_SERVER['REQUEST_URI'] = $GLOBALS['apparent_folder'] . 'search.php';
+}
 if (is_annonce_module_active() && String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/' . $GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'] . '-' . String::rawurlencode(vn($_GET['page'])) . '-' . vb($_GET['search']) . '.html') || String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/produits/' . vb($_GET['search']) . '.html') || String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/produits/' . vb($_GET['search']) . '-' . vn($_GET['page']) . '.html')) {
 	// Pour éviter des problèmes avec les + dans l'URL, on a dans le .htaccess une règle avec l'option B qui permet de garder encodé search et est à décoder via String::rawurldecode
 	$_GET['search'] = String::rawurldecode(vb($_GET['search']));
@@ -33,12 +40,14 @@ if (is_annonce_module_active() && String::rawurldecode(get_current_url(false, tr
 		redirect_and_die('/', true);
 	}
 }
-foreach(array('/produits/', '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-') as $this_url_rewriting_main_expression) {
-	if(!empty($_GET['page']) && String::strpos(get_current_url(true, true), 'page=') !== false && is_annonce_module_active() && String::strpos(get_current_url(false, true), $this_url_rewriting_main_expression) !== false && String::strpos(get_current_url(false, true), '-' . vn($_GET['page']) . '-') === false) {
+foreach(array('/produits/', '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', '/supplier-research-', '/recherche-fournisseur-', '/busqueda-proveedor-') as $this_url_rewriting_main_expression) {
+	if(!empty($_GET['page']) && String::strpos(get_current_url(true, true), 'page=') !== false && is_annonce_module_active() && String::strpos(get_current_url(false, true), $this_url_rewriting_main_expression) !== false) {
 		// Numéro de page en ?page=... alors que URL rewriting contient déjà numéro de page
+		// String::strpos(get_current_url(false, true), '-' . vn($_GET['page']) . '-') === false permettrait de savoir si la valeur dans l'URL rewriting est différente que valeur en GET, mais peu importe, de toutes façons on redirige
 		redirect_and_die(get_current_url(false), true);
-	}elseif(!empty($_GET['search']) && String::strpos(get_current_url(true, true), 'search=') !== false && is_annonce_module_active() && String::strpos(get_current_url(false, true), $this_url_rewriting_main_expression) !== false && String::strpos(get_current_url(false, true), '-' . vn($_GET['search']) . '.html') === false) {
+	}elseif(!empty($_GET['search']) && String::strpos(get_current_url(true, true), 'search=') !== false && is_annonce_module_active() && String::strpos(get_current_url(false, true), $this_url_rewriting_main_expression) !== false) {
 		// Numéro de page en ?search=... alors que URL rewriting contient déjà la recherche
+		// String::strpos(get_current_url(false, true), '-' . vn($_GET['search']) . '.html') === false permettrait de savoir si la valeur dans l'URL rewriting est différente que valeur en GET, mais peu importe, de toutes façons on redirige
 		redirect_and_die(get_current_url(false), true);
 	}
 }
@@ -75,9 +84,10 @@ if (empty($search)) {
 	$search = '';
 	$terms = array();
 } elseif (String::strlen($search) < 3) {
-	// On n'autorise pas de recherche sur un seul caractère ou 2 caractères
 	if (get_current_url(false) != get_current_url(true)) {
-		redirect_and_die(get_current_url(false), true);
+		// On n'autorise pas de recherche sur un seul caractère ou 2 caractères
+		// On prend une recherche vide à la place, mais en gardant la recherche sur les critères complémentaires
+		redirect_and_die(get_current_url(true, false, array('search', 'match')), true);
 	}
 	$search = '';
 	$terms = array();
@@ -132,9 +142,12 @@ $tpl_f->assign('is_advanced_search_active', is_advanced_search_active());
 $tpl_f->assign('is_annonce_module_active', is_annonce_module_active());
 if (is_advanced_search_active()) {
 	if (!is_annonce_module_active()) {
-		// on contruit la liste des catégories
-		$GLOBALS['parent_categorie'] = vn($_GET["categorie"]); // catégorie sélectionnée
-		construit_arbo_categorie($GLOBALS['select_categorie'], $GLOBALS['parent_categorie'], 0); // on contruit les option du select des catégories
+		// on construit la liste des catégories
+		if(empty($GLOBALS['select_categorie'])) {
+			$GLOBALS['parent_categorie'] = vn($_GET["categorie"]); // catégorie sélectionnée
+			$GLOBALS['select_categorie'] = '';
+			construit_arbo_categorie($GLOBALS['select_categorie'], $GLOBALS['parent_categorie'], 0); // on construit les options du select des catégories
+		}
 		$tpl_f->assign('select_categorie', $GLOBALS['select_categorie']);
 		$tpl_f->assign('STR_CAT_LB', $GLOBALS['STR_CAT_LB']);
 
@@ -219,8 +232,6 @@ $i = 1;
 $resultat_produit = true;
 $found_words_array = array();
 $taille_texte_affiche = 400;
-$bbcode = array('[tagsearch]', '[/tagsearch]');
-$replace_bbcode = array('<span class="search_tag">', '</span>');
 
 $tpl_r = $GLOBALS['tplEngine']->createTemplate('search_result.tpl');
 $tpl_r->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
@@ -247,7 +258,7 @@ if (!is_annonce_module_active()) {
 			$additional_sql_cond_array[] = 'pt.taille_id= "' . intval($_GET['taille']) . '"';
 		}
 		if (!empty($_GET['categorie'])) {
-			$additional_sql_cond_array[] = 'pc.categorie_id="' . intval($_GET['categorie']) . '" OR c.parent_id="' . intval($_GET['categorie']) . '"';
+			$additional_sql_cond_array[] = 'pc.categorie_id IN ("' . implode('","', get_category_tree_and_itself(intval($_GET['categorie']), 'sons', 'categories')) . '")';
 		}
 		if (!empty($_GET['couleur'])) {
 			$additional_sql_inner .= ' INNER JOIN peel_produits_couleurs pco ON p.id=pco.produit_id';
@@ -317,7 +328,7 @@ if (!is_annonce_module_active()) {
 		} else {
 			$additional_sql_cond = '';
 		}
-		$result_affichage_produit = affiche_produits(null, null, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, 3, true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
+		$result_affichage_produit = affiche_produits(null, 2, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, 3, true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
 		if(!empty($GLOBALS['products_found']) && String::strlen($real_search)>=4) {
 			$found_words_array[] = $real_search;
 		}
@@ -352,7 +363,7 @@ if (is_annonce_module_active()) {
 			}
 			$xml_call_args .= 'search='.$_GET['search'];
 		}
-		if(!empty($GLOBALS['ads_found'])) {
+		if(!empty($GLOBALS['ads_found']) && is_map_module_active()) {
 			$res_affiche_annonces = getUserMap(null, $xml_call_args, 0, false, false) . $res_affiche_annonces;
 		}
 	}
@@ -381,34 +392,13 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		// si trop long, on coupe
 		$texte = String::str_shorten($texte, $taille_texte_affiche, '', '...');
 		$chapo = String::str_shorten($chapo, $taille_texte_affiche, '', '...');
-		// on fait une recherche sur le texte sans accent avec les mots de l'utilisateur,
-		// si qqchose est trouvé, on ajoute un BBCODE pour le marquer
+		// on fait une recherche sur le texte sans accent avec les mots de l'utilisateur
+		$texte = highlight_found_text($texte, $terms, $found_words_array);
+		$titre = highlight_found_text($titre, $terms, $found_words_array);
+		// certains champ ne sont pas affichés, mais on teste pour savoir si le mot se trouve dedans pour l'ajouter au tag_cloud
 		// on ajoute dans le tableau  $found_words_array[]
-		foreach ($terms as $this_term) {
-			$preg_condition = getPregConditionCompatAccents($this_term);
-			if(!empty($this_term)) {
-				if ((strpos($texte, $this_term)) !== false) {
-					$texte = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $texte, -1);
-					$found_words_array[] = $this_term;
-				}
-				if ((strpos($titre, $this_term)) !== false) {
-					$titre = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $titre, -1);
-					$found_words_array[] = $this_term;
-				}
-				// certains champ ne sont pas affichés, mais on teste pour savoir si le mot se trouve dedans pour l'ajouter au tag_cloud
-				$surtitre = preg_match('/' . $preg_condition . '/i', $surtitre);
-				if ($surtitre > 0) {
-					$found_words_array[] = $this_term;
-				}
-				$chapo = preg_match('/' . $preg_condition . '/i', $chapo);
-				if ($chapo > 0) {
-					$found_words_array[] = $this_term;
-				}
-			}
-		}
-		// on remplace le BBcode
-		$texte = str_replace($bbcode, $replace_bbcode, $texte);
-		$titre = str_replace($bbcode, $replace_bbcode, $titre);
+		highlight_found_text($surtitre, $terms, $found_words_array);
+		highlight_found_text($chapo, $terms, $found_words_array);
 		// affichage
 		$tpl_arts_found[] = array('num' => $i,
 			'category_href' => get_content_category_url($art['rubrique_id'], $art['rubrique']),
@@ -439,21 +429,9 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		// on coupe le texte si trop long
 		$description = String::str_shorten($description, $taille_texte_affiche, '', '...');
 		// on fait une recherche sur le texte sans accent avec les mots de l'utilisateur,
-		// si qqchose est trouvé, on l'ajoute dans le tableau  $found_words_array[]
-		foreach ($terms as $this_term) {
-			$preg_condition = getPregConditionCompatAccents($this_term);
-			if (strpos($description, $this_term) !== false) {
-				$description = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $description, - 1);
-				$found_words_array[] = $this_term;
-			}
-			if (strpos($nom, $this_term) !== false) {
-				$nom = preg_replace('/' . $preg_condition . '/i', $bbcode[0] . '$0' . $bbcode[1], $nom, -1);
-				$found_words_array[] = $this_term;
-			}
-		}
-		// on remplace le BBcode
-		$description = str_replace($bbcode, $replace_bbcode, $description);
-		$nom = str_replace($bbcode, $replace_bbcode, $nom);
+		// si qqchose est trouvé, highlight_found_text l'ajoute dans le tableau  $found_words_array[]
+		$description = highlight_found_text($description, $terms, $found_words_array);
+		$nom = highlight_found_text($nom, $terms, $found_words_array);
 		// affichage
 		$tpl_brands_found[] = array('num' => $i,
 			'href' => $urlbrand,

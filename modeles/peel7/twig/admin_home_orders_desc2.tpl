@@ -3,34 +3,36 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_home_orders_desc2.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_home_orders_desc2.tpl 38958 2013-11-23 21:57:22Z gboussin $
 #}<h3>{{ STR_ADMIN_INDEX_ORDERS_DESC2 }}{{ STR_BEFORE_TWO_POINTS }}:</h3>
-<table class="home_block_data_table">
-	<tr>
-		<th>{{ STR_ADMIN_ID }} / {{ STR_ADMIN_NAME }}</th>
-		<th>{{ STR_DATE }}</th>
-		<th>{{ STR_TOTAL }} {{ ttc_ht }}</th>
-		<th>{{ STR_PAYMENT }}</th>
-{% if is_fianet_sac_module_active %}
-		<th>{{ STR_ADMIN_INDEX_FIANET_VALIDATION }}</th>
-{% endif %}
-	</tr>
-{% for res in results %}
-	{{ res.tr_rollover }}
-		<td>{{ res.id }}<br />{{ res.nom_bill }}</td>
-		<td>{{ res.date }}</td>
-		<td>{{ res.prix }}</td>
-		<td>{{ res.statut_paiement }}</td>
+<div class="table-responsive">
+	<table class="home_block_data_table">
+		<tr>
+			<th>{{ STR_ADMIN_ID }} / {{ STR_ADMIN_NAME }}</th>
+			<th>{{ STR_DATE }}</th>
+			<th>{{ STR_TOTAL }} {{ ttc_ht }}</th>
+			<th>{{ STR_PAYMENT }}</th>
 	{% if is_fianet_sac_module_active %}
-		<td class="center"><center><table><tr><td>{{ this_order_sac_status }}</td></tr></table></center></td>
+			<th>{{ STR_ADMIN_INDEX_FIANET_VALIDATION }}</th>
 	{% endif %}
-	</tr>
-{% endfor %}
-</table>
+		</tr>
+	{% for res in results %}
+		{{ res.tr_rollover }}
+			<td>{{ res.id }}<br />{{ res.nom_bill }}</td>
+			<td>{{ res.date }}</td>
+			<td>{{ res.prix }}</td>
+			<td>{{ res.statut_paiement }}</td>
+		{% if is_fianet_sac_module_active %}
+			<td class="center"><center><table><tr><td>{{ this_order_sac_status }}</td></tr></table></center></td>
+		{% endif %}
+		</tr>
+	{% endfor %}
+	</table>
+</div>

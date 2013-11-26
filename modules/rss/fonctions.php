@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38799 2013-11-18 15:10:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,19 +33,19 @@ if (!function_exists('affiche_rss')) {
 			$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/rss/rss.php?critere=on_promo');
 			$tpl->assign('rss_new_window', true);
 		}
-		$tpl->assign('src', $GLOBALS['wwwroot'] . '/icones/rss.png');
+		$tpl->assign('src', $GLOBALS['repertoire_images'] . '/rss.png');
 
 		if (!empty($GLOBALS['site_parameters']['facebook_page_link'])) {
 			$tpl->assign('fb_href', $GLOBALS['site_parameters']['facebook_page_link']);
-			$tpl->assign('fb_src', $GLOBALS['wwwroot'] . '/icones/facebook.png');
+			$tpl->assign('fb_src', $GLOBALS['repertoire_images'] . '/facebook.png');
 		}
 		if (!empty($GLOBALS['site_parameters']['twitter_page_link'])) {
 			$tpl->assign('twitter_href', $GLOBALS['site_parameters']['twitter_page_link']);
-			$tpl->assign('twitter_src', $GLOBALS['wwwroot'] . '/icones/logo_twitter.png');
+			$tpl->assign('twitter_src', $GLOBALS['repertoire_images'] . '/twitter.png');
 		}
 		if (!empty($GLOBALS['site_parameters']['googleplus_page_link'])) {
 			$tpl->assign('googleplus_href', $GLOBALS['site_parameters']['googleplus_page_link']);
-			$tpl->assign('googleplus_src', $GLOBALS['wwwroot'] . '/icones/Google-1.png');
+			$tpl->assign('googleplus_src', $GLOBALS['repertoire_images'] . '/googleplus.png');
 		}
 		$output .= $tpl->fetch();
 		if ($return_mode) {

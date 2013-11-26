@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: choixbase.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: choixbase.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_INSTALLATION', 3);
 include("../configuration.inc.php");
 
-
 $DOC_TITLE = $GLOBALS['STR_ADMIN_INSTALL_STEP3_TITLE'];
 $error_message = '';
+unset($_SESSION['session_install_finished']);
 
 if (isset($_POST['admin_force_ssl'])) $_SESSION['session_install_admin_force_ssl'] = $_POST['admin_force_ssl'];
 if (isset($_POST['serveur'])) $_SESSION['session_install_serveur'] = $_POST['serveur'];
@@ -35,7 +35,7 @@ if (!empty($_POST['wwwroot'])) {
 	$_SESSION['session_install_wwwroot'] = $_POST['wwwroot'];
 }
 
-if (@mysql_connect($_SESSION['session_install_serveur'], $_SESSION['session_install_utilisateur'], $_SESSION['session_install_motdepasse']) === false) {
+if (empty($_SESSION['session_install_serveur']) || empty($_SESSION['session_install_utilisateur']) || @mysql_connect($_SESSION['session_install_serveur'], $_SESSION['session_install_utilisateur'], $_SESSION['session_install_motdepasse']) === false) {
 	redirect_and_die("bdd.php?err=1");
 }
 $i = 0;
@@ -68,8 +68,8 @@ $tpl->assign('STR_CONTINUE', $GLOBALS['STR_CONTINUE']);
 $tpl->assign('step_title', $DOC_TITLE);
 $output = $tpl->fetch();
 
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

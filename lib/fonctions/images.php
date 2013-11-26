@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: images.php 37934 2013-08-28 15:09:20Z sdelaporte $
+// $Id: images.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,10 @@ function image_resize($origin_filename_with_path, $new_filename_with_path, $dest
 	}
 	if (empty($source) && function_exists('imagecreatefromjpeg')) {
 		// On essaie quoiqu'il arrive de décoder en JPEG
-		$source = imagecreatefromjpeg($origin_filename_with_path);
+		$source = @imagecreatefromjpeg($origin_filename_with_path);
+		if (empty($source)) {
+			$source = @imagecreatefrompng($origin_filename_with_path);
+		}
 	}
 	if (empty($source)) {
 		return false;

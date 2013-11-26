@@ -3,27 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: multipage_template_default_1.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<table class="multipage-area">
-	<tr class="middle">
-		<td class="center" {if $total_page>1 && !$show_page_if_only_one}colspan="3"{/if}>
-			{$results_per_page}
-		</td>
-	</tr>
-{if $total_page>1 && !$show_page_if_only_one}
-	<tr class="multipage middle">
-		<td class="multipage_left">{$first_page}{$previous_page}&nbsp;</td>
-		<td class="center multipage_middle">
-			{foreach $loop as $l}{$l.page} {/foreach}
-		</td>
-		<td class="multipage_right">&nbsp;{$next_page}{$last_page}</td>
-	</tr>
-{/if}
-</table>
+// $Id: multipage_template_default_1.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<div class="multipage-area">
+	<div class="center">
+		{$results_per_page}
+	</div>
+	{if $total_page>1 && !$show_page_if_only_one}
+	<div class="multipage">
+		<ul class="pagination">
+			{if $first_page}<li>{$first_page}</li>{/if}
+			{if $previous_page}<li>{$previous_page}</li>{/if}
+			{foreach $loop as $l}<li{if $l.i==$current_page} class="active"{/if}>{$l.page}</li>{/foreach}
+			{if $next_page}<li>{$next_page}</li>{/if}
+			{if $last_page}<li>{$last_page}</li>{/if}
+		</ul>
+	</div>
+	{/if}
+</div>

@@ -3,19 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_arbo_categorie.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_arbo_categorie.tpl 38950 2013-11-22 20:57:51Z gboussin $
 #}{{ tr_rollover }}
 	<td class="center">
 		<a title="{{ STR_ADMIN_CATEGORIES_ADD_SUBCATEGORY|str_form_value }}" href="{{ ajout_cat_href|escape('html') }}"><img src="{{ ajout_cat_src|escape('html') }}" width="24" alt="" /></a>
 		&nbsp;<a title="{{ STR_ADMIN_CATEGORIES_ADD_PRODUCT|str_form_value }}" href="{{ ajout_prod_href|escape('html') }}"><img src="{{ ajout_prod_src|escape('html') }}" width="24" alt="" /></a>
-		&nbsp;<a title="{{ STR_ADMIN_CATEGORIES_DELETE_CATEGORY|str_form_value }}" onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" href="{{ sup_cat_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="" /></a>
+		&nbsp;<a title="{{ STR_ADMIN_CATEGORIES_DELETE_CATEGORY|str_form_value }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" href="{{ sup_cat_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="" /></a>
 	</td>
 	<td class="center">{{ cat_id }}</td>
 	<td class="left">{{ indent }}{% if (image) %}<img src="{{ image.src|escape('html') }}" alt="{{ image.name|str_form_value }}" />{% endif %}</td>

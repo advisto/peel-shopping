@@ -3,24 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_home.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<table class="main_table">
-	<tr>
-		<td class="entete" colspan="6">{{ STR_ADMIN_HTML_TITLE }}</td>
-	</tr>
-	<tr>
-		<td colspan="5">
-			<p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_HTML_CREATE }}</a></p>
-			<b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_HTML_EXPLAIN }}
-		</td>
-	</tr>
+// $Id: admin_liste_home.tpl 38978 2013-11-24 23:18:34Z gboussin $
+#}<div class="entete">{{ STR_ADMIN_HTML_TITLE }}</div>
+<p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_HTML_CREATE }}</a></p>
+<div class="alert alert-info"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_HTML_EXPLAIN }}</div>
+<div class="table-responsive">
+	<table class="table">
 	{% if (results) %}
 		<tr>
 			<td class="menu">{{ STR_ADMIN_ACTION }}</td>
@@ -33,7 +28,7 @@
 		{% for res in results %}
 		{{ res.tr_rollover }}
 		<td class="center" width="50">
-			<a onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.titre }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }} {{ res.titre }}" /></a>
+			<a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.titre }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }} {{ res.titre }}" /></a>
 			<a title="{{ STR_ADMIN_HTML_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="edit" /></a>
 		</td>
 		<td class="center">{{ res.lang|html_entity_decode_if_needed }}</td>
@@ -46,7 +41,8 @@
 	{% else %}
 		<tr><td><b>-</b></td></tr>
 	{% endif %}
-</table>
+	</table>
+</div>
 {% if is_welcome_ad_module_active %}
-<br /><br /><a href="{{ wwwroot }}" onclick="thisdate=new Date;thisdate.setFullYear(thisdate.getFullYear()-1);document.cookie='info_inter=; path=/; expires='+thisdate.toGMTString();">{{ STR_ADMIN_HTML_DELETE_COOKIE_LINK }}</a>
+<br /><a href="{{ wwwroot }}" onclick="thisdate=new Date;thisdate.setFullYear(thisdate.getFullYear()-1);document.cookie='info_inter=; path=/; expires='+thisdate.toGMTString();">{{ STR_ADMIN_HTML_DELETE_COOKIE_LINK }}</a>
 {% endif %}

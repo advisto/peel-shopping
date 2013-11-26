@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: historique_commandes.php 38908 2013-11-21 16:22:31Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -30,7 +30,12 @@ switch (vb($_REQUEST['mode'])) {
 		$qid_commande = query($sql);
 		if ($this_order = fetch_assoc($qid_commande)) {
 			// On a bien rentré une URL qui est complète pour voir cette commande
-			$output .= affiche_resume_commande(intval($_GET['id']), true, true, !in_array($this_order['id_statut_paiement'], array(2,3)));
+			if(!empty($GLOBALS['site_parameters']['payment_status_forbid_payment'])) {
+				$payment_status_forbid_payment = $GLOBALS['site_parameters']['payment_status_forbid_payment'];
+			} else {
+				$payment_status_forbid_payment = array(2,3,6);
+			}
+			$output .= affiche_resume_commande(intval($_GET['id']), true, true, !in_array($this_order['id_statut_paiement'], $payment_status_forbid_payment));
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
 			$tpl->assign('message', $GLOBALS['STR_AUTH_DENIAL']);

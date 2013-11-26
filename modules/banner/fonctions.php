@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37970 2013-08-30 13:06:21Z gboussin $
+// $Id: fonctions.php 38815 2013-11-18 19:24:56Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 // Définition du tableau de critère SQL (champ => Valeur)
-$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page');
+$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page');
 
 /**
  * affiche_banner()
@@ -239,13 +239,12 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						// On préserve le HTML mais on corrige les & isolés
 						$banner_html = String::htmlentities($banner['tag_html'], ENT_COMPAT, GENERAL_ENCODING, false, true);
 					}
-					$output .= '<div class="publicite" style="margin-top:3px;">' . $banner_html . '</div>';
+					$output .= '<div class="ba_pu" style="margin-top:3px;">' . $banner_html . '</div>';
 					$last_rang = $banner['rang'];
 				}
 				// Attention : these_banners_id_array est local, alors que viewed_banners_array est global et contient les autres bannières de la page
 				$these_banners_id_array[]=$banner['id'];
 				$GLOBALS['viewed_banners_array'][]=$banner['id'];
-
 			}
 			if (!empty($this_cache_object)) {
 				if(!empty($output)){
@@ -265,7 +264,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 					// $these_banners_id_array est vide => on a chargé le contenu à partir du cache
 					// On vérifie a posteriori si on a du flash ou non (ça permet de bénéficier du cache dans près de 100% des cas, sauf cas exeptionnel où on relance la recherche cette fois-ci hors cache
 					// On n'envoie pas les pubs flash sur iphone / ipod / ipad (si pas avec autre pub non flash - sinon, on envoie quand même)
-					$output = affiche_banner($position, $return_mode, $page, $cat_id, $this_annonce_number, $page_type, $keywords_array, $lang, $return_array_with_raw_information, $ad_id, $page_related_to_user_id, true);
+					return affiche_banner($position, $return_mode, $page, $cat_id, $this_annonce_number, $page_type, $keywords_array, $lang, $return_array_with_raw_information, $ad_id, $page_related_to_user_id, true);
 				} else {
 					// Sécurité - Normalement on ne passe jamais ici car si $disable_cache === true, alors on n'a pas mis de flash volontairement.
 					$output = '';

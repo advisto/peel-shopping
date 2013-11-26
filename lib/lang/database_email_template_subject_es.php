@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_es.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: database_email_template_subject_es.php 38682 2013-11-13 11:35:48Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -60,7 +60,7 @@ $peel_email_template["subject"] = array(
   "signature" => "Firmas mensajes de correo electrónico automáticos",
   "cree_cheque_cadeau_client_type1" => "[FRIEND] le ofrece un cheque regalo",
   "warn_admin_user_subscription" => "[CIVILITE] [NAME] [NOM_FAMILLE] acaba de registrarse en [SITE_NAME]",
-  "warn_admin_reve_subscription" => "",
+  "warn_admin_reve_subscription" => "El distribuidor [CIVILITE] [NAME] [NOM_FAMILLE] acaba de registrarse en [SITE_NAME]",
   "email_retour_virement" => "Validación de su devolución de mercancías #[RETURN_ID]",
   "email_retour_avoir" => "Validación de su devolución de mercancías #[RETURN_ID]",
   "email_reste_avoir_remboursement" => "Reembolso de su crédito #[RETURN_ID]",

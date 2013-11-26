@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: direaunami.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: direaunami.php 38682 2013-11-13 11:35:48Z gboussin $
 //
 
 include("../../configuration.inc.php");
@@ -62,10 +62,14 @@ switch (vb($_POST['mode'])) {
 		} else {
 			$tpl->assign('is_error', false);
 			$items = 5;
-			if (strpos($referer, $GLOBALS['wwwroot']) === false) {
+			if (String::strpos($referer, $GLOBALS['wwwroot']) === 0) {
+				$product_link = $referer;
+			} elseif (String::substr($referer, 0 , 1) == '/') {
+				// Referer court ou tentative de hack
 				$product_link = $GLOBALS['wwwroot'] . $referer;
 			} else {
-				$product_link = $referer;
+				// Tentative de hack a priori
+				$product_link = $GLOBALS['wwwroot'];
 			}
 			for ($numitems = 0; $numitems < $items; $numitems++) {
 				if ((!empty($fname[$numitems])) && (!empty($femail[$numitems]))) {
@@ -93,8 +97,9 @@ switch (vb($_POST['mode'])) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/direaunami.tpl');
 		$tpl->assign('action', get_current_url(false));
 		
-		if (!empty($_SERVER['HTTP_REFERER'])) {
+		if (!empty($_SERVER['HTTP_REFERER']) && String::strpos($_SERVER['HTTP_REFERER'], $GLOBALS['wwwroot']) === 0) {
 			// $_SERVER['HTTP_REFERER'] n'est pas toujours disponible, ça dépend du réglage du navigateur
+			// Pour éviter des hacks, on ne prend $_SERVER['HTTP_REFERER'] que si il contient $GLOBALS['wwwroot']
 			$referer = $_SERVER['HTTP_REFERER'];
 		} elseif (!empty($_SESSION['session_referer'])) {
 			// Variable de session qui peut être initialisée dans produit_details.php et article_details.php

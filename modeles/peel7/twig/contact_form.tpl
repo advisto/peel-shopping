@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 37960 2013-08-29 16:47:44Z gboussin $
+// $Id: contact_form.tpl 38950 2013-11-22 20:57:51Z gboussin $
 #}<h1 class="page_title">{{ STR_CONTACT }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <div id="contact">
 	<div id="contact_info">{{ contact_info }}</div>
-	<div id="contact_form">{% if (success_msg) and (success_msg) %}<div class="global_success">{{ success_msg|nl2br_if_needed }}</div>{% endif %}
+	<div id="contact_form">{% if (success_msg) and (success_msg) %}<div class="alert alert-success">{{ success_msg|nl2br_if_needed }}</div>{% endif %}
 		<div class="contact_intro">{{ STR_CONTACT_INTRO }}</div>
-		<form class="entryform" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
+		<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
 			{{ extra_field }}
 			<table class="contact_form_table">
 				<tr>
@@ -28,7 +28,7 @@
 					</td>
 					<td>
 		{% endif %}
-					<select id="sujet" name="sujet" style="">
+					<select class="form-control" id="sujet" name="sujet" style="">
 					{% for key in sujet_options|keys %}
 						<option value="{{ key|str_form_value }}"{% if key==sujet_options_selected %} selected="selected"{% endif %}>{{ sujet_options[key] }}</option>
 					{% endfor %}
@@ -39,61 +39,61 @@
 				<tr{% if is_advistofr_module_active %} class="no-display"{% endif %}>
 					<td><label for="commande_id">{{ STR_ORDER_NUMBER }} {{ STR_BEFORE_TWO_POINTS }}:<br /><i>({{ STR_REQUIRED_ORDER_NUMBER }})</i></label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="commande_id" name="commande_id" value="{{ commande_id|str_form_value }}" />{{ commande_error }}
+						<input type="text" class="form-control" id="commande_id" name="commande_id" value="{{ commande_id|str_form_value }}" />{{ commande_error }}
 					</td>
 				</tr>
 				<tr>
 					<td><label for="societe">{{ STR_SOCIETE }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						{{ societe_error }}<input class="form" type="text" id="societe" name="societe" value="{{ societe_value|str_form_value }}" />
+						{{ societe_error }}<input type="text" class="form-control" id="societe" name="societe" value="{{ societe_value|str_form_value }}" />
 					</td>
 				</tr>
 				<tr>
 					<td><label for="nom">{{ STR_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="nom" name="nom" value="{{ name_value|str_form_value }}" />{{ name_error }}
+						<input type="text" class="form-control" id="nom" name="nom" value="{{ name_value|str_form_value }}" />{{ name_error }}
 					</td>
 				</tr>
 				<tr{% if is_advistofr_module_active %} class="no-display"{% endif %}>
 					<td><label for="prenom">{{ STR_FIRST_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="prenom" name="prenom" value="{{ first_name_value|str_form_value }}" />{{ first_name_error }}
+						<input type="text" class="form-control" id="prenom" name="prenom" value="{{ first_name_value|str_form_value }}" />{{ first_name_error }}
 					</td>
 				</tr>
 				<tr>
 					<td><label for="email">{{ STR_EMAIL }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="email" id="email" name="email" value="{{ email_value|str_form_value }}" />{{ email_error }}
+						<input type="email" class="form-control" id="email" name="email" value="{{ email_value|str_form_value }}" />{{ email_error }}
 					</td>
 				</tr>
 				<tr>
 					<td><label for="adresse">{{ STR_ADDRESS }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<textarea rows="3" cols="54" class="textarea-contact" id="adresse" name="adresse">{{ address_value }}</textarea>
+						<textarea class="textarea-contact form-control" rows="3" cols="54" id="adresse" name="adresse">{{ address_value }}</textarea>
 					</td>
 				</tr>
 				<tr{% if is_advistofr_module_active %} class="no-display"{% endif %}>
 					<td><label for="code_postal">{{ STR_ZIP }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="code_postal" name="code_postal" value="{{ zip_value|str_form_value }}" />
+						<input type="text" class="form-control" id="code_postal" name="code_postal" value="{{ zip_value|str_form_value }}" />
 					</td>
 				</tr>
 				<tr{% if is_advistofr_module_active %} class="no-display"{% endif %}>
 					<td><label for="ville">{{ STR_TOWN }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="ville" name="ville" value="{{ town_value|str_form_value }}" />
+						<input type="text" class="form-control" id="ville" name="ville" value="{{ town_value|str_form_value }}" />
 					</td>
 				</tr>
 				<tr{% if is_advistofr_module_active %} class="no-display"{% endif %}>
 					<td><label for="pays">{{ STR_COUNTRY }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="text" id="pays" name="pays" value="{{ country_value|str_form_value }}" />
+						<input type="text" class="form-control" id="pays" name="pays" value="{{ country_value|str_form_value }}" />
 					</td>
 				</tr>
 				<tr>
 					<td><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile{% if is_advistofr_module_active %} no-display{% endif %}">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-						<input class="form" type="tel" id="telephone" name="telephone" rows="10" value="{{ telephone_value|str_form_value }}" />{{ telephone_error }}
+						<input type="tel" class="form-control" id="telephone" name="telephone" value="{{ telephone_value|str_form_value }}" />{{ telephone_error }}
 					</td>
 				</tr>
 				{% if is_advistofr_module_active %}
@@ -103,12 +103,12 @@
 				{% endif %}
 				<tr>
 					<td><label for="texte">{{ STR_TEXT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
-					<td><textarea id="texte" name="texte" rows="10">{{ texte_value }}</textarea>{{ texte_error }}</td>
+					<td><textarea class="form-control" id="texte" name="texte" rows="10">{{ texte_value }}</textarea>{{ texte_error }}</td>
 				</tr>
 				<tr>
 					<td><label for="dispo">{{ STR_DISPO }}{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
-					   <select id="dispo" name="dispo">
+					   <select class="form-control" id="dispo" name="dispo">
 						   <option value="A.M">{{ STR_DAY_AM }}</option>
 						   <option value="P.M">{{ STR_DAY_PM }}</option>
 						</select>
@@ -121,7 +121,7 @@
 				</tr>
 				<tr>
 					<td class="left">{{ captcha.validation_code_copy_txt }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
-					<td>{{ captcha.error }}<input name="code" type="text" size="5" maxlength="5" id="code" value="{{ captcha.value|str_form_value }}" /></td>
+					<td>{{ captcha.error }}<input name="code" type="text" class="form-control" size="5" maxlength="5" id="code" value="{{ captcha.value|str_form_value }}" /></td>
 				</tr>
 				{% endif %}
 			</table>
@@ -131,7 +131,7 @@
 			{% if is_advistofr_module_active %}
 				<a href="{{ href|escape('html') }}#" class="a_submit" onclick="document.form_contact.submit();return false;" ></a>
 			{% else %}
-				<input type="submit" class="clicbouton" value="{{ STR_SEND|str_form_value }}" />
+				<input type="submit" class="btn btn-primary" value="{{ STR_SEND|str_form_value }}" />
 			{% endif %}
 			</div>
 			<p{% if is_advistofr_module_active %} class="no-display"{% endif %}>{{ cnil_txt|nl2br_if_needed }}</p>

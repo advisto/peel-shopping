@@ -3,12 +3,12 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: arbo_categorie.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<option value="{{ value|str_form_value }}"{% if is_selected %} selected="selected"{% endif %}>{{ indent }}{{ label }}</option>
+// $Id: arbo_categorie.tpl 38967 2013-11-24 17:15:47Z gboussin $
+#}{% if mode=='option' %}<option value="{{ value|str_form_value }}"{% if is_selected %} selected="selected"{% endif %}>{{ indent }}{{ label }}</option>{% else %}<li class="{% if is_selected %} active{% endif %}" title="{{ value|str_form_value }}">{{ indent }}{{ label }}</li>{% endif %}

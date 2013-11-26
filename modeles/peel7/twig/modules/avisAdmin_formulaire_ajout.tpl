@@ -3,41 +3,41 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avisAdmin_formulaire_ajout.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: avisAdmin_formulaire_ajout.tpl 38969 2013-11-24 18:40:24Z gboussin $
 #}{% if type == 'produit' %}
 	{% if is_product_select_list %}
-<form class="entryform" method="post" action="{{ action|escape('html') }}">
+<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="full_width" cellpadding="4">
 				<tr>
 			<td class="entete" colspan="2">{{ STR_MODULE_AVIS_ADMIN_GIVE_OPINION }}</td>
 		</tr> 
 		<tr>
-			<td width="200" class="label top">{{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td width="200" class="title_label top">{{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ prenom }} {{ nom_famille }}</td>
 		</tr>
 		<tr>
-			<td class="label top">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="pseudo" value="{{ pseudo|str_form_value }}" maxlength="50" /></td>
+			<td class="title_label top">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="pseudo" value="{{ pseudo|str_form_value }}" maxlength="50" /></td>
 		</tr>
 		<tr>
-			<td class="label top">{{ STR_PRODUCT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label top">{{ STR_PRODUCT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ product_error }}{{ product_select_list }}</td>
 		</tr>
 		<tr>
 			<td class="top">
 				<b>{{ STR_YOUR_OPINION }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
-				<br /><input type="text" name="compteur" size="4" onfocus="blur()" value="255" /> <span style="margin-left:5px;"> {{ STR_REMINDING_CHAR }}</span>
+				<br /><input type="text" class="form-control compteur" name="compteur" size="4" onfocus="blur()" value="255" /> <span style="margin-left:5px;"> {{ STR_REMINDING_CHAR }}</span>
 			</td>
 			<td>
 				{{ error_avis }}
-				<textarea name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur)" onkeyup="Compter(this,255,compteur)" onblur="Compter(this,255,compteur)">{{ avis|html_entity_decode_if_needed }}</textarea>
+				<textarea class="form-control" name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur)" onkeyup="Compter(this,255,compteur)" onblur="Compter(this,255,compteur)">{{ avis|html_entity_decode_if_needed }}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -58,41 +58,41 @@
 				<input type="hidden" name="mode" value="insere_avis" />
 				<input type="hidden" name="type" value="produit" />
 				<input type="hidden" name="langue" value="{{ langue|str_form_value }}" />
-				<input class="bouton" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" name="validate" />
+				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" name="validate" />
 			</td>
 		</tr>
 	</table>
 </form>
 	{% else %}
-<div class="global_success">{{ STR_MODULE_AVIS_ADMIN_NO_PRODUCT_FOUND }}</div>
+<div class="alert alert-success">{{ STR_MODULE_AVIS_ADMIN_NO_PRODUCT_FOUND }}</div>
 	{% endif %}
 {% elseif type == 'annonce' %}
 	{% if is_annonce_select_list %}
-<form class="entryform" method="post" action="{{ action|escape('html') }}">
+<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="full_width" cellpadding="4">
 		<tr>
 			<td class="entete" colspan="2">{{ STR_MODULE_AVIS_ADMIN_GIVE_OPINION }}</td>
 		</tr> 
 		<tr>
-			<td width="200" class="label top">{{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td width="200" class="title_label top">{{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ prenom }} {{ nom_famille }}</td>
 		</tr>
 		<tr>
-			<td class="label top">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="pseudo" value="{{ pseudo|str_form_value }}" maxlength="50" /></td>
+			<td class="title_label top">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="pseudo" value="{{ pseudo|str_form_value }}" maxlength="50" /></td>
 		</tr>
 		<tr>
-			<td class="label top">{{ STR_MODULE_ANNONCES_AD }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label top">{{ STR_MODULE_ANNONCES_AD }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ annonce_error }}{{ annonce_select_list }}</td>
 		</tr>
 		<tr>
 			<td class="top">
 				<b>{{ STR_YOUR_OPINION }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
-				<br /><input type="text" name="compteur" size="4" onfocus="blur()" value="255" />{{ STR_REMINDING_CHAR }} 
+				<br /><input type="text" class="form-control compteur" name="compteur" size="4" onfocus="blur()" value="255" />{{ STR_REMINDING_CHAR }} 
 			</td>
 			<td>
 				{{ error_avis }}
-				<textarea name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur)" onkeyup="Compter(this,255,compteur)" onblur="Compter(this,255,compteur)">{{ avis|html_entity_decode_if_needed }}</textarea>
+				<textarea class="form-control" name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur)" onkeyup="Compter(this,255,compteur)" onblur="Compter(this,255,compteur)">{{ avis|html_entity_decode_if_needed }}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -115,12 +115,12 @@
 				<input type="hidden" name="mode" value="insere_avis" />
 				<input type="hidden" name="type" value="annonce" />
 				<input type="hidden" name="langue" value="{{ langue|str_form_value }}" />
-				<input class="bouton" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" name="validate" />
+				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" name="validate" />
 			</td>
 		</tr>
 	</table>
 </form>
 	{% else %}
-<div class="global_success">{{ STR_MODULE_ANNONCES_ADMIN_NO_AD_FOUND }}</div>
+<div class="alert alert-success">{{ STR_MODULE_ANNONCES_ADMIN_NO_AD_FOUND }}</div>
 	{% endif %}
 {% endif %}

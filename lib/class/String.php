@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: String.php 38799 2013-11-18 15:10:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 37904 2013-08-27 21:19:26Z gboussin $
+ * @version $Id: String.php 38799 2013-11-18 15:10:10Z gboussin $
  * @access public
  */
 class String {
@@ -169,15 +169,15 @@ class String {
 	 * WARNING : This functions has only 2 arguments, as the mb_substr_count has less arguments than the non-multibyte function substr_count
 	 *
 	 * @param string $string The input string.
-	 * @param integer $start
+	 * @param integer $searched
 	 * @return
 	 */
-	static function substr_count($string, $start)
+	static function substr_count($string, $searched)
 	{
 		if (function_exists('mb_substr_count')) {
-			return mb_substr_count($string, $start);
+			return mb_substr_count($string, $searched);
 		} else {
-			return substr_count($string, $start);
+			return substr_count($string, $searched);
 		}
 	}
 
@@ -263,7 +263,12 @@ class String {
 				// Si le texte se termine par une entité pas finie (ex : &#34) on la retire.
 				$beginning_text = String::substr($beginning_text, 0, String::strrpos($beginning_text, '&'));
 			}
-			return $beginning_text . $middle_separator . $ending_text . $ending;
+			$string = $beginning_text . $middle_separator . $ending_text . $ending;
+			while (String::substr_count($string, '(') > String::substr_count($string, ')')) {
+				// Si le texte coupé a des parenthèses fermantes manquantes
+				$string .= ')';
+			}
+			return $string;
 		} else {
 			return $string;
 		}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: profilAdmin_liste.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: profilAdmin_liste.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="3">{$STR_MODULE_PROFIL_ADMIN_TITLE}</td>
@@ -23,7 +23,7 @@
 					<td><a href="{$add_href|escape:'html'}">{$STR_MODULE_PROFIL_ADMIN_CREATE}</a></td>
 				</tr>
 			</table>
-			<p class="global_help">{$STR_MODULE_PROFIL_ADMIN_LIST_EXPLAIN}</p>
+			<p class="alert alert-info">{$STR_MODULE_PROFIL_ADMIN_LIST_EXPLAIN}</p>
 		</td>
 	</tr>
 	{if isset($results)}
@@ -40,6 +40,6 @@
 	</tr>
 	{/foreach}
 	{else}
-	<tr><td colspan="3"><b>{$STR_MODULE_PROFIL_ADMIN_NOTHING_FOUND}</b></td></tr>
+	<tr><td colspan="3"><div class="alert alert-warning">{$STR_MODULE_PROFIL_ADMIN_NOTHING_FOUND}</div></td></tr>
 	{/if}
 </table>

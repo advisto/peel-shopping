@@ -3,29 +3,29 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_result.tpl 37943 2013-08-29 09:31:55Z gboussin $
+// $Id: search_result.tpl 38976 2013-11-24 22:14:47Z gboussin $
 #}{% if is_annonce_module_active %}
 	{% if (res_affiche_annonces) %}
-<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}</h2>
+<h1 class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} - {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}{% endif %}</h1>
 	{{ res_affiche_annonces }}
-	{% elseif page<1 %}
-<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}</h2>
+	{% elseif page<1 and not (result_affichage_produit) and not (arts_found) and not (brands_found) %}
+<h1 class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} - {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}{% endif %}</h1>
 <div>{{ STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS }}</div><br />
 	{% endif %}
 {% endif %}
 {% if not is_annonce_module_active %}
 	{% if (result_affichage_produit) %}
-<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_PRODUCT }}</h2><br />
+<h1 class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_PRODUCT }}{% endif %}</h1>
 	{{ result_affichage_produit }}
-	{% elseif page<1 %}
-<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_PRODUCT }}</h2><br />
+	{% elseif page<1 and not (res_affiche_annonces) and not (arts_found) and not (brands_found) %}
+<h1 class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_PRODUCT }}{% endif %}</h1>
 <div>{{ STR_SEARCH_NO_RESULT_PRODUCT }}</div><br />
 	{% endif %}
 {% endif %}
@@ -38,7 +38,7 @@
 				{{ art.texte }}
 			</p>
 		{% endfor %}
-	{% elseif page<1 %}
+	{% elseif page<1 and not is_annonce_module_active and not (res_affiche_annonces) and not (result_affichage_produit) and not (brands_found) %}
 <h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_ARTICLE }}</h2><br />
 <div>{{ STR_SEARCH_NO_RESULT_ARTICLE }}</div><br />
 	{% endif %}
@@ -50,7 +50,7 @@
 	<b>{{ brand.num }}. <a href="{{ brand.href|escape('html') }}">{{ brand.nom|html_entity_decode_if_needed }}</a></b> - {{ brand.description|html_entity_decode_if_needed }}
 </p>
 		{% endfor %}
-	{% elseif page<1 %}
+	{% elseif page<1 and not is_annonce_module_active and not (res_affiche_annonces) and not (result_affichage_produit) and not (arts_found) %}
 <h2 class="search_result">{{ STR_RESULT_SEARCH }} {{ search|strtoupper }} {{ STR_SEARCH_RESULT_BRAND }}</h2>
 <div>{{ STR_SEARCH_NO_RESULT_BRAND }}</div><br />
 	{% endif %}

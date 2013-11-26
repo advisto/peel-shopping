@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: chart-data.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: chart-data.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -32,7 +32,10 @@ $graph_type = array();
 $colors = array();
 $legend_font_size = 12;
 $font_size = 12;
-if (strtotime($date2) - strtotime($date1) < 6300 * 24 * 30 * 6) {
+
+if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+	$date_format = 'timestamp1000';
+} elseif (strtotime($date2) - strtotime($date1) < 6300 * 24 * 30 * 6) {
 	$date_format = 'veryshort';
 } else {
 	$date_format = 'short';
@@ -108,10 +111,10 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
         GROUP BY TO_DAYS(date_insert)');
 	// On déclare pour définir l'ordre d'affichage dans le flash
 	while ($row = fetch_assoc($res)) {
-		if (empty($data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date($row['date_inscription'], $date_format)])) {
-			$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date($row['date_inscription'], $date_format)] = 0;
+		if (empty($data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)])) {
+			$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)] = 0;
 		}
-		$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date($row['date_inscription'], $date_format)] += $row['this_count'];
+		$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)] += $row['this_count'];
 	}
 	$colors[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]] = '0000FF';
 	$title = (!empty($date1)?'' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($date1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($date2):'');
@@ -172,7 +175,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 		if (empty($data['CA'][get_formatted_date($row['a_timestamp'], $date_format)])) {
 			$data['CA'][get_formatted_date($row['a_timestamp'], $date_format)] = 0;
 		}
-		$data['CA'][get_formatted_date($row['a_timestamp'], $date_format)] += $row['this_total'];
+		$data['CA'][get_formatted_date($row['a_timestamp'], $date_format)] += round($row['this_total'], 2);
 	}
 	$title = '' . (!empty($date1)?' ' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($date1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($date2):'');
 }

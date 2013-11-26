@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 37993 2013-09-02 16:46:19Z gboussin $
+// $Id: user.php 38815 2013-11-18 19:24:56Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -198,6 +198,10 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		// Paramètre lié à la fonction get_specific_field_infos.
 		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
 			if (isset($frm[$this_field])) {
+				if (is_array($frm[$this_field])) {
+					// Si $frm[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
+					$frm[$this_field] = implode(',', $frm[$this_field]);
+				}
 				$user_specific_field[] = $this_field;
 				$user_specific_field_values[] = nohtml_real_escape_string($frm[$this_field]);
 			}
@@ -409,6 +413,10 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
 		// Paramètre lié à la fonction get_specific_field_infos.
 		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+			if (is_array($frm[$this_field])) {
+				// Si $frm[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
+				$frm[$this_field] = implode(',', $frm[$this_field]);
+			}
 			$user_specific_field[] = $this_field . ' = "' . nohtml_real_escape_string($frm[$this_field]) . '"';
 		}
 	}
@@ -791,27 +799,28 @@ function get_user_information($user_id = null, $get_full_infos = false)
 		// Pas les droits pour voir les informations sur les administrateurs et les revendeurs
 		$sql_cond .= " AND priv NOT LIKE '%admin%' AND priv NOT LIKE '%reve%'";
 	}
+	$cache_id = md5($user_id.$sql_cond.($get_full_infos?'full':''));
 	if (!empty($user_id)) {
-		if (!isset($result_array[md5($user_id.$sql_cond)])) {
+		if (!isset($result_array[$cache_id])) {
 			$qid = query("SELECT *
 				FROM peel_utilisateurs
 				WHERE id_utilisateur = '" . intval($user_id) . "'" . $sql_cond);
-			$result_array[$user_id] = fetch_assoc($qid);
+			$result_array[$cache_id] = fetch_assoc($qid);
 			if($get_full_infos && is_annonce_module_active()) {
-				if($result_array[$user_id]['etat']) {
+				if($result_array[$cache_id]['etat']) {
 					$sqlCount = 'SELECT COUNT(*) AS this_count
 						FROM peel_lot_vente plv
 						WHERE id_personne = "' . intval($user_id) . '" AND enligne="OK"';
 					$resCount = query($sqlCount);
 					if ($Count = fetch_assoc($resCount)) {
-						$result_array[$user_id]['active_ads_count'] = $Count['this_count'];
+						$result_array[$cache_id]['active_ads_count'] = $Count['this_count'];
 					}
 				} else {
-					$result_array[$user_id]['active_ads_count'] = 0;
+					$result_array[$cache_id]['active_ads_count'] = 0;
 				}
 			}
 		}
-		return $result_array[$user_id];
+		return $result_array[$cache_id];
 	} else {
 		return null;
 	}
@@ -852,7 +861,7 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 4) {
+			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 4 && is_numeric(String::substr(str_replace(' ', '', $user_infos['intracom_for_billing']), 2))) {
 				// Utilisateur avec un n° de TVA intracom, en Europe mais pas en France
 				return true;
 			}

@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_form_contact_user.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<form method="post" action="{$action|escape:'html'}">
+// $Id: commercialeAdmin_form_contact_user.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<table class="full_width">
 		<tr>
 			<th style="width:40%;">{$STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE}{$STR_BEFORE_TWO_POINTS}:</th>
@@ -19,13 +19,13 @@
 				<input type="hidden" name="id_utilisateur" value="{$id_user|str_form_value}" />
 				<input type="hidden" name="mode" value="add_contact_planified" />
 				<input name="form_edit_contact_user_id" type="hidden" value="{$id_user|str_form_value}" />
-				<input name="form_contact_planified_date" size="27" id="contact_planified_date" type="text" class="datepicker" value="" />
+				<input name="form_contact_planified_date" size="27" id="contact_planified_date" type="text" class="form-control datepicker" value="" />
 			</td>
 		</tr>
 		<tr>
 			<th>{$STR_ADMIN_REASON}</th>
 			<td>
-				<select name="form_contact_planified_reason">
+				<select class="form-control" name="form_contact_planified_reason">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="interesting_profile">{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTING_PROFILE}</option>
 					<option value="interested_by_product">{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTED_BY_PRODUCT}</option>
@@ -36,57 +36,51 @@
 		</tr>
 		<tr>
 			<th>{$STR_COMMENTS}</th>
-			<td><textarea name="form_contact_planified_comment" rows="2" cols="28" id="contact_planified_comment"></textarea></td>
+			<td><textarea class="form-control" name="form_contact_planified_comment" rows="2" cols="28" id="contact_planified_comment"></textarea></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><br /><input name="contact_planified_submit" style="width:80px" type="submit" value="{$STR_VALIDATE|str_form_value}" class="bouton" /></td>
+			<td colspan="2" class="center"><br /><input name="contact_planified_submit" style="width:80px" type="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></td>
 		</tr>
 	</table>
 </form>
 {if isset($rce)}
-<form method="post" action="{$action|escape:'html'}">
+<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<h2 class="entete">{$STR_MODULE_COMMERCIAL_ADMIN_EDIT_PLANIFIED_CONTACT} {$id_contact_planified}</h2>
 	<table class="full_width">
 		<tr>
+			<th style="width:40%;">{$STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE}{$STR_BEFORE_TWO_POINTS}:</th>
 			<td>
-				<table class="full_width">
-					<tr>
-						<th style="width:40%;">{$STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE}{$STR_BEFORE_TWO_POINTS}:</th>
-						<td>
-							<input type="hidden" name="mode" value="update_contact_planified" />
-							<input name="form_edit_contact_planified_date" size="27" value="{$rce.date|str_form_value}" id="edit_contact_planified_date" type="text" />
-						</td>
-					</tr>
-					<tr>
-						<th>{$STR_ADMIN_REASON}</th>
-						<td>
-							<select name="form_edit_contact_planified_reason">
-								<option value="">{$STR_CHOOSE}...</option>
-								<option value="interesting_profile"{if $rce.reason == 'interesting_profile'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTING_PROFILE}</option>
-								<option value="interested_by_product"{if $rce.reason == 'interested_by_product'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTED_BY_PRODUCT}</option>
-								<option value="payment_expected"{if $rce.reason == 'payment_expected'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_PAYMENT_EXPECTED}</option>
-								<option value="follow_up"{if $rce.reason == 'follow_up'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_FOLLOW_UP}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<th>{$STR_COMMENTS}</th>
-						<td><textarea name="form_edit_contact_planified_comment" rows="2" cols="28" id="contact_planified_comment" >{$rce.comments}</textarea></td>
-					</tr>
-					<tr>
-						<td class="center" colspan="2">
-							<input name="form_edit_contact_planified_id" type="hidden" value="{$id_contact_planified|str_form_value}" />
-							<input name="edit_contact_planified_submit" style="width:80px" type="submit" value="{$STR_VALIDATE|str_form_value}" class="bouton" />
-						</td>
-					</tr>
-				</table>
+				<input type="hidden" name="mode" value="update_contact_planified" />
+				<input name="form_edit_contact_planified_date" size="27" value="{$rce.date|str_form_value}" id="edit_contact_planified_date" type="text" class="form-control" />
+			</td>
+		</tr>
+		<tr>
+			<th>{$STR_ADMIN_REASON}</th>
+			<td>
+				<select class="form-control" name="form_edit_contact_planified_reason">
+					<option value="">{$STR_CHOOSE}...</option>
+					<option value="interesting_profile"{if $rce.reason == 'interesting_profile'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTING_PROFILE}</option>
+					<option value="interested_by_product"{if $rce.reason == 'interested_by_product'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_INTERESTED_BY_PRODUCT}</option>
+					<option value="payment_expected"{if $rce.reason == 'payment_expected'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_PAYMENT_EXPECTED}</option>
+					<option value="follow_up"{if $rce.reason == 'follow_up'} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_FOLLOWED_REASON_FOLLOW_UP}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th>{$STR_COMMENTS}</th>
+			<td><textarea class="form-control" name="form_edit_contact_planified_comment" rows="2" cols="28" id="contact_planified_comment" >{$rce.comments}</textarea></td>
+		</tr>
+		<tr>
+			<td class="center" colspan="2">
+				<input name="form_edit_contact_planified_id" type="hidden" value="{$id_contact_planified|str_form_value}" />
+				<input name="edit_contact_planified_submit" style="width:80px" type="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" />
 			</td>
 		</tr>
 	</table>
 </form>
 {/if}
 {if $are_results}
-<form id="contact_planified" method="post" action="{$modif_action}">
+<form class="entryform form-inline" role="form" id="contact_planified" method="post" action="{$modif_action}">
 	<table id="tablesForm" class="full_width">
 		{$links_header_row}
 		{foreach $results as $res}
@@ -107,7 +101,7 @@
 		</tr>
 		<tr>
 			<td colspan="5" class="center">
-				<input name="contact_planified_delete" style="width:80px" type="submit" value="{$STR_DELETE|str_form_value}" class="bouton" />
+				<input name="contact_planified_delete" style="width:80px" type="submit" value="{$STR_DELETE|str_form_value}" class="btn btn-primary" />
 			</td>
 		</tr>
 	</table>

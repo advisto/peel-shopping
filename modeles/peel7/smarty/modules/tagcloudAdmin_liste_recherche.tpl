@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tagcloudAdmin_liste_recherche.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: tagcloudAdmin_liste_recherche.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="4">{$STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE}</td>
@@ -28,7 +28,7 @@
 	{foreach $results as $res}
 		{$res.tr_rollover}
 		<td class="center">
-			<a onclick="return confirm('{$STR_ADMIN_DELETE_WARNING|filtre_javascript:true:true:true}');" title="{$STR_DELETE|str_form_value} {$res.tag_name}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a>
+			<a data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}" title="{$STR_DELETE|str_form_value} {$res.tag_name}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a>
 			<a title="{$STR_MODULE_TAGCLOUD_ADMIN_MODIFY_THIS_TAG}" href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" width="16" height="16" alt="" /></a>
 		</td>
 		<td><a title="{$STR_MODULE_TAGCLOUD_ADMIN_MODIFY_THIS_TAG}" href="{$res.edit_href|escape:'html'}">{$res.tag_name}</a></td>
@@ -37,7 +37,7 @@
 	</tr>
 	{/foreach}
 	{else}
-	<tr><td><b>{$STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND}</b></td></tr>
+	<tr><td><div class="alert alert-warning">{$STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND}</div></td></tr>
 	{/if}
 </table>
 <p>{$links_multipage}</p>	

@@ -3,21 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 /**
- * affiche_formulaire_modif_avis()
- *
  * Affiche le formulaire de modification de avis
  *
  * @param integer $id
@@ -236,7 +234,8 @@ function product_select_list($default = null)
 {
 	$output = "";
 	$sql = "SELECT id,nom_" . $_SESSION['session_langue'] . " AS nom 
-		FROM peel_produits";
+		FROM peel_produits
+		LIMIT 1000";
 	$qid = query($sql);
 	if (num_rows($qid) > 0) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_product_select_list.tpl');
@@ -262,7 +261,8 @@ function annonce_select_list($default = null)
 {
 	$output = "";
 	$sql = "SELECT ref, titre_".$_SESSION['session_langue']." AS titre
-		FROM peel_lot_vente";
+		FROM peel_lot_vente
+		LIMIT 1000";
 	$qid = query($sql);
 	if (num_rows($qid) > 0) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_product_select_list.tpl');

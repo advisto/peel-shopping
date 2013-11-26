@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_modif_position.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<form method="post" action="{$action|escape:'html'}">
+// $Id: admin_formulaire_modif_position.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="positionner" />
 	<input type="hidden" name="catid" value="{$catid|str_form_value}" />
@@ -28,9 +28,9 @@
 		{$res.tr_rollover}
 			<td class="center"><input type="hidden" name="id[]" value="{$res.value|str_form_value}" /><a href="{$res.modif_href|escape:'html'}">{$res.name}</a></td>
 			<td class="center">{$res.prix}</td>
-			<td class="center"><input type="text" name="position[]" size="2" value="{$res.position|str_form_value}" /></td>
+			<td class="center"><input type="text" class="form-control" name="position[]" value="{$res.position|str_form_value}" /></td>
 		</tr>
 {/foreach}
-		<tr><td colspan="3" align="center"><p><input type="submit" value="{$STR_ADMIN_POSITIONS_POSITION_PRODUCTS|str_form_value}" class="bouton" /></p></td></tr>
+		<tr><td colspan="3" align="center"><p><input type="submit" value="{$STR_ADMIN_POSITIONS_POSITION_PRODUCTS|str_form_value}" class="btn btn-primary" /></p></td></tr>
 	</table>
 </form>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an     |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: import_produits.php 38976 2013-11-24 22:14:47Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,7 +21,8 @@ if (is_stock_advanced_module_active()) {
 }
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock');
 $DOC_TITLE = $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_TITLE'];
-include("modeles/haut.php");
+
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $action = vb($_POST['action']);
 // On récupère les noms des champs de la table de produits
@@ -188,7 +189,7 @@ switch ($action) {
 					}
 				}
 				fclose($fp);
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_IMPORTATION_OK'], $GLOBALS['nbprod_insert'] + $GLOBALS['nbprod_update'] + $GLOBALS['nbprod_update_null'], $GLOBALS['nbprod_update'], $GLOBALS['nbprod_update_null'], $GLOBALS['nbprod_insert'], $GLOBALS['nbprod_categorie_insert'])))->fetch();
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_IMPORTATION_OK'], vn($GLOBALS['nbprod_insert']) + vn($GLOBALS['nbprod_update']) + vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_update']), vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_insert']), vn($GLOBALS['nbprod_categorie_insert']))))->fetch();
 			}
 		}
 		break;
@@ -245,6 +246,6 @@ switch ($action) {
 		echo $tpl->fetch();
 		break;
 }
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

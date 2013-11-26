@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: format.php 39030 2013-11-26 08:59:31Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -224,9 +224,10 @@ function get_float_from_user_input($string, $from_currency_rate = 1)
  * @param boolean $allow_escape_single_quote
  * @param boolean $allow_escape_double_quote
  * @param boolean $skip_endline
+ * @param boolean $inside_html
  * @return
  */
-function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true, $skip_endline = true)
+function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true, $skip_endline = true, $inside_html = true)
 {
 	if ($addslashes) {
 		$string = addslashes($string);
@@ -235,7 +236,7 @@ function filtre_javascript($string, $addslashes = true, $allow_escape_single_quo
 		}
 		if (!$allow_escape_double_quote) {
 			$string = str_replace('\"', '"', $string);
-		}else{
+		} elseif($inside_html) {
 			$string = str_replace('\"', '&quot;', $string);
 		}
 	}
@@ -435,13 +436,17 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 	// $date = strftime(str_replace('%A', $GLOBALS['day_of_week'][(0 + strftime('%w', strtotime($datetime_or_timestamp)))], str_replace('%B', $GLOBALS['months_names'][(0 + strftime('%m', strtotime($datetime_or_timestamp)))], $GLOBALS['date_format_long'])), strtotime($datetime_or_timestamp));
 	if (!empty($GLOBALS['date_format_'.$mode])) {
 		$format = $GLOBALS['date_format_'.$mode];
-	} else {
+	} elseif($mode != 'timestamp' && $mode != 'timestamp1000') {
 		$format = $GLOBALS['date_format_long'];
+	} else {
+		$format = null;
 	}
-	if ($hour_minute===true) {
-		$format .= ' ' . $GLOBALS['time_format_long'];
-	}elseif (!empty($hour_minute)) {
-		$format .= ' ' . vb($GLOBALS['time_format_'.$hour_minute]);
+	if($format !== null) {
+		if ($hour_minute===true) {
+			$format .= ' ' . $GLOBALS['time_format_long'];
+		}elseif (!empty($hour_minute)) {
+			$format .= ' ' . vb($GLOBALS['time_format_'.$hour_minute]);
+		}
 	}
 	if (empty($datetime_or_timestamp) || $datetime_or_timestamp==='0') {
 		$date = '';
@@ -463,9 +468,12 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 	} else {
 		$date = $datetime_or_timestamp;
 	}
-	if($date!=='' && $date!==false && $date!==null && is_numeric($date)) {
+	if($date!=='' && $date!==false && $date!==null && is_numeric($date) && $format !== null) {
 		// Format numérique timestamp => on convertit en date
 		$date = strftime($format, $date);
+	} elseif($mode == 'timestamp1000' && is_numeric($date)) {
+		// ms instead of seconds
+		$date = $date * 1000;
 	}
 	return $date;
 }
@@ -688,7 +696,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 function output_csv_http_export_header($filename, $type = 'excel', $page_encoding)
 {
 	if (a_priv('demo')) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch();
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch());
 		die();
 	}
 
@@ -705,17 +713,18 @@ function output_csv_http_export_header($filename, $type = 'excel', $page_encodin
 /**
  * output_xml_http_export_header()
  *
- * @param mixed $filename
- * @param mixed $page_encoding
+ * @param string $filename
+ * @param string $page_encoding
+ * @param string $content_type
  * @return
  */
-function output_xml_http_export_header($filename, $page_encoding)
+function output_xml_http_export_header($filename, $page_encoding, $content_type = 'application/svg+xml')
 {
 	if (a_priv('demo')) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch();
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch());
 		die();
 	}
-	header('Content-Type: application/svg+xml; charset=' . $page_encoding);
+	header('Content-Type: '.$content_type.'; charset=' . $page_encoding);
 	header("Expires: 0");
 	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 	header("Content-disposition: filename=" . $filename);
@@ -975,5 +984,32 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
 		array_pop($keywords_array);
 	}
 	return $keywords_array;
+}
+
+/**
+ * Highlights terms in text
+ *
+ * @param string $text
+ * @param array $terms
+ * @param array $found_tags
+ * @param array $found_words_array
+ * @return
+ */
+function highlight_found_text($text, $terms, &$found_words_array, $found_tags = array('<span class="search_tag">', '</span>')) {
+	$bbcode = array('[tagsearch]', '[/tagsearch]');
+	if(!is_array($terms)) {
+		$terms = array($terms);
+	}
+	foreach ($terms as $this_term) {
+		if(String::strlen($this_term)>0) {
+			$preg_condition = getPregConditionCompatAccents($this_term);
+			if (stripos($text, $this_term) !== false) {
+				$text = preg_replace('/' . $preg_condition . '/iu', $bbcode[0] . '$0' . $bbcode[1], $text, -1);
+				$found_words_array[] = $this_term;
+			}
+		}
+	}
+	// on remplace le BBcode par les tags demandés - On le fait à la fin pour éviter les problèmes d'échappement avec preg
+	return str_replace($bbcode, $found_tags, $text);
 }
 ?>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 37979 2013-08-30 16:31:42Z gboussin $
+// $Id: display_user_forms.php 38773 2013-11-17 21:01:09Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,13 +33,30 @@ if (!function_exists('get_specific_field_infos')) {
 				if(!empty($GLOBALS['site_parameters']['user_specific_field_values'][$this_field])) {
 					$this_field_values = explode(',', $GLOBALS['site_parameters']['user_specific_field_values'][$this_field]);
 					$this_field_names = explode(',', $GLOBALS['site_parameters']['user_specific_field_names'][$this_field]);
+					$field_type = $GLOBALS['site_parameters']['user_specific_field_types'][$this_field];
+	
+					if ($field_type == 'checkbox') {
+						if (!empty($frm[$this_field])) {
+							if (is_array($frm[$this_field])) {
+								// Si $frm vient directement du formulaire, les valeurs pour les checkbox sont sous forme de tableau.
+								$frm_this_field_values_array = $frm[$this_field];
+							} else {
+								// pour les checkbox, $frm[$this_field] peux contenir plusieurs valeurs séparées par des virgules si les données viennent de la BDD
+								$frm_this_field_values_array = explode(',', $frm[$this_field]);
+							}
+						}
+					} else {
+						// Pour les autres champ, $frm[$this_field] contient une valeur unique.
+						$frm_this_field_values_array = array(vb($frm[$this_field]));
+					}
 					foreach($this_field_values as $this_key => $this_value) {
 							$tpl_options[] = array('value' => $this_value,
-									'issel' => vb($frm[$this_field]) == $this_value,
+									'issel' => in_array($this_value, $frm_this_field_values_array),
 									'name' => $this_field_names[$this_key]
 								);
 					}
 					$specific_fields[] = array('options' => $tpl_options,
+							'field_type' => $field_type,
 							'field_name' => $this_field,
 							'field_title' => $this_title,
 							'mandatory_fields' => (!empty($GLOBALS['site_parameters']['user_mandatory_fields'][$this_field])),
@@ -178,7 +195,11 @@ if (!function_exists('get_user_change_params_form')) {
 			'error_text' => $form_error_object->text('origin'),
 			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
 			));
+
 		$tpl->assign('specific_fields', get_specific_field_infos($frm, $form_error_object));
+
+
+
 		// Select permettant de paramétrer la langue par défaut du compte lors de l'envoi d'email
 		$sqlLng = "SELECT lang, nom_".$_SESSION['session_langue']." AS nom_lang
 			FROM peel_langues
@@ -189,12 +210,14 @@ if (!function_exists('get_user_change_params_form')) {
 		$resLng = query($sqlLng);
 		$language_for_automatic_emails_options = array();
 		$language_for_automatic_emails_selected = null;
-		while ($lng = fetch_assoc($resLng)) {
-			$language_for_automatic_emails_options[vb($lng['lang'])] = vb($lng['nom_lang']);
-			if ($lng['lang'] == $frm['lang']) {
-				$language_for_automatic_emails_selected = vb($lng['lang']);
+		
+		if (!empty($frm['lang'])) {
+			while ($lng = fetch_assoc($resLng)) {
+				$language_for_automatic_emails_options[vb($lng['lang'])] = vb($lng['nom_lang']);
+				if ($lng['lang'] == $frm['lang']) {
+					$language_for_automatic_emails_selected = vb($lng['lang']);
+				}
 			}
-			$i++;
 		}
 		$tpl->assign('language_for_automatic_emails_options', $language_for_automatic_emails_options);
 		$tpl->assign('language_for_automatic_emails_selected', $language_for_automatic_emails_selected);
@@ -416,7 +439,6 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('STR_COMMERCIAL_AGENT', $GLOBALS['STR_COMMERCIAL_AGENT']);
 		$tpl->assign('STR_NEWSLETTER_YES', $GLOBALS['STR_NEWSLETTER_YES']);
 		$tpl->assign('STR_COMMERCIAL_YES', $GLOBALS['STR_COMMERCIAL_YES']);
-		$tpl->assign('STR_OPEN_ACCOUNT', $GLOBALS['STR_OPEN_ACCOUNT']);
 		$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 		$tpl->assign('STR_FONCTION', $GLOBALS['STR_FONCTION']);
 		$tpl->assign('STR_ACTIVITY', $GLOBALS['STR_ACTIVITY']);
@@ -582,6 +604,23 @@ if (!function_exists('get_access_account_form')) {
 		$tpl->assign('password_error', $form_error_object->text('mot_passe'));
 		$tpl->assign('token', get_form_token_input('membre.php', true));
 		$tpl->assign('login_txt', $GLOBALS['STR_LOGIN']);
+		if (function_exists('get_social_icone')) {
+			$tpl->assign('social_icone', get_social_icone());
+		}
+		$social = array('is_any' => false);
+		if (is_facebook_connect_module_active()) {
+			$social['is_any'] = true;
+			$social['facebook'] = get_facebook_connect_btn();
+		}
+		if (is_sign_in_twitter_module_active()) {
+			$social['is_any'] = true;
+			$social['twitter'] = get_sign_in_twitter_btn();
+		}
+		if (is_openid_module_active()) {
+			$social['is_any'] = true;
+			$social['openid'] = get_openid_btn();
+		}
+		$tpl->assign('social', $social);
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -710,16 +749,15 @@ if (!function_exists('get_contact_extra_field')) {
 
 if (!function_exists('js_password_control')) {
 	/**
+	 * le javascript de contrôle du niveau de mot de passe
 	 *
 	 * @return
 	 */
 	function js_password_control($field_id)
 	{
-		return '
-	<!-- le javascript de contrôle du niveau de mot de passe -->
-	<script><!--//--><![CDATA[//><!--
-	set_password_image_level("' . filtre_javascript($field_id, true, false, true) . '","' . filtre_javascript($GLOBALS['repertoire_images'], true, false, true) . '");
-	//--><!]]></script>';
+		$GLOBALS['js_ready_content_array'][] = '
+		set_password_image_level("' . filtre_javascript($field_id, true, false, true) . '","' . $GLOBALS['repertoire_images'] . '","' . filtre_javascript('pwd_level_image', true, false, true) . '",' . (!empty($GLOBALS['site_parameters']['bootstrap_enabled'])?'true':'false') . ');
+';
 	}
 }
 

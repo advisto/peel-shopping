@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.0.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.1.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 37904 2013-08-27 21:19:26Z gboussin $
+# $Id: .htaccess 39022 2013-11-26 00:39:30Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -81,6 +81,7 @@
 # Une erreur 404 est associé à une mauvaise recherche (désactivée par défaut).
 # ATTENTION : configurez le ErrorDocument en précisant le bon chemin en cas d'installation dans un répertoire
 # Le code est à adapter en cas de site multilingue.
+# ErrorDocument 404 /monrepertoiredeboutique/search.php?type=error404
 ErrorDocument 404 /search.php?type=error404
 
 <FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">
@@ -91,6 +92,17 @@ ErrorDocument 404 /search.php?type=error404
 <FilesMatch "^http:">
 	ErrorDocument 404 default
 </FilesMatch>
+
+# Exclure une IP : décommenter ce qui suit et mettre le début d'une IP (classe d'IP) ou une IP entière
+# Deny from xxx.xxx.xxx.xxx
+
+# Exclure un user-agent : décommenter ce qui suit
+# SetEnvIfNoCase User-Agent "Excludeduseragent" bad_bot
+# Deny from env=bad_bot
+
+<Files ~ "403\.shtml$">
+	Allow from all
+</Files>
 
 # FIN DE CONFIGURATION ###
 
@@ -106,9 +118,9 @@ AddDefaultCharset UTF-8
 </FilesMatch>
 
 <ifModule mod_headers.c>
-	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc)$">
+	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc|woff|eot|svg|ttf)$">
 		# Mise en cache par le navigateur pendant 24h par défaut des images, CSS, Javascript.
-		Header set Cache-Control "max-age=604800"
+		Header set Cache-Control "max-age=604800, public"
 	</FilesMatch>
 </ifModule>
 
@@ -120,10 +132,10 @@ AddDefaultCharset UTF-8
 	Order allow,deny
 	Deny from all
 </Files>
-<Files ~ "\info.inc.php$">
+<Files ~ "info.inc.php$">
 	Deny from all
 </Files>
-<Files ~ "\configuration.inc.php$">
+<Files ~ "configuration.inc.php$">
 	Deny from all
 </Files>
 
@@ -138,6 +150,17 @@ AddDefaultCharset UTF-8
 	# ...ou... :
 	# RewriteBase /monrepertoiredeboutique/
 
+	# DEBUT DE EDITION SUR MESURE
+	# Redirection des demandes qui auraient dues être faites via un CDN
+	# RewriteCond %{HTTP_HOST} !^cdn(.*)\.(.*)\.(.*)$
+	# RewriteCond %{REQUEST_URI} ^(images|upload|icones|modeles/images)/(.*)$
+	# RewriteRule ^(.*)$ http://#######/$1 [R=301,L,QSA]
+	# Redirection des demandes qui n'auraient pas dues être faites via un CDN
+	# RewriteCond %{HTTP_HOST} ^cdn(.*)\.(.*)\.(.*)$
+	# RewriteCond %{REQUEST_URI} !^(images|upload|icones|modeles/images)/(.*)$
+	# RewriteRule ^(.*)$ http://cdn#######/$1 [R=301,L,QSA]
+	# FIN DE EDITION SUR MESURE
+
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$
 	# Suivant les hébergements, il faut ou non laisser un / devant $2 dans la ligne suivante (bug apache sur certaines versions ?)
@@ -150,6 +173,10 @@ AddDefaultCharset UTF-8
 	RewriteRule ^rss\.xml$  modules/rss/rss.php [QSA,L]
 	RewriteRule ^rss-([0-9]+)\.xml$  modules/rss/rss.php?cat=$1 [QSA,L]
 
+	# sitemap pour google et yahoo
+	RewriteRule ^sitemap\.xml$  get_sitemap.php?file=sitemap [QSA,L]
+	RewriteRule ^urllist\.txt$  get_sitemap.php?file=urllist [QSA,L]
+	
 	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/$ achat/index.php [QSA,L]
 	RewriteRule ^(achat|buy|comprar|kauf|acquisto|koop)/cat-(.*)-([0-9]+)\.html$ achat/index.php?catid=$3 [QSA,L]
 	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/(.*)\.(.*)$ achat/$2.$3 [QSA,L]

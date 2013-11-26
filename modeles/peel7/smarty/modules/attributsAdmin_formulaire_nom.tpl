@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_formulaire_nom.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<form method="post" action="{$action|escape:'html'}">
+// $Id: attributsAdmin_formulaire_nom.tpl 38975 2013-11-24 21:57:43Z gboussin $
+*}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
 	<table class="main_table">
@@ -35,8 +35,8 @@
 		{foreach $langs as $lng}
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$lng.code|upper}</td></tr>
 		<tr>
-			<td class="label">{$STR_ADMIN_NAME} {$lng.code|upper}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="width:460px" type="text" name="nom_{$lng.code}" value="{$lng.value|str_form_value}" /></td>
+			<td class="title_label">{$STR_ADMIN_NAME} {$lng.code|upper}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="nom_{$lng.code}" value="{$lng.value|str_form_value}" /></td>
    	 	</tr>
 		{/foreach}
 		<tr>
@@ -44,14 +44,14 @@
 		</tr>
 		<tr>
 			<td><label for="texte_libre_attribute">{$STR_ADMIN_TECHNICAL_CODE}{$STR_BEFORE_TWO_POINTS}:</label></td>
-			<td><input type="text" name="technical_code" value="{$technical_code|str_form_value}"></td>
+			<td><input type="text" class="form-control" name="technical_code" value="{$technical_code|str_form_value}"></td>
 		</tr>
 		<tr>
 			<td class="right"><input type="radio" id="texte_libre_attribute" name="attribut_type" value="0" {if $texte_libre == '0' OR empty($texte_libre)} checked="checked"{/if} /></td>
 			<td><label for="texte_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_OPTIONS_LIST_ATTRIBUTE}</label></td>
 		</tr>
 		<tr>
-			<td class="right"><input type="radio" id="texte_non_libre_attribute" name="attribut_type" value="1" {if $texte_libre == '1' AND $upload == '0'} checked="checked"{/if} /></td>
+			<td class="right"><input type="radio" id="texte_non_libre_attribute" name="attribut_type" value="1" {if $texte_libre == '1' && $upload == '0'} checked="checked"{/if} /></td>
 			<td><label for="texte_non_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE}</label></td>
 		</tr>
 		<tr>
@@ -68,7 +68,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><p><input type="hidden" name="show_description" value="{$show_description|str_form_value}"><input class="bouton" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>
+			<td colspan="2" class="center"><p><input type="hidden" name="show_description" value="{$show_description|str_form_value}"><input class="btn btn-primary" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>
 		</tr>
 	</table>
 </form>

@@ -1,27 +1,18 @@
 /***********************************************
-* Pausing up-down scroller- © Dynamic Drive (www.dynamicdrive.com)
+* Pausing up-down scroller- Dynamic Drive (www.dynamicdrive.com)
 * This notice MUST stay intact for legal use
 * Visit http://www.dynamicdrive.com/ for this script and 100s more.
 ***********************************************/
 
-function pausescroller(content, divId, divClass, delay){
+function pausescroller(content, divId, delay){
 	this.content=content; //message array content
 	this.tickerid=divId; //ID of ticker div to display information
 	this.delay=delay; //Delay between msg change, in miliseconds.
 	this.mouseoverBol=0; //Boolean to indicate whether mouse is currently over scroller (and pause it if it is)
 	this.hiddendivpointer=1; //index of message array for hidden div
-	document.write('<div id="'+divId+'" class="'+divClass+'" style="position: relative; overflow: hidden; width:96%;height: 230px;padding: 5px 3px;"><div class="innerDiv" style="position: absolute; width: 100%" id="'+divId+'1">'+content[0]+'</div><div class="innerDiv" style="position: absolute; width: 100%; visibility: hidden" id="'+divId+'2">'+content[1]+'</div></div>');
+	document.getElementById(divId).innerHTML = '<div class="innerDiv" style="position: absolute; width: 96%" id="'+divId+'1">'+content[0]+'</div><div class="innerDiv" style="position: absolute; width: 96%; visibility: hidden" id="'+divId+'2">'+content[1]+'</div>';
 	var scrollerinstance=this;
-	if (window.addEventListener) {
-		//run onload in DOM2 browsers
-		window.addEventListener("load", function(){scrollerinstance.initialize()}, false);
-	} else if (window.attachEvent) {
-		//run onload in IE5.5+
-		window.attachEvent("onload", function(){scrollerinstance.initialize()});
-	} else if (document.getElementById) {
-		//if legacy DOM browsers, just start scroller after 0.5 sec
-		setTimeout(function(){scrollerinstance.initialize()}, 500);
-	}
+	scrollerinstance.initialize();
 }
 
 // initialize()- Initialize scroller method.
@@ -33,7 +24,7 @@ pausescroller.prototype.initialize=function(){
 	this.hiddendiv=document.getElementById(this.tickerid+"2");
 	this.visibledivtop=parseInt(pausescroller.getCSSpadding(this.tickerdiv));
 	//set width of inner DIVs to outer DIV's width minus padding (padding assumed to be top padding x 2)
-	this.visiblediv.style.width=this.hiddendiv.style.width=this.tickerdiv.offsetWidth-(this.visibledivtop*2)+"px";
+	//this.visiblediv.style.width=this.hiddendiv.style.width=this.tickerdiv.offsetWidth-(this.visibledivtop*2)+"px";
 	this.getinline(this.visiblediv, this.hiddendiv);
 	this.hiddendiv.style.visibility="visible";
 	var scrollerinstance=this;

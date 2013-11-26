@@ -3,18 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bdd.php 37925 2013-08-28 10:14:26Z gboussin $
+// $Id: bdd.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_INSTALLATION', 2);
 include("../configuration.inc.php");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_INSTALL_STEP2_TITLE'];
+unset($_SESSION['session_install_finished']);
 
 if (!isset($_SESSION['session_admin_ssl']) && (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')) {
 	$_SESSION['session_admin_ssl'] = "1";
@@ -75,8 +76,8 @@ $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 
 $output = $tpl->fetch();
 
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
-include($GLOBALS['dirroot'] . "/" . $GLOBALS['site_parameters']['backoffice_directory_name'] . "/modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

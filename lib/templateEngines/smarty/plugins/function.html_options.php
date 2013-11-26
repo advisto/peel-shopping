@@ -140,7 +140,7 @@ function smarty_function_html_options($params, $template)
     if (!empty($name)) {
         $_html_class = !empty($class) ? ' class="'.$class.'"' : '';
         $_html_id = !empty($id) ? ' id="'.$id.'"' : '';
-        $_html_result = '<select name="' . $name . '"' . $_html_class . $_html_id . $extra . '>' . "\n" . $_html_result . '</select>' . "\n";
+        $_html_result = '<select class="form-control" name="' . $name . '"' . $_html_class . $_html_id . $extra . '>' . "\n" . $_html_result . '</select>' . "\n";
     } 
 
     return $_html_result;

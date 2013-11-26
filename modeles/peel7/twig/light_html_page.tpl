@@ -3,19 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: light_html_page.tpl 37943 2013-08-29 09:31:55Z gboussin $
+// $Id: light_html_page.tpl 38970 2013-11-24 18:53:25Z gboussin $
 #}<!DOCTYPE html>
 <html lang="{{ lang }}" dir="ltr">
 {% if not full_head_section_text %}
 	<head>
-		<meta charset="{{ charset }}" />
+		{% if charset %}<meta charset="{{ charset }}" />{% endif %}
 		<title>{{ title }}</title>
 		{{ additional_header }}
 	{% if (css_files) %}
@@ -23,13 +23,10 @@
 		<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" />
 		{% endfor %}
 	{% endif %}
-	{% if (js_files) %}
-		{% for js_href in js_files %}
-		<script src="{{ js_href|escape('html') }}"></script>
-		{% endfor %}
-	{% endif %}
+		{% if (js_output) %}{{ js_output }}{% endif %}
 		<!--[if lt IE 9]>
 		<script src="{{ wwwroot }}/lib/js/html5shiv.js"></script>
+		<script src="{{ wwwroot }}/lib/js/respond.js"></script>
 		<![endif]-->
 	</head>
 {% else %}

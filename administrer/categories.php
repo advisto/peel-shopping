@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: categories.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv('admin_products');
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_CATEGORIES_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $categorie_options = '';
 $frm = $_POST;
@@ -104,7 +104,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -143,6 +143,8 @@ function update_category_sons_promotions($parent_id, $promotion_devises = 0, $pr
  */
 function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent = "", $first_line = 0, $depth = 1)
 {
+	static $tpl;
+
 	$sql = "SELECT c.id, c.reference, c.nom_" . $_SESSION['session_langue'] . ", c.etat, c.position, c.nb, c.image_" . $_SESSION['session_langue'] . "";
 	if (is_category_promotion_module_active ()) {
 		$sql .= ", c.promotion_devises, c.promotion_percent";
@@ -154,12 +156,20 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 	$qid = query($sql);
 
 	while ($cat = fetch_assoc($qid)) {
-		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_arbo_categorie.tpl');
-
+		if(empty($tpl)){
+			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_arbo_categorie.tpl');
+		}
 		if ($cat['image_' . $_SESSION['session_langue']] != "") {
-			$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($cat['image_' . $_SESSION['session_langue']], 80, 50, 'fit'),
+			if (pathinfo($cat['image_' . $_SESSION['session_langue']], PATHINFO_EXTENSION) == 'pdf') {
+				$this_thumb = thumbs('logoPDF_small.png', 80, 50, 'fit', $GLOBALS['dirroot'] .'/images/');
+			} else {
+				$this_thumb = thumbs($cat['image_' . $_SESSION['session_langue']], 80, 50, 'fit');
+			}
+			$tpl->assign('image', array('src' =>  $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
 					'name' => $cat['image_' . $_SESSION['session_langue']]
 					));
+		}else{
+			$tpl->assign('image', null);
 		}
 		$tpl->assign('tr_rollover', tr_rollover($first_line, true));
 		$tpl->assign('ajout_cat_href', get_current_url(false) . "?mode=ajout&id=" . $cat['id']);
@@ -171,13 +181,15 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		$tpl->assign('cat_id', $cat['id']);
 		$tpl->assign('indent', $indent);
 		$tpl->assign('modif_href', get_current_url(false) . "?mode=modif&id=" . $cat['id']);
-		$tpl->assign('cat_nom', $cat['nom_' . $_SESSION['session_langue']]);
+		$tpl->assign('cat_nom', (!empty($cat['nom_' . $_SESSION['session_langue']])?$cat['nom_' . $_SESSION['session_langue']]:'['.$cat['id'].']'));
 		$tpl->assign('sites_names', get_all_site_names());
 
 		if (is_category_promotion_module_active()) {
 			$tpl->assign('promotion', array('percent' => number_format($cat['promotion_percent'], 2),
 					'prix' => fprix($cat['promotion_devises'], true, $GLOBALS['site_parameters']['code'], false)
 					));
+		}else{
+			$tpl->assign('promotion', null);
 		}
 
 		$tpl->assign('depth', $depth);
@@ -186,6 +198,8 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		$tpl->assign('cat_position', $cat['position']);
 		if ($cat['position'] > 1) {
 			$tpl->assign('up_href', get_current_url(false) . '?mode=modif_etat&id=' . $cat['id'] . '&position=' . ($cat['position'] - 1));
+		}else{
+			$tpl->assign('up_href', null);
 		}
 		$tpl->assign('desc_href', get_current_url(false) . '?mode=modif_etat&id=' . $cat['id'] . '&position=' . ($cat['position'] + 1));
 		$tpl->assign('etat_onclick', 'change_status("categories", "' . $cat['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")');
@@ -493,6 +507,7 @@ function affiche_formulaire_categorie(&$frm)
 	$tpl->assign('etat', $frm['etat']);
 	$tpl->assign('type_affichage', $frm['type_affichage']);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
+	$tpl->assign('pdf_logo_src', $GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 
 	$tpl_langs = array();
 	$tpl->assign('is_lot_module_active', is_lot_module_active());
@@ -509,14 +524,27 @@ function affiche_formulaire_categorie(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_img = null;
 		if (!empty($frm["image_" . $lng])) {
-			$tpl_img = array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image_" . $lng],
+			if (String::strtolower(String::substr($frm['image_' . $lng], strrpos($frm['image_' . $lng], ".") + 1)) == 'pdf') {
+				$type = 'pdf';
+			} else {
+				$type = 'img';
+			}	
+			if(strpos($frm['image_' . $lng], '://') !== false) {
+				$this_url = $frm['image_' . $lng];
+			} elseif(strpos($frm['image_' . $lng], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
+				$this_url = $GLOBALS['wwwroot'] . $frm['image_' . $lng];
+			} else {
+				$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image_' . $lng];
+			}
+			$tpl_img = array('src' => $this_url,
 				'nom' => $frm["image_" . $lng],
+				'type' => $type,
 				'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&lang=' . $lng,
 				);
 		}
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng],
-			'description_te' => getTextEditor('description_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+			'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_titre' => $frm['meta_titre_' . $lng],
 			'meta_key' => $frm['meta_key_' . $lng],
 			'meta_desc' => $frm['meta_desc_' . $lng],

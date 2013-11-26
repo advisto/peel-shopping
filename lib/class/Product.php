@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 37981 2013-08-30 16:39:16Z gboussin $
+// $Id: Product.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 37981 2013-08-30 16:39:16Z gboussin $
+ * @version $Id: Product.php 38682 2013-11-13 11:35:48Z gboussin $
  * @access public
  */
 class Product {
@@ -279,6 +279,7 @@ class Product {
 			$this->ecotaxe_ttc = 0;
 		}
 		$this->prix_ht = $this->prix / (1 + $this->tva / 100);
+		// On ajoute au prix les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
 		$price_calculation = affiche_attributs_form_part($this, 'price_calculation', null, null, null, null, null, is_reseller_module_active() && is_reseller(), false, false, true);
 		$this->prix_ht += vn($GLOBALS['last_calculation_additional_price_ht']);
 		$this->vat_applicable = $vat_applicable;
@@ -303,7 +304,6 @@ class Product {
 	 */
 	function set_configuration($color_id = null, $size_id = null, $attributs_list = null, $reseller_mode = false, $format_attribut_description_for_database = false)
 	{
-		static $nom_attribut_array;
 		// Color has no impact on price
 		$this->configuration_color_id = $color_id;
 		if ($this->configuration_size_id !== $size_id) {
@@ -385,19 +385,19 @@ class Product {
 	function get_possible_colors()
 	{
 		static $possible_colors;
-		$colors_array = array();
-		if (!isset($possible_colors[$this->id . '-' . $_SESSION['session_langue']])) {
-			$possible_colors[$this->id . '-' . $_SESSION['session_langue']] = array();
+		$cache_id = $this->id . '-' . $_SESSION['session_langue'];
+		if (!isset($possible_colors[$cache_id])) {
+			$possible_colors[$cache_id] = array();
 			$query = query('SELECT pc.couleur_id, c.nom_' . $_SESSION['session_langue'] . '
 				FROM peel_produits_couleurs pc
 				INNER JOIN peel_couleurs c ON c.id = pc.couleur_id
 				WHERE pc.produit_id  = "' . intval($this->id) . '"
 				ORDER BY c.position ASC, c.nom_' . $_SESSION['session_langue'] . ' ASC');
 			while ($result = fetch_assoc($query)) {
-				$possible_colors[$this->id . '-' . $_SESSION['session_langue']][$result['couleur_id']] = $result['nom_' . $_SESSION['session_langue']];
+				$possible_colors[$cache_id][$result['couleur_id']] = $result['nom_' . $_SESSION['session_langue']];
 			}
 		}
-		return $possible_colors[$this->id . '-' . $_SESSION['session_langue']];
+		return $possible_colors[$cache_id];
 	}
 
 	/**
@@ -447,7 +447,7 @@ class Product {
 				$possible_sizes[$this->id . '-' . $_SESSION['session_langue']][] = $result;
 			}
 		}
-		if (!empty($possible_sizes)) {
+		if (!empty($possible_sizes) && !empty($possible_sizes[$this->id . '-' . $_SESSION['session_langue']])) {
 			foreach($possible_sizes[$this->id . '-' . $_SESSION['session_langue']] as $result) {
 				if ($return_mode == 'name') {
 					$sizes_array[$result['taille_id']] = $result['nom_' . $_SESSION['session_langue']];
@@ -486,35 +486,39 @@ class Product {
 	 */
 	function get_possible_attributs($return_mode = 'name', $get_configuration_results_only = false, $user_promotion_percentage = 0, $with_taxes = true, $reseller_mode = false, $format = false, $add_tax_type_text = false, $get_attributes_with_multiple_options_only = true, $get_attributes_with_single_options_only = false, $filter_technical_code = null)
 	{
+		static $attributs_array;
 		if (!is_attributes_module_active()) {
 			continue;
 		}
-		if(!empty($this->id)) {
-			$attributs_array = get_possible_attributs($this->id, ($return_mode=='infos'?'rough':$return_mode), $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only, ($get_configuration_results_only?$this->configuration_attributs_list:null));
-		} else {
-			$attributs_array = array();
-		}
-		if (!empty($attributs_array) && $return_mode == 'infos') {
-			foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
-				foreach ($this_attribut_values_array as $this_attribut_id => $result) {
-					if(!empty($filter_technical_code) && $result['technical_code'] == $filter_technical_code) {
-						continue;
+		$cache_id = md5(serialize(array($return_mode, $get_configuration_results_only, $user_promotion_percentage, $with_taxes, $reseller_mode, $format, $add_tax_type_text, $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only, $filter_technical_code, $this->id, $this->configuration_attributs_list)));
+		if (!isset($attributs_array[$cache_id])) {
+			if(!empty($this->id)) {
+				$attributs_array[$cache_id] = get_possible_attributs($this->id, ($return_mode=='infos'?'rough':$return_mode), $get_attributes_with_multiple_options_only, $get_attributes_with_single_options_only, ($get_configuration_results_only?$this->configuration_attributs_list:null));
+			} else {
+				$attributs_array[$cache_id] = array();
+			}
+			if (!empty($attributs_array[$cache_id]) && $return_mode == 'infos') {
+				foreach ($attributs_array[$cache_id] as $this_nom_attribut_id => $this_attribut_values_array) {
+					foreach ($this_attribut_values_array as $this_attribut_id => $result) {
+						if(!empty($filter_technical_code) && $result['technical_code'] == $filter_technical_code) {
+							continue;
+						}
+						if ($reseller_mode && $result["prix_revendeur"] != 0) {
+							$original_price = $result["prix_revendeur"] / (1 + $this->tva / 100);
+						} else {
+							$original_price = $result["prix"] / (1 + $this->tva / 100);
+						}
+						$final_price = $original_price * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage) / 100);
+						$result['name'] = $result['nom'];
+						$result['row_original_price'] = $this->format_prices($original_price, $with_taxes, false, false, false);
+						$result['row_final_price'] = $this->format_prices($final_price, $with_taxes, false, false, false);
+						$result['final_price_formatted'] = $this->format_prices($final_price, $with_taxes, false, $format, $add_tax_type_text);
+						$attributs_array[$cache_id][$this_nom_attribut_id][$this_attribut_id] = $result;
 					}
-					if ($reseller_mode && $result["prix_revendeur"] != 0) {
-						$original_price = $result["prix_revendeur"] / (1 + $this->tva / 100);
-					} else {
-						$original_price = $result["prix"] / (1 + $this->tva / 100);
-					}
-					$final_price = $original_price * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage) / 100);
-					$result['name'] = $result['nom'];
-					$result['row_original_price'] = $this->format_prices($original_price, $with_taxes, false, false, false);
-					$result['row_final_price'] = $this->format_prices($final_price, $with_taxes, false, false, false);
-					$result['final_price_formatted'] = $this->format_prices($final_price, $with_taxes, false, $format, $add_tax_type_text);
-					$attributs_array[$this_nom_attribut_id][$this_attribut_id] = $result;
 				}
 			}
 		}
-		return $attributs_array;
+		return $attributs_array[$cache_id];
 	}
 	
 	/**
@@ -597,56 +601,67 @@ class Product {
 	 */
 	function get_product_pictures($display_pdf = false, $force_id_couleur = null, $only_return_first_picture = false)
 	{
-		if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
-			if (!empty($force_id_couleur)) {
-				$sql_condition = ' AND couleur_id="' . intval($force_id_couleur) . '"';
-			} elseif (!empty($this->configuration_color_id)) {
-				$sql_condition = ' AND couleur_id="' . intval($this->configuration_color_id) . '"';
-			} else {
-				// Si il n'y a pas de couleur choisie, on sélectionne la couleur par défaut choisie par l'admin
-				$sql_condition = ' AND couleur_id="' . intval($this->default_color_id) . '"';
-			}
-			$sql = 'SELECT *
-				FROM peel_produits_couleurs
-				WHERE produit_id="' . intval($this->id) . '" ' . $sql_condition . '
-				LIMIT 1';
-			$q = query($sql);
-			if ($result = fetch_assoc($q)) {
-				// On commence par l'image par défaut pour que ce soit le premier élément du tableau
-				if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
-					$product_images[] = $result['image' . $result['default_image']];
+		static $product_images;
+		$cache_id = md5(serialize(array($this->id, $this->configuration_color_id, $this->default_color_id, $display_pdf, $force_id_couleur, $only_return_first_picture)));
+		if (!isset($product_images[$cache_id])) {
+			if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
+				if (!empty($force_id_couleur)) {
+					$sql_condition = ' AND couleur_id="' . intval($force_id_couleur) . '"';
+				} elseif (!empty($this->configuration_color_id)) {
+					$sql_condition = ' AND couleur_id="' . intval($this->configuration_color_id) . '"';
+				} else {
+					// Si il n'y a pas de couleur choisie, on sélectionne la couleur par défaut choisie par l'admin
+					$sql_condition = ' AND couleur_id="' . intval($this->default_color_id) . '"';
 				}
-				for($i = 1;$i <= 5;$i++) {
-					if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
-						$product_images[] = $result['image' . $i];
+				$sql = 'SELECT *
+					FROM peel_produits_couleurs
+					WHERE produit_id="' . intval($this->id) . '" ' . $sql_condition . '
+					LIMIT 1';
+				$q = query($sql);
+				if ($result = fetch_assoc($q)) {
+					// On commence par l'image par défaut pour que ce soit le premier élément du tableau
+					if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
+						$product_images[$cache_id][] = $result['image' . $result['default_image']];
+					}
+					for($i = 1;$i <= 5;$i++) {
+						if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images[$cache_id])) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
+							$product_images[$cache_id][] = $result['image' . $i];
+						}
 					}
 				}
-			}
-			$sql = 'SELECT default_image, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10
-				FROM peel_produits
-				WHERE id=' . intval($this->id);
-			$q = query($sql);
-			if ($result = fetch_assoc($q)) {
+				if($this->default_image === null) {
+					// Produit chargé à partir de données transmises de l'extérieur => nécessite de compléter les informations
+					$sql = 'SELECT default_image, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10
+						FROM peel_produits
+						WHERE id=' . intval($this->id);
+					$q = query($sql);
+					if ($result = fetch_assoc($q)) {
+						foreach($result as $this_item => $this_value) {
+							$this->$this_item = $this_value;
+						}
+					}
+				}
 				// On commence par l'image par défaut pour que ce soit le premier élément du tableau
-				if (!empty($result['default_image']) && is_numeric($result['default_image']) && !empty($result['image' . $result['default_image']]) && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $result['default_image']], PATHINFO_EXTENSION) != 'pdf')) {
-					$product_images[] = $result['image' . $result['default_image']];
+				$this_image_item = 'image' . $this->default_image;
+				if (!empty($this->default_image) && is_numeric($this->default_image) && !empty($this->$this_image_item) && (!$only_return_first_picture || empty($product_images[$cache_id])) && ($display_pdf || pathinfo($this->$this_image_item, PATHINFO_EXTENSION) != 'pdf')) {
+					$product_images[$cache_id][] = $this->$this_image_item;
 				}
 				for($i = 1;$i <= 10;$i++) {
-					if (!empty($result['image' . $i]) && $i != $result['default_image'] && (!$only_return_first_picture || empty($product_images)) && ($display_pdf || pathinfo($result['image' . $i], PATHINFO_EXTENSION) != 'pdf')) {
-						$product_images[] = $result['image' . $i];
+					$this_image_item = 'image' . $i;
+					if (!empty($this->$this_image_item) && $i != $this->default_image && (!$only_return_first_picture || empty($product_images[$cache_id])) && ($display_pdf || pathinfo($this->$this_image_item, PATHINFO_EXTENSION) != 'pdf')) {
+						$product_images[$cache_id][] = $this->$this_image_item;
 					}
 				}
+			} else {
+				$ad_object = new Annonce($this->id);
+				$product_images[$cache_id][] = $ad_object->get_annonce_picture();
+				unset($ad_object);
 			}
-		} else {
-			$ad_object = new Annonce($this->id);
-			$product_images[] = $ad_object->get_annonce_picture();
-			unset($ad_object);
+			if (empty($product_images[$cache_id])) {
+				$product_images[$cache_id] = false;
+			}
 		}
-		if (!empty($product_images)) {
-			return $product_images;
-		} else {
-			return false;
-		}
+		return $product_images[$cache_id];
 	}
 
 	/**
@@ -694,6 +709,7 @@ class Product {
 				$price_ht += $this->configuration_total_original_price_attributs_ht;
 			}
 		}
+		$price_ht = $price_ht * $quantity;
 		return $this->format_prices($price_ht, $with_taxes, (!empty($add_ecotax)?$quantity:false), $format, $add_tax_type_text);
 	}
 
@@ -781,7 +797,6 @@ class Product {
 			$price_ht = $price_ht * (1 - $user_promotion_percentage / 100) ;
 		}
 		$price_ht = $price_ht * $quantity;
-
 		return $this->format_prices($price_ht, $with_taxes, (!empty($add_ecotax)?$quantity:false), $format, $add_tax_type_text, $add_rdfa_properties);
 	}
 
@@ -873,9 +888,9 @@ class Product {
 	 * @param boolean $display_old_price_inline
 	 * @return
 	 */
-	function affiche_prix($with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_expand_in_container', $display_old_price_inline = true, $add_rdfa_properties = false)
+	function affiche_prix($with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $add_rdfa_properties = false, $display_with_vat_symbol = true)
 	{
-		$output = affiche_prix($this, $with_taxes, $reseller_mode, $return_mode, $display_with_measurement, $item_id, $display_ecotax, $display_old_price, $table_css_class, $display_old_price_inline, true, $add_rdfa_properties);
+		$output = affiche_prix($this, $with_taxes, $reseller_mode, $return_mode, $display_with_measurement, $item_id, $display_ecotax, $display_old_price, $table_css_class, $display_old_price_inline, $display_with_vat_symbol, $add_rdfa_properties);
 
 		if ($return_mode) {
 			return $output;

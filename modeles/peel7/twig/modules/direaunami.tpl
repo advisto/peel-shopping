@@ -3,61 +3,62 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: direaunami.tpl 37943 2013-08-29 09:31:55Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}">
+// $Id: direaunami.tpl 38969 2013-11-24 18:40:24Z gboussin $
+#}<h1>{{ STR_TELL_FRIEND }}</h1>
+<p>{{ STR_MODULE_DIREAUNAMI_MSG_TELL_FRIEND|nl2br_if_needed }}</p>
+<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<!-- Début Dire à un ami -->
-	<h2>{{ STR_TELL_FRIEND }}</h2><p>{{ STR_MODULE_DIREAUNAMI_MSG_TELL_FRIEND|nl2br_if_needed }}</p>
-	<table class="full_width" cellpadding="2">
+	<table class="full_width">
 		<tr>
 			<td>{{ STR_YOUR_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ STR_YOUR_EMAIL }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
-			<td><input type="text" name="yname" size="25" value="{{ yname|str_form_value }}" /></td>
-			<td><input type="email" name="yemail" size="29" value="{{ yemail|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="yname" size="25" value="{{ yname|str_form_value }}" /></td>
+			<td><input type="email" class="form-control" name="yemail" size="29" value="{{ yemail|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_THEIR_NAMES }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ STR_THEIR_EMAILS }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
-			<td><input type="text" name="fname[]" size="25" /></td>
-			<td><input type="email" name="femail[]" size="29" /></td>
+			<td><input type="text" class="form-control" name="fname[]" size="25" /></td>
+			<td><input type="email" class="form-control" name="femail[]" size="29" /></td>
 		</tr>
 		<tr>
-			<td><input type="text" name="fname[]" size="25" /></td>
-			<td><input type="email" name="femail[]" size="29" /></td>
+			<td><input type="text" class="form-control" name="fname[]" size="25" /></td>
+			<td><input type="email" class="form-control" name="femail[]" size="29" /></td>
 		</tr>
 		<tr>
-			<td><input type="text" name="fname[]" size="25" /></td>
-			<td><input type="email" name="femail[]" size="29" /></td>
+			<td><input type="text" class="form-control" name="fname[]" size="25" /></td>
+			<td><input type="email" class="form-control" name="femail[]" size="29" /></td>
 		</tr>
 		<tr>
-			<td><input type="text" name="fname[]" size="25" /></td>
-			<td><input type="email" name="femail[]" size="29" /></td>
+			<td><input type="text" class="form-control" name="fname[]" size="25" /></td>
+			<td><input type="email" class="form-control" name="femail[]" size="29" /></td>
 		</tr>
 		<tr>
-			<td><input type="text" name="fname[]" size="25" /></td>
-			<td><input type="email" name="femail[]" size="29" /></td>
+			<td><input type="text" class="form-control" name="fname[]" size="25" /></td>
+			<td><input type="email" class="form-control" name="femail[]" size="29" /></td>
 		</tr>
 		<tr>
 			<td colspan="2">{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
-			<td colspan="2"><textarea rows="6" cols="54" name="comments" style="width:500px"></textarea></td>
+			<td colspan="2"><textarea class="form-control" rows="6" cols="54" name="comments"></textarea></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="center">
 				<input type="hidden" name="referer" value="{{ referer|str_form_value }}" />
 				<input name="mode" value="send" type="hidden" />
-				<input class="clicbouton" type="submit" name="action" value="{{ STR_SEND|str_form_value }}" />
+				<input class="btn btn-primary" type="submit" name="action" value="{{ STR_SEND|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>

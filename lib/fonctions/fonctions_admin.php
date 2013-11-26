@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 38063 2013-09-05 13:00:38Z gboussin $
+// $Id: fonctions_admin.php 39029 2013-11-26 08:52:00Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,362 +36,405 @@ function get_admin_menu()
 		$menu_items['home'][$GLOBALS['wwwroot'] . '/'] = $GLOBALS["STR_ADMIN_MENU_HOME_FRONT"];
 		if (a_priv('admin_manage', true)) {
 			$main_menu_items['manage'] = array($GLOBALS['administrer_url'] . '/sites.php' => $GLOBALS["STR_ADMIN_MENU_MANAGE_TITLE"]);
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/sites.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SITES"];
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/configuration.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CONFIGURATION"];
+			$menu_items['manage']['manage_general'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_TITLE"];
+			$menu_items['manage_general'][$GLOBALS['administrer_url'] . '/sites.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SITES"];
+			$menu_items['manage_general'][$GLOBALS['administrer_url'] . '/configuration.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CONFIGURATION"];
 			if (is_lot_module_active()) {
-				$menu_items['manage'][$GLOBALS['wwwroot'] . '/modules/lot/administrer/lot.php?mode=edit_global_promotion_percent_by_threshold'] = $GLOBALS["STR_ADMIN_MENU_GLOBAL_PROMOTION_PERCENT_BY_THRESHOLD"];
+				$menu_items['manage_general'][$GLOBALS['wwwroot'] . '/modules/lot/administrer/lot.php?mode=edit_global_promotion_percent_by_threshold'] = $GLOBALS["STR_ADMIN_MENU_GLOBAL_PROMOTION_PERCENT_BY_THRESHOLD"];
 			}
-			if (is_carrousel_module_active ()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/carrousel/administrer/carrousel.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CARROUSEL"];
-			}
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/societe.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SOCIETE"];
-			if (is_devises_module_active ()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/devises/administrer/devises.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DEVISES"];
-			}
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/langues.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LANGUES"];
-			if (is_module_ecotaxe_active ()) {
-				$menu_items['manage'][$GLOBALS['administrer_url'] . '/ecotaxes.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EXOTAXE"];
-			}
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/tva.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_TVA"];
+			$menu_items['manage_general'][$GLOBALS['administrer_url'] . '/societe.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SOCIETE"];
+			$menu_items['manage_general'][$GLOBALS['administrer_url'] . '/langues.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LANGUES"];
 			if (is_module_profile_active ()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/profil/administrer/profil.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PROFIL"];
+				$menu_items['manage_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/profil/administrer/profil.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PROFIL"];
 			}
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/paiement.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT"];
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/clean_folders.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CLEAN_FOLDERS"];
+			$menu_items['manage_general'][$GLOBALS['administrer_url'] . '/clean_folders.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CLEAN_FOLDERS"];
 			if (is_butterflive_module_active ()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/butterflive/admin/butterflive.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_BUTTERFLIVE"];
+				$menu_items['manage_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/butterflive/admin/butterflive.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_BUTTERFLIVE"];
 			}
-			$menu_items['manage'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_HEADER"].' &nbsp; -';
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/pays.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_COUNTRIES"];
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/zones.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_ZONES"];
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/types.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY"];
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/tarifs.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_COST"];
+			$menu_items['manage']['manage_payments'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT_AND_TAXES"];
+			$menu_items['manage_payments'][$GLOBALS['administrer_url'] . '/paiement.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT"];
+			if (is_devises_module_active ()) {
+				$menu_items['manage_payments'][$GLOBALS['wwwroot_in_admin'] . '/modules/devises/administrer/devises.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DEVISES"];
+			}
+			$menu_items['manage_payments'][$GLOBALS['administrer_url'] . '/tva.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_TVA"];
+			if (is_module_ecotaxe_active ()) {
+				$menu_items['manage_payments'][$GLOBALS['administrer_url'] . '/ecotaxes.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EXOTAXE"];
+			}
+			$menu_items['manage_payments'][$GLOBALS['administrer_url'] . '/statut_paiement.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PAYMENT_STATUS"];
+			$menu_items['manage']['manage_delivery'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_HEADER"];
+			$menu_items['manage_delivery'][$GLOBALS['administrer_url'] . '/pays.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_COUNTRIES"];
+			$menu_items['manage_delivery'][$GLOBALS['administrer_url'] . '/zones.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_ZONES"];
+			$menu_items['manage_delivery'][$GLOBALS['administrer_url'] . '/types.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY"];
+			$menu_items['manage_delivery'][$GLOBALS['administrer_url'] . '/tarifs.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_COST"];
+			$menu_items['manage_delivery'][$GLOBALS['administrer_url'] . '/statut_livraison.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_STATUS"];
 			if (is_icirelais_module_active ()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/icirelais/administrer/icirelais_file_synchronize_V2.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_ICIRELAIS"];
+				$menu_items['manage_delivery'][$GLOBALS['wwwroot_in_admin'] . '/modules/icirelais/administrer/icirelais_file_synchronize_V2.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_ICIRELAIS"];
 			}
-			$menu_items['manage'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MANAGE_EMAILS_HEADER"].' &nbsp; -';
-			$menu_items['manage'][$GLOBALS['administrer_url'] . '/email-templates.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAIL"];
-			if (is_webmail_module_active()) {
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
-				$menu_items['manage'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
-			}
+			$menu_items['manage']['manage_emails'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAILS_HEADER"];
+			$menu_items['manage_emails'][$GLOBALS['administrer_url'] . '/email-templates.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAIL"];
 		}
 		if (a_priv('admin_users', true)) {
 			// Menu des utilisateurs
 			$main_menu_items['users'] = array($GLOBALS['administrer_url'] . '/utilisateurs.php' => $GLOBALS["STR_ADMIN_MENU_USERS_USERS"]);
-			$menu_items['users'][$GLOBALS['administrer_url'] . '/utilisateurs.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_LIST"];
-			$menu_items['users'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_USERS_USER_CREATE"];
+			$menu_items['users']['users_general'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS"];
+			$menu_items['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_LIST"];
+			$menu_items['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_USERS_USER_CREATE"];
 
 			if (is_groups_module_active ()) {
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/groups/administrer/groupes.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_GROUPS_LIST"];
+				$menu_items['users_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/groups/administrer/groupes.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_GROUPS_LIST"];
 			}
-			$menu_items['users'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=liste&priv=supplier'] = $GLOBALS["STR_ADMIN_MENU_USERS_SUPPLIERS_LIST"];
-			$menu_items['users'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_USERS_RETAINING"].' &nbsp; -';
-			$menu_items['users'][$GLOBALS['administrer_url'] . '/newsletter.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_NEWSLETTER"];
+			$menu_items['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=liste&priv=supplier'] = $GLOBALS["STR_ADMIN_MENU_USERS_SUPPLIERS_LIST"];
+			$menu_items['users']['users_retaining'] = $GLOBALS["STR_ADMIN_MENU_USERS_RETAINING"];
+			$menu_items['users_retaining'][$GLOBALS['administrer_url'] . '/newsletter.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_NEWSLETTER"];
 			if (is_module_wanewsletter_active ()) {
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/newsletter/admin/admin.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_WANEWSLETTER"];
+				$menu_items['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/newsletter/admin/admin.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_WANEWSLETTER"];
 			}
-			$menu_items['users'][$GLOBALS['administrer_url'] . '/codes_promos.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CODE_PROMO"];
+			$menu_items['users_retaining'][$GLOBALS['administrer_url'] . '/codes_promos.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CODE_PROMO"];
 			if (is_good_clients_module_active ()) {
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/good_clients/administrer/bons_clients.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BEST_CLIENTS"];
+				$menu_items['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/good_clients/administrer/bons_clients.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BEST_CLIENTS"];
 			}
 			if (is_birthday_module_active ()) {
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/birthday/administrer/bons_anniversaires.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BIRTHDAY"];
+				$menu_items['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/birthday/administrer/bons_anniversaires.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BIRTHDAY"];
 			}
 			if (is_module_gift_checks_active ()) {
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/gift_check/administrer/cheques_cadeaux.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_GIFT_CHECKS"];
+				$menu_items['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/gift_check/administrer/cheques_cadeaux.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_GIFT_CHECKS"];
 			}
 			// Si le module commerciale existe, alors on affiche le menu relation client
-			if (is_commerciale_module_active()) {
-				$menu_items['users'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_USERS_SALES_MANAGEMENT"].' &nbsp; -';
-				if (is_relance_avance_module_active()) {
-					$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/relance_avance/administrer/relances.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CONTACT_REMINDERS"];
+			if (is_webmail_module_active() || is_relance_avance_module_active() || is_commerciale_module_active() || file_exists($GLOBALS['dirroot'] . '/modules/maps_users/administrer/map_google_search.php')) {
+				$menu_items['users']['users_sales'] = $GLOBALS["STR_ADMIN_MENU_USERS_SALES_MANAGEMENT"];
+				if (is_webmail_module_active()) {
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
 				}
-				$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/commerciale/administrer/list_admin_contact_planified.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_TO_CONTACT"];
-				$menu_items['users'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=search&commercial=' . $_SESSION['session_utilisateur']['id_utilisateur']] = sprintf($GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_PER_SALESMAN"], vb($_SESSION['session_utilisateur']['pseudo']));
+				if (is_relance_avance_module_active()) {
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/relance_avance/administrer/relances.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CONTACT_REMINDERS"];
+				}
+				if (is_commerciale_module_active()) {
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/commerciale/administrer/list_admin_contact_planified.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_TO_CONTACT"];
+					$menu_items['users_sales'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=search&commercial=' . $_SESSION['session_utilisateur']['id_utilisateur']] = sprintf($GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_PER_SALESMAN"], vb($_SESSION['session_utilisateur']['pseudo']));
+				}
 				if (file_exists($GLOBALS['dirroot'] . '/modules/maps_users/administrer/map_google_search.php')) {
-					$menu_items['users'][$GLOBALS['wwwroot_in_admin'] . '/modules/maps_users/administrer/map_google_search.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_MAP"];
+					$menu_items['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/maps_users/administrer/map_google_search.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_MAP"];
 				}
 			}
 		}
 		if (a_priv('admin_products', true)) {
 			$main_menu_items['products'] = array($GLOBALS['administrer_url'] . '/produits.php' => $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS"]);
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/produits.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS_LIST"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/produits.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCT_ADD"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/categories.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_CATEGORIES_LIST"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/categories.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_CATEGORY_ADD"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/positions.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS_ORDER"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/prix.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRICE_UPDATE"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/prix_pourcentage.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRICE_UPDATE_BY_PERCENTAGES"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/marques.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_BRAND_LIST"];
+			$menu_items['products']['products_general'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS"];
+			$menu_items['products_general'][$GLOBALS['administrer_url'] . '/produits.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS_LIST"];
+			$menu_items['products_general'][$GLOBALS['administrer_url'] . '/produits.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCT_ADD"];
+			$menu_items['products_general'][$GLOBALS['administrer_url'] . '/positions.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRODUCTS_ORDER"];
+			$menu_items['products_general'][$GLOBALS['administrer_url'] . '/prix.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRICE_UPDATE"];
+			$menu_items['products_general'][$GLOBALS['administrer_url'] . '/prix_pourcentage.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_PRICE_UPDATE_BY_PERCENTAGES"];
 			if (is_telechargement_module_active ()) {
-				$menu_items['products'][$GLOBALS['wwwroot_in_admin'] . '/modules/telechargement/administrer/telechargement.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_DOWNLOADABLE_FILES"];
+				$menu_items['products_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/telechargement/administrer/telechargement.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_DOWNLOADABLE_FILES"];
 			}
-			if (is_module_ecotaxe_active ()) {
-				$menu_items['products'][$GLOBALS['administrer_url'] . '/ecotaxes.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ECOTAX"];
-			}
-			if (is_references_module_active()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/references/administrer/categories_references.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_REFERENCES_CATEGORIES"];
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/references/administrer/references.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_REFERENCES"];
-			}
-			$menu_items['products'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES_HEADER"].' &nbsp; -';
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/couleurs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_COLORS"];
-			$menu_items['products'][$GLOBALS['administrer_url'] . '/tailles.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_SIZES"];
+			$menu_items['products']['products_categories'] = $GLOBALS["STR_ADMIN_CATEGORIES"];
+			$menu_items['products_categories'][$GLOBALS['administrer_url'] . '/categories.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_CATEGORIES_LIST"];
+			$menu_items['products_categories'][$GLOBALS['administrer_url'] . '/categories.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_CATEGORY_ADD"];
+			$menu_items['products_categories'][$GLOBALS['administrer_url'] . '/marques.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_BRAND_LIST"];
+			$menu_items['products']['products_attributes'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES_HEADER"];
+			$menu_items['products_attributes'][$GLOBALS['administrer_url'] . '/couleurs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_COLORS"];
+			$menu_items['products_attributes'][$GLOBALS['administrer_url'] . '/tailles.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_SIZES"];
 			if (is_attributes_module_active ()) {
-				$menu_items['products'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/nom_attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES"];
-				$menu_items['products'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_OPTIONS"];
+				$menu_items['products_attributes'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/nom_attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES"];
+				$menu_items['products_attributes'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_OPTIONS"];
 			}
-			if (file_exists($GLOBALS['dirroot'] . '/modules/hosting/administrer/hosting.php')) {
-				$menu_items['products'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING_HEADER"].' &nbsp; -';
-				$menu_items['products'][$GLOBALS['wwwroot_in_admin'] . '/modules/hosting/administrer/hosting.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING"];
 			}
-		}
 		if (a_priv('admin_sales', true)) {
 			// Menu des ventes
 			$main_menu_items['sales'] = array($GLOBALS['administrer_url'] . '/commander.php' => $GLOBALS["STR_ADMIN_MENU_SALES_SALES_TITLE"]);
-			$menu_items['sales'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_SALES_SALES_HEADER"].' &nbsp; -';
-			$menu_items['sales'][$GLOBALS['administrer_url'] . '/commander.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDERS"];
-			$menu_items['sales'][$GLOBALS['administrer_url'] . '/commander.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDER_CREATION"];
+			$menu_items['sales']['sales_general'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_HEADER"];
+			$menu_items['sales_general'][$GLOBALS['administrer_url'] . '/commander.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDERS"];
+			$menu_items['sales_general'][$GLOBALS['administrer_url'] . '/commander.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDER_CREATION"];
 			if (is_payback_module_active ()) {
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/payback/administrer/retours.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PRODUCT_RETURN"];
+				$menu_items['sales_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/payback/administrer/retours.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PRODUCT_RETURN"];
 			}
 			if (is_module_export_ventes_active ()) {
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT_HEADER"];
+				$menu_items['sales_general'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT_HEADER"];
 			} else {
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT"];
+				$menu_items['sales_general'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT"];
 			}
 
 			if (is_kekoli_module_active ()) {
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/kekoli/administrer/kekoli.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_EXPORT"];
+				$menu_items['sales_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/kekoli/administrer/kekoli.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_EXPORT"];
 			}
 			if (is_download_module_active ()) {
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/commander.php?mode=download'] = $GLOBALS["STR_ADMIN_MENU_SALES_NUMERIC_SALES"];
+				$menu_items['sales_general'][$GLOBALS['administrer_url'] . '/commander.php?mode=download'] = $GLOBALS["STR_ADMIN_MENU_SALES_NUMERIC_SALES"];
 			}
-			$menu_items['sales'][$GLOBALS['administrer_url'] . '/statut_paiement.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PAYMENT_STATUS"];
-
-			if (is_stats_module_active() || is_module_marge_active() || is_module_genere_pdf_active() || is_accounting_module_active()) {
-				$menu_items['sales'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_SALES_ACCOUNTING_HEADER"].' &nbsp; -';
+			if (file_exists($GLOBALS['dirroot'] . '/modules/hosting/administrer/hosting.php')) {
+				$menu_items['sales']['sales_hosting'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING_HEADER"];
+				$menu_items['sales_hosting'][$GLOBALS['wwwroot_in_admin'] . '/modules/hosting/administrer/hosting.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING"];
+			}
+			if (file_exists($GLOBALS['dirroot'] . '/modules/multisite/administrer/stats.php') || is_stats_module_active() || is_module_marge_active() || is_module_genere_pdf_active() || is_accounting_module_active()) {
+				$menu_items['sales']['sales_accounting'] = $GLOBALS["STR_ADMIN_MENU_SALES_ACCOUNTING_HEADER"];
 				if (file_exists($GLOBALS['dirroot'] . '/modules/multisite/administrer/stats.php')) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/multisite/administrer/stats.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_MULTISITE_STATS"];
+					$menu_items['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/multisite/administrer/stats.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_MULTISITE_STATS"];
 				}
 				if (is_accounting_module_active() && a_priv('compta', true)) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/accounting/administrer/index-compta.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ACCOUNTING"];
+					$menu_items['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/accounting/administrer/index-compta.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ACCOUNTING"];
 				}
 				if (is_stats_module_active ()) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/statistiques/administrer/statcommande.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_STAT"];
+					$menu_items['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/statistiques/administrer/statcommande.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_STAT"];
 				}
 				if (is_module_marge_active ()) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/marges/administrer/marges.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_MARGINS"];
+					$menu_items['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/marges/administrer/marges.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_MARGINS"];
 				}
 				if (is_module_genere_pdf_active ()) {
-					$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/facture_advanced/administrer/genere_pdf.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PDF_BILLS"];
+					$menu_items['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/facture_advanced/administrer/genere_pdf.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PDF_BILLS"];
 				}
 			}
 			if (is_stock_advanced_module_active ()) {
-				$menu_items['sales'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_SALES_STOCKS_HEADER"].' &nbsp; -';
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/stocks1clic.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK"];
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/produits.php?mode=stocknul'] = $GLOBALS["STR_ADMIN_MENU_SALES_PRODUCTS_TO_ORDER"];
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/etatstock.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK_STATUS"];
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/alertes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK_ALERTS"];
+				$menu_items['sales']['sales_stocks'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCKS_HEADER"];
+				$menu_items['sales_stocks'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/stocks1clic.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK"];
+				$menu_items['sales_stocks'][$GLOBALS['administrer_url'] . '/produits.php?mode=stocknul'] = $GLOBALS["STR_ADMIN_MENU_SALES_PRODUCTS_TO_ORDER"];
+				$menu_items['sales_stocks'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/etatstock.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK_STATUS"];
+				$menu_items['sales_stocks'][$GLOBALS['wwwroot_in_admin'] . '/modules/stock_advanced/administrer/alertes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_STOCK_ALERTS"];
 			}
-			$menu_items['sales'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_HEADER"].' &nbsp; -';
+			$menu_items['sales']['sales_delivery'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_HEADER"];
 			if (is_module_export_livraisons_active ()) {
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_EXPORT"];
+				$menu_items['sales_delivery'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_EXPORT"];
 			} else {
-				$menu_items['sales'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_REPORT"];
+				$menu_items['sales_delivery'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_REPORT"];
 			}
 			if (is_module_picking_active ()) {
-				$menu_items['sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/picking/administrer/picking.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PICKING_LIST"];
+				$menu_items['sales_delivery'][$GLOBALS['wwwroot_in_admin'] . '/modules/picking/administrer/picking.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PICKING_LIST"];
 			}
-			$menu_items['sales'][$GLOBALS['administrer_url'] . '/statut_livraison.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_STATUS"];
 		}
 		if (a_priv('admin_content', true)) {
 			$main_menu_items['content'] = array($GLOBALS['administrer_url'] . '/articles.php' => $GLOBALS["STR_ADMIN_MENU_CONTENT_TITLE"]);
-			$menu_items['content'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_HEADER"].' &nbsp; -';
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/articles.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_LIST"];
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/articles.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLE_ADD"];
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/rubriques.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORIES_LIST"];
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/rubriques.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORY_ADD"];
+			$menu_items['content']['content_articles'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_HEADER"];
+			$menu_items['content_articles'][$GLOBALS['administrer_url'] . '/articles.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_LIST"];
+			$menu_items['content_articles'][$GLOBALS['administrer_url'] . '/articles.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLE_ADD"];
+			$menu_items['content_articles'][$GLOBALS['administrer_url'] . '/rubriques.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORIES_LIST"];
+			$menu_items['content_articles'][$GLOBALS['administrer_url'] . '/rubriques.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORY_ADD"];
 
-			$menu_items['content'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_CONTENT_HTML_HEADER"].' &nbsp; -';
+			$menu_items['content']['content_general'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML_HEADER"];
 			$url_cgv = get_cgv_url(false);
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/cgv.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS"];
+			$menu_items['content_general'][$GLOBALS['administrer_url'] . '/cgv.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS"];
 			if (file_exists($GLOBALS['dirroot'] . '/modules/cgu-template/administrer/cgu-update.php')) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu-update.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_TEMPLATES"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu-update.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_TEMPLATES"];
 			}
 			if (file_exists($GLOBALS['dirroot'] . '/modules/cgu-template/administrer/cgu.php')) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_GENERATE"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_GENERATE"];
 			}
 			if (is_parrainage_module_active ()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/parrainage/administrer/parrain.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_SPONSOR_TERMS"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/parrainage/administrer/parrain.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_SPONSOR_TERMS"];
 			}
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/legal.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_LEGAL"];
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/plan.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_GOOGLEMAP"];
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/contacts.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CONTACTS"];
+			$menu_items['content_general'][$GLOBALS['administrer_url'] . '/legal.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_LEGAL"];
+			$menu_items['content_general'][$GLOBALS['administrer_url'] . '/plan.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_GOOGLEMAP"];
+			$menu_items['content_general'][$GLOBALS['administrer_url'] . '/contacts.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CONTACTS"];
 			if (is_module_tagcloud_active ()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/tagcloud/administrer/tagcloud.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TAGCLOUD"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/tagcloud/administrer/tagcloud.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TAGCLOUD"];
 			}
 			if (is_module_faq_active()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/faq/administrer/faq.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FAQ"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/faq/administrer/faq.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FAQ"];
 			}
 			if (is_lexique_module_active ()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/lexique/administrer/lexique.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_LEXICAL"];
+				$menu_items['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/lexique/administrer/lexique.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_LEXICAL"];
 			}
 			if (is_module_forum_active ()) {
-				$menu_items['content'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM"].' &nbsp; -';
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forum_messages.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM_MESSAGES"];
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forums.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUMS"];
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forum_cats.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM_CATEGORIES"];
+				$menu_items['content']['content_forum'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM"];
+				$menu_items['content_forum'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forum_messages.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM_MESSAGES"];
+				$menu_items['content_forum'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forums.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUMS"];
+				$menu_items['content_forum'][$GLOBALS['wwwroot_in_admin'] . '/modules/forum/administrer/list_forum_cats.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_FORUM_CATEGORIES"];
 			}
-			$menu_items['content'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER"].' &nbsp; -';
-			$menu_items['content'][$GLOBALS['administrer_url'] . '/html.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"];
+			$menu_items['content']['content_various'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER"];
+			$menu_items['content_various'][$GLOBALS['administrer_url'] . '/html.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"];
 			if (is_module_banner_active()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/banner/administrer/banner.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_BANNERS"];
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/banner/administrer/banner.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_BANNERS"];
+			}
+			if (is_carrousel_module_active ()) {
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/carrousel/administrer/carrousel.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CARROUSEL"];
 			}
 			if (is_module_tagcloud_active()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/tagcloud/administrer/tagcloud.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TAGCLOUD"];
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/tagcloud/administrer/tagcloud.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TAGCLOUD"];
 			}
 			if (is_partenaires_module_active ()) {
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/partenaires/administrer/categories_partenaires.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_CATEGORIES"];
-				$menu_items['content'][$GLOBALS['wwwroot_in_admin'] . '/modules/partenaires/administrer/partenaires.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"];
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/partenaires/administrer/categories_partenaires.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_CATEGORIES"];
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/partenaires/administrer/partenaires.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"];
+			}
+			if (is_references_module_active()) {
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/references/administrer/references.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_REFERENCES"];
+				$menu_items['content_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/references/administrer/categories_references.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_REFERENCES_CATEGORIES"];
 			}
 		}
-		if (a_priv('admin_webmastering', true)) {
+		if (a_priv('admin_moderation', true) || a_priv('admin_webmastering', true)) {
 			$main_menu_items['webmastering'] = array($GLOBALS['administrer_url'] . '/produits_achetes.php' => $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"]);
-			// Menu de webmastering
-			$menu_items['webmastering'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"].' &nbsp; -';
-			if (is_module_avis_active ()) {
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/avis/administrer/avis.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"];
-			}
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/produits_achetes.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"];
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/import_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/export_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"];
-			if (file_exists($GLOBALS['dirroot'] . '/modules/import/administrer/import_clients.php')) {
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/import/administrer/import_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
-			}
-			if (is_module_export_clients_active ()) {
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"];
-			}
-			if (is_expeditor_module_active ()) {
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/expeditor/administrer/expeditor.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPEDITOR"];
-			}
-			$menu_items['webmastering'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SEO_HEADER"].' &nbsp; -';
-			if (is_module_comparateur_active ()) {
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/comparateur/administrer/mysql2comparateur.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_COMPARATORS"];
-			}
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/sitemap.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP"];
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/urllist.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP_URLLIST"];
-			$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/meta.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_META"];
-			if (is_affiliate_module_active ()) {
-				$menu_items['webmastering'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE"].' &nbsp; -';
-				$menu_items['webmastering'][$GLOBALS['administrer_url'] . '/commander.php?mode=affi'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_ORDERS"];
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/affiliation/administrer/ventes_affiliation.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_REPORT"];
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/affiliation/administrer/affiliation.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_TERMS"];
-			}
-			if (file_exists($GLOBALS['dirroot'] . '/modules/projects_management/administrer/projects.php')) {
-				$menu_items['webmastering'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_MANAGEMENT"].' &nbsp; -';
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/projects.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_TASKS"];
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/project-custom-orders.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_SOLD"];
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/project-events.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_CONTENT"];
-			}
-			if (file_exists($GLOBALS['dirroot'] . '/modules/calc/calc.php')) {
-				$menu_items['webmastering'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"].' &nbsp; -';
-				$menu_items['webmastering'][$GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"];
-			}
 		}
 		if (a_priv('admin_moderation', true)) {
 			// Si le module vitrine existe ou module annonce
-			$main_menu_items['moderation'] = array($GLOBALS['administrer_url'] . '/list_admin_actions.php' => $GLOBALS["STR_ADMIN_MENU_MODERATION_TITLE"]);
 			if (is_vitrine_module_active() || is_annonce_module_active()) {
 				if (is_annonce_module_active()) {
-					$menu_items['moderation'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MODERATION_ADS_HEADER"].' &nbsp; -';
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/annonces.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADS"];
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/annonces.php?mode=creation_gold'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_GOLD"];
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/categories.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_CATEGORIES"];
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/categories.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_CATEGORY_ADD"];
+					$menu_items['webmastering']['moderation_ads'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADS_HEADER"];
+					$menu_items['moderation_ads'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/annonces.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADS"];
+					$menu_items['moderation_ads'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/annonces.php?mode=creation_gold'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_GOLD"];
+					$menu_items['moderation_ads'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/categories.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_CATEGORIES"];
+					$menu_items['moderation_ads'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/categories.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_CATEGORY_ADD"];
 				}
 				if (is_vitrine_module_active()) {
-					$menu_items['moderation'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MODERATION_STORES_HEADER"].' &nbsp; -';
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/vitrine/administrer/vitrine.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_STORES"];
+					$menu_items['webmastering']['moderation_stores'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_STORES_HEADER"];
+					$menu_items['moderation_stores'][$GLOBALS['wwwroot_in_admin'] . '/modules/vitrine/administrer/vitrine.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_STORES"];
 				}
 				if (is_annonce_module_active()) {
-					$menu_items['moderation'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MODERATION_CONTENT"].' &nbsp; -';
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/black_list.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_BLACKLISTED_WORDS"];
-					$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/abus.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ABUSE_REPORTS"];
+					$menu_items['webmastering']['moderation_content'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_CONTENT"];
+					$menu_items['moderation_content'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/black_list.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_BLACKLISTED_WORDS"];
+					$menu_items['moderation_content'][$GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/abus.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ABUSE_REPORTS"];
 				}
 			}
-			$menu_items['moderation'][] = '- &nbsp; '.$GLOBALS["STR_ADMIN_MENU_MODERATION_VARIOUS_HEADER"].' &nbsp; -';
+			$menu_items['webmastering']['moderation_various'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_TITLE"];
 			if (is_phone_cti_module_active()) {
-				$menu_items['moderation'][$GLOBALS['wwwroot_in_admin'] . '/modules/phone_cti/administrer/list_calls.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"];
+				$menu_items['moderation_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/phone_cti/administrer/list_calls.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"];
 			}
-			$menu_items['moderation'][$GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=PHONE'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"];
-			$menu_items['moderation'][$GLOBALS['administrer_url'] . '/list_admin_actions.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"];
-			$menu_items['moderation'][$GLOBALS['administrer_url'] . '/connexion_user.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"];
+			$menu_items['moderation_various'][$GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=PHONE'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"];
+			$menu_items['moderation_various'][$GLOBALS['administrer_url'] . '/list_admin_actions.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"];
+			$menu_items['moderation_various'][$GLOBALS['administrer_url'] . '/connexion_user.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"];
+		}
+		if (a_priv('admin_webmastering', true)) {
+			// Menu de webmastering
+			$menu_items['webmastering']['webmastering_marketing'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"];
+			if (is_module_avis_active ()) {
+				$menu_items['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/avis/administrer/avis.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"];
+			}
+			$menu_items['webmastering_marketing'][$GLOBALS['administrer_url'] . '/produits_achetes.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"];
+			$menu_items['webmastering_marketing'][$GLOBALS['administrer_url'] . '/import_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
+			$menu_items['webmastering_marketing'][$GLOBALS['administrer_url'] . '/export_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"];
+			if (file_exists($GLOBALS['dirroot'] . '/modules/import/administrer/import_clients.php')) {
+				$menu_items['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/import/administrer/import_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
+			}
+			if (is_module_export_clients_active ()) {
+				$menu_items['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"];
+			}
+			if (is_expeditor_module_active ()) {
+				$menu_items['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/expeditor/administrer/expeditor.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPEDITOR"];
+			}
+			$menu_items['webmastering']['webmastering_seo'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SEO_HEADER"];
+			if (is_module_comparateur_active ()) {
+				$menu_items['webmastering_seo'][$GLOBALS['wwwroot_in_admin'] . '/modules/comparateur/administrer/mysql2comparateur.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_COMPARATORS"];
+			}
+			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/sitemap.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP"];
+			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/urllist.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP_URLLIST"];
+			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/meta.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_META"];
+			if (is_affiliate_module_active ()) {
+				$menu_items['webmastering']['webmastering_affiliate'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE"];
+				$menu_items['webmastering_affiliate'][$GLOBALS['administrer_url'] . '/commander.php?mode=affi'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_ORDERS"];
+				$menu_items['webmastering_affiliate'][$GLOBALS['wwwroot_in_admin'] . '/modules/affiliation/administrer/ventes_affiliation.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_REPORT"];
+				$menu_items['webmastering_affiliate'][$GLOBALS['wwwroot_in_admin'] . '/modules/affiliation/administrer/affiliation.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE_TERMS"];
+			}
+			if (file_exists($GLOBALS['dirroot'] . '/modules/projects_management/administrer/projects.php')) {
+				$menu_items['webmastering']['webmastering_projects'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_MANAGEMENT"];
+				$menu_items['webmastering_projects'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/projects.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_TASKS"];
+				$menu_items['webmastering_projects'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/project-custom-orders.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_SOLD"];
+				$menu_items['webmastering_projects'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/project-events.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_CONTENT"];
+			}
+			if (file_exists($GLOBALS['dirroot'] . '/modules/calc/calc.php')) {
+				$menu_items['webmastering']['webmastering_various'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"];
+				$menu_items['webmastering_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"];
+			}
 		}
 	}
 	$current_url = get_current_url(false);
 	$current_url_full = get_current_url(true);
 
 	$output = '
-<ul id="menu1">
 ';
 	$i = 0;
 	foreach ($main_menu_items as $this_main_item => $this_main_array) {
-		if ($i == 9) {
-			$output .= '
-</ul><ul id="menu2">';
-		}
-		$current_menu = (!empty($menu_items[$this_main_item][$current_url_full]));
-		$full_match = true;
-		if ($current_menu === false && !empty($menu_items[$this_main_item])) {
-			$current_menu = (!empty($menu_items[$this_main_item][$current_url]));
-			$full_match = false;
+		if (!empty($menu_items[$this_main_item]) && is_array($menu_items[$this_main_item])) {
+			foreach(array_keys($menu_items[$this_main_item]) as $this_key) {
+				$current_menu = (!empty($menu_items[$this_key][$current_url_full]));
+				$full_match = true;
+				if ($current_menu === false && !empty($menu_items[$this_key])) {
+					$current_menu = (!empty($menu_items[$this_key][$current_url]));
+					$full_match = false;
+				}
+				if(!empty($current_menu)) {
+					break;
+				}
+			}
+		} else {
+			$current_menu = (!empty($menu_items[$this_main_item][$current_url_full]));
+			$full_match = true;
+			if ($current_menu === false && !empty($menu_items[$this_main_item])) {
+				$current_menu = (!empty($menu_items[$this_main_item][$current_url]));
+				$full_match = false;
+			}
 		}
 		foreach ($this_main_array as $this_main_url => $this_main_title) {
+			$main_class = array();
+			$main_attributes = array();
 			if ($current_menu !== false || !empty($this_main_array[$current_url]) || !empty($this_main_array[$current_url_full])) {
-				$main_class = ' class="current"';
-			} else {
-				$main_class = '';
+				$main_class[] = 'active';
+			}
+			if (!empty($menu_items[$this_main_item])) {
+				$main_class[] = 'dropdown-toggle';
+				$main_attributes[] = 'role="button" data-toggle="dropdown"';
+				$this_main_url = '#';
 			}
 			if ($this_main_item == 'home') {
-				$this_main_text = '<a title="' . $GLOBALS['STR_HOME'] . '" href="' . htmlspecialchars($this_main_url) . '"' . $main_class . '><img src="' . $GLOBALS['administrer_url'] . '/modeles/images/home.png" alt="" style="padding: 0px 6px 0px 4px;" /></a>';
+				$this_main_text = '<a id="menu_label_'.$this_main_item.'" title="' . $GLOBALS['STR_HOME'] . '" href="' . htmlspecialchars($this_main_url) . '" class="' . implode(' ', $main_class) . '" ' . implode(' ', $main_attributes) . '><span class="glyphicon glyphicon-home"></span></a>';
 			} else {
 				if (!empty($this_main_url) && !is_numeric($this_main_url)) {
-					$this_main_text = '<a title="' . $this_main_title . '" href="' . htmlspecialchars($this_main_url) . '"' . $main_class . '>' . $this_main_title . '</a>';
+					$this_main_text = '<a id="menu_label_'.$this_main_item.'" href="' . htmlspecialchars($this_main_url) . '" class="' . implode(' ', $main_class) . '" ' . implode(' ', $main_attributes) . '>' . $this_main_title . (!empty($menu_items[$this_main_item])?'<b class="caret"></b>':'') . '</a>';
 				} else {
-					$this_main_text = '<span>' . $this_main_title . '</span>';
+					$this_main_text = '<a id="menu_label_'.$this_main_item.'" href="#">' . $this_main_title . '</a>';
 				}
 			}
 			if (!empty($menu_items[$this_main_item])) {
-				$this_main_text .= '<ul class="sousMenu">
+				$this_main_text .= '<ul class="sousMenu dropdown-menu" role="menu" aria-labelledby="menu_label_'.$this_main_item.'">
 ';
-				foreach ($menu_items[$this_main_item] as $this_url => $this_title) {
-					if (($current_url == $this_url && !$full_match) || $current_url_full == $this_url) {
-						$class = ' class="current"';
-					} elseif ($this_url == $GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php') {
-						$class = ' onclick="return(window.open(this.href)?false:true);"';
+				foreach ($menu_items[$this_main_item] as $this_url => $this_submenu) {
+					if (!empty($menu_items[$this_url]) && is_array($menu_items[$this_url])) {
+						$this_main_text .= '<li class="dropdown-submenu">
+							<a id="menu_'.substr(md5($this_url . $this_submenu),0,8).'" href="#" class="dropdown-toggle">' . String::strtoupper($this_submenu) . '</a>
+							<ul class="sousMenu dropdown-menu" role="menu" aria-labelledby="menu_'.substr(md5($this_url . $this_submenu),0,8).'">
+';
+						foreach ($menu_items[$this_url] as $this_url => $this_title) {
+							if (($current_url == $this_url && !$full_match) || $current_url_full == $this_url) {
+								$class = ' class="active"';
+							} elseif ($this_url == $GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php') {
+								$class = ' onclick="return(window.open(this.href)?false:true);"';
+							} else {
+								$class = '';
+							}
+							if (!empty($this_url) && !is_numeric($this_url)) {
+								$this_text = '<a title="' . String::str_form_value($this_title) . '" href="' . htmlspecialchars($this_url) . '"' . $class . '>' . $this_title . '</a>';
+							} else {
+								$this_text = '<a href="#"' . $main_class . '>' . $this_title . '</a>';
+							}
+							$this_main_text .= '<li>' . $this_text . '</li>';
+						}
+						$this_main_text .= '
+		</ul>
+	</li>';
 					} else {
-						$class = '';
+						$this_title = $this_submenu;
+						if (($current_url == $this_url && !$full_match) || $current_url_full == $this_url) {
+							$class = ' class="active"';
+						} elseif ($this_url == $GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php') {
+							$class = ' onclick="return(window.open(this.href)?false:true);"';
+						} else {
+							$class = '';
+						}
+						if (!empty($this_url) && !is_numeric($this_url)) {
+							$this_text = '<a title="' . $this_title . '" href="' . htmlspecialchars($this_url) . '"' . $class . '>' . $this_title . '</a>';
+						} else {
+							$this_text = '<a href="#"' . $main_class . '>' . $this_title . '</a>';
+						}
+						$this_main_text .= '<li>' . $this_text . '</li>';
 					}
-					if (!empty($this_url) && !is_numeric($this_url)) {
-						$this_text = '<a title="' . $this_title . '" href="' . htmlspecialchars($this_url) . '"' . $class . '>' . $this_title . '</a>';
-					} else {
-						$this_text = '<span' . $main_class . '>' . $this_title . '</span>';
-					}
-					$this_main_text .= '<li>' . $this_text . '</li>';
 				}
 				$this_main_text .= '
 </ul>';
 			}
 			$output .= '
-	<li class="menu_main_item menu_' . $this_main_item . '">' . $this_main_text . '</li>
+	<li class="menu_main_item menu_' . $this_main_item . ' dropdown">' . $this_main_text . '</li>
 ';
 		}
 		$i++;
 	}
 	$output .= '
-</ul>
 ';
 	return $output;
 }
@@ -604,21 +647,35 @@ function file_uncompress($source_filename, $destination_filename)
  * Fonction permettant de connaitre l'id d'un produit
  *
  * @param string $name
+ * @param boolean $large_search
  * @return
  */
-function get_product_id_by_name($name)
+function get_product_id_by_name($name, $large_search = false)
 {
 	// Si plusieurs produits existent avec un même nom, on prend celui qui est actif et mis à jour le plus récemment
+	// La collation UTF8 permet de trouver avec = la valeur sans tenir compte des majuscules
 	$sql = 'SELECT id
 		FROM peel_produits
-		WHERE LOWER(nom_' . $_SESSION['session_langue'] . ')="' . nohtml_real_escape_string(String::strtolower(trim($name))) . '" OR LOWER(nom_' . $_SESSION['session_langue'] . ')="' . nohtml_real_escape_string(String::strtolower($name)) . '"
+		WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(trim($name)) . '"' . (trim($name)!=$name ? ' OR nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(String::strtolower($name)) . '"' : '') . '
 		ORDER BY etat DESC, date_maj DESC
 		LIMIT 1';
 	$q = query($sql);
 	if ($result = fetch_assoc($q)) {
 		return $result['id'];
 	} else {
-		return false;
+		if($large_search) {
+			$sql = 'SELECT id
+				FROM peel_produits
+				WHERE nom_' . $_SESSION['session_langue'] . ' LIKE "%' . nohtml_real_escape_string(String::strtolower(trim($name))) . '%"
+				ORDER BY IF(nom_' . $_SESSION['session_langue'] . ' LIKE "' . nohtml_real_escape_string(String::strtolower(trim($name))) . '%",1,0) DESC, etat DESC, date_maj DESC
+				LIMIT 1';
+			$q = query($sql);
+		}
+		if ($result = fetch_assoc($q)) {
+			return $result['id'];
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -689,9 +746,9 @@ function get_data_lang()
 		}
 	}
 	$lang_select = '
-<form id="langue" method="get" action="' . String::str_form_value(get_current_url(false)) . '">
+<form id="langue" method="get" action="' . String::str_form_value(get_current_url(false)) . '" class="entryform form-inline">
 	<div>'.$GLOBALS["STR_ADMIN_LANGUAGE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].':
-		' . $get_options . '<select name="langue" onchange="document.getElementById(\'langue\').submit()">
+		' . $get_options . '<select name="langue" class="form-control" onchange="document.getElementById(\'langue\').submit()" style="width:200px;">
 			<option value="">' . $GLOBALS['STR_CHOOSE'] . '...</option>
 ';
 	foreach ($GLOBALS['lang_names'] as $this_lang => $this_lang_name) {
@@ -719,8 +776,8 @@ function get_admin_site_select()
 		$all_site_names = get_all_site_names();
 		if (count($all_site_names) > 1) {
 			$output .= '
-<form method="get" id="ecom" action="' . get_current_url(false) . '" >
-	<select name="ecom" onchange="document.getElementById(\'ecom\').submit()">
+<form method="get" id="ecom" action="' . get_current_url(false) . '" class="form-control">
+	<select name="ecom" class="form-control" onchange="document.getElementById(\'ecom\').submit()">
 		<option value="">' . $GLOBALS['STR_CHOOSE'] . '...</option>
 ';
 			while ($res_boutik = fetch_assoc($query_boutik)) {
@@ -828,7 +885,7 @@ function envoie_client_code_promo($id_utilisateur, $id_codepromo)
 		$la_date = date("Y-m-d");
 
 		if (!empty($id_utilisateur)) {
-			$remise = get_discount_text($cp['remise_valeur'], $cp['remise_percent'], display_prices_with_taxes_active());
+			$remise = get_discount_text($cp['remise_valeur'], $cp['remise_percent'], true);
 			$user_infos = get_user_information($id_utilisateur);
 			$email = $user_infos['email'];
 
@@ -908,6 +965,7 @@ function nettoyer_dir($dir, $older_than_seconds = 3)
  */
 function affiche_liste_commandes_admin($frm = null)
 {
+	$output = '';
 	$sql_inner = '';
 	$sql_cond = '';
 	$sql = "";
@@ -953,7 +1011,7 @@ function affiche_liste_commandes_admin($frm = null)
 	$Links->SortDefault = 'DESC';
 	$results_array = $Links->Query();
 	if (empty($results_array)) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_NO_RESULT']))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_NO_RESULT']))->fetch();
 	}
 	// Affichage des commandes en liste
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_commande_liste.tpl');
@@ -1052,8 +1110,8 @@ function affiche_liste_commandes_admin($frm = null)
 	$tpl->assign('STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION', $GLOBALS['STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION']);
 	$tpl->assign('STR_ADMIN_COMMANDER_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_COMMANDER_NO_ORDER_FOUND']);
 	$tpl->assign('STR_NOTA_BENE', $GLOBALS['STR_NOTA_BENE']);
-	
-	echo $tpl->fetch();
+	$output .= $tpl->fetch();
+	return $output;
 }
 
 /**
@@ -1186,7 +1244,8 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl->assign('dup_href', get_current_url(false) . '?mode=duplicate&id=' . $commande['id']);
 			$tpl->assign('dup_src', $GLOBALS['administrer_url'] . '/images/duplicate.png');
 			$tpl->assign('STR_ADMIN_ORDER_DUPLICATE', $GLOBALS['STR_ADMIN_ORDER_DUPLICATE']);
-
+			$tpl->assign('STR_ADMIN_ORDER_DUPLICATE_WARNING', $GLOBALS['STR_ADMIN_ORDER_DUPLICATE_WARNING']);
+			
 			$tpl->assign('is_module_factures_html_active', is_module_factures_html_active());
 			if (is_module_factures_html_active()) {
 				$tpl->assign('facture_html_href', $GLOBALS['wwwroot'] . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
@@ -1315,7 +1374,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				'adresse' => vb($commande['adresse_' . $value]),
 				'zip' => vb($commande['zip_' . $value]),
 				'ville' => vb($commande['ville_' . $value]),
-				'country_select_options' => get_country_select_options(vb($commande['pays_' . $value], null, 'name', false, null, true, vb($commande['lang'])))
+				'country_select_options' => get_country_select_options(vb($commande['pays_' . $value]), null, 'name', false, null, true, vb($commande['lang']))
 				);
 		}
 		$tpl->assign('client_infos', $tpl_client_infos);
@@ -1407,7 +1466,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 
 		$tpl->assign('get_mode', $_GET['mode']);
 
-		$tpl->assign('order_line_js', get_order_line(array('id' => '[id]', 'ref' => '[ref]', 'nom' => '[nom]', 'quantite' => '[quantite]', 'remise' => '[remise]', 'remise_ht' => '[remise_ht]', 'percent' => '[percent]', 'purchase_prix' => '[purchase_prix]', 'purchase_prix_ht' => '[purchase_prix_ht]', 'tva_percent' => '[tva_percent]', 'prix_cat' => '[prix_cat]', 'prix_cat_ht' => '[prix_cat_ht]'), '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]'), true, true, false);
+		$GLOBALS['js_content_array'][] = "new_order_line_html='".filtre_javascript(get_order_line(array('id' => '[id]', 'ref' => '[ref]', 'nom' => '[nom]', 'quantite' => '[quantite]', 'remise' => '[remise]', 'remise_ht' => '[remise_ht]', 'percent' => '[percent]', 'purchase_prix' => '[purchase_prix]', 'purchase_prix_ht' => '[purchase_prix_ht]', 'tva_percent' => '[tva_percent]', 'prix_cat' => '[prix_cat]', 'prix_cat_ht' => '[prix_cat_ht]'), '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]'), true, true, false)."';";
 
 		$tpl->assign('site_avoir', $GLOBALS['site_parameters']['avoir']);
 		if (is_parrainage_module_active()) {
@@ -1539,9 +1598,9 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_ADMIN_UTILISATEURS_CREATE_ORDER', $GLOBALS["STR_ADMIN_UTILISATEURS_CREATE_ORDER"]);
 		$tpl->assign('STR_ADMIN_FORM_SAVE_CHANGES', $GLOBALS["STR_ADMIN_FORM_SAVE_CHANGES"]);
 
-		echo $tpl->fetch();
+		return $tpl->fetch();
 	} elseif (!empty($id)) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_COMMANDER_NO_ORDER_WITH_ID_FOUND"], $id)))->fetch();
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_COMMANDER_NO_ORDER_WITH_ID_FOUND"], $id)))->fetch();
 	}
 }
 
@@ -1554,6 +1613,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
  */
 function send_facture_pdf_commandes($frm)
 {
+	$output = '';
 	if (!empty($frm)) {
 		$sql = "SELECT email
 			FROM peel_commandes
@@ -1566,13 +1626,14 @@ function send_facture_pdf_commandes($frm)
 			} else {
 				sendclient($frm['id'], 'pdf', $frm['bill_type']);
 			}
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MSG_ORDER_SENT_OK'], intval($frm['id']), $result['email'])))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MSG_ORDER_SENT_OK'], intval($frm['id']), $result['email'])))->fetch();
 		} else {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER'], intval($frm['id']))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER'], intval($frm['id']))))->fetch();
 		}
 	} else {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER'], intval($frm['id']))))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER'], intval($frm['id']))))->fetch();
 	}
+	return $output;
 }
 
 
@@ -1623,7 +1684,7 @@ function save_commande_in_database($frm)
 		if (!empty($result) && $u = fetch_object($result)) {
 			$frm['email'] = $u->email;
 			$frm['id_utilisateur'] = $u->id_utilisateur;
-		} elseif(!empty($frm['email'])) {
+		} elseif(!empty($frm['email1'])) {
 			// Création de l'utilisateur si on ne le trouve pas uniquement si l'email est renseigné
 			$frm['email'] = vb($frm['email1']);
 			$new_user_infos = array('priv' => 'util',
@@ -1961,36 +2022,34 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 	}
 
 	$output = '
-			<table class="admin_commande_details" id="line' . $i . '">
-				<tr class="top">
-					<td style="width:20px">
-						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="if(confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, false, true) .'\')){delete_order_line(' . $i . ');} return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
-						<input name="nom_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['nom_attribut'])) . '" />
-						<input name="total_prix_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['total_prix_attribut'])) . '" />
-					</td>
-					<td style="width:40px">
-						<input name="id' . $i . '" style="width:100%" type="number" value="' . String::str_form_value(vb($line_data['id'])) . '" />
-					</td>
-					<td style="width:65px">
-						<input id="ref' . $i . '" name="ref' . $i . '" style="width:100%" type="text" value="' . String::str_form_value(vb($line_data['ref'])) . '" />
+				<tr class="top" id="line' . $i . '">
+					<td>
+						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
+						<input class="form-control" name="nom_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['nom_attribut'])) . '" />
+						<input class="form-control" name="total_prix_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['total_prix_attribut'])) . '" />
 					</td>
 					<td>
-						<input type="text" id="l' . $i . '" name="l' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['nom']) . '" />' . (isset($line_data['on_download'])?($line_data['on_download'] == 1?'<br/><a href="' . get_current_url(false) . '?mode=download">'.$GLOBALS["STR_ADMIN_PRODUITS_NUMERIC_PRODUCT_SEND"].'</a>':''):'') . '
+						<input class="form-control" name="id' . $i . '" style="width:100%" type="number" value="' . String::str_form_value(vb($line_data['id'])) . '" />
 					</td>
-					<td style="width:70px" id="s' . $i . '" class="center"><select style="width:70px" name="size_' . $i . '">' . $size_options_html . '</select></td>
-					<td style="width:70px" id="c' . $i . '" class="center"><select style="width:70px" name="color_' . $i . '">' . $color_options_html . '</select></td>
-					<td style="width:40px"><input type="number" name="q' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['quantite']) . '" id="q' . $i . '" /></td>
-					<td style="width:70px"><input type="number" name="p_cat' . $i . '" style="width:100%" value="' . String::str_form_value($prix_cat_displayed) . '" id="p_cat' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
-					<td style="width:60px"><input type="number" name="remis' . $i . '" style="width:100%" value="' . String::str_form_value($unit_fixed_remise_displayed) . '" id="remis' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'amount\');" /></td>
-					<td style="width:40px"><input type="number" name="perc' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['percent']) . '" id="perc' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
-					<td style="width:70px"><input type="number" name="p' . $i . '" style="width:100%" value="' . String::str_form_value($purchase_prix_displayed) . '" id="p' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'final\');" /></td>
-					<td style="width:60px" id="t' . $i . '">
-						<select name="t' . $i . '">' . $tva_options_html . '</select>
+					<td>
+						<input class="form-control" id="ref' . $i . '" name="ref' . $i . '" style="width:100%" type="text" value="' . String::str_form_value(vb($line_data['ref'])) . '" />
 					</td>
-					<td style="width:120px"> ' . vb($attribute_display) . ' </td>
+					<td>
+						<input class="form-control" type="text" id="l' . $i . '" name="l' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['nom']) . '" />' . (isset($line_data['on_download'])?($line_data['on_download'] == 1?'<br/><a href="' . get_current_url(false) . '?mode=download">'.$GLOBALS["STR_ADMIN_PRODUITS_NUMERIC_PRODUCT_SEND"].'</a>':''):'') . '
+					</td>
+					<td id="s' . $i . '" class="center"><select style="width:64px" name="size_' . $i . '" class="form-control">' . $size_options_html . '</select></td>
+					<td id="c' . $i . '" class="center"><select style="width:64px" name="color_' . $i . '" class="form-control">' . $color_options_html . '</select></td>
+					<td><input class="form-control" type="number" name="q' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['quantite']) . '" id="q' . $i . '" /></td>
+					<td><input class="form-control" type="text" name="p_cat' . $i . '" style="width:100%" value="' . String::str_form_value($prix_cat_displayed) . '" id="p_cat' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
+					<td><input class="form-control" type="text" name="remis' . $i . '" style="width:100%" value="' . String::str_form_value($unit_fixed_remise_displayed) . '" id="remis' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'amount\');" /></td>
+					<td><input class="form-control" type="text" name="perc' . $i . '" style="width:100%" value="' . String::str_form_value($line_data['percent']) . '" id="perc' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'percentage\');" /></td>
+					<td><input class="form-control" type="text" name="p' . $i . '" style="width:100%" value="' . String::str_form_value($purchase_prix_displayed) . '" id="p' . $i . '" onkeyup="order_line_calculate(' . $i . ', \'final\');" /></td>
+					<td id="t' . $i . '">
+						<select name="t' . $i . '" class="form-control">' . $tva_options_html . '</select>
+					</td>
+					<td> ' . vb($attribute_display) . ' </td>
 				</tr>
-			</table>
-			';
+';
 
 	return $output;
 }
@@ -2063,7 +2122,7 @@ function affiche_actions_moderations_user($user_id)
 	if ($countResultats > 0) {
 		$output .= '</table>';
 	} else {
-		$output .= '<br /><center><h2>'.$GLOBALS['STR_ADMIN_NO_ADMIN_ACTION_FOUND_FOR_THIS_USER'].'</h2></center><br />';
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_NO_ADMIN_ACTION_FOUND_FOR_THIS_USER']))->fetch();
 	}
 	return $output;
 }
@@ -2238,25 +2297,25 @@ function affiche_phone_event($user_id)
 	if (!empty($res)) {
 		// warning : phone call not ended;
 		$output .= '
-			<hr /><center><h2 id="phone_section" style="color:green">' . sprintf(($res['action'] == 'PHONE_EMITTED'?$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_EMITTED"]:$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_RECEIVED"]), vb($res['pseudo_membre'])) . ' : '.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_ON"].' ' . get_formatted_date($res['date']) . '</h2></center>
+			<hr /><h2 id="phone_section" style="color:green">' . sprintf(($res['action'] == 'PHONE_EMITTED'?$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_EMITTED"]:$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_RECEIVED"]), vb($res['pseudo_membre'])) . ' : '.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_STARTED_ON"].' ' . get_formatted_date($res['date']) . '</h2>
 			<br />
 			<center>
 				<table class="full_width">
 					<tr>
 						<th>'.$GLOBALS["STR_COMMENTS"].'</th>
 						<td class="center">
-							<textarea name="form_phone_comment" rows="5" cols="50" id="phone_comment" >' . (!empty($res['remarque'])?vb($res['remarque']):'') . '</textarea>
+							<textarea class="form-control" name="form_phone_comment" rows="5" cols="50" id="phone_comment" >' . (!empty($res['remarque'])?vb($res['remarque']):'') . '</textarea>
 						</td>
 					</tr>
 					<tr>
 						<td></td>
-						<td class="center"><input name="turn_off_phone" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_CLOSE"].'" class="bouton" /></td>
+						<td class="center"><input name="turn_off_phone" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_CLOSE"].'" class="btn btn-primary" /></td>
 					</tr>
 				</table>
 			</center>';
 	} else {
 		$output .= '
-				<center><h2 id="phone_section">'.$GLOBALS["STR_ADMIN_UTILISATEURS_MANAGE_CALLS"].'</h2></center><br />
+				<h2 id="phone_section">'.$GLOBALS["STR_ADMIN_UTILISATEURS_MANAGE_CALLS"].'</h2>
 				<center>
 					<table >
 						<tr>
@@ -2264,7 +2323,7 @@ function affiche_phone_event($user_id)
 						</tr>
 						<tr>
 							<td class="center">
-								<textarea name="form_phone_comment" rows="5" cols="50" id="phone_comment" >' . (!empty($_POST['phone_comment'])?$_POST['phone_comment']:'') . '</textarea>
+								<textarea class="form-control" name="form_phone_comment" rows="5" cols="50" id="phone_comment" >' . (!empty($_POST['phone_comment'])?$_POST['phone_comment']:'') . '</textarea>
 							</td>
 						</tr>
 					</table>
@@ -2273,14 +2332,14 @@ function affiche_phone_event($user_id)
 							<td class="center" style="width:50%;">
 								<table class="full_width">
 									<tr>
-										<td class="center"><input name="phone_emitted_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_INITIATE"].'" class="bouton" /></td>
+										<td class="center"><input name="phone_emitted_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_INITIATE"].'" class="btn btn-primary" /></td>
 									</tr>
 								</table>
 							</td>
 							<td class="center" style="width:50%;">
 								<table class="full_width">
 									<tr>
-										<td class="center"><input name="phone_received_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_RECEIVED_INITIATE"].'" class="bouton" /></td>
+										<td class="center"><input name="phone_received_submit" type="submit" value="'.$GLOBALS["STR_ADMIN_UTILISATEURS_CALL_RECEIVED_INITIATE"].'" class="btn btn-primary" /></td>
 									</tr>
 								</table>
 							</td>
@@ -2697,6 +2756,10 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	$query_alter_table[] = 'ALTER TABLE `peel_produits` ADD `tab5_title_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_produits` ADD `tab6_title_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_produits` ADD `name_' . word_real_escape_string($new_lang) . '` VARCHAR( 100 ) NOT NULL DEFAULT ""';
+	if(!in_array('nom_'.$new_lang, get_table_index('peel_produits', null, true))) {
+		// Index sur 2 lettres seulement pour éviter de prendre trop de mémoire si bcp de produits
+		$query_alter_table[] = 'ALTER TABLE `peel_produits` ADD INDEX (`nom_' . word_real_escape_string($new_lang) . '` (2))';
+	}
 	$query_alter_table[] = 'ALTER TABLE `peel_profil` ADD `name_' . word_real_escape_string($new_lang) . '` VARCHAR( 100 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_profil` ADD `description_document_' . word_real_escape_string($new_lang) . '` TEXT NOT NULL';
 	$query_alter_table[] = 'ALTER TABLE `peel_profil` ADD `document_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
@@ -2907,7 +2970,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 		}
 		$sql = "SELECT url_rewriting
 			FROM peel_langues
-			WHERE url_rewriting='' AND lang!='" . real_escape_string($new_lang)."'
+			WHERE url_rewriting='' AND lang!='" . real_escape_string($new_lang)."' AND etat=1
 			LIMIT 1";
 		$query = query($sql);
 		if(fetch_assoc($query)) {
@@ -3145,7 +3208,10 @@ if (!function_exists('affiche_liste_produits')) {
 				WHERE " . $where;
 
 			$Links = new Multipage($sql, 'affiche_liste_produits');
-			$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'reference' => $GLOBALS['STR_REFERENCE'], $GLOBALS['STR_CATEGORY'], $GLOBALS['STR_WEBSITE'], ('nom_' . $_SESSION['session_langue']) => $GLOBALS['STR_ADMIN_NAME'], 'prix' => $GLOBALS['STR_PRICE'] . ' ' . $GLOBALS['site_parameters']['symbole'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']), 'etat' => $GLOBALS['STR_STATUS'], 'on_stock' => $GLOBALS['STR_STOCK']);
+			$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'reference' => $GLOBALS['STR_REFERENCE'], $GLOBALS['STR_CATEGORY'], $GLOBALS['STR_WEBSITE'], ('nom_' . $_SESSION['session_langue']) => $GLOBALS['STR_ADMIN_NAME'], 'prix' => $GLOBALS['STR_PRICE'] . ' ' . $GLOBALS['site_parameters']['symbole'] . ' ' . (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']), 'etat' => $GLOBALS['STR_STATUS']);
+			if (is_stock_advanced_module_active()) {
+				$HeaderTitlesArray['on_stock'] = $GLOBALS['STR_STOCK'];
+			}
 			if (is_gifts_module_active()) {
 				$HeaderTitlesArray['points'] = $GLOBALS['STR_GIFT_POINTS'];
 				$tpl->assign('STR_MODULE_GIFTS_ADMIN_GIFT', $GLOBALS['STR_MODULE_GIFTS_ADMIN_GIFT']);
@@ -3411,7 +3477,7 @@ if (!function_exists('affiche_liste_articles')) {
 			foreach ($results_array as $ligne) {
 				$tmpLigne = array(
 					'tr_rollover' => tr_rollover($i, true),
-					'titre' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?String::html_entity_decode_if_needed($ligne['titre_' . $_SESSION['session_langue']]):'[-]'),
+					'titre' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?String::html_entity_decode_if_needed($ligne['titre_' . $_SESSION['session_langue']]):'[' . $ligne['id'] . ']'),
 					'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'] . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1),
 					'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
 					'rubs' => array(),

@@ -3,19 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_arbo_rubrique.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_arbo_rubrique.tpl 38950 2013-11-22 20:57:51Z gboussin $
 #}{{ tr_rollover }}
 <td class="center">
 	<a title="{{ STR_ADMIN_RUBRIQUES_ADD_SUBCATEGORY|str_form_value }}" href="{{ ajout_rub_href|escape('html') }}"><img src="{{ rubrique_src|escape('html') }}" width="24" /></a>
 	&nbsp;<a title="{{ STR_ADMIN_RUBRIQUES_ADD_ARTICLE|str_form_value }}" href="{{ ajout_art_href|escape('html') }}"><img src="{{ prod_cat_src|escape('html') }}" width="24" /></a>
-	&nbsp;<a title="{{ STR_ADMIN_RUBRIQUES_DELETE_CATEGORY|str_form_value }} {{ nom|escape('html') }}" onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" href="{{ sup_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a>
+	&nbsp;<a title="{{ STR_ADMIN_RUBRIQUES_DELETE_CATEGORY|str_form_value }} {{ nom|escape('html') }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" href="{{ sup_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a>
 </td>
 <td class="left" style="padding-left:10px">{{ indent }}{% if (image) %}<img src="{{ image_src|escape('html') }}" alt="{{ image|str_form_value }}" />{% endif %}</td>
 <td class="left">{{ indent }}<a href="{{ modif_href|escape('html') }}">{{ nom|html_entity_decode_if_needed }}</a></td>

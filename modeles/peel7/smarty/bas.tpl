@@ -3,57 +3,67 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}								</td>
-							</tr>
-							<tr>
-								<td class="center">
+// $Id: bas.tpl 39020 2013-11-26 00:36:36Z gboussin $
+*}
+							<div class="row bottom_middle">
+								<div class="col-md-12">
 									{$MODULES_BOTTOM_MIDDLE}
-								</td>
-							</tr>
-						</table>
+								</div>
+							</div>
+						</div>
+						<div class="middle_column_footer">&nbsp;</div>
 					</div>
-					<div class="middle_column_footer">&nbsp;</div>
 				</div>
 				<!-- Fin middle_column -->
 				{if $page_columns_count == 3}
 				<!-- Début right_column -->
-				<div class="right_column">
-				{$MODULES_RIGHT}
+				<div class="right_column container">
+					<div class="row">
+						{$MODULES_RIGHT}
+					</div>
 				</div>
 				<!-- Fin right_column -->
 				{/if}
 			</div>
 			<!-- Fin main_content -->
-			<!-- Début Footer -->
-			<footer id="footer">
+			<div class="push"></div>
+		</div>
+		<!-- Fin Total -->
+		<!-- Début Footer -->
+		<div id="footer" class="clearfix">
+			<div class="container">
 				<div class="affiche_contenu_html_footer">
 					{if isset($CONTENT_HOME_BOTTOM)}
 					{$CONTENT_HOME_BOTTOM}
 					{/if}
 					{$CONTENT_FOOTER}
 				</div>
-				{$MODULES_FOOTER}
-				{$FOOTER}
+			</div>
+			<footer class="footer">
+				<div class="container">
+					{$MODULES_FOOTER}
+					<div class="col-sm-4 col-md-3 footer_col">
+						{$FOOTER}
+					</div>
+					<div class="clearfix visible-sm"></div>
+					{$rss}
+					<div class="clearfix"></div>
+					<div id="flags_xs" class="pull-right visible-xs">{if !empty($flags_links_array)}{'&nbsp;'|implode:$flags_links_array}{/if}{$flags}</div>
+					{if isset($module_devise)}<div id="currencies_xs" class="pull-right visible-xs">{$module_devise}</div>{/if}
+					<div class="clearfix"></div>
+					{$footer_link}
+				</div>
 			</footer>
-			<!-- Fin Footer -->
 		</div>
-		<!-- Fin Total -->
-		{if isset($add_cart_alert)}
-			<script><!--//--><![CDATA[//><!--
-			alert('{$add_cart_alert|filtre_javascript:true:true:false:false}');
-			//--><!]]></script>
-		{/if}
-		{if isset($end_javascript)}
-			{$end_javascript}
-		{/if}
+		<!-- Fin Footer -->
+		{$js_output}
 		{$tag_analytics}
 		{if isset($butterflive_tracker)}
 			{$butterflive_tracker}

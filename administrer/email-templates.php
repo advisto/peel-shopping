@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: email-templates.php 38982 2013-11-25 01:02:14Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -271,7 +271,7 @@ if (isset($_GET['etat']) && $_GET['etat'] == "0") {
 
 $sql .= ' ORDER BY technical_code ASC, lang ASC';
 
-$Links = new Multipage($sql, 'email_templates', 100);
+$Links = new Multipage($sql, 'email_templates', 40);
 $results_array = $Links->query();
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_report.tpl');
@@ -320,9 +320,9 @@ $tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
 
 $report = $tpl->fetch();
 
-include('modeles/haut.php');
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output . $report;
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * emailLinksExplanations()

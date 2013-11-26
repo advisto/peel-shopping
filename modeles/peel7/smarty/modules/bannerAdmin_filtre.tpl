@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_filtre.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<form method="post" action="{$action|escape:'html'}">
+// $Id: bannerAdmin_filtre.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<table class="full_width">
 		<tr>
 			<td class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</td>
@@ -28,20 +28,20 @@
 						<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
 					</tr>
 					<tr>
-						<td><input type="text" name="filter_description" id="filter_description" value="{$filter_description|str_form_value}" /></td>
+						<td><input type="text" class="form-control" name="filter_description" id="filter_description" value="{$filter_description|str_form_value}" /></td>
 						<td>
-							<select name="filter_categorie_banniere" id="filter_categorie_banniere">
+							<select class="form-control" name="filter_categorie_banniere" id="filter_categorie_banniere">
 								<option value="">---</option>
 								{foreach $options as $o}
 								<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
 								{/foreach}
 							</select>
 						</td>
-						<td><input type="text" name="filter_lang" id="filter_lang" value="{$filter_lang|str_form_value}" /></td>
-						<td><input type="text" class="datepicker" name="filter_date_debut" id="filter_date_debut" value="{$filter_date_debut|str_form_value}" /></td>
-						<td><input type="text" class="datepicker" name="filter_date_fin" id="filter_date_fin" value="{$filter_date_fin|str_form_value}" /></td>
+						<td><input type="text" class="form-control" name="filter_lang" id="filter_lang" value="{$filter_lang|str_form_value}" /></td>
+						<td><input type="text" class="form-control datepicker" name="filter_date_debut" id="filter_date_debut" value="{$filter_date_debut|str_form_value}" /></td>
+						<td><input type="text" class="form-control datepicker" name="filter_date_fin" id="filter_date_fin" value="{$filter_date_fin|str_form_value}" /></td>
 						<td>
-							<select name="filter_etat">
+							<select class="form-control" name="filter_etat">
 								<option value="-"{if $filter_etat == "-"} selected="selected"{/if}>{$STR_MODULE_BANNER_ADMIN_ALL}</option>
 								<option value="1"{if $filter_etat == "1"} selected="selected"{/if}>{$STR_ADMIN_ONLINE}</option>
 								<option value="0"{if $filter_etat == "0"} selected="selected"{/if}>{$STR_ADMIN_OFFLINE}</option>
@@ -52,7 +52,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="bouton" value="{$STR_SEARCH|str_form_value}" /></p></td>
+			<td class="center"><p><input type="hidden" name="mode" value="search" /><input type="submit" class="btn btn-primary" value="{$STR_SEARCH|str_form_value}" /></p></td>
 		</tr>
 	</table>
 </form>

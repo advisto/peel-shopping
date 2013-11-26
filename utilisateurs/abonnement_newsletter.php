@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4,  which is subject to an    |
+// | This file is part of PEEL Shopping 7.1.0,  which is subject to an    |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -25,7 +25,7 @@ if (!empty($_POST['email'])) {
 	$qid_user = array();
 	$update = false;
 
-	if (!verify_token('get_simple_newsletter', 60, false)) {
+	if (!verify_token('get_simple_newsletter', 120, false)) {
 		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	} else {
 		if (!EmailOK($frm['email'])) {

@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix_pourcentage.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: prix_pourcentage.php 38695 2013-11-14 14:20:16Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['percent_prod']) && is_numeric($_POST['percent_prod']) && !empty($_POST['for_price'])) {
 	if (!verify_token($_SERVER['PHP_SELF'])) {
@@ -96,28 +96,20 @@ while ($r_select_cats = fetch_assoc($q_select_cats)) {
 }
 $tpl->assign('cats_options', $tpl_cats_options);
 
-$tpl_products_options = array();
-$tpl_products_options[] = array('value' => 'all',
-	'issel' => !empty($_POST['produits']) && in_array('all', vb($_POST['produits'])),
-	'name' => String::strtoupper($GLOBALS["STR_ADMIN_ALL_PRODUCTS"])
-	);
-$q_select_products = query('SELECT id, nom_' . $_SESSION['session_langue'] . '
-	FROM peel_produits
-	WHERE etat = "1"
-	ORDER BY nom_' . $_SESSION['session_langue'] . '');
-while ($r_select_products = fetch_assoc($q_select_products)) {
-	$tpl_products_options[] = array('value' => intval($r_select_products['id']),
-		'issel' => !empty($_POST['produits']) && in_array($r_select_products['id'], vb($_POST['produits'])),
-		'name' => (!empty($r_select_products['nom_' . $_SESSION['session_langue']])?$r_select_products['nom_' . $_SESSION['session_langue']]:'['.$r_select_products['id'].']')
-		);
-}
-$tpl->assign('products_options', $tpl_products_options);
+$tpl->assign('nb_produits', 0);
 $tpl->assign('for_price', vb($_POST['for_price']));
 $tpl->assign('percent_prod', vb($_POST['percent_prod']));
 $tpl->assign('operation', vb($_POST['operation']));
+$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
+$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 $tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
 $tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 $tpl->assign('STR_OR', $GLOBALS['STR_OR']);
+$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
+$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+$tpl->assign('STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH', $GLOBALS['STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH']);
+$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM', $GLOBALS['STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM']);
+$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE', $GLOBALS['STR_ADMIN_PRODUCT_ORDERED_DELETE']);
 $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_TITLE', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_TITLE']);
 $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN']);
 $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_CATEGORY', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_CATEGORY']);
@@ -132,6 +124,6 @@ $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_RAISE', $GLOBALS['STR_ADMIN_PRIX_POURCE
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 echo $tpl->fetch();
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 ?>

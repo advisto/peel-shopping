@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 37989 2013-09-02 13:37:16Z sdelaporte $
+// $Id: database_email_template_text_es.php 38739 2013-11-15 23:07:41Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -49,7 +49,7 @@ Si experimenta problemas con la descarga, por favor contacta con [SUPPORT_COMMAN
 
 Además, le invitamos a editar su factura desde el siguiente enlace:
 
-[WWWROOT]/factures/commande_pdf.php?code_facture=[CODE_FACTURE]&mode=factura ",
+[WWWROOT]/factures/commande_pdf.php?code_facture=[CODE_FACTURE]&mode=facture ",
   "commande_parrain_avoir" => "Hola,
 
 Siguiendo el pedido de una de sus ahijados en nuestra tienda en línea, usted beneficia de un crédito a [AVOIR] a cuenta de su próximo pedido.",
@@ -67,23 +67,23 @@ Le agradecemos por su confianza.",
 Detalle del mensaje [DATE]:
 
 Nombre: [NOM_FAMILLE]
-Nombre: [PRIMERA]
+Nombre: [PRENOM]
 Empresa: [SOCIETE]
-Tel: [TELÉFONO]
+Tel: [TELEPHONE]
 E-mail: [EMAIL]
-Disponibilidad: [disponible]
+Disponibilidad: [DISPO]
 
-Asunto: [TEMA]
+Asunto: [SUJET]
 
 Mensaje:
 
-[TEXTO]
+[TEXTE]
 
 IP: [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hola,
 
-Un pedido con el número [ORDER_ID] ha sido registrado [WWWROOT] ",
+Un pedido con el número [ORDER_ID] ha sido registrado [WWWROOT]",
   "admin_info_payment_credit_card_3_times" => "Hola,
 
 Un pedido con pago en tres veces con el número [ORDER_ID] ha sido registrado [SITE]
@@ -122,7 +122,7 @@ Tenemos el placer de confirmarle la preparación y la próxima entrega del pedid
 Los artículos enviados:
 [SHIPPED_ITEMS]
 La forma de entrega que ha escogido al realizar un pedido es: [TYPE]
-Referencias del envío: le No. del paquete es [PAQUETE]. Por correo, puede seguir su paquete haciendo clic en el siguiente enlace: http://www.coliposte.fr/
+Referencias del envío: le No. del paquete es [COLIS]. Por correo, puede seguir su paquete haciendo clic en el siguiente enlace: http://www.coliposte.fr/
 
 Dirección de envío:
 [CLIENT_INFOS_SHIP]
@@ -293,13 +293,13 @@ Detalle del mensaje [DATE].
 [GIFTLIST_ITEMS] ",
   "parrainage" => "Hola,
 
-[PSEUDO] le invita a descubrir el sitio [SITE] y recibir un crédito de [REBAJA] en su primer pedido validando su cuenta cliente.
+[PSEUDO] le invita a descubrir el sitio [SITE] y recibir un crédito de [REBATE] en su primer pedido validando su cuenta cliente.
 
 Haga clic en el siguiente enlace para validar su cuenta:
- [WWWROOT] / modules / patrocinio / inscription.php?email=[EMAIL_FILLEUL]&code=[MDL]&id=[user_id]
+ [WWWROOT] / modules / patrocinio / inscription.php?email=[EMAIL_FILLEUL]&code=[MDP]&id=[ID_UTILISATEUR]
 
 Su nombre de usuario: [EMAIL_FILLEUL]
-Contraseña: [MDL]
+Contraseña: [MDP]
 ",
   "email_alerte" => "Hola,
 
@@ -316,7 +316,7 @@ Le enviamos este correo electrónico después de conexión con éxito de un admi
 
 ID de cliente: [USER]
 Conexión IP: [REMOTE_ADDR]
-Reverse DNS: [reverse_dns]
+Reverse DNS: [REVERSE_DNS]
 Tiempo de conexión: [DATETIME]
 
 Este correo electrónico está diseñado para informarle acerca de la seguridad de su tienda PEEL para protegerlo mejor.",
@@ -343,8 +343,11 @@ El siguiente usuario acaba de registrarse:
 
 [link=\"[ADMIN_URL]\"]Dale la cuenta de usuario[/link]
 ",
-  "warn_admin_reve_subscription" => "",
-  "email_retour_virement" => "Hola,
+  "warn_admin_reve_subscription" => "Le informamos que el distribuidor [link=\"[ADMIN_URL]\"] [CIVILITE] [PRENOM] [NOM_FAMILLE]] [/link] está registrado en [SITE].
+
+Esta cuenta está actualmente en estado de \"Vendedor en espera\". Esta cuenta está activa, pero beneficiará a distribuidor de tasas cuando lo pasa en estado \"Revendedor\". 
+",
+"email_retour_virement" => "Hola,
 
 Hemos recibido su número de devolución [RETURN_ID].
 De acuerdo a su elección, la cantidad o [MONTANT] será reembolsado por transferencia bancaria tan pronto como sea posible ",
@@ -423,14 +426,18 @@ Ciudad: [VILLE]
 País: [PAYS]
 Sitio web: [SITE_WEB]
 
-Si esta información es inexacta, por favor, actualice su sesión en su cuenta de usuario en [Wwwroot] / users / change_params.php
+Si esta información es inexacta, por favor, actualice su sesión en su cuenta de usuario en [WWWROOT] / users / change_params.php
 
 Si usted olvida su contraseña, gracias por utilizar la herramienta de recuperación disponible en el siguiente enlace: [WWWROOT]/utilisateurs/change_params.php
 
 Por favor, recuerde que la exactitud de esta información es esencial para el buen funcionamiento del sitio y para el éxito de cada negocio. Cualquier información incorrecta o inexacta puede resultar en la cancelación de su cuenta.
 
 Para más información, póngase en contacto con nosotros.",
-"inscription_newsletter" => ""
+"inscription_newsletter" => "Hola,
+
+Gracias por su suscripción al boletín de [SITE_NAME]. Usted recibirá un boletín semanal a la dirección [EMAIL].
+
+Pronto en [WWWROOT]."
 );
 
 ?>

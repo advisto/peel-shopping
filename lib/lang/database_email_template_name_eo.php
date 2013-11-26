@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
-// | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
+// | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
+// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_eo.php 37972 2013-08-30 14:35:54Z sdelaporte $
+// $Id: database_email_template_name_eo.php 38682 2013-11-13 11:35:48Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -68,7 +68,8 @@ $peel_email_template["name"] = array(
   "email_retour_client" => "Via peto pri returno",
   "cron_order_payment_failure_alerts" => "Helpo pri pago",
   "cron_order_not_paid_alerts" => "Pago de via mendo",
-  "cron_update_contact_info" => "Konfirmo pri valido de viaj adresoj"
+  "cron_update_contact_info" => "Konfirmo pri valido de viaj adresoj",
+  "inscription_newsletter" => "Aliĝo al la novaĵ-bulteno ĉe [SITE]"
 );
 
 ?>

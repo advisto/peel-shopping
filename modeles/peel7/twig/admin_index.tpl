@@ -3,27 +3,29 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_index.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: admin_index.tpl 38958 2013-11-23 21:57:22Z gboussin $
 #}{% if (KeyyoCalls) %}{{ KeyyoCalls }}{% endif %}
-<table class="main_table">
-	<tr>
-		<td style="width:33%; vertical-align:top;">{{ orders }}</td>
-		<td style="width:33%; vertical-align:top;">{{ sales }}</td>
-		<td style="width:33%; vertical-align:top;">{{ products }}</td>
-	</tr>
-	<tr>
-		<td style="padding-top:10px; vertical-align:top;">{{ delivery }}</td>
-		<td style="padding-top:10px; vertical-align:top;">{{ users }}</td>
-		<td style="padding-top:10px; vertical-align:top;">{{ peel }}</td>
-	</tr>
-</table>
+<div style="margin-left:-15px; margin-right:-15px">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ orders }}</div>
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ sales }}</div>
+			<div class="clearfix visible-md visible-sm"></div>
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ products }}</div>
+			<div class="clearfix visible-lg"></div>
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ delivery }}</div>
+			<div class="clearfix visible-md visible-sm"></div>
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ users }}</div>
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ peel }}</div>
+		</div>
+	</div>
+</div>
 <br />
-<div class="center">{{ data_lang }}</div>
-<p class="global_error center"><a href="{{ sortie_href|escape('html') }}">{{ STR_ADMIN_INDEX_SECURITY_WARNING }}</a></p>
+<p class="alert alert-danger center"><a href="{{ sortie_href|escape('html') }}" class="alert-link">{{ STR_ADMIN_INDEX_SECURITY_WARNING }}</a></p>

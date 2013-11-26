@@ -3,18 +3,17 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: HTMLHead.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: HTMLHead.tpl 38972 2013-11-24 19:26:15Z gboussin $
 #}
 <head>
 	{{ meta }}
-	<base href="{{ wwwroot }}/" />
 	{% if (favicon_href) %}<link rel="icon" type="image/x-icon" href="{{ favicon_href }}" />
 	<link rel="shortcut icon" type="image/x-icon" href="{{ favicon_href }}" />{% endif %}
 	{% if (link_rss_html) %}{{ link_rss_html }}{% endif %}
@@ -23,23 +22,16 @@
 {% endfor %}
 	{% if (bg_colors) %}
 	<style>
-		body {ldelim }} background-color:{{ bg_colors.body }}; {rdelim }}
-		#menu1 li, .main_menu_wide {ldelim }} background-color:{{ bg_colors.menu }}; {rdelim }}
+		body { background-color:{{ bg_colors.body }}; }
+		#menu1 li, .main_menu_wide { background-color:{{ bg_colors.menu }}; }
 		<!--[if IE]>
-			#contact_form{ldelim }}height:100% !important;{rdelim }}
+			#contact_form{height:100% !important;}
 		<![endif]-->
 	</style>
 	{% endif %}
-{% for js_href in js_files %}
-	<script src="{{ js_href|escape('html') }}"></script>
-{% endfor %}
 	{{ js_output }}
-	{% if js_content %}
-	<script><!--//--><![CDATA[//><!--
-		{{ js_content }}
-	//--><!]]></script>
-	{% endif %}
 	<!--[if lt IE 9]>
 	<script src="{{ wwwroot }}/lib/js/html5shiv.js"></script>
+	<script src="{{ wwwroot }}/lib/js/respond.js"></script>
 	<![endif]-->
 </head>

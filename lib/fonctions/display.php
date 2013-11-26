@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 38068 2013-09-05 13:18:53Z gboussin $
+// $Id: display.php 39019 2013-11-26 00:18:01Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -28,13 +28,16 @@ if (!function_exists('tr_rollover')) {
 	 */
 	function tr_rollover($line_number, $return_mode = false, $style = null, $onclick = null, $id = null)
 	{
-		$output = '';
-		$tpl = $GLOBALS['tplEngine']->createTemplate('tr_rollover.tpl');
+		static $tpl;
+		if(empty($tpl)) {
+			$tpl = $GLOBALS['tplEngine']->createTemplate('tr_rollover.tpl');
+		}
 		$tpl->assign('onclick', $onclick);
 		$tpl->assign('style', $style);
 		$tpl->assign('line_number', $line_number);
 		$tpl->assign('id', $id);
-		$output .= $tpl->fetch();
+		
+		$output = $tpl->fetch();
 		if ($return_mode) {
 			return $output;
 		} else {
@@ -131,8 +134,8 @@ if (!function_exists('affiche_meta')) {
 		// PRIORITE 5 : Récupération des metas par défaut
 		$sql_Meta = 'SELECT *
 			FROM peel_meta
-			WHERE 1
-			ORDER BY IF(technical_code="", 0, 1) ASC, id ASC
+			WHERE "'.get_current_url(true).'" LIKE CONCAT(technical_code, "%")
+			ORDER BY LENGTH(technical_code) DESC
 			LIMIT 1';
 		$query_Meta = query($sql_Meta);
 		$m_default = fetch_assoc($query_Meta);
@@ -202,7 +205,7 @@ if (!function_exists('affiche_meta')) {
 		}
 		$GLOBALS['meta_description_html_uncut'] = $this_description;
 		if (!empty($this_description)) {
-			$this_description = String::str_shorten(str_replace(array('    ', '   ', '  ', ' .', '....'), array(' ', ' ', ' ', '.', '.'), trim(strip_tags(String::html_entity_decode_if_needed(str_replace(array("\r", "\n", "<br>", "<br />", "</p>"), ' ', $this_description))))), 190, '', '...', 170);
+			$this_description = String::str_shorten(str_replace(array('    ', '   ', '  ', ' .', '....'), array(' ', ' ', ' ', '.', '.'), trim(String::strip_tags(String::html_entity_decode_if_needed(str_replace(array("\r", "\n", "<br>", "<br />", "</p>"), ' ', $this_description))))), 190, '', '...', 170);
 			if ($this_description == String::strtoupper($this_description)) {
 				$this_description = String::strtolower($this_description);
 			}
@@ -222,6 +225,16 @@ if (!function_exists('affiche_meta')) {
 		if (is_facebook_module_active() && !empty($display_facebook_tag)) {
 			$tpl->assign('facebook_tag', display_facebook_tag($m));
 		}
+		if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+			$tpl->assign('specific_meta', '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
+		}
+		if(!empty($_GET['update']) && $_GET['update'] == 1) {
+			$robots = 'noindex, nofollow';
+		} else {
+			$robots = 'all';
+		}
+		$tpl->assign('robots', $robots);
+		
 		$output .= $tpl->fetch();
 		if ($return_mode) {
 			return $output;
@@ -235,23 +248,30 @@ if (!function_exists('affiche_ariane')) {
 	/**
 	 * affiche_ariane()
 	 *
+	 * @param boolean $show_home
+	 * @param string $page_name
+	 * @param string $buttons
 	 * @return
 	 */
-	function affiche_ariane()
+	function affiche_ariane($show_home = true, $page_name = null, $buttons = null)
 	{
+		$ariane = array();
 		$tpl = $GLOBALS['tplEngine']->createTemplate('ariane.tpl');
 		$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
 
-		$ariane = array('href' => false,
-			'txt' => $GLOBALS['site']
-			);
+		if($show_home) {
+			$ariane = array('href' => false,
+				'txt' => $GLOBALS['site']
+				);
+		}
 		$other = array('href' => false,
 			'txt' => false
 			);
 
 		if (!defined('IN_HOME')) {
-			$ariane['href'] = $GLOBALS['wwwroot'] . '/';
-
+			if($show_home) {
+				$ariane['href'] = $GLOBALS['wwwroot'] . '/';
+			}
 			if (defined('IN_CATALOGUE')) {
 				$other['txt'] = affiche_arbre_categorie(vn($_GET['catid']));
 			} elseif (defined('IN_CATALOGUE_PRODUIT')) {
@@ -370,8 +390,12 @@ if (!function_exists('affiche_ariane')) {
 				$other['txt'] = $GLOBALS['STR_LEXIQUE'];
 				$other['href'] = get_lexicon_url();
 			}
+			if(!empty($page_name)) {
+				$other['txt'] .= ' &gt; ' . $page_name;
+			}
 			$tpl->assign('ariane', $ariane);
 			$tpl->assign('other', $other);
+			$tpl->assign('buttons', $buttons);
 			return $tpl->fetch();
 		}
 	}
@@ -429,16 +453,27 @@ if (!function_exists('get_brand_link_html')) {
 	 * @param integer $id_marque
 	 * @param boolean $return_mode
 	 * @param boolean $show_all_brands_link
+	 * @param string $location
 	 * @return
 	 */
-	function get_brand_link_html($id_marque = null, $return_mode = false, $show_all_brands_link = false)
+	function get_brand_link_html($id_marque = null, $return_mode = false, $show_all_brands_link = false, $location = null)
 	{
 		$output = '';
-		$sql = 'SELECT id, nom_' . $_SESSION['session_langue'] . ' AS marque, image
-			FROM peel_marques
-			WHERE etat=1';
+		$sql = 'SELECT m.id, m.nom_' . $_SESSION['session_langue'] . ' AS marque, m.image
+			FROM peel_marques m';
+		if (empty($id_marque)) {
+			$sql .= '
+			LEFT JOIN peel_produits p ON p.id_marque=m.id AND p.etat=1';
+		}
+		$sql .= '	WHERE m.etat=1';
 		if (!empty($id_marque)) {
-			$sql .= ' AND id="' . intval($id_marque) . '"';
+			$sql .= ' AND m.id="' . intval($id_marque) . '"
+			LIMIT 1';
+		} else {
+			$sql .= '
+			GROUP BY m.id
+			ORDER BY count(m.id) DESC
+			LIMIT 5';
 		}
 		$query = query($sql);
 		$links = array();
@@ -459,6 +494,7 @@ if (!function_exists('get_brand_link_html')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('brand_link_html.tpl');
 		$tpl->assign('as_list', empty($id_marque));
 		$tpl->assign('links', $links);
+		$tpl->assign('location', $location);
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -500,9 +536,12 @@ if (!function_exists('get_brand_description_html')) {
 				$tmpData['small_width'] = $GLOBALS['site_parameters']['small_width'];
 				$tmpData['has_image'] = !empty($brand_object->image);
 				if ($tmpData['has_image']) {
-					$tmpData['image'] = array('href' => ($show_links_to_details ? $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $brand_object->id : ''),
-							'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit')
-						);
+					$thumb_file = thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+					if(!empty($thumb_file)) {
+						$tmpData['image'] = array('href' => ($show_links_to_details ? $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $brand_object->id : ''),
+								'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit')
+							);
+					}
 				}
 				$tmpData['href'] = ($show_links_to_details ? $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $brand_object->id : '');
 				$tmpData['nb_produits_txt'] = $brand_products['nb_produits'] . ' ' . $GLOBALS['STR_ARTICLES'];
@@ -547,9 +586,12 @@ if (!function_exists('get_recursive_items_display')) {
 	 */
 	function get_recursive_items_display(&$all_parents_with_ordered_direct_sons_array, &$item_name_array, $this_parent, $this_parent_depth, $highlighted_item, $mode = 'categories', $location = null, $max_depth_allowed = null, $item_max_length = 25)
 	{
+		static $tpl;
 		$output = '';
 		if (!empty($all_parents_with_ordered_direct_sons_array[$this_parent])) {
-			$tpl = $GLOBALS['tplEngine']->createTemplate('recursive_items_display.tpl');
+			if(empty($tpl)) {
+				$tpl = $GLOBALS['tplEngine']->createTemplate('recursive_items_display.tpl');
+			}
 			$tpl->assign('sons_ico_src', $GLOBALS['wwwroot'] . '/images/right.gif');
 			$tpl->assign('location', $location);
 			$tpl->assign('item_max_length', $item_max_length);
@@ -612,9 +654,10 @@ if (!function_exists('get_recursive_items_display')) {
 					$tplItem['SONS'] = get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $this_item, $this_depth, $highlighted_item, $mode, $location, $max_depth_allowed, $item_max_length);
 					$tplItem['depth'] = $this_depth;
 				}
-				if (is_advistofr_module_active())
+				if (is_advistofr_module_active()) {
 					$tplItem['technical_code'] = get_technical_code($this_item);
-
+				}
+				$tplItem['id'] = 'menu_'.substr(md5(vb($tplItem['href']) . '_' . vb($tplItem['name'])),0,8);
 				$tplItems[] = $tplItem;
 			}
 			$tpl->assign('items', $tplItems);
@@ -853,57 +896,6 @@ if (!function_exists('print_actu')) {
 	}
 }
 
-if (!function_exists('print_new')) {
-	/**
-	 * print_new()
-	 *
-	 * @param boolean $return_mode
-	 * @return
-	 */
-	function print_new($return_mode = false)
-	{
-		$output = '';
-		$qid = query('SELECT p.*, c.id AS categorie_id, c.nom_' . $_SESSION['session_langue'] . ' AS categorie
-			FROM peel_produits p
-			INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-			INNER JOIN peel_categories c ON c.id=pc.categorie_id
-			WHERE p.on_new = "1" AND p.etat = "1"
-			GROUP BY p.id
-			LIMIT 0,2');
-		if (num_rows($qid) > 0) {
-			$tplData = array();
-			$tpl = $GLOBALS['tplEngine']->createTemplate('new.tpl');
-			$tpl->assign('title', NEWS);
-			while ($prod = fetch_assoc($qid)) {
-				$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-				if (!empty($product_object->image2)) {
-					$tplData[] = array('is_full' => true,
-						'href' => $product_object->get_product_url(),
-						'name' => $product_object->name,
-						'src' => $GLOBALS['repertoire_upload'] . '/' . $product_object->image1,
-						'trail' => $GLOBALS['repertoire_upload'] . '/' . $product_object->image2,
-						'descriptif' => $product_object->descriptif
-						);
-				} else {
-					$tplData[] = array('is_full' => false,
-						'href' => $product_object->get_product_url(),
-						'alt' => !empty($product_object->image1) ? $product_object->name : $GLOBALS['STR_PHOTO_NOT_AVAILABLE_ALT'],
-						'src' => !empty($product_object->image1) ? $GLOBALS['repertoire_upload'] . '/' . $product_object->image1 : $GLOBALS['repertoire_upload'] . '/pasimage.gif',
-						);
-				}
-				unset($product_object);
-			}
-			$tpl->assign('data', $tplData);
-			$output .= $tpl->fetch();
-		}
-		if ($return_mode) {
-			return $output;
-		} else {
-			echo $output;
-		}
-	}
-}
-
 if (!function_exists('print_compte')) {
 	/**
 	 * print_compte()
@@ -1003,7 +995,7 @@ if (!function_exists('print_compte')) {
 			if (num_rows($code_promo_query) > 0) {
 				$cpu_data = array();
 				while ($cp = fetch_assoc($code_promo_query)) {
-					$cpu_data[] = array('code_promo' => $cp['code_promo'], 'discount_text' => get_discount_text($cp['valeur_code_promo'], $cp['percent_code_promo'], display_prices_with_taxes_active()));
+					$cpu_data[] = array('code_promo' => $cp['code_promo'], 'discount_text' => get_discount_text($cp['valeur_code_promo'], $cp['percent_code_promo'], true));
 				}
 				$tpl->assign('code_promo_utilise', array('header' => $GLOBALS['STR_MES_CODE_PROMO_UTILISE'], 'data' => $cpu_data));
 			}
@@ -1049,10 +1041,10 @@ if (!function_exists('print_compte')) {
 
 			$profil = is_module_profile_active() ? get_profil($_SESSION['session_utilisateur']['priv']) : null;
 			if (is_module_profile_active()) {
-				if (!empty($profil['document']) || !empty($profil['description_document'])) {
+				if (!empty($profil['document_'.$_SESSION['session_langue']]) || !empty($profil['description_document_'.$_SESSION['session_langue']])) {
 					$tpl->assign('profile', array('header' => $GLOBALS['STR_ACCOUNT_DOCUMENTATION'],
-							'href' => $GLOBALS['repertoire_upload'] . '/' . $profil['document'],
-							'txt' => DOWNLOAD_DOCUMENT
+							'href' => $GLOBALS['repertoire_upload'] . '/' . $profil['document_'.$_SESSION['session_langue']],
+							'txt' => $GLOBALS['STR_DOWNLOAD_DOCUMENT']
 							));
 				}
 			}
@@ -1106,61 +1098,62 @@ if (!function_exists('affiche_mini_caddie')) {
 		$tpl->assign('count_products', $_SESSION['session_caddie']->count_products());
 		$tpl->assign('products_txt', ($_SESSION['session_caddie']->count_products() > 1 ? str_replace(array('(', ')'), array(''), $GLOBALS['STR_CADDIE_OBJECTS_COUNT']) : str_replace(array('(s)', '(es)', '(n)', '(en)'), '', $GLOBALS['STR_CADDIE_OBJECTS_COUNT'])));
 
-		$tpl->assign('has_details', false);
-		if ($_SESSION['session_caddie']->count_products() != 0 && $detailed) {
-			$tpl->assign('has_details', true);
-			$tplProducts = array();
-			foreach ($_SESSION['session_caddie']->articles as $numero_ligne => $product_id) {
-				$tmpProd = array();
-				$product_object = new Product($product_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-				$product_object->set_configuration($_SESSION['session_caddie']->couleurId[$numero_ligne], $_SESSION['session_caddie']->tailleId[$numero_ligne], is_reseller_module_active() && is_reseller());
-				// Récupére la taille si elle existe
-				if (!empty($product_object->configuration_size_id)) {
-					$tmpProd['size'] = array('label' => $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $product_object->get_size());
-				}
-				$urlprod = $product_object->get_product_url();
-				if (!empty($product_object->configuration_color_id)) {
-					// Si le produit a une couleur
-					$tmpProd['color'] = array('label' => $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $product_object->get_color());
-					$urlprod .= '?cId=' . $_SESSION['session_caddie']->couleurId[$numero_ligne];
-					if (isset($tmpProd['size'])) { // Si le produit a une couleur et une taille
-						$urlprod .= '&sId=' . $_SESSION['session_caddie']->tailleId[$numero_ligne];
-					}
-				} elseif (isset($tmpProd['size'])) { // si le produit a seulement une taille
-					$urlprod .= '?sId=' . $_SESSION['session_caddie']->tailleId[$numero_ligne];
-				}
-				$tmpProd['href'] = $urlprod;
-
-				if (display_prices_with_taxes_active()) {
-					$price_displayed = $_SESSION['session_caddie']->total_prix[$numero_ligne];
-				} else {
-					$price_displayed = $_SESSION['session_caddie']->total_prix_ht[$numero_ligne];
-				}
-				$tmpProd['quantite'] = $_SESSION['session_caddie']->quantite[$numero_ligne];
-				$tmpProd['name'] = $product_object->name;
-				$tmpProd['price'] = fprix($price_displayed, true);
-				$tplProducts[] = $tmpProd;
-				unset($product_object);
+		$tpl->assign('has_details', $detailed);
+		$tplProducts = array();
+		foreach ($_SESSION['session_caddie']->articles as $numero_ligne => $product_id) {
+			$tmpProd = array();
+			$product_object = new Product($product_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+			$product_object->set_configuration($_SESSION['session_caddie']->couleurId[$numero_ligne], $_SESSION['session_caddie']->tailleId[$numero_ligne], is_reseller_module_active() && is_reseller());
+			// Récupére la taille si elle existe
+			if (!empty($product_object->configuration_size_id)) {
+				$tmpProd['size'] = array('label' => $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $product_object->get_size());
 			}
-			$tpl->assign('products', $tplProducts);
-
-			if ($_SESSION['session_caddie']->total > 0) {
-				if (display_prices_with_taxes_active()) {
-					$total_displayed = $_SESSION['session_caddie']->total;
-					$shipping_displayed = $_SESSION['session_caddie']->cout_transport;
-				} else {
-					$total_displayed = $_SESSION['session_caddie']->total_ht;
-					$shipping_displayed = $_SESSION['session_caddie']->cout_transport_ht;
+			$urlprod = $product_object->get_product_url();
+			if (!empty($product_object->configuration_color_id)) {
+				// Si le produit a une couleur
+				$tmpProd['color'] = array('label' => $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $product_object->get_color());
+				$urlprod .= '?cId=' . $_SESSION['session_caddie']->couleurId[$numero_ligne];
+				if (isset($tmpProd['size'])) { // Si le produit a une couleur et une taille
+					$urlprod .= '&sId=' . $_SESSION['session_caddie']->tailleId[$numero_ligne];
 				}
-				if (!empty($_SESSION['session_caddie']->cout_transport)) {
-					$tpl->assign('transport', array('label' => $GLOBALS['STR_SHIPPING_COST'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($shipping_displayed, true)));
-				}
-				if (display_prices_with_taxes_active()) {
-					$tpl->assign('total', array('label' => $GLOBALS["STR_NET"] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($total_displayed, true)));
-				} else {
-					$tpl->assign('total', array('label' => $GLOBALS['STR_TOTAL_HT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($total_displayed, true)));
-				}
+			} elseif (isset($tmpProd['size'])) { // si le produit a seulement une taille
+				$urlprod .= '?sId=' . $_SESSION['session_caddie']->tailleId[$numero_ligne];
 			}
+			$tmpProd['href'] = $urlprod;
+
+			if (display_prices_with_taxes_active()) {
+				$price_displayed = $_SESSION['session_caddie']->total_prix[$numero_ligne];
+			} else {
+				$price_displayed = $_SESSION['session_caddie']->total_prix_ht[$numero_ligne];
+			}
+			$tmpProd['quantite'] = $_SESSION['session_caddie']->quantite[$numero_ligne];
+			$tmpProd['name'] = $product_object->name;
+			$tmpProd['price'] = fprix($price_displayed, true);
+			$display_picture = $product_object->get_product_main_picture(false);
+			if ($display_picture) {
+				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
+			} else {
+				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
+			}
+			$tmpProd['picture'] = $product_picture;
+			$tplProducts[] = $tmpProd;
+			unset($product_object);
+		}
+		$tpl->assign('products', $tplProducts);
+		if (display_prices_with_taxes_active()) {
+			$total_displayed = $_SESSION['session_caddie']->total;
+			$shipping_displayed = $_SESSION['session_caddie']->cout_transport;
+		} else {
+			$total_displayed = $_SESSION['session_caddie']->total_ht;
+			$shipping_displayed = $_SESSION['session_caddie']->cout_transport_ht;
+		}
+		if (!empty($_SESSION['session_caddie']->cout_transport)) {
+			$tpl->assign('transport', array('label' => $GLOBALS['STR_SHIPPING_COST'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($shipping_displayed, true)));
+		}
+		if (display_prices_with_taxes_active()) {
+			$tpl->assign('total', array('label' => $GLOBALS["STR_NET"] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($total_displayed, true)));
+		} else {
+			$tpl->assign('total', array('label' => $GLOBALS['STR_TOTAL_HT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => fprix($total_displayed, true)));
 		}
 		$tpl->assign('STR_CADDIE', $GLOBALS['STR_CADDIE']);
 		$tpl->assign('STR_DETAILS_ORDER', $GLOBALS['STR_DETAILS_ORDER']);
@@ -1262,13 +1255,19 @@ if (!function_exists('affiche_menu_recherche')) {
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('menu_recherche.tpl');
 		$tpl->assign('action', $GLOBALS['wwwroot'] . '/search.php');
-		$tpl->assign('use_autocomplete', $GLOBALS['site_parameters']['enable_prototype'] == 1);
-		$tpl->assign('autocomplete_href', $GLOBALS['wwwroot'] . '/modules/search/produit.php');
 		$tpl->assign('display_mode', $display_mode);
 		if (is_advanced_search_active()) {
 			$tpl->assign('advanced_search_script', get_advanced_search_script());
 			$tpl->assign('select_marque', affiche_select_marque(true));
 		}
+		// on construit la liste des catégories
+		if(empty($GLOBALS['select_categorie'])) {
+			$GLOBALS['parent_categorie'] = vn($_GET["categorie"]); // catégorie sélectionnée
+			$GLOBALS['select_categorie'] = '';
+			construit_arbo_categorie($GLOBALS['select_categorie'], $GLOBALS['parent_categorie'], 0); // on construit les options du select des catégories
+		}
+		$tpl->assign('select_categorie', $GLOBALS['select_categorie']);
+		$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
 		$tpl->assign('STR_SEARCH', $GLOBALS["STR_SEARCH"]);
 		if ($return_mode) {
 			return $tpl->fetch();
@@ -1309,7 +1308,7 @@ if (!function_exists('affiche_guide')) {
 			$tplLinks['access_plan'] = array('name' => 'access_plan', 'href' => $GLOBALS['wwwroot'] . '/plan_acces.php', 'label' => $GLOBALS['STR_ACCESS_PLAN'], 'selected' => defined('IN_PLAN_ACCES'));
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('guide_advistofr_module.tpl');
-			$tplLinks['contact'] = array('name' => 'contact', 'href' => $GLOBALS['wwwroot'] . '/utilisateurs/contact.php', 'label' => 'STR_CONTACT', 'selected' => defined('IN_CONTACT'));
+			$tplLinks['contact'] = array('name' => 'contact', 'href' => $GLOBALS['wwwroot'] . '/utilisateurs/contact.php', 'label' => $GLOBALS['STR_CONTACT'], 'selected' => defined('IN_CONTACT'));
 		}
 		if(isset($GLOBALS['site_parameters']['show_on_affiche_guide']) && is_array($GLOBALS['site_parameters']['show_on_affiche_guide'])) {
 			$temp = array();
@@ -1373,13 +1372,15 @@ if (!function_exists('affiche_compte')) {
 	 * affiche_compte()
 	 *
 	 * @param boolean $return_mode
+	 * @param string $location
 	 * @return
 	 */
-	function affiche_compte($return_mode = false)
+	function affiche_compte($return_mode = false, $location)
 	{
 		$output = '';
 		if (est_identifie()) {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('compte_mini.tpl');
+			$tpl->assign('location', $location);
 			$tpl->assign('repertoire_images', $GLOBALS['repertoire_images']);
 			$tpl->assign('membre_href', $GLOBALS['wwwroot'] . '/membre.php');
 			$tpl->assign('prenom', vb($_SESSION['session_utilisateur']['prenom']));
@@ -1397,18 +1398,18 @@ if (!function_exists('affiche_compte')) {
 			if (is_facebook_connect_module_active() && !empty($_SESSION['session_utilisateur']['connected_by_fb'])) {
 				$tpl->assign('fb_deconnect_lbl', $GLOBALS['STR_FB_DECONNECT']);
 			}
+			if (a_priv('admin*', true)) {
+				$tpl->assign('admin', array('href' => $GLOBALS['administrer_url'] . '/index.php', 'txt' => $GLOBALS['STR_ADMINISTRATION']));
+			}
 			$tpl->assign('STR_HELLO', $GLOBALS['STR_HELLO']);
 			$tpl->assign('STR_COMPTE', $GLOBALS['STR_COMPTE']);
 			$tpl->assign('STR_DECONNECT', $GLOBALS['STR_DECONNECT']);
 			$tpl->assign('STR_ORDER_HISTORY', $GLOBALS['STR_ORDER_HISTORY']);
 			$output .= $tpl->fetch();
 		} else {
-			if (is_module_url_rewriting_active()) {
-				$url_enregistrement = get_account_register_url(false, false);
-			} else {
-				$url_enregistrement = $GLOBALS['wwwroot'] . "/utilisateurs/enregistrement.php";
-			}
+			$url_enregistrement = get_account_register_url(false, false);
 			$tpl = $GLOBALS['tplEngine']->createTemplate('compte_login_mini.tpl');
+			$tpl->assign('location', $location);
 			$tpl->assign('repertoire_images', $GLOBALS['repertoire_images']);
 			$tpl->assign('email_lbl', $GLOBALS['STR_EMAIL']);
 			$tpl->assign('email', vb($frm['email']));
@@ -1418,7 +1419,7 @@ if (!function_exists('affiche_compte')) {
 			$tpl->assign('forgot_pass_href', $GLOBALS['wwwroot'] . '/utilisateurs/oubli_mot_passe.php');
 			$tpl->assign('forgot_pass_lbl', $GLOBALS['STR_FORGOT_YOUR_PASSWORD']);
 			$tpl->assign('enregistrement_href', $url_enregistrement);
-			$tpl->assign('enregistrement_lbl', $GLOBALS['STR_REGISTER']);
+			$tpl->assign('enregistrement_lbl', $GLOBALS['STR_OPEN_ACCOUNT']);
 			$tpl->assign('via_lbl', $GLOBALS['STR_VIA']);
 			if (function_exists('get_social_icone')) {
 				$tpl->assign('social_icone', get_social_icone());
@@ -1438,6 +1439,8 @@ if (!function_exists('affiche_compte')) {
 			}
 			$tpl->assign('social', $social);
 			$tpl->assign('STR_COMPTE', $GLOBALS['STR_COMPTE']);
+			$tpl->assign('STR_LOGIN', $GLOBALS['STR_LOGIN']);
+			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			$output .= $tpl->fetch();
 		}
 		if ($return_mode) {
@@ -1517,10 +1520,10 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js';
 		}
 		if (vb($GLOBALS['site_parameters']['enable_jquery']) == 1) {
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.js';
+			$GLOBALS['js_files'][-100] = $GLOBALS['wwwroot'] . '/lib/js/jquery.js';
 		}
 		$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/lib/css/jquery-ui.css';
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery-ui.js';
+		$GLOBALS['js_files'][-90] = $GLOBALS['wwwroot'] . '/lib/js/jquery-ui.js';
 		if(file_exists($GLOBALS['dirroot'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['session_langue'].'.js')) {
 			// Configuration pour une langue donnée
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['session_langue'].'.js';
@@ -1528,7 +1531,7 @@ if (!function_exists('getHTMLHead')) {
 		// <!-- librairie pour activer le zoom sur les categories (et produits si configuration dans l'administration) -->
 		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/lightbox.js';
 		// <!-- fin de librairie pour activer le zoom sur les categories -->
-		if (vb($GLOBALS['site_parameters']['enable_prototype']) == 1) {
+		if (vb($GLOBALS['site_parameters']['enable_prototype']) == 1 && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/prototype.js';
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/effects.js';
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/controls.js';
@@ -1541,11 +1544,11 @@ if (!function_exists('getHTMLHead')) {
 		if (is_carrousel_module_active()) {
 			// Pour ajouter des vidéos ou des effets au carrousel nivo_slider, il faut inclure les fichiers suivants :
 			// AnythingSlider optional extensions
-			// $GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.fx.min.js';
-			// $GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.video.min.js';
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/slides.min.jquery.js';
+			// $GLOBALS['js_files'][-18] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.fx.min.js';
+			// $GLOBALS['js_files'][-17] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.video.min.js';
+			$GLOBALS['js_files'][-20] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/slides.min.jquery.js';
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/carrousel.js';
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.min.js';
+			$GLOBALS['js_files'][-19] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.min.js';
 		}
 		if (is_advistofr_module_active()) {
 			$rub_query = query("SELECT technical_code
@@ -1566,50 +1569,42 @@ if (!function_exists('getHTMLHead')) {
 				if (is_references_module_active() && defined('IN_RUBRIQUE') && $rub['technical_code'] == 'creation') {
 					$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/modules/references/style/style.css';
 					$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/modules/references/phoenixgallery/style/style.css';
-					$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.easing.min.js';
+					$GLOBALS['js_files'][-60] = $GLOBALS['wwwroot'] . '/lib/js/jquery.easing.min.js';
 					$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/references/phoenixgallery/js/phoenixgallery.js';
 				}
 			}
 			if (is_photodesk_module_active() && defined('IN_CONTACT')) {
 				$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/modules/photodesk/css/style.css';
-				$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery.transform-0.6.2.min.js';
-				$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery.animate-shadow-min.js';
-				$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/photodesk.js';
-				$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery-ui-1.8.16.custom.min.js';
+				$GLOBALS['js_files'][-50] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery.transform-0.6.2.min.js';
+				$GLOBALS['js_files'][-49] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery.animate-shadow-min.js';
+				$GLOBALS['js_files'][-48] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery-ui-1.8.16.custom.min.js';
+				$GLOBALS['js_files'][-47] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/photodesk.js';
 			}
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/advistofr/advistofr.js';
 		}
 		// Librairie pour activer le zoom sur les produits
 		if (is_welcome_ad_module_active()) {
-			load_welcome_ad();
 			$js_output .= get_welcome_ad_script();
 		}
 		if ($GLOBALS['site_parameters']['zoom'] == 'jqzoom' && $GLOBALS['site_parameters']['enable_jquery'] == 1) {
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.jqzoom-core-pack.js';
+			$GLOBALS['js_files'][-70] = $GLOBALS['wwwroot'] . '/lib/js/jquery.jqzoom-core-pack.js';
 		} elseif ($GLOBALS['site_parameters']['zoom'] == 'cloud-zoom' && $GLOBALS['site_parameters']['enable_jquery'] == 1) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/cloud-zoom.1.0.2.js';
 		}
 		if (is_destockplus_module_active() || is_algomtl_module_active() || is_advistocom_module_active()) {
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modeles/' . vb($GLOBALS['site_parameters']['template_directory']) . '/menu.js';
+			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . '/menu.js';
 		}
 		if (is_module_forum_active() && $_SESSION['session_langue'] == 'fr') {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/forum/forum.js';
 		}
 		if (is_cart_popup_module_active() && !empty($_SESSION['session_show_caddie_popup'])) {
 			$js_output .= get_cart_popup_script();
+			unset($_SESSION['session_show_caddie_popup']);
 		}
 		if (is_googlefriendconnect_module_active()) {
 			$js_output .= google_friend_connect_javascript_library();
 		}
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/filesearchhover.js';
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/overlib.js';
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/advisto.js';
-		if (vb($GLOBALS['site_parameters']['anim_prod']) == 1) {
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/fly-to-basket.js';
-		}
-		$js_content_array[] = '
-(function($) {
-    $(document).ready(function() {
+		$GLOBALS['js_ready_content_array'][] = '
 		$(".datepicker").datepicker({                    
 			dateFormat: "'.str_replace(array('%d','%m','%Y','%y'), array('dd','mm','yy','y'), $GLOBALS['date_format_short']).'",
 			changeMonth: true,
@@ -1617,41 +1612,49 @@ if (!function_exists('getHTMLHead')) {
 			yearRange: "1902:2037"
 		});
 		'.vb($js_sortable).'
-   });
-})(jQuery);
 ';
+		if (empty($GLOBALS['site_parameters']['disable_autocomplete'])) {
+			$GLOBALS['js_ready_content_array'][] = '
+		bind_search_autocomplete("search", "' . $GLOBALS['wwwroot'] . '/modules/search/produit.php", true);
+';
+		}
 		if(!empty($GLOBALS['load_nyromodal'])){
 			$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/lib/css/nyroModal.css';
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.nyroModal.custom.js';
 		
-			$js_content_array[] = '
-(function($) {
-    $(document).ready(function() {
- 	 jQuery(".nyroModal").nyroModal();
-   });
-})(jQuery);';
+			$GLOBALS['js_ready_content_array'][] = '
+		$(".nyroModal").nyroModal();
+';
 		}
 		// On met en dernier fichiers CSS du site pour qu'ils aient priorité
+		if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+			$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/lib/css/bootstrap.css';
+			$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/bootstrap.js';
+			$GLOBALS['js_ready_content_array'][] = '
+	bootbox.setDefaults({
+		locale: "'.$_SESSION['session_langue'].'"
+	});';
+		}
+		$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/advisto.js';
+		if (vb($GLOBALS['site_parameters']['anim_prod']) == 1) {
+			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/fly-to-basket.js';
+		}
 		if(!empty($GLOBALS['site_parameters']['css'])) {
 			foreach (explode(',', $GLOBALS['site_parameters']['css']) as $this_css_filename) {
-				$GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/' . trim($this_css_filename);
+				if(file_exists($GLOBALS['repertoire_modele'] . '/css/' . trim($this_css_filename))) {
+					$GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/' . trim($this_css_filename);  // .'?'.time()
+				}
 			}
 		}
-		$GLOBALS['css_files'] = array_unique($GLOBALS['css_files']);
-		if(!empty($GLOBALS['site_parameters']['minify_css'])) {
-			$GLOBALS['css_files'] = get_minified_src($GLOBALS['css_files'], 'css', 3600);
-		}
-		$tpl->assign('css_files', $GLOBALS['css_files']);
+		$tpl->assign('css_files', get_css_files_to_load(!empty($GLOBALS['site_parameters']['minify_css'])));
+
 		// L'ordre des fichiers js doit être respecté ensuite dans le template
-		if(!empty($GLOBALS['site_parameters']['minify_js'])) {		
-			$GLOBALS['js_files'] = get_minified_src($GLOBALS['js_files'], 'js', 3600);
-		}
-		$tpl->assign('js_files', array_unique($GLOBALS['js_files']));
-		if(!empty($js_content_array)) {
-			$tpl->assign('js_content', implode("\n", $js_content_array));
+		if (!empty($GLOBALS['site_parameters']['javascript_force_load_header'])) {
+			$tpl->assign('js_output', $js_output . get_javascript_output(false, !empty($GLOBALS['site_parameters']['minify_js']), true));
+		} else {
+			$tpl->assign('js_output', $js_output);
 		}
 		$tpl->assign('msg_err_keyb', $GLOBALS['STR_ERR_KEYB']);
-		$tpl->assign('js_output', $js_output);
 
 		if (isset($_GET['catid'])) {
 			$queryCP = query('SELECT header_html_' . $_SESSION['session_langue'] . ' AS header_html, background_menu, background_color
@@ -1677,7 +1680,7 @@ if (!function_exists('getHTMLHead')) {
 
 if (!function_exists('get_menu')) {
 	/**
-	 * get_admin_menu()
+	 * Affiche le menu en front-office
 	 *
 	 * @return
 	 */
@@ -1692,8 +1695,8 @@ if (!function_exists('get_menu')) {
 			$GLOBALS['main_menu_items']['home'] = array($GLOBALS['wwwroot'] . '/' => $GLOBALS['STR_HOME']);
 			$GLOBALS['main_menu_items']['catalog'] = array(get_product_category_url() => $GLOBALS['STR_CATALOGUE']);
 			$GLOBALS['main_menu_items']['news'] = array(get_product_category_url() . 'nouveautes.php' => $GLOBALS['STR_NOUVEAUTES']);
-			$GLOBALS['main_menu_items']['promotions'] = array(get_product_category_url() . 'promotions.php' => $GLOBALS['STR_PROMOTIONS']);
 			$GLOBALS['main_menu_items']['content'] = array(get_content_category_url() => $GLOBALS["STR_INFORMATIONS"]);
+			$GLOBALS['main_menu_items']['other'] = array('#' => $GLOBALS["STR_OTHER"]);
 			if (is_annonce_module_active()) {
 				$GLOBALS['main_menu_items']['annonces'] = array($GLOBALS['wwwroot'] . '/modules/annonces/' => $GLOBALS['STR_MODULE_ANNONCES_ADS']);
 				if (est_identifie()) {
@@ -1710,10 +1713,13 @@ if (!function_exists('get_menu')) {
 				}
 			}
 			if (is_module_gift_checks_active()) {
-				$GLOBALS['main_menu_items']['check'] = array($GLOBALS['wwwroot'] . '/modules/gift_check/cheques.php' => $GLOBALS['STR_CHEQUE_CADEAU']);
+				$GLOBALS['menu_items']['news'][$GLOBALS['wwwroot'] . '/modules/gift_check/cheques.php'] = $GLOBALS['STR_CHEQUE_CADEAU'];
 			}
 			if (est_identifie()) {
 				$GLOBALS['main_menu_items']['account'] = array(get_account_url(false, false) => $GLOBALS['STR_COMPTE']);
+				if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+					$GLOBALS['menu_items']['account'][get_account_url(false, false)] = $GLOBALS['STR_COMPTE'];
+				}
 				$GLOBALS['menu_items']['account'][$GLOBALS['wwwroot'] . '/achat/historique_commandes.php'] = $GLOBALS['STR_ORDER_HISTORY'];
 				$GLOBALS['menu_items']['account'][$GLOBALS['wwwroot'] . '/utilisateurs/change_mot_passe.php'] = $GLOBALS['STR_CHANGE_PASSWORD'];
 				if (is_cart_preservation_module_active()) {
@@ -1725,14 +1731,18 @@ if (!function_exists('get_menu')) {
 				$GLOBALS['main_menu_items']['account'] = array($GLOBALS['wwwroot'] . '/membre.php' => $GLOBALS['STR_COMPTE']);
 			}
 			$GLOBALS['main_menu_items']['contact'] = array(get_contact_url(false, false) => $GLOBALS['STR_CONTACT']);
+			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+				$GLOBALS['menu_items']['contact'][get_contact_url(false, false)] = $GLOBALS['STR_CONTACT'];
+			}
 			$GLOBALS['menu_items']['contact'][$GLOBALS['wwwroot'] . '/plan_acces.php'] = $GLOBALS['STR_ACCESS_PLAN'];
 			if (a_priv('admin*', true)) {
 				$GLOBALS['main_menu_items']['admin'] = array($GLOBALS['administrer_url'] . '/index.php' => $GLOBALS['STR_ADMIN']);
 			}
-			$GLOBALS['menu_items']['promotions'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
+			$GLOBALS['menu_items']['news'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
 			if (is_flash_sell_module_active() && is_flash_active_on_site()) {
-				$GLOBALS['menu_items']['promotions'][$GLOBALS['wwwroot'] . '/modules/flash/flash.php'] = $GLOBALS['STR_FLASH'];
+				$GLOBALS['menu_items']['news'][$GLOBALS['wwwroot'] . '/modules/flash/flash.php'] = $GLOBALS['STR_FLASH'];
 			}
+			$GLOBALS['menu_items']['other'] = array_merge($GLOBALS['main_menu_items']['catalog'], $GLOBALS['menu_items']['news'], array('' => 'divider'), $GLOBALS['menu_items']['contact']);
 		}
 		if(isset($GLOBALS['site_parameters']['main_menu_items_if_available']) && is_array($GLOBALS['site_parameters']['main_menu_items_if_available'])) {
 			$temp = array();
@@ -1750,7 +1760,7 @@ if (!function_exists('get_menu')) {
 			} else {
 				$highlighted_item = 0;
 			}
-			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' as nom
+			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' as nom, parent_id
 				FROM peel_categories c
 				WHERE c.etat="1" AND nom_' . $_SESSION['session_langue'] . '!=""
 				ORDER BY c.position ASC, nom ASC';
@@ -1758,17 +1768,21 @@ if (!function_exists('get_menu')) {
 			while ($result = fetch_assoc($qid)) {
 				$all_parents_with_ordered_direct_sons_array[$result['parent_id']][] = $result['id'];
 				$item_name_array[$result['id']] = $result['nom'];
+				if(empty($result['parent_id'])) {
+					$result['nom'] = String::strtoupper($result['nom']);
+				}
 				if(!empty($GLOBALS['site_parameters']['insert_product_categories_in_menu'])) {
 					// Il faut définir par la suite cat_XX dans le paramètre main_menu_items_if_available depuis le back office pour que la catégorie s'affiche.
 					$GLOBALS['main_menu_items']["cat_" . $result['id']] = array(get_product_category_url($result['id'], $result['nom']) => $result['nom']);
+					$GLOBALS['categories_level'][$result['parent_id']][] = "cat_" . $result['id'];
 				}
 			}
 			$submenu_global['catalog'] = '';
 			if(!empty($item_name_array)) {
-				$submenu_global['catalog'] .= '<ul class="sousMenu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $highlighted_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), $item_max_length).'</ul>';
+				$submenu_global['catalog'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $highlighted_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), $item_max_length).'</ul>';
 				foreach($item_name_array as $catid => $nom) {
 					if (!empty($all_parents_with_ordered_direct_sons_array[$catid])) {
-						$submenu_global["cat_".$catid] = '<table style="float: left;">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $catid, 0, $highlighted_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), 50) . '</table>';
+						$submenu_global["cat_".$catid] = '<ul class="sousMenu dropdown-menu" role="menu">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $catid, 0, $highlighted_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), 50) . '</ul>';
 					}
 				}
 			}
@@ -1799,7 +1813,7 @@ if (!function_exists('get_menu')) {
 			}
 			$submenu_global['content'] = '';
 			if(!empty($item_name_array)) {
-				$submenu_global['content'] .= '<ul class="sousMenu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $highlighted_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], $item_max_length).'</ul>';
+				$submenu_global['content'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $highlighted_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], $item_max_length).'</ul>';
 				foreach($item_name_array as $rubid => $nom) {
 					if (!empty($GLOBALS['site_parameters']['insert_content_articles_in_menu'])) {
 						// Affichage des articles de la rubrique dans le sous menu
@@ -1809,7 +1823,7 @@ if (!function_exists('get_menu')) {
 							INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id AND r.technical_code NOT IN ('other', 'iphone_content')
 							WHERE r.id ='" . intval($rubid) . "'";
 						$qid = query($sql);
-						$submenu_global["rub_".$rubid] = '<ul class="sousMenu">';
+						$submenu_global["rub_".$rubid] = '<ul class="sousMenu dropdown-menu" role="menu">';
 						while ($result = fetch_assoc($qid)) {
 							$submenu_global["rub_".$rubid] .= '<li><a href="'. get_content_url($result['id']) . '">' . $result['nom'] . '</a></li>';
 						}
@@ -1817,13 +1831,27 @@ if (!function_exists('get_menu')) {
 					} elseif (!empty($all_parents_with_ordered_direct_sons_array[$rubid])) {
 						// Affichage des sous-rubriques dans le sous-menu
 						$submenu_global["rub_".$rubid] = '
-							<ul class="sousMenu">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $rubid, 0, $highlighted_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], 50) . vb($article) .'</ul>';
+							<ul class="sousMenu dropdown-menu" role="menu">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $rubid, 0, $highlighted_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], 50) . vb($article) .'</ul>';
 					}
 				}
 			}
 		}
 		if(!empty($GLOBALS['site_parameters']['main_menu_items_if_available']) && is_array($GLOBALS['site_parameters']['main_menu_items_if_available'])) {
 			$temp_main_menu_items = array();
+			if(in_array('cat_*', $GLOBALS['site_parameters']['main_menu_items_if_available']) && !empty($GLOBALS['categories_level'][0])) {
+				foreach($GLOBALS['site_parameters']['main_menu_items_if_available'] as $this_value) {
+					if($this_value=='cat_*') {
+						foreach($GLOBALS['categories_level'][0] as $this_imported_value) {
+							if(String::strpos($this_value, 'cat_') === 0) {
+								$new_menu[] = $this_imported_value;
+							}
+						}
+					} else {
+						$new_menu[] = $this_value;
+					}
+				}
+				$GLOBALS['site_parameters']['main_menu_items_if_available'] = $new_menu;
+			}
 			foreach($GLOBALS['site_parameters']['main_menu_items_if_available'] as $this_value) {
 				if(isset($GLOBALS['main_menu_items'][$this_value])) {
 					// Filtre des entrées principales du menu à partir de la valeur de main_menu_items_if_available défini en back office
@@ -1847,6 +1875,18 @@ if (!function_exists('get_menu')) {
 						}
 						$GLOBALS['menu_items'] = $temp_menu_items;
 					}
+				} elseif(String::strpos($this_value, 'menu_html_') === 0) {
+					$this_output = affiche_contenu_html($this_value, true);
+					if(!empty($this_output)) {
+						$GLOBALS['main_menu_items'][$this_value] = '
+				<ul class="sousMenu dropdown-menu" role="menu">
+					<li>
+						<div class="yamm-content">
+							' . affiche_contenu_html($this_value, true) . '
+						</div>
+					</li>
+				</ul>';
+					}
 				}
 			}
 			$GLOBALS['main_menu_items'] = $temp_main_menu_items;
@@ -1856,17 +1896,19 @@ if (!function_exists('get_menu')) {
 		$current_url_full = get_current_url(true);
 		$menu = array();
 		foreach($GLOBALS['main_menu_items'] as $this_main_item => $this_main_array) {
-			$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url_full]));
-			$full_match = true;
-			if ($current_menu === false && !empty($GLOBALS['menu_items'][$this_main_item])) {
-				$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url]));
-				$full_match = false;
-			}
+			// On ne prend que les menus demandés pour l'affichage
 			foreach ($this_main_array as $this_main_url => $this_main_title) {
+				$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url_full]));
+				$full_match = true;
+				if ($current_menu === false && !empty($GLOBALS['menu_items'][$this_main_item])) {
+					$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url]));
+					$full_match = false;
+				}
 				$tmp_menu_item = array('name' => $this_main_item,
+						'id' => 'menu_' . String::substr(md5($this_main_item.'_'.$this_main_title.'_'.$this_main_url), 0, 4),
 						'label' => $this_main_title,
 						'href' => (!empty($this_main_url) && !is_numeric($this_main_url)) ? $this_main_url : false,
-						'selected' => ($current_menu !== false || !empty($this_main_array[$current_url]) || !empty($this_main_array[$current_url_full])),
+						'selected' => ($current_menu !== false || !empty($this_main_array[$current_url]) || !empty($this_main_array[$current_url_full]) || String::strpos(vb($submenu_global[$this_main_item]),'class="minus active"')!==false),
 						'submenu_global' => vb($submenu_global[$this_main_item]),
 						'class' => $this_main_item,
 						'submenu' => array()
@@ -1884,6 +1926,7 @@ if (!function_exists('get_menu')) {
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('menu.tpl');
 		$tpl->assign('menu', $menu);
+		$tpl->assign('site', $GLOBALS['site']);
 		$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
 		return $tpl->fetch();
 	}
@@ -1900,7 +1943,7 @@ if (!function_exists('affiche_flags')) {
 	 * @uses $GLOBALS['tplEngine']
 	 * @return flags view
 	 */
-	function affiche_flags($return_mode = false, $forced_destination_url = null, $display_names = false, $langs_array = array())
+	function affiche_flags($return_mode = false, $forced_destination_url = null, $display_names = false, $langs_array = array(), $big_flags = false, $force_width = null)
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('flags.tpl');
 		$data = array();
@@ -1911,10 +1954,15 @@ if (!function_exists('affiche_flags')) {
 				} else {
 					$url = get_current_url_in_other_language($this_lang);
 				}
+				if($big_flags && !empty($GLOBALS['lang_flags_big'][$this_lang])) {
+					$this_flag = $GLOBALS['lang_flags_big'][$this_lang];
+				} else {
+					$this_flag = $GLOBALS['lang_flags'][$this_lang];
+				}
 				$data[] = array('lang' => $this_lang,
 					'lang_name' => (!empty($GLOBALS['lang_names'][$this_lang])?$GLOBALS['lang_names'][$this_lang]:$this_lang),
 					'href' => $url,
-					'src' => ((String::strpos($GLOBALS['lang_flags'][$this_lang], '/') !== false) ? $GLOBALS['lang_flags'][$this_lang] : $GLOBALS['wwwroot'] . '/lib/flag/' . $GLOBALS['lang_flags'][$this_lang]),
+					'src' => ((String::strpos($this_flag, '/') !== false) ? $this_flag : $GLOBALS['wwwroot'] . '/lib/flag/' . $this_flag),
 					'selected' => ($_SESSION['session_langue'] == $this_lang && empty($forced_destination_url)),
 					'flag_css_class' => (($_SESSION['session_langue'] == $this_lang && empty($forced_destination_url)) ? "flag_selected":"flag_not_selected")
 					);
@@ -1922,6 +1970,7 @@ if (!function_exists('affiche_flags')) {
 		}
 		$tpl->assign('data', $data);
 		$tpl->assign('display_names', $display_names);
+		$tpl->assign('force_width', $force_width);
 		if ($return_mode) {
 			return $tpl->fetch();
 		} else {
@@ -2001,16 +2050,19 @@ if (!function_exists('output_light_html_page')) {
 		$tpl->assign('body', $body);
 		$tpl->assign('full_head_section_text', $full_head_section_text);
 		if (empty($full_head_section_text) && $add_general_css_js_files) {
+			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+				$GLOBALS['js_files'][-100] = $GLOBALS['wwwroot'] . '/lib/js/jquery.js';
+				$GLOBALS['css_files'][] = $GLOBALS['wwwroot'] . '/lib/css/bootstrap.css';
+				$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/bootstrap.js';
+			}
 			foreach (explode(',', $GLOBALS['site_parameters']['css']) as $this_css_filename) {
 				$GLOBALS['css_files'][] = $GLOBALS['repertoire_css'] . '/' . trim($this_css_filename);
 			}
 			if(!empty($GLOBALS['css_files'])) {
+				ksort($GLOBALS['css_files']);
 				$tpl->assign('css_files', array_unique($GLOBALS['css_files']));
 			}
-			if(!empty($GLOBALS['js_files'])) {
-				// L'ordre des fichiers js doit être respecté ensuite dans le template
-				$tpl->assign('js_files', array_unique($GLOBALS['js_files']));
-			}
+			$tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']), !empty($GLOBALS['site_parameters']['minify_js'])));
 		}
 		$output = $tpl->fetch();
 		if (!empty($convert_to_encoding)) {
@@ -2071,18 +2123,13 @@ if (!function_exists('print_delete_installation_folder')) {
 		// Tout ce qui est ci-dessous ne peut pas aller chercher d'informations en base de données car logiciel non installé
 		$title = $GLOBALS['STR_INSTALLATION'];
 		// Gestion de l'affichage des drapeaux lors de l'installation
-		foreach($GLOBALS['lang_codes'] as $this_lang) {
-			// Remplacement de petits drapeaux par gros drapeaux
-			if(file_exists($GLOBALS['dirroot'] . '/images/'.$this_lang.'.png')) {
-				$GLOBALS['lang_flags'][$this_lang] = $GLOBALS['wwwroot'] . '/images/'.$this_lang.'.png';
-			}
-		}
 		if (!is_writable($GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile")) {
-			$body = sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], "/lib/templateEngines/smarty/compile");
+			echo sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], "/lib/templateEngines/smarty/compile");
+			die();
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('delete_installation_folder.tpl');
 			$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
-			$tpl->assign('installation_links', affiche_flags(true, $GLOBALS['wwwroot'] . '/installation/index.php', true, $GLOBALS['admin_lang_codes']));
+			$tpl->assign('installation_links', affiche_flags(true, $GLOBALS['wwwroot'] . '/installation/index.php', true, $GLOBALS['admin_lang_codes'], true, null));
 			$tpl->assign('STR_INSTALLATION_PROCEDURE', $GLOBALS['STR_INSTALLATION_PROCEDURE']);
 			$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN']);
 			$tpl->assign('STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE', $GLOBALS['STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE']);
@@ -2092,16 +2139,14 @@ if (!function_exists('print_delete_installation_folder')) {
 		}
 		$additional_header = '
 		<style>
-			h1 { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #337733; }
-			h2 { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: #CC0000; }
-			p { font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; color: #000000; }
-			.launch_installation, .center { text-align:center; }
-			.launch_installation { margin: 30px; min-width: 770px; }
+			h1 { font-size: 24px; color: #337733; }
+			h2 { font-size: 20px; }
+			.launch_installation, .center { text-align:center; margin-top: 10px; }
 			.flag_not_selected { width: 167px; height:167px; }
-			.full_flag { display: inline-block; font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; color: #000000; padding:15px; }
+			.full_flag { display: inline-block; font-size: 18px; font-weight: bold; color: #000000; padding:15px; }
 			.full_flag a { text-decoration: none; color: #000000 !important;}
 			.full_flag a:hover { text-decoration: underline;}
-			.footer { background-color: #DDDDDD; padding:20px; }
+			.footer { padding-top:10px; margin-top: 10px;}
 		</style>
 ';
 		output_light_html_page($body, $title, $additional_header);

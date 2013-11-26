@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_liste_by_id.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: attributsAdmin_liste_by_id.tpl 38982 2013-11-25 01:02:14Z gboussin $
 #}
-<form method="post" name="associe_produit_attribut" action="{{ action|escape('html') }}">
+<form class="entryform form-inline" role="form" method="post" name="associe_produit_attribut" action="{{ action|escape('html') }}">
 	<table cellpadding="4" class="main_table">
 		<tr>
 			<td class="entete" colspan="2">{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_TITLE }} "{{ product_name }}"</td>
@@ -21,7 +21,7 @@
 			<td colspan="2">
 				<a href="{{ product_revenir_href|escape('html') }}">{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCT }}</a><br />
 				<a href="{{ product_liste_revenir_href|escape('html') }}">{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCTS_LIST }}</a><br />
-				<div class="global_help">{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_EXPLAIN_SELECT }}</div>
+				<div class="alert alert-info">{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_EXPLAIN_SELECT }}</div>
 			</td>
 		</tr>
 		<tr>
@@ -30,17 +30,17 @@
 		</tr>
 	{% for res in results %}
 		{{ res.tr_rollover }}
-			<td class="label">{% if (res.nom) %}{{ res.nom|html_entity_decode_if_needed }}{% else %}[{{ res.id }}]{% endif %}</td>
+			<td class="title_label">{% if (res.nom) %}{{ res.nom|html_entity_decode_if_needed }}{% else %}[{{ res.id }}]{% endif %}</td>
 			<td>
-		{% if (res.sub_res) or res.texte_libre or res.upload }}
+		{% if (res.sub_res) or res.texte_libre or res.upload %}
 			{% if (res.sub_res) %}
-					<select name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:100%" size="{% if (res.sub_res|@count)<5 }}{{ res.sub_res|@count }}{% else %}5{% endif %}">
+					<select class="form-control" name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:100%" size="{% if (res.sub_res|length)<5 %}{{ res.sub_res|length }}{% else %}5{% endif %}">
 				{% for sr in res.sub_res %}
-						<option value="{{ sr.value|str_form_value }}" {% if sr.issel %} selected="selected"{% endif %}>{{ sr.desc|html_entity_decode_if_needed }}{% if sr.prix>0 }} - {{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST }} : {{ sr.prix }} {{ STR_TTC }}{% endif %}</option>
+						<option value="{{ sr.value|str_form_value }}" {% if sr.issel %} selected="selected"{% endif %}>{{ sr.desc|html_entity_decode_if_needed }}{% if sr.prix>0 %} - {{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST }} : {{ sr.prix }} {{ STR_TTC }}{% endif %}</option>
 				{% endfor %}
 					</select>
-			{% elseif res.texte_libre or res.upload }}
-					<select name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:400px" size="1">
+			{% elseif res.texte_libre or res.upload %}
+					<select class="form-control" name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:400px" size="1">
 						<option value="0" {% if res.issel %} selected="selected"{% endif %}>
 						{% if (res.texte_libre) %}
 							[{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_FREE_TEXT }}]
@@ -57,5 +57,5 @@
 		</tr>
 	{% endfor %}
 	</table>
-	<div class="center"><input type="submit" class="bouton" value="{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_ASSOCIATE_ATTRIBUTE|str_form_value }}" /></div>
+	<div class="center"><input type="submit" class="btn btn-primary" value="{{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_ASSOCIATE_ATTRIBUTE|str_form_value }}" /></div>
 </form>

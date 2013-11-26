@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,17 +32,11 @@ if (!defined('IN_PEEL')) {
  */
 function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_file_path = null, $rename_file = true, $return_absolute_path=false)
 {
+	static $tpl_error;
 	if (empty($image)) {
 		return false;
 	}
 	$GLOBALS['error_text_to_display'] = '';
-	if ($path === null) {
-		if(strpos($image, '://') !== false || strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
-			$path = $GLOBALS['uploaddir'];
-		} else {
-			$path = $GLOBALS['dirroot'];
-		}
-	}
 	if (empty($new_file_path)) {
 		if(strpos($image, '://') !== false || strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
 			$new_file_path = $GLOBALS['uploaddir'] . '/thumbs/';
@@ -52,10 +46,17 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 	}
 	if(strpos($image, '://')!==false) {
 		// URL présente dans le nom de l'image
-		$imageFile = $image;
+		$imageFile = str_replace(' ', '%20', $image);
 		// Pas possible de récupèrer la date et l'heure de dernière modification de l'image
 		$srcTime = 0;
 	} else {
+		if ($path === null) {
+			if(strpos($image, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
+				$path = $GLOBALS['uploaddir'];
+			} else {
+				$path = $GLOBALS['dirroot'];
+			}
+		}
 		$imageFile = $path . '/' . $image;
 		// On récupère la date et l'heure de dernière modification de l'image
 		$srcTime = @filemtime($imageFile);
@@ -105,7 +106,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 				// L'image ne semble pas valide
 				if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
-				}
+					}
 				$skip_creation = true;
 			}
 		}
@@ -169,7 +170,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 				default:
 					if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
 						$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $imageFile))->fetch();
-					}
+						}
 					return false;
 			}
 			if(!empty($srcImg)) {
@@ -192,7 +193,7 @@ function thumbs($image, $width, $height, $method = 'fit', $path = null, $new_fil
 			if (empty($res)) {
 				if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
 					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
-				}
+					}
 				if(empty($cachedThumbFile_filemtime)){
 					return false;
 				} else {

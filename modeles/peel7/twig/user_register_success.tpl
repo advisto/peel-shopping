@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_success.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: user_register_success.tpl 38682 2013-11-13 11:35:48Z gboussin $
 #}<h1 class="page_title">{{ hello_txt }} {{ name|html_entity_decode_if_needed }}</h1>
 <p>{{ msg_login_ok_txt|nl2br_if_needed }}</p>
 <p>{{ STR_EMAIL }}: <b>{{ email }}</b></p>

@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 37983 2013-09-02 09:04:37Z sdelaporte $
+// $Id: rubriques.php 38682 2013-11-13 11:35:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv('admin_content');
 
 $DOC_TITLE = $GLOBALS['STR_ADMIN_RUBRIQUES_TITLE'];
-include("modeles/haut.php");
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $form_error_object = new FormError();
 $frm = $_POST;
@@ -107,7 +107,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 }
 
-include("modeles/bas.php");
+include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
  * FONCTIONS
@@ -124,6 +124,11 @@ include("modeles/bas.php");
  */
 function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent = "", $first_line = 0, $depth = 1)
 {
+	static $tpl;
+	if(empty($tpl)) {
+		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_arbo_rubrique.tpl');
+	}
+
 	$sql = 'SELECT r.id, r.nom_' . $_SESSION['session_langue'] . ', r.etat, r.position, r.image, r.articles_review, r.technical_code
 		FROM peel_rubriques r
 		WHERE r.parent_id = "' . intval($parent_id) . '"
@@ -131,22 +136,21 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 	$qid = query($sql);
 
 	while ($rub = fetch_assoc($qid)) {
-		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_arbo_rubrique.tpl');
 		if (!empty($rub['image'])) {
 			if (pathinfo($rub['image'], PATHINFO_EXTENSION) == 'pdf') {
 				$this_thumb = thumbs('logoPDF_small.png', 80, 50, 'fit', $GLOBALS['dirroot'] .'/images/');
 			} else {
 				$this_thumb = thumbs($rub['image'], 80, 50, 'fit');
 			}
+			$tpl->assign('image', $rub['image']);
+			$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 		}
-		$tpl->assign('image', vb($rub['image']));
-		$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 		$tpl->assign('tr_rollover', tr_rollover($first_line, true));
 		$tpl->assign('ajout_rub_href', get_current_url(false) . '?mode=ajout&id=' . $rub['id']);
 		$tpl->assign('rubrique_src', $GLOBALS['administrer_url'] . '/images/rubrique-24.gif');
 		$tpl->assign('ajout_art_href', $GLOBALS['administrer_url'] . '/articles.php?mode=ajout&rubrique_id=' . $rub['id']);
 		$tpl->assign('prod_cat_src', $GLOBALS['administrer_url'] . '/images/prod-cat-24.gif');
-		$tpl->assign('nom', $rub['nom_' . $_SESSION['session_langue']]);
+		$tpl->assign('nom', (!empty($rub['nom_' . $_SESSION['session_langue']])?$rub['nom_' . $_SESSION['session_langue']]:'['.$rub['id'].']'));
 		$tpl->assign('sup_href', get_current_url(false) . '?mode=suppr&id=' . $rub['id']);
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		$tpl->assign('indent', $indent);
@@ -429,7 +433,7 @@ function affiche_formulaire_rubrique(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => vb($frm['nom_' . $lng]),
-			'description_te' => getTextEditor('description_' . $lng, 760, 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+			'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_key' => vb($frm['meta_key_' . $lng]),
 			'meta_desc' => vb($frm['meta_desc_' . $lng]),
 			'meta_titre' => vb($frm['meta_titre_' . $lng]),
@@ -437,11 +441,25 @@ function affiche_formulaire_rubrique(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
+	$tpl->assign('pdf_logo_src',$GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 	if (!empty($frm["image"])) {
-		$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image"],
+		if (String::strtolower(String::substr($frm['image'], strrpos($frm['image'], ".") + 1)) == 'pdf') {
+			$type = 'pdf';
+		} else {
+			$type = 'img';
+		}
+		if(strpos($frm['image'], '://') !== false) {
+			$this_url = $frm['image'];
+		} elseif(strpos($frm['image'], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
+			$this_url = $GLOBALS['wwwroot'] . $frm['image'];
+		} else {
+			$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image'];
+		}
+		$tpl->assign('image', array('src' => $this_url,
 				'name' => $frm["image"],
+				'type' => $type,
 				'sup_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'
-				));
+		));
 	}
 	if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
 		$tpl_diapo = array();

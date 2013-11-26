@@ -3,26 +3,26 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_liste_nom.tpl 37904 2013-08-27 21:19:26Z gboussin $
-*}<table class="main_table" cellpadding="2">
+// $Id: attributsAdmin_liste_nom.tpl 38682 2013-11-13 11:35:48Z gboussin $
+*}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="4">{$STR_MODULE_ATTRIBUTS_ADMIN_TITLE}</td>
 	</tr>
 	<tr>
-		<td colspan="4"><div class="global_help">{$STR_MODULE_ATTRIBUTS_ADMIN_EXPLAIN}</div></td>
+		<td colspan="4"><div class="alert alert-info">{$STR_MODULE_ATTRIBUTS_ADMIN_EXPLAIN}</div></td>
 	</tr>
 	<tr>
 		<td colspan="4"><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_MODULE_ATTRIBUTS_ADMIN_CREATE}</a></td>
 	</tr>
 {if $num_results == 0}
-	<tr><td><b>{$STR_MODULE_ATTRIBUTS_ADMIN_NOTHING_FOUND}</b></td></tr>
+	<tr><td><div class="alert alert-warning">{$STR_MODULE_ATTRIBUTS_ADMIN_NOTHING_FOUND}</div></td></tr>
 {else}
 	<tr>
 		<td class="menu" style="width:200px">{$STR_ADMIN_ACTION}</td>
@@ -32,7 +32,7 @@
 	</tr>
 	{foreach $results as $res}
 		{$res.tr_rollover}
-			<td class="center"><a onclick="return confirm('{$STR_ADMIN_CONFIRM_JAVASCRIPT|filtre_javascript:true:true:true}');" title="{$STR_DELETE|str_form_value} {$res.nom}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> <a href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" alt="{$STR_ADMIN_UPDATE}" /></a></td>
+			<td class="center"><a data-confirm="{$STR_ADMIN_CONFIRM_JAVASCRIPT|str_form_value}" title="{$STR_DELETE|str_form_value} {$res.nom}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a> <a href="{$res.edit_href|escape:'html'}"><img src="{$edit_src|escape:'html'}" alt="{$STR_ADMIN_UPDATE}" /></a></td>
 			<td class="center"><a title="{$STR_MODULE_ATTRIBUTS_ADMIN_UPDATE|str_form_value}" href="{$res.edit_href|escape:'html'}">{$res.nom}</a></td>
 			<td class="center">
 				{if !$res.texte_libre && !$res.upload}

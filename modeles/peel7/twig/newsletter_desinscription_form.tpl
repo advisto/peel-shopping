@@ -3,24 +3,24 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter_desinscription_form.tpl 37943 2013-08-29 09:31:55Z gboussin $
+// $Id: newsletter_desinscription_form.tpl 38682 2013-11-13 11:35:48Z gboussin $
 #}<h2>{{ header }}</h2>
-<form class="entryform" method="post" action="{{ action|escape('html') }}">
+<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="full_width" >
 		<tr>
 			<td>{{ label }}:</td>
-			<td>{{ error }}<input type="email" name="email" size="20" value="{{ email|str_form_value }}" /></td>
+			<td>{{ error }}<input type="text" class="form-control" name="email" value="{{ email|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			 <td></td>
-			<td class="center"><p><input type="submit" value="{{ submit|str_form_value }}" class="clicbouton" style="width:auto;" /></p></td>
+			<td class="center"><p><input type="submit" value="{{ submit|str_form_value }}" class="btn btn-primary" style="width:auto;" /></p></td>
 		</tr>
 	</table>
 </form>

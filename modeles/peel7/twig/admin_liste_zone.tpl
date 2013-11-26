@@ -3,39 +3,37 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_zone.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<table class="main_table">
-	<tr>
-		<td class="entete" colspan="5">{{ STR_ADMIN_ZONES_TITLE }}</td>
-	</tr>
-	<tr>
-		<td colspan="5"><p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_ZONES_CREATE }}</a></p></td>
-	</tr>
-	{% if (results) %}
-	<tr>
-		<td class="menu">{{ STR_ADMIN_ACTION }}</td>
-		<td class="menu">{{ STR_SHIPPING_ZONE }}</td>
-		<td class="menu">{{ STR_VAT }}</td>
-		<td class="menu">{{ STR_ADMIN_ZONES_FREE_DELIVERY }}</td>
-		<td class="menu">{{ STR_ADMIN_POSITION }}</td>
-	</tr>
-	{% for res in results %}
-	{{ res.tr_rollover }}
-		<td class="center"><a onclick="return confirm('{{ STR_ADMIN_DELETE_WARNING|filtre_javascript(true,true,true) }}');" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> &nbsp; <a title="{{ STR_ADMIN_ZONES_UPDATE }}" href="{{ res.modif_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" width="16" height="16" alt="" /></a></td>
-		<td style="padding-left:10px"><a title="{{ STR_ADMIN_ZONES_UPDATE|str_form_value }}" href="{{ res.modif_href|escape('html') }}">{{ res.nom }}</a></td>
-		<td class="center">{% if res.tva == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
-		<td class="center">{% if res.on_franco == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
-		<td class="center position">{{ res.position }}</td>
-	</tr>
-	{% endfor %}
-	{% else %}
-	<tr><td><b>{{ STR_ADMIN_ZONES_NOTHING_FOUND }}</b></td></tr>
-	{% endif %}
-</table>
+// $Id: admin_liste_zone.tpl 38961 2013-11-23 23:06:58Z gboussin $
+#}<div class="entete">{{ STR_ADMIN_ZONES_TITLE }}</div>
+<div><p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_ZONES_CREATE }}</a></p></div>
+{% if (results) %}
+<div class="table-responsive">
+	<table class="table">
+		<tr>
+			<td class="menu">{{ STR_ADMIN_ACTION }}</td>
+			<td class="menu">{{ STR_SHIPPING_ZONE }}</td>
+			<td class="menu">{{ STR_VAT }}</td>
+			<td class="menu">{{ STR_ADMIN_ZONES_FREE_DELIVERY }}</td>
+			<td class="menu">{{ STR_ADMIN_POSITION }}</td>
+		</tr>
+		{% for res in results %}
+		{{ res.tr_rollover }}
+			<td class="center"><a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> &nbsp; <a title="{{ STR_ADMIN_ZONES_UPDATE }}" href="{{ res.modif_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" width="16" height="16" alt="" /></a></td>
+			<td style="padding-left:10px"><a title="{{ STR_ADMIN_ZONES_UPDATE|str_form_value }}" href="{{ res.modif_href|escape('html') }}">{{ res.nom }}</a></td>
+			<td class="center">{% if res.tva == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
+			<td class="center">{% if res.on_franco == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
+			<td class="center position">{{ res.position }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+</div>
+{% else %}
+<div class="alert alert-warning">{{ STR_ADMIN_ZONES_NOTHING_FOUND }}</div>
+{% endif %}

@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_import_produits_form.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}" name="categories" enctype="multipart/form-data">
+// $Id: admin_import_produits_form.tpl 38958 2013-11-23 21:57:22Z gboussin $
+#}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" name="categories" enctype="multipart/form-data">
  	{{ form_token }}
 	<input type="hidden" name="action" value="import" />
 	<input type="hidden" name="nomtable" value="peel_produits" />
@@ -19,12 +19,12 @@
 		<tr><td class="entete">{{ STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE }}</td></tr>
 		<tr>
 			<td>
-				<br />
-				<b>{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT }}</b>{{ STR_BEFORE_TWO_POINTS }}: CSV
-				<br />
-				{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN }}<br />
-				{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ example_href|escape('html') }}">exemple_prod.csv</a><br />
-				<p>
+				<div class="alert alert-info">
+					<b>{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT }}</b>{{ STR_BEFORE_TWO_POINTS }}: CSV
+					<br />
+					{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN }}<br />
+					{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE }}{{ STR_BEFORE_TWO_POINTS }}: <a href="{{ example_href|escape('html') }}">exemple_prod.csv</a><br />
+				</div>
 			</td>
 		</tr>
 		<tr>
@@ -50,21 +50,21 @@
 		<tr>
 			<td>
 				<br />
-				<div class="global_help">
+				<div class="alert alert-info">
 					<b>{{ STR_WARNING }}{{ STR_BEFORE_TWO_POINTS }}:</b><br />{{ STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN }}
 				</div>
 			</td>
 		</tr>
 		<tr>
 		  	<td class="center">
-				<p class="global_error">{{ STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID }}</p>
+				<p class="alert alert-danger">{{ STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID }}</p>
 				<p>{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: <input type="file" name="fichier" /></p>
-				<p>{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}: <select name="import_encoding">
+				<p>{{ STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}: <select class="form-control" name="import_encoding" style="width: 150px">
 						<option value="utf-8"{% if import_encoding == 'utf-8' %} selected="selected"{% endif %}>UTF-8</option>
 						<option value="iso-8859-1"{% if import_encoding == 'iso-8859-1' %} selected="selected"{% endif %}>ISO 8859-1</option>
 					</select></p>
-				<p>{{ STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR }}{{ STR_BEFORE_TWO_POINTS }}: <input style="width:50px" type="text" name="columns_separator" value="" /> ({{ STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN }})</p>
-				<p><input type="submit" name="submit" value="{{ STR_VALIDATE|str_form_value }}" class="bouton" /></p>
+				<p>{{ STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR }}{{ STR_BEFORE_TWO_POINTS }}: <input style="width:50px" type="text" class="form-control" name="columns_separator" value="" /> ({{ STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN }})</p>
+				<p><input type="submit" name="submit" value="{{ STR_VALIDATE|str_form_value }}" class="btn btn-primary" /></p>
 			</td>
 		</tr>
 	 </table>

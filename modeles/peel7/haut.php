@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: haut.php 39003 2013-11-25 17:02:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,9 @@ $GLOBALS['header_html'] = '';
 if (empty($GLOBALS['page_columns_count'])) {
 	$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['site_general_columns_count'];
 }
-header('Content-type: text/html; charset=' . GENERAL_ENCODING);
+$GLOBALS['page_columns_count'] = 3;
+
+output_general_http_header();
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('haut.tpl');
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
@@ -32,7 +34,6 @@ if (is_facebook_module_active()) {
 	$tpl->assign('facebook_xmls', get_facebook_xmlns());
 }
 $tpl->assign('page_name', vb($GLOBALS['page_name']));
-$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['header_html']));
 if (!defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && vb($GLOBALS['site_parameters']['site_suspended']) && a_priv('admin')) {
 	$tpl->assign('update_msg', $GLOBALS['STR_UPDATE_WEBSITE']);
 }
@@ -45,13 +46,13 @@ if (is_facebook_connect_module_active()) {
 }
 
 if (is_welcome_ad_module_active()) {
+	load_welcome_ad();
 	$tpl->assign('welcome_ad_div', get_welcome_ad_div());
 }
 if (is_cart_popup_module_active() && !empty($_SESSION['session_show_caddie_popup'])) {
 	$tpl->assign('cart_popup_div', get_cart_popup_div());
-	unset($_SESSION['session_show_caddie_popup']);
 }
-$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes']));
+$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], true, 26));
 
 if (is_devises_module_active()) {
 	$tpl->assign('module_devise', affiche_module_devise(true));
@@ -63,10 +64,13 @@ if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) &
 		);
 }
 
-$tpl->assign('header_html', $GLOBALS['header_html']);
 $tpl->assign('repertoire_images', $GLOBALS['repertoire_images']);
 $tpl->assign('MODULES_HEADER', get_modules('header', true, null, vn($_GET['catid'])));
-$tpl->assign('CONTENT_HEADER', affiche_contenu_html('header', true));
+if(empty($_COOKIE['page_warning_close']) || $_COOKIE['page_warning_close']!='closed') {
+	$tpl->assign('CONTENT_HEADER', affiche_contenu_html('header', true));
+} else {
+	$tpl->assign('CONTENT_HEADER', null);
+}
 $tpl->assign('MODULES_ARIANE', get_modules(null, true, 'ariane', vn($_GET['catid'])));
 $tpl->assign('CONTENT_SCROLLING', affiche_contenu_html('scrolling', true));
 
@@ -78,11 +82,16 @@ if ($GLOBALS['page_columns_count'] > 1) {
 	if((defined('IN_CATALOGUE_ANNONCE') || defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE_DETAILS')) && is_annonce_module_active()) {
 		$modules_left .= get_modules('left_annonce', true, null, vn($_GET['catid'])); 
 	}
-	$modules_left .= get_modules('left', true, null, vn($_GET['catid']));
+	$modules_left .= get_modules('above_middle', true, null, vn($_GET['catid']));
 	$tpl->assign('MODULES_LEFT', $modules_left);
 }
 if (is_vitrine_module_active() && !empty($GLOBALS['vitrine_and_user_infos'])) {
-	$tpl->assign('user_information_boutique', display_user_information_boutique($GLOBALS['vitrine_and_user_infos']['id']));
+	if(!empty($GLOBALS['vitrine_and_user_infos']['id_vitrine'])) {
+		$id_vitrine = $GLOBALS['vitrine_and_user_infos']['id_vitrine'];
+	} else {
+		$id_vitrine = $GLOBALS['vitrine_and_user_infos']['id'];
+	}
+	$tpl->assign('user_information_boutique', display_user_information_boutique($id_vitrine));
 }
 
 if (is_module_ariane_panier_active() && (defined('IN_CADDIE') || defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
@@ -107,6 +116,20 @@ if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'i
 		$tpl->assign('appstore_image', $appstore_image);
 	}
 }
+$tpl->assign('est_identifie', est_identifie());
+$tpl->assign('show_open_account', est_identifie() && !empty($GLOBALS['site_parameters']['show_open_account']));
+if(!empty($_SESSION['session_utilisateur']['email'])) {
+	$tpl->assign('session_utilisateur_email', $_SESSION['session_utilisateur']['email']);
+}
+$tpl->assign('account_dropdown', affiche_compte(true, 'popup'));
+$tpl->assign('STR_LOGIN', $GLOBALS['STR_LOGIN']);
+$tpl->assign('account_register_url', get_account_register_url(false, false));
+$tpl->assign('STR_OPEN_ACCOUNT', $GLOBALS['STR_OPEN_ACCOUNT']);
+
+// A exécuter en dernier dans ce fichier car prend tous les javascripts
+// header_html est passé par référence à getHTMLHead pour être rempli
+$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['header_html']));
+$tpl->assign('header_html', $GLOBALS['header_html']);
 echo $tpl->fetch();
 
 ?>

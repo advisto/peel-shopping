@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: display_article.php 38983 2013-11-25 09:01:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -134,9 +134,14 @@ if (!function_exists('get_articles_html')) {
 			FROM peel_articles p
 			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id " . $extra_sql. "
 			INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id
-			WHERE p.etat = '1' AND titre_" . $_SESSION['session_langue'] . " != ''
-			ORDER BY p.`" . word_real_escape_string((isset($_GET['tri']) ? $_GET['tri'] : 'position')) . "` " . word_real_escape_string((isset($_GET['sort']) ? $_GET['sort'] : 'ASC')) . " , p.id DESC";
+			WHERE p.etat = '1' AND p.titre_" . $_SESSION['session_langue'] . " != ''";
 		$Links = new Multipage($sql, 'get_articles_html', 15, 7, 0, false);
+		$Links->order_sql_prefix = 'p';
+		$Links->order_get_variable = 'tri';
+		$Links->sort_get_variable = 'sort';
+		$Links->OrderDefault = 'position';
+		$Links->SortDefault = 'ASC';
+		$Links->forced_second_order_by_string = 'p.id DESC';
 		$results_array = $Links->Query();
 		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_html.tpl');
@@ -319,12 +324,16 @@ if (!function_exists('affiche_arbre_rubrique')) {
 	 */
 	function affiche_arbre_rubrique($rubid = 0, $additional_text = null)
 	{
+		static $tpl;
+		$output = '';
 		$qid = query('SELECT parent_id, nom_' . $_SESSION['session_langue'] . '
 			FROM peel_rubriques r
 			WHERE id = "' . intval($rubid) . '" AND etat = "1" AND r.technical_code NOT IN ("other", "iphone_content")');
 		if (num_rows($qid)) {
 			list($parent, $nom) = fetch_row($qid);
-			$tpl = $GLOBALS['tplEngine']->createTemplate('arbre_rubrique.tpl');
+			if(empty($tpl)) {
+				$tpl = $GLOBALS['tplEngine']->createTemplate('arbre_rubrique.tpl');
+			}
 			$tpl->assign('href', get_content_category_url($rubid, $nom));
 			$tpl->assign('label', $nom);
 			$nom = $tpl->fetch();
@@ -352,6 +361,7 @@ if (!function_exists('construit_arbo_rubrique')) {
 	 */
 	function construit_arbo_rubrique(&$sortie, &$preselectionne, $parent = 0, $indent = '')
 	{
+		static $tpl;
 		$sql = 'SELECT r.id, r.nom_' . $_SESSION['session_langue'] . ', r.parent_id
 			FROM peel_rubriques r
 			WHERE r.parent_id = "' . intval($parent) . '"
@@ -363,7 +373,9 @@ if (!function_exists('construit_arbo_rubrique')) {
 			} else {
 				$selectionne = ($rub['id'] == $preselectionne ? ' selected="selected"' : '');
 			}
-			$tpl = $GLOBALS['tplEngine']->createTemplate('arbo_rubrique.tpl');
+			if(empty($tpl)) {
+				$tpl = $GLOBALS['tplEngine']->createTemplate('arbo_rubrique.tpl');
+			}
 			$tpl->assign('value', intval($rub['id']));
 			$tpl->assign('is_selected', !empty($selectionne));
 			$tpl->assign('indent', $indent);

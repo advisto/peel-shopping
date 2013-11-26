@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: ipn.php 38682 2013-11-13 11:35:48Z gboussin $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -24,7 +24,7 @@ if (PAYPAL_SANDBOX) {
 } else {
 	$paypal_domain = 'ipnpb.paypal.com';
 }
-// send_email($support, 'INFOS - commande '.$_POST['item_number'], 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
+// send_email($GLOBALS['support'], 'INFOS - commande '.$_POST['item_number'], 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
 $req = 'cmd=_notify-validate';
 foreach ($_POST as $key => $value) {
 	$req .= "&" . $key . "=" . urlencode($value);
@@ -53,7 +53,7 @@ if ($r = fetch_assoc($q)) {
 		}
 		if (!$fp) {
 			// HTTP ERROR
-			send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement n\'a pas pu être pris en compte pour des raisons techniques : ' . $errno . ' - ' . $errstr . '. L\'IP du serveur qui a voulu confirmer une transaction est : ' . $_SERVER['REMOTE_ADDR']);
+			send_email($GLOBALS['support'], 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement n\'a pas pu être pris en compte pour des raisons techniques : ' . $errno . ' - ' . $errstr . '. L\'IP du serveur qui a voulu confirmer une transaction est : ' . $_SERVER['REMOTE_ADDR']);
 		} else {
 			$item_name = vb($_POST['item_name']);
 			$item_number = intval($_POST['item_number']);
@@ -69,7 +69,7 @@ if ($r = fetch_assoc($q)) {
 			while (!feof($fp)) {
 				$res = fgets ($fp, 1024);
 				// $res vaut d'abord des entêtes HTTP, puis VERIFIED ou INVALID, puis d'autres entêtes HTTP pour fermer connexion
-				if (strcmp(strip_tags($res), "VERIFIED") == 0) {
+				if (strcmp(trim(strip_tags($res)), "VERIFIED") == 0) {
 					if ($payment_status == "Completed") {
 						$peel_status = 3;
 						email_commande($item_number);
@@ -81,10 +81,12 @@ if ($r = fetch_assoc($q)) {
 						$peel_status = 6;
 					} elseif ($payment_status == "Refunded") {
 						$peel_status = 9;
+					} else {
+						send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" dans votre boutique car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\npayment_status : " . $payment_status . "\n\n" . print_r($_REQUEST, true));
 					}
-				} elseif (strcmp(strip_tags($res), "INVALID") == 0) {
+				} elseif (strcmp(trim(strip_tags($res)), "INVALID") == 0) {
 					$peel_status = 2;
-					send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé en annulé dans votre boutique car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
+					send_email($GLOBALS['support'], 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" dans votre boutique car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
 				}
 				if (!empty($peel_status)) {
 					update_order_payment_status($item_number, $peel_status, true, null, null, false, 'paypal');
@@ -94,10 +96,10 @@ if ($r = fetch_assoc($q)) {
 			fclose ($fp);
 		}
 	} else {
-		send_email($support, 'Alerte : Montant altéré de la transaction Paypal - commande ' . intval($_POST['item_number']) . '', round($r['montant'] * 100) . ' = ' . round($_POST['mc_gross'] * 100));
+		send_email($GLOBALS['support'], 'Alerte : Montant altéré de la transaction Paypal - commande ' . intval($_POST['item_number']) . '', round($r['montant'] * 100) . ' = ' . round($_POST['mc_gross'] * 100));
 	}
 } else {
-	send_email($support, 'Alerte : problème sur transaction Paypal commande non trouvée ' . intval($_POST['item_number']) . '', 'Les informations Paypal semblent incorrectes ' . "\n\n" . print_r($_REQUEST, true));
+	send_email($GLOBALS['support'], 'Alerte : problème sur transaction Paypal commande non trouvée ' . intval($_POST['item_number']) . '', 'Les informations Paypal semblent incorrectes ' . "\n\n" . print_r($_REQUEST, true));
 }
 
 ?>

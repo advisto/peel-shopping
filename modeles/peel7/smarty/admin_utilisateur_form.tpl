@@ -3,23 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 37995 2013-09-02 17:55:15Z gboussin $
-*}<form enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
+// $Id: admin_utilisateur_form.tpl 38975 2013-11-24 21:57:43Z gboussin $
+*}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id_utilisateur" value="{$id_utilisateur|str_form_value}" />
 	<input type="hidden" name="remise_valeur" value="{$remise_valeur|str_form_value}" />
 	<table class="main_table">
-		<tr>
-			<td class="entete" colspan="2"><img src="{$administrer_url}/images/liste_clients.gif" width="16" height="16" alt="" align="absmiddle" /> {$STR_ADMIN_UTILISATEURS_EDIT_TITLE}</td>
-		</tr>
 {if $id_utilisateur}
 	{if $is_webmail_module_active}
 		<tr>
@@ -32,7 +29,7 @@
 {/if}
 {if $gift_check_link}
 		<tr>
-			<td style="font-weight:bold;" colspan="2"><img src="{$wwwroot_in_admin}/images/mail.gif" />&nbsp;<a onclick="return confirm('{$STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM|filtre_javascript:true:true:true}');" href="{$gift_checks_href|escape:'html'}">{$STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK}</a></td>
+			<td style="font-weight:bold;" colspan="2"><img src="{$wwwroot_in_admin}/images/mail.gif" />&nbsp;<a data-confirm="{$STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK_CONFIRM|str_form_value}" href="{$gift_checks_href|escape:'html'}">{$STR_ADMIN_UTILISATEURS_CREATE_GIFT_CHECK}</a></td>
 		</tr>
 {/if}
 {if $societe}
@@ -45,13 +42,13 @@
 		</tr>
 {/if}
 		<tr>
-			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="http://www.infogreffe.com/infogreffe/index.do">{$STR_ADMIN_UTILISATEURS_INFOGREFFE}</a></td>
+			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="https://www.infogreffe.fr/societes/">{$STR_ADMIN_UTILISATEURS_INFOGREFFE}</a></td>
 		</tr>
 		<tr>
 			<td class="entete" colspan="2"><img src="{$administrer_url}/images/liste_clients.gif" width="16" height="16" alt="" align="absmiddle" />{$STR_ADMIN_UTILISATEURS_EDIT_TITLE} {$email}</td>
 		</tr>
 		<tr>
-			<td colspan="2"><div class="global_help">{$STR_ADMIN_UTILISATEURS_UPDATE_EXPLAIN}</div></td>
+			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_UPDATE_EXPLAIN}</div></td>
 		</tr>
 {if isset($date_insert)}
 		<tr>
@@ -79,9 +76,9 @@
 {/if}
 {if $is_annonce_module_active}
 		<tr>
-			<td class="label">{$STR_ADMIN_UTILISATEURS_ADMIN_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="title_label">{$STR_ADMIN_UTILISATEURS_ADMIN_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select name="note_administrateur">
+				<select class="form-control" name="note_administrateur">
 	{foreach array(-1, 10, 20, 30, 40, 50) as $note_admin}
 					<option value="{$note_admin|str_form_value}" {if $note_administrateur == $note_admin} selected="selected"{/if}>{if $note_admin == - 1}{$STR_NONE}{else}{$note_admin / 10|round}{/if}</option>
 	{/foreach}
@@ -89,9 +86,9 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="label">{$STR_ADMIN_UTILISATEURS_MODERATION_MORE_STRICT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="title_label">{$STR_ADMIN_UTILISATEURS_MODERATION_MORE_STRICT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select id="control_plus" name="control_plus">
+				<select class="form-control" id="control_plus" name="control_plus">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="1" {if $control_plus=='1'} selected="selected"{/if}>{$STR_YES}</option>
 					<option value="0" {if $control_plus=='0'} selected="selected"{/if}>{$STR_NO}</option>
@@ -100,17 +97,17 @@
 		</tr>
 {/if}
 		<tr>
-			<td class="label">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="email" style="width:100%" value="{$email|str_form_value}" /></td>
+			<td class="title_label">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="email" style="width:100%" value="{$email|str_form_value}" /></td>
 		</tr>
 		<tr>
-			<td class="label">{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="pseudo" style="width:100%" value="{$pseudo|str_form_value}" /></td>
+			<td class="title_label">{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{$pseudo|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select name="etat" id="etat">
+				<select class="form-control" name="etat" id="etat">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="1" {if $etat=='1'} selected="selected"{/if}>{$STR_ADMIN_ACTIVATED}</option>
 					<option value="0" {if $etat=='0'} selected="selected"{/if}>{$STR_ADMIN_DEACTIVATED}</option>
@@ -121,7 +118,7 @@
 			<td>{$STR_ADMIN_PRIVILEGE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 {if isset($priv_options)}
-				<select multiple="multiple" name="priv[]">
+				<select class="form-control" multiple="multiple" name="priv[]">
 				{foreach $priv_options as $o}
 					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
 				{/foreach}
@@ -132,7 +129,7 @@
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_ACCOUNT_MANAGER}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select name="commercial_contact_id">
+				<select class="form-control" name="commercial_contact_id">
 					<option value="0"{if empty($commercial_contact_id)} selected="selected"{/if}>{$STR_ADMIN_UTILISATEURS_NO_ACCOUNT_MANAGER}</option>
 					{foreach $util_options as $o}
 					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
@@ -145,7 +142,7 @@
 			<td>{$STR_ADMIN_GROUP}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 	{if isset($groupes_options)}
-			<select name="id_groupe">
+			<select class="form-control" name="id_groupe">
 				<option value="">-------------------------------------------</option>
 				{foreach $groupes_options as $o}
 				<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed} / - {$o.remise} %</option>
@@ -159,17 +156,17 @@
 {/if}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_CLIENT_CODE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="code_client" style="width:100%" value="{$code_client|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="code_client" style="width:100%" value="{$code_client|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_COMPANY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="societe" style="width:100%" value="{$societe|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="societe" style="width:100%" value="{$societe|str_form_value}" /></td>
 		</tr>
 {if $is_annonce_module_active}
 		<tr>
 			<td>{$STR_ACTIVITY}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<td>
-				<select id="activity" name="activity">
+				<select class="form-control" id="activity" name="activity">
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="punctual" {if $activity == "punctual"} checked="checked"{/if}>{$STR_PUNCTUAL}</option>
 					<option value="recurrent" {if $activity == "recurrent"} checked="checked"{/if}>{$STR_RECURRENT}</option>
@@ -187,117 +184,117 @@
 		</tr>
 		<tr>
 			<td>{$STR_FIRST_NAME}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="prenom" style="width:100%" value="{$prenom|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="prenom" style="width:100%" value="{$prenom|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_LAST_NAME}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="nom_famille" style="width:100%" value="{$nom_famille|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="nom_famille" style="width:100%" value="{$nom_famille|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_TELEPHONE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="tel" name="telephone" style="width:100%" value="{$telephone|str_form_value}" />{$telephone_calllink}</td>
+			<td><input type="tel" class="form-control" name="telephone" style="width:100%" value="{$telephone|str_form_value}" />{$telephone_calllink}</td>
 		</tr>
 		<tr>
 			<td>{$STR_FAX}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="tel" name="fax" style="width:100%" value="{$fax|str_form_value}" /></td>
+			<td><input type="tel" class="form-control" name="fax" style="width:100%" value="{$fax|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="tel" name="portable" style="width:100%" value="{$portable|str_form_value}" />{$portable_calllink}</td>
+			<td><input type="tel" class="form-control" name="portable" style="width:100%" value="{$portable|str_form_value}" />{$portable_calllink}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><textarea name="adresse" class="textarea-formulaire" style="width:100%" rows="6" cols="54">{$adresse}</textarea></td>
+			<td><textarea class="form-control" name="adresse" style="width:100%" rows="6" cols="54">{$adresse}</textarea></td>
 		</tr>
 		<tr>
 			<td>{$STR_ZIP}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="code_postal" style="width:100%" value="{$code_postal|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="code_postal" style="width:100%" value="{$code_postal|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_TOWN}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="ville" style="width:100%" value="{$ville|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="ville" style="width:100%" value="{$ville|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_COUNTRY}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select name="pays">
+				<select class="form-control" name="pays">
 					{$country_select_options}
 				</select>
 			</td>
 		</tr>
 		<tr>
 			<td>{$STR_NAISSANCE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="naissance" style="width:150px" class="datepicker" value="{$naissance|str_form_value}" /></td>
+			<td><input type="text" class="form-control datepicker" name="naissance" style="width:150px" value="{$naissance|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_CODES_PROMOS_PERCENT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="remise_percent" style="width:150px" value="{$remise_percent|str_form_value}" /> %</td>
+			<td><input type="text" class="form-control" name="remise_percent" style="width:150px" value="{$remise_percent|str_form_value}" /> %</td>
 		</tr>
 		<tr>
 			<td>{$STR_AVOIR}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td ><input type="text" name="avoir" style="width:150px" value="{$avoir|str_form_value}" /> {$site_symbole}</td>
+			<td ><input type="text" class="form-control" name="avoir" style="width:150px" value="{$avoir|str_form_value}" /> {$site_symbole}</td>
 		</tr>
 		<tr>
 			<td>{$STR_GIFT_POINTS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td ><input type="text" name="points" style="width:150px" value="{$points|str_form_value}" /> {$STR_GIFT_POINTS}</td>
+			<td ><input type="text" class="form-control" name="points" style="width:150px" value="{$points|str_form_value}" /> {$STR_GIFT_POINTS}</td>
 		</tr>
-		{if $is_module_vacances_active AND $vacances_type == 2}
+		{if $is_module_vacances_active && $vacances_type == 2}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_ON_HOLIDAY_SUPPLIER}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="checkbox" name="on_vacances" value="1"{if !empty($on_vacances)} checked="checked"{/if} /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_SUPPLIER_RETURN_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="on_vacances_date" style="width:150px" class="datepicker" value="{$on_vacances_date|str_form_value}" /></td>
+			<td><input type="text" class="form-control datepicker" name="on_vacances_date" style="width:150px" value="{$on_vacances_date|str_form_value}" /></td>
 		</tr>
 		{/if}
 		<tr>
 			<td>{$STR_SIREN}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="siret" style="width:100%" value="{$siret|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="siret" style="width:100%" value="{$siret|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_VAT_INTRACOM}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="intracom_for_billing" style="width:100%" value="{$intracom_for_billing|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="intracom_for_billing" style="width:100%" value="{$intracom_for_billing|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_MODULE_PREMIUM_APE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="ape" style="width:100%" value="{$ape|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="ape" style="width:100%" value="{$ape|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="url" style="width:100%" placeholder="http://" value="{$url|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="url" style="width:100%" placeholder="http://" value="{$url|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_WEBSITE_DESCRIPTION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><textarea name="description" style="width:100%" rows="10" cols="54">{$description}</textarea></td>
+			<td><textarea class="form-control" name="description" style="width:100%" rows="10" cols="54">{$description}</textarea></td>
 		</tr>
 		<tr>
 			<td>{$STR_BANK_ACCOUNT_CODE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="code_banque" style="width:100%" value="{$code_banque|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="code_banque" style="width:100%" value="{$code_banque|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_BANK_ACCOUNT_COUNTER}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="code_guichet" style="width:100%" value="{$code_guichet|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="code_guichet" style="width:100%" value="{$code_guichet|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_BANK_ACCOUNT_NUMBER}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="numero_compte" style="width:100%" value="{$numero_compte|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="numero_compte" style="width:100%" value="{$numero_compte|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_BANK_ACCOUNT_RIB}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="cle_rib" style="width:100%" value="{$cle_rib|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="cle_rib" style="width:100%" value="{$cle_rib|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_BANK_ACCOUNT_DOMICILIATION}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="domiciliation" style="width:100%" value="{$domiciliation|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="domiciliation" style="width:100%" value="{$domiciliation|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_SWIFT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="bic" style="width:100%" value="{$bic|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="bic" style="width:100%" value="{$bic|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_IBAN}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="iban" style="width:100%" value="{$iban|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="iban" style="width:100%" value="{$iban|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ORIGIN}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -315,7 +312,7 @@
 				<label>{$STR_LANGUAGE_FOR_AUTOMATIC_EMAILS}{$STR_BEFORE_TWO_POINTS}:</label></span>
 			</td>
 			<td>
-				<select id="lang" name="lang">
+				<select class="form-control" id="lang" name="lang">
 					{foreach $langues as $o}
 					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
 					{/foreach}
@@ -334,7 +331,7 @@
 		<tr>
 			<td>{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select id="favorite_category" name="favorite_category">
+				<select class="form-control" id="favorite_category" name="favorite_category">
 					{$favorite_category}
 				</select>
 			</td>
@@ -343,7 +340,7 @@
 		<tr>
 			<td>{$STR_FIRST_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select id="id_cat_1" name="id_cat_1">
+				<select class="form-control" id="id_cat_1" name="id_cat_1">
 					{$favorite_category_1}
 				</select>
 			</td>
@@ -351,7 +348,7 @@
 		<tr>
 			<td>{$STR_SECOND_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select id="id_cat_2" name="id_cat_2">
+				<select class="form-control" id="id_cat_2" name="id_cat_2">
 					{$favorite_category_2}
 				</select>
 			</td>
@@ -359,7 +356,7 @@
 		<tr>
 			<td>{$STR_THIRD_CHOICE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select id="id_cat_3" name="id_cat_3">
+				<select class="form-control" id="id_cat_3" name="id_cat_3">
 					{$favorite_category_3}
 				</select>
 			</td>
@@ -371,15 +368,15 @@
 {/if}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_CLIENT_BUDGET} {$STR_HT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="project_budget_ht" style="width:100%" value="{$project_budget_ht|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="project_budget_ht" style="width:100%" value="{$project_budget_ht|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_CLIENT_PROJECT_CHANCES}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="project_chances_estimated" style="width:100%" value="{$project_chances_estimated|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="project_chances_estimated" style="width:100%" value="{$project_chances_estimated|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><textarea name="comments" style="width:100%">{$comments}</textarea></td>
+			<td><textarea class="form-control" name="comments" style="width:100%">{$comments}</textarea></td>
 		</tr>
 		<tr>
 			<td style="width:40%;">{$STR_LOGO}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -387,14 +384,14 @@
 				{if isset($logo_src)}<img src="{$logo_src|escape:'html'}" alt="" /> <a href="{$logo_del_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="" /> {$STR_ADMIN_DELETE_LOGO}</a>{else}<input type="file" id="logo" name="logo" />{/if}
 			</td>
 		</tr>
-		{if $is_annonce_module_active AND $is_modif_mode}
+		{if $is_annonce_module_active && $is_modif_mode}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_PROJECT_PRODUCT_PROPOSED}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="project_product_proposed" style="width:100%" value="{$project_product_proposed|str_form_value}" /></td>
+			<td><input type="text" class="form-control" name="project_product_proposed" style="width:100%" value="{$project_product_proposed|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_PROJECT_DATE_FORECASTED}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" name="project_date_forecasted" style="width:100%" class="datepicker" value="{$project_date_forecasted|str_form_value}" /></td>
+			<td><input type="text" class="form-control datepicker" name="project_date_forecasted" style="width:100%" value="{$project_date_forecasted|str_form_value}" /></td>
 		</tr>
 		{/if}
 		{if $is_clients_module_active}
@@ -438,7 +435,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_CLIENT_TYPE}{$STR_BEFORE_TWO_POINTS}:</td>
 						<td>
-							<select id="type" name="type">
+							<select class="form-control" id="type" name="type">
 								<option value="">{$STR_CHOOSE}...</option>
 								<option disabled="disabled" style="text-align:center;font-weight:bold;" value="">{$STR_BUYERS}{$STR_BEFORE_TWO_POINTS}:</option>
 								<option value="importers_exporters"{if $type=='importers_exporters'} selected="selected"{/if}>{$STR_IMPORTERS_EXPORTERS}</option>
@@ -454,7 +451,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_WHO}</td>
 						<td class="left">
-							<select name="seg_who" id="seg_who">
+							<select class="form-control" name="seg_who" id="seg_who">
 								{$seg_who}
 							</select>
 						</td>
@@ -462,7 +459,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_BUY}</td>
 						<td class="left">
-							<select name="seg_buy" id="seg_buy">
+							<select class="form-control" name="seg_buy" id="seg_buy">
 								{$seg_buy}
 							</select>
 						</td>
@@ -470,7 +467,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_WANTS}</td>
 						<td class="left">
-							<select name="seg_want" id="seg_want">
+							<select class="form-control" name="seg_want" id="seg_want">
 								{$seg_want}
 							</select>
 						</td>
@@ -478,7 +475,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_THINKS}</td>
 						<td class="left">
-							<select name="seg_think" id="seg_think">
+							<select class="form-control" name="seg_think" id="seg_think">
 								{$seg_think}
 							</select>
 						</td>
@@ -486,7 +483,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_FOLLOWED_BY}</td>
 						<td class="left">
-							<select name="seg_followed" id="seg_followed">
+							<select class="form-control" name="seg_followed" id="seg_followed">
 								{$seg_followed}
 							</select>
 						</td>
@@ -494,7 +491,7 @@
 					<tr>
 						<td>{$STR_ADMIN_UTILISATEURS_JOB}{$STR_BEFORE_TWO_POINTS}:</td>
 						<td>
-							<select id="fonction" name="fonction">
+							<select class="form-control" id="fonction" name="fonction">
 								<option value="">{$STR_CHOOSE}...</option>
 								<option value="leader"{if $fonction=='leader'} selected="selected"{/if}>{$STR_LEADER}</option>
 								<option value="manager"{if $fonction=='manager'} selected="selected"{/if}>{$STR_MANAGER}</option>
@@ -508,49 +505,49 @@
 				</table>
 			</td>
 		</tr>
-		{if $is_vitrine_module_active AND $is_id_utilisateur}
+		{if $is_vitrine_module_active && $is_id_utilisateur}
 		<tr><td colspan="2"><br />{$vitrine_admin}</td></tr>
 		{/if}
 		<tr>
-			<td colspan="2"><p class="center"><input class="bouton" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>
+			<td colspan="2"><p class="center"><input class="btn btn-primary" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>
 		</tr>
 	</table>
 </form>
-{if $is_abonnement_module_active AND $is_id_utilisateur}
+{if $is_abonnement_module_active && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td class="entete">{$STR_MODULE_ABONNEMENT_ADMIN_MANAGE_SUBSCRIPTIONS}</td></tr>
 	<tr><td>{$abonnement_admin}</td></tr>
 </table>
 <br />
 {/if}
-{if !empty($add_credit_gold_user)}
+{if !empty($add_credit_gold_user) && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td>{$add_credit_gold_user}</td></tr>
 	<tr><td>{$liste_annonces_admin}</td></tr>
 </table>
 <br />
 {/if}
-{if $is_commerciale_module_active AND $is_id_utilisateur}
+{if $is_commerciale_module_active && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td class="entete">{$STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE}</td></tr>
 	<tr><td>{$form_contact_user}</td></tr>
 </table>
 <br />
 {/if}
-{if isset($phone_event)}
+{if isset($phone_event) && $is_id_utilisateur}
 <table id="phone_event" class="full_width">
 	<tr><td class="entete">{$STR_ADMIN_UTILISATEURS_MANAGE_CALLS}</td></tr>
 	<tr><td>{$phone_event}</td></tr>
 </table>
 {/if}
-{if $is_webmail_module_active AND $is_id_utilisateur}
+{if $is_webmail_module_active && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>{$list_user_mail}</td></tr>
 </table>
 <br />
 {/if}
-{if isset($download_files)}
+{if isset($download_files) && $is_id_utilisateur}
 <table id="download_files" class="full_width">
 	<tr><td>{$download_files}</td></tr>
 </table>

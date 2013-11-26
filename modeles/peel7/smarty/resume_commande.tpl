@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: resume_commande.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: resume_commande.tpl 38950 2013-11-22 20:57:51Z gboussin $
 *}<h2>{$STR_ORDER_DETAIL}</h2>
 <table class="full_width" cellpadding="3">
 	<caption></caption>
@@ -88,51 +88,57 @@
 	</tr>
 	<tr>
 		<td colspan="2">
-			<table class="caddie">
-				<tr>
-					<th>{$STR_REFERENCE}</th>
-					<th>{$STR_PRODUCT}</th>
-					<th>{$STR_SOLD_PRICE}</th>
-					<th>{$STR_QUANTITY}</th>
-					{if $is_conditionnement_module_active}<th>{$STR_CONDITIONNEMENT}</td><td class="center">{$STR_CONDITIONNEMENT_QTY}</th>{/if}
-					<th>{$STR_TOTAL_TTC}</th>
-					{if isset($STR_MODULE_PAYBACK_RETURN_REQUEST)}<th>{$STR_MODULE_PAYBACK_RETURN_REQUEST}</th>{/if}
-				</tr>
+			<div class="table-responsive">
+			<table class="table caddie table-striped table-hover">
+				<thead>
+					<tr>
+						<th>{$STR_REFERENCE}</th>
+						<th>{$STR_PRODUCT}</th>
+						<th>{$STR_SOLD_PRICE}</th>
+						<th>{$STR_QUANTITY}</th>
+						{if $is_conditionnement_module_active}<th>{$STR_CONDITIONNEMENT}</td><td class="center">{$STR_CONDITIONNEMENT_QTY}</th>{/if}
+						<th>{$STR_TOTAL_TTC}</th>
+						{if isset($STR_MODULE_PAYBACK_RETURN_REQUEST)}<th>{$STR_MODULE_PAYBACK_RETURN_REQUEST}</th>{/if}
+					</tr>
+				</thead>
+				<tbody>
 				{foreach $products_data as $pd}
-				<tr>
-					<td class="lignecaddie" align="center">{$pd.reference}</td>
-					<td class="lignecaddie" align="center">{$pd.product_text}</td>
-					<td class="lignecaddie" align="center">{$pd.prix}</td>
-					<td class="lignecaddie" align="center">{$pd.quantite}</td>
-					{if $is_conditionnement_module_active}<td class="lignecaddie" align="center">{$pd.conditionnement}</td><td class="lignecaddie" align="center">{$pd.conditionnement_qty}</td>{/if}
-					<td class="lignecaddie" align="center" style="width:71px;">{$pd.total_prix}</td>
-					{if $pd.is_form_retour}
-					<td class="lignecaddie" align="center">
-						<form method="post" action="{$pd.action}">
-							<input type="hidden" name="commandeid" value="{$pd.commandeid|intval}" />
-							<input type="hidden" name="utilisateurid" value="{$pd.utilisateurid|intval}" />
-							<input type="hidden" name="paiement" value="{$pd.paiement|str_form_value}" />
-							<input type="hidden" name="langue" value="{$pd.langue|str_form_value}" />
-							<input type="hidden" name="nom_produit" value="{$pd.nom_produit|str_form_value}" />
-							<input type="hidden" name="qte_produit" value="{$pd.quantite|str_form_value}" />
-							<input type="hidden" name="taille_produit" value="{$pd.taille_produit|str_form_value}" />
-							<input type="hidden" name="couleur_produit" value="{$pd.couleur_produit|str_form_value}" />
-							<input type="hidden" name="id_produit" value="{$pd.id_produit|intval}" />
-							<input type="hidden" name="prix_ht_produit" value="{$pd.prix_ht_produit|str_form_value}" />
-							<input type="hidden" name="prix_ttc_produit" value="{$pd.prix_ttc_produit|str_form_value}" />
-							<input type="hidden" name="tva_produit" value="{$pd.tva_produit|str_form_value}" />
-							<input type="submit" class="clicbouton" value="{$return_this_product_txt|str_form_value}" />
-						</form>
-					</td>
-					{/if}
-				</tr>
+					<tr>
+						<td class="lignecaddie center">{$pd.reference}</td>
+						<td class="lignecaddie center">{$pd.product_text}</td>
+						<td class="lignecaddie center">{$pd.prix}</td>
+						<td class="lignecaddie center">{$pd.quantite}</td>
+						{if $is_conditionnement_module_active}<td class="lignecaddie center">{$pd.conditionnement}</td><td class="lignecaddie center">{$pd.conditionnement_qty}</td>{/if}
+						<td class="lignecaddie center" style="width:71px;">{$pd.total_prix}</td>
+						{if $pd.is_form_retour}
+						<td class="lignecaddie center">
+							<form class="entryform form-inline" role="form" method="post" action="{$pd.action}">
+								<input type="hidden" name="commandeid" value="{$pd.commandeid|intval}" />
+								<input type="hidden" name="utilisateurid" value="{$pd.utilisateurid|intval}" />
+								<input type="hidden" name="paiement" value="{$pd.paiement|str_form_value}" />
+								<input type="hidden" name="langue" value="{$pd.langue|str_form_value}" />
+								<input type="hidden" name="nom_produit" value="{$pd.nom_produit|str_form_value}" />
+								<input type="hidden" name="qte_produit" value="{$pd.quantite|str_form_value}" />
+								<input type="hidden" name="taille_produit" value="{$pd.taille_produit|str_form_value}" />
+								<input type="hidden" name="couleur_produit" value="{$pd.couleur_produit|str_form_value}" />
+								<input type="hidden" name="id_produit" value="{$pd.id_produit|intval}" />
+								<input type="hidden" name="prix_ht_produit" value="{$pd.prix_ht_produit|str_form_value}" />
+								<input type="hidden" name="prix_ttc_produit" value="{$pd.prix_ttc_produit|str_form_value}" />
+								<input type="hidden" name="tva_produit" value="{$pd.tva_produit|str_form_value}" />
+								<input type="submit" class="btn btn-primary" value="{$return_this_product_txt|str_form_value}" />
+							</form>
+						</td>
+						{/if}
+					</tr>
 				{/foreach}
+				</tbody>
 			</table>
+			</div>
 				{if isset($downloadable_file_link_array)}
 			<table>
 					{foreach $downloadable_file_link_array as $item}
 				<tr>
-					<td class="lignecaddie" align="center">
+					<td class="lignecaddie center">
 						 <a href="{$item.link}">{$item.date} - {$item.name} - {$STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD}</a>
 					</td>
 				</tr>

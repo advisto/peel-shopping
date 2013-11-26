@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: devises.tpl 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: devises.tpl 38682 2013-11-13 11:35:48Z gboussin $
 *}<div class="select_currency">
-	{$STR_MODULE_DEVISES_CHOISIR_DEVISE} <select name="devise" onchange="document.location='{$url_part|htmlspecialchars|addslashes}'+this.options[this.selectedIndex].value">
+	<select class="form-control" name="devise" onchange="document.location='{$url_part|htmlspecialchars|addslashes}'+this.options[this.selectedIndex].value" aria-label="{$STR_MODULE_DEVISES_CHOISIR_DEVISE|str_form_value}">
 	{foreach $options as $o}
-	<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed}</option>
+		<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed}</option>
 	{/foreach}
-		</select>
+	</select>
 </div>

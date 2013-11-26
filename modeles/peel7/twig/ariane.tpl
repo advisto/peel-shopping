@@ -3,18 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ariane.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<div property="breadcrumb">
-	{% if ariane.href %}<a href="{{ ariane.href|escape('html') }}" title="{{ ariane.txt }}">{% endif %}<img src="{{ wwwroot }}/images/home_ariane.jpg" alt="{{ ariane.txt }}" />{% if ariane.href %}</a>{% endif %}
+// $Id: ariane.tpl 38964 2013-11-24 15:22:17Z gboussin $
+#}<div property="breadcrumb" class="breadcrumb">
+	{% if ariane %}{% if ariane.href %}<a href="{{ ariane.href|escape('html') }}" title="{{ ariane.txt }}">{% endif %}<span class="glyphicon glyphicon-home" alt="{{ ariane.txt }}"></span>{% if ariane.href %}</a>{% endif %}{% endif %}
 	{% if other.txt %}
-		&gt;
+		{% if ariane %} &gt; {% endif %}
 		{% if other.href %}<span typeof="Breadcrumb"><a property="url" href="{{ other.href|escape('html') }}" title="{{ other.txt }}"><span property="title">{% endif %}{{ other.txt }}{% if other.href %}</span></a></span>{% endif %}
 	{% endif %}
+	{% if buttons %}<div class="breadcrumb_buttons">{{ buttons }}</div><div class="clearfix"></div>{% endif %}
 </div>

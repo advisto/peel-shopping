@@ -35,4 +35,6 @@
 	border:1px solid #000;
 }
 
-
+.mousetrap {
+	background:url(../../images/blank.gif);
+}

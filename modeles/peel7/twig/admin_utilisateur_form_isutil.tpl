@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form_isutil.tpl 38009 2013-09-03 21:36:26Z gboussin $
-#}<form method="post" action="{{ action|escape('html') }}">
+// $Id: admin_utilisateur_form_isutil.tpl 38982 2013-11-25 01:02:14Z gboussin $
+#}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<input name="mode" type="hidden" value="event_comment" />
 	<center>
 		<table class="full_width" >
@@ -25,12 +25,12 @@
 			</tr>
 			<tr>
 				<td class="center">
-					<textarea name="form_event_comment" rows="5" cols="50" id="event_comment">{{ event_comment }}</textarea>
+					<textarea class="form-control" name="form_event_comment" rows="5" cols="50" id="event_comment">{{ event_comment }}</textarea>
 				</td>
 			</tr>
 			<tr>
 				<td class="center">
-					<input name="form_event_submit" type="submit" value="{{ STR_ADMIN_UTILISATEURS_SAVE_EVENT|str_form_value }}" class="bouton" /><br />
+					<input name="form_event_submit" type="submit" value="{{ STR_ADMIN_UTILISATEURS_SAVE_EVENT|str_form_value }}" class="btn btn-primary" /><br />
 					<br />
 				</td>
 			</tr>
@@ -49,6 +49,7 @@
 	</tr>
 </table>
 {% endif %}
+{% if (affiche_liste_abus) %}
 <table class="full_width" >
 	<tr>
 		<td class="entete">{{ STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT }}</td>
@@ -57,7 +58,7 @@
 		<td>{{ actions_moderations_user }}</td>
 	</tr>
 </table>
-<br />
+{% endif %}
 <table class="main_table">
 	<tr>
 		<td class="entete" colspan="{{ columns }}"><img src="{{ mini_liste_commande_src|escape('html') }}" width="22" height="19" alt="" align="absmiddle">{{ STR_ADMIN_UTILISATEURS_ORDERS_LIST }}</td>
@@ -95,9 +96,9 @@
 	{% endfor %}
 	<tr>
 		<td class="center" colspan="{{ columns }}">
-			<form method="post" action="{{ action2|escape('html') }}">
+			<form class="entryform form-inline" role="form" method="post" action="{{ action2|escape('html') }}">
 				{{ form_token }}
-				<input type="submit" name="print_all_bill" value="{{ STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS|str_form_value }}" class="bouton" />
+				<input type="submit" name="print_all_bill" value="{{ STR_ADMIN_UTILISATEURS_PRINT_ALL_BILLS|str_form_value }}" class="btn btn-primary" />
 				<input type="hidden" name="user_id" value="{{ user_id|str_form_value }}" />
 			</form>
 		</td>

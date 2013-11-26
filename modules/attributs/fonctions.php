@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 37904 2013-08-27 21:19:26Z gboussin $
+// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -201,6 +201,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 			$input_class = '';
 			$input_on_change = '';
 			$options = array();
+			$max_label_length=0;
 			$preselected_value = vb($attribut_preselect_infos[$this_nom_attribut_id]);
 			unset($type_affichage_attribut);
 			$attribut_additional_price_ttc = 0;
@@ -328,6 +329,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
 					}
+					$max_label_length = max($max_label_length, String::strlen(String::html_entity_decode_if_needed(vb($this_attribut_infos['descriptif']))));
 				}
 				$j++;
 			}
@@ -343,6 +345,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'input_type' => $input_type,
 						'input_class' => $input_class,
 						'options' => $options,
+						'max_label_length' => $max_label_length,
 						'onchange' => $input_on_change . ' update_product_price' . $save_suffix_id . '();'
 					);
 			}
@@ -369,14 +372,14 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
  * Formatte l'attribut (de type upload) du produit
  *
  * @param string $str_image : est une chaine de caractère qui peut être au format image directement ou alors peut être un texte qui contient des extraits d'images
- * @param boolean $set : definit si l'on a passé un format d'image (false) ou alors si on a passé du text contenant des images (true)
+ * @param boolean $set : definit si l'on a passé un format d'image (false) ou alors si on a passé du text contenant éventuellement des images (true)
  * @return
  */
 function display_option_image($str_image, $set = false)
 {
 	$output = '';
 	if ($set) {
-		// si $str_image est un texte contenant des images
+		// si $str_image est un texte contenant éventuellement des images
 		$inital_text = $str_image;
 		$option_tab = explode("{{", $str_image);
 		if (count($option_tab) > 1) {
@@ -384,11 +387,15 @@ function display_option_image($str_image, $set = false)
 			foreach ($option_tab as $str_img) {
 				if (($end_str = String::strpos($str_img, "}}")) !== false) {
 					$str_img = String::substr($str_img, 0, $end_str);
-					$small_option_image = thumbs($str_img, 0, 25, 'fit');
+					if (pathinfo($str_img, PATHINFO_EXTENSION) == 'pdf') {
+						$small_option_image = $GLOBALS['wwwroot'] . '/images/logoPDF_small.png';
+					} else {
+						$small_option_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($str_img, 0, 25, 'fit');
+					}
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
-							'set' => TRUE,
+							'set' => true,
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $str_img,
-							'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $small_option_image
+							'src' => $small_option_image
 						))->fetch();
 					$str_image = str_replace('{{' . $str_img . '}}', $str_img_new, $str_image);
 				}
@@ -396,11 +403,11 @@ function display_option_image($str_image, $set = false)
 		}
 		$output .= $str_image;
 	} else {
-		$small_option_image = thumbs($str_image, 0, 25, 'fit');
+		$small_option_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($str_image, 0, 25, 'fit');
 		$output .= $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
-				'set' => FALSE,
+				'set' => false,
 				'href' => $GLOBALS['repertoire_upload'] . '/' . $str_image,
-				'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $small_option_image
+				'src' => $small_option_image
 			))->fetch();
 	}
 	return $output;

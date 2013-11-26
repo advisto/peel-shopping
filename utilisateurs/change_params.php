@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 37995 2013-09-02 17:55:15Z gboussin $
+// $Id: change_params.php 38682 2013-11-13 11:35:48Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -28,7 +28,7 @@ if (!empty($_POST)) {
 	if (is_abonnement_module_active() && is_user_verified($_SESSION['session_utilisateur']['id_utilisateur'])) {
 		$disabled_verified_fields = true;
 		$original_frm = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
-		foreach(array('email', 'telephone', 'portable', 'fax', 'prenom', 'nom_famille', 'societe', 'adresse', 'code_postal', 'ville', 'pays', 'intracom_for_billing') as $this_key) {
+		foreach(array('email', 'telephone', 'portable', 'fax', 'prenom', 'nom_famille', 'societe', 'siret', 'adresse', 'code_postal', 'ville', 'pays', 'intracom_for_billing') as $this_key) {
 			$frm[$this_key] = vb($original_frm[$this_key]);
 		}
 	}
@@ -46,7 +46,7 @@ if (!empty($_POST)) {
 			WHERE id_utilisateur!='" . intval($frm['id_utilisateur']) . "' AND pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'")) > 0)) {
 		$form_error_object->add('pseudo', $GLOBALS['STR_ERR_NICKNAME_STILL']);
 	}
-	if (!verify_token('change_params', 60, false)) {
+	if (!verify_token('change_params', 120, false)) {
 		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	}
 	// Si nous sommes en France, nous avons renseigner le numéro $GLOBALS['STR_SIREN'], et cela nécessite un contrôle

@@ -3,40 +3,52 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: menu.tpl 37904 2013-08-27 21:19:26Z gboussin $
-#}<nav class="main_menu_wide">
-	<div class="main_menu">
-		<ul id="menu1">
-			{% for item in menu %}
-				<li class="menu_main_item menu_{{ item.name }}">
-					{% if item.href %}
-						<a href="{{ item.href|htmlspecialchars }}"{% if item.selected %} class="current"{% endif %}>{% if item.name == 'home' %}<img src="{{ wwwroot }}/images/home.png" alt="" style="padding: 4px 6px 0px 4px;" />{% else %}{{ item.label }}{% endif %}</a>
-					{% else %}
-						<span>{{ item.label }}</span>
-					{% endif %}
-					{% if (item.submenu) %}
-						<ul class="sousMenu">
-							{% for sitem in item.submenu %}
-								<li>
-								{% if sitem.href %}
-									<a href="{{ sitem.href|htmlspecialchars }}"{% if sitem.selected %} class="current"{% endif %}>{{ sitem.label }}</a>
-								{% else %}
-									<span{% if sitem.selected %} class="current"{% endif %}>{{ sitem.label }}</span>
-								{% endif %}
-								</li>
-							{% endfor %}
-						</ul>
-					{% endif %}
-					{{ item.submenu_global }}
-				</li>
-			{% endfor %}
-		</ul>
+// $Id: menu.tpl 38975 2013-11-24 21:57:43Z gboussin $
+#}			</div>
+		</div>
 	</div>
-</nav>
+	<div class="navbar-inner main_menu_wide">
+		<div class="container">
+			<div class="navbar-collapse collapse">
+				<nav class="main_menu">
+					<ul id="menu1" class="nav navbar-nav">
+						{% for item in menu %}
+							{% if item.label=='divider' %}
+						<li role="presentation" class="divider"></li>
+							{% else %}
+						<li class="menu_main_item menu_{{ item.name }}{% if item.selected %} active{% endif %}{% if (item.submenu) or (item.submenu_global) %} dropdown{% endif %}">
+							{% if item.href %}
+							<a id="{{ item.id|str_form_value }}" {% if (item.submenu) or (item.submenu_global) %}href="{{ item.href|htmlspecialchars }}" class="dropdown-toggle" data-toggle="dropdown" role="button"{% else %}href="{{ item.href|htmlspecialchars }}"{% endif %}>{% if item.name == 'home' %}<span class="glyphicon glyphicon-home"></span>{% else %}{{ item.label }}{% endif %}{% if (item.submenu) or (item.submenu_global) %} <span class="caret"></span>{% endif %}</a>
+								{% else %}
+							<span>{{ item.label }}</span>
+								{% endif %}
+								{% if (item.submenu) %}
+							<ul class="sousMenu dropdown-menu" role="menu" aria-labelledby="{{ item.id|str_form_value }}">
+									{% for sitem in item.submenu %}
+										{% if sitem.label=='divider' %}
+								<li role="presentation" class="divider"></li>
+										{% else %}
+								<li{% if sitem.selected %} class="active"{% endif %}>
+											{% if sitem.href %}
+									<a href="{{ sitem.href|htmlspecialchars }}">{{ sitem.label }}</a>
+											{% else %}
+									<span>{{ sitem.label }}</span>
+											{% endif %}
+								</li>
+										{% endif %}
+									{% endfor %}
+							</ul>
+								{% endif %}
+							{{ item.submenu_global }}
+						</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+				</nav>

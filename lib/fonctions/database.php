@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 38022 2013-09-04 22:45:39Z gboussin $
+// $Id: database.php 38682 2013-11-13 11:35:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -83,8 +83,8 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 		$sujet_du_mail = 'MySQL connection problem (' . mysqli_connect_errno() . '): '.mysqli_connect_error();
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL on " . $serveur_mysql . " - the user is " . $utilisateur_mysql . ". Please check if MySQL is currently launched and if the connection parameters are valid.";
 		$contenu_du_mail .= "\n\nLa page " . $_SERVER['REQUEST_URI'] . " a provoqué une erreur lors de sa tentative de connexion à MySQL situé sur le serveur " . $serveur_mysql . " - l'utilisateur est " . $utilisateur_mysql . ". Il faudrait vérifier si le serveur MySQL est actuellement lancé et si les paramètres de connexion sont valides.";
-		if (!empty($support)) {
-			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
+		if (!empty($GLOBALS['support'])) {
+			send_email($GLOBALS['support'], $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
 		}
 		if (!empty($GLOBALS['site_parameters']['display_warning_if_connection_problem'])) {
 			echo $sujet_du_mail;

@@ -3,48 +3,39 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_categorie.tpl 37987 2013-09-02 12:18:07Z gboussin $
-*}{if $is_category_promotion_module_active}
-	{$colspan = 8}
-{else}
-	{$colspan = 7}
-{/if}
-<table class="full_width" cellpadding="2">
-	<tr><td colspan="{$colspan}" class="entete">{$STR_ADMIN_CATEGORIES_LIST_TITLE}</td></tr>
-	<tr><td colspan="{$colspan}"><p><img src="{$add_src|escape:'html'}" alt="" /><a href="{$add_href|escape:'html'}">{$STR_ADMIN_CATEGORIES_CREATE}</a></p></td></tr>
-	<tr>
-		<td colspan="{$colspan}">
-			<img src="{$cat_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_ADD_SUBCATEGORY}
-		</td>
-	</tr>
-	<tr>
-		<td colspan="{$colspan}">
-			<img src="{$prod_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_ADD_PRODUCT}
-		</td>
-	</tr>
-	<tr>
-		<td colspan="{$colspan}">
-			<img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_DELETE_CATEGORY}
-		</td>
-	</tr>
-	<tr>
-		<td class="menu">{$STR_ADMIN_ACTION}</td>
-		<td class="menu">{$STR_ADMIN_ID}</td>
-		<td class="menu">{$STR_ADMIN_IMAGE}</td>
-		<td class="menu" style="text-align:left">{$STR_ADMIN_CATEGORIES}</td>
-		<td class="menu" style="text-align:left">{$STR_WEBSITE}</td>
-{if $is_category_promotion_module_active}
-		<td class="menu">{$STR_PROMOTION}</td>
-{/if}
-		<td class="menu">{$STR_ADMIN_POSITION}</td>
-		<td class="menu">{$STR_STATUS}</td>
-	</tr>
-	{$categorie_options}
-</table>
+// $Id: admin_liste_categorie.tpl 38958 2013-11-23 21:57:22Z gboussin $
+*}<div class="entete">{$STR_ADMIN_CATEGORIES_LIST_TITLE}</div>
+<div><p><img src="{$add_src|escape:'html'}" alt="" /><a href="{$add_href|escape:'html'}">{$STR_ADMIN_CATEGORIES_CREATE}</a></p></div>
+<div>
+	<img src="{$cat_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_ADD_SUBCATEGORY}
+</div>
+<div>
+	<img src="{$prod_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_ADD_PRODUCT}
+</div>
+<div>
+	<img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" class="middle" /> {$STR_ADMIN_CATEGORIES_DELETE_CATEGORY}
+</div>
+<div class="table-responsive">
+	<table class="table">
+		<tr>
+			<td class="menu">{$STR_ADMIN_ACTION}</td>
+			<td class="menu">{$STR_ADMIN_ID}</td>
+			<td class="menu">{$STR_ADMIN_IMAGE}</td>
+			<td class="menu" style="text-align:left">{$STR_ADMIN_CATEGORIES}</td>
+			<td class="menu" style="text-align:left">{$STR_WEBSITE}</td>
+	{if $is_category_promotion_module_active}
+			<td class="menu">{$STR_PROMOTION}</td>
+	{/if}
+			<td class="menu">{$STR_ADMIN_POSITION}</td>
+			<td class="menu">{$STR_STATUS}</td>
+		</tr>
+		{$categorie_options}
+	</table>
+</div>
