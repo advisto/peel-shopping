@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: display.php 39172 2013-12-04 14:19:57Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1889,11 +1889,17 @@ if (!function_exists('get_menu')) {
 		foreach($GLOBALS['main_menu_items'] as $this_main_item => $this_main_array) {
 			// On ne prend que les menus demandés pour l'affichage
 			foreach ($this_main_array as $this_main_url => $this_main_title) {
-				$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url_full]));
-				$full_match = true;
-				if ($current_menu === false && !empty($GLOBALS['menu_items'][$this_main_item])) {
-					$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url]));
+				if($this_main_item == 'other' && ((defined("IN_CATALOGUE") && !empty($_GET['catid'])) || (defined("IN_RUBRIQUE") && !empty($_GET['rubid'])))) {
+					// On ne sélectionne pas le menu "Autre" si on est dans une catégorie de produits ou une rubrique de contenu
+					$current_menu = false;
 					$full_match = false;
+				} else {
+					$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url_full]));
+					$full_match = true;
+					if ($current_menu === false && !empty($GLOBALS['menu_items'][$this_main_item])) {
+						$current_menu = (!empty($GLOBALS['menu_items'][$this_main_item][$current_url]));
+						$full_match = false;
+					}
 				}
 				$tmp_menu_item = array('name' => $this_main_item,
 						'id' => 'menu_' . String::substr(md5($this_main_item.'_'.$this_main_title.'_'.$this_main_url), 0, 4),
