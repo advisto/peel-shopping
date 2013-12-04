@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 39095 2013-12-01 20:24:10Z gboussin $
+// $Id: contact_form.tpl 39162 2013-12-04 10:37:44Z gboussin $
 #}<h1 class="page_title">{{ STR_CONTACT }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <div id="contact">

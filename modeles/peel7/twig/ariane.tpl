@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ariane.tpl 38964 2013-11-24 15:22:17Z gboussin $
+// $Id: ariane.tpl 39162 2013-12-04 10:37:44Z gboussin $
 #}<div property="breadcrumb" class="breadcrumb">
 	{% if ariane %}{% if ariane.href %}<a href="{{ ariane.href|escape('html') }}" title="{{ ariane.txt }}">{% endif %}<span class="glyphicon glyphicon-home" alt="{{ ariane.txt }}"></span>{% if ariane.href %}</a>{% endif %}{% endif %}
 	{% if other.txt %}

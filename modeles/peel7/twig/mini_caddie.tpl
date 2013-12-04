@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: mini_caddie.tpl 38981 2013-11-25 00:04:00Z gboussin $
+// $Id: mini_caddie.tpl 39162 2013-12-04 10:37:44Z gboussin $
 #}<div id="fly_to_basket_destination"></div>
 <div class="dropdown">
 	<a class="dropdown-toggle btn btn-default caddie-button" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart"></span><span class="badge minicaddie_badge_xs">{{ count_products }}</span><span class="caret"></span></a>

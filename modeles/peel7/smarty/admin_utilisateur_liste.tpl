@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 38982 2013-11-25 01:02:14Z gboussin $
+// $Id: admin_utilisateur_liste.tpl 39162 2013-12-04 10:37:44Z gboussin $
 *}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div class="row">

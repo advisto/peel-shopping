@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 38978 2013-11-24 23:18:34Z gboussin $
+// $Id: specific_field.tpl 39162 2013-12-04 10:37:44Z gboussin $
 #}{% if f.field_type == "radio" %}
 	{% for o in f.options %}
 		<input type="radio" value="{{ o.value|str_form_value }}"{% if o.issel %} checked="checked"{% endif %} id="{{ f.field_name }}#{{ o.value|str_form_value }}" name="{{ f.field_name }}[]"/> <label for="{{ f.field_name }}#{{ o.value|str_form_value }}">{{ o.name }}</label><br />

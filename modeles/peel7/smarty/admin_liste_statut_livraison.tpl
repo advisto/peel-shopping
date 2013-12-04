@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_statut_livraison.tpl 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: admin_liste_statut_livraison.tpl 39162 2013-12-04 10:37:44Z gboussin $
 *}<div class="entete">{$STR_ADMIN_STATUT_LIVRAISON_TITLE}</div>
 <p class="alert alert-info">{$STR_ADMIN_STATUT_LIVRAISON_EXPLAIN}</p>
 <p><img src="{$add_button_url|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_status_url|escape:'html'}">{$STR_ADMIN_STATUT_LIVRAISON_CREATE}</a></p>

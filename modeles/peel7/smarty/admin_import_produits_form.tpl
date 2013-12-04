@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_import_produits_form.tpl 38737 2013-11-15 21:39:12Z gboussin $
+// $Id: admin_import_produits_form.tpl 39162 2013-12-04 10:37:44Z gboussin $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" name="categories" enctype="multipart/form-data">
  	{$form_token}
 	<input type="hidden" name="action" value="import" />

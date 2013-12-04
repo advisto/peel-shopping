@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2008
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class graph
@@ -1263,7 +1263,7 @@ class graph
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class line
@@ -1379,7 +1379,7 @@ class line
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class line_hollow extends line
@@ -1422,7 +1422,7 @@ class line_hollow extends line
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class line_dot extends line_hollow
@@ -1440,7 +1440,7 @@ class line_dot extends line_hollow
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar
@@ -1551,7 +1551,7 @@ class bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar_3d extends bar
@@ -1569,7 +1569,7 @@ class bar_3d extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar_fade extends bar
@@ -1587,7 +1587,7 @@ class bar_fade extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar_outline extends bar
@@ -1625,7 +1625,7 @@ class bar_outline extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar_glass extends bar_outline
@@ -1651,7 +1651,7 @@ class bar_glass extends bar_outline
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class bar_sketch extends bar_outline
@@ -1690,7 +1690,7 @@ class bar_sketch extends bar_outline
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class candle
@@ -1718,7 +1718,7 @@ class candle
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class hlc
@@ -1745,7 +1745,7 @@ class hlc
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: open-flash-chart.php 39162 2013-12-04 10:37:44Z gboussin $
  * @access public
  */
 class point

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ariane_panier.tpl 38978 2013-11-24 23:18:34Z gboussin $
+// $Id: ariane_panier.tpl 39162 2013-12-04 10:37:44Z gboussin $
 #}<div id="ariane_panier">
 	<ul class="pager">
 		<li class="in_caddie {% if in_caddie %}current{% elseif was_in_caddie %}visited_before{% else %}disabled{% endif %}">
