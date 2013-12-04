@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact.php 38920 2013-11-21 23:29:37Z gboussin $
+// $Id: contact.php 39095 2013-12-01 20:24:10Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -32,7 +32,7 @@ if (!empty($_POST) && empty($_GET['prodid'])) {
 		$frm['sujet'] = $GLOBALS["STR_CALL_BACK_EMAIL"]; // Variable de langue à définir
 	} else {
 		// Le formulaire a été soumis, on essaie de créer un nouveau compte d'utilisateur
-		if (is_advistofr_module_active()) {
+		if (!empty($GLOBALS['site_parameters']['contact_form_short_mode'])) {
 			$form_error_object->valide_form($frm,
 				array('nom' => $GLOBALS['STR_ERR_NAME'],
 					'email' => $GLOBALS['STR_ERR_EMAIL'],
@@ -58,7 +58,7 @@ if (!empty($_POST) && empty($_GET['prodid'])) {
 		if (!$form_error_object->has_error('commande_id') && vb($frm['sujet']) == $GLOBALS['STR_CONTACT_SELECT3'] && empty($frm['commande_id'])) {
 			$form_error_object->add('commande_id', $GLOBALS['STR_ERR_ORDER_NUMBER']);
 		}
-		if (is_captcha_module_active() && !is_advistofr_module_active()) {
+		if (is_captcha_module_active()) {
 			if (empty($frm['code'])) {
 				// Pas de tentative de déchiffrement, on laisse le captcha
 				$form_error_object->add('code', $GLOBALS['STR_EMPTY_FIELD']);
@@ -94,13 +94,10 @@ if (!empty($_POST) && empty($_GET['prodid'])) {
 			$_SESSION['session_form_contact_sent']++;
 			$frm['is_ok'] = true;
 		}
-		if (!is_advistofr_module_active()) {
-			include($GLOBALS['repertoire_modele'] . "/haut.php");
-			// Si le module webmail est activé, on insere dans la table webmail la requete user
-			echo get_contact_success($frm);
-			include($GLOBALS['repertoire_modele'] . "/bas.php");
-			die();
-		}
+		include($GLOBALS['repertoire_modele'] . "/haut.php");
+		// Si le module webmail est activé, on insère dans la table webmail la requête user
+		echo get_contact_success($frm);
+		include($GLOBALS['repertoire_modele'] . "/bas.php");
 	}
 } elseif (!empty($_GET['prodid'])) {
 	$product_object = new Product($_GET['prodid'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());

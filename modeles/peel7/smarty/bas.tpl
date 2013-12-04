@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 39020 2013-11-26 00:36:36Z gboussin $
+// $Id: bas.tpl 39126 2013-12-03 16:12:18Z sdelaporte $
 *}
 							<div class="row bottom_middle">
 								<div class="col-md-12">
@@ -53,7 +53,9 @@
 						{$FOOTER}
 					</div>
 					<div class="clearfix visible-sm"></div>
-					{$rss}
+					{if isset($rss)}
+						{$rss}
+					{/if}
 					<div class="clearfix"></div>
 					<div id="flags_xs" class="pull-right visible-xs">{if !empty($flags_links_array)}{'&nbsp;'|implode:$flags_links_array}{/if}{$flags}</div>
 					{if isset($module_devise)}<div id="currencies_xs" class="pull-right visible-xs">{$module_devise}</div>{/if}

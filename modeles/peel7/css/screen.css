@@ -202,12 +202,12 @@ input.form-control[type="file"] {
 .rss_bloc {
 	margin-top: 10px;
 }
-#footer ul, .header_basicblock ul {
+#footer ul, .header_basicblock > ul {
 	list-style: none;
 	margin: 10px 0px 0px 0px;
 	padding: 2px 0 2px 0;
 }
-#footer  li, .header_basicblock li {
+#footer  li, .header_basicblock > ul > li {
 	border-left: 1px solid #DDDDDD;
 	display: inline;
 	padding: 0 0.5em 0 0.6em;
@@ -575,6 +575,8 @@ a:hover .minicaddie_md {
 .lignecaddie_produit_image img {
 	margin: 5px;
 	border: 1px solid #EEEEEE;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
 	border-radius: 3px;
 }
 .lignecaddie_quantite {
@@ -1142,6 +1144,8 @@ td.fc_detail {
 }
 .fc_image img, .sub_category img, img.product_image, div.image_grande a, .categorie_accueil img {
 	border: 1px solid #EEEEEE;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
 	border-radius: 6px;
 }
 .fc_image img:hover, .sub_category img:hover, img.product_image:hover, div.image_grande a:hover, .categorie_accueil img:hover {
@@ -1477,6 +1481,8 @@ a.carousel-control:hover, a.carousel-control:focus {
 	.navbar .nav > li > a:focus {
 		padding-top: 2px;
 		padding-bottom: 2px;
+		-webkit-border-radius: 8px;
+		-moz-border-radius: 8px;
 		border-radius: 8px;
 		border: 1px solid #AAAAAA;
 	}
@@ -1612,6 +1618,9 @@ a.carousel-control:hover, a.carousel-control:focus {
 	}
 	.formulaire-achat .form-control {
 		width: 310px;
+	}
+	.fp_produit .affiche_critere_stock {
+		max-width: 350px;
 	}
 } 
 @media (min-width: 1200px) {

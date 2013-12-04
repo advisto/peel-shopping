@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 38999 2013-11-25 15:23:25Z gboussin $
+// $Id: configuration.inc.php 39095 2013-12-01 20:24:10Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -415,39 +415,27 @@ $GLOBALS['rewritefile'] = $GLOBALS['dirroot'] . "/modules/url_rewriting/rewrite.
 
 $GLOBALS['fonctionsannonces'] = $GLOBALS['dirroot'] . "/modules/annonces/fonctions.php";
 $GLOBALS['fonctionsvitrine'] = $GLOBALS['dirroot'] . "/modules/vitrine/fonctions.php";
-// Module site de présentation peel.fr
-$GLOBALS['fonctionspeelfr'] = $GLOBALS['dirroot'] . '/modules/peelfr/fonctions.php';
-$GLOBALS['fonctionssmv'] = $GLOBALS['dirroot'] . "/modules/smv/fonctions.php";
-$GLOBALS['fonctionsoriental'] = $GLOBALS['dirroot'] . "/modules/pages-orientales/fonctions.php";
-if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_peelfr_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][1001] = '/modules/peelfr/lang/';
-	include($GLOBALS['fonctionspeelfr']);
+
+// Chargement de modules complémentaires
+if (!defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['load_site_specific_files_before_others'])) {
+	foreach($GLOBALS['site_parameters']['load_site_specific_files_before_others'] as $this_file_relative_path) {
+		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
+			include($GLOBALS['dirroot'] . $this_file_relative_path);
+		}
+	}
 }
-// Module site de présentation destockplus
-$GLOBALS['fonctionsdestockplus'] = $GLOBALS['dirroot'] . '/modules/destockplus/fonctions.php';
-if (is_destockplus_module_active()) {
-	include($GLOBALS['fonctionsdestockplus']);
+if (!defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['load_site_specific_lang_folders'])) {
+	foreach($GLOBALS['site_parameters']['load_site_specific_lang_folders'] as $this_key => $this_file_relative_path) {
+		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
+			// Ces fichiers de langue sont chargés en derniers grâce à leur clé élevée, et sont donc prioritaires
+			$GLOBALS['modules_lang_directory_array'][1000 + $this_key] = $this_file_relative_path;
+		}
+	}
 }
-// Module site de présentation algomtl
-$GLOBALS['fonctionsalgomtl'] = $GLOBALS['dirroot'] . '/modules/algomtl/fonctions.php';
-if (is_algomtl_module_active()) {
-	include($GLOBALS['fonctionsalgomtl']);
-}
-// Module site de présentation advistocom
-$GLOBALS['fonctionsadvistocom'] = $GLOBALS['dirroot'] . '/modules/advistocom/fonctions.php';
-if (is_advistocom_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][1002] = '/modules/advistocom/lang/';
-	include($GLOBALS['fonctionsadvistocom']);
-}
-// Module site de présentation advisto.fr
-$GLOBALS['fonctionsadvistofr'] = $GLOBALS['dirroot'] . '/modules/advistofr/fonctions.php';
-if (is_advistofr_module_active()) {
-	$GLOBALS['modules_lang_directory_array'][1003] = '/modules/advistofr/lang/';
-	include($GLOBALS['fonctionsadvistofr']);
-}
+
 if (is_module_url_rewriting_active()) {
 	// NB: The module has to be loaded even if LOAD_NO_OPTIONAL_MODULE is defined
-	require($rewritefile);
+	require($GLOBALS['rewritefile']);
 }
 require($GLOBALS['dirroot'] . "/lib/fonctions/url_standard.php");
 
@@ -542,8 +530,9 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 			}
 		}
 	}
+	sort($GLOBALS['admin_lang_codes']);
 }
-sort($GLOBALS['admin_lang_codes']);
+
 foreach($GLOBALS['lang_codes'] as $this_lang) {
 	// Ajout des gros drapeaux
 	if(file_exists($GLOBALS['dirroot'] . '/images/'.$this_lang.'.png')) {
@@ -1099,12 +1088,6 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_crons_module_active()) {
 		include($GLOBALS['dirroot'] . "/modules/crons/functions/emails.php");
 	}
-	if (is_destockplus_module_active()) {
-		$GLOBALS['modules_lang_directory_array'][1004] = '/modules/destockplus/lang/';
-	}
-	if (is_algomtl_module_active()) {
-		$GLOBALS['modules_lang_directory_array'][1005] = '/modules/algomtl/lang/';
-	}
 }
 if (!IN_INSTALLATION) {
 	// Initialisation de l'objet caddie si nécessaire
@@ -1140,13 +1123,12 @@ if (!defined('SKIP_SET_LANG')) {
 	// On charge les fichiers de langue des modules
 	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), false, true, false);
 }
-if ((!IN_INSTALLATION || IN_INSTALLATION >= 5) && !defined('LOAD_NO_OPTIONAL_MODULE')) {
+if ((!IN_INSTALLATION || IN_INSTALLATION >= 5) && !defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
 	// Fichiers nécessitant que les fonctions d'URL soient toutes définies et les constantes de langue
-	if (is_destockplus_module_active()) {
-		include($GLOBALS['dirroot'] . "/modules/destockplus/includes/configure.php");
-	}
-	if (is_algomtl_module_active()) {
-		include($GLOBALS['dirroot'] . "/modules/algomtl/includes/configure.php");
+	foreach($GLOBALS['site_parameters']['load_site_specific_files_after_others'] as $this_file_relative_path) {
+		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
+			include($GLOBALS['dirroot'] . $this_file_relative_path);
+		}
 	}
 }
 if (!empty($GLOBALS['installation_folder_active'])) {
@@ -1163,5 +1145,4 @@ if (!empty($_POST['password_first_hash']) && !empty($_POST['password_length']) &
 		redirect_and_die($GLOBALS['wwwroot'] . '/membre.php');
 	}
 }
-
 ?>

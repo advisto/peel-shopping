@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 38972 2013-11-24 19:26:15Z gboussin $
+// $Id: admin_haut.php 39089 2013-11-29 23:21:23Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -133,6 +133,10 @@ if (vb($GLOBALS['site_parameters']['used_uploader']) == 'fineuploader') {
 				request: {
 						endpoint: "'.$GLOBALS['wwwroot_in_admin'].'/fine_uploader.php?origin='.urlencode($_SERVER['SCRIPT_FILENAME']).'",
 						inputName: object.attr("id")
+					},
+				failedUploadTextDisplay: {
+						mode: "custom",
+						maxChars: 100
 					},
 				text: {
 					uploadButton: "' . String::str_form_value($GLOBALS["STR_DOWNLOAD"]) . '",

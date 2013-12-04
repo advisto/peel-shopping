@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: Product.php 39133 2013-12-03 17:34:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: Product.php 39133 2013-12-03 17:34:25Z sdelaporte $
  * @access public
  */
 class Product {
@@ -202,8 +202,8 @@ class Product {
 					$sql .= ", p.conditionnement";
 				}
 				$sql .= " FROM peel_produits p
-					INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-					INNER JOIN peel_categories c ON c.id = pc.categorie_id
+					LEFT JOIN peel_produits_categories pc ON pc.produit_id=p.id
+					LEFT JOIN peel_categories c ON c.id = pc.categorie_id
 					WHERE p.id = '" . intval($id) . "' " . ($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') . "
 					LIMIT 1";
 				// Le limit 1 est nécessaire car le produit peut être associé à plusieurs catégories => on ne récupère que la première catégorie trouvée

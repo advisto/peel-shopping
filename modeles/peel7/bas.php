@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 39020 2013-11-26 00:36:36Z gboussin $
+// $Id: bas.php 39126 2013-12-03 16:12:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -69,8 +69,9 @@ $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 // Si js_files pas mis dans haut.php (chargement asynchrone ou demandés entre temps dans la génération PHP)
 // Au cas où on veuille mettre les javascript en pied de <body> au lieu de head, pour plus de vitesse (mais moins conforme aux usages)
 $tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']), !empty($GLOBALS['site_parameters']['minify_js'])));
-
-$tpl->assign('rss', affiche_rss(true));
+if (is_module_rss_active()) {
+	$tpl->assign('rss', affiche_rss(true));
+}
 $tpl->assign('footer_link', affiche_contenu_html("footer_link", true));
 
 echo $tpl->fetch();

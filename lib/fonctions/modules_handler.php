@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: modules_handler.php 39118 2013-12-03 12:25:41Z gboussin $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -712,24 +712,6 @@ function is_annonce_module_active() {
 }
 
 /**
- * is_smv_module_active()
- *
- * @return
- */
-function is_smv_module_active() {
-    return file_exists($GLOBALS['fonctionssmv']);
-}
-
-/**
- * is_oriental_module_active()
- *
- * @return
- */
-function is_oriental_module_active() {
-    return file_exists($GLOBALS['fonctionsoriental']);
-}
-
-/**
  * is_abonnement_module_active()
  *
  * @return
@@ -808,51 +790,6 @@ function is_map_module_active(){
  */
 function is_carrousel_module_active() {
     return file_exists($GLOBALS['fonctionscarrousel']);
-}
-
-/**
- * is_peelfr_module_active()
- *
- * @return
- */
-function is_peelfr_module_active() {
-    return file_exists($GLOBALS['fonctionspeelfr']);
-}
-
-/**
- * is_advistofr_module_active()
- *
- * @return
- */
-function is_advistofr_module_active() {
-    return file_exists($GLOBALS['fonctionsadvistofr']);
-}
-
-/**
- * is_destockplus_module_active()
- *
- * @return
- */
-function is_destockplus_module_active() {
-    return file_exists($GLOBALS['fonctionsdestockplus']);
-}
-
-/**
- * is_algomtl_module_active()
- *
- * @return
- */
-function is_algomtl_module_active() {
-	return file_exists($GLOBALS['fonctionsalgomtl']);
-}
-
-/**
- * is_advistocom_module_active()
- *
- * @return
- */
-function is_advistocom_module_active() {
-	return file_exists($GLOBALS['fonctionsadvistocom']);
 }
 
 /**

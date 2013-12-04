@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39009 2013-11-25 19:48:10Z gboussin $
+// $Id: fonctions.php 39095 2013-12-01 20:24:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -514,7 +514,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'menu') {
 				$this_block_style = ' ';
 				foreach ($modules_array as $this_module2) {
-					if (!is_peelfr_module_active() && $this_module2['technical_code'] == 'caddie' && $this_module['location'] == 'header' && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+					if ($this_module2['technical_code'] == 'caddie' && $this_module['location'] == 'header' && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 						$this_block_style = ' style="width:80%"';
 					}
 				}
@@ -1079,6 +1079,15 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 	$already_loaded = true;
 	$js_content = '';
 	$output = '';
+	if(!empty($GLOBALS['site_parameters']['load_site_specific_js_files'])) {
+		$GLOBALS['js_files'] = array_merge(vb($GLOBALS['js_files'], array()), $GLOBALS['site_parameters']['load_site_specific_js_files']);
+	}
+	if(!empty($GLOBALS['site_parameters']['load_site_specific_js_content_array'])) {
+		$GLOBALS['js_content_array'] = array_merge(vb($GLOBALS['js_content_array'], array()), $GLOBALS['site_parameters']['load_site_specific_js_content_array']);
+	}
+	if(!empty($GLOBALS['site_parameters']['load_site_specific_js_ready_content_array'])) {
+		$GLOBALS['js_ready_content_array'] = array_merge(vb($GLOBALS['js_ready_content_array'], array()), $GLOBALS['site_parameters']['load_site_specific_js_ready_content_array']);
+	}
 	foreach($js_filenames_array as $this_js_array_name) {
 		if(!empty($GLOBALS[$this_js_array_name])) {
 			ksort($GLOBALS[$this_js_array_name]);
@@ -1676,8 +1685,11 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 				// => la surcharge des valeurs par défaut est possible
 				ksort($GLOBALS['modules_lang_directory_array']);
 				foreach($GLOBALS['modules_lang_directory_array'] as $this_directory) {
-					if(file_exists($GLOBALS['dirroot'] . $this_directory . $this_lang . ".php")) {
-						include($GLOBALS['dirroot'] . $this_directory . $this_lang . ".php");
+					if(String::strpos($this_directory, $GLOBALS['dirroot']) === false) {
+						$this_directory = $GLOBALS['dirroot'] . $this_directory;
+					}
+					if(file_exists($this_directory . $this_lang . ".php")) {
+						include($this_directory . $this_lang . ".php");
 					}
 				}
 			}
@@ -3186,6 +3198,11 @@ function update_configuration_variable($id_or_technical_code, $frm)
  * @return
  */
 function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
+	if($files_type == 'css') {
+		$this_wwwroot = get_wwwroot_cdn('repertoire_css');
+	} else {
+		$this_wwwroot = $GLOBALS['wwwroot'];
+	}
 	if($files_type == 'js') {
 		// Pour des raisons de compatibilité, on n'applique pas de minified sur les fichiers contenant ces chaines de caractères
 		$excluded_files = array('prototype.js', 'controls.js', 'effects.js');
@@ -3197,11 +3214,14 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 			$this_file = 'http:' . $this_file;
 		} elseif(String::strpos($this_file, '//') === false && String::substr($this_file, 0, 1) == '/') {
 			// Chemin absolu
-			$this_file = $GLOBALS['wwwroot'] . $this_file;
+			$this_file = $this_wwwroot . $this_file;
 		} elseif(String::strpos($this_file, '//') === false) {
 			// Chemin relatif
 			$this_file = dirname(get_current_url(false)) . $this_file;
 		} 
+		if($GLOBALS['wwwroot'] != $this_wwwroot) {
+			$this_file = str_replace($GLOBALS['wwwroot'], $this_wwwroot, $this_file);
+		}
 		$files_array[$this_key] = $this_file = String::html_entity_decode($this_file);
 		unset($skip);
 		if(!empty($excluded_files)) {
@@ -3239,8 +3259,8 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 		} elseif(!empty($filemtime)) {
 			foreach($files_to_minify_array as $this_key => $this_file) {
 				// On regarde les fichiers à fusionner pour voir si ils ont changé depuis la création du cache
-				$this_mtime = @filemtime(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
-				if(empty($this_mtime) && !file_exists(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file))) {
+				$this_mtime = @filemtime(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+				if(empty($this_mtime) && !file_exists(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file))) {
 					// Le fichier n'existe pas, on ne tient donc pas compte de ce fichier
 					unset($files_to_minify_array[$this_key]);
 				}
@@ -3262,13 +3282,13 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				if($files_type == 'css') {
 					$symlinks = array();
 					$docroot = $GLOBALS['dirroot'];
-					if(String::strlen($GLOBALS['apparent_folder'])>1) {
-						$this_wwwroot = String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1);
+					if(String::strlen($GLOBALS['apparent_folder'])>1 && String::strpos($this_wwwroot, $GLOBALS['apparent_folder']) !== false) {
+						$this_http_main_path = String::substr($this_wwwroot, 0, String::strlen($this_wwwroot) - String::strlen($GLOBALS['apparent_folder']) + 1);
 					} else {
-						$this_wwwroot = $GLOBALS['wwwroot'];
+						$this_http_main_path = $this_wwwroot;
 					}
-					$options = array('currentDir' => str_replace($this_wwwroot, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
-					$css_content = file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
+					$options = array('currentDir' => str_replace($this_http_main_path, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
+					$css_content = file_get_contents(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					if(strlen($css_content)/substr_count($css_content, "\n")>50) {
 						// Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
 						// Néanmoins on appelle quand même la classe minify qui va corriger les chemins des URL appelées dans le fichier
@@ -3276,9 +3296,9 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 					}
 					$output .= "\n\n\n".Minify_CSS::minify($css_content, $options);
 				} elseif($files_type == 'js') {
-					$output .= "\n\n\n".file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
+					$output .= "\n\n\n".file_get_contents(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 				} else {
-					$output .= "\n\n\n".file_get_contents(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $this_file));
+					$output .= "\n\n\n".file_get_contents(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 				}
 			}
 			if(!empty($output)) {
@@ -3306,7 +3326,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 			touch($file_path);
 		}
 	}
-	$files_array[] = str_replace($GLOBALS['dirroot'], $GLOBALS['wwwroot'], $file_path);
+	$files_array[] = str_replace($GLOBALS['dirroot'], $this_wwwroot, $file_path);
 	return $files_array;
 }
 
@@ -3373,11 +3393,13 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 		".$sql_additional_join."
 		WHERE p.reference LIKE '" . nohtml_real_escape_string($search) . "%' AND p.nom_" . $_SESSION['session_langue'] . "!=''" . $sql_additional_cond . "
 		ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
-	$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
-		FROM peel_produits p
-		".$sql_additional_join."
-		WHERE (p.nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($search) . "%' AND p.nom_" . $_SESSION['session_langue'] . "!=''))" . $sql_additional_cond . "
-		ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
+	if(empty($GLOBALS['site_parameters']['autocomplete_fast_partial_search'])) {
+		$queries_sql_array[] = "SELECT p.*, p.nom_" . $_SESSION['session_langue'] . " AS nom
+			FROM peel_produits p
+			".$sql_additional_join."
+			WHERE (p.nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($search) . "%' AND p.nom_" . $_SESSION['session_langue'] . "!=''))" . $sql_additional_cond . "
+			ORDER BY p.nom_" . $_SESSION['session_langue'] . " ASC";
+	}
 	foreach($queries_sql_array as $this_query_sql) {
 		if(String::strpos($this_query_sql, 'LIMIT') === false) {
 			$this_query_sql .= ' LIMIT '.intval($maxRows);

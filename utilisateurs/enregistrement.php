@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: enregistrement.php 39095 2013-12-01 20:24:10Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -34,8 +34,8 @@ if (!empty($frm)) {
 	}
 	$form_error_names['mot_passe'] = $GLOBALS['STR_ERR_PASSWORD'];
 	$form_error_object->valide_form($frm, $form_error_names);
-	if (is_destockplus_module_active() || is_algomtl_module_active()) {
-		// Le champ societe est rendu obligatoire
+	if (!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
+		// Le champ société est rendu obligatoire
 		if (empty($frm['societe'])) {
 			$form_error_object->add('societe', $GLOBALS['STR_ERR_SOCIETY']);
 		}
@@ -48,7 +48,7 @@ if (!empty($frm)) {
 			$form_error_object->add('activity', $GLOBALS['STR_ERR_ACTIVITY']);
 		}
 	}
-	// Si nous sommes en France, nous avons renseigner le numéros $GLOBALS['STR_SIREN'], nécéssite un contrôle
+	// Si nous sommes en France, nous avons renseigner le numéro $GLOBALS['STR_SIREN'], nécéssite un contrôle
 	if (isset($frm['siret']) && vb($frm['pays']) == 1 && !preg_match("#([0-9]){9,14}#", str_replace(array(' ', '.'), '', $frm['siret']))) {
 		$form_error_object->add('siret', $GLOBALS['STR_ERR_SIREN']);
 	}
@@ -86,7 +86,7 @@ if (!empty($frm)) {
 		} else {
 			if (!check_captcha($frm['code'], $frm['code_id'])) {
 				$form_error_object->add('code', $GLOBALS['STR_CODE_INVALID']);
-				// Code mal déchiffré, on en donne un autre
+				// Code mal déchiffré par l'utilisateur, on en donne un autre
 				delete_captcha(vb($frm['code_id']));
 				unset($frm['code']);
 			}

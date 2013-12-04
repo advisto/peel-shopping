@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: fonctions.php 39095 2013-12-01 20:24:10Z gboussin $
 //
 
 if (!defined('IN_PEEL')) {
@@ -59,7 +59,7 @@ function affiche_tagcloud($return_mode = false)
 		ksort($tags);
 		foreach ($tags as $key => $value) {
 			$tpl_tags[] = array(
-				'href' => $GLOBALS['wwwroot'] . '/search.php?match=1&search=' . $key,
+				'href' => get_search_url() . '?match=1&search=' . $key,
 				'value' => $value,
 				'key' => $key,
 				'level' => intval(($value-$min) / max(1, $max-$min) * 10)

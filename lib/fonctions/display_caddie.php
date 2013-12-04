@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 38908 2013-11-21 16:22:31Z gboussin $
+// $Id: display_caddie.php 39095 2013-12-01 20:24:10Z gboussin $
 // Fichier inclue uniquement sur les pages qui font appels aux fonctions ci-dessous
 if (!defined('IN_PEEL')) {
 	die();
@@ -22,10 +22,9 @@ if (!function_exists('get_caddie_content_html')) {
 	 *
 	 * @param class $form_error_object
 	 * @param mixed $mode_transport
-	 * @param boolean $display_cart_title_image
 	 * @return
 	 */
-	function get_caddie_content_html(&$form_error_object, $mode_transport, $display_cart_title_image = true)
+	function get_caddie_content_html(&$form_error_object, $mode_transport)
 	{
 		$output = '';
 		$listcadeaux_owner = '';

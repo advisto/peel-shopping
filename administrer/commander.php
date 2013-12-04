@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: commander.php 39084 2013-11-29 16:31:12Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -91,7 +91,8 @@ switch (vb($_REQUEST['mode'])) {
 			if ((isset($frm['statut_paiement']) && is_numeric($frm['statut_paiement'])) || (isset($frm['statut_livraison']) && is_numeric($frm['statut_livraison']))) {
 				for ($i = 0;$i < count($frm['id']);$i++) {
 					if (!empty($frm['change_statut' . $frm['id'][$i]])) {
-						update_order_payment_status($frm['id'][$i], vb($frm['statut_paiement']), true, vb($frm['statut_livraison']));
+						// Retourne un message de confirmation d'envoi d'email en cas d'expédition.
+						$output .= update_order_payment_status($frm['id'][$i], vb($frm['statut_paiement']), true, vb($frm['statut_livraison']));
 					}
 				}
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_STATUS_UPDATED']))->fetch();

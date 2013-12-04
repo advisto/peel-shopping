@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 38773 2013-11-17 21:01:09Z gboussin $
+// $Id: display_user_forms.php 39095 2013-12-01 20:24:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -226,8 +226,7 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('token', get_form_token_input('change_params'));
 		$tpl->assign('id_utilisateur', $_SESSION['session_utilisateur']['id_utilisateur']);
 		$tpl->assign('is_annonce_module_active', is_annonce_module_active());
-		$tpl->assign('is_destockplus_module_active', is_destockplus_module_active());
-		$tpl->assign('is_algomtl_module_active', is_algomtl_module_active());
+		$tpl->assign('add_b2b_form_inputs', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
 		$tpl->assign('cnil_txt', String::textEncode($GLOBALS['STR_CNIL']));
 		$tpl->assign('STR_CHANGE', $GLOBALS['STR_CHANGE']);
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
@@ -294,9 +293,8 @@ if (!function_exists('get_user_register_form')) {
 		$output = '';
 		$tpl = $GLOBALS['tplEngine']->createTemplate('user_register_form.tpl');
 		$tpl->assign('is_annonce_module_active', is_annonce_module_active());
-		$tpl->assign('is_destockplus_module_active', is_destockplus_module_active());
-		$tpl->assign('is_algomtl_module_active', is_algomtl_module_active());
-		$tpl->assign('is_societe_mandatory', is_destockplus_module_active() || is_algomtl_module_active());
+		$tpl->assign('add_b2b_form_inputs', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
+		$tpl->assign('is_societe_mandatory', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('email', vb($frm['email']));
 		$tpl->assign('email_error', $form_error_object->text('email'));
@@ -638,14 +636,14 @@ if (!function_exists('get_contact_form')) {
 	{
 		$output = '';
 		$tpl = $GLOBALS['tplEngine']->createTemplate('contact_form.tpl');
-		$tpl->assign('is_advistofr_module_active', is_advistofr_module_active());
+		$tpl->assign('short_form', !empty($GLOBALS['site_parameters']['contact_form_short_mode']));
 		if ($form_error_object->has_error('token')) {
 			$tpl->assign('token_error', $form_error_object->text('token'));
 		}
-		if (is_advistofr_module_active() && !empty($frm['is_ok'])) {
+		if (!empty($frm['is_ok'])) {
 			$tpl->assign('success_msg', $GLOBALS['STR_TICKET_OK']);
 		}
-		$tpl->assign('contact_info', ((!is_advistofr_module_active()) ? affiche_contenu_html("contact_page", true) : get_details_societe()));
+		$tpl->assign('contact_info', (!function_exists('get_details_societe') ? affiche_contenu_html("contact_page", true) : get_details_societe()));
 		$tpl->assign('action', get_current_url(false).(!empty($GLOBALS['main_div_id'])?'?ctx='.$GLOBALS['main_div_id']:''));
 		$tpl->assign('extra_field', get_contact_extra_field());
 		$tpl->assign('sujet_options', array(
@@ -678,7 +676,7 @@ if (!function_exists('get_contact_form')) {
 		$tpl->assign('texte_error', $form_error_object->text('texte'));
 		$tpl->assign('STR_DISPO', $GLOBALS['STR_DISPO']);
 		
-		if (is_captcha_module_active() && !is_advistofr_module_active()) {
+		if (is_captcha_module_active()) {
 			// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
 			$tpl->assign('captcha', array(
 				'validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE'],
@@ -688,7 +686,7 @@ if (!function_exists('get_contact_form')) {
 				'value' => vb($frm['code'])
 			));
 		}
-		$tpl->assign('align', (is_advistofr_module_active()) ? 'right' : 'left');
+		$tpl->assign('align', (!empty($GLOBALS['site_parameters']['contact_form_align']) ? $GLOBALS['site_parameters']['contact_form_align'] : 'left'));
 		$tpl->assign('token', get_form_token_input('user_contact'));
 		$tpl->assign('href', get_current_url(false));
 		$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);

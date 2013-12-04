@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 39019 2013-11-26 00:18:01Z gboussin $
+// $Id: display.php 39095 2013-12-01 20:24:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -316,7 +316,7 @@ if (!function_exists('affiche_ariane')) {
 				$other['href'] = $GLOBALS['wwwroot'] . '/contacts.php';
 			} elseif (defined('IN_SEARCH')) {
 				$other['txt'] = $GLOBALS['STR_SEARCH'];
-				$other['href'] = $GLOBALS['wwwroot'] . '/search.php';
+				$other['href'] = get_search_url();
 			} elseif (defined('IN_SITEMAP')) {
 				$other['txt'] = $GLOBALS['STR_SITEMAP'];
 				$other['href'] = $GLOBALS['wwwroot'] . '/sitemap.php';
@@ -654,7 +654,7 @@ if (!function_exists('get_recursive_items_display')) {
 					$tplItem['SONS'] = get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $this_item, $this_depth, $highlighted_item, $mode, $location, $max_depth_allowed, $item_max_length);
 					$tplItem['depth'] = $this_depth;
 				}
-				if (is_advistofr_module_active()) {
+				if (function_exists('get_technical_code')) {
 					$tplItem['technical_code'] = get_technical_code($this_item);
 				}
 				$tplItem['id'] = 'menu_'.substr(md5(vb($tplItem['href']) . '_' . vb($tplItem['name'])),0,8);
@@ -1254,7 +1254,7 @@ if (!function_exists('affiche_menu_recherche')) {
 	function affiche_menu_recherche($return_mode = false, $display_mode = 'header')
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('menu_recherche.tpl');
-		$tpl->assign('action', $GLOBALS['wwwroot'] . '/search.php');
+		$tpl->assign('action', get_search_url());
 		$tpl->assign('display_mode', $display_mode);
 		if (is_advanced_search_active()) {
 			$tpl->assign('advanced_search_script', get_advanced_search_script());
@@ -1287,7 +1287,6 @@ if (!function_exists('affiche_guide')) {
 	 */
 	function affiche_guide($location, $return_mode = false, $more_infos = true)
 	{
-		if (!is_advistofr_module_active()) {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('guide.tpl');
 			$tplLinks = array();
 			$tplLinks['contact'] = array('name' => 'contact', 'href' => $GLOBALS['wwwroot'] . '/contacts.php', 'label' => $GLOBALS['STR_CONTACT_INFO'], 'selected' => defined('IN_CONTACT_US'));
@@ -1306,10 +1305,6 @@ if (!function_exists('affiche_guide')) {
 			if (is_references_module_active())
 				$tplLinks['references'] = array('name' => 'references', 'href' => $GLOBALS['wwwroot'] . '/modules/references/references.php', 'label' => $GLOBALS['STR_NOS_REFERENCES'], 'selected' => defined('IN_REFERENCE'));
 			$tplLinks['access_plan'] = array('name' => 'access_plan', 'href' => $GLOBALS['wwwroot'] . '/plan_acces.php', 'label' => $GLOBALS['STR_ACCESS_PLAN'], 'selected' => defined('IN_PLAN_ACCES'));
-		} else {
-			$tpl = $GLOBALS['tplEngine']->createTemplate('guide_advistofr_module.tpl');
-			$tplLinks['contact'] = array('name' => 'contact', 'href' => $GLOBALS['wwwroot'] . '/utilisateurs/contact.php', 'label' => $GLOBALS['STR_CONTACT'], 'selected' => defined('IN_CONTACT'));
-		}
 		if(isset($GLOBALS['site_parameters']['show_on_affiche_guide']) && is_array($GLOBALS['site_parameters']['show_on_affiche_guide'])) {
 			$temp = array();
 			foreach($GLOBALS['site_parameters']['show_on_affiche_guide'] as $this_value) {
@@ -1550,7 +1545,7 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/carrousel.js';
 			$GLOBALS['js_files'][-19] = $GLOBALS['wwwroot'] . '/modules/carrousel/js/jquery.anythingslider.min.js';
 		}
-		if (is_advistofr_module_active()) {
+		if (!empty($_GET['rubid'])) {
 			$rub_query = query("SELECT technical_code
 				FROM peel_rubriques r
 				WHERE r.id ='" . intval(vn($_GET['rubid'])) . "'");
@@ -1580,7 +1575,6 @@ if (!function_exists('getHTMLHead')) {
 				$GLOBALS['js_files'][-48] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/jquery-ui-1.8.16.custom.min.js';
 				$GLOBALS['js_files'][-47] = $GLOBALS['wwwroot'] . '/modules/photodesk/js/photodesk.js';
 			}
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/advistofr/advistofr.js';
 		}
 		// Librairie pour activer le zoom sur les produits
 		if (is_welcome_ad_module_active()) {
@@ -1590,9 +1584,6 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['js_files'][-70] = $GLOBALS['wwwroot'] . '/lib/js/jquery.jqzoom-core-pack.js';
 		} elseif ($GLOBALS['site_parameters']['zoom'] == 'cloud-zoom' && $GLOBALS['site_parameters']['enable_jquery'] == 1) {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/cloud-zoom.1.0.2.js';
-		}
-		if (is_destockplus_module_active() || is_algomtl_module_active() || is_advistocom_module_active()) {
-			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']) . '/menu.js';
 		}
 		if (is_module_forum_active() && $_SESSION['session_langue'] == 'fr') {
 			$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/modules/forum/forum.js';

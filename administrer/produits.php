@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 38695 2013-11-14 14:20:16Z sdelaporte $
+// $Id: produits.php 39133 2013-12-03 17:34:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -450,7 +450,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 			if (!empty($frm['categories'])) {
 				$prod_href = get_product_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], $frm['categories'][0], $GLOBALS['categorie_names_by_id'][$frm['categories'][0]]);
 			} else {
-				$prod_href = '';
+				// Le lien du produit est généré sans categorie. Le produit sera accessible depuis ce lien.
+				$prod_href = get_product_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], 0, '');
 			}
 			$sql_nb_view = query("SELECT nb_view
 				FROM peel_produits

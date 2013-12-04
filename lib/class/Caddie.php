@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: Caddie.php 39084 2013-11-29 16:31:12Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 38682 2013-11-13 11:35:48Z gboussin $
+ * @version $Id: Caddie.php 39084 2013-11-29 16:31:12Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -1152,7 +1152,7 @@ class Caddie {
 			if (!empty($this->commande_id) && $this->commande_id != $order_id) {
 				// On annule la commande précédemment liée à ce caddie car on vient de créer une nouvelle commande lui correspondant
 				// SAUF si elle est déjà payée (=> 3ème argument à false)
-				update_order_payment_status($this->commande_id, 6, false);
+				echo update_order_payment_status($this->commande_id, 6, false);
 			}
 			// On retire les points utilisés lors de la commande.
 			// NB : Cette gestion n'utilise pas "total_points" de peel_commandes, qui est géré ailleurs et concerne les points gagnés lors de la commande

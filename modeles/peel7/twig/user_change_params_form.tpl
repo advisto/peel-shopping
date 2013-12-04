@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 38974 2013-11-24 21:18:46Z gboussin $
+// $Id: user_change_params_form.tpl 39095 2013-12-01 20:24:10Z gboussin $
 #}<h1 class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
@@ -44,7 +44,7 @@
 		<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="societe" id="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ societe_error }}
 	</div>
-{% if is_destockplus_module_active or is_algomtl_module_active }}
+{% if add_b2b_form_inputs }}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>

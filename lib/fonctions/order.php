@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 39005 2013-11-25 17:27:35Z gboussin $
+// $Id: order.php 39093 2013-11-29 23:42:52Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -116,6 +116,7 @@ function get_bill_number($bill_number_format, $id, $generate_bill_number_if_empt
  */
 function update_order_payment_status($order_id, $status_or_is_payment_validated, $allow_update_paid_orders = true, $id_statut_livraison = null, $delivery_tracking = null, $no_stock_decrement_already_done = false, $payment_technical_code=null)
 {
+	$output = '';
 	$sql_set_array = array();
 	if ($status_or_is_payment_validated === true) {
 		// Commande payée
@@ -284,9 +285,10 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			query("UPDATE peel_commandes
 				SET e_datetime = '" . date('Y-m-d H:i:s', time()) . "'
 				WHERE id = '" . intval($order_id) . "'");
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande['email'])))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande['email'])))->fetch();
 		}
 	}
+	return $output;
 }
 
 /**
@@ -341,6 +343,7 @@ function put_session_commande(&$frm)
  */
 function create_or_update_order(&$order_infos, &$articles_array)
 {
+	$output = '';
 	// "nom du champ dans la BDD" => "nom du champ dans $order_infos"
 	$name_compatibility_array = array(
 		"paiement" => "payment_technical_code"
@@ -777,11 +780,12 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	// Tout est maintenant en BDD, sauf les statuts qui n'ont pas été modifiés
 	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
 	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
-	update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
+	$output .= update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
 	if(is_nexway_module_active()) {
 		include_once($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 		Nexway::create_order($order_infos, $articles_array);
 	}
+	// On n'affiche pas le contenu de $output
 	return $order_id;
 }
 

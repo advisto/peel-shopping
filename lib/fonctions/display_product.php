@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 39006 2013-11-25 17:38:06Z gboussin $
+// $Id: display_product.php 39107 2013-12-02 16:44:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1117,6 +1117,7 @@ if (!function_exists('get_subcategories_table')) {
 			$cats = array();
 			$j = 0;
 			while ($cat = fetch_assoc($qid_c)) {
+				$tmpCat = array();
 				$tmpCat['href'] = get_product_category_url($cat['id'], $cat['nom_' . $_SESSION['session_langue']]);
 				$tmpCat['name'] = $cat['nom_' . $_SESSION['session_langue']];
 				$tmpCat['i'] = $j + 1;

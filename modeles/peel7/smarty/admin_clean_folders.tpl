@@ -10,9 +10,9 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_clean_folders.tpl 39028 2013-11-26 08:45:42Z gboussin $
+// $Id: admin_clean_folders.tpl 39108 2013-12-03 09:16:20Z gboussin $
 *}<div class="center">
-	<a class="btn btn-primary" href="{$wwwroot}/?update=1">CSS{$STR_BEFORE_TWO_POINTS}: {$STR_REFRESH}</a>
+	<a class="btn btn-primary" href="{$wwwroot}/?update=1">CSS &amp; Javascript {$STR_BEFORE_TWO_POINTS}: {$STR_REFRESH}</a>
 </div>
 <hr />
 <form class="entryform form-inline" role="form" method="post" action="{$action_thumbs|escape:'html'}">

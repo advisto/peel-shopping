@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: index.php 39095 2013-12-01 20:24:10Z gboussin $
 /*! \mainpage PEEL Shopping 7.1.0 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
@@ -31,7 +31,7 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('index.tpl');
 if (is_module_vacances_active() && get_vacances_type() == 1) {
 	$tpl->assign('error', vb($GLOBALS['site_parameters']['module_vacances_client_msg_' . $_SESSION['session_langue']]));
 }
-if (is_advistofr_module_active()) {
+if (function_exists('get_home_title')) {
 	$tpl->assign('home_title', get_home_title());
 }
 

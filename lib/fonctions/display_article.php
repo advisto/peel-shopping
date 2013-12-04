@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 38983 2013-11-25 09:01:28Z gboussin $
+// $Id: display_article.php 39095 2013-12-01 20:24:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -242,7 +242,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 				'modify_content_category_txt' => $GLOBALS['STR_MODIFY_CONTENT_CATEGORY']
 			));
 		}
-		if (is_advistofr_module_active() && !empty($rubid)) {
+		if (!empty($rubid) && !empty($GLOBALS['site_parameters']['show_special_on_content_category'])) {
 			$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
 				FROM peel_articles p
 				INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id AND pc.rubrique_id = '" . intval($rubid) . "'

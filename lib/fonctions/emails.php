@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: emails.php 39046 2013-11-26 22:11:03Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -200,6 +200,9 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 					$result = mail($this_email, '=?' . String::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_content, $mail_header);
 				} else {
 					$result = mail($this_email, $mail_subject, $mail_content, $mail_header);
+				}
+				if(!empty($GLOBALS['site_parameters']['trigger_user_notice_email_sent']) && empty($GLOBALS['display_errors'])) {
+					trigger_error('Email sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
 				}
 			}else{
 				trigger_error('Email invalide : ' . $this_email, E_USER_NOTICE);

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 38734 2013-11-15 19:47:31Z gboussin $
+// $Id: utilisateurs.php 39095 2013-12-01 20:24:10Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -739,8 +739,7 @@ function afficher_formulaire_utilisateur(&$frm)
 		$tpl->assign('download_files', affiche_liste_telechargement($frm['id_utilisateur']));
 	}
 	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
-	$tpl->assign('is_destockplus_module_active', is_destockplus_module_active());
-	$tpl->assign('is_algomtl_module_active', is_algomtl_module_active());
+	$tpl->assign('add_b2b_form_inputs', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
 	$tpl->assign('fonction', vb($frm['fonction']));
 	$tpl->assign('type', vb($frm['type']));
 	$tpl->assign('client_note', intval(getClientNote($frm)));
@@ -1142,9 +1141,6 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	if (isset($frm['offre_commercial']) && $frm['offre_commercial'] != '') {
 		$sql_where_array[] = 'u.commercial="' . nohtml_real_escape_string($frm['offre_commercial']) . '"';
 	}
-	if (!empty($frm['priv'])) {
-		$sql_where_array[] = 'u.priv="' . nohtml_real_escape_string(vb($frm['priv'])) . '"';
-	}
 	if (!empty($frm['valid'])) {
 		$sql_where_array[] = 'u.valid ="' . nohtml_real_escape_string($frm['valid']) . '"';
 	}
@@ -1339,7 +1335,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$sql_where_array[] = "(u.code_client LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.email LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.ville LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.nom_famille LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.code_postal LIKE '%" . nohtml_real_escape_string($cle) . "%') ";
 	}
 	if (!empty($priv) && $priv == "newsletter") {
-		$sql_where_array[] = "u.newsletter = '1'";
+		$sql_where_array[] = "(u.priv = '" . nohtml_real_escape_string($priv) . "' OR u.newsletter = '1')";
 	} elseif (!empty($priv)) {
 		$sql_where_array[] = "u.priv = '" . nohtml_real_escape_string($priv) . "'";
 	}
@@ -1496,7 +1492,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl->assign('seg_think', formSelect('seg_think', tab_think(), vb($_GET['seg_think'])));
 		$tpl->assign('seg_followed', formSelect('seg_followed', tab_followed(), vb($_GET['seg_followed'])));
 
-		$tpl->assign('is_destockplus_module_active', is_destockplus_module_active());
+		$tpl->assign('add_b2b_form_inputs', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
 		$tpl->assign('is_abonnement_module_active', is_abonnement_module_active());
 		if (is_abonnement_module_active()) {
 			$tpl->assign('abonne', formSelect('abonne', tab_followed_abonne(), vb($_GET['abonne'])));

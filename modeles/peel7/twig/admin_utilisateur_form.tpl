@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 38963 2013-11-24 14:32:35Z gboussin $
+// $Id: admin_utilisateur_form.tpl 39153 2013-12-03 22:44:08Z gboussin $
 #}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -308,9 +308,7 @@
 		{% endfor %}
 		{% if langues|length>1 %}
 		<tr>
-			<td>
-				<label>{{ STR_LANGUAGE_FOR_AUTOMATIC_EMAILS }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			</td>
+			<td>{{ STR_LANGUAGE_FOR_AUTOMATIC_EMAILS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<select class="form-control" id="lang" name="lang">
 					{% for o in langues %}

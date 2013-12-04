@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: caddie_affichage.php 39095 2013-12-01 20:24:10Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_caddie.php");
 
@@ -114,7 +114,7 @@ if (!empty($redirect_next_step)) {
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['caddie_affichage_page_columns_count'];
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 
-echo get_caddie_content_html($form_error_object, vn($GLOBALS['site_parameters']['mode_transport']), !is_peelfr_module_active());
+echo get_caddie_content_html($form_error_object, vn($GLOBALS['site_parameters']['mode_transport']));
 
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 

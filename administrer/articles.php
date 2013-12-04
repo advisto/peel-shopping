@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 39015 2013-11-25 22:20:07Z gboussin $
+// $Id: articles.php 39095 2013-12-01 20:24:10Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -271,7 +271,6 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		$tpl->assign('rubrique_error', $form_error_object->text('rubriques'));
 		$tpl->assign('etat', $frm['etat']);
 		$tpl->assign('position', $frm['position']);
-		$tpl->assign('is_advistofr_module_active', is_advistofr_module_active());
 		$tpl->assign('on_special', $frm['on_special']);
 		$tpl->assign('technical_code', $frm['technical_code']);
 

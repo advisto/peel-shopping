@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: fine_uploader.php 39089 2013-11-29 23:21:23Z gboussin $
 
 include("configuration.inc.php");
 
@@ -30,7 +30,7 @@ if (!empty($GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
 }
 
 // Specify max file size in bytes.
-$uploader->sizeLimit = $GLOBALS['site_parameters']['uploaded_file_max_size'];
+$uploader->sizeLimit = min($uploader->toBytes(ini_get('upload_max_filesize')), $uploader->toBytes(ini_get('post_max_size')), $GLOBALS['site_parameters']['uploaded_file_max_size']);
 
 // Specify the input name set in the javascript.
 $uploader->inputName = key($_FILES);

@@ -8,7 +8,7 @@
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 39022 2013-11-26 00:39:30Z gboussin $
+# $Id: .htaccess 39094 2013-12-01 19:06:01Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -119,7 +119,7 @@ AddDefaultCharset UTF-8
 
 <ifModule mod_headers.c>
 	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc|woff|eot|svg|ttf)$">
-		# Mise en cache par le navigateur pendant 24h par défaut des images, CSS, Javascript.
+		# Mise en cache par le navigateur pendant 7j par défaut des images, CSS, Javascript.
 		Header set Cache-Control "max-age=604800, public"
 	</FilesMatch>
 </ifModule>
@@ -153,13 +153,15 @@ AddDefaultCharset UTF-8
 	# DEBUT DE EDITION SUR MESURE
 	# Redirection des demandes qui auraient dues être faites via un CDN
 	# RewriteCond %{HTTP_HOST} !^cdn(.*)\.(.*)\.(.*)$
-	# RewriteCond %{REQUEST_URI} ^(images|upload|icones|modeles/images)/(.*)$
-	# RewriteRule ^(.*)$ http://#######/$1 [R=301,L,QSA]
+	# RewriteCond %{REQUEST_URI} ^(upload|icones|modeles/images)/(.*)$
+	# RewriteRule ^(.*)$ http://cdn#######/$1 [R=301,L,QSA]
 	# Redirection des demandes qui n'auraient pas dues être faites via un CDN
 	# RewriteCond %{HTTP_HOST} ^cdn(.*)\.(.*)\.(.*)$
-	# RewriteCond %{REQUEST_URI} !^(images|upload|icones|modeles/images)/(.*)$
-	# RewriteRule ^(.*)$ http://cdn#######/$1 [R=301,L,QSA]
+	# RewriteCond %{REQUEST_URI} !^(upload|icones|modeles/images)/(.*)$
+	# RewriteRule ^(.*)$ http://www#######/$1 [R=301,L,QSA]
 	# FIN DE EDITION SUR MESURE
+
+	RewriteRule ^(images/|upload|icones|modeles/images)/ - [L]
 
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$

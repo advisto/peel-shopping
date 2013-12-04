@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 38682 2013-11-13 11:35:48Z gboussin $
+// $Id: change_params.php 39095 2013-12-01 20:24:10Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -57,7 +57,7 @@ if (!empty($_POST)) {
 		// Ce champ n'est défini que si le site est en plusieurs langues
 		$form_error_object->add('lang', $GLOBALS['STR_EMPTY_FIELD']);
 	}
-	if (is_destockplus_module_active() || is_algomtl_module_active()) {
+	if (!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 		// Le champ societe est rendu obligatoire
 		if (empty($frm['societe'])) {
 			$form_error_object->add('societe', $GLOBALS['STR_ERR_SOCIETY']);

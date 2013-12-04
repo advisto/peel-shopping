@@ -13,7 +13,7 @@ class FineUploader {
     protected $uploadName;
 
     function __construct(){
-        $this->sizeLimit = $this->toBytes(ini_get('upload_max_filesize'));
+        $this->sizeLimit = min($this->toBytes(ini_get('upload_max_filesize')), $this->toBytes(ini_get('post_max_size')));
     }
 
     /**
@@ -57,7 +57,7 @@ class FineUploader {
         }
 
         if (!is_writable($uploadDirectory)){
-            return array('error' => "Server error. Uploads directory ".$uploadDirectory." isn't writable or executable.");
+            return array('error' => sprintf($GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_NOK"], $uploadDirectory));
         }
 
         if(!isset($_SERVER['CONTENT_TYPE'])) {
@@ -84,7 +84,7 @@ class FineUploader {
         // Validate file size
 
         if ($size == 0){
-            return array('error' => 'File is empty.');
+            return array('error' => $GLOBALS["STR_FILE_EMPTY"]);
         }
 
         if ($size > $this->sizeLimit){
@@ -256,7 +256,7 @@ class FineUploader {
      * Converts a given size with units to bytes.
      * @param string $str
      */
-    protected function toBytes($str){
+    function toBytes($str){
         $val = trim($str);
         $last = strtolower($str[strlen($str)-1]);
         switch($last) {

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 39023 2013-11-26 00:43:48Z gboussin $
+// $Id: search.php 39095 2013-12-01 20:24:10Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -121,7 +121,7 @@ $search_attribute_tab = array('marque' => array('table' => 'marques', 'join' => 
 
 $tpl_f = $GLOBALS['tplEngine']->createTemplate('search_form.tpl');
 $tpl_f->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
-$tpl_f->assign('action', $GLOBALS['wwwroot']. '/search.php');
+$tpl_f->assign('action', get_search_url());
 $tpl_f->assign('value', $search);
 $tpl_f->assign('match', $match);
 $tpl_f->assign('search', String::strtoupper($real_search));
