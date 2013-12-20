@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: Product.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 39162 2013-12-04 10:37:44Z gboussin $
+ * @version $Id: Product.php 39392 2013-12-20 11:08:42Z gboussin $
  * @access public
  */
 class Product {
@@ -143,12 +143,12 @@ class Product {
 						, p.technical_code
 						, p.reference
 						, p.ean_code
-						, p.nom_" . $_SESSION['session_langue'] . " AS name
-						, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
-						, p.description_" . $_SESSION['session_langue'] . " AS description
-						, p.meta_titre_" . $_SESSION['session_langue'] . " AS meta_titre
-						, p.meta_desc_" . $_SESSION['session_langue'] . " AS meta_desc
-						, p.meta_key_" . $_SESSION['session_langue'] . " AS meta_key
+						, p.nom_" . $lang . " AS name
+						, p.descriptif_" . $lang . " AS descriptif
+						, p.description_" . $lang . " AS description
+						, p.meta_titre_" . $lang . " AS meta_titre
+						, p.meta_desc_" . $lang . " AS meta_desc
+						, p.meta_key_" . $lang . " AS meta_key
 						, p.on_estimate
 						, p.prix
 						, p.prix_achat
@@ -197,7 +197,7 @@ class Product {
 						, p.position
 						, p.extra_link
 						, c.id AS categorie_id
-						, c.nom_" . $_SESSION['session_langue'] . " AS categorie";
+						, c.nom_" . $lang . " AS categorie";
 				if (is_conditionnement_module_active()) {
 					$sql .= ", p.conditionnement";
 				}
@@ -226,25 +226,25 @@ class Product {
 			}
 		}
 		if (empty($this->name)) {
-			$name = 'nom_' . $_SESSION['session_langue'];
+			$name = 'nom_' . $lang;
 			$this->name = String::html_entity_decode_if_needed(vb($this->$name));
 		} else {
 			$this->name = String::html_entity_decode_if_needed($this->name);
 		}
 		if (empty($this->descriptif)) {
-			$descriptif = 'descriptif_' . $_SESSION['session_langue'];
+			$descriptif = 'descriptif_' . $lang;
 			$this->descriptif = String::html_entity_decode_if_needed(vb($this->$descriptif));
 		} else {
 			$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
 		}
-		correct_output($this->descriptif, false, 'html');
+		correct_output($this->descriptif, false, 'html', $lang);
 		if (empty($this->description)) {
-			$description = 'description_' . $_SESSION['session_langue'];
+			$description = 'description_' . $lang;
 			$this->description = String::html_entity_decode_if_needed(vb($this->$description));
 		} else {
 			$this->description = String::html_entity_decode_if_needed($this->description);
 		}
-		correct_output($this->description, false, 'html');
+		correct_output($this->description, false, 'html', $lang);
 		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
 		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, true, false, true);
 		foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
@@ -338,7 +338,7 @@ class Product {
 	{
 		if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
 			if (empty($this->categorie_id) || empty($this->categorie)) {
-				$query = query("SELECT p.nom_" . $_SESSION['session_langue'] . ", pc.categorie_id, r.nom_" . $_SESSION['session_langue'] . " AS categorie
+				$query = query("SELECT p.nom_" . $this->lang . ", pc.categorie_id, r.nom_" . $this->lang . " AS categorie
 					FROM peel_produits p
 					INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
 					INNER JOIN peel_categories r ON r.id = pc.categorie_id
@@ -346,7 +346,7 @@ class Product {
 				if ($prod = fetch_assoc($query)) {
 					$this->categorie_id = $prod['categorie_id'];
 					$this->categorie = $prod['categorie'];
-					$this->name = $prod['nom_' . $_SESSION['session_langue']];
+					$this->name = $prod['nom_' . $this->lang];
 				}
 			}
 			if (!empty($this->categorie_id)) {
@@ -385,16 +385,16 @@ class Product {
 	function get_possible_colors()
 	{
 		static $possible_colors;
-		$cache_id = $this->id . '-' . $_SESSION['session_langue'];
+		$cache_id = $this->id . '-' . $this->lang;
 		if (!isset($possible_colors[$cache_id])) {
 			$possible_colors[$cache_id] = array();
-			$query = query('SELECT pc.couleur_id, c.nom_' . $_SESSION['session_langue'] . '
+			$query = query('SELECT pc.couleur_id, c.nom_' . $this->lang . '
 				FROM peel_produits_couleurs pc
 				INNER JOIN peel_couleurs c ON c.id = pc.couleur_id
 				WHERE pc.produit_id  = "' . intval($this->id) . '"
-				ORDER BY c.position ASC, c.nom_' . $_SESSION['session_langue'] . ' ASC');
+				ORDER BY c.position ASC, c.nom_' . $this->lang . ' ASC');
 			while ($result = fetch_assoc($query)) {
-				$possible_colors[$cache_id][$result['couleur_id']] = $result['nom_' . $_SESSION['session_langue']];
+				$possible_colors[$cache_id][$result['couleur_id']] = $result['nom_' . $this->lang];
 			}
 		}
 		return $possible_colors[$cache_id];
@@ -436,21 +436,21 @@ class Product {
 	{
 		static $possible_sizes;
 		$sizes_array = array();
-		if (!isset($possible_sizes[$this->id . '-' . $_SESSION['session_langue']])) {
-			$possible_sizes[$this->id . '-' . $_SESSION['session_langue']] = array();
+		if (!isset($possible_sizes[$this->id . '-' . $this->lang])) {
+			$possible_sizes[$this->id . '-' . $this->lang] = array();
 			$query = query('SELECT t.*, pt.taille_id
 				FROM peel_produits_tailles pt
 				INNER JOIN peel_tailles t ON t.id=pt.taille_id
 				WHERE pt.produit_id="' . intval($this->id) . '"
-				ORDER BY t.position ASC, t.prix ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC');
+				ORDER BY t.position ASC, t.prix ASC, t.nom_' . $this->lang . ' ASC');
 			while ($result = fetch_assoc($query)) {
-				$possible_sizes[$this->id . '-' . $_SESSION['session_langue']][] = $result;
+				$possible_sizes[$this->id . '-' . $this->lang][] = $result;
 			}
 		}
-		if (!empty($possible_sizes) && !empty($possible_sizes[$this->id . '-' . $_SESSION['session_langue']])) {
-			foreach($possible_sizes[$this->id . '-' . $_SESSION['session_langue']] as $result) {
+		if (!empty($possible_sizes) && !empty($possible_sizes[$this->id . '-' . $this->lang])) {
+			foreach($possible_sizes[$this->id . '-' . $this->lang] as $result) {
 				if ($return_mode == 'name') {
-					$sizes_array[$result['taille_id']] = $result['nom_' . $_SESSION['session_langue']];
+					$sizes_array[$result['taille_id']] = $result['nom_' . $this->lang];
 				} else {
 					if ($reseller_mode && $result["prix_revendeur"] != 0) {
 						$original_price = $result["prix_revendeur"] / (1 + $this->tva / 100);
@@ -458,7 +458,7 @@ class Product {
 						$original_price = $result["prix"] / (1 + $this->tva / 100);
 					}
 					$final_price = $original_price * (1 - $this->get_all_promotions_percentage($reseller_mode, $user_promotion_percentage) / 100);
-					$result['name'] = $result['nom_' . $_SESSION['session_langue']];
+					$result['name'] = $result['nom_' . $this->lang];
 					$result['row_original_price'] = $this->format_prices($original_price, $with_taxes, false, false, false);
 					$result['row_final_price'] = $this->format_prices($final_price, $with_taxes, false, false, false);
 					$result['final_price_formatted'] = $this->format_prices($final_price, $with_taxes, false, $format, $add_tax_type_text);
@@ -546,11 +546,11 @@ class Product {
 	function get_product_brands()
 	{
 		$brands_array = array();
-		$query = query('SELECT pm.nom_' . $_SESSION['session_langue'] . '
+		$query = query('SELECT pm.nom_' . $this->lang . '
 			FROM peel_marques pm
 			WHERE pm.id="' . intval($this->id_marque) . '"');
 		while ($result = fetch_assoc($query)) {
-			$brands_array[$this->id_marque] = $result['nom_' . $_SESSION['session_langue']];
+			$brands_array[$this->id_marque] = $result['nom_' . $this->lang];
 		}
 		return $brands_array;
 	}
@@ -563,12 +563,12 @@ class Product {
 	function get_product_options()
 	{
 		$options_array = array();
-		$query = query('SELECT pa.descriptif_' . $_SESSION['session_langue'] . '
+		$query = query('SELECT pa.descriptif_' . $this->lang . '
 			FROM peel_attributs pa
 			INNER JOIN peel_produits_attributs ppa ON ppa.attribut_id = pa.id
 			WHERE ppa.produit_id = ' . intval($this->id));
 		while ($result = fetch_assoc($query)) {
-			$options_array[] = $result['descriptif_' . $_SESSION['session_langue']];
+			$options_array[] = $result['descriptif_' . $this->lang];
 		}
 		return $options_array;
 	}
@@ -988,13 +988,13 @@ class Product {
 	function get_possible_categories()
 	{
 		$categories_array = array();
-		$query = query('SELECT pc.categorie_id, c.nom_' . $_SESSION['session_langue'] . '
+		$query = query('SELECT pc.categorie_id, c.nom_' . $this->lang . '
 			FROM peel_produits_categories pc
 			INNER JOIN peel_categories c ON c.id = pc.categorie_id
 			WHERE pc.produit_id  = "' . intval($this->id) . '"
-			ORDER BY c.position ASC, c.nom_' . $_SESSION['session_langue'] . ' ASC');
+			ORDER BY c.position ASC, c.nom_' . $this->lang . ' ASC');
 		while ($result = fetch_assoc($query)) {
-			$categories_array[$result['categorie_id']] = $result['nom_' . $_SESSION['session_langue']];
+			$categories_array[$result['categorie_id']] = $result['nom_' . $this->lang];
 		}
 		return $categories_array;
 	}

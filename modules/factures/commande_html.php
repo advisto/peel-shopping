@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an		|
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: commande_html.php 39392 2013-12-20 11:08:42Z gboussin $
 include("../../configuration.inc.php");
 
 if (!is_module_factures_html_active() || is_user_bot()) {
@@ -127,7 +127,10 @@ if ($commande = fetch_object($qid_commande)) {
 		$reference = $this_ordered_product["reference"];
 		$prix_cat = fprix($this_ordered_product["prix_cat"], true, $commande->devise, true, get_float_from_user_input(vn($commande->currency_rate)));
 		$prix = fprix($this_ordered_product["prix"], true, $commande->devise, true, get_float_from_user_input(vn($commande->currency_rate)));
-		$quantite = intval($this_ordered_product['quantite']);
+		$quantite = $this_ordered_product['quantite'];
+		if(empty($GLOBALS['site_parameters']['allow_float_quantity']) || intval($quantite) == floatval($quantite)) {
+			$quantite = intval($quantite);
+		}
 		$total_prix = fprix($this_ordered_product["total_prix"], true, $commande->devise, true, get_float_from_user_input(vn($commande->currency_rate)));
 		$tva = $this_ordered_product['tva_percent'];
 

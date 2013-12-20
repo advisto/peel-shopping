@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: caddie_ajout.php 39392 2013-12-20 11:08:42Z gboussin $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -30,7 +30,10 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	} elseif (isset($_GET['prodid']) && !empty($_GET['prodid'])) {
 		$email_check = '';
 		$id = intval(trim($_GET['prodid']));
-		$quantite = max(0, intval($_POST['qte']));
+		$quantite = max(0, get_float_from_user_input($_POST['qte']));
+	}
+	if(empty($GLOBALS['site_parameters']['allow_float_quantity'])) {
+		$quantite = intval($quantite);
 	}
 	$product_object = new Product($id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
 	$listcadeaux_owner = null;

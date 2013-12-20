@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.tpl 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: haut.tpl 39394 2013-12-20 11:34:21Z sdelaporte $
 #}<!DOCTYPE html>
 <html lang="{{ lang }}" dir="ltr">
 	{{ HTML_HEAD }}
@@ -65,7 +65,6 @@
 				</div>
 			</header>
 			<!-- Fin Header -->
-			{{ MODULES_ARIANE }}
 			{% if CONTENT_SCROLLING != '' %}
 			<marquee onmouseout="this.start();" onmouseover="this.stop();" truespeed="1" scrollamount="3" scrolldelay="40">
 				{{ CONTENT_SCROLLING }}
@@ -99,4 +98,5 @@
 						<div class="col-md-12">
 							<a href="#" id="haut_de_page"></a>
 							{{ MODULES_TOP_MIDDLE }}
+							{{ output_create_or_update_order }}
 							{{ error_text_to_display }}

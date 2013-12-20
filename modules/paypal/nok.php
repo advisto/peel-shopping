@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nok.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: nok.php 39393 2013-12-20 11:26:15Z sdelaporte $
 include("../../configuration.inc.php");
 
 if (empty($_GET['id'])) {
@@ -48,7 +48,7 @@ if (!empty($session_utilisateur_id) || (!empty($_SESSION['session_last_bill_view
 	if ($r = fetch_assoc($q)) {
 		// On n'autorise pas l'annulation d'une commande déjà payée pour éviter les problèmes
 		// avec un éventuel utilisateur qui revient en arrière dans son navigateur et clique sur annuler
-		update_order_payment_status($r['id'], false, false);
+		$GLOBALS['output_create_or_update_order'] = update_order_payment_status($r['id'], false, false);
 	}
 }
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: display_product.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -558,6 +558,8 @@ if (!function_exists('affiche_produits')) {
 		$nb_colonnes=4;
 		$params = params_affiche_produits($condition_value1, null, $type, $nb_par_page, $mode, $reference_id, $nb_colonnes, $always_show_multipage_footer, $additional_sql_inner, $additional_sql_cond, $additionnal_sql_having);
 		$results_array = $params['Links']->Query();
+		// Information sur nombre de produits trouvés mise en variable globale pour réutilisation a posteriori à l'extérieur de la fonction
+		$GLOBALS['products_found'] = $params['Links']->nbRecord;
 		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('produits.tpl');
 		$tpl->assign('is_associated_product', ((!$no_display_if_empty || !empty($results_array)) AND $type == 'associated_product'));
@@ -575,6 +577,7 @@ if (!function_exists('affiche_produits')) {
 			}
 		}
 		$tpl->assign('title_level', $title_level);
+		$tpl->assign('products_found', $GLOBALS['products_found']);
 		
 		if (empty($results_array)) {
 			$tpl->assign('no_results', true);
@@ -596,7 +599,6 @@ if (!function_exists('affiche_produits')) {
 			}
 			$tpl->assign('details_text', vb($details_text));
 			$tpl->assign('allow_order', $allow_order);
-			$GLOBALS['products_found'] = count($results_array);
 		}
 
 		$tpl->assign('prods_line_mode', ($params['mode'] == 'line'));

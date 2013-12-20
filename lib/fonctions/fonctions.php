@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: fonctions.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -375,7 +375,7 @@ function get_modules_array($only_active = false, $location = null, $technical_co
 		$modules = array();
 		$sql = 'SELECT *
 			FROM peel_modules
-			WHERE ' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?'(':'') . '(1' . ($technical_code ? ' AND technical_code="' . nohtml_real_escape_string($technical_code) . '"' : '') . ($location ? ' AND location="' . nohtml_real_escape_string($location) . '" AND technical_code!="ariane"' : '') . ')' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ? ' OR (technical_code="caddie" AND location="below_middle")' : '') . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?')':'') . ($only_active ? ' AND etat="1"' : '') . '
+			WHERE ' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?'(':'') . '(1' . ($technical_code ? ' AND technical_code="' . nohtml_real_escape_string($technical_code) . '"' : '') . ($location ? ' AND location="' . nohtml_real_escape_string($location) . '"' : '') . ')' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ? ' OR (technical_code="caddie" AND location="below_middle")' : '') . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?')':'') . ($only_active ? ' AND etat="1"' : '') . '
 			ORDER BY position, id';
 
 		$query = query($sql);
@@ -3282,7 +3282,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				if($files_type == 'css') {
 					$symlinks = array();
 					$docroot = $GLOBALS['dirroot'];
-					if(String::strlen($GLOBALS['apparent_folder'])>1 && String::strpos($this_wwwroot, $GLOBALS['apparent_folder']) !== false) {
+					if(String::strlen($GLOBALS['apparent_folder'])>1 && String::strpos($this_wwwroot, String::substr($GLOBALS['apparent_folder'], 0, String::strlen($GLOBALS['apparent_folder']) - 1)) !== false) {
 						$this_http_main_path = String::substr($this_wwwroot, 0, String::strlen($this_wwwroot) - String::strlen($GLOBALS['apparent_folder']) + 1);
 					} else {
 						$this_http_main_path = $this_wwwroot;

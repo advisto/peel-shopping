@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: haut.php 39393 2013-12-20 11:26:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -71,7 +71,6 @@ if(empty($_COOKIE['page_warning_close']) || $_COOKIE['page_warning_close']!='clo
 } else {
 	$tpl->assign('CONTENT_HEADER', null);
 }
-$tpl->assign('MODULES_ARIANE', get_modules(null, true, 'ariane', vn($_GET['catid'])));
 $tpl->assign('CONTENT_SCROLLING', affiche_contenu_html('scrolling', true));
 
 if (is_carrousel_module_active()) {
@@ -98,6 +97,7 @@ if (is_module_ariane_panier_active() && (defined('IN_CADDIE') || defined('IN_STE
 	$tpl->assign('ariane_panier', ariane_panier());
 }
 $tpl->assign('MODULES_TOP_MIDDLE', get_modules('top_middle', true, null, vn($_GET['catid'])));
+$tpl->assign('output_create_or_update_order', vb($GLOBALS['output_create_or_update_order']));
 $tpl->assign('error_text_to_display', vb($GLOBALS['error_text_to_display']));
 if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 	// Site vu sur ipad, ipod ou iphone alors qu'une application Appstore existe => on met un lien vers elle en début de page

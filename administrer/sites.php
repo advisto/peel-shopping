@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: sites.php 39392 2013-12-20 11:08:42Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -408,14 +408,14 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			'etat' => $this_module_infos['etat'],
 			'in_home' => $this_module_infos['in_home'],
 			'position' => $this_module_infos['position'],
-			'is_above_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
+			'is_above_middle_off' => in_array($this_module_infos['technical_code'], array('menu')),
 			'is_below_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
 			'is_footer_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'caddie', 'account', 'last_views', 'paiement_secu')),
-			'is_header_off' => in_array($this_module_infos['technical_code'], array('advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'catalogue', 'last_views', 'paiement_secu', 'news')),
+			'is_header_off' => in_array($this_module_infos['technical_code'], array('ariane', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'catalogue', 'last_views', 'paiement_secu', 'news')),
 			'is_top_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
 			'is_center_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
 			'is_center_middle_home_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
-			'is_bottom_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
+			'is_bottom_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'guide')),
 			'is_top_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
 			'is_bottom_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
 			'is_annonce_place_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),

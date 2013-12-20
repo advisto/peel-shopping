@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: order.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -780,12 +780,12 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	// Tout est maintenant en BDD, sauf les statuts qui n'ont pas été modifiés
 	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
 	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
-	$output .= update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
+	// output_create_or_update_order sera afficher dans le fichier admin_haut.
+	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
 	if(is_nexway_module_active()) {
 		include_once($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 		Nexway::create_order($order_infos, $articles_array);
 	}
-	// On n'affiche pas le contenu de $output
 	return $order_id;
 }
 

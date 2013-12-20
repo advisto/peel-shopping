@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: display_article.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -68,7 +68,7 @@ if (!function_exists('get_article_details_html')) {
 			}
 		}
 		$output .= $tpl->fetch();
-		correct_output($output, true, 'html');
+		correct_output($output, true, 'html', $_SESSION['session_langue']);
 		return $output;
 	}
 }
@@ -107,7 +107,7 @@ if (!function_exists('get_rubriques_sons_html')) {
 			$tpl->assign('description', String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]))),500,'','...',450));
 			$output .= $tpl->fetch();
 		}
-		correct_output($output, true, 'html');
+		correct_output($output, true, 'html', $_SESSION['session_langue']);
 		return $output;
 	}
 }
@@ -172,7 +172,7 @@ if (!function_exists('get_articles_html')) {
 		}
 		$tpl->assign('multipage', $Links->GetMultipage());
 		$output .= $tpl->fetch();
-		correct_output($output, true, 'html');
+		correct_output($output, true, 'html', $_SESSION['session_langue']);
 		return $output;
 	}
 }
@@ -266,7 +266,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 		}
 		
 		$output .= $tpl->fetch();
-		correct_output($output, true, 'html');
+		correct_output($output, true, 'html', $_SESSION['session_langue']);
 		return $output;
 	}
 }

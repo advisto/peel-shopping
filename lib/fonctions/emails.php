@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: emails.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -124,8 +124,8 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		}
 	}
 	// Traitement des tags dans les templates. Même si $template_tags est vide il faut le faire pour gérer les tags génériques
-	$mail_content = template_tags_replace($mail_content, $template_tags, false, $format);
-	$mail_subject = template_tags_replace(String::strip_tags($mail_subject), $template_tags, false, 'text');
+	$mail_content = template_tags_replace($mail_content, $template_tags, false, $format, $lang);
+	$mail_subject = template_tags_replace(String::strip_tags($mail_subject), $template_tags, false, 'text', $lang);
 	if ($format == "text") {
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
@@ -273,32 +273,71 @@ function prepare_email_tags($user_id, $order_id)
  * @param integer $template_technical_id
  * @return
  */
-function getTextAndTitleFromEmailTemplateLang($template_technical_code, $template_lang, $template_technical_id = 0)
+function getTextAndTitleFromEmailTemplateLang($template_technical_code, $template_lang, $template_technical_id = null)
 {
 	// Dans le cas de la newsletter, le titre ne doit pas être celui du template, mais le titre renseigné dans la liste des newsletters.
-	if (!empty($template_technical_code) && $template_technical_code=='template_newsletter') {
-		$sql ='SELECT pet.default_signature_code, pet.id, pet.technical_code, pet.name as name_template, pet.subject, pet.text, pet.lang, pet.active, pet.id_cat, pn.sujet_fr as name
-			FROM peel_email_template pet
-			LEFT JOIN peel_newsletter pn ON pet.technical_code = pn.template_technical_code
-			WHERE pet.active="TRUE" AND pet.technical_code="'.real_escape_string($template_technical_code).'" AND pet.lang="'.real_escape_string($template_lang).'"
-			LIMIT 1';
+	$sql = 'SELECT *
+		FROM peel_email_template
+		WHERE active="TRUE"	';
+	if(!empty($template_technical_id)) {
+		$sql .= 'AND id="' . intval($template_technical_id) . '"';
 	} else {
-		$sql = 'SELECT *
-			FROM peel_email_template
-			WHERE active="TRUE"	';
-		if(!empty($template_technical_id)) {
-			$sql .= 'AND id="' . intval($template_technical_id) . '"';
-		} else {
-			$sql .= 'AND technical_code="' . nohtml_real_escape_string($template_technical_code) . '" AND (lang="' . word_real_escape_string($template_lang) . '" OR lang="")';
-		}
-		$sql .= 'LIMIT 1';
+		$sql .= 'AND technical_code="' . nohtml_real_escape_string($template_technical_code) . '" AND (lang="' . word_real_escape_string($template_lang) . '" OR lang="")';
 	}
+	$sql .= 'LIMIT 1';
 	$query_template = query($sql);
 	if ($this_template = fetch_assoc($query_template)) {
+		if(!empty($this_template['lang'])) {
+			$this_lang = $this_template['lang'];
+		} elseif(!empty($template_lang)) {
+			$this_lang = $template_lang;
+		} else {
+			$this_lang = $_SESSION['session_langue'];
+		}
+		if ($this_template['technical_code'] != 'layout') {
+			$generic_layout_infos = getTextAndTitleFromEmailTemplateLang('layout', $this_lang, null);
+			if(!empty($generic_layout_infos['text'])) {
+				// Lors de la fusion des templates, on passe en HTML les sauts de ligne si nécessaire pour chaque template
+				$this_template['text'] = str_replace('[TEMPLATE]', String::nl2br_if_needed($this_template['text']), String::nl2br_if_needed($generic_layout_infos['text']));
+			}
+		}
+		if (String::strpos($this_template['text'], '[NEWSLETTER]') !== false) {
+			// Le template contient une newsletter, on donne au template le sujet de la newsletter
+			$news_infos = get_last_newsletter(null, $this_lang);
+			if(!empty($news_infos['sujet_' . $this_lang])) {
+				$this_template['subject'] = $news_infos['sujet_' . $this_lang];
+			}
+			// NB : Le contenu du tag [NEWSLETTER] sera remplacé comme tous les autres tags plus tard lors de l'appel à la fonction template_tags_replace
+		}
 		return $this_template;
 	} else {
 		return null;
 	}
 }
 
+/**
+ * Récupère les informations de la newsletter de l'id demandée, ou de la dernière newsletter dans une langue donnée. Cela sert lorsqu'on veut envoyer un email contenant le tag [NEWSLETTER] sans aucune information
+ *
+ * @param integer $id
+ * @param string $lang
+ * @return
+ */
+function get_last_newsletter($id = null, $lang = null) {
+	if(!empty($id)) {
+		$sql_cond_array[] = "id='".intval($id)."'";
+	}
+	if(!empty($lang)) {
+		$sql_cond_array[] = "(lang='' OR lang='" . word_real_escape_string($lang)  . "')";
+	}
+	if(empty($sql_cond_array)) {
+		$sql_cond_array[] = 1;
+	}
+	$sql = "SELECT *
+		FROM peel_newsletter
+		WHERE " . implode(' AND ', $sql_cond_array) . "
+		ORDER BY id DESC
+		LIMIT 1";
+	$res = query($sql);
+	return fetch_assoc($res);
+}
 ?>

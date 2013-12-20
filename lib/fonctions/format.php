@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: format.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -578,16 +578,20 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
  * @param array $custom_template_tags
  * @param boolean $replace_only_custom_tags
  * @param string $format : null => does not touch the format of the tag, "text" or "html"
+ * @param string $lang
  * @return
  */
-function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null)
+function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null, $lang = null)
 {
+	if (empty($lang)) {
+		$lang = $_SESSION['session_langue'];
+	}
 	$template_tags = array();
 	if(!$replace_only_custom_tags) {
 		// On rajoute les tags génériques au site
 		$template_tags['SITE'] = $GLOBALS['site'];
 		$template_tags['SITE_NAME'] = $GLOBALS['site'];
-		$template_tags['WWWROOT'] = $GLOBALS['wwwroot'].'/';
+		$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang).'/';
 		$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
 		$template_tags['CURRENT_URL'] = get_current_url(false);
 		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
@@ -638,6 +642,16 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// On remplace par le contenu du flux
 			if(!empty($tag_name_array[1])){
 				$template_tags[$this_tag] = get_rss_feed_content($tag_name_array[1]);
+			}
+		}
+		if (empty($custom_template_tags['NEWSLETTER']) && String::strpos($text, '[NEWSLETTER]') !== false) {
+			// On envoie un message qui contient un tag NEWSLETTER et dont on n'a pas spécifié explicitement le contenu => on récupère son contenu automatiqueemnt
+			// On prend la dernière newsletter rentrée en BDD - pas de possibilité de faire autrement, sinon il faut passer par le module de gestion de newsletter
+			$news_infos = get_last_newsletter(null, $lang);
+			if (!empty($news_infos)) {
+				// On remplace les tags à l'intérieur de la newsletter pour éviter problèmes et avoir besoin de passer le traitement en double sur l'intégralité du texte
+				// Par ailleurs on évite de se retrouver dans une boucle si le texte de la newsletter indiquait (de manière erronée !) un tag [NEWSLETTER]
+				$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $frm['lang']]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
 			}
 		}
 	}
@@ -736,16 +750,17 @@ function output_xml_http_export_header($filename, $page_encoding, $content_type 
  * @param string $output
  * @param boolean $replace_template_tags
  * @param string $format : null => does not touch the format of the tag, "text" or "html"
+ * @param string $lang
  * @return
  */
-function correct_output(&$output, $replace_template_tags = false, $format = null)
+function correct_output(&$output, $replace_template_tags = false, $format = null, $lang = null)
 {
 	if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
 		$wwwroot_to_replace = str_replace('https://', 'http://', $GLOBALS['wwwroot']);
 		$output = str_replace($wwwroot_to_replace, $GLOBALS['wwwroot'], $output);
 	}
 	if($replace_template_tags) {
-		$output = template_tags_replace($output, array(), false, $format);
+		$output = template_tags_replace($output, array(), false, $format, $lang);
 	}
 }
 

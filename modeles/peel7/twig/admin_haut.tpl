@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.tpl 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: admin_haut.tpl 39393 2013-12-20 11:26:15Z sdelaporte $
 #}<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -81,6 +81,8 @@
 		<div class="container">
 			<div class="main_content row">
 				<div class="col-md-12">
+					{$output_create_or_update_order}
+					{$error_text_to_display}
 {% if is_demo_error %}
 					<p class="alert alert-danger fade in">{{ STR_ADMIN_DEMO_WARNING }} <button class="close remember-close" aria-hidden="true" data-dismiss="alert" type="button" id="demo_warning_close">×</button></p>
 {% endif %}

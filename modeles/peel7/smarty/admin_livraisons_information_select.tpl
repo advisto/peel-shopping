@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_livraisons_information_select.tpl 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: admin_livraisons_information_select.tpl 39392 2013-12-20 11:08:42Z gboussin $
 *}{$STR_ORDER_STATUT_LIVRAISON}{$STR_BEFORE_TWO_POINTS}:
 <select class="form-control" name="statut" style="width:200px;">
 	<option value="">{$STR_ADMIN_ALL_ORDERS}</option>

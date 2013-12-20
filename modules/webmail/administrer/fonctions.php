@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: fonctions.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -271,26 +271,16 @@ function send_mail_admin($frm)
 		} else {
 			$email_from = $GLOBALS['site_parameters']['email_webmaster'];
 		}
-		if (!empty($template_id)) {
-			$template_infos = getTextAndTitleFromEmailTemplateLang(null, $frm['lang'], $template_id);
-			// Récupération d'une newsletter correspondant à ce modèle
-			// On prend la dernière newsletter rentrée en BDD - pas de possibilité de faire autrement, sinon il faut passer par le module de gestion de newsletter
-			$sql_n = "SELECT *
-				FROM peel_newsletter
-				WHERE template_technical_code='" . vb($template_infos['technical_code']) . "'
-				ORDER BY id DESC";
-			$res_n = query($sql_n);
-			if ($news_infos = fetch_assoc($res_n)) {
-				$custom_template_tags['NEWSLETTER'] = $news_infos['message_' . $frm['lang']];
-			}
-		}
-		if (!empty($template_infos)) {
+		if(!empty($template_id)) {
+			// Le texte tapé par l'administrateur est issu d'un modèle d'email
 			$this_data = 'template_' . vn($template_id);
-			// On ne stocke pas le message réellement envoyé pour ne pas saturer la BDD
+			// Donc on ne stocke pas le message réellement envoyé pour ne pas saturer la BDD
+			// (le message est issu d'un template, donc le contenu est proche du modèle original)
+			// NB : On pourrait faire des tests complémentaires en utilisant $template_infos = getTextAndTitleFromEmailTemplateLang(null, $frm['lang'], $template_id);
 			$this_comment = '';
 		} else {
 			$this_data = 'NO_TEMPLATE';
-			// On stocke le message si il est différent du template
+			// On stocke le message car il n'est pas issu d'un template
 			$this_comment = $frm['message'];
 		}
 		if (!empty($frm['submit_send_email_all'])) {

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: newsletter.php 39392 2013-12-20 11:08:42Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -238,7 +238,7 @@ function maj_newsletter($id, $frm)
 }
 
 /**
- * Récupération des données de la newsletter
+ * Programmation de l'envoi de la newsletter
  *
  * @param integer $id
  * @param mixed $debut
@@ -254,15 +254,16 @@ function send_newsletter($id, $debut, $limit, $test = false)
 	$news_infos = fetch_assoc($res_n);
 
 	$format = $news_infos['format'];
-	// Récupération technical_code du template associé à la newsletter
+	// Récupération du technical_code du template associé à la newsletter
 	$template_technical_code = $news_infos['template_technical_code'];
 	// Stockage des messages et sujets, selon les langues disponibles sur le site
 	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		// Ajout des Custom template tag de la newsletter en fonction de la langue
 		$custom_template_tags[$this_lang] = null;
 		if (!empty($news_infos['message_' . $this_lang])) {
-			// Récupération du template email associé à la newsletter en fonction des langues disponible
+			// Récupération du template email associé à la newsletter en fonction des langues disponibles
 			if (!empty($template_technical_code)) {
+				// On a un modèle, qui contient un tag NEWSLETTER : on récupère son HTML, et on remplace [NEWSLETTER] par le texte de la newsletter
 				$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $this_lang);
 				$message[$this_lang] = $template_infos['text'];
 				$custom_template_tags[$this_lang]['NEWSLETTER'] = $news_infos['message_' . $this_lang];
@@ -273,7 +274,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 			$sujet[$this_lang] = $news_infos['sujet_' . $this_lang];
 		}
 	}
-	/* Récupération de la liste des emails */
+	// Récupération de la liste des emails
 	if (!empty($message)) {
 		foreach(array_keys($message) as $this_lang) {
 			if (!$test) {
@@ -291,7 +292,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
 				// Les emails seront envoyés a posteriori avec un cron
 				// Si nous avons des tags à remplacer dans le contenue
-				$message[$this_lang] = template_tags_replace($message[$this_lang], $custom_template_tags[$this_lang], true);
+				$message[$this_lang] = template_tags_replace($message[$this_lang], $custom_template_tags[$this_lang], true, null, $this_lang);
 				program_cron_email($sql_u, $message[$this_lang], $sujet[$this_lang], $_SESSION['session_utilisateur']['email'], null, $this_lang);
 				query("UPDATE peel_newsletter
 					SET statut='envoi ok', date_envoi='" . date('Y-m-d H:i:s', time()) . "'

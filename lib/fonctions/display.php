@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 39172 2013-12-04 14:19:57Z gboussin $
+// $Id: display.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -223,7 +223,8 @@ if (!function_exists('affiche_meta')) {
 		$tpl->assign('description', String::ucfirst($this_description));
 		$tpl->assign('content_language', $_SESSION['session_langue']);
 		if (is_facebook_module_active() && !empty($display_facebook_tag)) {
-			$tpl->assign('facebook_tag', display_facebook_tag($m));
+			$display_facebook_tag_array = array('meta_titre'=>$this_title, 'meta_desc'=>$this_description, 'image'=>$m['image']);
+			$tpl->assign('facebook_tag', display_facebook_tag($display_facebook_tag_array));
 		}
 		if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 			$tpl->assign('specific_meta', '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
@@ -1800,6 +1801,7 @@ if (!function_exists('get_menu')) {
 				if(!empty($GLOBALS['site_parameters']['insert_article_categories_in_menu'])) {
 					// Il faut définir par la suite rub_XX dans le paramètre main_menu_items_if_available depuis le back office pour que la rubrique s'affiche.
 					$GLOBALS['main_menu_items']["rub_".$result['id']] = array(get_content_category_url($result['id'], $result['nom']) => $result['nom']);
+					$GLOBALS['rubriques_level'][$result['parent_id']][] = "rub_" . $result['id'];
 				}
 			}
 			$submenu_global['content'] = '';
@@ -1830,10 +1832,26 @@ if (!function_exists('get_menu')) {
 		if(!empty($GLOBALS['site_parameters']['main_menu_items_if_available']) && is_array($GLOBALS['site_parameters']['main_menu_items_if_available'])) {
 			$temp_main_menu_items = array();
 			if(in_array('cat_*', $GLOBALS['site_parameters']['main_menu_items_if_available']) && !empty($GLOBALS['categories_level'][0])) {
+				$new_menu = array();
 				foreach($GLOBALS['site_parameters']['main_menu_items_if_available'] as $this_value) {
 					if($this_value=='cat_*') {
 						foreach($GLOBALS['categories_level'][0] as $this_imported_value) {
 							if(String::strpos($this_value, 'cat_') === 0) {
+								$new_menu[] = $this_imported_value;
+							}
+						}
+					} else {
+						$new_menu[] = $this_value;
+					}
+				}
+				$GLOBALS['site_parameters']['main_menu_items_if_available'] = $new_menu;
+			}
+			if(in_array('rub_*', $GLOBALS['site_parameters']['main_menu_items_if_available']) && !empty($GLOBALS['rubriques_level'][0])) {
+				$new_menu = array();
+				foreach($GLOBALS['site_parameters']['main_menu_items_if_available'] as $this_value) {
+					if($this_value=='rub_*') {
+						foreach($GLOBALS['rubriques_level'][0] as $this_imported_value) {
+							if(String::strpos($this_value, 'rub_') === 0) {
 								$new_menu[] = $this_imported_value;
 							}
 						}
@@ -2350,7 +2368,7 @@ if (!function_exists('affiche_contenu_html')) {
 			// On préserve le HTML mais on corrige les & isolés
 			$output .= template_tags_replace(String::htmlentities(String::html_entity_decode_if_needed($obj->contenu_html), ENT_COMPAT, GENERAL_ENCODING, false, true), array(), false, 'html');
 		}
-		correct_output($output, false, 'html');
+		correct_output($output, false, 'html', $_SESSION['session_langue']);
 		if ($return_mode) {
 			return $output;
 		} else {

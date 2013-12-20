@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.1.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.1.2, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 39162 2013-12-04 10:37:44Z gboussin $
+# $Id: peel.sql 39392 2013-12-20 11:08:42Z gboussin $
 #
 
 --
@@ -750,7 +750,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (263, 'bootstrap_enabled', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Activer ou non Bootstrap en front-office', 1),
 (264, 'disable_add_to_cart_section_if_null_base_price_and_no_option', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Désactive l''affichage du bouton d''ajout au caddie si le produit est gratuit et sans option - Mettez à false si vous voulez gérer des processus de commande malgré l''absence de prix', 1),
 (265, 'paypal_additional_fields', 'core', 'string', '<input name="solution_type" value="Sole" type="hidden"><input name="landing_page" value="Billing" type="hidden">', '', '2013-09-01 12:00:00', 'Permet d''ajouter des champs hidden au formulaire de communication à Paypal - par exemple : <input name="solution_type" value="Sole" type="hidden"><input name="landing_page" value="Billing" type="hidden">', 1),
-(266, 'autocomplete_hide_images', 'core', 'boolean', 'true', '', '2013-09-01 12:00:00', 'Par défaut : false - Permet de ne pas afficher la vignette dans l''autocomplete de la recherche : c''est intéressant en cas d''absence complète d''image sur un site', '1'),
+(266, 'autocomplete_hide_images', 'core', 'boolean', 'false', '', '2013-09-01 12:00:00', 'Par défaut : false - Permet de ne pas afficher la vignette dans l''autocomplete de la recherche : c''est intéressant en cas d''absence complète d''image sur un site', '1'),
 (267, 'autocomplete_fast_partial_search', 'core', 'boolean', 'false', '', '2013-09-01 12:00:00', 'Par défaut : false - Permet d''accélerer les recherches en ne cherchant pas toutes les combinaisons possibles. En cas de trop grand nombre de produit, il n''est pas raisonnable de faire des recherches de type LIKE "%..."', '1'),
 (268, 'load_site_specific_files_before_others', 'core', 'array', '', '', '2013-09-01 12:00:00', 'Par défaut : vide - Permet de charger des fichiers de fonctions non prévus dans le logiciel', '1'),
 (269, 'load_site_specific_files_after_others', 'core', 'array', '', '', '2013-09-01 12:00:00', 'Par défaut : vide - Permet de charger des fichiers de fonctions non prévus dans le logiciel', '1'),
@@ -1151,7 +1151,7 @@ INSERT INTO `peel_modules` (`id`, `technical_code`, `location`, `display_mode`, 
 (8, 'news', 'below_middle', 'sideblocktitle', 4, 1),
 (9, 'advertising', 'below_middle', 'sideblock', 5, 0),
 (10, 'menu', 'header', '', 4, 1),
-(11, 'ariane', 'header', '', 5, 0),
+(11, 'ariane', 'above_middle', '', 5, 0),
 (12, 'advertising1', 'below_middle', 'sideblock', 10, 0),
 (13, 'advertising2', 'below_middle', 'sideblock', 11, 0),
 (14, 'advertising3', 'below_middle', 'sideblock', 12, 0),

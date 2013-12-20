@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: Caddie.php 39393 2013-12-20 11:26:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 39162 2013-12-04 10:37:44Z gboussin $
+ * @version $Id: Caddie.php 39393 2013-12-20 11:26:15Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -292,6 +292,9 @@ class Caddie {
 	 */
 	function add_product(&$product_object, $added_quantity_wished, $email_check, $listcadeaux_owner = null, $custom_product_reference = null)
 	{
+		if(empty($GLOBALS['site_parameters']['allow_float_quantity'])) {
+			$added_quantity_wished = intval($added_quantity_wished);
+		}
 		if (in_array($product_object->id, $this->articles) && empty($email_check)) {
 			// Si le produit est dans le caddie, et que ce n'est pas un chèque cadeau, alors on va vouloir fusionner les données dans une même ligne
 			foreach ($this->articles as $k => $this_produit_id) {
@@ -347,7 +350,7 @@ class Caddie {
 		if (!empty($line_infos['id'])) {
 			foreach ($line_infos['id'] as $numero_ligne => $product_id) {
 				if (!empty($this->articles[$numero_ligne])) {
-					$this->change_line_data($numero_ligne, $product_id, vn($line_infos['quantite'][$numero_ligne]), vn($line_infos['couleurId'][$numero_ligne]), vn($line_infos['tailleId'][$numero_ligne]), vb($line_infos['email_check'][$numero_ligne]), vn($line_infos['id_attribut'][$numero_ligne]), vb($line_infos['listcadeaux_owner'][$numero_ligne]));
+					$this->change_line_data($numero_ligne, $product_id, get_float_from_user_input(vn($line_infos['quantite'][$numero_ligne])), vn($line_infos['couleurId'][$numero_ligne]), vn($line_infos['tailleId'][$numero_ligne]), vb($line_infos['email_check'][$numero_ligne]), vn($line_infos['id_attribut'][$numero_ligne]), vb($line_infos['listcadeaux_owner'][$numero_ligne]));
 				}
 			}
 		}
@@ -371,6 +374,9 @@ class Caddie {
 	{
 		if (!is_numeric($numero_ligne)) {
 			return false;
+		}
+		if(empty($GLOBALS['site_parameters']['allow_float_quantity'])) {
+			$quantity_wished = intval($quantity_wished);
 		}
 		$this->articles[$numero_ligne] = $product_id;
 		// Si on gère les stocks pour ce produit, la valeur $quantite est temporaire avant validation du stock disponible
@@ -1152,7 +1158,7 @@ class Caddie {
 			if (!empty($this->commande_id) && $this->commande_id != $order_id) {
 				// On annule la commande précédemment liée à ce caddie car on vient de créer une nouvelle commande lui correspondant
 				// SAUF si elle est déjà payée (=> 3ème argument à false)
-				echo update_order_payment_status($this->commande_id, 6, false);
+				$GLOBALS['output_create_or_update_order'] = update_order_payment_status($this->commande_id, 6, false);
 			}
 			// On retire les points utilisés lors de la commande.
 			// NB : Cette gestion n'utilise pas "total_points" de peel_commandes, qui est géré ailleurs et concerne les points gagnés lors de la commande

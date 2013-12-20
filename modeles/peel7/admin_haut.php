@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 39162 2013-12-04 10:37:44Z gboussin $
+// $Id: admin_haut.php 39392 2013-12-20 11:08:42Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -200,6 +200,7 @@ if(!empty($GLOBALS['sortable_rpc'])) {
 		$(".sortable").disableSelection(); // on désactive la possibilité au navigateur de faire des sélections
 ';
 }
+$tpl->assign('output_create_or_update_order', vb($GLOBALS['output_create_or_update_order']));
 $tpl->assign('error_text_to_display', vb($GLOBALS['error_text_to_display']));
 $tpl->assign('css_files', get_css_files_to_load(!empty($GLOBALS['site_parameters']['minify_css'])));
 // Les fichiers js sont traités dans le footer
