@@ -140,6 +140,15 @@ input.form-control[type="file"] {
 		color: #FFFFFF;
 		padding-bottom: 10px;
 	}
+	span.fcb {
+		background: url("../images/fcb.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+		color: #FFFFFF;
+		display: block;
+		font-size: 14px;
+		font-weight: bold;
+		height: 17px;
+		padding-right: 75px;
+	}
 	@media (max-width: 991px) {
 		#total {
 			margin-bottom: 0px;

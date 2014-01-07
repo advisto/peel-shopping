@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.2, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.3, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39392 2013-12-20 11:08:42Z gboussin $
+// $Id: fonctions.php 39443 2014-01-06 16:44:24Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1036,15 +1036,26 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 	$tpl_options = array();
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
 		if ($approximative_amount_selected) {
-			// Pour éviter problèmes d'arrondis sur la TVA calculée à partir de la BDD, on regarde si elle vaut la valeur dans le select à 1% près
-			$is_selected = (abs(floatval($selected_vat) - floatval($tab_paiement['tva'])) * 100 <= abs($tab_paiement['tva']));
+			// Pour éviter problèmes d'arrondis sur la TVA calculée à partir de la BDD, on regarde si elle vaut la valeur dans le select à 0,1% près
+			$is_selected = (abs(floatval($selected_vat) - floatval($tab_paiement['tva'])) * 1000 <= abs($tab_paiement['tva']));
 		} else {
 			$is_selected = (floatval($selected_vat) == floatval($tab_paiement['tva']));
+		}
+		if($is_selected) {
+			$selected_vat_found = true;
 		}
 		$tpl_options[] = array(
 			'value' => $tab_paiement['tva'],
 			'name' => $tab_paiement['tva'],
 			'issel' => $is_selected
+		);
+	}
+	if(!empty($selected_vat) && empty($selected_vat_found)) {
+		// Valeur cherchée non trouvée (par exemple valeur en base de données qui n'est plus disponible dans les choix de TVA autorisés) : on la rajoute à la liste du select
+		$tpl_options[] = array(
+			'value' => $selected_vat,
+			'name' => $selected_vat . ' [' . $GLOBALS["STR_ADMIN_DEACTIVATED"] . ']',
+			'issel' => true
 		);
 	}
 	$tpl->assign('options', $tpl_options);

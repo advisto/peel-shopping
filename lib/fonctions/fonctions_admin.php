@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.2, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.3, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 39392 2013-12-20 11:08:42Z gboussin $
+// $Id: fonctions_admin.php 39443 2014-01-06 16:44:24Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1488,7 +1488,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		}
 		$tpl->assign('is_order_modification_allowed', $is_order_modification_allowed);
 		$tpl->assign('zone_tva', vb($commande['zone_tva']));
-		$tpl->assign('default_vat_select_options', get_vat_select_options('19.6'));
+		$tpl->assign('default_vat_select_options', get_vat_select_options('20.00'));
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED', $GLOBALS['STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED']);
 		$tpl->assign('STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE', $GLOBALS['STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE']);

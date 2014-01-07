@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 39393 2013-12-20 11:26:15Z sdelaporte $
+// $Id: Caddie.php 39444 2014-01-06 17:29:58Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 39393 2013-12-20 11:26:15Z sdelaporte $
+ * @version $Id: Caddie.php 39444 2014-01-06 17:29:58Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -594,10 +594,12 @@ class Caddie {
 	{
 		$this->total_produit_related_to_code_promo = 0;
 		$this->total_ecotaxe_ttc_related_to_code_promo = 0;
-		if ($new_code_promo !== null) {
+		if ($new_code_promo !== null && $this->code_promo != $new_code_promo) {
 			$this->code_promo = $new_code_promo;
-		} elseif (!empty($_GET['code_promo']) && $new_code_promo == "") {
-			$this->message_caddie = array("SUCCES_CODE_PROMO" => $GLOBALS['STR_YOUR_CODE_PROMO'] . ' ' . $this->code_promo . ' ' . $GLOBALS['STR_HAS_BEEN_DELETED'] . '.');
+			$code_promo_updated = true;
+			if ($new_code_promo === '') {
+				$this->message_caddie = array("SUCCES_CODE_PROMO" => $GLOBALS['STR_YOUR_CODE_PROMO'] . ' ' . $this->code_promo . ' ' . $GLOBALS['STR_HAS_BEEN_DELETED'] . '.');
+			}
 		}
 		if (!empty($this->code_promo)) {
 			// On vérifie d'abord la validité du code promo avec les paramètres insérés en back-office
@@ -608,6 +610,9 @@ class Caddie {
 				WHERE nom='" . nohtml_real_escape_string($this->code_promo) . "' AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND '" . date('Y-m-d', time()) . "' BETWEEN `date_debut` AND `date_fin` AND etat = '1'";
 			$query = query($sql);
 			$code_infos = fetch_assoc($query);
+			if(!empty($code_promo_updated) && !empty($code_infos)) {
+				$this->message_caddie = array("SUCCES_CODE_PROMO" => $GLOBALS['STR_YOUR_CODE_PROMO'] . ' ' . $code_infos['nom'] . ' ' . $GLOBALS['STR_IS_VALID'] . '.');
+			}
 		}
 		// REMARQUE si on passe ici avec $new_code_promo non vide :
 		// alors on doit absolument s'assurer que toutes les infos sur les produits et les ecotaxes sont bien à jour (exemple : nouveau produit vient d'être ajouté)
@@ -654,7 +659,6 @@ class Caddie {
 					// Si le code promotionnel n'a pas été trouvé dans une commande antérieure pour ce client, on passe à la suite.
 					if ($code_infos['montant_min'] <= $this->total_produit_related_to_code_promo) {
 						// Le code est OK : le montant minimum du code promotionnel est bien inférieur au montant total des catégories concernées par le code_promo
-						$this->message_caddie = array("SUCCES_CODE_PROMO" => $GLOBALS['STR_YOUR_CODE_PROMO'] . ' ' . $code_infos['nom'] . ' ' . $GLOBALS['STR_IS_VALID'] . '.');
 						if ($code_infos['on_type'] == 1) {
 							$this->percent_code_promo = $code_infos['remise_percent'];
 							$this->valeur_code_promo = 0;
@@ -666,15 +670,21 @@ class Caddie {
 					} else {
 						// Le code n'est pas pris en compte : le montant minimum du code promotionnel est supérieur au montant total des catégories concernées par le code_promo
 						$cancel_code = true;
-						$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CART_IS_NOT_ENOUGHT']));
+						if ($this->count_products()>0) {
+							$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CART_IS_NOT_ENOUGHT']));
+						}
 					}
 				} else {
 					$cancel_code = true;
-					$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CODE_PROMO_USE_ONLY_ONCE']));
+					if ($this->count_products()>0) {
+						$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CODE_PROMO_USE_ONLY_ONCE']));
+					}
 				}
 			} else {
 				$cancel_code = true;
-				$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CODE_PROMO_IS_NOT_FOR_THIS_CAT']));
+				if ($this->count_products()>0) {
+					$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_CODE_PROMO_IS_NOT_FOR_THIS_CAT']));
+				}
 			}
 		} elseif (empty($code_infos)) {
 			$cancel_code = true;
@@ -682,6 +692,7 @@ class Caddie {
 				$this->message_caddie = array("ERROR_CODE_PROMO" => nl2br($GLOBALS['STR_ERR_CODE_PROMO']));
 			}
 		}
+		
 		if (!empty($cancel_code)) {
 			$this->code_promo = "";
 			$this->cat_code_promo = 0;

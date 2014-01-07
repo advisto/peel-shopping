@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39392 2013-12-20 11:08:42Z gboussin $
+// $Id: fonctions.php 39443 2014-01-06 16:44:24Z sdelaporte $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -289,7 +289,7 @@ function affiche_formulaire_ajout_attribut(&$frm, &$form_error_object)
 		$frm["image"] = "";
 		$frm["prix"] = 0;
 		$frm['mandatory'] = 0;
-		$frm["tva"] = "19.60";
+		$frm["tva"] = "20.00";
 		$frm['position'] = 0;
 	}
 	$frm['nouveau_mode'] = "insere";
