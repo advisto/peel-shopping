@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: emails.php 39450 2014-01-07 17:21:14Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -326,13 +326,14 @@ function get_last_newsletter($id = null, $lang = null) {
 	if(!empty($id)) {
 		$sql_cond_array[] = "id='".intval($id)."'";
 	}
-	if(!empty($lang)) {
-		$sql_cond_array[] = "(lang='' OR lang='" . word_real_escape_string($lang)  . "')";
+	if(!empty($lang) && empty($id)) {
+		// On cherche une newsletter non vide pour la langue cherchée
+		$sql_cond_array[] = "(sujet_".$lang."!='' OR message_".$lang."!='')";
 	}
 	if(empty($sql_cond_array)) {
 		$sql_cond_array[] = 1;
 	}
-	$sql = "SELECT *
+	$sql = "SELECT id, date, format, template_technical_code, statut, sujet_".$lang.", message_".$lang."
 		FROM peel_newsletter
 		WHERE " . implode(' AND ', $sql_cond_array) . "
 		ORDER BY id DESC

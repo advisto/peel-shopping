@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: Product.php 39451 2014-01-07 17:32:52Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 39443 2014-01-06 16:44:24Z sdelaporte $
+ * @version $Id: Product.php 39451 2014-01-07 17:32:52Z gboussin $
  * @access public
  */
 class Product {
@@ -132,8 +132,10 @@ class Product {
 		}
 		if (!empty($product_infos)) {
 			// Faster than making an SQL request if we have data already available
-			foreach($product_infos as $this_item => $this_value) {
-				$this->$this_item = $this_value;
+			foreach(array_keys(get_object_vars($this)) as $this_item) {
+				if (isset($product_infos[$this_item]) && !in_array($this_item, array('id', 'lang'))) {
+					$this->$this_item = $product_infos[$this_item];
+				}
 			}
 		}
 		if (!$user_only_product_infos) {
