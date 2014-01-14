@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 39451 2014-01-07 17:32:52Z gboussin $
+// $Id: Product.php 39495 2014-01-14 11:08:09Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 39451 2014-01-07 17:32:52Z gboussin $
+ * @version $Id: Product.php 39495 2014-01-14 11:08:09Z sdelaporte $
  * @access public
  */
 class Product {
@@ -125,6 +125,7 @@ class Product {
 			$product_infos = get_object_vars($product_infos);
 		}
 		$this->lang = $lang;
+		$lang_items = array('name' => 'nom_' . $lang, 'descriptif' => 'descriptif_' . $lang, 'description' => 'description_' . $lang, 'meta_titre' => 'meta_titre_' . $lang, 'meta_desc' => 'meta_desc_' . $lang, 'meta_key' => 'meta_key_' . $lang);
 		if (empty($id)) {
 			$this->id = vn($product_infos['id']);
 		} else {
@@ -135,6 +136,8 @@ class Product {
 			foreach(array_keys(get_object_vars($this)) as $this_item) {
 				if (isset($product_infos[$this_item]) && !in_array($this_item, array('id', 'lang'))) {
 					$this->$this_item = $product_infos[$this_item];
+				} elseif (!empty($lang_items[$this_item]) && isset($product_infos[$lang_items[$this_item]])) {
+					$this->$this_item = $product_infos[$lang_items[$this_item]];
 				}
 			}
 		}
@@ -227,25 +230,10 @@ class Product {
 				$this->id = 0;
 			}
 		}
-		if (empty($this->name)) {
-			$name = 'nom_' . $lang;
-			$this->name = String::html_entity_decode_if_needed(vb($this->$name));
-		} else {
-			$this->name = String::html_entity_decode_if_needed($this->name);
-		}
-		if (empty($this->descriptif)) {
-			$descriptif = 'descriptif_' . $lang;
-			$this->descriptif = String::html_entity_decode_if_needed(vb($this->$descriptif));
-		} else {
-			$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
-		}
+		$this->name = String::html_entity_decode_if_needed($this->name);
+		$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
+		$this->description = String::html_entity_decode_if_needed($this->description);
 		correct_output($this->descriptif, false, 'html', $lang);
-		if (empty($this->description)) {
-			$description = 'description_' . $lang;
-			$this->description = String::html_entity_decode_if_needed(vb($this->$description));
-		} else {
-			$this->description = String::html_entity_decode_if_needed($this->description);
-		}
 		correct_output($this->description, false, 'html', $lang);
 		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
 		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, true, false, true);

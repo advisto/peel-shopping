@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: admin_commande_details.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -137,7 +137,7 @@
 			<td class="form_commande_detail">{{ STR_ADMIN_COMMANDER_TRACKING_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="form_commande_detail">
 				<input id="delivery_tracking" name="delivery_tracking" value="{{ delivery_tracking|trim|str_form_value }}" type="text" class="form-control" />
-				{% if is_icirelais_module_active %}<div id="tracking_url"></div><br /><a href="javascript:setTracking('{{ STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript(true,true,true) }}')">{{ STR_MODULE_ICIRELAIS_CREATE_TRACKING }}</a>{% endif %}
+				{% if is_icirelais_module_active %}<div id="tracking_url"></div><br /><a href="javascript:setTracking('{{ MODULE_ICIRELAIS_SETUP_TRACKING_URL|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript(true,true,true) }}')">{{ STR_MODULE_ICIRELAIS_CREATE_TRACKING }}</a>{% endif %}
 			</td>
 		</tr>
 		</tr>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 39450 2014-01-07 17:21:14Z gboussin $
+// $Id: emails.php 39495 2014-01-14 11:08:09Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -82,8 +82,9 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$mail_header .= "MIME-Version: 1.0" . $eol;
 	if (!empty($from)) {
 		// Au cas où $from ait plusieurs adresses emails (variable support par exemple)
-		if ($from == $GLOBALS['support']) {
-			$nom_expediteur = trim(vb($GLOBALS['site_parameters']['nom_expediteur']));
+		if ($from == $GLOBALS['support'] && !empty($GLOBALS['site_parameters']['nom_expediteur'])) {
+			$email_name_rules = array("\r" => '', "\n" => '', "\t" => '', '"' => "'", ',' => '', '<' => '[', '>' => ']');
+			$nom_expediteur = strtr($GLOBALS['site_parameters']['nom_expediteur'], $email_name_rules);
 		} else {
 			$nom_expediteur = '';
 		}
@@ -91,9 +92,9 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$from = trim($from_array[0]);
 		// création du header de l'email
 		if (!empty($nom_expediteur)) {
-			$mail_header .= "From: " . $nom_expediteur . ' <' . $from . '>' . $eol;
+			$mail_header .= 'From: "' . $nom_expediteur . '" <' . $from . '>' . $eol;
 		} else {
-			$mail_header .= "From: " . $from . $eol;
+			$mail_header .= 'From: ' . $from . $eol;
 		}
 		if (!empty($reply_to)) {
 			// Au cas où $reply_to ait plusieurs adresses emails (variable support par exemple)

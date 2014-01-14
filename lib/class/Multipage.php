@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: Multipage.php 39495 2014-01-14 11:08:09Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 39443 2014-01-06 16:44:24Z sdelaporte $
+ * @version $Id: Multipage.php 39495 2014-01-14 11:08:09Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -142,10 +142,10 @@ class Multipage {
 				if(!empty($this->nombre_session_var_name)){
 					$_SESSION[$this->nombre_session_var_name] = $_GET['nombre'];
 				}
-				if (empty($_POST) && !defined('IN_PEEL_ADMIN') && String::strpos(get_current_url(true), 'nombre=' . urlencode($_GET['nombre'])) !== false) {
-					// L'URL contient bien en GET nombre=... (sans qu'il ne soit dans une URL réécrite)
+				if (empty($_POST) && !defined('IN_PEEL_ADMIN') && String::strpos(get_current_url(true), 'nombre=' . urlencode($_GET['nombre'])) !== false && (empty($_GET['multipage']) || $_GET['multipage'] == $this->nombre_session_var_name)) {
+					// L'URL contient bien en GET nombre=... (sans qu'il ne soit dans une URL réécrite) et qui s'applique au multipage souhaité
 					// On fait une redirection 302 pour éviter que cette URL ne soit indexée
-					redirect_and_die(get_current_url(true, false, array('nombre')));
+					redirect_and_die(get_current_url(true, false, array('nombre', 'multipage')));
 				}
 			}
 			$ResultsPerPage = $this->DefaultResultsPerPage;
@@ -285,7 +285,7 @@ class Multipage {
 			if (strpos($link, '[NOMBRE]') !== false) {
 				$link = str_replace('[NOMBRE]', String::rawurlencode($nombre), $link);
 			} else {
-				$link .= (strstr($link, '?') ? '&' : '?') . 'nombre=' . urlencode($nombre);
+				$link .= (strstr($link, '?') ? '&' : '?') . 'nombre=' . urlencode($nombre) . '&multipage=' . $this->nombre_session_var_name;
 			}
 		}
 		return $link;

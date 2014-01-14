@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: configuration.inc.php 39495 2014-01-14 11:08:09Z sdelaporte $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -87,7 +87,7 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.1.3');
+define('PEEL_VERSION', '7.1.4');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -384,7 +384,7 @@ if (function_exists('array_walk_recursive')) {
 }
 if (((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($_GET['devise']) || !empty($_GET['nombre'])) && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) {
 	// Page de MAJ du cache : les moteurs ne doivent pas pouvoir activer ou référencer ces pages => redirection 301
-	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre')), true);
+	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre', 'multipage')), true);
 }
 
 if (IN_INSTALLATION >= 4 && empty($_SESSION['session_install_finished'])) {

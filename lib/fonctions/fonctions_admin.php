@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: fonctions_admin.php 39495 2014-01-14 11:08:09Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1170,7 +1170,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				$commande['adresse_' . $state] = vb($user_array['adresse']);
 				$commande['zip_' . $state] = vb($user_array['code_postal']);
 				$commande['ville_' . $state] = vb($user_array['ville']);
-				$commande['pays_' . $state] = vn(get_country_name($user_array['pays']));
+				$commande['pays_' . $state] = get_country_name(vn($user_array['pays']));
 			}
 			$commande['id_utilisateur'] = vn($user_id);
 			$commande['intracom_for_billing'] = vb($user_array['intracom_for_billing']);
@@ -1207,8 +1207,8 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			}
 		} else {
 			// Nouvelle commande : valeurs par défaut
-			$commande['pays_bill'] = vb(get_country_name(vn($GLOBALS['site_parameters']['default_country_id'])));
-			$commande['pays_ship'] = vb(get_country_name(vn($GLOBALS['site_parameters']['default_country_id'])));
+			$commande['pays_bill'] = get_country_name(vn($GLOBALS['site_parameters']['default_country_id']));
+			$commande['pays_ship'] = get_country_name(vn($GLOBALS['site_parameters']['default_country_id']));
 			$commande['zone_tva'] = 1;
 		}
 		if (!empty($commande['numero'])) {
@@ -1273,7 +1273,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl->assign('e_datetime', (empty($e_datetime) ? "" : vb($e_datetime)));
 			$tpl->assign('f_datetime', (empty($f_datetime) ? "" : vb($f_datetime)));
 			$tpl->assign('intracom_for_billing', vb($commande['intracom_for_billing']));
-			$tpl->assign('commande_date', vb(get_formatted_date(vb($commande['o_timestamp']))));
+			$tpl->assign('commande_date', get_formatted_date(vb($commande['o_timestamp'])));
 			$tpl->assign('email_href', $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . vn($commande['id_utilisateur']));
 			$tpl->assign('email', vb($commande['email']));
 		} else {
@@ -1285,7 +1285,12 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('is_icirelais_module_active', is_icirelais_module_active());
 		$tpl->assign('is_tnt_module_active', is_tnt_module_active());
 		if (is_icirelais_module_active()) {
+			$tpl->assign('icirelais', array(
+				'src' => $GLOBALS['wwwroot'] . '/modules/icirelais/js/icirelais.js',
+				'value' => vb($commande['delivery_tracking'])
+			));
 			$tpl->assign('STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE', $GLOBALS['STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE']);
+			$tpl->assign('MODULE_ICIRELAIS_SETUP_TRACKING_URL', MODULE_ICIRELAIS_SETUP_TRACKING_URL);
 			$tpl->assign('STR_MODULE_ICIRELAIS_COMMENT_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_COMMENT_TRACKING']);
 			$tpl->assign('STR_MODULE_ICIRELAIS_ERROR_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_ERROR_TRACKING']);
 			$tpl->assign('STR_MODULE_ICIRELAIS_CREATE_TRACKING', $GLOBALS['STR_MODULE_ICIRELAIS_CREATE_TRACKING']);
@@ -1295,8 +1300,8 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl->assign('payment_select', get_payment_select(vb($commande['payment_technical_code'])));
 		}
 
-		$tpl->assign('payment_status_options', vb(get_payment_status_options(vn($commande['id_statut_paiement']))));
-		$tpl->assign('delivery_status_options', vb(get_delivery_status_options(vn($commande['id_statut_livraison']))));
+		$tpl->assign('payment_status_options', get_payment_status_options(vn($commande['id_statut_paiement'])));
+		$tpl->assign('delivery_status_options', get_delivery_status_options(vn($commande['id_statut_livraison'])));
 
 		$tpl->assign('devise', vb($commande['devise']));
 		$tpl->assign('mode_transport', vn($GLOBALS['site_parameters']['mode_transport']));
@@ -1926,7 +1931,7 @@ function save_commande_in_database($frm)
 	} else {
 		// Récupération des données du formulaire
 		$cout_transport = get_float_from_user_input(vn($frm['cout_transport']), $frm['currency_rate']);
-		$cout_transport_ht = vn($cout_transport) / (1 + vn(get_float_from_user_input(vn($frm['tva_transport']))) / 100);
+		$cout_transport_ht = vn($cout_transport) / (1 + get_float_from_user_input(vn($frm['tva_transport'])) / 100);
 	}
 	// On récupère le type de transport
 	if (!empty($frm['type_transport'])) {

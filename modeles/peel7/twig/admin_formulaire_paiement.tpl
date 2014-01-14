@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_paiement.tpl 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: admin_formulaire_paiement.tpl 39496 2014-01-14 11:12:08Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -61,11 +61,11 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_TARIFS_MINIMAL_TOTAL }} ({{ site_symbole }} {{ STR_TTC }}){{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="totalmin" style="width:100px" value="{{ totalmin|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="totalmin" style="width:100px" value="{{ totalmin|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_TARIFS_MAXIMAL_TOTAL }} ({{ site_symbole }} {{ STR_TTC }}){{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" name="totalmax" style="width:100px" value="{{ totalmax|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="totalmax" style="width:100px" value="{{ totalmax|str_form_value }}" /></td>
 		</tr>
 		{% if is_payback_module_active %}
 		<tr>

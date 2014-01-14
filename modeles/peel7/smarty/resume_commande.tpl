@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: resume_commande.tpl 39443 2014-01-06 16:44:24Z sdelaporte $
+// $Id: resume_commande.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
 *}<h2>{$STR_ORDER_DETAIL}</h2>
 <table class="full_width" cellpadding="3">
 	<caption></caption>
@@ -53,7 +53,7 @@
 			{if isset($icirelais)}
 			<script src="{$icirelais.src|escape:'html'}"></script>
 			<input id="delivery_tracking" name="delivery_tracking" type="hidden" value="{$icirelais.value|str_form_value}" />
-			<div id="tracking_url"></div><a href="javascript:setTracking('{$STR_MODULE_ICIRELAIS_CONFIGURATION_TRACKING_URL_TITLE|filtre_javascript:true:true:true}','{$STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript:true:true:true}','{$STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript:true:true:true}')">{$STR_MODULE_ICIRELAIS_CREATE_TRACKING}</a>
+			<div id="tracking_url"></div><a href="javascript:setTracking('{$MODULE_ICIRELAIS_SETUP_TRACKING_URL|filtre_javascript:true:true:true}','{$STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript:true:true:true}','{$STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript:true:true:true}')">{$STR_MODULE_ICIRELAIS_CREATE_TRACKING}</a>
 			{/if}
 		</td>
 	</tr>
