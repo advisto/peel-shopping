@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_nl.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_name_nl.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -51,8 +51,8 @@ $peel_email_template["name"] = array(
   "cree_cheque_cadeau_client_type2" => "[FRIEND] biedt u een cadeaubon aan (bedrag)",
   "cree_cheque_cadeau_client_admin" => "Creëren van een cadeaubon",
   "gift_list" => "Lijst van geschenken",
-  "email_ordered_cadeaux" => "Opdracht in uw giftlijst \"[LIST_NAME]\"",
-  "listecadeau_voir" => "Opdracht in uw giftlijst \"[LIST_NAME]\"",
+  "email_ordered_cadeaux" => "Opdracht in uw giftlijst \"[GIFTLIST_NAME]\"",
+  "listecadeau_voir" => "Opdracht in uw giftlijst \"[GIFTLIST_NAME]\"",
   "parrainage" => "[PSEUDO] wil u sponsoren",
   "email_alerte" => "Product op voorraad op [SITE]",
   "decremente_stock" => "Waarschuwingsbericht STOCK",
@@ -71,4 +71,3 @@ $peel_email_template["name"] = array(
   "cron_update_contact_info" => "Bevestiging van de geldigheid van uw informatie"
 );
 
-?>

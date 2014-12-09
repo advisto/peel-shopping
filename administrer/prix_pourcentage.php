@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix_pourcentage.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: prix_pourcentage.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['percent_prod']) && is_numeric($_POST['percent_prod']) && !empty($_POST['for_price'])) {
@@ -55,17 +55,17 @@ if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['pe
 			}
 			query ('UPDATE peel_produits
 				SET  ' . $sql_set . '
-				WHERE ' . $sql_where);
+				WHERE ' . get_filter_site_cond('produits', null, true) .' AND ' . $sql_where);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK']))->fetch();
 		} elseif (!empty($_POST['produits'])) {
 			if (!in_array('all', $_POST['produits'])) {
-				$sql_where = 'WHERE id IN ("' . implode('","', nohtml_real_escape_string($_POST['produits'])) . '")';
+				$sql_where = ' id IN ("' . implode('","', nohtml_real_escape_string($_POST['produits'])) . '")';
 			} else {
-				$sql_where = ' WHERE 1';
+				$sql_where = ' 1';
 			}
 			query('UPDATE peel_produits
 				SET ' . $sql_set . '
-				' . $sql_where);
+				WHERE ' . get_filter_site_cond('produits', null, true) .' AND ' . $sql_where);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK']))->fetch();
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM']))->fetch();
@@ -86,7 +86,7 @@ $tpl_cats_options[] = array('value' => 'all',
 	);
 $q_select_cats = query('SELECT id, nom_' . $_SESSION['session_langue'] . '
 	FROM peel_categories
-	WHERE etat = "1"
+	WHERE etat = "1" AND ' . get_filter_site_cond('categories', null, true) . '
 	ORDER BY nom_' . $_SESSION['session_langue'] . '');
 while ($r_select_cats = fetch_assoc($q_select_cats)) {
 	$tpl_cats_options[] = array('value' => intval($r_select_cats['id']),
@@ -126,4 +126,3 @@ echo $tpl->fetch();
 
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

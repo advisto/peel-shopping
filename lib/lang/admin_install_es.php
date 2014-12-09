@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_es.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_install_es.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -35,7 +35,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "Usted tiene que estar de tu ho
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "Evite el uso de la raíz, y prefieren una contraseña mysql que son robustos y diferente de la contraseña de SSH para mayor seguridad";
 $GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Error: Por favor revise su información de idiomas y de conexión a la base de datos";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "Información: Usted puede especificar una URL para utilizar el cifrado HTTPS SSL sólo si su dominio tiene un certificado SSL válido configurado en el alojamiento.";
-$GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "URL Shop:";
+$GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "Sitio URL:";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Forzar el uso de SSL para la administración:";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN_NO"] = "No hacer fuerza";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN_YES"] = "Fuerza SSL (más seguro, https, pero debe ser funcional para el campo)";
@@ -66,7 +66,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FILE_MISSING"] = "Error archivo faltante";
 $GLOBALS["STR_ADMIN_INSTALL_FINISH_BUTTON"] = "Finalización de la instalación";
 $GLOBALS["STR_ADMIN_INSTALL_NOW_INSTALLED"] = "PEEL Shopping está instalado.";
 $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "Ahora se puede conectar a la interfaz de administración mediante los siguientes parámetros:";
-$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Una vez conectado, haga clic en Mi cuenta > Administrar el pie de página del sitio.";
+$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Una vez conectado, haga clic en \"Mi cuenta\" > \"Administrar\".";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Notas sobre la seguridad de su sitio:";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "REQUERIDO: Elimine el directorio de instalación para empezar a trabajar";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "MUY RECOMENDADO: Para la seguridad de su sitio, cambie el nombre del directorio => En la pagina \"Variables de configuración\", cambie la variable \"backoffice_directory_name\" de \"{$GLOBALS['site_parameters']['backoffice_directory_name']}\" a un nombre difícil de adivinar, y despues cambiar este directorio con FTP.";
@@ -78,4 +78,3 @@ $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Usted tendrá que cambiar man
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Usted tendrá que cambiar manualmente la codificación de la página - PEEL contacto: contact@peel.fr o +33 (0)  1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "La operación será normal, excepto que el módulo Butterflive no funcionarán";
 
-?>

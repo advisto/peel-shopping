@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bdd.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: bdd.php 43147 2014-11-07 14:47:12Z gboussin $
 define('IN_INSTALLATION', 2);
 include("../configuration.inc.php");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_INSTALL_STEP2_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_INSTALL_STEP2_TITLE'];
 unset($_SESSION['session_install_finished']);
 
 if (!isset($_SESSION['session_admin_ssl']) && (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')) {
@@ -43,22 +43,27 @@ foreach($GLOBALS['available_languages'] as $this_lang){
 asort($GLOBALS['select_languages']);
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('installation_bdd.tpl');
-$tpl->assign('step_title', $DOC_TITLE);
+$tpl->assign('step_title', $GLOBALS['DOC_TITLE']);
 $tpl->assign('confirm_message', $confirm_message);
 $tpl->assign('url_installation', str_replace('http://', 'https://', $detected_wwwroot . '/installation/'));
 $tpl->assign('ssl_admin_explain', (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off'));
 $tpl->assign('admin_force_ssl_selected', !empty($_SESSION['session_admin_ssl']));
 $tpl->assign('wwwroot_value', (!empty($_SESSION['session_install_wwwroot'])?$_SESSION['session_install_wwwroot']:$GLOBALS['detected_wwwroot']));
+$tpl->assign('site_name_value', (!empty($_SESSION['session_install_site_name'])?$_SESSION['session_install_site_name']:''));
+$tpl->assign('email_webmaster_value', (!empty($_SESSION['session_install_email_webmaster'])?$_SESSION['session_install_email_webmaster']:''));
 $tpl->assign('serveur_value', (!empty($_SESSION['session_install_serveur'])?$_SESSION['session_install_serveur']:'localhost'));
 $tpl->assign('utilisateur_value', (!empty($_SESSION['session_install_utilisateur'])?$_SESSION['session_install_utilisateur']:''));
 $tpl->assign('motdepasse_value', (!empty($_SESSION['session_install_motdepasse'])?$_SESSION['session_install_motdepasse']:''));
 $tpl->assign('select_languages', $GLOBALS['select_languages']);
 $tpl->assign('install_langs_value', (!empty($_SESSION['session_install_langs'])?$_SESSION['session_install_langs']:$_SESSION['session_langue']));
+$tpl->assign('STR_ADMIN_SITES_GENERAL_PARAMETERS', $GLOBALS['STR_ADMIN_SITES_GENERAL_PARAMETERS']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_INTRO_1', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_INTRO_1']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_INTRO_2', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_INTRO_2']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_INTRO_3', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_INTRO_3']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_INTRO_4', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_INTRO_4']);
 $tpl->assign('STR_ADMIN_INSTALL_ERROR_CONNEXION', $GLOBALS['STR_ADMIN_INSTALL_ERROR_CONNEXION']);
+$tpl->assign('STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL', $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL']);
+$tpl->assign('STR_ADMIN_SITES_SITE_NAME', $GLOBALS['STR_ADMIN_SITES_SITE_NAME']);
 $tpl->assign('STR_ERR_FILL_IN_ALL', $GLOBALS['STR_ERR_FILL_IN_ALL']);
 $tpl->assign('STR_ADMIN_INSTALL_EXPLAIN_SSL', $GLOBALS['STR_ADMIN_INSTALL_EXPLAIN_SSL']);
 $tpl->assign('STR_ADMIN_INSTALL_URL_STORE', $GLOBALS['STR_ADMIN_INSTALL_URL_STORE']);
@@ -79,5 +84,3 @@ $output = $tpl->fetch();
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
-
-?>

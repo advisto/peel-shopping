@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_commande_liste.tpl 43121 2014-11-05 17:44:12Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}{$STR_BEFORE_TWO_POINTS}: {$links_nbRecord}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div style="margin-top: 15px; margin-bottom: 15px">
@@ -68,26 +68,35 @@
 			{foreach $results as $res}
 			{$res.tr_rollover}
 				<td class="center">
-					<a href="commander.php?mode=modif&amp;commandeid={$res.order_id}">{$STR_MODIFY}</a><br />
+					<a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$STR_MODIFY}</a><br />
 				{if $is_duplicate_module_active}
 					<a href="{$res.dup_href|escape:'html'}" data-confirm="{$STR_ADMIN_ORDER_DUPLICATE_WARNING|str_form_value}" title="{$STR_ADMIN_ORDER_DUPLICATE|str_form_value}"><img src="{$res.dup_src|escape:'html'}" alt="" /></a>
 				{/if}
 				</td>
 				<td class="center">{$res.order_id}</td>
-				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={$res.order_id}">{$res.numero|default:'&nbsp;'}</a></td>
+				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$res.numero|default:'&nbsp;'}</a></td>
 				<td class="center">{$res.date}</td>
 				<td class="center">{$res.montant_prix}</td>
 				<td class="center">{$res.avoir_prix}</td>
 				<td class="center">{$res.modifUser}</td>
-				<td class="center"><input type="checkbox" name="change_statut{$res.order_id}" id="checkbox_tbl_{$res.order_id}" value="1" /></td>
+				<td class="center"><input type="checkbox" name="change_statut{$res.id}" id="checkbox_tbl_{$res.id}" value="1" /></td>
 				<td class="center">{$res.payment_name}</td>
-				<td class="center"><input type="hidden" name="id[]" value="{$res.order_id|str_form_value}" />
+				<td class="center"><input type="hidden" name="id[]" value="{$res.id|str_form_value}" />
 					{$res.payment_status_name}
 				</td>
-				<td class="center">{$res.delivery_status_name}</td>
+				{if !empty($res.picto_delivery_status_array)}
+					<td class="center">
+					{foreach $res.picto_delivery_status_array as $this_delivery_status_array}
+						<img class="change_status change_status_{$res.id}" src="{$this_delivery_status_array.etat_src|escape:'html'}" alt="" onclick="{$this_delivery_status_array.etat_onclick|escape:'html'}" />
+					{/foreach}
+					</td>
+				{else}
+					<td class="center">{$res.delivery_status_name}</td>
+				{/if}
 			{if $is_fianet_sac_module_active}
 				<td class="center"><center><table><tr><td>{$this_sac_status}</td></tr></table></center></td>
 			{/if}
+				<td class="center">{$res.site_name}</td>
 			</tr>
 			{/foreach}
 		</table>

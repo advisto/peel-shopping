@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,16 +24,19 @@ if (!defined('IN_PEEL')) {
  * @param integer $noise_max_size
  * @return
  */
-function securityCodeCreate($code, $fileName, $noise_level = 1000, $noise_max_size = 3)
+function securityCodeCreate($code, $fileName, $noise_level = null, $noise_max_size = 3)
 {
-	// Parametres
+	// Paramètres
 	$font = $GLOBALS['dirroot'] . "/modules/captcha/security_codes/bkant.ttf";
+	if($noise_level === null) {
+		$noise_level = 1000;
+	}
 	$fontSize = 25;
 	$imageWidth = 200;
 	$imageHeight = 70;
 	// Create image
 	$image = imagecreatetruecolor($imageWidth, $imageHeight);
-	// On créé une image
+	// On crée une image
 	$colorWhite = imagecolorallocate($image, 255, 255, 255);
 	$colorBlack = imagecolorallocate($image, 0, 0, 0);
 	// On la remplit de blanc
@@ -49,7 +52,7 @@ function securityCodeCreate($code, $fileName, $noise_level = 1000, $noise_max_si
 		imagettftext ($image, $fontSize, $f_rand, $x_rand, $y_rand, $color, $font, $code{$i});
 	}
 	for($i = 1;$i <= $noise_level;$i++) {
-		// Boucle pour faire 200 points de $color
+		// Boucle pour faire $noise_level points de $color
 		$x = mt_rand(0, $imageWidth);
 		$y = mt_rand(0, $imageHeight);
 		$color = imagecolorallocate($image, mt_rand(0, 180), mt_rand(0, 180), mt_rand(0, 180));
@@ -107,10 +110,10 @@ function get_captcha_inside_form(&$frm)
 			SET code="' . nohtml_real_escape_string($code) . '", time="' . time() . '"');
 		$code_id = insert_id();
 		$codeSecurityPath = sprintf($codeSecurityPath, $code_id);
-		securityCodeCreate($code, $GLOBALS['dirroot'] . $codeSecurityPath);
+		securityCodeCreate($code, $GLOBALS['dirroot'] . $codeSecurityPath, vn($GLOBALS['site_parameters']['captcha_noise_level'], 1000),  vn($GLOBALS['site_parameters']['captcha_noise_max_size'], 2));
 	}
 
-	$output .= '<img src="' . $GLOBALS['wwwroot'] . $codeSecurityPath . '" alt="Captcha" /><input type="hidden" name="code_id" value="' . intval($code_id) . '" />';
+	$output .= '<img src="' . $GLOBALS['wwwroot'] . $codeSecurityPath . '" alt="Captcha" class="well" style="padding:0px; margin-bottom:0px" /><input type="hidden" name="code_id" value="' . intval($code_id) . '" />';
 	return $output;
 }
 
@@ -152,7 +155,7 @@ function delete_captcha($form_object_id)
  * @param integer $older_than_hours
  * @return
  */
-function clean_security_codes($older_than_hours = 12)
+function clean_security_codes($older_than_hours = 4)
 {
 	// On supprime tout ce qui dépasse $older_than_hours heures
 	query('DELETE FROM peel_security_codes
@@ -160,7 +163,7 @@ function clean_security_codes($older_than_hours = 12)
 	$dir = $GLOBALS['dirroot'] . '/modules/captcha/security_codes/';
 	$i = 0;
 	if ($handle = opendir($dir)) {
-		while ($file = readdir($handle)) {
+		while (false !== ($file = readdir($handle))) {
 			// On supprime les anciens fichiers de plus de $older_than_hours heures qui ne sont pas des fichiers de typo (.ttf)
 			if ($file != '.' && $file != '..' && $file[0] != '.' && String::strpos($file, '.ttf') === false && filemtime($dir . $file) < time() - 3600 * $older_than_hours) {
 				@unlink($dir . $file);
@@ -174,4 +177,3 @@ function clean_security_codes($older_than_hours = 12)
 	}
 }
 
-?>

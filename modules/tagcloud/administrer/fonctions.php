@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -52,7 +52,7 @@ function affiche_formulaire_modif_recherche($id, &$frm)
 		/* Charge les informations de la recherche */
 		$qid = query("SELECT *
 			FROM peel_tag_cloud
-			WHERE id=" . intval($id));
+			WHERE id=" . intval($id) . " AND " . get_filter_site_cond('tag_cloud', null, true));
 		$frm = fetch_assoc($qid);
 	}
 	$frm['id'] = $id;
@@ -81,7 +81,8 @@ function affiche_formulaire_recherche(&$frm)
 	$tpl->assign('titre', $frm["titre"]);
 	$tpl_options = array();
 	$sql = "SELECT lang, nom_" . $_SESSION['session_langue'] . " AS name
-		FROM peel_langues";
+		FROM peel_langues
+		WHERE " . get_filter_site_cond('langues', null, true);
 	$query = query($sql);
 	while ($lang = fetch_object($query)) {
 		$tpl_options[] = array(
@@ -91,6 +92,8 @@ function affiche_formulaire_recherche(&$frm)
 		);
 	}
 	$tpl->assign('options', $tpl_options);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_TAGCLOUD_ADMIN_TAG_NAME', $GLOBALS['STR_MODULE_TAGCLOUD_ADMIN_TAG_NAME']);
 	$tpl->assign('STR_MODULE_TAGCLOUD_ADMIN_SEARCHES_COUNT', $GLOBALS['STR_MODULE_TAGCLOUD_ADMIN_SEARCHES_COUNT']);
@@ -107,7 +110,7 @@ function affiche_formulaire_recherche(&$frm)
 function supprime_recherche($id)
 {
 	query("DELETE FROM peel_tag_cloud
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('tag_cloud', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MODULE_TAGCLOUD_ADMIN_MSG_SEARCH_DELETED_OK']))->fetch();
 }
 
@@ -123,10 +126,12 @@ function insere_recherche($frm)
 			tag_name
 			, lang
 			, nbsearch
+			, site_id
 		) VALUES (
 			'" . nohtml_real_escape_string($frm['tag_name']) . "'
 			,'" . nohtml_real_escape_string($frm['lang']) . "'
 			,'" . nohtml_real_escape_string($frm['nbsearch']) . "'
+			,'" . nohtml_real_escape_string($frm['site_id']) . "'
 		)");
 }
 
@@ -142,8 +147,9 @@ function maj_recherche($id, $frm)
 	query("UPDATE peel_tag_cloud
 		SET	tag_name = '" . nohtml_real_escape_string($frm['tag_name']) . "',
 			lang = '" . nohtml_real_escape_string($frm['lang']) . "',
-			nbsearch = '" . nohtml_real_escape_string($frm['nbsearch']) . "'
-		WHERE id = " . intval($id));
+			nbsearch = '" . nohtml_real_escape_string($frm['nbsearch']) . "', 
+			site_id = '" . nohtml_real_escape_string($frm['site_id']) . "'
+		WHERE id = " . intval($id) . " AND " . get_filter_site_cond('tag_cloud', null, true));
 }
 
 /**
@@ -156,6 +162,7 @@ function affiche_liste_recherche($start)
 {
 	$sql = "SELECT *
 		FROM peel_tag_cloud
+		WHERE " . get_filter_site_cond('tag_cloud', null, true) . "
 		ORDER BY nbsearch DESC";
 	$Links = new Multipage($sql, 'tagcloud');
 	$results_array = $Links->query();
@@ -207,7 +214,7 @@ function get_tag_cloud($id)
 {
 	$r_tag = query("SELECT *
 		FROM peel_tag_cloud
-		WHERE id = '".intval($id)."'");
+		WHERE id = '".intval($id)."' AND " . get_filter_site_cond('tag_cloud', null, true));
 	if ( !empty($r_tag) )  {
 		$tag = fetch_assoc($r_tag);
 	} else {
@@ -215,5 +222,3 @@ function get_tag_cloud($id)
 	}
 	return $tag;
 }
-
-?>

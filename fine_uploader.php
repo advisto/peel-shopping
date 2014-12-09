@@ -1,16 +1,16 @@
 <?php
-// This file should be in UTF8 without BOM - Accents examples: éèê
+// This file should be in UTF8 without BOM - Accents examples: Ã©Ã¨Ãª
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fine_uploader.php 43477 2014-12-02 12:23:38Z gboussin $
 
 include("configuration.inc.php");
 
@@ -44,7 +44,7 @@ $save_full_path = $GLOBALS['dirroot'].$save_path;
 $rename_file = false; // Si false : on ne fait que retraiter le nom de base
 $extension = String::strtolower(pathinfo($uploader->getName(), PATHINFO_EXTENSION));
 if (empty($new_file_name_without_extension)) {
-	// Si aucun nom forcé, on en crée un
+	// Si aucun nom forcÃ©, on en crÃ©e un
 	$new_file_name_without_extension = format_filename_base($uploader->getName(), $rename_file);
 }
 $the_new_file_name = $new_file_name_without_extension . '.' . $extension;
@@ -58,16 +58,18 @@ if($uploader->inputName == 'name1') {
 }
 if($load) {
 	// To save the upload with a specified name, set the second parameter.
+	@ignore_user_abort(true);
+	@set_time_limit(0);
 	$result = $uploader->handleUpload($save_full_path, $the_new_file_name);
 
 	// To return a name used for uploaded file you can use the following line.
 	$result['uploadName'] = $uploader->getUploadName();
 	
 	if (!empty($GLOBALS['site_parameters']['extensions_valides_image']) && in_array($extension, $GLOBALS['site_parameters']['extensions_valides_image'])) {
-		// Les fichiers image sont convertis en jpg uniquement si nécessaire - sinon on garde le fichier d'origine
+		// Les fichiers image sont convertis en jpg uniquement si nÃ©cessaire - sinon on garde le fichier d'origine
 		$the_new_jpg_name = $new_file_name_without_extension . '.jpg';
-		// On charge l'image, et si sa taille est supérieure à $destinationW ou $destinationH, ou si elle fait plus de $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'] octets, on doit la régénèrer (sinon on la garde telle qu'elle était)
-		// Si on est dans le cas où on la regénère, on la convertit en JPEG à qualité $GLOBALS['site_parameters']['jpeg_quality'] % (par défaut dans PHP c'est 75%, et dans PEEL on utilise 88% par défaut) et on la sauvegarde sous son nouveau nom
+		// On charge l'image, et si sa taille est supÃ©rieure Ã  $destinationW ou $destinationH, ou si elle fait plus de $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'] octets, on doit la rÃ©gÃ©nÃ¨rer (sinon on la garde telle qu'elle Ã©tait)
+		// Si on est dans le cas oÃ¹ on la regÃ©nÃ¨re, on la convertit en JPEG Ã  qualitÃ© $GLOBALS['site_parameters']['jpeg_quality'] % (par dÃ©faut dans PHP c'est 75%, et dans PEEL on utilise 88% par dÃ©faut) et on la sauvegarde sous son nouveau nom
 		$image_resize_result = image_resize($save_full_path . '/' . $the_new_file_name, $save_full_path . '/' . $the_new_jpg_name, $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], false, true, $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'], $GLOBALS['site_parameters']['jpeg_quality']);
 		if (!empty($image_resize_result)) {
 			// Le redimensionnement de l'image a eu lieu
@@ -79,7 +81,7 @@ if($load) {
 	} else {
 		$type = 'img';
 	}
-	// On renvoie le HTML qu'on veut afficher à la place du bouton upload
+	// On renvoie le HTML qu'on veut afficher Ã  la place du bouton upload
 	$tpl = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
 	$file_infos = array('name' => $result['uploadName'],
 			'form_name' => $uploader->inputName,
@@ -94,8 +96,7 @@ if($load) {
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$result['html'] = $tpl->fetch();
 	
-	// On renvoie le résultat au jQuery
+	// On renvoie le rÃ©sultat au jQuery
 	header("Content-Type: text/plain");
 	echo json_encode($result);
 }
-?>

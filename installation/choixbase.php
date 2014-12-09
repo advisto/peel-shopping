@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: choixbase.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: choixbase.php 43147 2014-11-07 14:47:12Z gboussin $
 define('IN_INSTALLATION', 3);
 include("../configuration.inc.php");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_INSTALL_STEP3_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_INSTALL_STEP3_TITLE'];
 $error_message = '';
 unset($_SESSION['session_install_finished']);
 
@@ -23,11 +23,15 @@ if (isset($_POST['serveur'])) $_SESSION['session_install_serveur'] = $_POST['ser
 if (isset($_POST['utilisateur'])) $_SESSION['session_install_utilisateur'] = $_POST['utilisateur'];
 if (isset($_POST['motdepasse'])) $_SESSION['session_install_motdepasse'] = $_POST['motdepasse'];
 if (isset($_POST['langs'])) $_SESSION['session_install_langs'] = $_POST['langs'];
+if (isset($_POST['site_name'])) $_SESSION['session_install_site_name'] = $_POST['site_name'];
+if (isset($_POST['email_webmaster'])) $_SESSION['session_install_email_webmaster'] = $_POST['email_webmaster'];
 
-if ((isset($_POST['langs']) && empty($_POST['langs'])) || (isset($_POST['wwwroot']) && empty($_POST['wwwroot'])) || (isset($_POST['serveur']) && empty($_POST['serveur'])) || (isset($_POST['utilisateur']) && empty($_POST['utilisateur']))) {
+if ((isset($_POST['langs']) && empty($_POST['langs'])) || (isset($_POST['site_name']) && empty($_POST['site_name'])) || (isset($_POST['email_webmaster']) && empty($_POST['email_webmaster'])) || (isset($_POST['serveur']) && empty($_POST['serveur'])) || (isset($_POST['utilisateur']) && empty($_POST['utilisateur']))) {
 	redirect_and_die("bdd.php?err=empty");
 }
-if (!empty($_POST['wwwroot'])) {
+// On accepte wwwroot vide : dans ce cas, c'est une configuration pour multiboutique.
+// Elle marche aussi pour les boutiques seules, mais cela permet moins de vérifications par rapport à la détection automatique de chemin
+if (isset($_POST['wwwroot'])) {
 	while (!empty($_POST['wwwroot']) && String::substr($_POST['wwwroot'], - 1) == '/') {
 		// Suppression du / à la fin le cas si nécessaire
 		$_POST['wwwroot'] = String::substr($_POST['wwwroot'], 0, strlen($_POST['wwwroot']) - 1);
@@ -35,27 +39,24 @@ if (!empty($_POST['wwwroot'])) {
 	$_SESSION['session_install_wwwroot'] = $_POST['wwwroot'];
 }
 
-if (empty($_SESSION['session_install_serveur']) || empty($_SESSION['session_install_utilisateur']) || @mysql_connect($_SESSION['session_install_serveur'], $_SESSION['session_install_utilisateur'], $_SESSION['session_install_motdepasse']) === false) {
+if (empty($_SESSION['session_install_serveur']) || empty($_SESSION['session_install_utilisateur'])) {
 	redirect_and_die("bdd.php?err=1");
 }
-$i = 0;
-$listbdd = @mysql_list_dbs();
-$available_databases = array();
-if ($listbdd) {
-	while ($row = mysql_fetch_object($listbdd)) {
-		if ($row->Database == 'information_schema') {
-			continue;
-		}
-		$available_databases[] = $row->Database;
-		$i++;
-	}
+$GLOBALS['serveur_mysql'] = $_SESSION['session_install_serveur'];
+$GLOBALS['utilisateur_mysql'] = $_SESSION['session_install_utilisateur'];
+$GLOBALS['mot_de_passe_mysql'] = $_SESSION['session_install_motdepasse'];
+db_connect($GLOBALS['database_object'], false);
+if (!$GLOBALS['database_object']) {
+	redirect_and_die("bdd.php?err=1");
 }
+
+$available_databases = list_dbs();
 if (isset($_GET['err']) && $_GET['err']) {
 	$error_message .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_DATABASE_NO_ACCESS']))->fetch();
 }
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('installation_choixbase.tpl');
-$tpl->assign('step_title', $DOC_TITLE);
+$tpl->assign('step_title', $GLOBALS['DOC_TITLE']);
 $tpl->assign('available_databases', $available_databases);
 $tpl->assign('error_message', $error_message);
 $tpl->assign('selected_database', vb($_SESSION['session_install_choixbase']));
@@ -65,11 +66,9 @@ $tpl->assign('STR_ADMIN_INSTALL_DATABASE_SELECT', $GLOBALS['STR_ADMIN_INSTALL_DA
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_PLEASE_CLEAN_BEFORE_INSTALL', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_PLEASE_CLEAN_BEFORE_INSTALL']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_ADVISE_SPECIFIC', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_ADVISE_SPECIFIC']);
 $tpl->assign('STR_CONTINUE', $GLOBALS['STR_CONTINUE']);
-$tpl->assign('step_title', $DOC_TITLE);
+$tpl->assign('step_title', $GLOBALS['DOC_TITLE']);
 $output = $tpl->fetch();
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
-
-?>

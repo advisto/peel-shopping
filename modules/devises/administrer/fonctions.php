@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,6 +33,7 @@ function affiche_formulaire_ajout_devise($frm)
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
+	$frm['site_id'] = "";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_ADD'];
 
 	affiche_formulaire_devise($frm);
@@ -51,7 +52,7 @@ function affiche_formulaire_modif_devise($id, $frm)
 		/* Charge les informations de la devise */
 		$qid = query("SELECT * 
 			FROM peel_devises 
-			WHERE id = '" . intval($id) . "'");
+			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('devises', null, true) . "");
 		$frm = fetch_assoc($qid);
 	}
 	$frm['id'] = $id;
@@ -80,6 +81,8 @@ function affiche_formulaire_devise($frm)
 	$tpl->assign('symbole_parameters', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('conversion', $frm["conversion"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_TITLE', $GLOBALS['STR_MODULE_DEVISES_ADMIN_TITLE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
@@ -104,10 +107,10 @@ function supprime_devise($id)
 {
 	$qid = query("SELECT devise 
 		FROM peel_devises 
-		WHERE id='" . intval($id) . "'");
+		WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('devises', null, true) . "");
 	$col = fetch_assoc($qid);
 	/* Efface la devise */
-	query("DELETE FROM peel_devises WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_devises WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('devises', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_MSG_DELETED_OK'], $col['devise'])))->fetch();
 }
 
@@ -121,6 +124,7 @@ function insere_devise($frm)
 {
 	$sql = "INSERT INTO peel_devises (
 			etat
+			, site_id
 			, symbole
 			, symbole_place
 			, devise
@@ -128,10 +132,11 @@ function insere_devise($frm)
 			, code
 		) VALUES (
 			'" . intval($frm['etat']) . "'
-			,'" . nohtml_real_escape_string($frm['symbole']) . "'
-			,'" . nohtml_real_escape_string($frm['symbole_place']) . "'
+			, '" . intval($frm['site_id']) . "'
+			, '" . nohtml_real_escape_string($frm['symbole']) . "'
+			, '" . nohtml_real_escape_string($frm['symbole_place']) . "'
 			, '" . nohtml_real_escape_string($frm['devise']) . "'
-			,'" . nohtml_real_escape_string(floatval(str_replace(",", ".", $frm['conversion']))) . "'
+			, '" . nohtml_real_escape_string(floatval(str_replace(",", ".", $frm['conversion']))) . "'
 			, '" . nohtml_real_escape_string($frm['code']) . "'
 		)";
 	query($sql);
@@ -149,8 +154,15 @@ function maj_devise($id, $frm)
 	$conversion = str_replace(",", ".", $frm['conversion']);
 	$conversion = floatval($conversion);
 
-	$sql = "UPDATE peel_devises SET etat = '" . intval($frm['etat']) . "', symbole = '" . nohtml_real_escape_string($frm['symbole']) . "', symbole_place = '" . nohtml_real_escape_string($frm['symbole_place']) . "', devise = '" . nohtml_real_escape_string($frm['devise']) . "', conversion = '" . nohtml_real_escape_string($conversion) . "',code = '" . nohtml_real_escape_string($frm['code']) . "'
-		WHERE id = '" . intval($id) . "'";
+	$sql = "UPDATE peel_devises 
+		SET etat = '" . intval($frm['etat']) . "'
+			, symbole = '" . nohtml_real_escape_string($frm['symbole']) . "'
+			, symbole_place = '" . nohtml_real_escape_string($frm['symbole_place']) . "'
+			, devise = '" . nohtml_real_escape_string($frm['devise']) . "'
+			, conversion = '" . nohtml_real_escape_string($conversion) . "'
+			, code = '" . nohtml_real_escape_string($frm['code']) . "'
+			, site_id = '" . intval($frm['site_id']) . "'
+		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('devises', null, true) . "";
 
 	query($sql);
 }
@@ -171,9 +183,11 @@ function affiche_liste_devise($start)
 	$tpl_results = array();
 	$result = query("SELECT * 
 		FROM peel_devises 
+		WHERE " . get_filter_site_cond('devises', null, true) . "
 		ORDER BY devise");
 	if (!(num_rows($result) == 0)) {
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
@@ -183,6 +197,7 @@ function affiche_liste_devise($start)
 				'symbole' => $ligne['symbole'],
 				'conversion' => $ligne['conversion'],
 				'code' => $ligne['code'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
 				'etat_onclick' => 'change_status("devises", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 			);
@@ -193,6 +208,7 @@ function affiche_liste_devise($start)
 	$tpl->assign('site_code', vb($GLOBALS['site_parameters']['code']));
 	$tpl->assign('modif_href', $GLOBALS['administrer_url'] . '/sites.php?mode=modif&id=1');
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY', sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY'], vb($GLOBALS['site_parameters']['code'])));
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN', $GLOBALS['STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_LIST_TITLE', $GLOBALS['STR_MODULE_DEVISES_ADMIN_LIST_TITLE']);
@@ -225,7 +241,7 @@ function update_currencies_rates($base_currency_code, $commission_percentage = 2
 	$output = '<b>'.sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_UPDATE_TITLE'], $commission_percentage).' :</b><br />';
 	$q = query("SELECT code, conversion
 		FROM peel_devises
-		WHERE code!='" . nohtml_real_escape_string($base_currency_code) . "'");
+		WHERE code!='" . nohtml_real_escape_string($base_currency_code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
 	while ($result = fetch_object($q)) {
 		unset($rate);
 		$rate = quote_xe_currency($result->code, $base_currency_code);
@@ -250,7 +266,7 @@ function update_currencies_rates($base_currency_code, $commission_percentage = 2
 		foreach($currency_update as $code => $rate) {
 			query("UPDATE peel_devises
 				SET conversion='" . str_replace(',', '.', $rate) . "'
-				WHERE code='" . nohtml_real_escape_string($code) . "'");
+				WHERE code='" . nohtml_real_escape_string($code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
 		}
 		$output = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $output))->fetch();
 	} else {
@@ -327,4 +343,3 @@ function quote_google_currency($to, $from)
 	return $matches[1] ? $matches[1] : false;
 }
 
-?>

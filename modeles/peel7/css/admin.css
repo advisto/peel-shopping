@@ -23,6 +23,9 @@ label {
 .right {
 	text-align: right;
 }
+.bold {
+	font-weight: bold;
+}
 /* Styles admin PEEL */
 .main_table {
 	width: 100%;
@@ -205,6 +208,7 @@ table.avisAdmin_liste td {
 /* Homepage */
 .home_block {
 	z-index:1;
+	min-height: 507px;
 }
 .home_block h2 {
 	margin: 0px;
@@ -239,7 +243,9 @@ table.avisAdmin_liste td {
 	font-size: 9px;
 	text-align: center;
 }
-
+.home_block_select_multisite {
+	min-height: 0;
+}
 .home_block_green {
 	border-color: #63BE21;
 }
@@ -368,6 +374,9 @@ tr.classe3 {
 	padding-top: 5px; 
 	padding-bottom: 5px;
 	color: #000000;
+}
+.multipage_selected_field {
+	background-color:#5C5859;
 }
 
 /* Couleur des menus */
@@ -665,6 +674,7 @@ img {
 	background-color: #F5F5FF;
 	padding:10px;
 }
+
 /* Styles responsive */
 @media (max-width: 767px) {
 	.table-responsive {

@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tva.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: tva.php 43052 2014-10-30 11:22:19Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_TVA_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_TVA_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 if (isset($_POST['mode'])) {
@@ -117,13 +117,16 @@ function affiche_formulaire_modif_tva(&$id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_tva
-			WHERE id = '" . intval($id) . "'");
+			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('tva', null, true));
 		$frm = fetch_assoc($qid);
 	}
-	$frm['nouveau_mode'] = "maj";
-	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_TVA_SAVE'];
-
-	affiche_formulaire_tva($frm);
+	if (!empty($frm)) {
+		$frm['nouveau_mode'] = "maj";
+		$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_TVA_SAVE'];
+		affiche_formulaire_tva($frm);
+	} else {
+		redirect_and_die(get_current_url(false).'?mode=ajout');
+	}
 }
 
 /**
@@ -140,17 +143,20 @@ function affiche_formulaire_tva($frm)
 		$id = "";
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_tva.tpl');
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($id)));
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval($id));
 	$tpl->assign('tva', $frm['tva']);
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_TVA_FORM_TITLE', $GLOBALS['STR_ADMIN_TVA_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_VAT_PERCENTAGE', $GLOBALS['STR_ADMIN_VAT_PERCENTAGE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	echo $tpl->fetch();
 }
+				
 
 /**
  * Supprime la TVA spécifiée par $id
@@ -160,7 +166,7 @@ function affiche_formulaire_tva($frm)
  */
 function supprime_tva($id)
 {
-	query("DELETE FROM peel_tva WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_tva WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('tva', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_MSG_DELETED_OK']))->fetch();
 }
 
@@ -175,10 +181,10 @@ function insere_tva($frm)
 	$frm['tva'] = get_float_from_user_input($frm['tva']);
 	$qid = query("SELECT *
 		FROM peel_tva
-		WHERE tva = '" . floatval($frm['tva']) . "'");
+		WHERE tva = '" . floatval($frm['tva']) . "' AND " . get_filter_site_cond('tva', null, true));
 	if (!fetch_assoc($qid)) {
-		$qid = query("INSERT INTO peel_tva (tva)
-			VALUES ('" . floatval($frm['tva']) . "')");
+		$qid = query("INSERT INTO peel_tva (tva, site_id)
+			VALUES ('" . floatval($frm['tva']) . "', '" . intval($frm['site_id']) . "')");
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_MSG_CREATED_OK']))->fetch();
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_ERR_ALREADY_EXISTS']))->fetch();
@@ -196,8 +202,8 @@ function maj_tva($id, $frm)
 {
 	$frm['tva'] = get_float_from_user_input($frm['tva']);
 	query("UPDATE peel_tva
-		SET tva='" . floatval($frm['tva']) . "'
-		WHERE id='" . intval($frm['id']) . "'");
+		SET tva='" . floatval($frm['tva']) . "', site_id='" . intval($frm['site_id']) . "'
+		WHERE id='" . intval($frm['id']) . "'  AND " . get_filter_site_cond('tva', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_MSG_UPDATED_OK']))->fetch();
 }
 
@@ -213,17 +219,20 @@ function affiche_liste_tva()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$result = query("SELECT id, tva
+	$result = query("SELECT id, tva, site_id
 		FROM peel_tva
+		WHERE " . get_filter_site_cond('tva', null, true) ." 
 		ORDER BY id ASC");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
-				'tva' => $ligne['tva']
+				'tva' => $ligne['tva'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
@@ -240,7 +249,7 @@ function affiche_liste_tva()
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_ADMIN_TVA_UPDATE', $GLOBALS['STR_ADMIN_TVA_UPDATE']);
 	$tpl->assign('STR_ADMIN_TVA_NOTHING_FOUND', $GLOBALS['STR_ADMIN_TVA_NOTHING_FOUND']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	echo $tpl->fetch();
 }
 
-?>

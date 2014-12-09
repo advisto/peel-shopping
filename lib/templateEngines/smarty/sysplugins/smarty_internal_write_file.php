@@ -76,7 +76,7 @@ class Smarty_Internal_Write_File {
 
         if ($smarty->_file_perms !== null) {
             // set file permissions
-            chmod($_filepath, $smarty->_file_perms);
+            @chmod($_filepath, $smarty->_file_perms);
             umask($old_umask);
         }
         error_reporting($_error_reporting);

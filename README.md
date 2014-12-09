@@ -6,7 +6,7 @@ English:
 
 Français :
 
-- Présentation : http://www.peel.fr/
+- Présentation : https://www.peel.fr/
 - Documentation : http://doc.peel.fr/ et http://wiki.peel.fr/
 - Forum : http://forum.peel.fr/
 
@@ -170,7 +170,7 @@ Nous pouvons réimporter toutes les données des logiciels suivants (merci de no
 - Powerboutique
 - Autre logiciel : vous pouvez nous faire parvenir un fichiez SQL comprenant structure & données afin de procéder à la transcription de votre logiciel vers PEEL
 
-Contactez-nous sur http://www.peel.fr/ ou au 01 75 43 67 97.
+Contactez-nous sur https://www.peel.fr/ ou au 01 75 43 67 97.
 
 
 AJOUT D'UNE LANGUE

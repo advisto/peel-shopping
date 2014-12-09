@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ok.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ok.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 include("../../configuration.inc.php");
 
@@ -33,6 +33,11 @@ if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 // Ce fichier est appelé par l'utilisateur qui revient de Paypal et pour qui le paiement s'est apparemment bien passé (on n'en a ici aucune preuve).
 // Cette page est purement informative pour le client, et n'a qu'un titre indicatif.
 // Ce n'est pas ici que se trouve la validation du paiement, mais dans le script IPN qui est appelé directement par Paypal et dans lequel le traitement est sécurisé
+
+if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+	// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+	unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+}
 // Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 $_SESSION['session_caddie']->init();
 unset($_SESSION['session_commande']);
@@ -41,7 +46,7 @@ unset($_SESSION['session_commande']);
 if (!empty($session_utilisateur_id) || (!empty($_SESSION['session_last_bill_viewed']) && $_SESSION['session_last_bill_viewed'] == $transaction_id)) {
 	$sql = 'SELECT id
 		FROM peel_commandes
-		WHERE o_timestamp >= "' . date('Y-m-d H:i:s', (time())-7200) . '" AND id="' . intval($transaction_id) . '"';
+		WHERE o_timestamp >= "' . date('Y-m-d H:i:s', (time())-7200) . '" AND id="' . intval($transaction_id) . '" AND ' . get_filter_site_cond('commandes') . '';
 	if (!empty($session_utilisateur_id)) {
 		$sql .= ' AND id_utilisateur = "' . intval($session_utilisateur_id) . '"';
 	}
@@ -54,4 +59,3 @@ include($GLOBALS['repertoire_modele'] . "/haut.php");
 affichage_fin_cb(vb($r['id']), true);
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
-?>

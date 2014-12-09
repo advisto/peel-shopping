@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_prix_pourcentage.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_prix_pourcentage.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<div class="entete">{$STR_ADMIN_PRIX_POURCENTAGE_TITLE}</div>
@@ -31,7 +31,7 @@
 		<script><!--//--><![CDATA[//><!--
 			var new_order_line_html = '<tr class="top" id="line[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="produits[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
 		//--><!]]></script>
-		<div class="full-width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
+		<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
 			<table class="table admin_commande_details">
 				<thead>
 					<tr style="background-color:#EEEEEE">

@@ -1,19 +1,19 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43173 2014-11-12 16:47:54Z sdelaporte $
 if (!defined('PAYPAL_SANDBOX')) {
 	// Mettre à true pour faire des tests avec des comptes Sandbox
-	define('PAYPAL_SANDBOX', false);
+	define('PAYPAL_SANDBOX', !empty($GLOBALS['site_parameters']['paypal_sandbox']));
 }
 
 /**
@@ -33,9 +33,22 @@ if (!defined('PAYPAL_SANDBOX')) {
 function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $payment_times = 1, $sTexteLibre = '', $user_id, $prenom_ship, $nom_ship, $adresse_ship, $zip_ship, $ville_ship, $pays_ship, $telephone_ship, $prenom_bill = null, $nom_bill = null, $adresse_bill = null, $zip_bill = null, $ville_bill = null, $pays_bill = null, $telephone_bill = null)
 {
 	if (PAYPAL_SANDBOX) {
-		$url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+		$business = vb($GLOBALS['site_parameters']['secured_merchant_id']);
+		if(!empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
+			$url = 'https://securepayments.sandbox.paypal.com/webapps/HostedSoleSolutionApp/webflow/sparta/hostedSoleSolutionProcess';
+		} else {
+			$url = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+		}
 	} else {
-		$url = 'https://www.paypal.com/cgi-bin/webscr';
+		$business = vb($GLOBALS['site_parameters']['email_paypal']);
+		if (!empty($GLOBLAS['site_parameters']['enable_paypal_integral_evolution']) && empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
+			// Paypal integral evolution : 
+			$url = 'https://securepayments.paypal.com/cgi-bin/acquiringweb';
+		} elseif(!empty($GLOBLAS['site_parameters']['enable_paypal_integral_evolution']) && !empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
+			$url = 'https://securepayments.paypal.com/webapps/HostedSoleSolutionApp/webflow/sparta/hostedSoleSolutionProcess';
+		} else {
+			$url = 'https://www.paypal.com/cgi-bin/webscr';
+		}
 	}
 	// La déclaration no_shipping empêche la validation par Paypal des adresses
 	// alors que la documentation indique que c'est simplement censé empêcher l'utilisateur de changer l'adresse quand il arrive sur paypal
@@ -44,7 +57,11 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/paypal_form.tpl');
 	$tpl->assign('url', $url);
 	$tpl->assign('charset', GENERAL_ENCODING);
-	$tpl->assign('business', vb($GLOBALS['site_parameters']['email_paypal']));
+	// L'activation de paypal intégrale évolution nécessite d'avoir souscrit à l'offre auprès de paypal.
+	$tpl->assign('enable_paypal_integral_evolution', !empty($GLOBALS['site_parameters']['enable_paypal_integral_evolution']));
+	// L'activation de la version iframe nécessite paypal intégrale évolution
+	$tpl->assign('enable_paypal_iframe', !empty($GLOBALS['site_parameters']['enable_paypal_iframe']) && !empty($GLOBALS['site_parameters']['enable_paypal_integral_evolution']));
+	$tpl->assign('business', $business);
 	$tpl->assign('item_name', $GLOBALS['site'] . ' '.$GLOBALS["STR_ORDER_NAME"].' ' . $order_id);
 	$tpl->assign('item_number', intval($order_id));
 	$tpl->assign('amount', round($amount, 2));
@@ -76,4 +93,3 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	return $form;
 }
 
-?>

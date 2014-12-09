@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clients_segmentation.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: clients_segmentation.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,11 +24,12 @@ include($dirroot . '/lib/fonctions/fonctions_admin.php');
  */
 function updateClientsSegBuy()
 {
-	$query = query('SELECT id_utilisateur AS customers_id, count(*) AS this_count, IF( o_timestamp <"' . date('Y-m-d 00:00:00', time()-3600 * 24 * 365) . '",1,0) AS old
+	$query = query('SELECT o.id_utilisateur AS customers_id, count(*) AS this_count, IF( o_timestamp <"' . date('Y-m-d 00:00:00', time()-3600 * 24 * 365) . '",1,0) AS old
 		FROM peel_commandes o
-		WHERE id_statut_paiement = 3
-		GROUP BY id_utilisateur, IF( o_timestamp < "' . date('Y-m-d 00:00:00', time()-3600 * 24 * 365) . '",1,0)
-		ORDER BY id_utilisateur ASC');
+		INNER JOIN peel_statut_paiement sp ON sp.id=o.id_statut_paiement
+		WHERE sp.technical_code IN ("being_checked","completed")
+		GROUP BY o.id_utilisateur, IF(o.o_timestamp < "' . date('Y-m-d 00:00:00', time()-3600 * 24 * 365) . '",1,0)
+		ORDER BY o.id_utilisateur ASC');
 	while ($result = fetch_assoc($query)) {
 		if (empty($result['old'])) {
 			$recent_buys[$result['customers_id']] = $result['this_count'];
@@ -63,7 +64,7 @@ function updateClientsSegBuy()
 	foreach($users_seg_buy as $this_value => $ids_as_keys) {
 		query('UPDATE peel_utilisateurs
 			SET seg_buy="' . nohtml_real_escape_string($this_value) . '"
-			WHERE id_utilisateur IN ("' . implode('","', real_escape_string(array_keys($ids_as_keys))) . '")');
+			WHERE id_utilisateur IN ("' . implode('","', real_escape_string(array_keys($ids_as_keys))) . '") AND ' . get_filter_site_cond('utilisateurs') . '');
 	}
 	$GLOBALS['contentMail'] .= 'MAJ des valeurs de segmentation achat : OK' . "\n";
 }
@@ -75,7 +76,7 @@ function updateClientsSegBuy()
  */
 function updateClientsContactDates()
 {
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$query = query('SELECT UNIX_TIMESTAMP(expiration_date) AS paid_until_timestamp, user_id
 			FROM peel_gold_ads');
 		while ($result = fetch_assoc($query)) {
@@ -90,14 +91,15 @@ function updateClientsContactDates()
 	}
 	$query = query('SELECT id_membre, UNIX_TIMESTAMP(MAX(date)) AS last_contact_timestamp, COUNT(*) AS contacts_count
 		FROM peel_admins_actions
-		WHERE action IN ("PHONE_EMITTED", "PHONE_RECEIVED", "SEND_EMAIL")
+		WHERE action IN ("PHONE_EMITTED", "PHONE_RECEIVED", "SEND_EMAIL") AND ' . get_filter_site_cond('admins_actions') . '
 		GROUP BY id_membre');
 	while ($contact = fetch_assoc($query)) {
 		$last_contact_timestamps[$contact['id_membre']] = $contact['last_contact_timestamp'];
 		$contacts_counts[$contact['id_membre']] = $contact['contacts_count'];
 	}
 	$query = query('SELECT *, TO_DAYS(now())-TO_DAYS(GREATEST(date_insert,"2008-01-01 00:00:00")) AS followed_days
-		FROM peel_utilisateurs');
+		FROM peel_utilisateurs
+		WHERE ' . get_filter_site_cond('utilisateurs') . '');
 	while ($user = fetch_assoc($query)) {
 		$user_id = $user['id_utilisateur'];
 		$seg_followed = '';
@@ -201,7 +203,7 @@ function updateClientsContactDates()
 		if ($seg_followed != $user['seg_followed']) {
 			// Mise à jour des utilisateurs dont la date de contact (et/ou la raison) a/ont changé
 			query('UPDATE peel_utilisateurs
-				SET seg_followed="' . nohtml_real_escape_string($seg_followed) . '"
+				SET seg_followed="' . nohtml_real_escape_string($seg_followed) . '" AND ' . get_filter_site_cond('utilisateurs') . '
 				WHERE id_utilisateur=' . intval($user_id));
 		}
 		unset($next_contact_time);
@@ -216,4 +218,3 @@ $contentMail = 'Traitement des segmentations client et des dates de contact
 updateClientsSegBuy();
 updateClientsContactDates();
 
-?>

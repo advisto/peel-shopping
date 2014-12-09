@@ -1,26 +1,25 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: articles.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv('admin_content');
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_ARTICLES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_ARTICLES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $id = intval(vn($_REQUEST['id']));
-$rubrique_options = '';
 
 if (!isset($form_error_object)) {
 	$form_error_object = new FormError();
@@ -158,6 +157,8 @@ function affiche_formulaire_ajout_article($rubriques = 0, &$frm, &$form_error_ob
 		$frm['technical_code'] = "";
 		$frm['tva'] = "";
 		$frm['on_special'] = "";
+		$frm['on_reseller'] = "";
+		$frm['on_rollover'] = "";
 		$frm['image1'] = "";
 		$frm['position'] = "";
 	}
@@ -172,10 +173,13 @@ function affiche_formulaire_ajout_article($rubriques = 0, &$frm, &$form_error_ob
 	$frm['isAttached'] = "";
 	$frm['date_insere'] = "";
 	$frm['date_maj'] = "";
+	$frm['site_id'] = "";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$frm['site_country'] =  $GLOBALS['site_parameters']['site_country_allowed_array'];
+	}
 
 	$frm['normal_bouton'] = $GLOBALS['STR_ADMIN_ARTICLES_FORM_ADD_BUTTON'];
 	/* Construit la liste des catégories, présélectionne la catégorie racine */
-	construit_arbo_rubrique($GLOBALS['rubrique_options'], $frm['rubriques']);
 
 	affiche_formulaire_article($frm, $form_error_object);
 }
@@ -195,8 +199,11 @@ function affiche_formulaire_modif_article($id, &$frm, &$form_error_object)
 		/* Charge les informations de l'article */
 		$qid = query("SELECT *
 			FROM peel_articles
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('articles', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
+			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				$frm['site_country'] = explode(',', vb($frm['site_country']));
+			}
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ARTICLES_ERR_NOT_FOUND'], $id)))->fetch();
 			return false;
@@ -205,7 +212,7 @@ function affiche_formulaire_modif_article($id, &$frm, &$form_error_object)
 	/* Charge les catégories de l'article */
 	$qid = query("SELECT pa.rubrique_id,nom_" . $_SESSION['session_langue'] . " AS nom_rubrique
 		FROM peel_articles_rubriques pa
-		INNER JOIN peel_rubriques pr ON pa.rubrique_id=pr.id
+		INNER JOIN peel_rubriques pr ON pa.rubrique_id=pr.id AND " . get_filter_site_cond('rubriques', 'pr', true) . "
 		WHERE article_id = " . intval($id) . "");
 	$frm['rubriques'] = array();
 	while ($cat = fetch_assoc($qid)) {
@@ -215,7 +222,6 @@ function affiche_formulaire_modif_article($id, &$frm, &$form_error_object)
 	$frm['nouveau_mode'] = "maj";
 	$frm['normal_bouton'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
 
-	construit_arbo_rubrique($GLOBALS['rubrique_options'], $frm['rubriques']);
 	affiche_formulaire_article($frm, $form_error_object);
 }
 
@@ -230,14 +236,19 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_article.tpl');
 	$tpl->assign('add_category_url', $GLOBALS['administrer_url'] . '/rubriques.php?mode=ajout');
-	$tpl->assign('rubrique_options', vb($GLOBALS['rubrique_options']));
+	$rubrique_options = get_categories_output(null, 'rubriques', vb($frm['rubriques']), 'option', '&nbsp;&nbsp;', null);
+	$tpl->assign('rubrique_options', $rubrique_options);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_ARTICLES_CREATE_CATEGORY_FIRST', $GLOBALS['STR_ADMIN_ARTICLES_CREATE_CATEGORY_FIRST']);
 	$tpl->assign('STR_ADMIN_ARTICLES_CATEGORIE', $GLOBALS['STR_ADMIN_ARTICLES_CATEGORIE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_ADMIN_OFFLINE', $GLOBALS['STR_ADMIN_OFFLINE']);
 	$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
-	$tpl->assign('STR_ADMIN_DISPLAY_ON_HOMEPAGE', $GLOBALS['STR_ADMIN_DISPLAY_ON_HOMEPAGE']);
+	$tpl->assign('STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE', $GLOBALS['STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE']);
 	$tpl->assign('STR_ADMIN_SEE_RESULT_IN_REAL', $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL']);
 	$tpl->assign('STR_ADMIN_TITLE', $GLOBALS['STR_ADMIN_TITLE']);
 	$tpl->assign('STR_ADMIN_OVER_TITLE', $GLOBALS['STR_ADMIN_OVER_TITLE']);
@@ -249,29 +260,38 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_META_DESCRIPTION', $GLOBALS['STR_ADMIN_META_DESCRIPTION']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
-	$tpl->assign('STR_ADMIN_IMAGE', $GLOBALS['STR_ADMIN_IMAGE']);
+	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_ARTICLES_FORM_ADD', $GLOBALS['STR_ADMIN_ARTICLES_FORM_ADD']);
 	$tpl->assign('STR_ADMIN_ARTICLES_FORM_MODIFY', $GLOBALS['STR_ADMIN_ARTICLES_FORM_MODIFY']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
+	$tpl->assign('STR_ADMIN_ARTICLES_IS_ON_ROLLOVER', $GLOBALS['STR_ADMIN_ARTICLES_IS_ON_ROLLOVER']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
-	if (!empty($GLOBALS['rubrique_options'])) {
+	$tpl->assign('STR_ADMIN_ARTICLES_IS_ON_RESELLER', $GLOBALS['STR_ADMIN_ARTICLES_IS_ON_RESELLER']);
+	if (!empty($rubrique_options)) {
 		$tpl->assign('pdf_logo_src',$GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 		$tpl->assign('action', get_current_url(false) . '?start=0');
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 		$tpl->assign('mode', $frm['nouveau_mode']);
+		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+		}
 		$tpl->assign('id', intval($frm['id']));
 		if (isset($_GET['mode']) && $_GET['mode'] == "modif") {
-			$tpl->assign('art_href', get_content_url($frm['id'], $frm["titre_" . $_SESSION['session_langue']], vb($frm['rubriques']['0']), vb($frm['rubriques']['1'])));
+			$tpl->assign('art_href', get_content_url($frm['id'], $frm["titre_" . $_SESSION['session_langue']], vb($frm['rubriques']['0']), vb($frm['rubriques']['1']), false, false, null, vb($frm['site_id'])));
 		}
 		$tpl->assign('titre', $frm['titre_' . $_SESSION['session_langue']]);
 		$tpl->assign('rubrique_error', $form_error_object->text('rubriques'));
 		$tpl->assign('etat', $frm['etat']);
 		$tpl->assign('position', $frm['position']);
+		$tpl->assign('is_rollover_module_active', is_rollover_module_active());
+		$tpl->assign('is_on_rollover', !empty($frm['on_rollover']));
 		$tpl->assign('on_special', $frm['on_special']);
+		$tpl->assign('on_reseller', $frm['on_reseller']);
 		$tpl->assign('technical_code', $frm['technical_code']);
 
 		$tpl_langs = array();
@@ -295,7 +315,7 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 			} else {
 				$type = 'img';
 			}
-			if(strpos($frm['image1'], '://') !== false) {
+			if(strpos($frm['image1'], '//') !== false) {
 				$this_url = $frm['image1'];
 			} elseif(strpos($frm['image1'], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
 				$this_url = $GLOBALS['wwwroot'] . $frm['image1'];
@@ -324,11 +344,11 @@ function supprime_article($id)
 	/* Charge les infos de l'article. */
 	$qid = query("SELECT titre_" . $_SESSION['session_langue'] . "
 		FROM peel_articles
-		WHERE id = " . intval($id));
+		WHERE id = " . intval($id) . " AND " . get_filter_site_cond('articles', null, true) . "");
 	$prod = fetch_assoc($qid);
 
 	/* Efface le article */
-	query("DELETE FROM peel_articles WHERE id=" . intval($id));
+	query("DELETE FROM peel_articles WHERE id=" . intval($id) . " AND " . get_filter_site_cond('articles', null, true) . "");
 	/* Efface cet article de la table articles_rubriques */
 	query("DELETE FROM peel_articles_rubriques WHERE article_id=" . intval($id));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ARTICLES_MSG_DELETED'], String::html_entity_decode_if_needed($prod['titre_' . $_SESSION['session_langue']]))))->fetch();
@@ -342,14 +362,24 @@ function supprime_article($id)
  */
 function insere_article($frm)
 {
+	// Remplit les contenus vides
+	$frm = fill_other_language_content($frm);
+	
 	/* ajoute l'article dans la table articles */
 	$sql = "INSERT INTO peel_articles (etat
 			, image1
 			, date_insere
 			, date_maj
 			, position
+			, site_id
 			, technical_code
-			, on_special";
+			, on_reseller
+			, on_special
+			, on_rollover";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= ", site_country
+		";
+	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", titre_" . $lng . "
 			, chapo_" . $lng . "
@@ -364,9 +394,15 @@ function insere_article($frm)
 			, '" . date('Y-m-d H:i:s', time()) . "'
 			, '" . date('Y-m-d H:i:s', time()) . "'
 			, '" . intval($frm['position']) . "'
+			, '" . intval($frm['site_id']) . "'
 			, '" . nohtml_real_escape_string($frm['technical_code']) . "'
-			, '" . intval(vn($frm['on_special'])) . "'";
-
+			, '" . intval(vn($frm['on_reseller'])) . "'
+			, '" . intval(vn($frm['on_special'])) . "'
+			, '" . intval(vn($frm['on_rollover'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= ", '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+		";
+	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . real_escape_string($frm['titre_' . $lng]) . "'
 			, '" . real_escape_string($frm['chapo_' . $lng]) . "'
@@ -397,16 +433,26 @@ function insere_article($frm)
  * @param array $frm Array with all fields data
  * @return
  */
+
 function maj_article($id, $frm)
 {
+	// Remplit les contenu vides
+	$frm = fill_other_language_content($frm);
+	
 	/* Met à jour la table articles */
 	$sql = "UPDATE peel_articles SET etat = '" . intval($frm['etat']) . "'
 		, position = '" . intval($frm['position']) . "'
+		, site_id = '" . intval($frm['site_id']) . "'
 		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, image1 = '" . nohtml_real_escape_string($frm['image1']) . "'
 		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'
-		, on_special = '" . intval(vn($frm['on_special'])) . "'";
-
+		, on_reseller = '" . intval(vn($frm['on_reseller'])) . "'
+		, on_special = '" . intval(vn($frm['on_special'])) . "'
+		, on_rollover = '" . intval(vn($frm['on_rollover'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= "
+		, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";		
+	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, titre_" . $lng . "='" . real_escape_string($frm['titre_' . $lng]) . "'
@@ -418,7 +464,7 @@ function maj_article($id, $frm)
 	}
 
 	$sql .= "
-		WHERE id = '" . intval($id) . "'";
+		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('articles', null, true) . "";
 	query($sql);
 
 	/* Efface toutes les catégories auxquelles l'article est associé */
@@ -450,16 +496,15 @@ function supprime_fichier($id, $file)
 		case "image1":
 			$sql = "SELECT image1
 				FROM peel_articles
-				WHERE id = '" . intval($id) . "'";
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('articles', null, true) . "";
 			$res = query($sql);
 			$file = fetch_assoc($res);
 			query("UPDATE peel_articles
 				SET image1 = ''
-				WHERE id = '" . intval($id) . "'");
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('articles', null, true) . "");
 			break;
 	}
 	delete_uploaded_file_and_thumbs($file['image1']);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_FILE_DELETED'], $file['image1'])))->fetch();
 }
 
-?>

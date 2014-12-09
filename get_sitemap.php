@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: get_sitemap.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: get_sitemap.php 43197 2014-11-13 17:30:19Z gboussin $
 
 define('LOAD_NO_OPTIONAL_MODULE', true);
 include("configuration.inc.php");
@@ -32,5 +32,4 @@ if (!empty($_GET['file']) && $_GET['file'] == 'sitemap' && file_exists($sitemap_
 }
 
 output_xml_http_export_header($_GET['file'], 'utf-8', $content_type);
-echo file_get_contents($filename);
-?>
+echo String::file_get_contents_utf8($filename);

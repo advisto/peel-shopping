@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: produit_details_html.tpl 43345 2014-11-25 10:03:12Z sdelaporte $
 #}
 <div typeof="Product">
 	{% if (global_error) %}
@@ -35,6 +35,9 @@
 	<p style="color: red;">{{ admin.offline_txt }}</p>
 		{% endif %}
 	{% endif %}
+	{% if modify_product_by_owner is defined %}
+		<p colspan="6"><a href="{{ modify_product_by_owner.href|escape('html') }}" class="title_label">{{ modify_product_by_owner.label }}</a></p>
+	{% endif %}
 	<div class="fp_produit">
 		<div class="fp_image_grande">
 			<div class="image_grande" id="slidingProduct{{ product_id }}">
@@ -44,7 +47,7 @@
 					{% else %}
 						<a id="zoom1" {{ a_zoom_attributes }} href="{{ main_image.href|escape('html') }}" title="{{ product_name|str_form_value }}"><img property="image" id="mainProductImage" class="zoom" src="{{ main_image.src|escape('html') }}" alt="{{ product_name|str_form_value }}" /></a>
 					{% endif %}
-				{% else %}
+				{% elseif (no_photo_src) %}
 					<a href="{{ product_href|escape('html') }}"><img src="{{ no_photo_src }}" alt="{{ photo_not_available_alt|str_form_value }}" /></a>
 				{% endif %}
 			</div>
@@ -91,6 +94,14 @@
 									<a href="{{ avis.href|escape('html') }}" class="title_label partage">{{ avis.txt }}</a>
 								</td>
 							</tr>
+							{% if (tous_avis.display_opinion_resume_in_product_page) %}
+								<tr class="picto-tous_avis">
+									<td class="img-tous_avis"></td>
+									<td class="txtdetail-tous_avis">
+										{{ tous_avis.nb_avis }}  {% if tous_avis.nb_avis>1 %} {{ tous_avis.STR_POSTED_OPINIONS|lower }} {% else %} {{ tous_avis.STR_POSTED_OPINION|lower }} {% endif %} / {{ tous_avis.STR_MODULE_AVIS_NOTE|lower }} {% for foo in 1..tous_avis.average_rating %}<img src="{{ tous_avis.star_src|escape('html') }}" alt="" />{% endfor %}
+									</td>
+								</tr>
+							{% endif %}
 						</table>
 						{% endif %}
 						{% if (tous_avis) %}
@@ -129,11 +140,34 @@
 						</table>
 					</td>
 				</tr>
+				{% if addthis_buttons is defined %}
+				<tr>
+					<td>{{ addthis_buttons }}</td>
+				</tr>
+				{% endif %}
+				{% if display_facebook_like is defined %}
+				<tr>
+					<td>
+						<table class="product_link_to_modules">
+							<tr>
+								<td>
+									{{ display_facebook_like }}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				{% endif %}
 			</table>
 			{% endif %}
-			{{ javascript }}
 		</div>
-		<h1 class="titre_produit" property="name">{{ product_name }}</h1>
+		<h1 property="name" class="titre_produit" property="name">{{ product_name }}</h1>
+		{% if subscribe_trip_form is defined %}
+			{{ subscribe_trip_form }}
+		{% endif %}
+		{% if display_registred_user is defined %}
+			{{ display_registred_user }}
+		{% endif %}
 		{% if (check) %}
 			{{ check }}
 		{% elseif (critere_stock) %}
@@ -179,6 +213,9 @@
 		{% if (extra_link) %}
 			<p class="extra_link"><a href="{{ extra_link }}" onclick="return(window.open(this.href)?false:true);">{{ extra_link }}</a></p>
 		{% endif %}
+		{% if (categorie_sentence_displayed_on_product) %}
+			<p class="categorie_sentence_displayed_on_product">{{ categorie_sentence_displayed_on_product }}</p>
+		{% endif %}
 		{% if (explanation_table) %}
 			{{ explanation_table }}
 		{% endif %}
@@ -189,7 +226,7 @@
     <div class="tabbable">
 		<ul class="nav nav-tabs">
 	{% for tab in tabs %}
-			<li class="{% if tab.is_current %}active{% endif %}"><a href="#title_{{ tab.index }}" data-toggle="tab">{{ tab.title }}</a></li>
+			<li class="{% if tab.is_current %}active{% endif %}" id="{% if tab.tab_id %}{{ tab.tab_id }}{% endif %}"><a href="#title_{{ tab.index }}" data-toggle="tab" onclick="return false;" >{{ tab.title }}</a></li>
 	{% endfor %}
 		</ul>
 		<div class="tab-content">

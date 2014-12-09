@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_kekoli.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: export_kekoli.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -47,8 +47,8 @@ if (isset($_GET['id_statut_paiement']) && is_numeric($_GET['id_statut_paiement']
 	$extra2_sql = "";
 }
 $sqlC = "SELECT *
-	FROM peel_commandes
-	WHERE id_ecom='" . intval($GLOBALS['site_parameters']['id']) . "' AND type != '4' AND o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra1_sql . " " . $extra2_sql . "
+	FROM peel_commandes c
+	WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND type != '4' AND o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra1_sql . " " . $extra2_sql . "
 	ORDER BY o_timestamp";
 
 $output .= "NumeroColis;ReferenceExpedition;NomDestinataire;Commune;CodePostal;CodePays;EmailDestinataire;DateClotureBordereau;Adresse1;Adresse2;Adresse3;Adresse4\r\n";
@@ -79,13 +79,13 @@ while ($C = fetch_assoc($resC)) {
 	 }
 	$resType = query("SELECT nom_".$_SESSION['session_langue']." AS nom
 		FROM peel_types
-		WHERE id = '" . intval($C['type'])."' ". $sql_cond_types);
+		WHERE id = '" . intval($C['type'])."' AND " . get_filter_site_cond('types', null, true) . " ". $sql_cond_types);
 	$type = fetch_assoc($resType);
 
 	//On va chercher le code iso du pays
 	$resPays = query("SELECT iso
 		FROM peel_pays
-		WHERE 1 ".$sql_cond_pays);
+		WHERE " . get_filter_site_cond('pays', null, true) . " AND ".$sql_cond_pays);
 	$pays = fetch_assoc($resPays);
 
 	$NumeroColis          = $C['id'];
@@ -120,4 +120,3 @@ while ($C = fetch_assoc($resC)) {
 
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
-?>

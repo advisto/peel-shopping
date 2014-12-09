@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_en.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_subject_en.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -38,7 +38,7 @@ $peel_email_template["subject"] = array(
   "send_client_order_html" => "Your order [ORDER_ID] on [SITE]",
   "send_client_order_pdf" => "Your order [ORDER_ID] on [SITE]",
   "send_avis_expedition" => "Shipping order #[ORDER_ID]",
-  "email_commande" => "Order confirmation #[ORDER_ID]",
+  "email_commande" => "Order confirmation #[ORDER_ID] on [SITE]",
   "send_mail_order_admin" => "Record of the order #[ORDER_ID]",
   "initialise_mot_passe" => "New password for your customer account",
   "send_mail_for_account_creation" => "Your customer account",
@@ -68,7 +68,7 @@ $peel_email_template["subject"] = array(
   "email_retour_client" => "Your return request",
   "cron_order_payment_failure_alerts" => "Help for your payment",
   "cron_order_not_paid_alerts" => "Payment of your order",
-  "cron_update_contact_info" => "Confirmation of the validity of your information"
+  "cron_update_contact_info" => "Confirmation of the validity of your information",
+  "inscription_newsletter" => "Subscribe to newsletter [SITE]"
 );
 
-?>

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 43407 2014-11-28 11:58:32Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -33,7 +33,7 @@
 		<tr>
 			<td class="title_label top">{{ STR_CATEGORY }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" id="categories" name="categories[]" multiple="multiple" size="7" style="width: 100%">
+				<select class="form-control" id="categories" name="categories[]" multiple="multiple" size="10" style="width: 100%">
 				{{ categorie_options }}
 				</select>
 				{{ categorie_error }}
@@ -46,16 +46,42 @@
 			<td class="title_label">{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}: </td>
 			<td><input type="text" class="form-control" value="{{ position|html_entity_decode_if_needed|str_form_value }}" name="position" size="1" /></td>
 		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}: </td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
+	{% if (STR_ADMIN_SITE_COUNTRY) %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_SITE_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				{{ site_country_checkboxes }}
+			</td>
+		</tr>
+	{% endif %}
 	{% if is_module_gift_checks_active %}
 		<tr>
 			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_GIFT_CHECK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" id="on_check" name="on_check" value="1"{% if is_on_check %} checked="checked"{% endif %} /></td>
 		</tr>
 	{% endif %}
+	{% if products_table_additionnal_fields %}
+		{% for field in products_table_additionnal_fields_array %}
+ 		<tr>
+			<td class="title_label top">{{ field.title }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" value="{{ field.value|str_form_value }}" id="{{ field.name|str_form_value }}" name="{{ field.name|str_form_value }}" /></td>
+		</tr>
+		{% endfor %} 
+	{% endif %}
+	{% if skip_home_special_products %}
 		<tr>
 			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_ON_HOME }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_special" value="1"{% if is_on_special %} checked="checked"{% endif %} /></td>
 		</tr>
+	{% endif %}
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_PRODUITS_IS_ON_NEW }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_new" value="1"{% if is_on_new %} checked="checked"{% endif %} /></td>
@@ -69,6 +95,10 @@
 			{% endif %}
 		</tr>
 		<tr>
+			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_ON_RESELLER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="checkbox" name="on_reseller" value="1"{% if is_on_reseller %} checked="checked"{% endif %} /></td>
+		</tr>
+		<tr>
 			<td class="title_label top">{{ STR_ADMIN_PRODUITS_EXTRA_LINK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="extra_link" value="{{ extra_link|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
@@ -76,6 +106,12 @@
 		<tr>
 			<td class="title_label top">{{ STR_ADMIN_PRODUITS_BEST_SELLERS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_top" value="1"{% if is_on_top %} checked="checked"{% endif %} /></td>
+		</tr>
+	{% endif %}
+	{% if display_recommanded_product_on_cart_page %}
+		<tr>
+			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_ON_CART_PAGEe}}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="checkbox" name="recommanded_product_on_cart_page" value="1"{% if is_recommanded_product_on_cart_page %} checked="checked"{% endif %} /></td>
 		</tr>
 	{% endif %}
 	{% if is_rollover_module_active %}
@@ -229,7 +265,7 @@
 				<script><!--//--><![CDATA[//><!--
 					 var new_order_line_html = '<tr class="top" id="line[i]"><td><img src="{{ administrer_url }}/images/b_drop.png" alt="{{ STR_DELETE }}" onclick="if(bootbox.confirm(\'{{ STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript(true,true,false) }}\', function(result) {if(result) {delete_products_list_line([i], true);} } ))return false;" title="{{ STR_ADMIN_PRODUCT_ORDERED_DELETE }}" style="cursor:pointer" /> <input type="hidden" name="references[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
 				//--><!]]></script>
-				<div class="full-width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
+				<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
 					<table class="table admin_commande_details">
 						<thead>
 							<tr style="background-color:#EEEEEE">
@@ -245,7 +281,7 @@
 									<td>{{ o.reference }} {{ o.name }}</td>
 								</tr>{% endfor %}</tbody>
 					</table>
-					<p style="margin-top:0px;">{{ STR_DELETE }} {{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '', '', '', '', 'product');" onclick="lookup(this.value, '', '', '', '', 'product');" /></p>
+					<p style="margin-top:0px;">{{ STR_DELETE }} {{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" onclick="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" /></p>
 					<div class="suggestions" id="suggestions"></div>
 					<input id="nb_produits" type="hidden" name="nb_produits" value="{{ nb_produits|str_form_value }}" />
 				</div>
@@ -351,11 +387,11 @@
 		</tr>
 		<tr class="title_label" id="on_gift_points_tr">
 			<td>{{ STR_ADMIN_PRODUITS_GIFT_POINTS_NEEDED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" value="{{ on_gift_points|html_entity_decode_if_needed|str_form_value }}" name="on_gift_points" id="on_gift_points" size="3" /></td>
+			<td><input type="number" class="form-control" value="{{ on_gift_points|html_entity_decode_if_needed|str_form_value }}" name="on_gift_points" id="on_gift_points" size="3" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_PRODUITS_GIFT_POINTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="points" value="{{ points|str_form_value }}" /></td>
+			<td><input type="number" class="form-control" name="points" value="{{ points|str_form_value }}" /></td>
 		</tr>
 	{% endif %}
 	</table>
@@ -381,12 +417,12 @@
 	{% for i in files|keys %}
 		{% if (files.i) %}
 		<tr>
-			<td class="title_label">{% if files.i.type == 'img' %}{{ STR_ADMIN_IMAGE }} {% else %}{{ STR_ADMIN_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{% if files.i.type == 'img' %}{{ STR_IMAGE }} {% else %}{{ STR_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{% include "uploaded_file.tpl" with {'f':f,'STR_DELETE':STR_ADMIN_DELETE_THIS_FILE} %}</td>
 		</tr>
 		{% else %}
 		<tr>
-			<td class="title_label">{{ STR_ADMIN_FILE }} {{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_FILE }} {{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input name="image{{ i }}" type="file" value="" /></td>
 		</tr>
 		{% endif %}
@@ -401,14 +437,14 @@
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input name="default_image{{ c.id }}" value="{{ c.default_image|str_form_value }}" /> {{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT }}
+				<input class="form-control" name="default_image{{ c.id }}" value="{{ c.default_image|str_form_value }}" /> {{ STR_ADMIN_PRODUITS_DEFAULT_FILE_NUMBER_CONSTRAINT }}
 			</td>
 		</tr>
 		{% if (c.images) %}
 		{% for i in c.images|keys %}
 		{% if (f) %}
 		<tr>
-			<td class="title_label">{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ files.i.nom }} &nbsp;
 				<a href="{{ files.i.sup_href|escape('html') }}">
@@ -421,7 +457,7 @@
 		</tr>
 		{% else %}
 		<tr>
-			<td class="title_label">{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input class="form-control" name="imagecouleur{{ c.id }}_{{ i }}" type="file" value="" />
 			</td>
@@ -439,9 +475,11 @@
 	{% for l in langs %}
 			<div class="tab-pane" id="tab_{{ l.lng|upper }}">
 			<div class="bloc">{{ STR_ADMIN_PRODUITS_TEXT_RELATED_IN }} {{ l.lng|upper }}</div>
-		<label>{{ STR_ADMIN_NAME }} {{ l.lng|upper }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
+		{% if (not (product_name_forced_lang)) or l.lng==product_name_forced_lang %}
+ 		<label>{{ STR_ADMIN_NAME }} {{ l.lng|upper }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
 		<input type="text" class="form-control" name="nom_{{ l.lng }}" value="{{ l.nom|html_entity_decode_if_needed|str_form_value }}" /><br />
 		{{ l.nom_error }}
+		{% endif %}
 		<label>{{ STR_ADMIN_PRODUITS_SHORT_DESCRIPTION }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 		<input style="width:100%" name="descriptif_{{ l.lng }}" type="text" class="form-control" value="{{ l.descriptif|html_entity_decode_if_needed|str_form_value }}" />
 		<label>{{ STR_ADMIN_PRODUITS_DESCRIPTION }}{{ STR_BEFORE_TWO_POINTS }}:<br /></label>
@@ -478,14 +516,16 @@
 	<div class="center" style="padding:10px;">
 				<script><!--//--><![CDATA[//><!--
 				function verif_form() {
-					// Pas de catégorie sélectionnée, pourtant obligatoire.
-					if (document.getElementById('categories').selectedIndex < 0) {
+					// Pas de catégorie sélectionnée, pourtant obligatoire sauf pour les chèques cadeaux.
+					if($('#on_check').is(':checked')) {
+						return true;
+					} else if ($("#categories option:selected").text()=="") {
 						bootbox.alert("{{ STR_ERR_CAT|filtre_javascript(true,false,true,false) }}");
 						return false;
-					 }} else {
+					} else {
 						return true;
-					 }}
-				 }}
+					}
+				}
 				//--><!]]></script>
 				<p><input class="btn btn-primary" onclick="if (verif_form() == false) { return false; }}" type="submit" value="{{ normal_bouton|str_form_value }}" /></p>
 	</div>

@@ -1,23 +1,23 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: html.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: html.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_content");
 $id = vn($_GET['id']);
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_HTML_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_HTML_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
@@ -93,6 +93,10 @@ function affiche_formulaire_ajout_home(&$frm)
 		$frm['etat'] = 1;
 		$frm['titre'] = "";
 		$frm['contenu_html'] = "";
+		$frm['site_id'] = "";
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$frm['site_country'] = $GLOBALS['site_parameters']['site_country_allowed_array'];
+		}
 	}
 	$frm['lang'] = $_SESSION['session_langue'];
 	$frm['nouveau_mode'] = "insere";
@@ -117,8 +121,11 @@ function affiche_formulaire_modif_home($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_html
-			WHERE id = '" . intval($id) . "'");
+			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('html', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
+			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				$frm['site_country'] = explode(',', vb($frm['site_country']));
+			}
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_HTML_ERR_ZONE_NOT_FOUND']))->fetch();
 			return false;
@@ -139,11 +146,54 @@ function affiche_formulaire_modif_home($id, &$frm)
  */
 function affiche_formulaire_home(&$frm)
 {
+	// liste des emplacements prévus
+	$emplacement_array['affiche_contenu_html_menu'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONTENU_HTML_MENU'];
+	$emplacement_array['heade'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HEADER'];
+	$emplacement_array['footer'] = $GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER'];
+	$emplacement_array['home'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HOME'];
+	$emplacement_array['home_bottom'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HOME_BOTTOM'];
+	$emplacement_array['conversion_page'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONVERSION_PAGE'];
+	$emplacement_array['footer_link'] = $GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER_LINK'];
+	$emplacement_array['interstitiel'] = $GLOBALS['STR_ADMIN_HTML_PLACE_INTERSTITIEL'];
+	$emplacement_array['error404'] = $GLOBALS['STR_ADMIN_HTML_PLACE_ERROR404'];
+	$emplacement_array['scrolling'] = $GLOBALS['STR_ADMIN_HTML_PLACE_SCROLLING'];
+	$emplacement_array['contact_page'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONTACT_PAGE'];
+	if(file_exists($GLOBALS['fonctionscarrousel'])){
+		$emplacement_array['entre_carrousel'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CARROUSEL_TOP'];
+	}
+	if(is_reseller_module_active()){
+		$emplacement_array['devenir_revendeur'] = $GLOBALS['STR_ADMIN_HTML_PLACE_BECOME_RESELLER'];
+	}
+	if(file_exists($GLOBALS['fonctionspartenaires'])){
+		$emplacement_array['partner'] = $GLOBALS['STR_ADMIN_HTML_PLACE_PARTNER'];
+	}
+	if(file_exists($GLOBALS['fonctionsresellermap'])){
+		$emplacement_array['reseller_map'] = $GLOBALS['STR_ADMIN_HTML_PLACE_RESELLER_MAP'];
+	}
+	if(file_exists($GLOBALS['fonctionsannonces'])){
+		$emplacement_array['home_ad'] = $GLOBALS['STR_ADMIN_HTML_PLACE_ADS_TOP'];
+		$emplacement_array['top_create_ad'] = $GLOBALS['STR_ADMIN_HTML_PLACE_TOP_CREATE_AD'];
+	}
+	if(file_exists($GLOBALS['fonctionsparrain'])){
+		$emplacement_array['intro_parrainage'] = $GLOBALS['STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE'];
+	}
+	if(!empty($GLOBALS['site_parameters']['short_order_process'])){
+		$emplacement_array['short_order_process'] = $GLOBALS['STR_ADMIN_HTML_PLACE_END_SHORT_ORDER_PROCESS'];
+	}
+	if(empty($emplacement_array[vb($frm['emplacement'])])){
+		$emplacement_array[vb($frm['emplacement'])] = str_replace('_', ' ', ucfirst(vb($frm['emplacement'])));
+	}
+	asort($emplacement_array);
+	
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_home.tpl');
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+	}
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
@@ -154,22 +204,23 @@ function affiche_formulaire_home(&$frm)
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('etat', $frm["etat"]);
 	$tpl->assign('emplacement', vb($frm['emplacement']));
+	$tpl->assign('emplacement_array', $emplacement_array);
 	// Test sur la presence du fichier pour permettre le choix de l'emplacement independamment de la configuration du site
-	$tpl->assign('is_carrousel_allowed', file_exists($GLOBALS['fonctionscarrousel']));
-	$tpl->assign('is_reseller_allowed', is_reseller_module_active());
-	$tpl->assign('is_partenaires_allowed', file_exists($GLOBALS['fonctionspartenaires']));
-	$tpl->assign('is_reseller_map_allowed', file_exists($GLOBALS['fonctionsresellermap']));
-	$tpl->assign('is_annonce_allowed', file_exists($GLOBALS['fonctionsannonces']));
-	$tpl->assign('is_parrain_allowed', file_exists($GLOBALS['fonctionsparrain']));
 	$tpl->assign('titre', vb($frm['titre']));
 	$tpl->assign('contenu_html_te', getTextEditor('contenu_html', '100%', 500, String::html_entity_decode_if_needed(vb($frm['contenu_html']))));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_HTML_FORM_TITLE', $GLOBALS['STR_ADMIN_HTML_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUAGE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
 	$tpl->assign('STR_ADMIN_OFFLINE', $GLOBALS['STR_ADMIN_OFFLINE']);
+	$tpl->assign('STR_ADMIN_HTML_PLACE_END_SHORT_ORDER_PROCESS', $GLOBALS['STR_ADMIN_HTML_PLACE_END_SHORT_ORDER_PROCESS']);
 	$tpl->assign('STR_ADMIN_HTML_PLACE', $GLOBALS['STR_ADMIN_HTML_PLACE']);
+	$tpl->assign('STR_ADMIN_HTML_PLACE_CONTENU_HTML_MENU', $GLOBALS['STR_ADMIN_HTML_PLACE_CONTENU_HTML_MENU']);
 	$tpl->assign('STR_ADMIN_HTML_PLACE_HEADER', $GLOBALS['STR_ADMIN_HTML_PLACE_HEADER']);
 	$tpl->assign('STR_ADMIN_HTML_PLACE_FOOTER', $GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER']);
 	$tpl->assign('STR_ADMIN_HTML_PLACE_HOME', $GLOBALS['STR_ADMIN_HTML_PLACE_HOME']);
@@ -203,7 +254,7 @@ function affiche_formulaire_home(&$frm)
  */
 function supprime_home($id)
 {
-	query("DELETE FROM peel_html WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_html WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('html', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_HTML_MSG_ZONE_DELETED']))->fetch();
 }
 
@@ -215,8 +266,16 @@ function supprime_home($id)
  */
 function insere_home($frm)
 {
-	$sql = "INSERT INTO peel_html (etat, titre, contenu_html, o_timestamp, a_timestamp, emplacement,lang)
-		VALUES ('" . intval($frm['etat']) . "', '" . nohtml_real_escape_string($frm['titre']) . "', '" . real_escape_string($frm['contenu_html']) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . nohtml_real_escape_string($frm['emplacement']) . "', '" . nohtml_real_escape_string($frm['lang']) . "')";
+	$sql = "INSERT INTO peel_html (etat, titre, contenu_html, o_timestamp, a_timestamp, emplacement, lang, site_id";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= ", site_country";
+	}
+	$sql .= ")
+		VALUES ('" . intval($frm['etat']) . "', '" . nohtml_real_escape_string($frm['titre']) . "', '" . real_escape_string($frm['contenu_html']) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . nohtml_real_escape_string($frm['emplacement']) . "', '" . nohtml_real_escape_string($frm['lang']) . "', '" . intval($frm['site_id']) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= ", '" . word_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
+	}
+	$sql .= ")";
 	query($sql);
 }
 
@@ -232,6 +291,8 @@ function maj_home($id, $frm)
 	$sql = "UPDATE peel_html
 		SET etat = '" . intval($frm['etat']) . "'
 			, titre = '" . nohtml_real_escape_string($frm['titre']) . "'
+			, site_id = '" . intval($frm['site_id']) . "'
+			".(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])?", site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'":"")."
 			, contenu_html = '" . real_escape_string($frm['contenu_html']) . "'
 			".(!empty($frm['emplacement'])?", emplacement = '" . nohtml_real_escape_string($frm['emplacement']) . "'":"")."
 			, a_timestamp = '" . date('Y-m-d H:i:s', time()) . "'
@@ -254,12 +315,15 @@ function affiche_liste_home()
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$result = query("SELECT *
 		FROM peel_html
+		WHERE " . get_filter_site_cond('html', null, true) . "
 		ORDER BY a_timestamp DESC");
 	if (!(num_rows($result) == 0)) {
+		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+			$tmpLigne = array('tr_rollover' => tr_rollover($i, true),
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']]),
 				'titre' => $ligne['titre'],
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
@@ -269,12 +333,21 @@ function affiche_liste_home()
 				'etat_onclick' => 'change_status("html", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 				);
+			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				$site_country_array = array();
+				if(String::strlen($ligne['site_country'])>0) {
+					foreach(explode(',', $ligne['site_country']) as $this_id) {
+						$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
+					}
+				}
+				$tmpLigne['site_country'] = implode(', ', $site_country_array);
+			}
+			$tpl_results[] = $tmpLigne;
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
-	$tpl->assign('wwwroot', $GLOBALS['wwwroot'] . '/');
-	if (is_welcome_ad_module_active()) {
+	if (check_if_module_active('welcome_ad')) {
 		$tpl->assign('is_welcome_ad_module_active', true);
 		unset($_SESSION['session_info_inter_set']);
 	} else {
@@ -283,6 +356,10 @@ function affiche_liste_home()
 	$tpl->assign('STR_ADMIN_HTML_TITLE', $GLOBALS['STR_ADMIN_HTML_TITLE']);
 	$tpl->assign('STR_ADMIN_HTML_CREATE', $GLOBALS['STR_ADMIN_HTML_CREATE']);
 	$tpl->assign('STR_ADMIN_HTML_EXPLAIN', $GLOBALS['STR_ADMIN_HTML_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_NOTA_BENE', $GLOBALS['STR_NOTA_BENE']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
@@ -299,4 +376,3 @@ function affiche_liste_home()
 	echo $tpl->fetch();
 }
 
-?>

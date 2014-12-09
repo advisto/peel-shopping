@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: livraisons.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: livraisons.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_sales");
 
-$DOC_TITLE = "";
+$GLOBALS['DOC_TITLE'] = "";
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_livraisons_information_select.tpl');
@@ -44,9 +44,9 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		}
 		$sql = "SELECT *
 			FROM peel_commandes pc
-			LEFT JOIN peel_utilisateurs pu ON pc.id_utilisateur = pu.id_utilisateur
-			WHERE pc." . $date_field . " >= '" . nohtml_real_escape_string($dateAdded1) . "' AND pc." . $date_field . " <= '" . nohtml_real_escape_string($dateAdded2) . "' " . (isset($_GET['statut']) && is_numeric($_GET['statut'])? "AND id_statut_livraison = '" . intval($_GET['statut']) . "'" : "") . "
-			ORDER BY pc." . $date_field;
+			LEFT JOIN peel_utilisateurs pu ON pc.id_utilisateur = pu.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'pu', true) . "
+			WHERE " . get_filter_site_cond('commandes', 'pc', true) . " AND pc." . word_real_escape_string($date_field) . " >= '" . nohtml_real_escape_string($dateAdded1) . "' AND pc." . word_real_escape_string($date_field) . " <= '" . nohtml_real_escape_string($dateAdded2) . "' " . (isset($_GET['statut']) && is_numeric($_GET['statut'])? "AND id_statut_livraison = '" . intval($_GET['statut']) . "'" : "") . "
+			ORDER BY pc." . word_real_escape_string($date_field);
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$extra_csv_param = "&id_statut_livraison=" . intval($_GET['statut']);
 		} else {
@@ -87,7 +87,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			}
 			$tpl->assign('results', $tpl_results);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
-			if (is_module_export_livraisons_active()) {
+			if (check_if_module_active('export', '/administrer/export_livraisons.php')) {
 				$tpl->assign('export_encoding', $GLOBALS['site_parameters']['export_encoding']);
 				$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_livraisons.php?dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			}
@@ -135,4 +135,3 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

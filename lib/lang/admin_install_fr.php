@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_fr.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_install_fr.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -30,10 +30,10 @@ $GLOBALS["STR_ADMIN_INSTALL_MBSTRING"] = "Extension mbstring :";
 $GLOBALS["STR_ADMIN_INSTALL_UTF8"] = "UTF-8 disponible :";
 $GLOBALS["STR_ADMIN_INSTALL_ALLOW_URL_FOPEN"] = "Directive allow_url_fopen activée dans le php.ini :";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_1"] = "Nous allons installer les informations nécessaires en base de données.";
-$GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "Nous allons pour cela vous demander différentes informations.";
+$GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "Nous allons pour cela vous demander des informations de configuration.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "Vous devez obtenir auprès de votre hébergeur des identifiants MySQL.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "Evitez l'utilisation de root, et préférez un mot de passe mysql qui sont robuste et différent de votre mot de passe SSH pour plus de sécurité";
-$GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Erreur ! Veuillez vérifier les langues sélectionnées et vos informations de connexion à la base de données";
+$GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Erreur ! Veuillez vérifier les langues sélectionnées et que vos informations de configuration sont complètes";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "Information : Vous pouvez indiquer une URL en https pour utiliser le chiffrement SSL seulement si votre domaine a un certificat SSL valide configuré sur votre hébergement.";
 $GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "URL du site :";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Forcer l'utilisation du chiffrement SSL pour l'administration :";
@@ -53,7 +53,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DIRECTORY_NOK"] = "Le répertoire %s n'est pas acces
 $GLOBALS["STR_ADMIN_INSTALL_FILE_OK"] = "Le fichier %s est bien accessible en écriture";
 $GLOBALS["STR_ADMIN_INSTALL_FILE_NOK"] = "Le fichier %s n'est pas accessible en écriture =&gt; Ajoutez des droits en écriture";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_OK_PREFIX"] = "La base %s ne contient pas de table PEEL (c'est parfait).";
-$GLOBALS["STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS"] = "Nous allons vérifier certains droits sur les fichiers et les répertoires";
+$GLOBALS["STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS"] = "Vérification des droits d'accès sur les fichiers et les répertoires";
 $GLOBALS["STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN"] = "NB : La prochaine étape 5/6 va créer votre structure de données et peut prendre quelques secondes";
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_OK"] = "Les droits sont donc corrects";
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_NOK"] = "Veuillez corriger les erreurs avant de continuer";
@@ -66,7 +66,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FILE_MISSING"] = "Erreur fichier manquant";
 $GLOBALS["STR_ADMIN_INSTALL_FINISH_BUTTON"] = "Terminer l'installation";
 $GLOBALS["STR_ADMIN_INSTALL_NOW_INSTALLED"] = "PEEL Shopping est maintenant installé.";
 $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "Vous pouvez maintenant vous connecter sur l'interface d'administration en utilisant les paramètres suivants :";
-$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Une fois identifié, cliquez sur Mon compte > Administrer le site en bas de page.";
+$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Une fois identifié en tant qu'administrateur, vous pourrez cliquer sur \"Mon compte\" > \"Administrer\".";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Remarques relatives à la sécurité de votre site :";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "OBLIGATOIRE : supprimez le répertoire installation pour commencer à travailler";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "FORTEMENT RECOMMANDE : Pour la sécurité de votre site, renommez le nom du répertoire d'administration => Dans la page de gestion des \"variables de configuration\", changez la variable {$GLOBALS['site_parameters']['backoffice_directory_name']} par un nom difficile à deviner, puis changez le nom du dossier en FTP juste après.";
@@ -78,4 +78,3 @@ $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Il vous faudra modifier manue
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Le fonctionnement sera normal hormis le module Butterflive qui ne pourra pas fonctionner";
 
-?>

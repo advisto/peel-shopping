@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: format.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -94,9 +94,9 @@ function frmvalide($variable_to_test, $true_value = 'checked="checked"', $false_
  * @param string $default
  * @return
  */
-function vb(&$var, $default = "")
+function vb(&$var, $default = null)
 {
-	return isset($var) || is_null($var) ? $var : $default;
+	return isset($var) ? $var : $default;
 }
 
 /**
@@ -342,7 +342,7 @@ function get_country_iso_2_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -369,7 +369,7 @@ function get_country_iso_3_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso3
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"  AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -395,7 +395,7 @@ function get_country_iso_num_code($country_id_or_name)
 {
 	$sql = 'SELECT iso_num
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -426,8 +426,8 @@ function fdate(&$date_nok)
  * On peut donc appliquer cette fonction sur une date provenant d'un formulaire ou de la base de données
  *
  * @param mixed $datetime_or_timestamp Si nulle : date du jour. Si === '' ou === 0, alors c'est pas de de date
- * @param string $mode can be 'short' or 'long'
- * @param mixed $hour_minute displays the hour:minute or not
+ * @param string $mode can be 'short', 'long', 'standard', 'nice', 'veryshort', 'timestamp1000'
+ * @param mixed $hour_minute can be a boolean => displays the hour:minute or not, or "long" or "short" to define the format
  * @return
  */
 function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hour_minute = false)
@@ -461,7 +461,7 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 			$date = strtotime(get_mysql_date_from_user_input($datetime_or_timestamp));
 		}
 		if($date === -1) {
-			// strtotime retourne un timestamp en cas de succès, FALSE sinon. 
+			// strtotime retourne un timestamp en cas de succès, false sinon. 
 			// Mais avant PHP 5.1.0, cette fonction retournait -1 en cas d'échec. => on passe donc ici à false 
 			$date = false;
 		}
@@ -472,8 +472,8 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 		// Format numérique timestamp => on convertit en date
 		$date = strftime($format, $date);
 	} elseif($mode == 'timestamp1000' && is_numeric($date)) {
-		// ms instead of seconds
-		$date = $date * 1000;
+		// ms instead of seconds - on passe en chaine de caractères pour compatibilité avec entiers 32 bits si serveur n'est pas en 64 bits.
+		$date = '' . $date . '000';
 	}
 	return $date;
 }
@@ -569,9 +569,13 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
  *    - SITE / SITE_NAME : nom du site
  *    - WWWROOT : URL générale du site
  *    - PHP_SELF : script PHP exécuté
+ *    - REPERTOIRE_IMAGES : Repertoire qui contient les images de la charte graphique dans le dossier modele
+ *    - CATALOG_URL : URL de la page principal du catalogue, listant toutes les catégories
  *    - CURRENT_URL : URL appelée par l'utilisateur
  *    - REMOTE_ADDR : IP de l'utilisateur
- *    - DATETIME : date et heure
+ *    - DATETIME : date et heure actuelle
+ *    - DATE : date actuelle
+ *    - TIMESTAMP : Timestamp actuelle
  * On ne traite pas ici les tags qui nécessitent de connaître le numéro de facture (on les remplacera juste avant utilisation du texte)
  *
  * @param string $text
@@ -591,7 +595,8 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		// On rajoute les tags génériques au site
 		$template_tags['SITE'] = $GLOBALS['site'];
 		$template_tags['SITE_NAME'] = $GLOBALS['site'];
-		$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang).'/';
+		$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
+		$template_tags['CATALOG_URL'] = get_product_category_url();
 		$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
 		$template_tags['CURRENT_URL'] = get_current_url(false);
 		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
@@ -610,7 +615,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
 			$sql = 'SELECT id, nom
 				FROM peel_codes_promos cp
-				WHERE nb_valide>0 AND source="'.real_escape_string($tag_name_array[1]).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
+				WHERE ' . get_filter_site_cond('codes_promos', 'cp', defined('IN_PEEL_ADMIN')) . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($tag_name_array[1]).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
 				ORDER BY id ASC
 				LIMIT 1';
 			$query = query($sql);
@@ -618,17 +623,36 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$template_tags[$this_tag] = $obj->nom;
 				$sql = 'UPDATE peel_codes_promos
 					SET nb_valide=nb_valide-1
-					WHERE id="'.intval($obj->id).'"';
+					WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos', null, defined('IN_PEEL_ADMIN'));
 				$query = query($sql);
 			}
 		}
-		if(String::strpos($text, '[AD_CATEGORIES_OPTIONS]')!==false && is_annonce_module_active()) {
-			$tag_replace = '';
-			$ad_categories = get_ad_categories();
-			foreach ($ad_categories as $this_category_id => $this_category_name) {
-				$tag_replace .= '<option value="' . intval($this_category_id) . '" ' . (!empty($_POST['cat']) && intval($this_category_id) == intval($_POST['cat'])?'selected="selected"':'') . '>' . String::htmlentities($this_category_name) . '</option>';
-			}
-			$template_tags['AD_CATEGORIES_OPTIONS'] = $tag_replace;
+		if(String::strpos($text, '[AD_CATEGORIES_OPTIONS]') !== false && check_if_module_active('annonces')) {
+			$template_tags['AD_CATEGORIES_OPTIONS'] = get_categories_output(null, 'categories_annonces', vb($_POST['cat']), 'option', '&nbsp;&nbsp;', null);
+		}
+		if(String::strpos($text, '[USER_CLIENTS]') !== false && check_if_module_active('clients')) {
+			include($GLOBALS['fonctionsclients']);
+			$template_tags['USER_CLIENTS'] = affiche_descriptions_clients();
+			// On supprime les ajouts automatiques par l'éditeur de texte
+			$text = str_replace('<p>[USER_CLIENTS]</p>', '[USER_CLIENTS]', $text);
+		}
+		if(String::strpos($text, '[CONTACT_FORM]') !== false) {
+			// Affichage du formulaire de contact, avec gestion des erreurs 
+			$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
+			$text = str_replace('<p>[CONTACT_FORM]</p>', '[CONTACT_FORM]', $text);
+		}
+		if(String::strpos($text, '[AFFICHE_CARROUSEL_REFERENCE]') !== false && check_if_module_active('carrousel')) {
+			$template_tags['AFFICHE_CARROUSEL_REFERENCE'] = affiche_carrousel('references', true);
+		}
+		if(String::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
+			$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div></div></div>';
+			// On supprime les ajouts automatiques par l'éditeur de texte
+			$text = str_replace('<p>[CLOSE_MAIN_CONTAINER]</p>', '[CLOSE_MAIN_CONTAINER]', $text);
+		}
+		if(String::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
+			$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12"><div class="rub_wrapper special_content"><div class="rub_content">';
+			// On supprime les ajouts automatiques par l'éditeur de texte
+			$text = str_replace('<p>[REOPEN_MAIN_CONTAINER]</p>', '[REOPEN_MAIN_CONTAINER]', $text);
 		}
 		$tag_begin = -1;
 		while (String::strpos($text, '[RSS=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[RSS=', $tag_begin + 1)) !== false) {
@@ -683,9 +707,9 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	}
 	if(!$replace_only_custom_tags) {
 		foreach(array('d', 'D', 'j', 'l', 'N', 's', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y', 'a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'U') as $this_date_item) {
-		// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
-		$template_tags[$this_date_item] = date($this_date_item);
-	}
+			// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
+			$template_tags[$this_date_item] = date($this_date_item);
+		}
 	}
 	// On gère tous les tags qui restent à remplacer sans modification de la casse
 	foreach($template_tags as $this_tag => $this_tag_value) {
@@ -695,6 +719,14 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			$this_tag_value = String::nl2br_if_needed($this_tag_value);
 		}
 		$text = str_replace('[' . $this_tag . ']', $this_tag_value, $text);
+	}
+	if(!empty($GLOBALS['site_parameters']['replace_words_after_tags_replace'])) {
+		// Remplacement de mots clés par des versions personnalisées pour le site
+		foreach($GLOBALS['site_parameters']['replace_words_after_tags_replace'] as $replaced => $new) {
+			if(strpos($text, $replaced) !== false) {
+				$text = str_replace($replaced, $new, $text);
+			}
+		}
 	}
 	return $text;
 }
@@ -874,7 +906,9 @@ function smileysFormat ($string)
 function get_string_from_array($array)
 {
 	if(is_array($array)) {
+		// NB : Pas besoin de remplacer " par \" dans les valeurs des chaines, le décodage tient compte des " en association avec les virgules uniquement
 		if($array===array_values($array)) {
+			// On ne précise pas les clés du tableau
 			$string = '"' . implode('", "', $array) . '"';
 		}else {
 			foreach($array as $this_key => $this_value) {
@@ -896,7 +930,7 @@ function get_string_from_array($array)
 }
 
 /**
- * Convertit un tableau en chaine de caractère simple à gérer par un utilisateur
+ * Convertit une chaine de caractère simple à gérer par un utilisateur en un tableau PHP
  *
  * @param mixed $string
  * @return
@@ -1006,8 +1040,8 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
  *
  * @param string $text
  * @param array $terms
- * @param array $found_tags
  * @param array $found_words_array
+ * @param array $found_tags
  * @return
  */
 function highlight_found_text($text, $terms, &$found_words_array, $found_tags = array('<span class="search_tag">', '</span>')) {
@@ -1016,7 +1050,7 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 		$terms = array($terms);
 	}
 	foreach ($terms as $this_term) {
-		if(String::strlen($this_term)>0) {
+		if((String::strlen($text)<80  && String::strlen($this_term)>0) || String::strlen($this_term)>=3) { 
 			$preg_condition = getPregConditionCompatAccents($this_term);
 			if (stripos($text, $this_term) !== false) {
 				$text = preg_replace('/' . $preg_condition . '/iu', $bbcode[0] . '$0' . $bbcode[1], $text, -1);
@@ -1027,4 +1061,14 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 	// on remplace le BBcode par les tags demandés - On le fait à la fin pour éviter les problèmes d'échappement avec preg
 	return str_replace($bbcode, $found_tags, $text);
 }
-?>
+
+/**
+ * Convert birthday date to age
+ *
+ * @param string $date
+ * @return
+ */
+function userAgeFormat ($date)
+{
+ return floor((date('Ymd') - str_replace("-", "", $date)) / 10000);
+}

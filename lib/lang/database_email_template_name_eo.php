@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_eo.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_name_eo.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -51,8 +51,8 @@ $peel_email_template["name"] = array(
   "cree_cheque_cadeau_client_type2" => "[FRIEND] donas al vi donac-ĉekon (monsumo)",
   "cree_cheque_cadeau_client_admin" => "Kreado de donac-ĉekon",
   "gift_list" => "Listo de donacoj",
-  "email_ordered_cadeaux" => "Mendo ĉe via listo de donacoj \"[LIST_NAME]\"",
-  "listecadeau_voir" => "Mendo ĉe via listo de donacoj \"[LIST_NAME]\"",
+  "email_ordered_cadeaux" => "Mendo ĉe via listo de donacoj \"[GIFTLIST_NAME]\"",
+  "listecadeau_voir" => "Mendo ĉe via listo de donacoj \"[GIFTLIST_NAME]\"",
   "parrainage" => "[PSEUDO] deziras patroni vin",
   "email_alerte" => "Varoj en la stoko ĉe [SITE]",
   "decremente_stock" => "Avertilo pri stoko-nivelo",
@@ -72,4 +72,3 @@ $peel_email_template["name"] = array(
   "inscription_newsletter" => "Aliĝo al la novaĵ-bulteno ĉe [SITE]"
 );
 
-?>

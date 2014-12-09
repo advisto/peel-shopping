@@ -1,20 +1,21 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-#}<h1 class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
+// $Id: user_change_params_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+#}<h1 property="name" class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
-<div class="inscription_form">
+{% if not (enable_display_only_user_specific_field) %}
+	<div class="inscription_form">
 	{% if (verified_account_info) %}{{ verified_account_info }}{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label>{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -28,10 +29,12 @@
 			<input type="radio" name="civilite" value="M."{% if civilite_m_issel %} checked="checked"{% endif %} /> {{ STR_M }}
 		</span>{{ gender_error }}
 	</div>
+	{% if (STR_PSEUDO) %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="pseudo">{{ STR_PSEUDO }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">{% if is_annonce_module_active %}<b>{{ pseudo|html_entity_decode_if_needed }}</b></span>{% else %}<input class="form-control" type="text" name="pseudo" id="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} />{% endif %}</span>{{ pseudo_error }}
 	</div>
+	{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="prenom">{{ STR_FIRST_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="prenom" id="prenom" value="{{ first_name|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ first_name_error }}
@@ -44,7 +47,16 @@
 		<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="societe" id="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ societe_error }}
 	</div>
-{% if add_b2b_form_inputs }}
+	{% endif %}
+	{% for f in specific_fields %}
+		{% if f.field_position=='company' %}
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory_fields) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
+	</div>
+		{% endif %}
+	{% endfor %}
+{% if add_b2b_form_inputs %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
@@ -76,17 +88,17 @@
 		</span>{{ activity_error }}
 	</div>
 {% endif %}
+{% if (STR_FONCTION) %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="fonction">{{ STR_FONCTION }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="fonction" name="fonction">
 				<option value="">{{ STR_CHOOSE }}...</option>
-				<option value="leader" {% if fonction=='leader' %} selected="selected"{% endif %}>{{ STR_LEADER }}</option>
-				<option value="manager" {% if fonction=='manager' %} selected="selected"{% endif %}>{{ STR_MANAGER }}</option>
-				<option value="employee" {% if fonction=='employee' %} selected="selected"{% endif %}>{{ STR_EMPLOYEE }}</option>
+				{{ fonction_options }}
 			</select>
 		</span>{{ fonction_error }}
 	</div>
+{% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="tva">{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ intracom_form_error }}
@@ -101,14 +113,19 @@
 		<span class="enregistrementgauche"><label for="telephone">{{ STR_TELEPHONE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="telephone" id="telephone" value="{{ telephone|str_form_value }}" {{ content_rows_info }} /></span>{{ telephone_error }}
 	</div>
+{% if (STR_PORTABLE) %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="portable">{{ STR_PORTABLE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="portable" id="portable" value="{{ portable|str_form_value }}" {{ content_rows_info }} /></span>
 	</div>
+{% endif %}
+{% if false %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="fax">{{ STR_FAX }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="fax" id="fax" value="{{ fax|str_form_value }}" {{ content_rows_info }} /></span>
 	</div>
+{% endif %}
+{% if (STR_NAISSANCE) %}
 {% if (birthday_show) %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="naissance">{{ STR_NAISSANCE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -123,6 +140,7 @@
 	{% elseif (birthday_contact_admin) %}
 		{{ STR_ERR_BIRTHDAY2 }}
 	{% endif %}
+{% endif %}
 {% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="adresse">{{ STR_ADDRESS }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -152,16 +170,18 @@
 	<div class="enregistrement">
 		<span>{{ STR_ANNOUNCEMENT_INDICATION }}</span>
 	</div>
+	{% if favorite_category %}
 	<div class="enregistrement">
-		{% if favorite_category %}
 		<span class="enregistrementgauche"><label for="favorite_category">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="favorite_category" name="favorite_category">
 				{{ favorite_category }}
 			</select>
 		</span>
+	</div>
 		{{ favorite_category_error }}
-		{% else %}
+	{% else %}
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_1">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_1" name="id_cat_1">
@@ -169,6 +189,8 @@
 			</select>
 		</span>
 		{{ id_cat_1_error }}
+	</div>
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_2">{{ STR_SECOND_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_2" name="id_cat_2">
@@ -176,6 +198,8 @@
 			</select>
 		</span>
 		{{ id_cat_2_error }}
+	</div>
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_3">{{ STR_THIRD_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_3" name="id_cat_3">
@@ -186,15 +210,19 @@
 	</div>
 	{% endif %}
 {% endif %}
+{% if (STR_USER_ORIGIN) %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="origin">{{ STR_USER_ORIGIN }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</span>
 	</div>
+{% endif %}
 	{% for f in specific_fields %}
+		{% if f.field_position!='company' %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
 	</div>
+		{% endif %}
 	{% endfor %}
 	{% if language_for_automatic_emails_options|length>1 %}
 	<div class="enregistrement">
@@ -208,12 +236,16 @@
 		</span>
 	</div>
 	{% endif %}
+	{% if (STR_NEWSLETTER_YES) %}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="newsletter" value="1"{% if newsletter_issel %} checked="checked"{% endif %} /> {{ STR_NEWSLETTER_YES }}</span>
 	</div>
+	{% endif %}
+	{% if (STR_COMMERCIAL_YES) %}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="commercial" value="1"{% if commercial_issel %} checked="checked"{% endif %} /> {{ STR_COMMERCIAL_YES }}</span>
 	</div>	
+	{% endif %}
 </div>
 	<p class="center">
 		{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="btn btn-primary" />

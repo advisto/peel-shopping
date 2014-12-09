@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_avis.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: liste_avis.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 include("../../configuration.inc.php");
 
@@ -27,7 +27,7 @@ if (isset($_GET['prodid'])) {
 	if (is_module_avis_active() && !empty($_GET['prodid']) && is_numeric($_GET['prodid'])) {
 		// On charge les fonctions d'avis
 		include($fonctionsavis);
-		render_avis_public_list($_GET['prodid'], 'produit', vb($_GET['display_specific_note']));
+		echo render_avis_public_list($_GET['prodid'], 'produit', vb($_GET['display_specific_note']));
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('modules/avis_liste_notice.tpl', array('msg' => $GLOBALS['STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT']))->fetch();
 	}
@@ -36,7 +36,7 @@ if (isset($_GET['prodid'])) {
 	if (is_module_avis_active() && !empty($_GET['ref']) && is_numeric($_GET['ref'])) {
 		// On charge les fonctions d'avis
 		include($fonctionsavis);
-		render_avis_public_list($_GET['ref'], 'annonce', vb($_GET['display_specific_note']));
+		echo render_avis_public_list($_GET['ref'], 'annonce', vb($_GET['display_specific_note']));
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('modules/avis_liste_notice.tpl', array('msg' => $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD']))->fetch();
 	}
@@ -44,4 +44,3 @@ if (isset($_GET['prodid'])) {
 
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
-?>

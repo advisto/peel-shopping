@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_home.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_home.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_HTML_TITLE }}</div>
 <p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_HTML_CREATE }}</a></p>
 <div class="alert alert-info"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_HTML_EXPLAIN }}</div>
@@ -24,6 +24,7 @@
 			<td class="menu">{{ STR_DATE }}</td>
 			<td class="menu">{{ STR_ADMIN_PLACE }}</td>
 			<td class="menu">{{ STR_STATUS }}</td>
+			<td class="menu">{{ STR_ADMIN_WEBSITE }}</td>
 		</tr>
 		{% for res in results %}
 		{{ res.tr_rollover }}
@@ -36,6 +37,7 @@
 		<td class="center" width="150">{{ res.date }}</td>
 		<td class="center">{{ res.emplacement|html_entity_decode_if_needed }}</td>
 		<td class="center"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" onclick="{{ res.etat_onclick|escape('html') }}" /></td>
+		<td class="center" width="150">{{ res.site_name }}</td>
 		</tr>
 		{% endfor %}
 	{% else %}
@@ -44,5 +46,5 @@
 	</table>
 </div>
 {% if is_welcome_ad_module_active %}
-<br /><a href="{{ wwwroot }}" onclick="thisdate=new Date;thisdate.setFullYear(thisdate.getFullYear()-1);document.cookie='info_inter=; path=/; expires='+thisdate.toGMTString();">{{ STR_ADMIN_HTML_DELETE_COOKIE_LINK }}</a>
+<br /><a href="{{ wwwroot }}/" onclick="thisdate=new Date;thisdate.setFullYear(thisdate.getFullYear()-1);document.cookie='info_inter=; path=/; expires='+thisdate.toGMTString();">{{ STR_ADMIN_HTML_DELETE_COOKIE_LINK }}</a>
 {% endif %}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_clean_folders.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_clean_folders.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<div class="center">
 	<a class="btn btn-primary" href="{$wwwroot}/?update=1">CSS &amp; Javascript {$STR_BEFORE_TWO_POINTS}: {$STR_REFRESH}</a>
 </div>
@@ -61,7 +61,7 @@
 				<td colspan="2" height="15"></td>
 			</tr>
 			<tr>
-				<td colspan="2" style="text-align: center;"><input class="btn btn-primary" type="submit" value="{$STR_SUBMIT|str_form_value}" onclick="return advisto_confirm('{$STR_ADMIN_CONFIRM_JAVASCRIPT|filtre_javascript:true:true:true}', this.href);" /></td>
+				<td colspan="2" style="text-align: center;"><input class="btn btn-primary" type="submit" value="{$STR_SUBMIT|str_form_value}" onclick="return advisto_form_confirm('{$STR_ADMIN_CONFIRM_JAVASCRIPT|filtre_javascript:true:true:true}', this);" /></td>
 			</tr>
 		</table>
 	</form>

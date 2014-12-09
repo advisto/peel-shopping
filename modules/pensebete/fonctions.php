@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,7 +36,7 @@ function insere_pense($item_id = null, $type = null)
 	} elseif ($type == 'annonce') {
 		$annonce_object = new Annonce($item_id);
 		$this_url = $annonce_object->get_annonce_url();
-		$this_name = $annonce_object->titre;
+		$this_name = $annonce_object->get_titre();
 		$this_item = $GLOBALS['STR_MODULE_ANNONCES_THE_AD'];
 		$back_to_item = $GLOBALS['STR_MODULE_ANNONCES_BACK_TO_ADS'];
 		$this_field = 'id_annonce';
@@ -73,14 +73,14 @@ function insere_pense($item_id = null, $type = null)
  *
  * @return
  */
-function display_product_in_reminder()
+function display_product_in_reminder($return_mode = false)
 {
 	$sql = "SELECT pb.id as id_pense_bete, p.id, p.reference, p.nom_" . $_SESSION['session_langue'] . " AS name, p.image1, p.prix * (1-p.promotion/100) as prix, p.promotion, c.id as categorie_id, c.nom_" . $_SESSION['session_langue'] . " as categorie
 		FROM peel_produits p
 		INNER JOIN peel_pensebete pb ON (pb.id_produit = p.id)
 		INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-		INNER JOIN peel_categories c ON c.id = pc.categorie_id
-		WHERE pb.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'
+		INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+		WHERE pb.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('produits', 'p') . "
 		GROUP BY p.id";
 	$query = query($sql);
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/pensebete_display.tpl');
@@ -93,6 +93,8 @@ function display_product_in_reminder()
 	$tpl->assign('STR_UNIT_PRICE', $GLOBALS['STR_UNIT_PRICE']);
 	$tpl->assign('STR_DELETE_PROD_CART', $GLOBALS['STR_DELETE_PROD_CART']);
 	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+	$user_info = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
+	$tpl->assign('pseudo', $user_info['pseudo']);
 	
 	if (num_rows($query) > 0) {
 		$tpl->assign('are_prods', true);
@@ -112,6 +114,7 @@ function display_product_in_reminder()
 			}
 			$tpl_prods[] = array(
 				'del_href' => $GLOBALS['wwwroot'] . '/modules/pensebete/voir.php?mode=delete&id=' . $prod['id_pense_bete'],
+				'attributes_with_single_options_array' => $product_object->attributes_with_single_options_array,
 				'img' => $tpl_img,
 				'urlprod' => $urlprod,
 				'name' => $prod['name'],
@@ -120,10 +123,14 @@ function display_product_in_reminder()
 			);
 		}
 		$tpl->assign('prods', $tpl_prods);
-	}else{
+	} else {
 		$tpl->assign('are_prods', false);
 	}
-	echo $tpl->fetch();
+	if ($return_mode) {
+		return $tpl->fetch();
+	} else {
+		echo $tpl->fetch();
+	
+	}
 }
 
-?>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -54,7 +54,7 @@ function affiche_formulaire_modif_profil($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_profil
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND  " . get_filter_site_cond('profil', null, true) . "");
 		$frm = fetch_assoc($qid);
 	}
 	$frm['id'] = $id;
@@ -101,9 +101,11 @@ function affiche_formulaire_profil(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('priv', $frm["priv"]);
 	$tpl->assign('document_delete_icon_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_TITLE', $GLOBALS['STR_MODULE_PROFIL_ADMIN_TITLE']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_EXPLAIN', $GLOBALS['STR_MODULE_PROFIL_ADMIN_EXPLAIN']);
@@ -111,10 +113,9 @@ function affiche_formulaire_profil(&$frm)
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 	$tpl->assign('STR_ADMIN_DESCRIPTION', $GLOBALS['STR_ADMIN_DESCRIPTION']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN', $GLOBALS['STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_FILE', $GLOBALS['STR_ADMIN_FILE']);
-	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_UPLOAD_DOCUMENT', $GLOBALS['STR_MODULE_PROFIL_ADMIN_UPLOAD_DOCUMENT']);
-	$tpl->assign('STR_ADMIN_FILE', $GLOBALS['STR_ADMIN_FILE']);
+	$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
+	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_ABBREVIATE', $GLOBALS['STR_MODULE_PROFIL_ADMIN_ABBREVIATE']);
 	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
 	echo $tpl->fetch();
@@ -129,7 +130,8 @@ function affiche_formulaire_profil(&$frm)
 function insere_profil(&$frm)
 {
 	$sql = "INSERT INTO peel_profil (
-		priv";
+		priv
+		, site_id";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, name_" . $lng."
@@ -140,6 +142,7 @@ function insere_profil(&$frm)
 	$sql .= "
 	) VALUES (
 		'" . nohtml_real_escape_string($frm['priv']) . "'
+		, '" . nohtml_real_escape_string($frm['site_id']) . "'
 		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
@@ -164,6 +167,7 @@ function maj_profil($id, &$frm)
 {
 	$sql = "UPDATE peel_profil SET
 		priv = '" . nohtml_real_escape_string($frm['priv']) . "'
+		, site_id = '" . intval($frm['site_id']) . "'
 		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
@@ -188,7 +192,7 @@ function get_profil($technical_code)
 	/* Charge les informations du produit */
 	$qid = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE priv = '" . $technical_code . "'");
+		WHERE priv = '" . $technical_code . "' AND " . get_filter_site_cond('profil', null, true) . "");
 	$profil = fetch_assoc($qid);
 	return $profil;
 }
@@ -207,23 +211,27 @@ function affiche_liste_profil($start)
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 
-	$result = query("SELECT id, name_".$_SESSION['session_langue']." AS name, priv
+	$result = query("SELECT id, name_".$_SESSION['session_langue']." AS name, priv, site_id
 		FROM peel_profil
+		WHERE " . get_filter_site_cond('profil', null, true) . "
 		ORDER BY name");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'name' => $ligne['name'],
-				'priv' => $ligne['priv']
+				'priv' => $ligne['priv'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 			);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_TITLE', $GLOBALS['STR_MODULE_PROFIL_ADMIN_TITLE']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_CREATE', $GLOBALS['STR_MODULE_PROFIL_ADMIN_CREATE']);
@@ -247,12 +255,12 @@ function supprime_fichier_profil($id, $file) {
 	if(String::substr($file, 0, String::strlen('document_'))=='document_') {
 		$sql = "SELECT " . word_real_escape_string($file) . "
 			FROM peel_profil
-			WHERE id='" . intval($id) . "'";
+			WHERE id='" . intval($id) . "' AND  " . get_filter_site_cond('profil', null, true) . "";
 		$res = query($sql);
 		if ($file_infos = fetch_assoc($res)) {
 			query("UPDATE peel_profil
 				SET `" . word_real_escape_string($file) . "`=''
-				WHERE id='" . intval($id) . "'");
+				WHERE id='" . intval($id) . "'  AND  " . get_filter_site_cond('profil', null, true));
 		}
 	}
 	if (!empty($file_infos) && delete_uploaded_file_and_thumbs($file_infos[$file])) {
@@ -260,4 +268,3 @@ function supprime_fichier_profil($id, $file) {
 	}
 }
 
-?>

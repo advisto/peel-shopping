@@ -1,26 +1,26 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an     |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: import_produits.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products,admin_webmastering");
 
-if (is_stock_advanced_module_active()) {
+if (check_if_module_active('stock_advanced')) {
 	include($fonctionsstock_advanced_admin);
 }
-$specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock');
-$DOC_TITLE = $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_TITLE'];
+$specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock', 'Categorie', 'categorie_id');
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_TITLE'];
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
@@ -35,6 +35,7 @@ sort($product_field_names);
 // Seléction des attributs, actif ou pas.
 $q_nom_attrib = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
 	FROM peel_nom_attributs
+	WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
 	ORDER BY nom_" . $_SESSION['session_langue'] . "");
 $attributs_array = array();
 while ($attrib = fetch_assoc($q_nom_attrib)) {
@@ -56,11 +57,11 @@ switch ($action) {
 				echo '<input type="hidden" name="on_update[' . $this_id . ']" value="' . String::str_form_value($this_value) . '" />';
 				query("UPDATE peel_import_field
 					SET etat='1'
-					WHERE champs='" . nohtml_real_escape_string($this_value) . "'");
+					WHERE champs='" . nohtml_real_escape_string($this_value) . "' AND " . get_filter_site_cond('import_field', null, true) . "");
 				if (!affected_rows()) {
 					// Comme etat valait 0 avant, c'est que la ligne n'existait pas, on va donc la créer
 					query("INSERT INTO peel_import_field
-						SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "'");
+						SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "', site_id = " . intval($GLOBALS['site_id']));
 				}
 			}
 		}
@@ -79,7 +80,7 @@ switch ($action) {
 				$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_produits_fichier.tpl');
 				$tpl->assign('href', $GLOBALS['repertoire_upload'] . '/' . $fichier);
 				$tpl->assign('name', $fichier);
-				$tpl->assign('STR_ADMIN_FILE', $GLOBALS['STR_ADMIN_FILE']);
+				$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 				$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 				echo $tpl->fetch();
 				if ($_POST['type_import'] == 'chosen_fields') {
@@ -122,7 +123,7 @@ switch ($action) {
 					if (!in_array($this_field_name, $product_field_names) && strpos($this_field_name, "#") === false && strpos($this_field_name, "§") === false) {
 						// Si le champ trouvé dans le fichier n'est pas dans la table produit, et que le nom du produit ne contient pas de séparateur (spécifique aux attributs).
 						if (in_array($this_field_name, $specific_fields_array)) {
-							if(!in_array($this_field_name, array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Stock'))) {
+							if(!in_array($this_field_name, array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Stock', 'Categorie', 'categorie_id'))) {
 								// Les champs écartés dans la liste ci-dessus ici seront traités dans le script spécifiquement. Les autres champs spécifiques ne sont pas traités
 								$columns_skipped[] = $this_field_name;
 								echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_ERR_COLUMN_NOT_HANDLED'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
@@ -144,14 +145,14 @@ switch ($action) {
 				$line_number = 0;
 
 				if (empty($skip_import)) {
-					while (!feof($fp)) {
+					while (!String::feof($fp)) {
 						unset($product_id);
 						unset($set_sql_fields);
 						unset($field_values);
 						$last_treated_columns = 0;
 						$line_number++;
 						// Si une valeur de cas contient des sauts de ligne, alors on prend quand même la ligne suivante comme si c'était la continuité de cette ligne
-						while (!feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
+						while (!String::feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
 							// Tant qu'on n'atteint pas fin de fichier
 							$this_line = String::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
 							if (empty($this_line)) {
@@ -201,7 +202,8 @@ switch ($action) {
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'import'));
 		$tpl_inputs = array();
 		$req = query("SELECT champs, etat, texte_" . $_SESSION['session_langue'] . "
-			FROM peel_import_field");
+			FROM peel_import_field
+			WHERE " . get_filter_site_cond('import_field', null, true) . "");
 		while ($result = fetch_assoc($req)) {
 			$fields_explanations_arrays[$result['champs']] = $result;
 		}
@@ -248,4 +250,3 @@ switch ($action) {
 }
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

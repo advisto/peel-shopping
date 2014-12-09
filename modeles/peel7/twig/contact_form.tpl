@@ -1,20 +1,21 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-#}<h1 class="page_title">{{ STR_CONTACT }}</h1>
+// $Id: contact_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+#}{% if !skip_introduction_text %}<h1 property="name" class="page_title">{{ STR_CONTACT }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <div id="contact">
 	<div id="contact_info">{{ contact_info }}</div>
+{% endif %}
 	<div id="contact_form">{% if (success_msg) and (success_msg) %}<div class="alert alert-success">{{ success_msg|nl2br_if_needed }}</div>{% endif %}
 		<div class="contact_intro">{{ STR_CONTACT_INTRO }}</div>
 		<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
@@ -36,12 +37,14 @@
 					{{ sujet_error }}
 					</td>
 				</tr>
+		{% if (STR_REQUIRED_ORDER_NUMBER) %}
 				<tr{% if short_form %} class="no-display"{% endif %}>
 					<td><label for="commande_id">{{ STR_ORDER_NUMBER }} {{ STR_BEFORE_TWO_POINTS }}:<br /><i>({{ STR_REQUIRED_ORDER_NUMBER }})</i></label></td>
 					<td class="{{ align }}">
 						<input type="text" class="form-control" id="commande_id" name="commande_id" value="{{ commande_id|str_form_value }}" />{{ commande_error }}
 					</td>
 				</tr>
+		{% endif %}
 				<tr>
 					<td><label for="societe">{{ STR_SOCIETE }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
@@ -55,7 +58,7 @@
 					</td>
 				</tr>
 				<tr{% if short_form %} class="no-display"{% endif %}>
-					<td><label for="prenom">{{ STR_FIRST_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
+					<td><label for="prenom">{{ STR_FIRST_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
 						<input type="text" class="form-control" id="prenom" name="prenom" value="{{ first_name_value|str_form_value }}" />{{ first_name_error }}
 					</td>
@@ -121,21 +124,15 @@
 				</tr>
 				<tr>
 					<td class="left">{{ captcha.validation_code_copy_txt }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
-					<td>{{ captcha.error }}<input name="code" type="text" class="form-control" size="5" maxlength="5" id="code" value="{{ captcha.value|str_form_value }}" /></td>
+					<td><input name="code" type="text" class="form-control" size="5" maxlength="5" id="code" value="{{ captcha.value|str_form_value }}" />{{ captcha.error }}</td>
 				</tr>
-				{% endif %}
+				<tr>
+					<td></td>
+					<td>{{ token }}<div style="text-align:center; margin-top: 10px; margin-bottom: 10px;"><input type="submit" class="btn btn-primary" value="{{ STR_SEND|str_form_value }}" /></div></td>
+				</tr>
+	{% endif %}
 			</table>
-
-			<div style="text-align:center; margin-top: 10px;">
-				{{ token }}
-			{% if short_form %}
-				<a href="{{ href|escape('html') }}#" class="a_submit" onclick="document.form_contact.submit();return false;" ></a>
-			{% else %}
-				<input type="submit" class="btn btn-primary" value="{{ STR_SEND|str_form_value }}" />
-			{% endif %}
-			</div>
-			<p{% if short_form %} class="no-display"{% endif %}>{{ cnil_txt|nl2br_if_needed }}</p>
 			<p{% if short_form %} class="no-display"{% endif %}><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p>
 		</form>
 	</div>
-</div>
+	{if !$skip_introduction_text}</div>{/if}

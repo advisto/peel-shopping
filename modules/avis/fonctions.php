@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,16 +34,22 @@ function formulaire_avis($id, &$frm, &$form_error_object, $type)
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_formulaire.tpl');
 	$tpl->assign('action', get_current_url(true));
 	$tpl->assign('type', $type);
+	$tpl->assign('no_notation', vn($GLOBALS['site_parameters']['module_avis_no_notation']));
+	if (!empty($GLOBALS['site_parameters']['module_avis_use_html_editor'])) {
+		$tpl->assign('html_editor', getTextEditor('avis', '475px', '280px', "", '../../', 3));
+	}
+	
 	if ($type == 'produit') {
 		$tpl->assign('product_name', $product_object->name);
-		$tpl->assign('prodid', intval($_REQUEST['prodid']));
+		$tpl->assign('prodid', intval($id));
 		$tpl->assign('STR_MODULE_AVIS_WANT_COMMENT_PRODUCT', $GLOBALS['STR_MODULE_AVIS_WANT_COMMENT_PRODUCT']);
 	} elseif ($type == 'annonce') {
-		$tpl->assign('annonce_titre', $annonce_object->titre);
+		$tpl->assign('annonce_titre', $annonce_object->get_titre());
 		$tpl->assign('ref', intval($_REQUEST['ref']));
 		$tpl->assign('STR_MODULE_ANNONCES_AVIS_WANT_COMMENT_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_WANT_COMMENT_AD']);
 	}
-	$tpl->assign('id_utilisateur', intval($_SESSION['session_utilisateur']['id_utilisateur']));
+	
+	$tpl->assign('id_utilisateur', intval(vn($_SESSION['session_utilisateur']['id_utilisateur'])));
 	$tpl->assign('prenom', vb($_SESSION['session_utilisateur']['prenom']));
 	$tpl->assign('nom_famille', vb($_SESSION['session_utilisateur']['nom_famille']));
 	$tpl->assign('email', vb($_SESSION['session_utilisateur']['email']));
@@ -63,7 +69,7 @@ function formulaire_avis($id, &$frm, &$form_error_object, $type)
 	$tpl->assign('STR_YOUR_NOTE', $GLOBALS['STR_YOUR_NOTE']);
 	$tpl->assign('STR_MODULE_AVIS_SEND_YOUR_OPINION', $GLOBALS['STR_MODULE_AVIS_SEND_YOUR_OPINION']);
 	$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }
 
 /**
@@ -114,8 +120,8 @@ function insere_avis($frm)
 		, '" . nohtml_real_escape_string($frm['email']) . "'
 		, '" . nohtml_real_escape_string(String::strtolower($frm['prenom'])) . "'
 		, '" . nohtml_real_escape_string($frm['pseudo']) . "'
-		, '" . nohtml_real_escape_string($frm['avis']) . "'
-		, '" . intval($frm['note']) . "'
+		, '" . real_escape_string(String::getCleanHTML($frm['avis'])) . "'
+		, '" . intval(vn($frm['note'])) . "'
 		, '" . date('Y-m-d H:i:s', time()) . "'
 		, '0'
 		, '" . nohtml_real_escape_string($frm['langue']) . "'";
@@ -128,7 +134,7 @@ function insere_avis($frm)
 
 	query("UPDATE peel_utilisateurs
 		SET pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'
-		WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'");
+		WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 	$qid = query($sql);
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_insere.tpl');
@@ -142,9 +148,9 @@ function insere_avis($frm)
 		$tpl->assign('STR_MODULE_ANNONCES_AVIS_YOUR_COMMENT_ON_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_YOUR_COMMENT_ON_AD']);
 	}
 	$custom_template_tags['AVIS'] = $frm['avis'];
-	send_email($GLOBALS['support_sav_client'], '', '', 'insere_avis', $custom_template_tags, 'html', $GLOBALS['support'], true, false, true, $frm['email']);
+	send_email($GLOBALS['support_sav_client'], '', '', 'insere_avis', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $frm['email']);
 	$tpl->assign('STR_DONNEZ_AVIS', $GLOBALS['STR_DONNEZ_AVIS']);
-	$tpl->assign('STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION', $GLOBALS['STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION']);
+	$tpl->assign('STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION', $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION'],$GLOBALS['site'])))->fetch());
 	$tpl->assign('site', $GLOBALS['site']);
 	$tpl->assign('type', $frm['type']);
 	if ($frm['type'] == 'produit') {
@@ -154,7 +160,7 @@ function insere_avis($frm)
 		$tpl->assign('urlannonce', $urlannonce);
 		$tpl->assign('titre_annonce', $frm['titre_annonce']);
 	}
-	echo $tpl->fetch(); 
+	return $tpl->fetch(); 
 }
 
 /**
@@ -163,17 +169,18 @@ function insere_avis($frm)
  * @param mixed $prodid
  * @return
  */
-function render_avis_public_list($prodid, $type, $display_specific_note = null)
+function render_avis_public_list($prodid, $type, $display_specific_note = null, $no_display_if_empty = false)
 {
 	$output = '';
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_public_list.tpl');
 	if ($type == 'produit') {
 		$product_object = new Product($prodid, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
 		$urlprod = $product_object->get_product_url();
-		$sqlAvis = "SELECT *
-			FROM peel_avis
-			WHERE id_produit = '" . intval($prodid) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'
-			ORDER BY note DESC";
+		$sqlAvis = "SELECT a.*, u.civilite
+			FROM peel_avis a
+			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
+			WHERE a.id_produit = '" . intval($prodid) . "' AND a.etat = '1' AND a.lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'
+			ORDER BY a.note DESC";
 	} elseif ($type == 'annonce') {
 		$annonce_object = new Annonce($prodid);
 		$urlannonce = $annonce_object->get_annonce_url();
@@ -196,8 +203,10 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null)
 	$tpl->assign('STR_BACK_TO_PRODUCT', $GLOBALS['STR_BACK_TO_PRODUCT']);
 	$tpl->assign('STR_POSTED_OPINION', $GLOBALS['STR_POSTED_OPINION']);
 	$tpl->assign('STR_POSTED_OPINIONS', $GLOBALS['STR_POSTED_OPINIONS']);
+	$tpl->assign('STR_DONNEZ_AVIS', $GLOBALS['STR_DONNEZ_AVIS']);
 
 	if (num_rows($resAvis) > 0) {
+		$are_results = true;
 		$tpl->assign('are_results', true);
 		$qid = "SELECT AVG(note) AS average_rating
 			FROM peel_avis
@@ -237,21 +246,22 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null)
 			}
 			$tpl_results[] = array('i' => $i,
 				'pseudo' => $pseudo,
-				'date' => get_formatted_date($Avis['datestamp']),
-				'avis' => $Avis['avis']
+				'date' => get_formatted_date($Avis['datestamp'], 'short', true),
+				'avis' => $Avis['avis'],
+				'note' => $Avis['note']
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 		
 		$total_vote = array_sum($notation_array);
-		for($i=5;$i!=0;$i--) {
+		for($j=5;$j!=0;$j--) {
 			// Affiche les votes par ordre décroissant. Utilisation d'un for et non pas un foreach pour permettre l'affichage des notes sans vote (et donc pas présent dans le tableau notation_array)
-			$width = (vn($notation_array[$i]) / $total_vote) * 100;
-			$tpl_notation[] = array('note' => $i,
-				'nb_this_vote' => vn($notation_array[$i]),
+			$width = (vn($notation_array[$j]) / $total_vote) * 100;
+			$tpl_notation[] = array('note' => $j,
+				'nb_this_vote' => vn($notation_array[$j]),
 				'width' => ceil($width),
-				'link' => get_current_url(false) . '?prodid='.$prodid.'&display_specific_note='.$i
+				'link' => get_current_url(false) . '?prodid='.$prodid.'&display_specific_note='.$j
 				);
 		}
 		$tpl->assign('notations', $tpl_notation);
@@ -261,6 +271,7 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null)
 		$tpl->assign('total_vote', $total_vote);
 	} else {
 		$tpl->assign('are_results', false);
+		$are_results = false;
 	}
 
 	if ($type == 'produit') {
@@ -268,11 +279,16 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null)
 		$tpl->assign('urlprod', $urlprod);
 		unset($product_object);
 	} elseif ($type == 'annonce') {
-		$tpl->assign('annonce_titre', $annonce_object->titre);
+		$tpl->assign('annonce_titre', $annonce_object->get_titre());
 		$tpl->assign('urlannonce', $urlannonce);
 		unset($annonce_object);
 	}
-	echo $tpl->fetch();
+	
+	if (empty($are_results) && $no_display_if_empty) {
+		$output = '';
+	} else {
+		$output = $tpl->fetch();
+	}
+	return $output;
 }
 
-?>

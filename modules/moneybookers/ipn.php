@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ipn.php 43037 2014-10-29 12:01:40Z sdelaporte $
 include("../../configuration.inc.php");
 
 
@@ -29,7 +29,7 @@ if ($checknumber == vb($_POST['md5sig'])) {
 	if ($pay_to_email == $GLOBALS['site_parameters']['email_moneybookers']) {
 		$q = query('SELECT *
 				FROM peel_commandes
-				WHERE id="' . intval($transaction_id) . '"
+				WHERE id="' . intval($transaction_id) . '" AND ' . get_filter_site_cond('commandes') . '
 				LIMIT 1');
 		if ($r = fetch_assoc($q)) {
 			if (round($r['montant'], 2) == round($amount, 2)) {
@@ -68,4 +68,3 @@ if ($checknumber == vb($_POST['md5sig'])) {
 	//responce is NOT sent By Moneybookers
 	send_email($GLOBALS['support'], 'Alerte : problème sur transaction CB commande  ' . $transaction_id . '', 'Les informations Moneybookers semblent incorrectes ' . "\n\n" . print_r($_REQUEST, true));
 }
-?>

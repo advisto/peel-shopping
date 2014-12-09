@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -62,7 +62,7 @@ function affiche_formulaire_modif_nom_attribut($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_nom_attributs
-			WHERE id = " . intval($id));
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('nom_attributs', null, true) . "");
 		$frm = fetch_assoc($qid);
 	}
 	$frm['id'] = $id;
@@ -99,6 +99,8 @@ function affiche_formulaire_nom_attribut(&$frm)
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
 	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -114,6 +116,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_OPTIONS_LIST_ATTRIBUTE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_OPTIONS_LIST_ATTRIBUTE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE']);
+	$tpl->assign('STR_ADMIN_ATTRIBUT_STYLE_LINK', $GLOBALS['STR_ADMIN_ATTRIBUT_STYLE_LINK']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_DISPLAY_MODE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_DISPLAY_MODE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_SELECT_MENU', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_SELECT_MENU']);
@@ -133,10 +136,10 @@ function supprime_nom_attribut($id)
 {
 	$qid = query("SELECT nom_" . $_SESSION['session_langue'] . "
 		FROM peel_nom_attributs
-		WHERE id = " . intval($id));
+		WHERE id = " . intval($id) . " AND " . get_filter_site_cond('nom_attributs', null, true));
 	$col = fetch_assoc($qid);
 	query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id  = '" . intval($id) . "'");
-	query("DELETE FROM peel_nom_attributs WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_nom_attributs WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('nom_attributs', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_MSG_DELETED_OK'], String::html_entity_decode_if_needed($col['nom_' . $_SESSION['session_langue']]))))->fetch();
 }
 
@@ -158,6 +161,7 @@ function insere_nom_attribut($frm)
 	} 
 	$sql = "INSERT INTO peel_nom_attributs (
 			etat
+			, site_id
 			, mandatory
 			";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -165,6 +169,7 @@ function insere_nom_attribut($frm)
 	}
 	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description
 	) VALUES ('" . intval($frm['etat']) . "'
+			, '" . intval($frm['site_id']) . "'
 			, '" . intval($frm['mandatory']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
@@ -196,13 +201,14 @@ function maj_nom_attribut($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . nohtml_real_escape_string($lng) . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", mandatory = '" . intval($frm['mandatory']) . "'
+	$sql .= ", site_id = '" . intval($frm['site_id']) . "'
+			 , mandatory = '" . intval($frm['mandatory']) . "'
 			 , texte_libre ='" . intval($frm['texte_libre']) . "'
 			 , upload ='" . intval(vn($frm['upload'])) . "'
 			 , technical_code ='" . nohtml_real_escape_string($frm['technical_code']) . "'
 			 , type_affichage_attribut ='" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "'
 			 , show_description ='" . nohtml_real_escape_string($frm['show_description']) . "'
-			WHERE id='" . intval($id) . "'";
+			WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('nom_attributs', null, true);
 	query($sql);
 	// Si le nom de l'attribut est un texte libre alors on retire toutes ces options :
 	if (!empty($frm['texte_libre'])) {
@@ -233,14 +239,16 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description
-		FROM peel_nom_attributs
+	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description, site_id
+		FROM peel_nom_attributs 
+		WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'] . "");
 	$nr = num_rows($result);
 	$tpl->assign('num_results', $nr);
 	$tpl_results = array();
 	if ($nr != 0) {
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -250,13 +258,15 @@ function affiche_liste_nom_attribut($start)
 				'texte_libre_href' => $GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/attributs.php?mode=liste&attid=' . $ligne['id'],
 				'upload' => $ligne['upload'],
 				'etat_onclick' => 'change_status("attributs", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
-				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
+				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 	}
 	$tpl->assign('results', $tpl_results);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_TITLE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_TITLE']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_EXPLAIN', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_EXPLAIN']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CREATE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CREATE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_NOTHING_FOUND', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_NOTHING_FOUND']);
@@ -308,7 +318,7 @@ function affiche_formulaire_modif_attribut(&$frm, &$form_error_object)
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
 		$qid = query("SELECT *
 			FROM peel_attributs
-			WHERE id='" . intval($_GET['id']) . "'");
+			WHERE id='" . intval($_GET['id']) . "' AND " . get_filter_site_cond('attributs', null, true));
 		$frm = fetch_assoc($qid);
 	}
 	$frm["nouveau_mode"] = "maj";
@@ -328,10 +338,11 @@ function supprime_attribut()
 
 	$qid = query("SELECT descriptif_" . $_SESSION['session_langue'] . " AS descriptif
 		FROM peel_attributs
-		WHERE id='" . intval($id) . "'");
+		WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('attributs', null, true));
 
 	if ($bd = fetch_assoc($qid)) {
 		query("DELETE FROM peel_attributs WHERE id='" . intval($id) . "'");
+		query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id='" . intval($id) . "'");
 		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MSG_OPTION_DELETED_OK"], String::html_entity_decode_if_needed($bd['descriptif']))))->fetch();
 		echo $message;
 	}
@@ -348,11 +359,11 @@ function insere_attribut($id, $frm)
 {
 	$prix = get_float_from_user_input($frm['prix']);
 	$prix_revendeur = get_float_from_user_input($frm['prix_revendeur']);
-	$sql = "INSERT INTO peel_attributs (id_nom_attribut, image, prix, prix_revendeur, position, mandatory";
+	$sql = "INSERT INTO peel_attributs (id_nom_attribut, image, prix, prix_revendeur, position, mandatory, site_id";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng;
 	}
-	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "'";
+	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "', '" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['descriptif_' . $lng]) . "'";
 	}
@@ -377,11 +388,12 @@ function maj_attribut($id, $frm)
 		 ,  prix = '" . nohtml_real_escape_string($prix) . "'
 		 ,  prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
 		 ,  mandatory = '" . intval($frm['mandatory']) . "'
+		 ,  site_id = '" . intval($frm['site_id']) . "'
 		 ,  position = '" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng . " = '" . nohtml_real_escape_string($_POST['descriptif_' . $lng]) . "'";
 	}
-	$sql .= " WHERE id = '" . intval($_POST['id']) . "'";
+	$sql .= " WHERE id = '" . intval($_POST['id']) . "' AND " . get_filter_site_cond('attributs', null, true)."";
 	$qid = query($sql);
 }
 
@@ -415,7 +427,7 @@ function affiche_liste_attribut($frm)
 	affiche_choix_nom_attribut();
 	$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . " AS nom
 		FROM peel_nom_attributs
-		WHERE id='" . intval(vn($_GET['attid'])) . "' AND texte_libre = 0 AND upload = 0";
+		WHERE id='" . intval(vn($_GET['attid'])) . "' AND texte_libre = 0 AND upload = 0 AND " . get_filter_site_cond('nom_attributs', null, true) . "";
 	$q = query($sql);
 	if ($nom_att = fetch_object($q)) {
 		if (trim($nom_att->nom) == '') {
@@ -427,7 +439,7 @@ function affiche_liste_attribut($frm)
 		$tpl->assign('add_href', get_current_url(false) . '?mode=ajout&attid=' . $_GET['attid']);
 		$sql = "SELECT *
 			FROM peel_attributs
-			WHERE id_nom_attribut = '" . intval($_GET['attid']) . "'
+			WHERE id_nom_attribut = '" . intval($_GET['attid']) . "' AND " . get_filter_site_cond('attributs', null, true)."
 			ORDER BY descriptif_" . $_SESSION['session_langue'];
 		$res = query($sql);
 		$nr = num_rows($res);
@@ -435,6 +447,7 @@ function affiche_liste_attribut($frm)
 		$tpl_results = array();
 		if ($nr != 0) {
 			$i = 0;
+			$all_sites_name_array = get_all_sites_name_array();
 			while ($DescAtt = fetch_assoc($res)) {
 				$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 					'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
@@ -442,13 +455,15 @@ function affiche_liste_attribut($frm)
 					'edit_href' => get_current_url(false) . '?mode=modif&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
 					'descriptif' => $DescAtt['descriptif_' . $_SESSION['session_langue']],
 					'prix' => fprix($DescAtt['prix'], true, $GLOBALS['site_parameters']['code'], false),
-					'img_src' => (!empty($DescAtt['image']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($DescAtt['image'], 100, 100, "fit") : '')
+					'img_src' => (!empty($DescAtt['image']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($DescAtt['image'], 100, 100, "fit") : ''),
+					'site_name' => ($DescAtt['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$DescAtt['site_id']])
 					);
 				$i++;
 			}
 		}
 		$tpl->assign('results', $tpl_results);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION']);
@@ -475,7 +490,7 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 {
 	$res = query("SELECT nom_" . $_SESSION['session_langue'] . " AS nom
 		FROM peel_nom_attributs
-		WHERE id = '" . intval($_GET['attid']) . "'");
+		WHERE id = '" . intval($_GET['attid']) . "' AND " . get_filter_site_cond('nom_attributs', null, true) . "");
 	if ($nom_att = fetch_object($res)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_formulaire.tpl');
 		$tpl->assign('action', get_current_url(false) . '?attid=' . $_GET['attid']);
@@ -499,20 +514,22 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 					'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&attid=' . vb($_GET['attid']),
 					'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
 					));
-		}
+		}	
+		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 		$tpl->assign('prix', fprix(vn($frm['prix']), false, $GLOBALS['site_parameters']['code'], false));
 		$tpl->assign('prix_revendeur', fprix(vn($frm['prix_revendeur']), false, $GLOBALS['site_parameters']['code'], false));
 		$tpl->assign('symbole', $GLOBALS['site_parameters']['symbole']);
 		$tpl->assign('position', intval($frm['position']));
 		$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION']);
 		$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
-		$tpl->assign('STR_ADMIN_SHORT_DESCRIPTION', $GLOBALS['STR_ADMIN_SHORT_DESCRIPTION']);
+		$tpl->assign('STR_NAME', $GLOBALS['STR_NAME']);
 		$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
-		$tpl->assign('STR_ADMIN_IMAGE', $GLOBALS['STR_ADMIN_IMAGE']);
+		$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
 		$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_OVERCOST', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_OVERCOST']);
 		$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
@@ -564,7 +581,7 @@ function affiche_choix_nom_attribut()
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_choix_nom.tpl');
 	$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_nom_attributs
-		WHERE texte_libre = 0 AND upload = 0
+		WHERE texte_libre = 0 AND upload = 0 AND " . get_filter_site_cond('nom_attributs', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res = query($sql);
 	$tpl_options = array();
@@ -609,13 +626,15 @@ function affiche_liste_attributs_by_id($id)
 
 	$all_attributs_array = get_possible_attributs(null, 'rough', false, false);
 	$product_attributs_array = $product_object->get_possible_attributs('rough', false, 0, false, false, false, false, false, false);
+	$tpl_results = array();
+
 	if (!empty($all_attributs_array)) {
 		// On affiche la liste des attributs
 		$i = 0;
 		foreach ($all_attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
 			$tpl_sub_res = array();
 			foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
-				if (!empty($this_attribut_id)) {
+				if (!empty($this_attribut_id) || $this_attribut_id === 0) {
 					if(trim(String::strip_tags($this_attribut_infos['descriptif']))=='') {
 						$this_attribut_infos['descriptif'] = '['.$this_attribut_id.'] ';
 					}
@@ -665,11 +684,11 @@ function get_attributs_names($lang)
 {
 	$output_array = array();
 	$q = query('SELECT descriptif_' . word_real_escape_string($lang) . ' as nom
-		FROM peel_attributs');
+		FROM peel_attributs
+		WHERE ' . get_filter_site_cond('attributs', null, true));
 	while ($result = fetch_assoc($q)) {
 		$output_array[] = $result['nom'];
 	}
 	return $output_array;
 }
 
-?>

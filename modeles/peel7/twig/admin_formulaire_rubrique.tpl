@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_rubrique.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_rubrique.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -22,7 +22,7 @@
 		<tr>
 			<td style="width:250px">{{ STR_ADMIN_RUBRIQUES_PARENT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" name="parent_id" style="width:100%" size="5">
+				<select class="form-control" name="parent_id" style="width:100%" size="10">
 					<option value="0"{% if empty_parent_id %} selected="selected"{% endif %}>{{ STR_ADMIN_AT_ROOT }}</option>
 					{{ rubrique_options }}
 				</select>
@@ -39,6 +39,14 @@
 			<td>{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="number" class="form-control" name="position" value="{{ position|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
+ 		<tr>
+			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_DISPLAY_MODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -51,7 +59,7 @@
 			<td><input type="text" class="form-control" name="technical_code" value="{{ technical_code|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
 		<tr>
-			<td>{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 			{% if (image) %}
 				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ image.name }}&nbsp;
@@ -110,7 +118,7 @@
 			{% for i in diapo|keys %}
 				{% if (diapo.i) %}
 				<tr>
-					<td class="title_label">{% if diapo.i.type=='img' %}{{ STR_ADMIN_IMAGE }} {% else %}{{ STR_ADMIN_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+					<td class="title_label">{% if diapo.i.type=='img' %}{{ STR_IMAGE }} {% else %}{{ STR_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 					<td>{% include "uploaded_file.tpl" with {'f':diapo.i,'STR_DELETE':STR_ADMIN_DELETE_THIS_FILE} %}</td>
 				</tr>
 				{% endif %}
@@ -120,7 +128,7 @@
 		</tr>
 			{% for i in 1..5 %}
 				<tr>
-					<td class="title_label">{{ STR_ADMIN_FILE }} {{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+					<td class="title_label">{{ STR_FILE }} {{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 					<td><input style="width:250px" name="image{{ i }}" type="file" value="" /></td>
 				</tr>
 			{% endfor %}

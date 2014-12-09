@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: caddie_products_summary_table.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}
 <div class="col-sm-12">
 	<div class="table-responsive">
@@ -35,7 +35,7 @@
 					</a>
 				</td>
 				<td class="lignecaddie_produit_image">
-					<a href="{{ p.urlprod_with_cid }}"><img src="{{ p.src|escape('html') }}" alt="" /></a>
+					{% if (p.src) %}<a href="{{ p.urlprod_with_cid }}"><img src="{{ p.src|escape('html') }}" alt="" /></a>{% endif %}
 				</td>
 				<td class="lignecaddie_produit_details">
 					{% if with_form_fields %}
@@ -99,13 +99,19 @@
 				</td>
 				<td class="lignecaddie_quantite center">
 					{% if with_form_fields and p.quantite.value %}
-						<div class="input-group">
-							<input type="number" class="form-control" name="quantite[{{ p.numero_ligne }}]" value="{{ p.quantite.value|str_form_value }}" {% if (p.quantite.message) %} onchange="if(this.value>{{ p.quantite.stock_commandable }}) {this.value='{{ p.quantite.stock_commandable }}'; bootbox.alert('{{ p.quantite.message|filtre_javascript(true,true,true,false) }}'); } "{% endif %} />
-							<span class="input-group-addon"><a href="#" onclick="return frmsubmit('recalc')"><span class="glyphicon glyphicon-refresh"></span></a></span>
-						</div>
+						{% if p.quantite.hidden_fields %}
+							{{ p.quantite.value }}
+							<input type="hidden" value="{{ p.quantite.value|str_form_value }}" name="quantite[{{ p.numero_ligne }}]" />
+						{% else %}
+							<div class="input-group">
+								<input type="number" class="form-control" name="quantite[{{ p.numero_ligne }}]" value="{{ p.quantite.value|str_form_value }}" {% if (p.quantite.message) %} onchange="if(this.value>{{ p.quantite.stock_commandable }}) {this.value='{{ p.quantite.stock_commandable }}'; bootbox.alert('{{ p.quantite.message|filtre_javascript(true,true,true,false) }}'); } "{% endif %} />
+								<span class="input-group-addon"><a href="#" onclick="return frmsubmit('recalc')"><span class="glyphicon glyphicon-refresh"></span></a></span>
+							</div>
+						{% endif %}
 					{% else %}
 						{{ p.quantite }}
-					{% endif %}
+						<input type="hidden" name="quantite[{{ p.numero_ligne }}]" value="{% if p.on_download == 1 %}1{% else %}{{ p.quantite|str_form_value }}{% endif %}" />
+ 					{% endif %}
 				</td>
 				{% if is_conditionnement_module_active %}<td class="lignecaddie_prix center">{{ STR_CONDITIONNEMENT }}</td><td class="lignecaddie_prix" align="center">{{ STR_CONDITIONNEMENT_QTY }}</td>{% endif %}
 				<td class="lignecaddie_prix center">- {% if (p.remise) %}{{ p.remise }}{% endif %}</td>

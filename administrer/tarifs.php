@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tarifs.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: tarifs.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_TARIFS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_TARIFS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
@@ -98,6 +98,7 @@ function affiche_formulaire_ajout_tarif(&$frm)
 		$frm['tarif'] = "";
 		$frm["totalmax"] = "";
 		$frm['tva'] = 0;
+		$frm['site_id'] = '';
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
@@ -120,7 +121,7 @@ function affiche_formulaire_modif_tarif($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_tarifs
-			WHERE id =" . intval($id));
+			WHERE id =" . intval($id) . " AND " . get_filter_site_cond('tarifs', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_TARIFS_NOT_FOUND']))->fetch();
@@ -148,11 +149,13 @@ function affiche_formulaire_tarif(&$frm)
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
-	$tpl->assign('id', intval(vb($frm['id'])));
+	$tpl->assign('id', intval(vn($frm['id'])));
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 
 	$tpl_zones_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_zones
+		WHERE " . get_filter_site_cond('zones', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_zone = query($sql_zone);
 	while ($tab_zone = fetch_assoc($res_zone)) {
@@ -166,6 +169,7 @@ function affiche_formulaire_tarif(&$frm)
 	$tpl_type_options = array();
 	$sql_type = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_types
+		WHERE " . get_filter_site_cond('types', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_type = query($sql_type);
 	while ($tab_type = fetch_assoc($res_type)) {
@@ -184,6 +188,7 @@ function affiche_formulaire_tarif(&$frm)
 	$tpl->assign('vat_select_options', get_vat_select_options(vb($frm['tva'])));
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_TARIFS_CONFIG_STATUS', $GLOBALS['STR_ADMIN_TARIFS_CONFIG_STATUS']);
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
 	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
@@ -210,7 +215,7 @@ function affiche_formulaire_tarif(&$frm)
 function supprime_tarif($id)
 {
 	/* Efface le tarif */
-	query("DELETE FROM peel_tarifs WHERE id=" . intval($id));
+	query("DELETE FROM peel_tarifs WHERE id=" . intval($id) . " AND " . get_filter_site_cond('tarifs', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TARIFS_MSG_DELETED_OK']))->fetch();
 }
 
@@ -231,6 +236,7 @@ function insere_tarif($frm)
 		, totalmax
 		, tarif
 		, tva
+		, site_id
 	) VALUES (
 		'" . nohtml_real_escape_string($frm['zone']) . "'
 		,'" . nohtml_real_escape_string($frm['type']) . "'
@@ -240,6 +246,7 @@ function insere_tarif($frm)
 		,'" . nohtml_real_escape_string($frm['totalmax']) . "'
 		,'" . nohtml_real_escape_string($frm['tarif']) . "'
 		,'" . nohtml_real_escape_string($frm['tva']) . "'
+		,'" . intval($frm['site_id']) . "'
 	)");
 }
 
@@ -261,7 +268,8 @@ function maj_tarif($id, $frm)
 		,totalmax = '" . nohtml_real_escape_string($frm['totalmax']) . "'
 		,tarif = '" . nohtml_real_escape_string($frm['tarif']) . "'
 		,tva = '" . nohtml_real_escape_string($frm['tva']) . "'
-	WHERE id = '" . intval($id) . "'");
+		,site_id = '" . intval($frm['site_id']) . "'
+	WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('tarifs', null, true) . "");
 }
 
 /**
@@ -281,9 +289,11 @@ function affiche_liste_tarif()
 
 	$result = query("SELECT t.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
 		FROM peel_tarifs t
-		LEFT JOIN peel_zones z ON z.id=t.zone
+		LEFT JOIN peel_zones z ON z.id=t.zone AND " . get_filter_site_cond('zones', 'z', true) . "
+		WHERE " . get_filter_site_cond('tarifs', 't', true) . "
 		ORDER BY zone_name ASC, t.type ASC, t.tarif ASC");
 	if (!(num_rows($result) == 0)) {
+		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
@@ -296,12 +306,14 @@ function affiche_liste_tarif()
 				'zone_name' => vb($ligne['zone_name']),
 				'delivery_type_name' => get_delivery_type_name($ligne['type']),
 				'totalmin' => $ligne['totalmin'],
-				'totalmax' => $ligne['totalmax']
+				'totalmax' => $ligne['totalmax'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_TARIFS_TITLE', $GLOBALS['STR_ADMIN_TARIFS_TITLE']);
 	$tpl->assign('STR_ADMIN_TARIFS_CONFIG_STATUS', $GLOBALS['STR_ADMIN_TARIFS_CONFIG_STATUS']);
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
@@ -327,4 +339,3 @@ function affiche_liste_tarif()
 	echo $tpl->fetch();
 }
 
-?>

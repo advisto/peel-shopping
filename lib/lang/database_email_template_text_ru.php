@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_ru.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_ru.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -57,6 +57,7 @@ Details of the message sent on [DATE]:
 Name: [NOM_FAMILLE]
 Firstname: [PRENOM]
 Company name: [SOCIETE]
+Address : [ADRESSE]
 Phone number: [TELEPHONE]
 Email address: [EMAIL]
 Availability: [DISPO]
@@ -71,7 +72,7 @@ IP: [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hello,
 
-The order associated with the following number [ORDER_ID] has just been recorded on [WWWROOT]",
+The order associated with the following number [ORDER_ID] has just been recorded on [WWWROOT]/",
   "admin_info_payment_credit_card_3_times" => "Hello,
 
 The order associated with the following number [ORDER_ID] has just been recorded on [SITE]
@@ -226,14 +227,14 @@ My comments:
 
 [EMAIL_ACHETEUR] has bought you a gift!
 
-To benefit from it, please connect to the website [WWWROOT] and use your code [CHECK_NAME].
+To benefit from it, please connect to the website [WWWROOT]/ and use your code [CHECK_NAME].
 
 You will then benefit from a discount of [REMISE_VALEUR] for a minimal amount of purchase of [MONTANT_MIN] HT regarding your order.",
   "cree_cheque_cadeau_friend" => "Hello,
 
 Your friend [PRENOM] [NOM_FAMILLE] has bought you a gift on the website [SITE].
 
-In order to benefit from it, please connect to the website [WWWROOT] and use your code [CODE].
+In order to benefit from it, please connect to the website [WWWROOT]/ and use your code [CODE].
 
 You will then enjoy a discount of [PRIX] VAT INCLUDED on your order.
 ",
@@ -244,7 +245,7 @@ A promotion code [CODE] using the VOUCHER module has just been created on [SITE]
 
 [SITE] is offering you a 30 days voucher for an amount of [MONTANT].
 
-In order to benefit from it, please connect to the website [WWWROOT] and use your code [CODE].",
+In order to benefit from it, please connect to the website [WWWROOT]/ and use your code [CODE].",
   "cree_cheque_cadeau_client_admin" => "Hello,
 
 The promotional code [CODE] has been created using the sponsoring module [SITE].",
@@ -265,7 +266,7 @@ Here are the products ordered: [GIFTLIST_ITEMS]",
 Details of the message sent on [DATE]:
 
 [PRENOM] [NOM_FAMILLE] sends you his gift list called [GIFTLIST_NAME] :
-[WWWROOT]/modules/listecadeau/voir.php?email_liste=[URL_LISTE_CADEAU]
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS]",
   "parrainage" => "Hello,
@@ -290,7 +291,7 @@ Open stock : [STOCK_RESTANT_APRES_DEMANDE]",
   "signature" => "
 Customer service
 [SITE]
-[WWWROOT]",
+[WWWROOT]/",
   "admin_login" => "Hello,
 
 This email warns you that an administrator has logged in your website.
@@ -305,7 +306,7 @@ This email enhances the security on you PEEL eshop.",
 
 [SITE] is offering you a 30 days voucher for an amount of [PERCENT].
 
-In order to benefit from it, please connect to the website [WWWROOT] and use your code [CODE].",
+In order to benefit from it, please connect to the website [WWWROOT]/ and use your code [CODE].",
   "email_retour_virement" => "Hello,
 
 We have received your return number [RETURN_ID].
@@ -333,4 +334,3 @@ Please remember that items must be returned in good condition and in their origi
 Upon receipt of your items, we will validate the repayment thereof."
 );
 
-?>

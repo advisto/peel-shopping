@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: TwigEngine.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: TwigEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'TwigTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: TwigEngine.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: TwigEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
  * @access public
  */
 class TwigEngine extends EngineTpl {
@@ -99,6 +99,7 @@ class TwigEngine extends EngineTpl {
 		$data['dirroot'] = $GLOBALS['dirroot'];
 		$data['img_ps_dir'] = $GLOBALS['wwwroot'] . '/images';
 		$data['repertoire_images'] = $GLOBALS['repertoire_images'];
+		$data['repertoire_upload'] = $GLOBALS['repertoire_upload'];
 		$data['img_dir'] = $GLOBALS['repertoire_images'];
 		$data['repertoire_css'] = $GLOBALS['repertoire_css'];
 		$data['css_dir'] = $GLOBALS['repertoire_css'];
@@ -135,4 +136,3 @@ class TwigEngine extends EngineTpl {
 	}
 }
 
-?>

@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clean_folders.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: clean_folders.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_CLEAN_FOLDERS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CLEAN_FOLDERS_TITLE'];
 
 $errorMsg = '';
 $form_values = array();
@@ -67,7 +67,7 @@ if (isset($_POST['file_shortpath']) && isset($_POST['tx_qualite'])) {
 		$chemin_final = $dirroot . '/' . $_POST['file_shortpath'];
 		if (is_dir($chemin_final)) {
 			if ($dir_pointer = opendir($chemin_final)) {
-				while ($filename = readdir($dir_pointer)) {
+				while (false !== ($filename = readdir($dir_pointer))) {
 					if ($filename != '.' && $filename != '..' && is_file($chemin_final . '/' . $filename) && filesize($chemin_final . '/' . $filename) >= vn($_POST['size_ko']) * 1024) {
 						$array = explode('.', $filename);
 						$extension = $array[count($array) - 1];
@@ -96,6 +96,61 @@ if (isset($_POST['file_shortpath']) && isset($_POST['tx_qualite'])) {
 		}
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CLEAN_FOLDERS_MSG_IMAGES_OPTIMIZED_OK'], $i)))->fetch();
 	}
+}
+if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not_in_subfolders'])) {
+	$folder_origin = '/home/back214750/.snapshots/daily.0/localhost/home/algomtl/domains/algomtl.com/public_html/upload/thumbs/'; //$GLOBALS['uploaddir'] . '/thumbs/';
+	$folder = $GLOBALS['uploaddir'] . '/thumbs/';
+	if (is_dir($folder_origin)) {
+		$dir_pointer = opendir($folder_origin);
+		if(!empty($dir_pointer)) {
+			$i = 0;
+			while (false !== ($filename = readdir($dir_pointer))) {
+				if ($filename != '.' && $filename != '..' && is_file($folder_origin . '/' . $filename)) {
+					$filename_no_ext = pathinfo($filename, PATHINFO_FILENAME);
+					if(String::substr($filename_no_ext, -5, 1) != '-') {
+						echo '<b>' . $filename . ' NOK nom</b><br />';
+					} else {
+						if(!empty($_GET['create_thumbs_subfolders'])) {
+							$folder1 = String::substr($filename_no_ext, -4, 2);
+							$folder2 = ''; //String::substr($filename_no_ext, -2, 2);
+							if(!is_file($folder . '/' . $folder1 . '/' . (!empty($folder2) ? $folder2 . '/':'') . $filename)) {
+								if(!is_dir($folder . '/' . $folder1)) {
+									mkdir($folder . '/' . $folder1);
+								}
+								if(!empty($folder2) && !is_dir($folder . '/' . $folder1 . '/' . $folder2)) {
+									mkdir($folder . '/' . $folder1 . '/' . $folder2);
+								}
+								if(empty($_GET['test'])) {
+									copy($folder_origin . '/' . $filename, $folder . '/' . $folder1.'/' . (!empty($folder2) ? $folder2 . '/':'') . $filename);
+								}
+								echo '' . $filename . ' copied<br />';
+							} else {
+								echo '' . $filename . ' already exists<br />';
+							}
+						}
+						if(!empty($_GET['delete_thumbs_not_in_subfolders'])) {
+							if(empty($_GET['test'])) {
+								unlink($folder_origin . '/' . $filename);
+							}
+							echo '' . $filename . ' deleted<br />';
+						}
+					}
+				}
+				$i++;
+				if($i==100) {
+					// On recharge la page pour recommencer
+					echo '<meta http-equiv="refresh" content="1; url='.get_current_url(true).'">';
+					die();
+				}
+				if($i%20==0) {
+					sleep(1);
+				}
+			}
+		}
+	} else {
+		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf('%s not found', $folder)))->fetch();
+	}
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'FINISHED'))->fetch();
 }
 
 if ($show_form) {
@@ -127,4 +182,3 @@ if ($show_form) {
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

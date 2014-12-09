@@ -349,7 +349,7 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
                 $_template->tpl_vars = $save_tpl_vars;
                 $_template->config_vars =  $save_config_vars;
             }
-			$GLOBALS['peel_debug'][] = array('template' => 'Display template Smarty <b>' . $_template->source->name .'</b>' . ($_template->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time']);
+			$GLOBALS['peel_debug'][] = array('template' => 'Display template Smarty <b>' . $_template->source->name .'</b>' . ($_template->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
             return;
         } else {
             if ($merge_tpl_vars) {
@@ -357,7 +357,7 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
                 $_template->tpl_vars = $save_tpl_vars;
                 $_template->config_vars =  $save_config_vars;
             }
-			$GLOBALS['peel_debug'][] = array('template' => 'Fetch template Smarty <b>' . $_template->source->name .'</b>'  . ($_template->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time']);
+			$GLOBALS['peel_debug'][] = array('template' => 'Fetch template Smarty <b>' . $_template->source->name .'</b>'  . ($_template->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
             // return fetched content
             return $_output;
         }

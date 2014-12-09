@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_zone.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_zone.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_ZONES_TITLE }}</div>
 <div><p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_ZONES_CREATE }}</a></p></div>
 {% if (results) %}
@@ -22,6 +22,7 @@
 			<td class="menu">{{ STR_VAT }}</td>
 			<td class="menu">{{ STR_ADMIN_ZONES_FREE_DELIVERY }}</td>
 			<td class="menu">{{ STR_ADMIN_POSITION }}</td>
+			<td class="menu">{{ STR_ADMIN_WEBSITE }}</td>
 		</tr>
 		{% for res in results %}
 		{{ res.tr_rollover }}
@@ -30,6 +31,7 @@
 			<td class="center">{% if res.tva == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
 			<td class="center">{% if res.on_franco == 1 %}{{ STR_YES }}{% else %}{{ STR_NO }}{% endif %}</td>
 			<td class="center position">{{ res.position }}</td>
+			<td class="center position">{{ res.site_name }}</td>
 		</tr>
 		{% endfor %}
 	</table>

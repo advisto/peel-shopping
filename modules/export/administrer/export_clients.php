@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_clients.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: export_clients.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -33,7 +33,7 @@ output_csv_http_export_header($filename, 'csv', $page_encoding);
 
 $sqlC = "SELECT u.*
 	FROM peel_utilisateurs u
-	WHERE 1";
+	WHERE " . get_filter_site_cond('utilisateurs', 'u', true) . "";
 if (!empty($_GET['priv'])) {
 	$sqlC .= " AND u.priv = '" . nohtml_real_escape_string($_GET['priv']) . "'";
 }
@@ -58,4 +58,3 @@ while ($C = fetch_assoc($resC)) {
 
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
-?>

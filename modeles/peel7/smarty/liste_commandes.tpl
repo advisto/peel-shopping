@@ -1,17 +1,17 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_commandes.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-*}<h2 class="liste_commandes">{$STR_ORDER_HISTORY}</h2>
+// $Id: liste_commandes.tpl 43121 2014-11-05 17:44:12Z sdelaporte $
+*}<h1 property="name" class="liste_commandes">{$STR_ORDER_HISTORY}</h1>
 {if isset($STR_NO_ORDER)}
 <div><p>{$STR_NO_ORDER}</p></div>
 {else}
@@ -25,7 +25,7 @@
 			<th class="center" scope="col">{$STR_DATE}</th>
 			<th class="center" scope="col">{$STR_ORDER_STATUT_PAIEMENT}</th>
 			<th class="center" scope="col">{$STR_ORDER_STATUT_LIVRAISON}</th>
-			<th class="center" scope="col">{$STR_AMOUNT}</th>
+			<th class="center" scope="col">{if $display_prices_with_taxes_active}{$STR_AMOUNT} {$STR_TTC}{else}{$STR_AMOUNT} {$STR_HT}{/if}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -37,7 +37,7 @@
 			<br /><a onclick="return(window.open(this.href)?false:true);" href="{$o.facture_href|escape:'html'}" style="white-space: nowrap;"><img src="{$o.pdf_src|escape:'html'}" width="8" height="11" alt="" />&nbsp;{$STR_PDF_BILL}</a>
 		{/if}
 		</td>
-		<td class="center">{$o.id}</td>
+		<td class="center">{$o.order_id}</td>
 		<td class="center">{$o.date}</td>
 		<td class="center">{if !$o.paid}<a href="{$o.href|escape:'html'}">{$o.payment_status_name}</a>{else}{$o.payment_status_name}{/if}</td>
 		<td class="center">{$o.delivery_status_name}</td>

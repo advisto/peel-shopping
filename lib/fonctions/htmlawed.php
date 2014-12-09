@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: htmlawed.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: htmlawed.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL'))
 {
 	die();
@@ -90,7 +90,7 @@ See htmLawed_README.txt/htm
 		}
 		$C['deny_attribute'] = $x;
 		// config URL
-		$x = (isset($C['schemes'][2]) && strpos($C['schemes'], ':')) ? strtolower($C['schemes']) : 'href: aim, feed, file, ftp, gopher, http, https, irc, mailto, news, nntp, sftp, ssh, telnet; *:file, http, https';
+		$x = (isset($C['schemes'][2]) && strpos($C['schemes'], ':')) ? strtolower($C['schemes']) : 'href: aim, feed, file, ftp, gopher, http, https, irc, mailto, news, nntp, sftp, ssh, telnet; *:file, http, https, data';
 		$C['schemes'] = array();
 		foreach (explode(';', str_replace(array(' ', "\t", "\r", "\n"), '', $x)) as $v)
 		{
@@ -713,7 +713,7 @@ See htmLawed_README.txt/htm
 		{
 			return($C['and_mark'] ? "\x06" : '&'). (isset($U[$t]) ? $t : (isset($N[$t]) ? (!$C['named_entity'] ? '#'. ($C['hexdec_entity'] > 1 ? 'x'. dechex($N[$t]) : $N[$t]) : $t) : 'amp;'. $t)). ';';
 		}
-		if (($n = ctype_digit($t = substr($t, 1)) ? intval($t) : hexdec(substr($t, 1))) < 9 or($n > 13 && $n < 32) or $n == 11 or $n == 12 or($n > 126 && $n < 160 && $n != 133) or($n > 55295 && ($n < 57344 or($n > 64975 && $n < 64992) or $n == 65534 or $n == 65535 or $n > 1114111)))
+		if (($n = ctype_digit($t = substr($t, 1)) ? intval($t) : hexdec(substr($t, 1))) < 9 or($n > 13 && $n < 32) or $n == 11 or $n == 12 or($n > 126 && $n < 160 && $n != 133 && $n != 153 && $n != 156) or($n > 55295 && ($n < 57344 or($n > 64975 && $n < 64992) or $n == 65534 or $n == 65535 or $n > 1114111)))
 		{
 			return($C['and_mark'] ? "\x06" : '&'). "amp;#{$t};";
 		}
@@ -924,7 +924,11 @@ See htmLawed_README.txt/htm
 		}
 		if (!preg_match('`^<(/?)([a-zA-Z][a-zA-Z1-6]*)([^>]*?)\s?>$`m', $t, $m))
 		{
-			return str_replace(array('<', '>'), array('&lt;', '&gt;'), $t);
+			if(strstr($t, 'data:image')){
+				return $t;
+			}else{
+				return str_replace(array('<', '>'), array('&lt;', '&gt;'), $t);
+			}
 		}
 		else
 		if (!isset($C['elements'][($e = strtolower($m[2]))]))
@@ -1521,5 +1525,3 @@ See htmLawed_README.txt/htm
 		// eof
 	}
 }
-
-?>

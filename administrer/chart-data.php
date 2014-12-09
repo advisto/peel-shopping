@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: chart-data.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: chart-data.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -56,7 +56,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 	$sex_names = array('M.' => 'H', 'Mlle' => 'F', 'Mme' => 'F');
 	$res = query('SELECT count(*) AS this_count, civilite, ' . $sql_age_formula . ' AS tranche
         FROM peel_utilisateurs
-        WHERE 1 ' . (!empty($date1)?(' AND date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
+        WHERE ' . get_filter_site_cond('utilisateurs', null, true) . ' ' . (!empty($date1)?(' AND date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
         GROUP BY civilite, ' . $sql_age_formula);
 	$data['Tous'] = array();
 	while ($row = fetch_assoc($res)) {
@@ -107,7 +107,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 	}
 	$res = query('SELECT count(*) AS this_count, date_insert AS date_inscription, 1 AS actif
         FROM peel_utilisateurs
-        WHERE 1 ' . (!empty($date1)?(' AND date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
+        WHERE ' . get_filter_site_cond('utilisateurs', null, true) . ' ' . (!empty($date1)?(' AND date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
         GROUP BY TO_DAYS(date_insert)');
 	// On déclare pour définir l'ordre d'affichage dans le flash
 	while ($row = fetch_assoc($res)) {
@@ -119,10 +119,11 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 	$colors[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]] = '0000FF';
 	$title = (!empty($date1)?'' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($date1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($date2):'');
 } elseif ($type == 'product-categories' && a_priv('admin_products', true)) {
-	$res = query('SELECT count(*) AS this_count, c.nom_fr AS nom_categorie
+	$res = query('SELECT count(*) AS this_count, c.nom_'.$_SESSION['session_langue'].' AS nom_categorie
 		FROM peel_produits p
 		INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-		INNER JOIN peel_categories c ON c.id=pc.categorie_id
+		INNER JOIN peel_categories c ON c.id=pc.categorie_id AND ' . get_filter_site_cond('categories', 'c', true) . '
+		WHERE ' . get_filter_site_cond('produits', 'p', true) . '
         GROUP BY c.id');
 	while ($row = fetch_assoc($res)) {
 		$data[String::substr($row['nom_categorie'], 0, 20)] = $row['this_count'];
@@ -133,7 +134,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 } elseif ($type == 'users-by-sex' && a_priv('admin_users', true)) {
 	$res = query('SELECT count(*) AS this_count, civilite
         FROM peel_utilisateurs
-        ' . (!empty($date1)?('WHERE date BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
+        WHERE ' . get_filter_site_cond('utilisateurs', null, true) . '' . (!empty($date1)?(' AND (date BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '")'):'') . '
         GROUP BY civilite');
 	while ($row = fetch_assoc($res)) {
 		if ($row['civilite'] == 'M.') {
@@ -146,10 +147,10 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 	$all_graph_type = 'pie';
 	$title = $GLOBALS['STR_ADMIN_CHART_DATA_USERS_BY_SEX'] . ' ' . (!empty($date1)?' ' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($date1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($date2):'');
 } elseif ($type == 'users-by-country' && a_priv('admin_users', true)) {
-	$res = query('SELECT count(*) AS this_count, c.nom_fr AS country_name
+	$res = query('SELECT count(*) AS this_count, c.nom_'.$_SESSION['session_langue'].' AS country_name
 		FROM `peel_utilisateurs` a
-		INNER JOIN peel_pays c ON c.id = a.pays
-		' . (!empty($date1)?('WHERE a.date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
+		INNER JOIN peel_pays c ON c.id = a.pays AND ' . get_filter_site_cond('pays', 'c', true)  . '
+		WHERE ' . get_filter_site_cond('utilisateurs', 'a', true) . '' . (!empty($date1)?(' AND (a.date_insert BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '")'):'') . '
 		GROUP BY a.pays');
 	while ($row = fetch_assoc($res)) {
 		$data[$row['country_name']] = $row['this_count'];
@@ -167,10 +168,11 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 			}
 		}
 	}
-	$res = query('SELECT SUM(montant_ht) AS this_total, a_timestamp
-		FROM peel_commandes
-		WHERE id_statut_paiement IN ("2","3") ' . (!empty($date1)?(' AND a_timestamp BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
-        GROUP BY TO_DAYS(a_timestamp)');
+	$res = query('SELECT SUM(c.montant_ht) AS this_total, c.a_timestamp
+		FROM peel_commandes c
+		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp', true) . '
+		WHERE sp.technical_code IN ("being_checked","completed") AND ' . get_filter_site_cond('commandes', 'c', true) . ' ' . (!empty($date1)?(' AND c.a_timestamp BETWEEN "' . nohtml_real_escape_string($date1) . '" AND "' . nohtml_real_escape_string($date2) . '"'):'') . '
+        GROUP BY TO_DAYS(c.a_timestamp)');
 	while ($row = fetch_assoc($res)) {
 		if (empty($data['CA'][get_formatted_date($row['a_timestamp'], $date_format)])) {
 			$data['CA'][get_formatted_date($row['a_timestamp'], $date_format)] = 0;
@@ -181,4 +183,3 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 }
 echo advistoChart($data, vb($title), $all_graph_type, $graph_type, $colors, $legend_font_size, $width);
 
-?>

@@ -1,19 +1,20 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-*}<h1 class="page_title">{$STR_CHANGE_PARAMS}</h1>
+// $Id: user_change_params_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+*}<h1 property="name" class="page_title">{$STR_CHANGE_PARAMS}</h1>
 {if isset($token_error)}{$token_error}{/if}
 <form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+{if empty($enable_display_only_user_specific_field)}
 <div class="inscription_form">
 	{if isset($verified_account_info)}{$verified_account_info}{/if}
 	<div class="enregistrement">
@@ -28,10 +29,12 @@
 			<input type="radio" name="civilite" value="M."{if $civilite_m_issel} checked="checked"{/if} /> {$STR_M}
 		</span>{$gender_error}
 	</div>
+	{if !empty($STR_PSEUDO)}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="pseudo">{$STR_PSEUDO} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementgauche"><label for="pseudo">{$STR_PSEUDO} {if !$pseudo_is_optionnal}<span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label>{/if}</span>
 		<span class="enregistrementdroite">{if $is_annonce_module_active}<b>{$pseudo|html_entity_decode_if_needed}</b></span>{else}<input type="text" class="form-control" name="pseudo" id="pseudo" value="{$pseudo|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} />{/if}</span>{$pseudo_error}
 	</div>
+	{/if}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="prenom">{$STR_FIRST_NAME} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="prenom" id="prenom" value="{$first_name|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} /></span>{$first_name_error}
@@ -44,6 +47,14 @@
 		<span class="enregistrementgauche"><label for="societe">{$STR_SOCIETE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="societe" id="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} /></span>{$societe_error}
 	</div>
+	{foreach $specific_fields as $f}
+		{if $f.field_position=='company'}
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
+	</div>
+		{/if}
+	{/foreach}
 {if $add_b2b_form_inputs}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -76,17 +87,17 @@
 		</span>{$activity_error}
 	</div>
 {/if}
+{if !empty($STR_FONCTION)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="fonction">{$STR_FONCTION}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="fonction" name="fonction">
 				<option value="">{$STR_CHOOSE}...</option>
-				<option value="leader" {if $fonction=='leader'} selected="selected"{/if}>{$STR_LEADER}</option>
-				<option value="manager" {if $fonction=='manager'} selected="selected"{/if}>{$STR_MANAGER}</option>
-				<option value="employee" {if $fonction=='employee'} selected="selected"{/if}>{$STR_EMPLOYEE}</option>
+				{$fonction_options}
 			</select>
 		</span>{$fonction_error}
 	</div>
+{/if}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="tva">{$STR_INTRACOM_FORM}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} /></span>{$intracom_form_error}
@@ -101,14 +112,19 @@
 		<span class="enregistrementgauche"><label for="telephone">{$STR_TELEPHONE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="telephone" id="telephone" value="{$telephone|str_form_value}" {$content_rows_info} /></span>{$telephone_error}
 	</div>
+{if !empty($STR_PORTABLE)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="portable">{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="portable" id="portable" value="{$portable|str_form_value}" {$content_rows_info} /></span>
 	</div>
+{/if}
+{if false}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="fax">{$STR_FAX}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="tel" class="form-control" name="fax" id="fax" value="{$fax|str_form_value}" {$content_rows_info} /></span>
 	</div>
+{/if}
+{if !empty($STR_NAISSANCE)}
 {if !empty($birthday_show)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="naissance">{$STR_NAISSANCE}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -118,11 +134,12 @@
 	{if !empty($birthday_edit)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="naissance">{$STR_NAISSANCE}{$STR_BEFORE_TWO_POINTS}:</label></span>
-		<span class="enregistrementdroite"><input class="form-control datepicker" type="text" name="naissance" id="naissance" value="{$naissance|str_form_value}" />{$naissance_error}
+		<span class="enregistrementdroite"><input class="form-control datepicker" type="text" name="naissance" id="naissance" value="{$naissance|str_form_value}" style="width:110px" />{$naissance_error}
 	</div>
 	{elseif !empty($birthday_contact_admin)}
 		{$STR_ERR_BIRTHDAY2}
 	{/if}
+{/if}
 {/if}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="adresse">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -152,8 +169,8 @@
 	<div class="enregistrement">
 		<span>{$STR_ANNOUNCEMENT_INDICATION}</span>
 	</div>
-	<div class="enregistrement">
 	{if !empty($favorite_category)}
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="favorite_category">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="favorite_category" name="favorite_category">
@@ -161,7 +178,9 @@
 			</select>
 		</span>
 		{$favorite_category_error}
+	</div>
 	{else}
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_1">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_1" name="id_cat_1">
@@ -169,6 +188,8 @@
 			</select>
 		</span>
 		{$id_cat_1_error}
+	</div>
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_2">{$STR_SECOND_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_2" name="id_cat_2">
@@ -176,6 +197,8 @@
 			</select>
 		</span>
 		{$id_cat_2_error}
+	</div>
+	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_3">{$STR_THIRD_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_3" name="id_cat_3">
@@ -183,18 +206,23 @@
 			</select>
 		</span>
 		{$id_cat_3_error}
-	{/if}
 	</div>
+	{/if}
 {/if}
+{if !empty($STR_USER_ORIGIN)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="origin">{$STR_USER_ORIGIN}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">{include file="user_origins.tpl" origin_infos=$origin_infos}{$origin_infos.error_text}</span>
 	</div>
+{/if}
+{/if}
 	{foreach $specific_fields as $f}
+		{if $f.field_position!='company'}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
 	</div>
+		{/if}
 	{/foreach}
 	{if $language_for_automatic_emails_options|@count>1}
 	<div class="enregistrement">
@@ -206,12 +234,16 @@
 		</span>
 	</div>
 	{/if}
+{if !empty($STR_NEWSLETTER_YES)}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="newsletter" value="1"{if $newsletter_issel} checked="checked"{/if} /> {$STR_NEWSLETTER_YES}</span>
 	</div>
+{/if}
+{if !empty($STR_COMMERCIAL_YES)}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="commercial" value="1"{if $commercial_issel} checked="checked"{/if} /> {$STR_COMMERCIAL_YES}</span>
 	</div>	
+{/if}
 </div>
 	<p class="center">
 		{$token}<input type="submit" value="{$STR_CHANGE|str_form_value}" class="btn btn-primary" />

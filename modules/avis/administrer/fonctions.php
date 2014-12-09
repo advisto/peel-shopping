@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -87,7 +87,7 @@ function affiche_liste_avis()
 	$results_array = $Links->Query();
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_liste.tpl');
-	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
+	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 	$tpl->assign('add_prod_href', get_current_url(false) . '?mode=ajout&type=produit');
 	$tpl->assign('add_annonce_href', get_current_url(false) . '?mode=ajout&type=annonce');
@@ -235,6 +235,7 @@ function product_select_list($default = null)
 	$output = "";
 	$sql = "SELECT id,nom_" . $_SESSION['session_langue'] . " AS nom 
 		FROM peel_produits
+		WHERE " . get_filter_site_cond('produits', null, true) . "
 		LIMIT 1000";
 	$qid = query($sql);
 	if (num_rows($qid) > 0) {
@@ -331,10 +332,9 @@ function ajout_avis($frm)
 		$custom_template_tags['NOM_FAMILLE'] = vb($_SESSION['session_utilisateur']['nom_famille']);
 		$custom_template_tags['NOM_PRODUIT'] = String::html_entity_decode_if_needed($produit[1]);
 		$custom_template_tags['AVIS'] = $frm['avis'];
-		send_email($GLOBALS['support_sav_client'], '', '', 'insere_avis', $custom_template_tags, 'html', $GLOBALS['support'], true, false, true, $frm['email']);
+		send_email($GLOBALS['support_sav_client'], '', '', 'insere_avis', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $frm['email']);
 		return true;
 	}
 	return false;
 }
 
-?>

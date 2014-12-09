@@ -1,14 +1,14 @@
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an     |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
-// | More information: http://www.peel.fr/lire/licence-gpl-70.html		  |
+// | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: README.txt 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: README.txt 43141 2014-11-07 10:37:09Z sdelaporte $
 
 English: 
 
@@ -16,7 +16,7 @@ English:
 
 Français :
 
-- Présentation : http://www.peel.fr/
+- Présentation : https://www.peel.fr/
 - Documentation : http://doc.peel.fr/ et http://wiki.peel.fr/
 - Forum : http://forum.peel.fr/
 
@@ -177,7 +177,7 @@ Nous pouvons réimporter toutes les données des logiciels suivants (merci de no
 - Powerboutique
 - Autre logiciel : vous pouvez nous faire parvenir un fichiez SQL comprenant structure & données afin de procéder à la transcription de votre logiciel vers PEEL
 
-Contactez-nous sur http://www.peel.fr/ ou au 01 75 43 67 97.
+Contactez-nous sur https://www.peel.fr/ ou au 01 75 43 67 97.
 
 
 AJOUT D'UNE LANGUE

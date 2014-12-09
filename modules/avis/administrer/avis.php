@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: avis.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -19,7 +19,7 @@ necessite_priv("admin_webmastering");
 
 include($GLOBALS['dirroot'] . "/modules/avis/administrer/fonctions.php");
 
-$DOC_TITLE = "Gérer les avis des internautes";
+$GLOBALS['DOC_TITLE'] = "Gérer les avis des internautes";
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $start = intval(vn($_GET['start'])); // Détermine la variable start (début de page)
@@ -71,4 +71,3 @@ switch (vb($_REQUEST['mode'])) {
 
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

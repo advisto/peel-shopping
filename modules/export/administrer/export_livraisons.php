@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_livraisons.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: export_livraisons.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -39,7 +39,7 @@ if (!empty($_GET["id_statut_livraison"])) {
 }
 $sqlC = "SELECT *
 	FROM peel_commandes
-	WHERE o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra_sql . "
+	WHERE o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' AND " . get_filter_site_cond('commandes', null, true) . " " . $extra_sql . "
 	ORDER BY o_timestamp";
 
 $output .= "Nom\tPrénom\tSociété\tAdresse\tCode postal\tVille\tEtages\tPays\tPoids\tArticle\tQuantité\tTransport\tCommande\tDate\r\n";
@@ -54,7 +54,7 @@ while ($C = fetch_assoc($resC)) {
 
 	$resCA = query("SELECT *
 		FROM peel_commandes_articles
-		WHERE commande_id = '" . intval($C['id']) . "'");
+		WHERE commande_id = '" . intval($C['id']) . "'  AND " . get_filter_site_cond('commandes_articles', null, true) . "");
 	while ($CA = fetch_assoc($resCA)) {
 		if ($CA['quantite'] != 0) {
 			$output .= filtre_csv($C['nom_ship']) . "\t";
@@ -78,4 +78,3 @@ while ($C = fetch_assoc($resC)) {
 
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
-?>

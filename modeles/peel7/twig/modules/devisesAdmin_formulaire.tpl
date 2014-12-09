@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: devisesAdmin_formulaire.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: devisesAdmin_formulaire.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form name="entryform" method="post" action="{{ action|escape('html') }}">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
@@ -34,11 +34,11 @@
 			<td><input maxlength="10" type="text" class="form-control" name="symbole" value="{{ symbole|str_form_value }}" /></td>
 		</tr>
 		<tr>
-			<td colspan="2">{{ STR_MODULE_DEVISES_ADMIN_SYMBOL_AT_RIGHT }}</td>
+			<td>{{ STR_MODULE_DEVISES_ADMIN_SYMBOL_AT_RIGHT }}</td>
 			<td><input type="radio" name="symbole_place" value="1"{% if symbole_place == "1" %} checked="checked"{% endif %} /></td>
 		</tr>
 		<tr>
-			<td colspan="2">{{ STR_MODULE_DEVISES_ADMIN_SYMBOL_AT_LEFT }}</td>
+			<td>{{ STR_MODULE_DEVISES_ADMIN_SYMBOL_AT_LEFT }}</td>
 			<td><input type="radio" name="symbole_place" value="0"{% if symbole_place == "0" %} checked="checked"{% endif %} /></td>
 		</tr>
 		<tr>
@@ -49,6 +49,14 @@
 			<td class="title_label">{{ STR_ADMIN_CONVERSION }} (1 {{ symbole_parameters }} = ...){{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="conversion" value="{{ conversion|str_form_value }}" /></td>
 	 	</tr>
+ 		<tr>
+			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
 		<tr>
 			<td class="center" colspan="2"><p><input class="btn btn-primary" type="submit" value="{{ titre_bouton|str_form_value }}" /></p></td>
 		</tr>

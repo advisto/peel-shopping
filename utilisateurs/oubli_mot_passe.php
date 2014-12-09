@@ -1,22 +1,24 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: oubli_mot_passe.php 43102 2014-11-04 15:40:20Z sdelaporte $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
-$page_name = 'oubli_mot_passe';
+$GLOBALS['page_name'] = 'oubli_mot_passe';
+$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_GET_PASSWORD"];
+
 // Le formulaire a été soumis, vérifie si l'identification est ok
 $frm = $_POST;
 $form_error_object = new FormError();
@@ -36,7 +38,7 @@ if (!empty($_POST['token'])) {
 if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && empty($frm)) {
 	$qid = query("SELECT mot_passe, id_utilisateur
 			FROM peel_utilisateurs
-			WHERE email = '" . nohtml_real_escape_string($_GET["email"]) . "'");
+			WHERE email = '" . nohtml_real_escape_string($_GET["email"]) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 	$utilisateur = fetch_assoc($qid);
 	$new_hash = sha256($_GET["email"] . $_GET['time'] . $utilisateur['id_utilisateur'] . $utilisateur['mot_passe']);
 	if (($_GET['hash'] == $new_hash)) {
@@ -61,7 +63,8 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
 		} elseif ((num_rows(query("SELECT 1
 				FROM peel_utilisateurs
-				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "' AND priv!='newsletter' ")) == 0)) {
+				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "' AND priv!='newsletter' AND etat=1 AND " . get_filter_site_cond('utilisateurs') . "")) == 0)) {
+				// Compte inexistant, ou désactivé. Un compte désactivé n'est pas censé pouvoir retrouver son mot de passe.
 			$form_error_object->add('email', $GLOBALS['STR_ERR_NOEMAIL']);
 		}
 	}
@@ -76,7 +79,7 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 	if ($password_twice == $password_once) {
 		query("UPDATE peel_utilisateurs
 			SET mot_passe='" . get_user_password_hash($password_once) . "'
-			WHERE email='" . nohtml_real_escape_string($email) . "'");
+			WHERE email='" . nohtml_real_escape_string($email) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_RECOVER_PASSWORD_OK']))->fetch();
 	} else {
 		$mode = 'renew_password';
@@ -101,4 +104,3 @@ include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
-?>

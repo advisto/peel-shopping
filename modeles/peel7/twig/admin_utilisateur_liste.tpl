@@ -1,21 +1,21 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div class="row">
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
-					<label for="search_email">{{ STR_ADMIN_ID }} / {{ STR_EMAIL }} / {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+					<label for="search_email">{{ STR_ADMIN_ID }} / {{ STR_EMAIL }}{% if (STR_PSEUDO) %} / {{ STR_PSEUDO }}{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					<input type="text" class="form-control" id="search_email" name="email" value="{{ email|str_form_value }}" />
 				</div>
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
@@ -127,9 +127,7 @@
 					<label for="search_fonction">{{ STR_FONCTION }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					<select class="form-control" id="search_fonction" name="fonction">
 						<option value="">{{ STR_CHOOSE }}...</option>
-						<option value="leader"{% if fonction=='leader' %} selected="selected"{% endif %}>{{ STR_LEADER }}</option>
-						<option value="manager"{% if fonction=='manager' %} selected="selected"{% endif %}>{{ STR_MANAGER }}</option>
-						<option value="employee"{% if fonction=='employee' %} selected="selected"{% endif %}>{{ STR_EMPLOYEE }}</option>
+						{{ fonction_options }}
 					</select>
 				</div>
 				<div class="clearfix visible-md visible-lg"></div>
@@ -336,6 +334,30 @@
 					<input type="text" class="form-control" name="annonces_contiennent" id="search_annonces_contiennent" value="{{ annonces_contiennent|str_form_value }}" />
 				</div>	
 			{% endif %}
+			{% if is_groups_module_active %}
+				<div class="col-md-3 col-sm-4 col-xs-12 center">
+					<label for="search_group">{{ STR_ADMIN_GROUP }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+				{% if groupes_options is defined %}
+					<select class="form-control" name="group" id="search_group">
+						<option value="">{{ STR_CHOOSE }}...</option>
+						{% for o in groupes_options %}
+						<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
+						{% endfor %}
+					</select>
+				{% else %}
+					{{ STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED }}
+				{% endif %}
+				</div>
+			{% endif %}
+				<div class="col-md-3 col-sm-4 col-xs-12 center">
+					<label for="search_group">{{ STR_ADMIN_GROUP }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+					<select class="form-control" name="group" id="search_group">
+						<option value="">{{ STR_CHOOSE }}...</option>
+						{% for o in groupes_options %}
+						<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 			</div>
 			<div id="search_col" class="col-md-3 col-sm-3 col-xs-12 center pull-right" style="margin-top: 20px; margin-bottom: 20px">
 				<input type="hidden" name="mode" value="search" /><input type="submit" class="btn btn-primary" value="{{ STR_SEARCH|str_form_value }}" />
@@ -355,7 +377,7 @@
 	{% for res in results %}
 		{{ res.tr_rollover }}
 			<td style="width:111px">
-				<table>
+				<table style="width:111px">
 					<tr>
 						<td style="min-width:25px"><input name="user_ids[]" type="checkbox" value="{{ res.id_utilisateur|str_form_value }}" id="{{ res.id_utilisateur }}" /></td>
 						<td style="min-width:25px"><a data-confirm="{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD_CONFIRM }}" title="{{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD|str_form_value }} {{ res.email }}" href="{{ res.init_href|escape('html') }}"><img src="{{ administrer_url }}/images/password-24.gif" alt="" /></a></td>
@@ -402,6 +424,7 @@
 			<td class="center">{{ res.compter_nb_commandes_parrainees }}</td>
 			<td class="center">{{ res.recuperer_parrain }}</td>
 			{% endif %}
+			<td class="center">{{ res.site_name }}</td>
 		</tr>
 	{% endfor %}
 	</table>

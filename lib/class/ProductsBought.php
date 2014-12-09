@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ProductsBought.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ProductsBought.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: ProductsBought.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: ProductsBought.php 43037 2014-10-29 12:01:40Z sdelaporte $
  * @access public
  */
 class ProductsBought {
@@ -69,11 +69,12 @@ class ProductsBought {
 			SUM( ca.total_prix ) AS montant_total,
 			IF(p.id IS NOT NULL, 1,0) AS in_catalog
 		FROM peel_commandes_articles ca
-		LEFT JOIN peel_commandes c ON ca.commande_id = c.id
-		LEFT JOIN peel_produits p ON p.id = ca.produit_id
-		WHERE c.id_statut_paiement IN ('2','3')
+		INNER JOIN peel_commandes c ON ca.commande_id = c.id AND " . get_filter_site_cond('commandes', 'c', true) . "
+		INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
+		LEFT JOIN peel_produits p ON p.id = ca.produit_id AND " . get_filter_site_cond('produits', 'p', true) . "
+		WHERE " . get_filter_site_cond('commandes_articles', 'ca', true) . "
+			AND sp.technical_code IN ('being_checked','completed')
 			AND ca.quantite > '0'
-			AND c.id_ecom = '" . intval($GLOBALS['site_parameters']['id']) . "'
 			" . (!empty($id)?" AND ca.produit_id='" . intval($id) . "'":"") . "
 		GROUP BY IF(ca.produit_id>0,ca.produit_id,ca.nom_produit), ca.couleur, ca.taille
 		ORDER BY quantite_totale DESC
@@ -125,14 +126,15 @@ class ProductsBought {
 	function clients()
 	{
 		$ret = array();
-		$req = query("SELECT peel_utilisateurs.*,
-				SUM(peel_commandes_articles.total_prix) AS total_paye,
-				SUM(peel_commandes_articles.quantite) AS total_quantite
-			FROM peel_utilisateurs
-			RIGHT JOIN peel_commandes ON peel_commandes.id_utilisateur = peel_utilisateurs.id_utilisateur
-			INNER JOIN peel_commandes_articles ON peel_commandes_articles.commande_id=peel_commandes.id
-			WHERE peel_commandes_articles.produit_id = " . intval($this->produit_id) . " AND peel_commandes_articles.quantite > 0 AND peel_commandes.id_statut_paiement IN ('2','3')
-			GROUP BY peel_utilisateurs.id_utilisateur");
+		$req = query("SELECT u.*,
+				SUM(ca.total_prix) AS total_paye,
+				SUM(ca.quantite) AS total_quantite
+			FROM peel_utilisateurs u
+			RIGHT JOIN peel_commandes c ON c.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('commandes', 'c', true) . "
+			INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
+			INNER JOIN peel_commandes_articles ca ON ca.commande_id=c.id AND  " . get_filter_site_cond('commandes_articles', 'ca', true) . " 
+			WHERE ca.produit_id = " . intval($this->produit_id) . " AND ca.quantite > 0 AND sp.technical_code IN ('being_checked','completed') AND " . get_filter_site_cond('utilisateurs', 'u', true) . "
+			GROUP BY u.id_utilisateur");
 		while ($tmp = fetch_object($req)) {
 			$ret[] = $tmp;
 		}
@@ -140,4 +142,3 @@ class ProductsBought {
 	}
 }
 
-?>

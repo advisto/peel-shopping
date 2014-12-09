@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,35 +33,24 @@ function affiche_menu_deroulant_1($div_id, $items_html_array)
 		foreach ($items_html_array as $this_item_html) {
 			$fcontent[] = 'scrollercontent[\'' . $div_id . '\'][' . ($i++) . ']=\'' . str_replace(array('   ', '  ', "\t"), ' ', filtre_javascript($this_item_html, true, true, false)) . '\';' . "\r\n";
 		}
-		if (empty($GLOBALS['scroller_1_already_initialized'])) {
-			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/scroller.js';
-			$GLOBALS['js_content_array'][] = '
-	var delay = 3000; //set delay between message change (in miliseconds)
-	var maxsteps=20; // number of steps to take to change from start color to endcolor
-	var stepdelay=25; // time in miliseconds of a single step
-	var startcolor= new Array(255,255,255); // start color (red, green, blue)
-	var endcolor=new Array(0,0,0); // end color (red, green, blue)
-	var begintag=\'<div>\';
-	var closetag=\'</div>\';
-	var fwidth=\'160px\'; //set scroller width
-	var fheight=\'170px\'; //set scroller height
-	var fadelinks=0;  //should links inside scroller content also fade like text? 0 for no, 1 for yes.
-	var fadecounter=new Array();
-	var scrollercontent=new Array();
-	var index_max = new Array();
+		$output .= '
+<script><!--//--><![CDATA[//><!--
+	' . (empty($GLOBALS['scroller_1_already_initialized']) ? '
 	var index = new Array();
-';
-			$GLOBALS['scroller_1_already_initialized'] = true;
-		}
-		$GLOBALS['js_content_array'][] = '
-	index[\'' . $div_id . '\'] = 0;
-	index_max[\'' . $div_id . '\'] =' . $i . ';
+	var scrollercontent=new Array();
+	' : '') . '
+	index[\'' . $div_id . '\']=0;
 	scrollercontent[\'' . $div_id . '\']=new Array();
 	' . implode('', $fcontent) . '
+//--><!]]></script>
 ';
 		$GLOBALS['js_ready_content_array'][] = '
 	changecontent(\'' . $div_id . '\');
 ';
+		if (empty($GLOBALS['scroller_1_already_initialized'])) {
+			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/scroller.js';
+			$GLOBALS['scroller_1_already_initialized'] = true;
+		}
 		$output .= '
 <div id="' . $div_id . '"></div>
 ';
@@ -108,7 +97,6 @@ new pausescroller(' . $div_id . '_content, "' . $div_id . '", 3000);
 }
 
 /**
- * get_on_rollover_products_html()
  *
  * @return
  */
@@ -118,8 +106,8 @@ function get_on_rollover_products_html()
 	$sql = "SELECT p.*, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
 		FROM peel_produits p
 		INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-		INNER JOIN peel_categories c ON c.id = pc.categorie_id
-		WHERE p.on_rollover = '1' AND p.nom_" . $_SESSION['session_langue'] . " != '' AND c.nom_" . $_SESSION['session_langue'] . " != '' AND p.etat='1'  ".(empty($GLOBALS['site_parameters']['allow_command_product_ongift'])?" AND p.on_gift != '1'":'')."
+		INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+		WHERE p.on_rollover = '1' AND " . get_filter_site_cond('produits', 'p') . " AND p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " != '' AND c.nom_" . $_SESSION['session_langue'] . " != '' AND p.etat='1'  ".(empty($GLOBALS['site_parameters']['allow_command_product_ongift'])?" AND p.on_gift != '1'":'')."
 		GROUP BY p.id
 		ORDER BY p.date_insere DESC
 		LIMIT 20";
@@ -135,5 +123,33 @@ function get_on_rollover_products_html()
 	}
 	return $items;
 }
+/**
+ *
+ * @return
+ */
+function get_on_rollover_articles_html()
+{
+	$items = array();
+	$sql = "SELECT a.on_reseller, .titre_" . $_SESSION['session_langue'] . " as name, a.image1 as image, a.date_insere, a.etat, a.id, a.on_special, r.id AS rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique
+		FROM peel_articles a
+		INNER JOIN peel_articles_rubriques ar ON a.id = ar.article_id
+		INNER JOIN peel_rubriques r ON r.id = ar.rubrique_id AND " . get_filter_site_cond('rubriques', 'r') . "
+		WHERE a.on_rollover = '1' AND a.titre_" . $_SESSION['session_langue'] . " != '' AND r.nom_" . $_SESSION['session_langue'] . " != '' AND a.etat='1' AND " . get_filter_site_cond('articles', 'a') . "
+		GROUP BY a.id
+		ORDER BY a.date_insere DESC
+		LIMIT 20";
+	$query = query($sql);
+	$i = 0;
+	while ($article = fetch_assoc($query)) {
+		if ((!a_priv("admin_product") && !a_priv("reve")) && $article['on_reseller'] == 1) {
+			continue;
+		} else {
+			$article_html = get_articles_in_container_html($article, $GLOBALS['site_parameters']['only_show_articles_with_picture_in_containers']);
+			if (!empty($article_html)) {
+				$items[] = $article_html;
+			}
+		}
+	}
+	return $items;
+}
 
-?>

@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: codes_promos.php 43187 2014-11-13 15:35:30Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_sales,admin_users");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_CODES_PROMOS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CODES_PROMOS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $mode = vb($_REQUEST['mode']);
@@ -127,6 +127,8 @@ function affiche_formulaire_ajout_code_promo(&$frm)
 		$frm["etat"] = "";
 		$frm["on_type"] = vb($_GET['on_type']);
 		$frm["nom"] = "";
+		$frm["site_id"] = "";
+		$frm["cat_not_apply_code_promo"] = "";
 	}
 	$frm["nouveau_mode"] = "insere";
 	$frm["date_debut"] = get_formatted_date(time());
@@ -149,7 +151,7 @@ function affiche_formulaire_modif_code_promo($id, &$frm)
 		// Charge les informations du code promo
 		$qid = query("SELECT *
 			FROM peel_codes_promos
-			WHERE id = '" . intval($id) . "'");
+			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('codes_promos', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_CODES_PROMOS_ERR_NOT_FOUND']))->fetch();
@@ -170,7 +172,6 @@ function affiche_formulaire_modif_code_promo($id, &$frm)
  */
 function affiche_formulaire_code_promo(&$frm)
 {
-	construit_arbo_categorie($categorie_options, vb($frm['id_categorie']));
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_code_promo.tpl');
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . vb($frm['nouveau_mode']) . intval(vb($frm['id']))));
@@ -184,14 +185,18 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('remise_valeur', vn($frm['remise_valeur']));
 	$tpl->assign('montant_min', vn($frm['montant_min']));
-	$tpl->assign('categorie_options', $categorie_options);
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie']), 'option', '&nbsp;&nbsp;', null));
+	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo'])), 'option', '&nbsp;&nbsp;', null));
 	$tpl->assign('nombre_prevue', vb($frm["nombre_prevue"]));
 	$tpl->assign('nb_used_per_client', vb($frm["nb_used_per_client"]));
+	$tpl->assign('product_filter', vb($frm['product_filter']));
 	$tpl->assign('etat', vn($frm['etat']));
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('titre_bouton', vn($frm['titre_bouton']));
 	if($frm["nouveau_mode"] != "insere") {
 		$tpl->assign('STR_ADMIN_CODES_PROMOS_ALREADY_USED', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ALREADY_USED'], vn($frm['compteur_utilisation'])));
 	}
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
 	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
@@ -201,6 +206,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_NB_FORECASTED_EXPLAIN', $GLOBALS['STR_ADMIN_CODES_PROMOS_NB_FORECASTED_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ALL_CATEGORIES', $GLOBALS['STR_ADMIN_ALL_CATEGORIES']);
 	$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
+	$tpl->assign('STR_ADMIN_CATEGORIES_TO_EXCLUDE', $GLOBALS['STR_ADMIN_CATEGORIES_TO_EXCLUDE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_MIN', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_MIN'], $GLOBALS['site_parameters']['symbole']));
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_MIN_EXPLAIN', $GLOBALS['STR_ADMIN_CODES_PROMOS_MIN_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_PERCENT', $GLOBALS['STR_ADMIN_CODES_PROMOS_PERCENT']);
@@ -210,6 +216,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_PROMO_CODE', $GLOBALS['STR_PROMO_CODE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER', $GLOBALS['STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_STATUS', $GLOBALS['STR_ADMIN_CODES_PROMOS_STATUS']);
+	$tpl->assign('STR_ADMIN_PRODUCT_NAME', $GLOBALS['STR_ADMIN_PRODUCT_NAME']);
 	echo $tpl->fetch();
 }
 
@@ -223,9 +230,9 @@ function supprime_code_promo($id)
 {
 	$result = fetch_assoc(query("SELECT *
 		FROM peel_codes_promos
-		WHERE id=" . intval($id)));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('codes_promos', null, true) . ""));
 	query("DELETE FROM peel_codes_promos
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('codes_promos', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ERR_DELETED'], String::strtoupper($result['nom']))))->fetch();
 }
 
@@ -247,10 +254,13 @@ function maj_code_promo($id, $frm)
 			, on_type = '" . intval($frm['on_type']) . "'
 			, montant_min = '" . floatval(get_float_from_user_input($frm['montant_min'])) . "'
 			, etat = '" . intval($frm['etat']) . "'
+			, site_id = '" . intval($frm['site_id']) . "'
 			, id_site = '" . $GLOBALS['site_parameters']['id'] . "'
 			, id_categorie = '" . intval($frm['id_categorie']) . "'
 			, nombre_prevue = '" . intval($frm['nombre_prevue']) . "'
 			, nb_used_per_client ='" . intval($frm['nb_used_per_client']) . "'
+			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
+			, cat_not_apply_code_promo ='" . get_string_from_array(nohtml_real_escape_string(vn($frm['cat_not_apply_code_promo']))) . "'
 		WHERE id='" . intval($id) . "'";
 	query($sql);
 }
@@ -264,9 +274,10 @@ function affiche_liste_code_promo()
 {
 	$sql = "SELECT cp.*, nom_" . $_SESSION['session_langue'] . " AS category_name
 		FROM peel_codes_promos cp
-		LEFT JOIN peel_categories c ON c.id=cp.id_categorie";
+		LEFT JOIN peel_categories c ON c.id=cp.id_categorie AND " . get_filter_site_cond('categories', 'c', true) . "
+		WHERE " . get_filter_site_cond('codes_promos', 'cp', true) . "";
 	$Links = new Multipage($sql, 'codes_promos');
-	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'nom' => $GLOBALS['STR_ADMIN_CODE'], 'date_debut' => $GLOBALS['STR_ADMIN_BEGIN_DATE'], 'date_fin' => $GLOBALS['STR_ADMIN_END_DATE'], 'remise_percent,remise_valeur' => $GLOBALS['STR_ADMIN_DISCOUNT'], 'montant_min' => $GLOBALS['STR_ADMIN_DATE_STARTING'], 'category_name' => $GLOBALS['STR_CATEGORY'], 'etat' => $GLOBALS['STR_STATUS'], 'source' => $GLOBALS['STR_ADMIN_SOURCE']);
+	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'nom' => $GLOBALS['STR_ADMIN_CODE'], 'date_debut' => $GLOBALS['STR_ADMIN_BEGIN_DATE'], 'date_fin' => $GLOBALS['STR_ADMIN_END_DATE'], 'remise_percent,remise_valeur' => $GLOBALS['STR_ADMIN_DISCOUNT'], 'montant_min' => $GLOBALS['STR_ADMIN_DATE_STARTING'], 'category_name' => $GLOBALS['STR_CATEGORY'], 'etat' => $GLOBALS['STR_STATUS'], 'source' => $GLOBALS['STR_ADMIN_SOURCE'], 'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
 	$Links->OrderDefault = "date_debut";
 	$Links->SortDefault = "ASC";
@@ -279,6 +290,7 @@ function affiche_liste_code_promo()
 	if (empty($results_array)) {
 		$tpl->assign('are_results', false);
 	} else {
+		$all_sites_name_array = get_all_sites_name_array();
 		$tpl->assign('are_results', true);
 		$tpl->assign('links_header_row', $Links->getHeaderRow());
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
@@ -300,7 +312,8 @@ function affiche_liste_code_promo()
 				'category_name' => $ligne['category_name'],
 				'etat_onclick' => 'change_status("codes_promos", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
-				'source' => $ligne['source']
+				'source' => $ligne['source'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
@@ -329,7 +342,7 @@ function affiche_liste_code_pour_client($id_utilisateur)
 	$utilisateur = get_user_information($id_utilisateur);
 	$qcpromo = query("SELECT *
 		FROM peel_codes_promos
-		WHERE etat = '1' AND source != 'CHQ'");
+		WHERE etat = '1' AND source != 'CHQ' AND " . get_filter_site_cond('codes_promos', null, true) . "");
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_code_pour_client.tpl');
 	$tpl_options = array();
@@ -373,4 +386,3 @@ function affiche_liste_code_pour_client($id_utilisateur)
 	echo $tpl->fetch();
 }
 
-?>

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_article.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_article.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{% if not rubrique_options %}
 <div class="entete">{{ STR_ADMIN_ARTICLES_FORM_ADD }}</div>
 <p><a href="{{ add_category_url }}">{{ STR_ADMIN_ARTICLES_CREATE_CATEGORY_FIRST }}</a></p>
@@ -21,7 +21,7 @@
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
 	<table class="main_table">
 		<tr>
-			<td class="entete" colspan="2">{% if (art_href) %}{{ STR_ADMIN_ARTICLES_FORM_MODIFY }} "{{ titre }}" - <a href="{{ art_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">Voir en ligne</a>{% else %}{{ STR_ADMIN_ARTICLES_FORM_ADD }}{% endif %}</td>
+			<td class="entete" colspan="2">{% if (art_href) %}{{ STR_ADMIN_ARTICLES_FORM_MODIFY }} "{{ titre }}" - <a href="{{ art_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_SEE_RESULT_IN_REAL }}</a>{% else %}{{ STR_ADMIN_ARTICLES_FORM_ADD }}{% endif %}</td>
 		</tr>
 		<tr>
 			<td colspan="2">&nbsp;</td>
@@ -44,16 +44,45 @@
 			</td>
 		</tr>
 		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
+	{% if (STR_ADMIN_SITE_COUNTRY) %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_SITE_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				{{ site_country_checkboxes }}
+			</td>
+		</tr>
+	{% endif %}
+		<tr>
 			<td class="title_label">{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input type="number" class="form-control" name="position" value="{{ position|html_entity_decode_if_needed|str_form_value }}" />
 			</td>
 		</tr>
+		{% if is_rollover_module_active %}
+			<tr>
+				<td class="title_label top">{{ STR_ADMIN_ARTICLES_IS_ON_ROLLOVER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td><input type="checkbox" name="on_rollover" value="1"{% if is_on_rollover %} checked="checked"{% endif %} /></td>
+			</tr>
+		{% endif %}
 		<tr>
-			<td class="title_label">{{ STR_ADMIN_DISPLAY_ON_HOMEPAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="on_special" value="1"{% if on_special == '1' %} checked="checked"{% endif %} />{{ STR_YES }}<br />
-				<input type="radio" name="on_special" value="0"{% if on_special == '0' or not(on_special) %} checked="checked"{% endif %} />{{ STR_NO }}
+				<input type="radio" name="on_special" value="1"{% if on_special == '1' %} checked="checked"{% endif %} /> {{ STR_YES }}<br />
+				<input type="radio" name="on_special" value="0"{% if on_special == '0' or not(on_special) %} checked="checked"{% endif %} /> {{ STR_NO }}
+			</td>
+		</tr>
+ 		<tr>
+			<td class="title_label">{{ STR_ADMIN_ARTICLES_IS_ON_RESELLER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="radio" name="on_reseller" value="1"{% if on_reseller == '1' %} checked="checked"{% endif %} /> {{ STR_YES }}<br />
+				<input type="radio" name="on_reseller" value="0"{% if on_reseller == '0' or not (on_reseller) %} checked="checked"{% endif %} /> {{ STR_NO }}
 			</td>
 		</tr>
 		<tr>
@@ -63,7 +92,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="title_label">{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 			{% if (image) %}
 				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ image.nom }}&nbsp;

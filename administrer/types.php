@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: types.php 43052 2014-10-30 11:22:19Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS["STR_ADMIN_TYPES_TITLE"];
+$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_TYPES_TITLE"];
 
 $output = '';
 $frm = $_POST;
@@ -124,15 +124,17 @@ function affiche_formulaire_modif_type($id, &$frm)
 		/* Charge les informations du type */
 		$qid = query("SELECT *
 			FROM peel_types
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('types', null, true) . "");
 		$frm = fetch_assoc($qid);
 	}
-	$frm['id'] = $id;
-
-	$frm["nouveau_mode"] = "maj";
-	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-
-	return affiche_formulaire_type($frm);
+	if (!empty($frm)) {
+		$frm['id'] = $id;
+		$frm["nouveau_mode"] = "maj";
+		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+		return affiche_formulaire_type($frm);
+	} else {
+		redirect_and_die(get_current_url(false).'?mode=ajout');
+	}
 }
 
 /**
@@ -159,15 +161,22 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('etat', vb($frm['etat']));
 	$tpl->assign('without_delivery_address', $frm['without_delivery_address']);
 	$tpl->assign('is_socolissimo_module_active', is_socolissimo_module_active());
-	$tpl->assign('is_socolissimo', $frm['is_socolissimo']);
+		if (is_socolissimo_module_active()) {
+		$tpl->assign('is_socolissimo', $frm['is_socolissimo']);
+	}
 	$tpl->assign('is_icirelais_module_active', is_icirelais_module_active());
-	$tpl->assign('is_icirelais', $frm['is_icirelais']);
-	$tpl->assign('is_fianet_module_active', is_fianet_module_active());
+	if (is_icirelais_module_active()) {
+		$tpl->assign('is_icirelais', $frm['is_icirelais']);
+	}
+	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
 	$tpl->assign('is_tnt_module_active', is_tnt_module_active());
 	$tpl->assign('tnt_threshold', vb($frm['tnt_threshold']));
 	$tpl->assign('is_tnt', vb($frm['is_tnt']));
 	$tpl->assign('fianet_type_transporteur', vb($frm['fianet_type_transporteur']));
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_SOCOLISSIMO', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_SOCOLISSIMO']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_TYPES_FORM_TITLE', $GLOBALS['STR_ADMIN_TYPES_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
@@ -203,7 +212,7 @@ function supprime_type($id)
 {
 	/* Efface le type */
 	query("DELETE FROM peel_types 
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('types', null, true));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_TYPES_MSG_DELETED_OK'], get_delivery_type_name($id))))->fetch();
 }
 
@@ -215,7 +224,7 @@ function supprime_type($id)
  */
 function insere_type($frm)
 {
-	$sql = "INSERT INTO peel_types (position
+	$sql = "INSERT INTO peel_types (position, site_id
 		, without_delivery_address, etat";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
@@ -226,7 +235,7 @@ function insere_type($frm)
 	if (is_icirelais_module_active()) {
 		$sql .= ", is_icirelais";
 	}
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur";
 	}
 	if(is_tnt_module_active()){
@@ -234,7 +243,7 @@ function insere_type($frm)
 		$sql .= ", tnt_threshold";
 	}
 	$sql .= "
-	) VALUES ('" . intval($frm['position']) . "'
+	) VALUES ('" . intval($frm['position']) . "', '" . intval($frm['site_id']) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
 		, '" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -246,7 +255,7 @@ function insere_type($frm)
 	if (is_icirelais_module_active()) {
 		$sql .= ", '" . intval($frm['is_icirelais']) . "'";
 	}
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . intval($frm['fianet_type_transporteur']) . "'";
 	}
 	if(is_tnt_module_active()){
@@ -268,6 +277,7 @@ function insere_type($frm)
 function maj_type($id, $frm)
 {
 	$sql = "UPDATE peel_types SET position = '" . nohtml_real_escape_string($frm['position']) . "'
+		, site_id = '" . nohtml_real_escape_string($frm['site_id']) . "'
 		, without_delivery_address='" . intval($frm['without_delivery_address']) . "'
 		, etat='" . intval(vn($frm['etat'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -277,9 +287,9 @@ function maj_type($id, $frm)
 		$sql .= ", is_socolissimo = '" . intval($frm['is_socolissimo']) . "'";
 	}
 	if (is_icirelais_module_active()) {
-		$sql .= ", is_icirelais = '" . intval($frm['is_icirelais']) . "'";
+		$sql .= ", is_icirelais = '" . intval(vn($frm['is_icirelais'])) . "'";
 	}
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur = '" . intval($frm['fianet_type_transporteur']) . "'";
 	}
 	if(is_tnt_module_active()){
@@ -303,12 +313,14 @@ function affiche_liste_type()
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 
-	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", position, etat
+	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", position, etat, site_id
 		FROM peel_types t
+		WHERE " . get_filter_site_cond('types', 't', true) . "
 		ORDER BY t.position");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -316,13 +328,15 @@ function affiche_liste_type()
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'etat_onclick' => 'change_status("types", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
-				'position' => $ligne['position']
+				'position' => $ligne['position'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
 	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=types';
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_TYPES_TITLE', $GLOBALS['STR_ADMIN_TYPES_TITLE']);
 	$tpl->assign('STR_ADMIN_TYPES_EXPLAIN', $GLOBALS['STR_ADMIN_TYPES_EXPLAIN']);
@@ -338,4 +352,3 @@ function affiche_liste_type()
 	return $tpl->fetch();
 }
 
-?>

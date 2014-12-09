@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_ventes.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: export_ventes.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -45,7 +45,7 @@ if (!empty($_GET["id_statut_paiement"])) {
 }
 $sqlC = "SELECT *
 	FROM peel_commandes
-	WHERE id_ecom = '" . intval($GLOBALS['site_parameters']['id']) . "' AND o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra_sql . "
+	WHERE " . get_filter_site_cond('commandes', null, true) . " AND o_timestamp>='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra_sql . "
 	ORDER BY o_timestamp";
 
 $ensemble_cout_transport = $ensemble_total_ht = $ensemble_total_ttc = $super_total = 0;
@@ -55,6 +55,7 @@ $total_transport_ht = 0;
 $total_ht = 0;
 $total_tva = 0;
 $total = 0;
+$netapayer = 0;
 
 $ligne_total_produit_ht = $ligne_total_produit_ttc = 0;
 $ligne_cout_transport_ht = $ligne_tva_cout_transport = $ligne_cout_transport = 0;
@@ -63,7 +64,7 @@ $ligne_tarif_paiement_ht = $ligne_tva_tarif_paiement = $ligne_tarif_paiement = 0
 if ($mode != 'one_line_per_order') {
 	$output .= "Numéro commande\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tArticle\tQuantité\tPrix unitaire HT\tTotal HT\tTaux TVA\tTVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\r\n";
 } else {
-	$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
+	$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tAvoir client\tNet à payer\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
 }
 $resC = query($sqlC);
 
@@ -83,7 +84,8 @@ while ($commande = fetch_assoc($resC)) {
 	$total_transport_ht += $commande['cout_transport_ht'];
 	$total_tva += $commande['total_tva'];
 	$total_ht += $commande['montant_ht'];
-	$total += $commande['montant'];
+	$total += $commande['montant']+$commande['avoir'];
+	$netapayer += $commande['montant'];
 
 	$vat_arrays[] = get_vat_array($commande['code_facture']);
 
@@ -119,7 +121,7 @@ while ($commande = fetch_assoc($resC)) {
 			}
 		}
 	} else {
-			$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($commande['montant_ht']) . "\t" . filtre_csv($commande['total_tva']) . "\t" . filtre_csv($commande['montant']) . "\t" .  filtre_csv($commande['cout_transport_ht']) . "\t" .  filtre_csv($commande['tva_cout_transport']) . "\t" .  filtre_csv($commande['cout_transport']) ."\t" .  filtre_csv($commande['tarif_paiement']) ."\t" .  filtre_csv($commande['tva_tarif_paiement']) . "\t" . filtre_csv($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . filtre_csv($commande['total_produit_ht']) . "\t" . filtre_csv($commande['tva_total_produit']) . "\t" . filtre_csv($commande['total_produit']) ."\r\n";
+			$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($commande['montant_ht']) . "\t" . filtre_csv($commande['total_tva']) . "\t" . filtre_csv($commande['montant']+$commande['avoir'])  ."\t" . filtre_csv($commande['avoir']) . "\t"  . filtre_csv($commande['montant']) . "\t" .  filtre_csv($commande['cout_transport_ht']) . "\t" .  filtre_csv($commande['tva_cout_transport']) . "\t" .  filtre_csv($commande['cout_transport']) ."\t" .  filtre_csv($commande['tarif_paiement']) ."\t" .  filtre_csv($commande['tva_tarif_paiement']) . "\t" . filtre_csv($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . filtre_csv($commande['total_produit_ht']) . "\t" . filtre_csv($commande['tva_total_produit']) . "\t" . filtre_csv($commande['total_produit']) ."\r\n";
 	}
 }
 
@@ -129,7 +131,6 @@ if ($mode != 'one_line_per_order') {
 	$output .= "\t\t\t\t\t\t\t\t\tTOTAL HT tout compris :\t" . fxsl($ligne_total_produit_ht + $ligne_cout_transport_ht + $ligne_tarif_paiement_ht) . "\r\n";
 	$output .= "\t\t\t\t\t\t\t\t\tTVA tout compris :\t" . fxsl(($ligne_total_produit_ttc - $ligne_total_produit_ht) + $ligne_tva_cout_transport + $ligne_tva_tarif_paiement) . "\r\n";
 	$output .= "\t\t\t\t\t\t\t\t\tTOTAL TTC tout compris :\t" . fxsl($ligne_total_produit_ttc + $ligne_cout_transport + $ligne_tarif_paiement) . "\r\n";
-} 
+}
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
-?>

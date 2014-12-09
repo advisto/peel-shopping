@@ -68,8 +68,8 @@ class FineUploader {
 
         // Get size and name
 
-        $file = $_FILES[$this->inputName];
-        $size = $file['size'];
+        $file = vb($_FILES[$this->inputName]);
+        $size = vb($file['size']);
 
         if ($name === null){
             $name = $this->getName();

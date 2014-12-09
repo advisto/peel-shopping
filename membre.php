@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: membre.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: membre.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_ACCES_ACCOUNT', true);
 include("configuration.inc.php");
 
@@ -18,7 +18,9 @@ if (est_identifie()) {
 	redirect_and_die(get_account_url(false, false));
 }
 
-$page_name = 'membre';
+$GLOBALS['page_name'] = 'membre';
+$GLOBALS['DOC_TITLE'] =  $GLOBALS['STR_ACCES_ACCOUNT'];
+
 $form_error_object = new FormError();
 $frm = array();
 /* Le formulaire a été soumis, vérification des paramètres de connexion */
@@ -39,7 +41,10 @@ if (!empty($_POST)) {
 	if (!$form_error_object->count()) {
 		$utilisateur = user_login_now($_POST['email'], $_POST['mot_passe']);
 		if ($utilisateur) {
-			if (!empty($_SESSION['session_redirect_after_login']) && strpos($_SESSION['session_redirect_after_login'], $GLOBALS['wwwroot']) === 0) {
+			if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']])) {
+				// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
+				redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']]);
+			} elseif (!empty($_SESSION['session_redirect_after_login']) && strpos($_SESSION['session_redirect_after_login'], $GLOBALS['wwwroot']) === 0) {
 				// Pour éviter que des spammeurs n'utilisent referer, on vérifie que l'URL de redirection contient wwwroot
 				$goto = $_SESSION['session_redirect_after_login'];
 				unset($_SESSION['session_redirect_after_login']);
@@ -70,4 +75,3 @@ echo '
 ' . get_access_account_form($frm, $form_error_object);
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
-?>

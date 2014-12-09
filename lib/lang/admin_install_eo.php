@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_eo.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_install_eo.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -66,7 +66,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FILE_MISSING"] = "Eraro pro mankanta dosiero";
 $GLOBALS["STR_ADMIN_INSTALL_FINISH_BUTTON"] = "Fini la instalon";
 $GLOBALS["STR_ADMIN_INSTALL_NOW_INSTALLED"] = "PEEL Shopping instaliĝis.";
 $GLOBALS["STR_ADMIN_INSTALL_YOU_CAN_LOGIN_ADMIN"] = "Eblas nun viziti la administran paĝon laŭ la sekvaj agordoj:";
-$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Post ensaluto, klaku Mia Konto > Administrado, malsupre de la paĝo.";
+$GLOBALS["STR_ADMIN_INSTALL_ADMIN_LINK_INFOS"] = "Post ensaluto, klaku \"Mia Konto\" > \"Administrado\".";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS"] = "Rimarkoj rilate sekurecon ĉe via retejo:";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_DELETE_INSTALL"] = "DEVIGE forigu la instalan dosierujon antaŭ ol komenci labori";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "TRE REKOMENDAS NI, por la sekureco de via retejo, alinomi la dosieron \"administrer\", pere de FTP-programo, al nomo malfacile trovebla, kaj same nomi la variablon {$GLOBALS['site_parameters']['backoffice_directory_name']} de la agorda dosiero \"configuration.inc.php\".";
@@ -78,4 +78,3 @@ $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Necesos aliigi mane la kodigo
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Necesos aliigi mane la kodigon de la retejo - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Ĉio devus en orde funkcii, krom la modulo \"Butterflive\" kies funkciado ne eblos.";
 
-?>

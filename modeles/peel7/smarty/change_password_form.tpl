@@ -1,17 +1,17 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_password_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-*}<h1 class="page_title">{$change_password}</h1>
+// $Id: change_password_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+*}<h1 property="name" class="page_title">{$change_password}</h1>
 {if !empty($noticemsg)}
 	{$noticemsg}
 {else}
@@ -33,7 +33,7 @@
 			<span class="enregistrementgauche"><label for="nouveau_mot_passe">{$STR_NEW_PASSWORD_CONFIRM} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite"><input type="password" class="form-control" name="nouveau_mot_passe2" id="nouveau_mot_passe2" size="32" value="{$new_password_confirm|str_form_value}" /> {$new_password_confirm_error}</span>
 		</div>
-		<p class="center">{$token}<input type="submit" value="{$STR_CHANGE|str_form_value}" class="btn btn-primary" />&nbsp;&nbsp;&nbsp;<input type="reset" value="{$STR_EMPTY_FIELDS|str_form_value}" class="btn btn-primary" /></p>
+		<p class="center">{$token}<input type="submit" value="{$STR_CHANGE|str_form_value}" class="btn btn-primary" />&nbsp;&nbsp;&nbsp;<input type="reset" value="{$STR_EMPTY_FIELDS|str_form_value}" class="btn btn-warning" /></p>
 	</form>
 	{$js_password_control}
 {/if}

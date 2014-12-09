@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_de.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_name_de.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -38,8 +38,8 @@ $peel_email_template["name"] = array(
   "send_client_order_html" => "Ihre Bestellung [ORDER_ID] auf [SITE] mit HTML-Rechnung",
   "send_client_order_pdf" => "Ihre Bestellung [ORDER_ID] auf [SITE] mit PDF-Rechnung",
   "send_avis_expedition" => "Versandnachweis von Bestellung [ORDER_ID]",
-  "email_commande" => "Bestellbestätigung [ORDER_ID]",
-  "send_mail_order_admin" => "[ORDER_ID] Registrierung der Bestellung [SITE]",
+  "email_commande" => "Bestellbestätigung Nr.[ORDER_ID]",
+  "send_mail_order_admin" => "Registrierung der BestellungNr.[ORDER_ID] auf [SITE]",
   "initialise_mot_passe" => "Neues Kennwort für Ihr Konto",
   "send_mail_for_account_creation" => "Öffnung Ihres Kontos",
   "insere_avis" => "Ein Nutzer hat auf [SITE] einen Kommentar hinterlassen",
@@ -51,8 +51,8 @@ $peel_email_template["name"] = array(
   "cree_cheque_cadeau_client_type2" => "[FRIEND] offeriert Ihnen einen Geschenkgutschein (Betrag)",
   "cree_cheque_cadeau_client_admin" => "Erzeugen eines Geschenkgutscheins",
   "gift_list" => "Wunschliste",
-  "email_ordered_cadeaux" => "Bestellung von Ihrer Wunschliste \"[LIST_NAME]\"",
-  "listecadeau_voir" => "Bestellung von Ihrer Wunschliste \"[LIST_NAME]\"",
+  "email_ordered_cadeaux" => "Bestellung von Ihrer Wunschliste \"[GIFTLIST_NAME]\"",
+  "listecadeau_voir" => "Bestellung von Ihrer Wunschliste \"[GIFTLIST_NAME]\"",
   "parrainage" => "[PSEUDO] möchte Sie sponsern",
   "email_alerte" => "Produkt vorrätig auf [SITE]",
   "decremente_stock" => "Warnhinweis STOCK",
@@ -71,4 +71,3 @@ $peel_email_template["name"] = array(
   "cron_update_contact_info" => "Bestätigung der Gültigkeit Ihrer Angaben"
 );
 
-?>

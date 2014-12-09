@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -56,20 +56,22 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		// Dans le cas d'attributs upload ou texte_libre, aucune option n'est associée => LEFT JOIN peel_attributs et non pas INNER JOIN
 		if(!empty($product_id)) {
 			// Pour un produit donné, on peut associer les attributs que l'on veut, et également spécifier les options acceptables de ces attributs pour ce produit en particulier
-			// Il ne faut donc pas faire de jointure entre peel_attributs et peel_nom_attributs, mais passer par peel_produits_attributs pour faire les deux jointures indépendemment
+			// Il ne faut donc pas faire de jointure entre peel_attributs et peel_nom_attributs, mais passer par peel_produits_attributs pour faire les deux jointures indépendemment. Il faut dans ce cas prendre l'id de l'attribut dans peel_produits_attributs et pas dans peel_attributs par cohérence, et résoud un problème dans le cas d'attribut fictif (paramètre attribut_fictive_options_functions_by_technical_codes_array)
+			$sql_select = 'pa.attribut_id';
 			$sql_from_and_where = "FROM peel_produits_attributs pa
-				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id
-				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1'
+				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id AND " . get_filter_site_cond('attributs', 'a', defined('IN_PEEL_ADMIN')) . "
+				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na', defined('IN_PEEL_ADMIN')) . "
 				WHERE pa.produit_id = '" . intval($product_id) . "'";
 		} else {
+			$sql_select = 'a.id AS attribut_id';
 			$sql_from_and_where = "FROM peel_nom_attributs na
-				LEFT JOIN peel_attributs a ON a.id_nom_attribut=na.id
-				WHERE na.etat = '1'";
+				LEFT JOIN peel_attributs a ON a.id_nom_attribut=na.id AND " . get_filter_site_cond('attributs', 'a', defined('IN_PEEL_ADMIN')) . "
+				WHERE na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na', defined('IN_PEEL_ADMIN'));
 		}
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
-		$sql = "SELECT a.id AS attribut_id, na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur
+		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur
 			".$sql_from_and_where."
 			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
@@ -82,15 +84,17 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 			$possible_attributs[$product_id . '-' . $_SESSION['session_langue']][] = $result;
 		}
 	}
+	
 	if (!empty($possible_attributs)) {
 		foreach($possible_attributs[$product_id . '-' . $_SESSION['session_langue']] as $result) {
 			// Si l'attribut n'a pas d'option, $result['attribut_id'] vaut NULL => on applique vn() pour obtenir 0
 			$attributs_array[intval($result['nom_attribut_id'])][intval(vn($result['attribut_id']))] = $result;
 		}
 		foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
-			// DEBUT de gestion d'attributs avec options fictives, n'utilisant pas peel_attributs pour les options mais d'autres sources d'information
+			
 			if (!empty($this_attribut_values_array[0]) && count($this_attribut_values_array)==1) {
 				if (!empty($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array']) && !empty($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array'][$this_attribut_values_array[0]['technical_code']]) && function_exists($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array'][$this_attribut_values_array[0]['technical_code']])) {
+					// DEBUT de gestion d'attributs avec options fictives, n'utilisant pas peel_attributs pour les options mais d'autres sources d'information
 					$this_function = $GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array'][$this_attribut_values_array[0]['technical_code']];
 					// La fonction doit avoir un seul argument, qui est la liste des options filtrées
 					if(!empty($attribut_and_options_filter_array[$this_nom_attribut_id])) {
@@ -104,11 +108,28 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 					// Si c'est texte_libre, c'est une notion de stockage par la suite du texte choisi, sous forme d'id 0
 					// Mais dans le tableau des options on fait apparaitre l'id de l'option fictive dans tous les cas 
 					// On remplit le contenu de l'attribut pour la liste des options
+					
+			
+			
 					foreach($fictive_options_array as $this_id => $this_fictive_options) {
-						$attributs_array[$this_nom_attribut_id][$this_id] = $attributs_array[$this_nom_attribut_id][0];
-						$attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] = $this_fictive_options;
+						if (empty($product_id) || (!empty($attributs_array[$this_nom_attribut_id][$this_id]['descriptif']) &&  $attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] == $this_fictive_options )) {
+							// Si empty($product_id) on veux tous les attributs possible pour le produit, sinon on prend ce qui est associé au produit.
+							$attributs_array[$this_nom_attribut_id][$this_id] = $attributs_array[$this_nom_attribut_id][0];
+							$attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] = $this_fictive_options;
+							// L'id de l'attribut dans ce cas est l'id qui est généré par la fonction de attribut_fictive_options_functions_by_technical_codes_array. 
+							$attributs_array[$this_nom_attribut_id][$this_id]['attribut_id'] = $this_id;
+						}
 					}
-					unset($attributs_array[$this_nom_attribut_id][0]);
+					if ($this_attribut_values_array[0]['type_affichage_attribut'] == 1) {
+						unset($attributs_array[$this_nom_attribut_id][0]);
+					}
+					foreach ($attributs_array[$this_nom_attribut_id] as $this_attribut_id => $this_attribut_values) {
+						// Ici ont supprime les attributs qui ont un ID à NULL, qu'il faut supprimer de la liste. Les id NULL sont créé par la requête SQL de séléction d'attribut
+						if($this_attribut_values['attribut_id'] === NULL) {
+							unset($attributs_array[$this_nom_attribut_id][$this_attribut_id]);
+						}
+					}
+					// FIN de gestion d'attributs avec options fictives
 				}
 				if(!empty($attribut_and_options_filter_array) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id]) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)])) {
 					$attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif'] = $attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)];
@@ -117,7 +138,6 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 					}
 				}
 			}
-			// FIN de gestion d'attributs avec options fictives
 		}
 		if($get_attributes_with_multiple_options_only || $get_attributes_with_single_options_only) {
 			// On retire les attributs qui ne respectent pas les conditions : unique ou multiple
@@ -328,6 +348,14 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
+					} elseif ($type_affichage_attribut == 4) {
+						// Affichage sous forme de lien
+						$input_type = 'link';
+						$options[] = array(
+								'value' => $this_attribut_id,
+								'name' => 'custom_attribut[' . $this_nom_attribut_id . ']',
+								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif'])
+							);
 					}
 					$max_label_length = max($max_label_length, String::strlen(String::html_entity_decode_if_needed(vb($this_attribut_infos['descriptif']))));
 				}
@@ -389,13 +417,16 @@ function display_option_image($str_image, $set = false)
 					$str_img = String::substr($str_img, 0, $end_str);
 					if (pathinfo($str_img, PATHINFO_EXTENSION) == 'pdf') {
 						$small_option_image = $GLOBALS['wwwroot'] . '/images/logoPDF_small.png';
+						$is_pdf = true;
 					} else {
 						$small_option_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($str_img, 0, 25, 'fit');
+						$is_pdf = false;
 					}
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 							'set' => true,
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $str_img,
-							'src' => $small_option_image
+							'src' => $small_option_image,
+							'is_pdf' => $is_pdf
 						))->fetch();
 					$str_image = str_replace('{{' . $str_img . '}}', $str_img_new, $str_image);
 				}
@@ -670,4 +701,3 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 	return implode('§', $combinaisons_array);
 }
 
-?>

@@ -1,24 +1,34 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paypal_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-#}<form class="entryform form-inline" role="form" id="paypalForm" action="{{ url }}" method="post">
+// $Id: paypal_form.tpl 43352 2014-11-25 14:17:01Z sdelaporte $
+#}{% if enable_paypal_iframe %}
+<iframe name="hss_iframe" width="570px" height="540px" style="border:none;"></iframe>
+{% endif %}
+<form class="entryform form-inline" role="form" id="paypalForm" action="{{ url }}" method="post" {% if  enable_paypal_iframe %}target="hss_iframe" name="form_iframe"{% endif %}>
 	<input type="hidden" name="charset" value="{{ charset|str_form_value }}">
-	<input type="hidden" name="cmd" value="_ext-enter" />
-	<input type="hidden" name="redirect_cmd" value="_xclick" />
+	{% if enable_paypal_integral_evolution %}
+		{# integral evolution : replace cmd field value with "_hosted-payment" + delete redirect_cmd field + replace "amount" name field with "subtotal" #}
+		<input type="hidden" name="subtotal" value="{{ amount|str_form_value }}" />
+		<input type="hidden" name="cmd" value="_hosted-payment" />
+		<input type="hidden" name="paymentaction" value="sale">
+	{% else %}
+		<input type="hidden" name="cmd" value="_ext-enter" /> 
+		<input type="hidden" name="amount" value="{{ amount|str_form_value }}" />
+		<input type="hidden" name="redirect_cmd" value="_xclick" />
+	{% endif %}
 	<input type="hidden" name="business" value="{{ business|str_form_value }}" />
 	<input type="hidden" name="item_name" value="{{ item_name|str_form_value }}" />
 	<input type="hidden" name="item_number" value="{{ item_number|str_form_value }}" />
-	<input type="hidden" name="amount" value="{{ amount|str_form_value }}" />
 	<input type="hidden" name="page_style" value="Primary" />
 	<input type="hidden" name="first_name" value="{{ first_name|str_form_value }}">
 	<input type="hidden" name="last_name" value="{{ last_name|str_form_value }}">
@@ -42,5 +52,14 @@
 	<input type="hidden" name="lc" value="{{ lc|upper|str_form_value }}" />
 	<input type="hidden" name="email" value="{{ email|str_form_value }}" />
 	{{ additional_fields }}
+	{% if enable_paypal_iframe %}
 	<input type="image" src="{{ paypal_bouton_src|str_form_value }}"  name="submit" alt="{{ paypal_button_alt|str_form_value }}" />
+	{% else %}
+		<input type="hidden" name="template" value="templateD">
+	{% endif %}
 </form>
+{% if enable_paypal_iframe %}
+<script type="text/javascript">
+	document.form_iframe.submit();
+</script>
+{% endif %}

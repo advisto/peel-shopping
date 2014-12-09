@@ -1,17 +1,17 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-#}<h1 class="page_title">{{ compte }}</h1>
+// $Id: compte.tpl 43061 2014-10-30 16:54:39Z sdelaporte $
+#}<h1 property="name" class="page_title">{{ compte }}</h1>
 <div class="page_content">
 <p>{{ msg_support }}</p>
 	{% if est_identifie %}
@@ -41,11 +41,21 @@
 		- <a href="{{ ads.buy_href|escape('html') }}">{{ ads.STR_MODULE_ANNONCES_BUY_GOLD_ADS }}</a><br />
 		{% endif %}
 		
+		{% if page_agenda is defined %}
+		<h3>{{ STR_MODULE_AGENDA_TITRE }}</h3>
+		- <a href="{{ page_agenda.href|escape('html') }}">{{ page_agenda.txt }}</a><br />
+		{% endif %}
+
+		{% if page_creation_produit is defined %}
+		<h3>{{ STR_CATALOGUE }}</h3>
+		- <a href="{{ page_creation_produit.href|escape('html') }}">{{ page_creation_produit.txt }}</a><br />
+		{% endif %}
+		
 		{% if (shop) %}
 		<h3>{{ shop.header }}</h3>
 		- <a href="{{ shop.href|escape('html') }}">{{ shop.txt }}</a><br />
 		{% endif %}
-		
+
 		<h3>{{ change_params.header }}</h3>
 		- <a href="{{ change_password.href|escape('html') }}">{{ change_password.txt }}</a><br />
 		- <a href="{{ change_params.href|escape('html') }}">{{ change_params.txt }}</a><br />
@@ -98,7 +108,7 @@
 		
 		{% if (gift) %}
 		<br />
-		<h3>{{ gift.header }}</h3>
+		<h3>{{ gift.header }}: {{ gift.gifts_points }}</h3>
 		- <a href="{{ gift.href|escape('html') }}">{{ gift.txt }}</a><br />
 		{% endif %}
 		
@@ -113,10 +123,22 @@
 		- <a href="{{ affiliate.account_sell_href|escape('html') }}">{{ affiliate.STR_AFFILIATE_ACCOUNT_SELL }}</a><br />
 		{% endif %}
 		
+		{% if sauvegarde_recherche is defined %}
+			<h3>{{ STR_MODULE_SAUVEGARDE_SEARCH_LIST }}</h3>
+			- <a href="{{ sauvegarde_recherche.href|escape('html') }}">{{ sauvegarde_recherche.txt }}</a><br />
+		{% endif %}
+
 		{% if (profile) %}
 		<h3>{{ profile.header }}</h3>
+		{{ profile.content }}
 		- <a href="{{ profile.href|escape('html') }}">{{ profile.txt }}</a><br />
 		{% endif %}
+ 		
+		{% if disable_account is defined %}
+		<br />
+		- <a data-confirm="{{ confirm_disable_account }}" href="{{ disable_account_href|escape('html') }}">{{ disable_account_text }}</a><br /><br />
+		{% endif %}
+
 		{% if (user_alerts) %}
 		- <a href="{{ user_alerts.href|escape('html') }}">{{ user_alerts.txt }}</a><br />
 		{% endif %}

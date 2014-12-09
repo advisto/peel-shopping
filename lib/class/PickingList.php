@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: PickingList.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: PickingList.php 43121 2014-11-05 17:44:12Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require_once($GLOBALS['dirroot'] . "/lib/class/pdf/tcpdf.php");
  * @package PEEL
  * @author oodorizzi
  * @copyright Copyright (c) 2010
- * @version $Id: PickingList.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: PickingList.php 43121 2014-11-05 17:44:12Z sdelaporte $
  * @access public
  */
 class PickingList extends TCPDF {
@@ -92,9 +92,10 @@ class PickingList extends TCPDF {
 		if (is_numeric($statut)) {
 			$this->PickingList_title .= " ".$GLOBALS["STR_ADMIN_PICKING_GENERATED_WITH_DELIVERY_STATUS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": " . String::strtoupper(get_delivery_status_name($statut));
 		}
-		$sql = "SELECT c.*
+		$sql = "SELECT c.*, sp.technical_code AS statut_paiement
 			FROM peel_commandes c
-			WHERE c.o_timestamp>='" . nohtml_real_escape_string($dateAdded1) . "' AND c.o_timestamp<='" . nohtml_real_escape_string($dateAdded2) . "' " . (is_numeric($statut)?" AND c.id_statut_livraison = '" . intval($statut) . "'":"") . " AND id_ecom = '" . intval($GLOBALS['site_parameters']['id']) . "'
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			WHERE c.o_timestamp>='" . nohtml_real_escape_string($dateAdded1) . "' AND c.o_timestamp<='" . nohtml_real_escape_string($dateAdded2) . "' " . (is_numeric($statut)?" AND c.id_statut_livraison = '" . intval($statut) . "'":"") . " AND " . get_filter_site_cond('commandes', 'c') . "
 			ORDER BY c.o_timestamp";
 		$query = query($sql);
 
@@ -146,7 +147,7 @@ class PickingList extends TCPDF {
 			$this->SetTextColor(0, 0, 0); #Noir*/
 			$this->SetFont("Helvetica", "B", 10);
 			$this->SetXY($x1 + 2, $y1 + 1.5);
-			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER_NAME"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$id."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
+			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER_NAME"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$commande['order_id']."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
 
 			$y1 = $y1 + 11;
 			$this->SetXY($x1 + 2, $y1);
@@ -203,7 +204,7 @@ class PickingList extends TCPDF {
 						$this->SetFillColor(255, 255, 255);
 						// $this->Rect($x1, $y1, $w, 11 + 6 * (count($product_infos_array) - $i), 'DF');
 						$this->SetXY($x1 + $x_margin, $y1 + 1);
-						$this->Cell(0, 4, '... '.$GLOBALS["STR_ADMIN_PICKING_GENERATED_NEW_PAGE_FOR_ORDER"].' ' . $id . ' ...');
+						$this->Cell(0, 4, '... '.$GLOBALS["STR_ADMIN_PICKING_GENERATED_NEW_PAGE_FOR_ORDER"].' ' . $commande['order_id'] . ' ...');
 						$y1 = $y1 + 4;
 					}
 					$i++;
@@ -216,4 +217,3 @@ class PickingList extends TCPDF {
 	}
 }
 
-?>

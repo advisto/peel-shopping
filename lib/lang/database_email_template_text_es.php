@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_es.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -69,6 +69,7 @@ Detalle del mensaje [DATE]:
 Nombre: [NOM_FAMILLE]
 Nombre: [PRENOM]
 Empresa: [SOCIETE]
+Dirección : [ADRESSE]
 Tel: [TELEPHONE]
 E-mail: [EMAIL]
 Disponibilidad: [DISPO]
@@ -83,7 +84,7 @@ IP: [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hola,
 
-Un pedido con el número [ORDER_ID] ha sido registrado [WWWROOT]",
+Un pedido con el número [ORDER_ID] ha sido registrado [WWWROOT]/",
   "admin_info_payment_credit_card_3_times" => "Hola,
 
 Un pedido con pago en tres veces con el número [ORDER_ID] ha sido registrado [SITE]
@@ -244,14 +245,14 @@ Comentarios adicionales:
 
 [EMAIL_ACHETEUR] quería darle un regalo!
 
-Para calificar, simplemente ingrese al sitio [WWWROOT] y utilice el código [CHECK_NAME].
+Para calificar, simplemente ingrese al sitio [WWWROOT]/ y utilice el código [CHECK_NAME].
 
 A continuación, recibirá un descuento del [REMISE_VALEUR] por una compra mínima de [MONTANT_MIN] HT por su pedido.",
   "cree_cheque_cadeau_friend" => "Hola,
 
 Su amigo [PRENOM] [NOM_FAMILLE] quería darle un regalo en el sitio [SITE].
 
-Para calificar, simplemente ingrese al sitio [WWWROOT] el código y utilice [CODE].
+Para calificar, simplemente ingrese al sitio [WWWROOT]/ el código y utilice [CODE].
 
 A continuación, recibirá un descuento del [PRIX] en su pedido.
 ",
@@ -263,7 +264,7 @@ El código de descuento [CODE] con el CHEQUE REGALO módulo ha sido creado  en [
 
 [SITE] ofrece un regalo de 30 días de [MONTANT].
 
-Para calificar, simplemente ingrese al sitio [WWWROOT] el código y utilice su código [CODE].
+Para calificar, simplemente ingrese al sitio [WWWROOT]/ el código y utilice su código [CODE].
 ",
   "cree_cheque_cadeau_client_admin" => "Hola,
 
@@ -288,7 +289,7 @@ Detalle del mensaje [DATE]
 Detalle del mensaje [DATE].
 
 [PRENOM] [NOM_FAMILLE] le envía a su lista de deseos [GIFTLIST_NAME]:
-[WWWROOT] / modules / listecadeau / voir.php?email_liste=[URL_LISTE_CADEAU]
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS] ",
   "parrainage" => "Hola,
@@ -296,7 +297,7 @@ Detalle del mensaje [DATE].
 [PSEUDO] le invita a descubrir el sitio [SITE] y recibir un crédito de [REBATE] en su primer pedido validando su cuenta cliente.
 
 Haga clic en el siguiente enlace para validar su cuenta:
- [WWWROOT] / modules / patrocinio / inscription.php?email=[EMAIL_FILLEUL]&code=[MDP]&id=[ID_UTILISATEUR]
+[WWWROOT]/modules/parrainage/inscription.php?email=[EMAIL_FILLEUL]&code=[MDP]&id=[ID_UTILISATEUR]
 
 Su nombre de usuario: [EMAIL_FILLEUL]
 Contraseña: [MDP]
@@ -324,12 +325,12 @@ Este correo electrónico está diseñado para informarle acerca de la seguridad 
 
 El servicio al cliente
 [SITE]
-[WWWROOT] ",
+[WWWROOT]/ ",
   "cree_cheque_cadeau_client_type1" => "Hola,
 
 [SITE] le ofrece un cheque regalo válido durante 30 días de un importe de [PERCENT].
 
-Para calificar, simplemente ingrese al sitio [WWWROOT] y utilice su código [CODE].
+Para calificar, simplemente ingrese al sitio [WWWROOT]/ y utilice su código [CODE].
 ",
   "warn_admin_user_subscription" => "El [DATE]
 
@@ -376,7 +377,7 @@ Tras la recepción de sus artículos, validaremos el reembolso de éstos. ",
 
 Nota: Si ha hecho su pago y ha recibido una confirmación de pago, por favor ignore este email porque su pago pronto será validado manualmente.
 
-Le escribimos en lo que concierne el pedido que ha tratado de pagar recientemente sobre [WWWROOT]
+Le escribimos en lo que concierne el pedido que ha tratado de pagar recientemente sobre [WWWROOT]/
 
 El contenido de su pedido: [PRODUCT_NAME]
 La cantidad total de su pedido: [TOTAL_AMOUNT]
@@ -426,7 +427,7 @@ Ciudad: [VILLE]
 País: [PAYS]
 Sitio web: [SITE_WEB]
 
-Si esta información es inexacta, por favor, actualice su sesión en su cuenta de usuario en [WWWROOT] / users / change_params.php
+Si esta información es inexacta, por favor, actualice su sesión en su cuenta de usuario en [WWWROOT]/utilisateurs/change_params.php
 
 Si usted olvida su contraseña, gracias por utilizar la herramienta de recuperación disponible en el siguiente enlace: [WWWROOT]/utilisateurs/change_params.php
 
@@ -437,7 +438,6 @@ Para más información, póngase en contacto con nosotros.",
 
 Gracias por su suscripción al boletín de [SITE_NAME]. Usted recibirá un boletín semanal a la dirección [EMAIL].
 
-Pronto en [WWWROOT]."
+Pronto en [WWWROOT]/."
 );
 
-?>

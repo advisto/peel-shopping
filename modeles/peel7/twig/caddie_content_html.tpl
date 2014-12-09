@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: caddie_content_html.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<div class="totalcaddie">
 	{% if is_empty %}
 	<p>{{ STR_EMPTY_CADDIE }}</p>
@@ -26,6 +26,7 @@
 			<div class="row">
 				{{ products_summary_table }}
 				<div class="col-sm-6">
+				{% if enable_code_promo %}
 					<div class="code_promo">
 					{% if (code_promo) %}
 						<div class="input-group">
@@ -45,12 +46,13 @@
 							<a href="#" onclick="return frmsubmit('recalc')"{% if (shipping_text) %} data-toggle="tooltip" title="{{ shipping_text|str_form_value }}"{% endif %} class="tooltip_link btn btn-success"><span class="glyphicon glyphicon-refresh"></span> {{ STR_UPDATE }}</a>
 						</div>
 					</div>
+				{% endif %}
 				{% if is_mode_transport %}
 					<div class="livraison well">
 						<fieldset>
 							<legend>{{ STR_DELIVERY }}</legend>
 							<div id="choix_zone">
-								<p class="caddie_bold">{{ STR_SHIPPING_ZONE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: {{ zone_error }}
+								<p class="caddie_bold">{{ STR_SHIPPING_ZONE }}&nbsp;<span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: {{ zone_error }}
 									<select class="form-control" name="pays_zone" onchange="return frmsubmit('recalc')">
 										<option value="">{{ STR_SHIP_ZONE_CHOOSE }}</option>
 										{% for zo in zone_options %}
@@ -96,7 +98,11 @@
 									</p>
 								{% else %}
 									<p class="center">
+										{% if recommanded_product_on_cart_page %}
+										{{ recommanded_product_on_cart_page }}
+										{% else %}
 										<button type="submit" class="tooltip_link btn btn-lg btn-primary"{% if (shipping_text) %} data-toggle="tooltip" title="{{ shipping_text|str_form_value }}"{% endif %} onclick="return frmsubmit('commande')">{{ STR_ORDER }} <span class="glyphicon glyphicon-chevron-right"></span></button>
+										{% endif %}
 									</p>
 								{% endif %}
 							</td>

@@ -2,13 +2,13 @@ Conditions générales d'utilisation du service PEEL
 --------------------------------------------------
 
 Les conditions générales quoi sont applicables sont celles présentes sur :
-http://www.peel.fr/lire/informations-58/conditions-generales-d-039-utilisation-1008.html
+https://www.peel.fr/lire/informations-58/conditions-generales-d-utilisation-1008.html
 
 Licence de PEEL Shopping :
-http://www.peel.fr/lire/licence-gpl-70.html
+https://www.peel.fr/lire/licence-gpl-pour-peel-shopping-70.html
 
 Licence des Modules additionnels vendus par PEEL :
-http://www.peel.fr/lire/licence-commerciale-71.html
+https://www.peel.fr/lire/licence-commerciale-71.html
 
 Siège Social de PEEL :
 Advisto SAS - Service PEEL
@@ -22,4 +22,4 @@ www.peel.fr
 Tél : 01 75 43 67 97
 RCS : 472 205 452 - Code APE 6201Z
 CNIL - déclaration No. 1045069
-PEEL ® est une marque déposée de Advisto SAS - Reproduction interdite - Tous droits réservés PEEL 2004-2013
+PEEL ® est une marque déposée de Advisto SAS - Reproduction interdite - Tous droits réservés PEEL 2004-2014

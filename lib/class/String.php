@@ -1,26 +1,29 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: String.php 43197 2014-11-13 17:30:19Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
+
+$GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
+
 /**
  * String : this class allows full compatibility with utf8 by using mbstring if available
  *
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: String.php 43197 2014-11-13 17:30:19Z gboussin $
  * @access public
  */
 class String {
@@ -50,10 +53,14 @@ class String {
 	 */
 	static function strpos($haystack, $needle, $offset = 0)
 	{
-		if (function_exists('mb_strpos')) {
-			return mb_strpos($haystack, $needle, $offset);
+		if($needle!=='' && $needle!== null) {
+			if (function_exists('mb_strpos')) {
+				return mb_strpos($haystack, $needle, $offset);
+			} else {
+				return strpos($haystack, $needle, $offset);
+			}
 		} else {
-			return strpos($haystack, $needle, $offset);
+			return false;
 		}
 	}
 
@@ -127,10 +134,14 @@ class String {
 	 */
 	static function strtolower($string)
 	{
-		if (function_exists('mb_strtolower')) {
-			return mb_strtolower($string);
+		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
+			if (function_exists('mb_strtolower')) {
+				return mb_strtolower($string);
+			} else {
+				return strtolower($string);
+			}
 		} else {
-			return strtolower($string);
+			return $string;
 		}
 	}
 
@@ -142,10 +153,14 @@ class String {
 	 */
 	static function strtoupper($string)
 	{
-		if (function_exists('mb_strtoupper')) {
-			return mb_strtoupper($string);
+		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
+			if (function_exists('mb_strtoupper')) {
+				return mb_strtoupper($string);
+			} else {
+				return strtoupper($string);
+			}
 		} else {
-			return strtoupper($string);
+			return $string;
 		}
 	}
 
@@ -157,10 +172,14 @@ class String {
 	 */
 	static function ucfirst($string)
 	{
-		if (function_exists('mb_ucfirst')) {
-			return mb_ucfirst($string);
+		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
+			if (function_exists('mb_ucfirst')) {
+				return mb_ucfirst($string);
+			} else {
+				return String::strtoupper(String::substr($string, 0, 1)) . String::substr($string, 1);
+			}
 		} else {
-			return String::strtoupper(String::substr($string, 0, 1)) . String::substr($string, 1);
+			return $string;
 		}
 	}
 
@@ -322,16 +341,23 @@ class String {
 	static function convert_accents($string, $convert_umlaut = false, $strip_umlaut = true)
 	{
 		$string = str_replace(array('à', 'á', 'â', 'ã', 'å'), 'a', $string);
+		$string = str_replace(array('À', 'Á', 'Â', 'Ã', 'Å'), 'A', $string);
 		$string = str_replace(array('è', 'é', 'ê', 'ë'), 'e' , $string);
+		$string = str_replace(array('È', 'É', 'Ê', 'Ë'), 'E' , $string);
 		$string = str_replace(array('ì', 'í', 'î', 'ï'), 'i' , $string);
+		$string = str_replace(array('Ì', 'Í', 'Î', 'Ï'), 'I' , $string);
 		$string = str_replace(array('ò', 'ó', 'ô', 'õ', 'ø'), 'o' , $string);
+		$string = str_replace(array('Ò', 'Ó', 'Ô', 'Õ', 'Ø'), 'O' , $string);
 		$string = str_replace(array('ù', 'ú', 'û'), 'u' , $string);
-		$string = str_replace(array('æ', 'œ', 'ý', 'ÿ', 'ç', 'ß', 'ñ'),
-			array('ae', 'oe', 'y', 'y', 'c', 'ss', 'n'), $string);
+		$string = str_replace(array('Ù', 'Ú', 'Û'), 'U' , $string);
+		$string = str_replace(array('æ', 'œ', 'ý', 'ÿ', 'ç', 'ß', 'ñ'), array('ae', 'oe', 'y', 'y', 'c', 'ss', 'n'), $string);
+		$string = str_replace(array('Æ', 'Œ', 'Ý', 'Ÿ', 'Ç', 'ß', 'Ñ'), array('AE', 'OE', 'Y', 'Y', 'C', 'SS', 'N'), $string);
 		if ($convert_umlaut) {
 			$string = str_replace(array('ä', 'ö', 'ü'), array('ae', 'oe', 'ue'), $string);
+			$string = str_replace(array('Ä', 'Ö', 'Ü'), array('AE', 'OE', 'UE'), $string);
 		} elseif ($strip_umlaut) {
 			$string = str_replace(array('ä', 'ö', 'ü'), array('a', 'o', 'u'), $string);
+			$string = str_replace(array('Ä', 'Ö', 'Ü'), array('A', 'O', 'U'), $string);
 		}
 		return $string;
 	}
@@ -521,7 +547,7 @@ class String {
 	 */
 	static function strip_tags($string, $allowed_tags = null)
 	{
-		return strip_tags(str_replace(array('    ', '   ', '  '), ' ', str_replace(array('<br />', '<br>', '</p>', '</td>', '</tr>', '</div>', '</h1>', '</h2>', '</h3>', '</h4>'), ' ', $string)), $allowed_tags);
+		return strip_tags(str_replace(array('    ', '   ', '  '), ' ', str_replace(array('<br />', '<br>', '</p>', '</td>', '</tr>', '</div>', '</h3>', '</h4>'), ' ', str_replace(array('<h1', '</h1>','<h2', '</h2>'), array(' - <h1', '</h1> - ', ' - <h2', '</h2> - '), $string))), $allowed_tags);
 	}
 
 	/**
@@ -538,7 +564,8 @@ class String {
 		$has_no_table = String::strpos($string, '&lt;table') === false && String::strpos($string, '<table') === false;
 		$has_no_ul = String::strpos($string, '&lt;ul') === false && String::strpos($string, '<ul') === false;
 		$has_no_script = String::strpos($string, '&lt;script') === false && String::strpos($string, '<script') === false;
-		if ($has_no_br && $has_no_p && $has_no_table && $has_no_ul && $has_no_script) {
+		$has_no_div = String::strpos($string, '&lt;div') === false && String::strpos($string, '<div') === false;
+		if ($has_no_br && $has_no_p && $has_no_table && $has_no_ul && $has_no_script && $has_no_div) {
 			$string = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), "\n", $string));
 		}
 		return $string;
@@ -618,10 +645,10 @@ class String {
 	 * @param string $additional_elements
 	 * @param integer $max_caracters_length On coupe le texte si le nombre de caractères dépasse la valeur autorisée ads_max_caracters_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - En cas de langue avec beaucoup de caractères spéciaux, cette valeur doit être fortement inférieure à la taille du champ en base de données
 	 * @param integer $max_octets_length On coupe sans ménagement le texte si la taille en octets dépasse la valeur autorisée ads_max_octets_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - ads_max_caracters_length doit être inférieur à la taille du champs en base de données en laissant la place pour les balises de cloture (champ TEXT = 65 536 octets)
-
+	 * @param integer $max_word_and_url_length
 	 * @return
 	 */
-	static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000)
+	static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000, $max_word_and_url_length = 100)
 	{
 		require_once($GLOBALS['dirroot'] . "/lib/fonctions/htmlawed.php");
 		if (empty($text)) {
@@ -641,8 +668,8 @@ class String {
 					'... ', '----- ', '_____ ', ': ', ' ', ''),
 				$text));
 		// On raccourcit tout ce qui dépasse 100 caractères de long sans espace : ce n'est pas normal car plus haut, on a ajouté des espaces derrières les ; et autres ...
-		$text = String::str_shorten_words($text, 100, ' ');
-		$text = str_replace(': //', '://', $text);
+		$text = String::str_shorten_words($text, $max_word_and_url_length, ' ');
+		$text = str_replace(array(': //', ': 808'), array('://', ':808'), $text);
 		if(!empty($max_caracters_length) && String::strlen(vb($text)) > $max_caracters_length * 1.1) {
 			// On coupe le texte si il dépasse la valeur autorisée de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes
 			$text = String::substr($text, 0, $max_caracters_length);
@@ -655,7 +682,7 @@ class String {
 		// $html_config['tidy']=1;
 		// ATTENTION : clean_ms_char corrompt le UTF8, donc il ne faut pas l'appliquer (si c'était compatible on aurait mis la valeur 2)
 		$html_config['clean_ms_char'] = 0;
-		$html_config['schemes'] = 'href: ftp, http, https, mailto; classid:clsid; *:http, https';
+		$html_config['schemes'] = 'href: ftp, http, https, mailto; classid:clsid; *:http, https, data';
 		// $html_config['keep_bad']=1;
 		if (!empty($safe)) {
 			$html_config['safe'] = 1;
@@ -744,13 +771,15 @@ class String {
 				$text_clean = $new_text_clean . String::substr($text_clean, $pointer, $text_end - $pointer);
 			}
 		}
-		$text_clean = str_replace(array('td align="middle"', 'Verdana,;', '</td><', '</tr><', '<br /><', "\n\n\n\n", "\n\n\n", "\n\n", "\r\n\r\n\r\n", "\r\n\r\n", "\r\n", 'font-size: xx-large', 'font size="9"', 'font size="8"', 'font size="7"', ' style=""', ' align=""'),
-			array('td align="center"', 'Verdana;', "</td>\n<", "</tr>\n<", "<br />\n<", "\n", "\n", "\n", "\n", "\n", "\n", 'font-size: x-large', 'font size="6"', 'font size="6"', 'font size="6"', '', ''), $text_clean);
+		$text_clean = str_replace(array(' alt="alt"', 'td align="middle"', 'Verdana,;', '</td><', '</tr><', '<br /><', "\n\n\n\n", "\n\n\n", "\n\n", "\r\n\r\n\r\n", "\r\n\r\n", "\r\n", 'font-size: xx-large', 'font size="9"', 'font size="8"', 'font size="7"', ' style=""', ' align=""'),
+			array(' alt=""', 'td align="center"', 'Verdana;', "</td>\n<", "</tr>\n<", "<br />\n<", "\n", "\n", "\n", "\n", "\n", "\n", 'font-size: x-large', 'font size="6"', 'font size="6"', 'font size="6"', '', ''), $text_clean);
 		return $text_clean;
 	}
 
 	/**
-	 * Fonction de compatibilité avec de vieilles versions de PEEL ou du contenu qui vient d'ailleurs
+	 * Ouvre un fichier
+	 * 
+	 * C'est une fonction de compatibilité avec du contenu qui n'est pas en UTF8 sans BOM comme il devrait être
 	 * De manière générale, tout fichier manipulé par PEEL est censé avoir un nom encodé en UTF8, pour gérer toute langue internationale, ce que ne peut pas faire ISO. 
 	 * Néanmoins en cas d'import de fichiers par FTP manuel, ou d'URL donnée avec lien vers un autre site, les fichiers risquent d'être mis en ISO.
 	 * Il est préférable de mettre le mode de compatibilité $try_filename_in_iso_8859_if_file_not_found = true
@@ -793,6 +822,68 @@ class String {
 	}
 
 	/**
+	 * Renvoie le contenu d'un fichier
+	 * 
+	 * De manière générale, tout fichier manipulé par PEEL est censé avoir un nom encodé en UTF8, pour gérer toute langue internationale, ce que ne peut pas faire ISO. 
+	 * Néanmoins en cas d'import de fichiers par FTP manuel, ou d'URL donnée avec lien vers un autre site, les fichiers risquent d'être mis en ISO.
+	 * Il est préférable de mettre le mode de compatibilité $try_filename_in_iso_8859_if_file_not_found = true
+	 *
+	 * @param string $filename
+	 * @param boolean $force_filename_in_iso_8859
+	 * @param boolean $try_filename_in_iso_8859_if_file_not_found
+	 * @return
+	 */
+	static function file_get_contents_utf8($filename, $force_filename_in_iso_8859 = false, $try_filename_in_iso_8859_if_file_not_found = true)
+	{
+		if($force_filename_in_iso_8859 && String::detect_utf8_characters($filename)){
+			// On ne veut pas que le nom soit en UTF8
+			$filename = String::convert_encoding($filename, 'iso-8859-1', GENERAL_ENCODING);
+		}
+		$file = @file_get_contents($filename);
+		if(empty($file) && $try_filename_in_iso_8859_if_file_not_found){
+			// Si le fichier a été enregistré non pas par l'application PEEL Shopping mais par un tiers, qui n'a pas mis le nom en UTF8
+			$filename = String::convert_encoding($filename, 'iso-8859-1', GENERAL_ENCODING);
+			$file = @file_get_contents($filename);
+		}
+		$bom = substr($file, 0, 3);
+		// On retire le BOM en début de fichier UTF8 si on en trouve un
+		// Le BOM est détecté avec pack("CCC", 0xef, 0xbb, 0xbf) ou "\xEF\xBB\xBF" ou b'\xEF\xBB\xBF' depuis PHP 5.2.1
+		if ($bom == "\xEF\xBB\xBF") {
+			// On a trouvé un BOM, on le retire donc
+			$file = substr($file, 3);
+		}
+		return $file;
+	}
+		
+	/**
+	 * Tests for end-of-file on a file pointer
+	 * In contrary of the default feof function, it returns true if $handle === false, and if timeout in feof
+	 * It wan be safely used with while (!String::feof($file)) { ... }
+	 *
+	 * @param mixed $handle
+	 * @return
+	 */
+	static function feof($handle) {
+		static $timeout;
+		if($handle === false) {
+			return true;
+		}		
+		// gestion des timeouts : feof renvoie false si il y a eu un timeout, et on change cela en true pour pouvoir faire des tests simples ensuite avec des while(!String::feof($file)) { ... }
+		if(!isset($timeout)) {
+			$timeout = @ini_get('default_socket_timeout');
+		}
+		if(empty($timeout)) {
+			$timeout = 10;
+		}
+		$start = microtime(true);
+		$result = feof($handle);
+		if(!$result && (microtime(true) - $start >= $timeout)) {
+			return true;
+		}
+		return $result;
+	}
+
+	/**
 	 * Returns string compatible with Apache without the AllowEncodedSlashes directive ON => avoids systematic 404 error when %2F in URL (when it is present outside of GET)
 	 *
 	 * @param string $string The input string.
@@ -825,4 +916,3 @@ class String {
 	}
 }
 
-?>

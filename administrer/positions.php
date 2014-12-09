@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: positions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: positions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_POSITIONS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_POSITIONS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 affiche_liste_position(vb($_GET['catid']));
@@ -29,7 +29,7 @@ switch (vb($_REQUEST['mode'])) {
 			foreach($_POST['id'] as $i => $prodid) {
 				query("UPDATE peel_produits
 					SET position = '" . intval($_POST['position'][$i]) . "'
-					WHERE id = '" . intval($prodid) . "'");
+					WHERE id = '" . intval($prodid) . "' AND " . get_filter_site_cond('produits', null, true) . "");
 			}
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_POSITIONS_MSG_UPDATED_OK']))->fetch();
 		}
@@ -62,7 +62,7 @@ function affiche_formulaire_modif_position($catid)
 	$sql = "SELECT p.*
 		FROM peel_produits p
 		INNER JOIN peel_produits_categories pc ON pc.categorie_id = '" . intval($catid) . "'
-		WHERE pc.produit_id = p.id
+		WHERE pc.produit_id = p.id AND " . get_filter_site_cond('produits', 'p', true) . "
 		ORDER BY position";
 	$resProd = query($sql);
 
@@ -107,9 +107,8 @@ function maj_position($id, $frm, $img)
  */
 function affiche_liste_position($categorie_id)
 {
-	construit_arbo_categorie($categorie_options, $categorie_id);
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_position.tpl');
-	$tpl->assign('categorie_options', $categorie_options);
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories',  $categorie_id, 'option', '&nbsp;&nbsp;', null));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_POSITIONS_LIST_TITLE', $GLOBALS['STR_ADMIN_POSITIONS_LIST_TITLE']);
 	$tpl->assign('STR_ADMIN_POSITIONS_LIST_EXPLAIN', $GLOBALS['STR_ADMIN_POSITIONS_LIST_EXPLAIN']);
@@ -117,4 +116,3 @@ function affiche_liste_position($categorie_id)
 	echo $tpl->fetch();
 }
 
-?>

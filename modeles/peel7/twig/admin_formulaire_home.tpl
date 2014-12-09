@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_home.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_home.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -31,6 +31,28 @@
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+ 		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:<br /></td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+	{% if (STR_ADMIN_SITE_COUNTRY) %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_SITE_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				{{ site_country_checkboxes }}
+			</td>
+		</tr>
+	{% endif %}
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
 		<tr>
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -44,35 +66,9 @@
 		<tr>
 			<td>{{ STR_ADMIN_HTML_PLACE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="emplacement" value="header"{% if emplacement == 'header' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_HEADER }}<br />
-				<input type="radio" name="emplacement" value="footer"{% if emplacement == 'footer' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_FOOTER }}<br />
-				<input type="radio" name="emplacement" value="home"{% if emplacement == 'home' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_HOME }}<br />
-				<input type="radio" name="emplacement" value="home_bottom" id="home_bottom"{% if emplacement == 'home_bottom' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_HOME_BOTTOM }}<br />
-				<input type="radio" name="emplacement" value="conversion_page"{% if emplacement == 'conversion_page' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_CONVERSION_PAGE }}<br />
-				<input type="radio" name="emplacement" value="footer_link"{% if emplacement == 'footer_link' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_FOOTER_LINK }}<br />
-				<input type="radio" name="emplacement" value="interstitiel"{% if emplacement == 'interstitiel' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_INTERSTITIEL }}<br />
-				<input type="radio" name="emplacement" value="error404" id="emplacement_error404"{% if emplacement == 'error404' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_ERROR404 }}<br />
-				<input type="radio" name="emplacement" value="scrolling" id="emplacement_scrolling"{% if emplacement == 'scrolling' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_SCROLLING }}<br />
-				<input type="radio" name="emplacement" value="contact_page" id="contact_page"{% if emplacement == 'contact_page' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_CONTACT_PAGE }}<br />
-				{% if is_carrousel_allowed %}
-				<input type="radio" name="emplacement" value="entre_carrousel"{% if emplacement == 'entre_carrousel' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_CARROUSEL_TOP }}<br />
-				{% endif %}
-				{% if is_reseller_allowed %}
-				<input type="radio" name="emplacement" value="devenir_revendeur"{% if emplacement == 'devenir_revendeur' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_BECOME_RESELLER }}<br />
-				{% endif %}
-				{% if is_partenaires_allowed %}
-				<input type="radio" name="emplacement" value="partner"{% if emplacement == 'partner' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_PARTNER }}<br />
-				{% endif %}
-				{% if is_reseller_map_allowed %}
-				<input type="radio" name="emplacement" value="reseller_map"{% if emplacement == 'reseller_map' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_RESELLER_MAP }}<br />
-				{% endif %}
-				{% if is_annonce_allowed %}
-				<input type="radio" name="emplacement" value="home_ad"{% if emplacement == 'home_ad' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_ADS_TOP }}<br />
-				<input type="radio" name="emplacement" value="top_create_ad"{% if emplacement == 'top_create_ad' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_TOP_CREATE_AD }}<br />
-				{% endif %}
-				{% if is_parrain_allowed %}
-				<input type="radio" name="emplacement" value="intro_parrainage"{% if emplacement == 'intro_parrainage' %} checked="checked"{% endif %} /> {{ STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE }}<br />
-				{% endif %}
+				{% for e_code,e_name in emplacement_array}
+					<input type="radio" name="emplacement" value="{$e_code}"{if $emplacement == $e_code} checked="checked"{/if} /> {$e_name}<br />
+				{% endfor %}
 			</td>
 		</tr>
 		<tr>

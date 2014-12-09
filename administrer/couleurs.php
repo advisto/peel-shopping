@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: couleurs.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: couleurs.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_COULEURS_COLORS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_COULEURS_COLORS_TITLE'];
 
 $output = '';
 $frm = $_POST;
@@ -114,7 +114,7 @@ function affiche_formulaire_modif_couleur($id, &$frm)
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
 		$qid = query("SELECT *
 			FROM peel_couleurs
-			WHERE id = " . intval($id));
+			WHERE id = " . intval($id) . " AND " .  get_filter_site_cond('couleurs', null, true));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_COULEURS_ERR_COLOR_NOT_FOUND']))->fetch();
@@ -144,9 +144,11 @@ function affiche_formulaire_couleur(&$frm)
 			'nom' => $frm['nom_' . $lng]
 			);
 	}
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('position', $frm["position"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
@@ -166,11 +168,11 @@ function supprime_couleur($id)
 {
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COULEURS_MSG_COLOR_DELETED'], get_color_name($id))))->fetch();
 	/* Efface la couleur */
-	query("DELETE FROM peel_couleurs WHERE id = '" . intval($id) . "'");
+	query("DELETE FROM peel_couleurs WHERE id = '" . intval($id) . "' AND " .  get_filter_site_cond('couleurs', null, true));
 	/* Efface cette couleur de la table produits_couleur */
 	query("DELETE FROM peel_produits_couleurs WHERE couleur_id = '" . intval($id) . "'");
 	/* Supprime le stock correspondant */
-	if (is_stock_advanced_module_active()) {
+	if (check_if_module_active('stock_advanced')) {
 		query("DELETE FROM peel_stocks WHERE couleur_id = '" . intval($id) . "'");
 	}
 }
@@ -184,14 +186,16 @@ function supprime_couleur($id)
 function insere_couleur($frm)
 {
 	$sql = "INSERT INTO peel_couleurs (
-			position
+			site_id
+			, position
 			";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
 	) VALUES (
-		'" . intval($frm['position']) . "'";
+		'" . intval($frm['site_id']) . "'
+		,'" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -211,11 +215,12 @@ function maj_couleur($id, $frm)
 {
 	/* Met à jour la table couleur */
 	$sql = "UPDATE peel_couleurs
-			SET position = '" . intval($frm['position']) . "'";
+			SET site_id = '" . intval($frm['site_id']) . "'
+			, position = '" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= "WHERE id = '" . intval($id) . "'";
+	$sql .= "WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('couleurs', null, true);
 	query($sql);
 }
 
@@ -228,6 +233,7 @@ function affiche_liste_couleur()
 {
 	$sql = "SELECT c.*
 		FROM peel_couleurs c
+		WHERE " .  get_filter_site_cond('couleurs', 'c', true) . "
 		ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
 	$result = query($sql);
 
@@ -238,18 +244,21 @@ function affiche_liste_couleur()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
-				'position' => $ligne['position']
+				'position' => $ligne['position'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
 	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=couleurs';
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_COULEURS_COLORS_TITLE', $GLOBALS['STR_ADMIN_COULEURS_COLORS_TITLE']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
@@ -263,4 +272,3 @@ function affiche_liste_couleur()
 	return $tpl->fetch();
 }
 
-?>

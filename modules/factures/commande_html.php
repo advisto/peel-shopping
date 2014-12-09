@@ -1,36 +1,40 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an		|
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: commande_html.php 43487 2014-12-02 17:37:29Z sdelaporte $
 include("../../configuration.inc.php");
-
-if (!is_module_factures_html_active() || is_user_bot()) {
+if(!empty($GLOBALS['site_parameters']['require_login_for_html_bill'])) {
+	necessite_identification();
+}
+if (!check_if_module_active('factures', '/commande_html.php') || is_user_bot()) {
 	// This module is not activated or this user is a bot => we redirect to the homepage
 	redirect_and_die($GLOBALS['wwwroot'] . "/");
 }
 
 /* Charge les détails d'une commande et les affiche */
-
+$auto_refresh = false;
 if (!empty($_GET['code_facture'])) {
 	$code_facture = $_GET['code_facture'];
-	$sql = 'SELECT *
-		FROM peel_commandes
-		WHERE HEX(code_facture) = HEX("' . nohtml_real_escape_string($code_facture) . '")';
+	$sql = 'SELECT c.*, sp.technical_code AS statut_paiement
+		FROM peel_commandes c
+		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . '
+		WHERE HEX(c.code_facture) = HEX("' . nohtml_real_escape_string($code_facture) . '") AND ' . get_filter_site_cond('commandes', 'c') . '';
 } elseif ((!empty($_GET['id']) && !empty($_GET['timestamp']))) {
 	$id = intval($_GET['id']);
 	$timestamp = $_GET['timestamp'];
-	$sql = 'SELECT *
-		FROM peel_commandes
-		WHERE id = "' . intval($id) . '" AND o_timestamp = "' . nohtml_real_escape_string($timestamp) . '"';
+	$sql = 'SELECT  c.*, sp.technical_code AS statut_paiement
+		FROM peel_commandes c
+		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . '
+		WHERE c.id = "' . intval($id) . '" AND c.o_timestamp = "' . nohtml_real_escape_string($timestamp) . '" AND ' . get_filter_site_cond('commandes', 'c') . '';
 } else {
 	die();
 }
@@ -44,8 +48,23 @@ if ($commande = fetch_object($qid_commande)) {
 	$order_infos = get_order_infos_array($commande);
 	$client = get_user_information($commande->id_utilisateur);
 	$id = intval($commande->id);
-	$numero = $id;
-	$date_document = $commande->o_timestamp;
+	$numero = intval($commande->order_id);
+	if(empty($commande->o_timestamp) || substr($commande->o_timestamp, 0, 10) == '0000-00-00') {
+		// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
+		$commande->o_timestamp = date('Y-m-d');
+	}
+	if (!empty($_GET['mode']) && $_GET['mode'] == 'bdc') {
+		$displayed_date = get_formatted_date($commande->o_timestamp, 'short');
+	} else {
+		// On veut une date de facture si possible et pas de commande
+		if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
+			// Une date de facture est définie
+			$displayed_date = get_formatted_date($commande->f_datetime, 'short');
+		} else {
+			// Pas de date de facture, on indique la date de commande
+			$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', 'long');
+		}
+	}
 	if (!empty($_GET['partial'])) {
 		if (!empty($_GET['currency_rate'])) {
 			$amount_to_pay = get_float_from_user_input($_GET['partial']) / get_float_from_user_input(vn($_GET['currency_rate']));
@@ -70,7 +89,7 @@ if ($commande = fetch_object($qid_commande)) {
 	<table class="main_table">
 		<tr>
 			<td class="center">
-				<h1 class="bill_title">' . $libelle . " " . $GLOBALS['STR_NUMBER'] . " " . $numero . " - " . get_formatted_date($date_document) . "" . '</h1>
+				<h1 property="name" class="bill_title">' . $libelle . " " . $GLOBALS['STR_NUMBER'] . " " . $numero . " - " . $displayed_date . "" . '</h1>
 			</td>
 		</tr>
 		<tr>
@@ -160,6 +179,10 @@ if ($commande = fetch_object($qid_commande)) {
 					<tr>
 						<td class="right" style="width:80%">' . $GLOBALS['STR_TOTAL_HT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="right"><b>' . $order_infos['net_infos_array']['montant_ht'] . '</b></td>
+					</tr>
+					<tr>
+						<td class="right" style="width:80%" >' . $GLOBALS['STR_PDF_AVOIR'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
+						<td class="right">' . $order_infos['net_infos_array']['avoir'] . '</td>
 					</tr>';
 
 	if (!is_micro_entreprise_module_active()) {
@@ -168,12 +191,24 @@ if ($commande = fetch_object($qid_commande)) {
 						<td class="right" style="width:80%">' . $GLOBALS['STR_VAT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
 						<td class="right" ><b>' . $order_infos['net_infos_array']['total_tva'] . '</b></td>
 					</tr>';
-	} else {
-		$output .= '
-					<tr>
-						<td></td>
-						<td class="right">' . $GLOBALS['STR_NO_VAT_APPLIABLE'] . '</td>
-					</tr>';
+	}
+	if (floatval($order_infos['net_infos_array']['total_tva'])==0) {
+		if (is_micro_entreprise_module_active()) {
+			// Pour les entreprises bénéficiant du régime de franchise de base de TVA, il faut obligatoirement porter sur chaque facture la mention suivante : « TVA non applicable, article 293 B du CGI ».
+			$output .= '
+						<tr>
+							<td class="right" colspan="2">' . $GLOBALS['STR_NO_VAT_APPLIABLE'] . '</td>
+						</tr>';
+		} elseif(is_user_tva_intracom_for_no_vat($commande->id_utilisateur)) {
+			// Pour les livraisons de biens intracommunautaires, les factures doivent obligatoirement comporter la mention suivante : « Exonération de TVA, article 262 ter 1 du CGI ».
+			// Lorsqu’il s’agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
+			// => Texte à définir en conséquence en fonction de votre site dans $GLOBALS['STR_INVOICE_BOTTOM_TEXT2']
+			$output .= '
+						<tr>
+							<td class="right" colspan="2">' . $GLOBALS['STR_INVOICE_BOTTOM_TEXT2'] . '</td>
+						</tr>';
+
+		}
 	}
 	if ($commande->tarif_paiement > 0) {
 		$output .= '
@@ -203,6 +238,8 @@ if ($commande = fetch_object($qid_commande)) {
 				 </table>
 	';
 	if (!empty($_GET['mode']) && $_GET['mode'] == 'bdc') {
+		// On raffraichit régulièrement la page pour éviter d'avoir un problème de timestamp entre le formulaire et la banque
+		$auto_refresh = true;
 		if (round($amount_to_pay, 2) != round($commande->montant, 2)) {
 			$output .= '
 				<p><b>' . $GLOBALS['STR_MODULE_FACTURES_WARNING_PARTIAL_PAYMENT'] . ' ' . fprix($amount_to_pay, true, vb($commande->devise), true, get_float_from_user_input(vn($commande->currency_rate))) . ' ' . $GLOBALS['STR_TTC'] . '</p>';
@@ -253,10 +290,9 @@ if ($commande = fetch_object($qid_commande)) {
 	</table>
 </div>
 ';
-	$title = $libelle . " " . $GLOBALS['STR_NUMBER'] . " " . $numero . " - " . get_formatted_date($date_document) ;
-	output_light_html_page($output, $title);
+	$title = $libelle . " " . $GLOBALS['STR_NUMBER'] . " " . $numero . " - " . $displayed_date ;
+	output_light_html_page($output, $title, ($auto_refresh ? '<meta http-equiv="refresh" content="900; url='. get_current_url() . '" />' : ''));
 } else {
-	echo '<h1>' . $GLOBALS['STR_NO_ORDER'] . '</h1>';
+	echo '<h1 property="name">' . $GLOBALS['STR_NO_ORDER'] . '</h1>';
 }
 
-?>

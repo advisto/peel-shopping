@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -18,17 +18,37 @@ if (!defined('IN_PEEL')) {
 /**
  * set_current_devise()
  *
- * @param mixed $new_currency_id
+ * @param string $currency_id_or_code
+ * @param integer $reference_country_id
  * @return
  */
-function set_current_devise($new_currency_id)
+function set_current_devise($currency_id_or_code, $reference_country_id = null)
 {
-	if (!empty($new_currency_id)) {
-		$resDevise = query("SELECT *
-			FROM peel_devises
-			WHERE etat='1' AND id='" . intval($new_currency_id) . "'");
+	if (!empty($_SESSION['session_utilisateur']['devise']) || !empty($currency_id_or_code) || !empty($reference_country_id)) {
+		if(!empty($_SESSION['session_utilisateur']['devise'])) {
+			// Devise forcée pour l'utilisateur, pas de possibilité d'en choisir une autre
+			$cond = "d.id='" . intval($_SESSION['session_utilisateur']['devise']) . "'";
+		} elseif(!empty($currency_id_or_code)) {
+			// On prend en priorité la devise demandée, sinon la prochaine devise trouvée disponible sur le site
+			if(is_numeric($currency_id_or_code)) {
+				$cond = "d.id='" . intval($currency_id_or_code) . "'";
+			} else {
+				$cond = "d.code='" . word_real_escape_string($currency_id_or_code) . "'";
+			}
+		} elseif(!empty($reference_country_id)) {
+			// On cherche uniquement la devise correspondant au pays donné. Si pas disponible sur le site, on ne modifie pas session_devise
+			$cond = "c.id='" . intval($reference_country_id) . "'";
+			$join = "INNER JOIN peel_pays c ON c.devise=d.code";
+		}
+		$sql = "SELECT d.*
+			FROM peel_devises d
+			" . vb($join) . "
+			WHERE d.etat='1' AND " . get_filter_site_cond('devises', 'd') . "
+			ORDER BY IF(" . $cond . ", -1, 1) ASC
+			LIMIT 1";
+		$resDevise = query($sql);
 		if ($Devise = fetch_object($resDevise)) {
-			$_SESSION['session_devise']['symbole'] = String::html_entity_decode_if_needed($Devise->symbole);
+			$_SESSION['session_devise']['symbole'] = String::html_entity_decode(str_replace('&euro;', '€', $Devise->symbole));
 			$_SESSION['session_devise']['symbole_place'] = $Devise->symbole_place;
 			$_SESSION['session_devise']['conversion'] = $Devise->conversion;
 			$_SESSION['session_devise']['code'] = $Devise->code;
@@ -44,35 +64,41 @@ function set_current_devise($new_currency_id)
  */
 function affiche_module_devise($return_mode = false)
 {
+	if(!empty($_SESSION['session_utilisateur']['devise'])) {
+		// Devise imposée
+		return null;
+	}
 	$output = '';
-	$resDevise = query("SELECT *
-		FROM peel_devises
-		WHERE etat='1'
-		ORDER BY devise");
-	$url_part = str_replace(array('?devise=' . vb($_GET['devise']), '&devise=' . vb($_GET['devise'])), array('', ''), $_SERVER['REQUEST_URI']);
-	if (String::strpos($url_part, '?') === false) {
-		$url_part .= '?devise=';
-	} else {
-		$url_part .= '&devise=';
+	if(empty($GLOBALS['site_parameters']['currencies_select_in_front_office_disabled'])) {
+		$resDevise = query("SELECT *
+			FROM peel_devises
+			WHERE etat='1' AND " . get_filter_site_cond('devises') . "
+			ORDER BY devise");
+		$url_part = str_replace(array('?devise=' . vb($_GET['devise']), '&devise=' . vb($_GET['devise'])), array('', ''), $_SERVER['REQUEST_URI']);
+		if (String::strpos($url_part, '?') === false) {
+			$url_part .= '?devise=';
+		} else {
+			$url_part .= '&devise=';
+		}
+		$tpl_options = array();
+		while ($Devise = fetch_assoc($resDevise)) {
+			$tpl_options[] = array(
+				'value' => intval($Devise['id']),
+				'issel' => $Devise['code'] == $_SESSION['session_devise']['code'],
+				'name' => $Devise['devise']
+			);
+		}
+		if(count($tpl_options)>1) {
+			$tpl = $GLOBALS['tplEngine']->createTemplate('modules/devises.tpl');
+			$tpl->assign('STR_MODULE_DEVISES_CHOISIR_DEVISE', $GLOBALS['STR_MODULE_DEVISES_CHOISIR_DEVISE']);
+			$tpl->assign('url_part', $url_part);
+			$tpl->assign('options', $tpl_options);
+			$output .= $tpl->fetch();
+		}
 	}
-	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/devises.tpl');
-	$tpl->assign('STR_MODULE_DEVISES_CHOISIR_DEVISE', $GLOBALS['STR_MODULE_DEVISES_CHOISIR_DEVISE']);
-	$tpl->assign('url_part', $url_part);
-	$tpl_options = array();
-	while ($Devise = fetch_assoc($resDevise)) {
-		$tpl_options[] = array(
-			'value' => intval($Devise['id']),
-			'issel' => $Devise['code'] == $_SESSION['session_devise']['code'],
-			'name' => $Devise['devise']
-		);
-	}
-	$tpl->assign('options', $tpl_options);
-	$output .= $tpl->fetch();
 	if ($return_mode) {
 		return $output;
 	} else {
 		echo $output;
 	}
 }
-
-?>

@@ -1,29 +1,23 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: sites.php 43488 2014-12-02 18:02:14Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_manage");
+necessite_priv("admin_manage", true, true);
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_SITES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_SITES_TITLE'];
 $output = '';
-if (!isset($_REQUEST['mode'])) {
-	$all_site_names = get_all_site_names();
-	if (count($all_site_names) == 1) {
-		redirect_and_die($_SERVER["PHP_SELF"] . "?mode=modif&id=1");
-	}
-}
 
 $frm = $_POST;
 $form_error_object = new FormError();
@@ -34,75 +28,131 @@ if (!empty($frm['logo']) && strpos($frm['logo'], 'http') === false) {
 	}
 	$frm['logo'] = $GLOBALS['wwwroot'] . $frm['logo'];
 }
-
+if (!empty($_GET['mode']) && in_array($_GET['mode'], array('insere', 'ajout', 'duplicate', 'suppr')) && $_SESSION['session_utilisateur']['site_id']>0) {
+	// la création/duplication/suppression de nouveau site est réservé aux admin multisite. Dans le cas de l'affichage du formulaire ou de l'intertion de donnée et si l'admin n'a pas les droits, on modifie le GET['mode'] pour afficher affiche_liste_site
+	// Le lien de création de site ne s'affiche pas aux administrateurs multisite.
+	$_GET['mode'] = 'default';
+}
 switch (vb($_GET['mode'])) {
 	case "ajout" :
-		$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['favicon']));
-		$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
+		// Affiche le formulaire d'ajout de site
 		$output .= affiche_formulaire_ajout_site($frm);
 		break;
 
 	case "modif" :
+		// Affiche le formulaire d'ajout de site si POST est vide, sinon modifie les valeurs en BDD avec la fonction create_or_update_site
 		if (!empty($frm)) {
+			// $_POST est défini
 			$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['favicon']));
 			$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
 			
-			if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']) . vb($_GET['id']))) {
+			if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']))) {
+				// Contrôle du token
 				$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 			}
-			$form_error_object->valide_form($frm,
-				array('email_webmaster' => $GLOBALS['STR_ADMIN_SITES_ERR_EMPTY_EMAIL'] . ' "'.$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"].'".'));
+			
+			// Vérification de la présence d'information indispensable pour configurer un site
+			// - email du webmaster 
+			// - URL
+			// - nom du site
+			$form_error_object->valide_form($frm, array('email_webmaster' => $GLOBALS['STR_ADMIN_SITES_ERR_EMPTY_EMAIL'] . ' "' . $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] . '".',
+				'nom_'.$_SESSION['session_langue'] => sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $GLOBALS['STR_ADMIN_SITES_SITE_NAME']) . '.',
+				'wwwroot' => sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], $GLOBALS['STR_ADMIN_WWWROOT']) . '.'));
+			
 			if (!$form_error_object->count()) {
-				create_or_update_site($_GET['id'], $frm);
+				// => Pas d'erreur lors du contrôle du formulaire, on peut faire les modifications en BDD
+				$frm['site_id'] = $_GET['id'];
+				$output .= create_or_update_site($frm, true, $_GET['mode']);
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITES_MSG_UPDATED_OK']))->fetch();
 				$output .= affiche_liste_site();
 			} else {
+				// Au moins une erreur est présente dans les valeurs envoyées par le formulaire
 				foreach ($form_error_object->error as $name => $text) {
 					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $text))->fetch();
 				}
 				$output .= affiche_formulaire_modif_site($_GET['id'], $frm);
 			}
 		} else {
-			$output .= affiche_formulaire_modif_site($_GET['id'], $frm);
+			$output .= affiche_formulaire_modif_site($_GET['id'], null);
 		}
 		break;
-	/*
+		
 	case "suppr" :
+		// Suppression d'un site
 		$output .= supprime_site($_GET['id']);
 		$output .= affiche_liste_site();
+		break;	
+
+	case "duplicate" :
+		// Duplication d'un site existant.
+		if (check_if_module_active('duplicate') && isset($_GET['id'])) {
+			include($fonctionsduplicate);
+			// Il faut que l'administrateur possède les droits d'administration pour tous les sites pour faire la duplication, sinon il ne pourra pas accéder aux informations du site en cours de création
+			$_SESSION['session_admin_multisite'] = 0;
+			// Exécute la duplication
+			duplicate_site(intval($_GET['id']));
+			// Redirection vers la page de liste de site, afin d'éviter une nouvelle duplication en faisant F5
+			redirect_and_die(get_current_url(false));
+		} else {
+			// Affiche la liste des sites configurés
+			$output .= affiche_liste_site();
+		}
 		break;
 
 	case "insere" :
-		if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']) . vb($_GET['id']))) {
+		// Fait l'intertion d'un nouveau site (vient après mode=ajout)
+		if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']))) {
+			// Contrôle du token
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
+		// Vérification de la présence d'information indispensable pour configurer un site
+		// - email du webmaster 
+		// - URL
+		// - nom du site
+		$form_error_object->valide_form($frm, array('email_webmaster' => $GLOBALS['STR_ADMIN_SITES_ERR_EMPTY_EMAIL'] . ' "' . $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] . '".',
+			'nom_'.$_SESSION['session_langue'] => sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], '"'.$GLOBALS['STR_ADMIN_SITES_SITE_NAME'].'"') . '.',
+			'wwwroot' => sprintf($GLOBALS['STR_MISSED_ATTRIBUT_MANDATORY'], '"'.$GLOBALS['STR_ADMIN_WWWROOT'].'"'). '.'));
 		if (!$form_error_object->count()) {
-			create_or_update_site(null, $frm);
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITES_MSG_INSERTED_OK']))->fetch();
+			// Récupération du l'id de site la plus élevée pour attribuer un nouvel id au nouveau site.
+			$query = query('SELECT MAX( site_id ) as site_id
+				FROM peel_configuration');
+			$new_site_id = fetch_assoc($query);
+			$frm['site_id'] = $new_site_id['site_id']+1;
+			$frm['favicon'] = upload('favicon', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['favicon']));
+			$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
+
+			// => Pas d'erreur lors du contrôle du formulaire, on peut faire les modifications en BDD
+						// Il faut que l'administrateur possède les droits d'administration pour tous les sites pour faire la duplication, sinon il ne pourra pas accéder aux informations du site en cours de création
+			$_SESSION['session_admin_multisite'] = 0;
+			$output .= create_or_update_site($frm, false, $_GET['mode'], $GLOBALS['lang_codes']);
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_INSERTED_OK'], $frm['nom_' . $_SESSION['session_langue']])))->fetch();
 			$output .= affiche_liste_site();
 		} else {
-			if ($form_error_object->has_error('token')) {
-				$output .= $form_error_object->text('token');
+			// Au moins une erreur est présente dans les valeurs envoyées par le formulaire
+			foreach ($form_error_object->error as $name => $text) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $text))->fetch();
 			}
-			$output .= affiche_formulaire_ajout_statut($frm);
+			$output .= affiche_formulaire_ajout_site($frm);
 		}
 		break;
-	*/
+
 	case "supprfavicon" :
+		// Suppression du favicon depuis le formulaire de modification de site (mode=modif)
 		supprime_favicon(vn($_GET['id']), $_GET['favicon']);
 		$output .= affiche_formulaire_modif_site($_GET['id'], $frm);
 		break;
 
 	case "supprdefault_picture" :
+		// Suppression de l'image par défaut du produit depuis le formulaire de modification de site (mode=modif)
 		supprime_default_picture(vn($_GET['id']), $_GET['default_picture']);
 		$output .= affiche_formulaire_modif_site($_GET['id'], $frm);
 		break;
 
 	default :
+		// Affichage de la liste des sites (si il y a plus d'un site configuré)
 		$output .= affiche_liste_site();
 		break;
 }
-
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
@@ -112,7 +162,7 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
  */
 
 /**
- * UNUSED : Affiche un formulaire vierge pour ajouter un site
+ * Retourne le formulaire d'ajout de site en paramétrant la fonction affiche_formulaire_site
  *
  * @param array $frm Array with all fields data
  * @return
@@ -124,148 +174,187 @@ function affiche_formulaire_ajout_site(&$frm)
 	$urlscript = dirname($_SERVER['PHP_SELF']);
 	$url = ($urlscript == '/') ? trim($urlsite) : trim($urlsite . $urlscript);
 
+	if(empty($frm)) {
+		$frm['default_country_id'] = vn($GLOBALS['site_parameters']['default_country_id']);
+		foreach($GLOBALS['admin_lang_codes'] as $lng) {
+			$frm['nom_' . $lng] = "";
+			$frm['logo_' . $lng] = "";
+		}
+		$frm['pays_exoneration_tva'] = "";
+		$frm['css'] = "";
+		$frm['template_directory'] = "";
+		$frm['template_multipage'] = "";
+		$frm['url'] = str_replace(array("/administrer", '/' . $GLOBALS['site_parameters']['backoffice_directory_name']), "", $url);
+		$frm['on_logo'] = 1;
+		$frm['favicon'] = "";
+		$frm['timemax'] = 1800;
+		$frm['seuil'] = 5;
+		$frm['seuil_total'] = 100;
+		$frm['seuil_total_reve'] = 100;
+		$frm['module_retail'] = 1;
+		$frm['module_affilie'] = 1;
+		$frm['commission_affilie'] = 5;
+		$frm['module_lot'] = 1;
+		$frm['module_parrain'] = 1;
+		$frm['module_cadeau'] = 1;
+		$frm['module_devise'] = 1;
+		// Il ne faut pas définir la devise par défaut en dur, puisque l'id de la devise dépend du site.
+		$frm['devise_defaut'] = '';
+		$frm['module_nuage'] = 1;
+		$frm['module_flash'] = 1;
+		$frm['module_captcha'] = 1;
+		$frm['module_cart_preservation'] = 1;
+		$frm['module_pub'] = 1;
+		$frm['module_faq'] = 1;
+		$frm['module_vacances'] = 1;
+		$frm['module_vacances_type'] = 0;
+		$frm['facebook_connect'] = 0;
+		$frm['fb_appid'] = "";
+		$frm['fb_secret'] = "";
+		$frm['fb_baseurl'] = "";
+		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
+			$frm['module_vacances_client_msg_' . $lng] = "";
+		}
+		$frm['module_precedent_suivant'] = 1;
+		$frm['in_category'] = 1;
+		$frm['module_forum'] = 1;
+		$frm['module_conditionnement'] = 1;
+		$frm['module_giftlist'] = 1;
+		$frm['module_rss'] = 1;
+		$frm['module_ecotaxe'] = 1;
+		$frm['module_url_rewriting'] = 1;
+		$frm['module_entreprise'] = 0;
+		$frm['display_prices_with_taxes'] = 1;
+		$frm['display_prices_with_taxes_in_admin'] = 1;
+		$frm['html_editor'] = 0;
+		$frm['avoir'] = 10;
+		$frm['email_paypal'] = "";
+		$frm['email_commande'] = "";
+		$frm['email_webmaster'] = "";
+		$frm['nom_expediteur'] = "";
+		$frm['email_client'] = "";
+		$frm['sips'] = "";
+		$frm['spplus'] = "";
+		$frm['systempay_payment_count'] = "";
+		$frm['systempay_payment_period'] = "";
+		$frm['systempay_cle_test'] = "";
+		$frm['systempay_cle_prod'] = "";
+		$frm['systempay_test_mode'] = "";
+		$frm['systempay_code_societe'] = "";
+		$frm['paybox_cgi'] = "";
+		$frm['paybox_site'] = "";
+		$frm['paybox_rang'] = "";
+		$frm['paybox_identifiant'] = "";
+		$frm['email_moneybookers'] = "";
+		$frm['secret_word'] = "";
+		$frm['module_rollover'] = 1;
+		$frm['type_rollover'] = 1;
+		$frm['logo_affiliation'] = "";
+		$frm['small_order_overcost_limit'] = "";
+		$frm['small_order_overcost_amount'] = "";
+		$frm['small_order_overcost_tva_percent'] = "";
+		$frm['minimal_amount_to_order'] = "";
+		$frm['mode_transport'] = 1;
+		$frm['format_numero_facture'] = "[id]";
+		$frm['module_socolissimo'] = 1;
+		$frm['module_icirelais'] = 1;
+		$frm['module_autosend'] = 0;
+		$frm['module_autosend_delay'] = 5;
+		$frm['fb_admins'] = '';
+		$frm['facebook_page_link'] = '';
+		$frm['socolissimo_foid'] = "";
+		$frm['socolissimo_sha1_key'] = "";
+		$frm['socolissimo_urlok'] = "";
+		$frm['socolissimo_urlko'] = "";
+		$frm['socolissimo_preparationtime'] = "";
+		$frm['socolissimo_forwardingcharges'] = "";
+		$frm['socolissimo_firstorder'] = "";
+		$frm['socolissimo_pointrelais'] = "";
+		$frm['socolissimo_dyForwardingChargesCMT'] = "";
+		$frm['tag_analytics'] = "";
+		$frm['availability_of_carrier'] = 0;
+		$frm['allow_add_product_with_no_stock_in_cart'] = "0";
+		$frm['zoom'] = "jqzoom";
+		$frm['enable_prototype'] = "";
+		$frm['enable_jquery'] = 1;
+		$frm['send_email_active'] = 1;
+		$frm['display_errors_for_ips'] = "";
+		$frm['display_nb_product'] = "0";
+		$frm['module_tnt'] = 0;
+		$frm['module_filtre'] = 1;
+		$frm['tnt_username'] = 0;
+		$frm['tnt_password'] = 0;
+		$frm['tnt_account_number'] = 0;
+		$frm['expedition_delay'] = 0;
+		$frm['expedition_delay'] = 0;
+		$frm['export_encoding'] = 0;
+		$frm['category_count_method'] = 0;
+		$frm['sessions_duration'] = 180;
+		$frm['nb_produit_page'] = 10;
+		$frm['small_width'] = 160;
+		$frm['small_height'] = 160;
+		$frm['medium_width'] = 300;
+		$frm['medium_height'] = 300;
+		$frm['anim_prod'] = 1;
+		// attribut pour l'image par défaut
+		$frm['default_picture'] = "";
+		// On prend les valeurs par défaut : site_id = 0 en base de données 
+		$sql = 'SELECT *
+			FROM peel_configuration
+			WHERE ' . get_filter_site_cond('configuration', null, true) . ' AND site_id = 0';
+		$q = query($sql);
+		while($result = fetch_assoc($q)) {
+			if(!in_array($result['technical_code'], array('wwwroot'))) {
+				$frm[$result['technical_code']] = $result['string'];
+			}
+		}
+	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
-	$frm['default_country_id'] = vn($GLOBALS['site_parameters']['default_country_id']);
-	foreach($GLOBALS['admin_lang_codes'] as $lng) {
-		$frm['nom_' . $lng] = "";
-		$frm['logo_' . $lng] = 1;
-	}
-	$frm['pays_exoneration_tva'] = "";
-	$frm['css'] = "";
-	$frm['template_directory'] = "";
-	$frm['template_multipage'] = "";
-	$frm['url'] = str_replace(array("/administrer", '/' . $GLOBALS['site_parameters']['backoffice_directory_name']), "", $url);
-	$frm['on_logo'] = 0;
-	$frm['favicon'] = "";
-	$frm['timemax'] = 1800;
-	$frm['seuil'] = 5;
-	$frm['seuil_total'] = 100;
-	$frm['seuil_total_reve'] = 100;
-	$frm['module_retail'] = 1;
-	$frm['module_affilie'] = 1;
-	$frm['commission_affilie'] = 5;
-	$frm['module_lot'] = 1;
-	$frm['module_parrain'] = 1;
-	$frm['module_cadeau'] = 1;
-	$frm['module_devise'] = 1;
-	$frm['devise_defaut'] = 1;
-	$frm['module_nuage'] = 1;
-	$frm['module_flash'] = 1;
-	$frm['module_cart_preservation'] = 1;
-	$frm['module_pub'] = 1;
-	$frm['module_faq'] = 1;
-	$frm['module_vacances'] = 1;
-	$frm['module_vacances_type'] = 0;
-	$frm['facebook_connect'] = 0;
-	$frm['fb_appid'] = "";
-	$frm['fb_secret'] = "";
-	$frm['fb_baseurl'] = "";
-
-	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$frm['module_vacances_client_msg_' . $lng] = "";
-	}
-
-	$frm['module_precedent_suivant'] = 1;
-	$frm['in_category'] = 1;
-	$frm['module_forum'] = 1;
-	$frm['module_conditionnement'] = 1;
-	$frm['module_giftlist'] = 1;
-	$frm['module_rss'] = 1;
-	$frm['module_ecotaxe'] = 1;
-	$frm['module_url_rewriting'] = 1;
-	$frm['module_entreprise'] = 0;
-	$frm['display_prices_with_taxes'] = 1;
-	$frm['display_prices_with_taxes_in_admin'] = 1;
-	$frm['html_editor'] = 1;
-	$frm['avoir'] = 10;
-	$frm['email_paypal'] = "";
-	$frm['email_commande'] = "";
-	$frm['email_webmaster'] = "";
-	$frm['nom_expediteur'] = "";
-	$frm['email_client'] = "";
-	$frm['sips'] = "";
-	$frm['spplus'] = "";
-	$frm['systempay_payment_count'] = "";
-	$frm['systempay_payment_period'] = "";
-	$frm['systempay_cle_test'] = "";
-	$frm['systempay_cle_prod'] = "";
-	$frm['systempay_test_mode'] = "";
-	$frm['systempay_code_societe'] = "";
-	$frm['paybox_cgi'] = "";
-	$frm['paybox_site'] = "";
-	$frm['paybox_rang'] = "";
-	$frm['paybox_identifiant'] = "";
-	$frm['email_moneybookers'] = "";
-	$frm['secret_word'] = "";
-	$frm['module_rollover'] = 1;
-	$frm['type_rollover'] = 1;
-	$frm['logo_affiliation'] = "";
-	$frm['small_order_overcost_limit'] = "";
-	$frm['small_order_overcost_amount'] = "";
-	$frm['small_order_overcost_tva_percent'] = "";
-	$frm['minimal_amount_to_order'] = "";
-	$frm['mode_transport'] = 1;
-	$frm['titre_bouton'] = "Ajouter un site";
-	$frm['format_numero_facture'] = "";
-	$frm['module_socolissimo'] = 1;
-	$frm['module_icirelais'] = 1;
-	$frm['module_autosend'] = 0;
-	$frm['module_autosend_delay'] = 5;
-	$frm['fb_admins'] = '';
-	$frm['facebook_page_link'] = '';
-	$frm['socolissimo_foid'] = "";
-	$frm['socolissimo_sha1_key'] = "";
-	$frm['socolissimo_urlok'] = "";
-	$frm['socolissimo_urlko'] = "";
-	$frm['socolissimo_preparationtime'] = "";
-	$frm['socolissimo_forwardingcharges'] = "";
-	$frm['socolissimo_firstorder'] = "";
-	$frm['socolissimo_pointrelais'] = "";
-	$frm['tag_analytics'] = "";
-	$frm['availability_of_carrier'] = 0;
-	$frm['allow_add_product_with_no_stock_in_cart'] = "";
-	$frm['zoom'] = "";
-	$frm['enable_prototype'] = "";
-	$frm['enable_jquery'] = "";
-	$frm['send_email_active'] = 1;
-	$frm['display_errors_for_ips'] = "*";
-	$frm['display_nb_product'] = "*";
-	$frm['module_tnt'] = 0;
-	$frm['tnt_username'] = 0;
-	$frm['tnt_password'] = 0;
-	$frm['tnt_account_number'] = 0;
-	$frm['expedition_delay'] = 0;
-	$frm['expedition_delay'] = 0;
-	
-	// attribut pour l'image par défaut
-	$frm['default_picture'] = "";
-
-	return affiche_formulaire_site($frm);
+	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_ADD'];
+	$frm_modules = get_modules_array(false, null, null, true);
+	return affiche_formulaire_site($frm, $frm_modules);
 }
 
 /**
- * Affiche le formulaire de modification pour le site sélectionné
+ * Retourne le formulaire de modification pour le site sélectionné en paramétrant la fonction affiche_formulaire_site
  *
  * @param integer $id
  * @param array $frm Array with all fields data
  * @return
  */
-function affiche_formulaire_modif_site($id, &$frm)
+function affiche_formulaire_modif_site($id, $frm)
 {
 	if (empty($frm)) {
-		// Charge les informations du produit
-		$frm = $GLOBALS['site_parameters'];
+		// On charge le tableau de configuration commune aux sites, puis spécifique au site en cours de modification
+		// Si les tableaux d'entrées ont des clés en commun, alors, la valeur finale pour cette clé écrasera la précédente. 
+		$frm = array();
+		$sql = 'SELECT *
+			FROM peel_configuration
+			WHERE ' . get_filter_site_cond('configuration', null, true) . ' AND site_id = '.intval($id);
+		$q = query($sql);
+		while($result = fetch_assoc($q)) {
+			$frm[$result['technical_code']] = $result['string'];
+		}
 	}
-	$frm_modules = get_modules_array(false, null, null, true);
-	$frm['id'] = $id;
-	$frm["nouveau_mode"] = "modif";
-	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-	return affiche_formulaire_site($frm, $frm_modules);
+	if (!empty($frm)) {
+		// Les modules ne sont pas concerné par le multi-site
+		$frm_modules = get_modules_array(false, null, null, true, $id);
+		$frm['id'] = $id;
+		$frm["nouveau_mode"] = "modif";
+		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+		return affiche_formulaire_site($frm, $frm_modules);
+	} elseif($_SESSION['session_utilisateur']['site_id'] == 0) {
+		// Si pas de site avec l'id demandé et que l'administrateur est multisite => on redirige vers le formulaire de création de site.
+		redirect_and_die(get_current_url(false).'?mode=ajout');
+	} else {
+		// Redirection vers la liste des sites administrables.
+		redirect_and_die(get_current_url(false));
+	}
 }
 
 /**
- * affiche_formulaire_site()
+ * Retourne le HTML du formulaire de modification/création de site
  *
  * @param array $frm Array with all fields data
  * @param mixed $frm_modules
@@ -273,6 +362,7 @@ function affiche_formulaire_modif_site($id, &$frm)
  */
 function affiche_formulaire_site(&$frm, $frm_modules)
 {
+	// Correction gestion variables de configuration booléennes
 	foreach(array('site_suspended', 'systempay_test_mode') as $this_field) {
 		if(isset($frm[$this_field])) {
 			if($frm[$this_field] === 'false') {
@@ -284,10 +374,11 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_site.tpl');
 
+	// Récupération des informations sur la configuration des zones pour l'affichage dans le formulaire "Pour information, votre configuration actuelle des zones franco de port est :" 
 	$tpl_zones = array();
 	$qid = query("SELECT *
 		FROM peel_zones
-		WHERE on_franco=1");
+		WHERE on_franco=1 AND " . get_filter_site_cond('zones', null, true) . "");
 	while ($result = fetch_assoc($qid)) {
 		$tpl_zones[] = array('href' => $GLOBALS['administrer_url'] . '/zones.php?mode=modif&id=' . $result['id'],
 			'nom' => $result['nom_' . $_SESSION['session_langue']]
@@ -297,39 +388,45 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('zones', $tpl_zones);
 	$tpl->assign('zones_href', $GLOBALS['administrer_url'] . '/zones.php');
 
-	$tpl->assign('action', get_current_url(false) . '?mode=' . String::str_form_value($frm["nouveau_mode"]) . '&id=' . intval($frm['id']));
-	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
+	$tpl->assign('action', get_current_url(false) . '?mode=' . String::str_form_value($frm["nouveau_mode"]) . (!empty($frm["id"]) ?'&id=' . intval($frm['id']):''));
+	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode']));
 	$tpl->assign('site_suspended', vb($frm['site_suspended']));
 
 	$tpl->assign('membre_admin_href', $GLOBALS['wwwroot'] . '/membre.php');
 
+	// Contenu multilingue
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
-			'nom' => $frm['nom_' . $lng],
-			'logo' => $frm['logo_' . $lng],
+			'nom' => vb($frm['nom_' . $lng]),
+			'logo' => vb($frm['logo_' . $lng]),
 			'module_vacances_value' => (!empty($frm['module_vacances_client_msg_' . $lng]) ? String::html_entity_decode_if_needed(vb($frm['module_vacances_client_msg_' . $lng])) : ""),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
+	
+	$tpl->assign('nouveau_mode', vb($frm["nouveau_mode"]));
+	$tpl->assign('wwwroot', vb($frm['wwwroot']));
+	$tpl->assign('session_langue', vb($_SESSION['session_langue']));
 
-	$tpl->assign('country_select_options', get_country_select_options(null, $frm['default_country_id'], 'id'));
+	$tpl->assign('country_select_options', get_country_select_options(null, vb($frm['default_country_id']), 'id'));
 
+	// Séléction des répertoires présents dans le répertoire modeles du site. Permet de générer un select permettant à l'admin de choisir le template associé au site.
 	if ($handle = opendir($GLOBALS['dirroot'] . "/modeles")) {
 		$tpl_directory_options = array();
 		while (false !== ($file = readdir($handle))) {
 			if ($file != "." && $file != ".." && $file != ".svn") {
 				$tpl_directory_options[] = array('value' => $file,
-					'issel' => $file == $frm['template_directory'],
+					'issel' => $file == vb($frm['template_directory']),
 					);
 			}
 		}
 		$tpl->assign('directory_options', $tpl_directory_options);
 	}
 
-	$tpl->assign('template_multipage', $frm['template_multipage']);
-	$tpl->assign('css', $frm['css']);
-	$tpl->assign('on_logo', $frm['on_logo']);
+	$tpl->assign('template_multipage', vb($frm['template_multipage']));
+	$tpl->assign('css', vb($frm['css']));
+	$tpl->assign('on_logo', vb($frm['on_logo']));
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 
 	if (!empty($frm["favicon"])) {
@@ -342,10 +439,10 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('zoom', vb($frm['zoom']));
 	$tpl->assign('enable_prototype', !empty($frm['enable_prototype']));
 	$tpl->assign('enable_jquery', !empty($frm['enable_jquery']));
-	$tpl->assign('export_encoding', $frm['export_encoding']);
-	$tpl->assign('module_autosend', $frm['module_autosend']);
-	$tpl->assign('module_autosend_delay', $frm['module_autosend_delay']);
-	$tpl->assign('category_count_method', $frm['category_count_method']);
+	$tpl->assign('export_encoding', vb($frm['export_encoding']));
+	$tpl->assign('module_autosend', vb($frm['module_autosend']));
+	$tpl->assign('module_autosend_delay', vb($frm['module_autosend_delay']));
+	$tpl->assign('category_count_method', vb($frm['category_count_method']));
 	$tpl->assign('popup_width', vb($frm['popup_width']));
 	$tpl->assign('popup_height', vb($frm['popup_height']));
 	$tpl->assign('admin_force_ssl', vb($frm['admin_force_ssl']));
@@ -361,12 +458,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('type_affichage_attribut', vb($frm['type_affichage_attribut']));
 	$tpl->assign('anim_prod', vb($frm['anim_prod']));
 
-	$tpl->assign('sessions_duration', $frm['sessions_duration']);
-	$tpl->assign('nb_produit_page', $frm['nb_produit_page']);
+	$tpl->assign('sessions_duration', vb($frm['sessions_duration']));
+	$tpl->assign('nb_produit_page', vb($frm['nb_produit_page']));
 
-	$tpl->assign('is_best_seller_module_active', is_best_seller_module_active());
+	$tpl->assign('is_best_seller_module_active', check_if_module_active('best_seller'));
 	$tpl->assign('promotions_href', $GLOBALS['wwwroot_in_admin'] . '/achat/promotions.php');
-	$tpl->assign('is_stock_advanced_module_active', is_stock_advanced_module_active());
+	$tpl->assign('is_stock_advanced_module_active', check_if_module_active('stock_advanced'));
 	$tpl->assign('is_fonctionsvacances', file_exists($GLOBALS['fonctionsvacances']));
 
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
@@ -382,21 +479,21 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	if (file_exists($GLOBALS['fonctionsdevises'])) {
 		$req = "SELECT *
 		FROM peel_devises
-		WHERE etat = '1'";
+		WHERE etat = '1' AND " . get_filter_site_cond('devises', null, true) . " AND site_id = " . intval(vn($frm['id']));
 		$res = query($req);
 		while ($tab_devise = fetch_assoc($res)) {
 			$tpl_devices_options[] = array('value' => intval($tab_devise['id']),
-				'issel' => $frm['devise_defaut'] == $tab_devise['id'],
+				'issel' => vb($frm['devise_defaut']) == $tab_devise['id'],
 				'name' => $tab_devise['devise']
 				);
 		}
 	}
 	$tpl->assign('devices_options', $tpl_devices_options);
-
+	
 	$tpl->assign('is_module_banner_active', is_module_banner_active());
-	$tpl->assign('is_vitrine_module_active', is_vitrine_module_active());
-	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
-	$tpl->assign('is_iphone_ads_module_active', is_iphone_ads_module_active());
+	$tpl->assign('is_vitrine_module_active', check_if_module_active('vitrine'));
+	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
+	$tpl->assign('is_iphone_ads_module_active', check_if_module_active('iphone-ads', 'ads.php'));
 	$tpl_modules = array();
 	$i = 0;
 	foreach ($frm_modules as $this_module_infos) {
@@ -411,10 +508,10 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			'is_above_middle_off' => in_array($this_module_infos['technical_code'], array('menu')),
 			'is_below_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
 			'is_footer_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'caddie', 'account', 'last_views', 'paiement_secu')),
-			'is_header_off' => in_array($this_module_infos['technical_code'], array('ariane', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'catalogue', 'last_views', 'paiement_secu', 'news')),
+			'is_header_off' => in_array($this_module_infos['technical_code'], array('ariane', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'catalogue', 'last_views', 'paiement_secu', 'news', 'articles_rollover')),
 			'is_top_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane')),
-			'is_center_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
-			'is_center_middle_home_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide')),
+			'is_center_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide', 'articles_rollover')),
+			'is_center_middle_home_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'catalogue', 'caddie', 'tagcloud', 'account', 'last_views', 'paiement_secu', 'search', 'best_seller', 'news', 'advertising', 'advertising1', 'advertising2', 'advertising3', 'advertising4', 'advertising5', 'brand', 'guide', 'articles_rollover')),
 			'is_bottom_middle_off' => in_array($this_module_infos['technical_code'], array('menu', 'guide')),
 			'is_top_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
 			'is_bottom_vitrine_off' => in_array($this_module_infos['technical_code'], array('menu', 'ariane', 'guide')),
@@ -426,7 +523,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('modules', $tpl_modules);
 
 	$tpl->assign('is_fonctionstagcloud', file_exists($GLOBALS['fonctionstagcloud']));
-	$tpl->assign('is_flash_sell_module_active', is_flash_sell_module_active());
+	$tpl->assign('is_flash_sell_module_active', file_exists($GLOBALS['dirroot'] . "/modules/flash/flash.php"));
 	$tpl->assign('is_fonctionsbanner', file_exists($GLOBALS['fonctionsbanner']));
 	$tpl->assign('is_fonctionsmenus', file_exists($GLOBALS['fonctionsmenus']));
 	$tpl->assign('is_fonctionsrss', file_exists($GLOBALS['fonctionsrss']));
@@ -521,14 +618,16 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('socolissimo_foid', vb($frm['socolissimo_foid']));
 	$tpl->assign('socolissimo_sha1_key', vb($frm['socolissimo_sha1_key']));
 	$tpl->assign('socolissimo_urlko', vb($frm['socolissimo_urlko']));
+	$tpl->assign('socolissimo_preparationtime', vb($frm['socolissimo_preparationtime']));
+	$tpl->assign('socolissimo_forwardingcharges', vb($frm['socolissimo_forwardingcharges']));
 	$tpl->assign('socolissimo_firstorder', vb($frm['socolissimo_firstorder']));
 	$tpl->assign('socolissimo_pointrelais', vb($frm['socolissimo_pointrelais']));
+	$tpl->assign('socolissimo_dyForwardingChargesCMT', vb($frm['socolissimo_dyForwardingChargesCMT']));
 	$tpl->assign('partner_count_method', vb($frm['partner_count_method']));
 	$tpl->assign('tnt_username', vn($frm['tnt_username']));
 	$tpl->assign('tnt_password', vn($frm['tnt_password']));
 	$tpl->assign('tnt_account_number', vn($frm['tnt_account_number']));
 	$tpl->assign('expedition_delay', vn($frm['expedition_delay']));
-
 	$tpl->assign('act_on_top', vn($frm['act_on_top']));
 	$tpl->assign('auto_promo', vn($frm['auto_promo']));
 	$tpl->assign('mode_transport', vn($frm['mode_transport']));
@@ -536,7 +635,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('display_prices_with_taxes', vn($frm['display_prices_with_taxes']));
 	$tpl->assign('display_prices_with_taxes_in_admin', vn($frm['display_prices_with_taxes_in_admin']));
 	$tpl->assign('module_devise', vn($frm['module_devise']));
-	$tpl->assign('html_editor', vn($frm['html_editor']));
+	$tpl->assign('html_editor', vb($frm['html_editor']));
 	$tpl->assign('send_email_active', vn($frm['send_email_active']));
 	$tpl->assign('module_nuage', vn($frm['module_nuage']));
 	$tpl->assign('module_flash', vn($frm['module_flash']));
@@ -566,9 +665,11 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('module_conditionnement', vn($frm['module_conditionnement']));
 	$tpl->assign('payment_status_decrement_stock', vn($frm['payment_status_decrement_stock']));
 	$tpl->assign('keep_old_orders_intact_date', (empty($frm['keep_old_orders_intact_date']) && intval(vn($frm['keep_old_orders_intact']))>1?get_formatted_date(vb($frm['keep_old_orders_intact'])) : vb($frm['keep_old_orders_intact_date'])));
+	$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
 	$tpl->assign('STR_ADMIN_SITES_PREMIUM_MODULE', $GLOBALS['STR_ADMIN_SITES_PREMIUM_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_CAPTCHA_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_CAPTCHA_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
+	$tpl->assign('STR_ADMIN_WWWROOT', $GLOBALS['STR_ADMIN_WWWROOT']);
 	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -583,7 +684,9 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_SITE_ACTIVATED_EXPLAIN2', $GLOBALS['STR_ADMIN_SITES_SITE_ACTIVATED_EXPLAIN2']);
 	$tpl->assign('STR_ADMIN_SITES_SITE_ACTIVATED_EXPLAIN3', $GLOBALS['STR_ADMIN_SITES_SITE_ACTIVATED_EXPLAIN3']);
 	$tpl->assign('STR_ADMIN_SITES_SITE_NAME', $GLOBALS['STR_ADMIN_SITES_SITE_NAME']);
-	$tpl->assign('STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED', $GLOBALS['STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED', $GLOBALS['STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED']);
+	}
 	$tpl->assign('STR_ADMIN_SITES_TEMPLATE_USED', $GLOBALS['STR_ADMIN_SITES_TEMPLATE_USED']);
 	$tpl->assign('STR_ADMIN_SITES_PAGE_LINKS_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_PAGE_LINKS_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_SITES_DISPLAY', $GLOBALS['STR_ADMIN_SITES_DISPLAY']);
@@ -700,6 +803,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_CURRENCIES_LINK', $GLOBALS['STR_ADMIN_SITES_CURRENCIES_LINK']);
 	$tpl->assign('STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE', $GLOBALS['STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR']);
+	$tpl->assign('STR_ADMIN_SITES_DEFAULT', $GLOBALS['STR_ADMIN_SITES_DEFAULT']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR_FCKEDITOR', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR_FCKEDITOR']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR_CKEDITOR', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR_CKEDITOR']);
@@ -833,10 +937,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FOID', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FOID']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_SHA1_KEY', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_SHA1_KEY']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_URL_KO', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_URL_KO']);
+	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS']);
+	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_DYFORWARDINGCHARGESCMT', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_DYFORWARDINGCHARGESCMT']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN']);
@@ -880,119 +986,130 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 }
 
 /**
- * Supprime le site spécifié par $id
+ * Efface les paramètres du site spécifié par $id. Laisse le contenu associé au site.
  *
  * @param integer $id
  * @return
  */
 function supprime_site($id)
 {
-	$qid = query("SELECT string AS nom
-		FROM peel_configuration
-		WHERE technical_code=nom_" . $_SESSION['session_langue'] . " AND site_id=" . intval($id));
-	$col = fetch_assoc($qid);
-
-	// Efface le site
-	query("DELETE FROM peel_configuration WHERE site_id='" . intval($id) . "'");
-
-	// Efface ce site de la table produits_site
-	query("DELETE FROM peel_commandes WHERE ecom_id='" . intval($id) . "'");
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_OK'], String::html_entity_decode_if_needed($col['nom']))))->fetch();
-}
-
-/**
- * create_or_update_site()
- *
- * @param integer $id
- * @param array $frm Array with all fields data
- * @return
- */
-function create_or_update_site($id, $frm)
-{
-	// Définition de devise_defaut ici car ne doit pas être égale à 0
-	if (empty($frm['devise_defaut'])) {
-		$frm['devise_defaut'] = 1;
+	// Récupération du nom des sites, pour afficher le message de confirmation de suppression (avant l'exécution de la requête)
+	$all_sites_name_array = get_all_sites_name_array();
+	$delete_table_array = array('admins_actions' ,'commandes' ,'codes_promos' ,'articles' ,'categories' ,'configuration' ,'html' ,'produits' ,'rubriques' ,'tarifs' ,'utilisateurs' ,'utilisateur_connexions' ,'zones' ,'societe' ,'langues' ,'devises' ,'marques' ,'meta' ,'cgv' ,'contacts' ,'legal' ,'access_map' ,'tailles' ,'couleurs' ,'banniere' ,'nom_attributs' ,'attributs' ,'ecotaxes' ,'email_template' ,'email_template_cat' ,'import_field' ,'modules' ,'newsletter' ,'paiement' ,'pays' ,'profil' ,'statut_livraison' ,'statut_paiement' ,'tva' ,'types' ,'webmail' ,'commandes_articles'); 
+	if (is_module_faq_active()) {
+		$delete_table_array[] = 'faq';
 	}
-	if (intval(vn($frm['keep_old_orders_intact']))>1 && empty($frm['keep_old_orders_intact_date'])) {
-		// Par défaut : date du jour
-		$frm['keep_old_orders_intact_date'] = get_formatted_date(time());
-		$frm['keep_old_orders_intact'] = (intval(vn($frm['keep_old_orders_intact']))>1? strtotime(get_mysql_date_from_user_input($frm['keep_old_orders_intact_date'])) : intval(vn($frm['keep_old_orders_intact'])));
+	if (is_groups_module_active()) {
+		$delete_table_array[] = 'groupes';
 	}
-	if(isset($frm['template_directory']) && !file_exists($GLOBALS['dirroot'] . "/modeles/" . vb($frm['template_directory']))) {
-		unset($frm['template_directory']);
+	if (check_if_module_active('lexique')) {
+		$delete_table_array[] = 'lexique';
 	}
-	// Traitement des checkbox pour mettre valeur dans $frm si pas coché	
-	foreach(array('enable_prototype', 'enable_jquery') as $this_key) {
-		$frm[$this_key] = vn($frm[$this_key]);
+	if (is_lot_module_active()) {
+		$delete_table_array[] = 'quantites';
 	}
-	// Met à jour la table de configuration
-	foreach($frm as $this_key => $this_value) {
-		if(!in_array($this_key, array('token', 'keep_old_orders_intact_date'))) {
-			foreach(array('module_', 'display_mode_', 'etat_', 'position_', 'home_') as $this_begin) {
-				if(String::substr($this_key, 0, String::strlen($this_begin)) == $this_begin && is_numeric(String::substr($this_key, String::strlen($this_begin)))) {
-					$skip = true;
-				}
-			}
-			if(empty($skip)) {
-				set_configuration_variable(array('technical_code' => $this_key, 'string' => $this_value, 'origin' => 'sites.php'), true);
-			}
-			unset($skip);
+	if (is_parrainage_module_active()) {
+		$delete_table_array[] = 'parrain';
+	}
+	if (check_if_module_active('stock_advanced')) {
+		$delete_table_array[] = 'alertes';
+	}
+	if (is_affiliate_module_active()) {
+		$delete_table_array[] = 'affiliation';
+	}
+	if (check_if_module_active('stock_advanced')) {
+		$delete_table_array[] = 'etatstock';
+	}
+	if (is_carrousel_module_active()) {
+		$delete_table_array[] = 'carrousels';
+		$delete_table_array[] = 'vignettes_carrousels';
+	}
+	// Exécution de la suppression.
+	foreach ($delete_table_array as $this_table_short_name) {
+		$qid = query("DELETE 
+			FROM peel_".word_real_escape_string($this_table_short_name)."
+			WHERE " . get_filter_site_cond($this_table_short_name, null, true) . " AND site_id=".intval($id));
+		if ($this_table_short_name == 'configuration' && affected_rows()) {
+			$site_erased = true;
 		}
 	}
-
-	$modules = get_modules_array();
-	foreach(array_keys($modules) as $key) {
-		$sql = "UPDATE peel_modules
-			SET location='" . nohtml_real_escape_string(vb($frm['module_' . $key])) . "'
-				, display_mode='" . nohtml_real_escape_string($frm['display_mode_' . $key]) . "'
-				, position='" . intval($frm['position_' . $key]) . "'
-				, etat=" . (empty($frm['etat_' . $key]) ? 0 : 1) . "
-				, in_home=" . (empty($frm['home_' . $key]) ? 0 : 1) . "
-			WHERE id='" . intval($key) . "'";
-		query($sql);
+	if (!empty($site_erased)) {
+		// suppression du site effectuée, il y a avait des entrées correspondantes au site dans la BDD. Il faut afficher un message de confirmation de suppression à l'admin
+		return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_OK'], String::html_entity_decode_if_needed(vb($all_sites_name_array[$id])))))->fetch();
+	} else {
+		// Aucune suppression effectuée, il n'y avait pas d'entrées correspondantes au site dans la BDD. Il faut avertir l'admin.
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_NOK'], String::html_entity_decode_if_needed(vn($id)))))->fetch();
 	}
-	return true;
 }
 
+
 /**
- * affiche_liste_site()
+ * Retourne la liste des sites configurés. N'utilise pas SMARTY.
  *
  * @return
  */
 function affiche_liste_site()
 {
-	return affiche_formulaire_modif_site(1, $GLOBALS['frm']);
-	/*
-	$output .= '
+	$output = '
 <table class="main_table">
 	<tr>
 		<td class="entete" colspan="4">' . $GLOBALS['STR_ADMIN_SITES_LIST_TITLE'] . '</td>
 	</tr>';
-	$all_site_names = get_all_site_names();
-	if (count($all_site_names) == 0) {
+	if(empty($GLOBALS['site_parameters']['multisite_disable']) && $_SESSION['session_utilisateur']['site_id']==0) {
+		// La création de site est reservé aux administrateur multisite.
+		$output .= '
+		<tr>
+			<td colspan="4"><a href="' . get_current_url(false) . '?mode=ajout">' . $GLOBALS['STR_ADMIN_SITES_ADD_SITE'] . '</a></td>
+		</tr>';
+	}
+	// Récupération des infos que l'on a pour chaque site pour l'afficher dans la liste des sites
+	// noms
+	$all_sites_name_array = get_all_sites_name_array(false, true);
+	// URL
+	$sites_wwwroot_array = get_sites_wwwroot_array();
+	if (count($all_sites_name_array) == 0) {
+		// Pas de site trouvé. En théorie impossible
 		$output .= '<tr><td><b>' . $GLOBALS['STR_ADMIN_SITES_LIST_NOTHING_FOUND'] . '</b></td></tr>';
 	} else {
+		// Affichage de la liste
 		$output .= '
 	<tr>
-		<td class="menu" width="50">' . $GLOBALS['STR_ADMIN_ACTION'] . '}</td>
+		<td class="menu" width="50">' . $GLOBALS['STR_ADMIN_ACTION'] . '</td>
 		<td class="menu" width="80">' . $GLOBALS['STR_ADMIN_ID'] . '</td>
 		<td class="menu">' . $GLOBALS['STR_ADMIN_SITES_SITE_NAME'] . '</td>
 		<td class="menu">' . $GLOBALS['STR_MODULE_PREMIUM_URL_WEBSITE'] . '</td>
 	</tr>';
 		$i = 0;
-		foreach ($all_site_names as $id => $nom) {
+		foreach ($all_sites_name_array as $site_id => $nom) {
+			// Boucle par nom de site. On peut faire aussi par wwwroot, choix arbitraire
+			// tr_rollover génère les tr avec une alternance de couleur, et un effet au survol de la souris
 			$output .= tr_rollover($i, true) . '
-		<td class="center"><a title="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" href="' . get_current_url(false) . '?mode=modif&id=' . $id . '"><img src="' . $GLOBALS['administrer_url'] . '/images/b_edit.png" alt="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" /></a></td>
-		<td class="title_label center">' . $id . '</td>
-		<td style="padding-left:10px">' . $nom . '</td>
-		<td class="left" style="padding-left:10px">' . vb($url) . '</td>
+		<td class="center">';
+			if(empty($GLOBALS['site_parameters']['multisite_disable']) && check_if_module_active('duplicate') && $_SESSION['session_utilisateur']['site_id']==0) {
+				// La duplication de site est réservé aux administrateurs multisite.
+				$output .= '
+			<a onclick="bootbox.confirm(\''.filtre_javascript(sprintf($GLOBALS["STR_ADMIN_SITE_DUPLICATE_CONFIRM"], $nom), true, true, true) . '\', function(result)  {if (result) {document.location = \'' . get_current_url(false) . '?mode=duplicate&id=' . $site_id . '\'}} ); return false;" title="' . $GLOBALS['STR_ADMIN_SITES_DUPLICATE'] . '" href="' . get_current_url(false) . '?mode=duplicate&id=' . $site_id . '"><img src="' . $GLOBALS['administrer_url'] . '/images/duplicate.png" alt="' . $GLOBALS['STR_ADMIN_SITES_DUPLICATE'] . '" /></a>';
+			}
+			$output .= '
+			<a title="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" href="' . get_current_url(false) . '?mode=modif&id=' . $site_id . '"><img src="' . $GLOBALS['administrer_url'] . '/images/b_edit.png" alt="' . $GLOBALS['STR_ADMIN_SITES_LIST_MODIFY'] . '" /></a>';
+			if(empty($GLOBALS['site_parameters']['multisite_disable']) && $_SESSION['session_utilisateur']['site_id']==0) {
+				// La suppression de site est réservé aux administrateurs multisite.
+				$output .= '
+			<a onclick="bootbox.confirm(\''.filtre_javascript(sprintf($GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"], $nom), true, true, true) . '\', function(result)  {if (result) {document.location = \'' . get_current_url(false) . '?mode=suppr&id=' . $site_id . '\'}}); return false;" title="' . $GLOBALS['STR_DELETE'] . '" href="' . get_current_url(false) . '?mode=suppr&id=' . $site_id . '"><img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="' . $GLOBALS['STR_DELETE'] . '" /></a>';
+			}
+			$output .= '
+		</td>
+		<td class="title_label center">' . $site_id . '</td>
+		<td class="center" style="padding-left:10px">' . ($site_id==0?$GLOBALS['STR_ADMIN_ALL_SITES']:vb($nom)) . '</td>
+		<td class="center" style="padding-left:10px">' . vb($sites_wwwroot_array[$site_id]) . '</td>
 	</tr>';
+			// L'incrément est utile pour la fonction tr_rollover
 			$i++;
 		}
+	}
 		$output .= "
 </table>";
-	}
-	return $output; */
+	return $output;
 }
 
 /**
@@ -1021,4 +1138,3 @@ function supprime_default_picture($id, $file)
 	return delete_uploaded_file_and_thumbs($file);
 }
 
-?>

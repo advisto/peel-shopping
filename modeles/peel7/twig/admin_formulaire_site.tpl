@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_site.tpl 43225 2014-11-17 09:16:50Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<table class="main_table">
@@ -19,6 +19,9 @@
 		</tr>
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_EXPLAIN }}</div></td>
+		</tr>
+		<tr>
+			<td colspan="2"><div class="alert alert-info">{{ STR_MANDATORY }}</div></td>
 		</tr>
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_GENERAL_PARAMETERS }}</td>
@@ -37,14 +40,21 @@
 		</tr>
 	{% for l in langs %}
 		<tr>
-			<td>{{ STR_ADMIN_SITES_SITE_NAME }} {{ l.lng|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{{ STR_ADMIN_SITES_SITE_NAME }} {{ l.lng|upper }}{% if l.lng == session_langue %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="max-width:250px" type="text" class="form-control" name="nom_{{ l.lng }}" value="{{ l.nom|str_form_value }}" /></td>
 		</tr>
 	{% endfor %}
 		<tr>
+ 			<td>{{ STR_ADMIN_WWWROOT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input style="max-width:250px" type="text" class="form-control" name="wwwroot" value="{{ wwwroot }}/" placeholder="http://www.domain.com" /></td>
+		</tr>
+		{% if (STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED) %}	
+		<tr>
 			<td>{{ STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><select class="form-control" name="default_country_id">{{ country_select_options }}</select></td>
-   	 	</tr>
+			<td><select class="form-control" name="default_country_id" style="max-width:250px">{{ country_select_options }}</select></td>
+		</tr>
+		{% endif %}
+
 		<tr>
 			<td>{{ STR_ADMIN_SITES_TEMPLATE_USED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -369,7 +379,7 @@
 			<td>
 				<input type="radio" name="keep_old_orders_intact" value="0" {% if keep_old_orders_intact == 0 %} checked="checked"{% endif %} /> {{ STR_NO }} <br />
 				<input type="radio" name="keep_old_orders_intact" value="1" {% if keep_old_orders_intact == 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_LAST_YEAR }}<br />
-				<input type="radio" name="keep_old_orders_intact" value="2" {% if keep_old_orders_intact > 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE }} <input style="width:100px" type="text" class="form-control datepicker" name="keep_old_orders_intact_date" value="{{ keep_old_orders_intact_date|str_form_value }}" />
+				<input type="radio" name="keep_old_orders_intact" value="2" {% if keep_old_orders_intact > 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE }} <input type="text" class="form-control datepicker" name="keep_old_orders_intact_date" value="{{ keep_old_orders_intact_date|str_form_value }}" style="width:110px" />
 			</td>
 		</tr>
 		<tr>
@@ -438,34 +448,36 @@
 				<input type="radio" name="module_ecotaxe" value="0" {% if module_ecotaxe == 0 %} checked="checked"{% endif %} /> {{ STR_NO }}
 			</td>
 		</tr>
+	{% nouveau_mode == "modif" %}
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_ADMIN_SITES_CURRENCIES_MODULE }}</td>
 		</tr>
-	{% if is_fonctionsdevises %}
-		<tr>
-			<td>{{ STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<input type="radio" name="module_devise" value="1" {% if module_devise == 1 %} checked="checked"{% endif %} /> {{ STR_YES }}
-				<input type="radio" name="module_devise" value="0" {% if module_devise == 0 %} checked="checked"{% endif %} /> {{ STR_NO }}
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">{{ STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN }}</td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_SITES_DEFAULT_CURRENCY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<select class="form-control" name="devise_defaut">
-				{% for o in devices_options %}
-				<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
-				{% endfor %}		
-				</select> {{ STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING }} - <a href="{{ devises_href|escape('html') }}">{{ STR_ADMIN_SITES_CURRENCIES_LINK }}</a>
-			</td>
-		</tr>
-	{% else %}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE }}</a></td>
-		</tr>
+		{% if is_fonctionsdevises %}
+			<tr>
+				<td>{{ STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td>
+					<input type="radio" name="module_devise" value="1" {% if module_devise == 1 %} checked="checked"{% endif %} /> {{ STR_YES }}
+					<input type="radio" name="module_devise" value="0" {% if module_devise == 0 %} checked="checked"{% endif %} /> {{ STR_NO }}
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">{{ STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN }}</td>
+			</tr>
+			<tr>
+				<td>{{ STR_ADMIN_SITES_DEFAULT_CURRENCY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td>
+					<select class="form-control" name="devise_defaut">
+					{% for o in devices_options %}
+					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
+					{% endfor %}		
+					</select> {{ STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING }} - <a href="{{ devises_href|escape('html') }}">{{ STR_ADMIN_SITES_CURRENCIES_LINK }}</a>
+				</td>
+			</tr>
+		{% else %}
+			<tr>
+				<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE }}</a></td>
+			</tr>
+		{% endif %}
 	{% endif %}
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_TEXT_EDITOR }}</td>
@@ -473,10 +485,11 @@
 		<tr>
 			<td>{{ STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN }}</td>
 			<td>
-				<input type="radio" name="html_editor" value="0" {% if html_editor == 0 %} checked="checked"{% endif %} /> <b>{{ STR_ADMIN_SITES_TEXT_EDITOR_FCKEDITOR }}</b><br />
-				<input type="radio" name="html_editor" value="3" {% if html_editor == 3 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_TEXT_EDITOR_CKEDITOR }}<br />
-				<input type="radio" name="html_editor" value="1" {% if html_editor == 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_TEXT_EDITOR_NICEDITOR }}<br />
-				<input type="radio" name="html_editor" value="4" {% if html_editor == 4 %} checked="checked"{% endif %} /> TinyMCE<br />
+				<input type="radio" name="html_editor" value="" {% if html_editor == '' %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_DEFAULT }} (textearea)<br />
+				<input type="radio" name="html_editor" value="0" {% if html_editor == '0' %} checked="checked"{% endif %} /> <b>{{ STR_ADMIN_SITES_TEXT_EDITOR_FCKEDITOR }}</b><br />
+				<input type="radio" name="html_editor" value="3" {% if html_editor == '3' %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_TEXT_EDITOR_CKEDITOR }}<br />
+				<input type="radio" name="html_editor" value="1" {% if html_editor == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_SITES_TEXT_EDITOR_NICEDITOR }}<br />
+				<input type="radio" name="html_editor" value="4" {% if html_editor == '4' %} checked="checked"{% endif %} /> TinyMCE<br />
 			</td>
 		</tr>
 		<tr>
@@ -515,6 +528,8 @@
 			<td>{{ STR_MODULE_WEBMAIL_ADMIN_CLIENT_SERVICE_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="max-width:250px" type="text" class="form-control" name="email_client" value="{{ email_client|str_form_value }}" /> {{ STR_ADMIN_SITES_EMAIL_EMPTY_DEFAULT_EXPLAIN }}</td>
 		</tr>
+	{% if nouveau_mode == "modif" %}
+		{# Les modules ne sont pas affichés lors de la création d'un site puisque la liste des modules pour ce site n'est pas encore présente en BDD. La configurations de module sera celle par défaut, comme défini dans create_new_site.sql #}
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULES_POSITIONS }}</td>
 		</tr>
@@ -616,6 +631,7 @@
 				</table>
 			</td>
 		</tr>
+	{% endif %}
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_ADMIN_SITES_PAYPAL_MODULE }}</td>
 		</tr>
@@ -650,7 +666,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN|htmlspecialchars }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td colspan="2"><textarea class="form-control" name="tag_analytics" style="width:100%" rows="5" cols="54">{{ tag_analytics }}</textarea></td>
+			<td><textarea class="form-control" name="tag_analytics" style="width:100%" rows="5" cols="54">{{ tag_analytics }}</textarea></td>
 		</tr>
 		<tr>
 			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_ADMIN_SITES_TAG_CLOUD_MODULE }}</td>
@@ -823,8 +839,8 @@
 		<tr>
 			<td>{{ STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="payment_status_decrement_stock" value="1,2,3"{% if payment_status_decrement_stock == '1,2,3' %} checked="checked"{% endif %} /> {{ STR_YES }}
-				<input type="radio" name="payment_status_decrement_stock" value="2,3"{% if payment_status_decrement_stock == '2,3' %} checked="checked"{% endif %} /> {{ STR_NO }}
+				<input type="radio" name="payment_status_decrement_stock" value="pending,being_checked,completed"{% if payment_status_decrement_stock == 'pending,being_checked,completed' %} checked="checked"{% endif %} /> {{ STR_YES }}
+				<input type="radio" name="payment_status_decrement_stock" value="being_checked,completed"{% if payment_status_decrement_stock == 'being_checked,completed' %} checked="checked"{% endif %} /> {{ STR_NO }}
 			</td>
 		</tr>
 		<tr>
@@ -1199,19 +1215,23 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:30px" type="text" class="form-control" name="socolissimo_preparationtime" value="{{ socolissimo_preparationtime|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN }}</td>
+			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_preparationtime" value="{{ socolissimo_preparationtime|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:30px" type="text" class="form-control" name="socolissimo_forwardingcharges" value="{{ socolissimo_forwardingcharges|str_form_value }}" /> {{ site_symbole }} - {{ STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES_EXPLAIN }}</td>
+			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_forwardingcharges" value="{{ socolissimo_forwardingcharges|str_form_value }}" /> {{ site_symbole }} - {{ STR_ADMIN_SITES_SO_COLISSIMO_FORWARDINGCHARGES_EXPLAIN }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:30px" type="text" class="form-control" name="socolissimo_firstorder" value="{{ socolissimo_firstorder|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN }}</td>
+			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_firstorder" value="{{ socolissimo_firstorder|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:30px" type="text" class="form-control" name="socolissimo_pointrelais" value="{{ socolissimo_pointrelais|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN }}</td>
+			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_pointrelais" value="{{ socolissimo_pointrelais|str_form_value }}" /> {{ STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN }}</td>
+		</tr>
+		<tr>
+			<td>{{ STR_ADMIN_SITES_SO_COLISSIMO_DYFORWARDINGCHARGESCMT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_dyForwardingChargesCMT" value="{{ socolissimo_dyForwardingChargesCMT|str_form_value }}" /></td>
 		</tr>
 		{% else %}
 		<tr>
@@ -1290,22 +1310,11 @@
 			<td colspan="2">{{ STR_ADMIN_SITES_SIPS_EXPLAIN }}</td>
 		</tr>
 		{% else %}
-		<input type="hidden" name="sips" value="{{ sips|str_form_value }}" />
 		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE }}</a></td>
-		</tr>
-		{% endif %}
-		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_ADMIN_SITES_SPPLUS_MODULE }}</td>
-		</tr>
-		{% if is_fonctionsspplus %}
-		<tr>
-			<td>{{ STR_ADMIN_SITES_SPPLUS_EXTERNAL_URL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:100%" type="text" class="form-control" name="spplus" value="{{ spplus|str_form_value }}" /></td>
-		</tr>
-		{% else %}
-		<tr>
-			<td colspan="2"><input type="hidden" name="spplus" value="{{ spplus|str_form_value }}" /><a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE }}</a></td>
+			<td colspan="2">
+				<input type="hidden" name="sips" value="{{ sips|str_form_value }}" />
+				<a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE }}</a>
+			</td>
 		</tr>
 		{% endif %}
 		<tr>

@@ -1,28 +1,28 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: commander.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_sales");
 
-if (is_fianet_sac_module_active()) {
+if (check_if_module_active('fianet_sac')) {
 	require_once($GLOBALS['fonctionsfianet_sac']);
 }
 
 $form_error_object = new FormError();
 $frm = $_POST;
-$DOC_TITLE = $GLOBALS["STR_ADMIN_INDEX_ORDERS_LIST"];
+$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_INDEX_ORDERS_LIST"];
 $output = '';
 
 if (!empty($_GET['commandeid'])) {
@@ -30,8 +30,8 @@ if (!empty($_GET['commandeid'])) {
 }
 switch (vb($_REQUEST['mode'])) {
     case "duplicate" :
-		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
-        if (is_duplicate_module_active() && isset($_GET['id'])) {
+		$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
+        if (check_if_module_active('duplicate') && isset($_GET['id'])) {
             include($fonctionsduplicate);
             duplicate_order(intval($_GET['id']));
 			unset($_GET['id']);
@@ -40,7 +40,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "ajout" :
-		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
+		$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_COMMANDER_CREATE"];
 		// Affiche le formulaire d'ajout de commande à partir d'un utilisateur
 		if (!empty($_GET['id_utilisateur'])) {
 			$user_id = intval($_GET['id_utilisateur']);
@@ -51,15 +51,15 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 	// Affiche le formulaire de la commande à modifier
 	case "modif" :
-		$DOC_TITLE = $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"];
+		$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"];
 		if (!empty($_POST['bdc_code_facture']) && !empty($_POST['bdc_sendclient'])) {
 			sendclient($_POST['bdc_id'], 'html', 'bdc', $_POST['bdc_partial']);
 			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
-		} elseif (!empty($_POST)) {	
+		} elseif (!empty($_POST)) {
 			// Ajout d'une commande en db + affichage du détail de la commande
 			$order_id = save_commande_in_database($frm);
 			if (!empty($frm['commandeid'])) {
-				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (is_stock_advanced_module_active() ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (check_if_module_active('stock_advanced') ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
 				$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
 			} else {
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
@@ -105,9 +105,9 @@ switch (vb($_REQUEST['mode'])) {
 	case "parrain" :
 		query('UPDATE peel_utilisateurs
 			SET avoir = avoir+' . nohtml_real_escape_string(vn($_POST['avoir'])) . '
-			WHERE id_utilisateur = "' . intval(vn($_POST['id_parrain'])) . '"');
+			WHERE id_utilisateur = "' . intval(vn($_POST['id_parrain'])) . '" AND ' . get_filter_site_cond('utilisateurs', null, true) . '');
 		$custom_template_tags['AVOIR'] = fprix(vn($_POST['avoir']), true, $GLOBALS['site_parameters']['code'], false);
-		send_email($_POST['email_parrain'], '', '', 'commande_parrain_avoir', $custom_template_tags, 'html', $GLOBALS['support']);
+		send_email($_POST['email_parrain'], '', '', 'commande_parrain_avoir', $custom_template_tags, null, $GLOBALS['support']);
 
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMANDER_MSG_AVOIR_SENT_BY_EMAIL_OK'], $custom_template_tags['AVOIR'], $_POST['email_parrain'])))->fetch();
 		$output .= affiche_details_commande(intval($_POST['id']), $_POST['mode'], null);
@@ -128,14 +128,14 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 	// efface les fichiers en téléchargement
 	case "efface_download" :
-		if (is_download_module_active()) {
+		if (check_if_module_active('download')) {
 			$output .=  efface_download();
 			$output .= affiche_liste_commandes_download();
 		}
 		break;
 	// envoi le lien de téléchargement par email
 	case "send_download" :
-		if (is_download_module_active()) {
+		if (check_if_module_active('download')) {
 			$output .=  efface_download();
 			send_mail_product_download(vn($_GET['commandeid']));
 			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MAIL_SENDED'] . " " . $_GET['email']))->fetch();
@@ -151,4 +151,3 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

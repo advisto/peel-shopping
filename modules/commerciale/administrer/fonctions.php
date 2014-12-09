@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -65,8 +65,8 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 
 	$query_contact = 'SELECT u.id_utilisateur AS contact_id, u.nom_famille AS contact_name, u.prenom AS contact_firstname, u.pseudo AS contact_login, u.etat AS contact_valid, u_admin.pseudo AS pseudo_admin, c.*
 		FROM peel_admins_contacts_planified c
-		LEFT JOIN peel_utilisateurs u_admin ON u_admin.id_utilisateur = c.admin_id
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = c.user_id
+		LEFT JOIN peel_utilisateurs u_admin ON u_admin.id_utilisateur = c.admin_id AND ' . get_filter_site_cond('utilisateurs', 'u_admin') . '
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = c.user_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
 		' . (!empty($sql_cond)?'WHERE ' . implode(' AND ', $sql_cond):'');
 
 	$Links = new Multipage($query_contact, 'liste_contact');
@@ -81,7 +81,8 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 
 	$tpl_account_type_options = array();
 	$sql = "SELECT *, name_".$_SESSION['session_langue']." AS name
-		FROM peel_profil";
+		FROM peel_profil
+		WHERE  " . get_filter_site_cond('profil', null, true) . "";
 	$res = query($sql);
 	// Recherche des profils utilisateur disponible
 	while ($account_type = fetch_assoc($res)) {
@@ -95,7 +96,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl_admin_options = array();
 	$sql = "SELECT *
 		FROM peel_utilisateurs
-		WHERE priv LIKE 'admin%'";
+		WHERE priv LIKE 'admin%' AND " . get_filter_site_cond('utilisateurs', null, true) . "";
 	$res = query($sql);
 	// Recherche des profils administrateur
 	while ($account_admin = fetch_assoc($res)) {
@@ -125,7 +126,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 			// On vérifie si il y a déjà eu des actions sur l'utilisateur
 			$query = query('SELECT UNIX_TIMESTAMP(MAX(date)) AS last_contact_timestamp
 			FROM peel_admins_actions
-			WHERE id_membre = "' . intval(vn($contact['user_id'])) . '" AND action IN ("PHONE_EMITTED", "PHONE_RECEIVED", "SEND_EMAIL")');
+			WHERE id_membre = "' . intval(vn($contact['user_id'])) . '" AND action IN ("PHONE_EMITTED", "PHONE_RECEIVED", "SEND_EMAIL") AND ' . get_filter_site_cond('admins_actions', null, true) . '');
 			$rep_query = fetch_assoc($query);
 			if (!empty($rep_query['last_contact_timestamp'])) {
 				if (($contact['timestamp'] > time()) && ($contact['timestamp'] > $rep_query['last_contact_timestamp'])) {
@@ -152,7 +153,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 					'etat_onclick' => 'change_status("contact", "' . $contact['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (!empty($contact['actif']) && $contact['actif'] == 'FALSE' ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'comments' => $contact['comments'],
-				'email_send_href' => (is_webmail_module_active()?$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_utilisateur=' . intval(vn($contact['contact_id'])):''),
+				'email_send_href' => (check_if_module_active('webmail')?$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_utilisateur=' . intval(vn($contact['contact_id'])):''),
 				'appeler_href' => $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($contact['contact_id'])) . '&start=0#phone_event',
 				);
 			$i++;
@@ -249,12 +250,12 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	$output = '';
 	$query = query("SELECT u.pseudo AS pseudo_user
 		FROM peel_utilisateurs u
-		WHERE u.id_utilisateur='" . intval(vn($id_user)) . "'");
+		WHERE u.id_utilisateur='" . intval(vn($id_user)) . "' AND " . get_filter_site_cond('utilisateurs', 'u', true) . "");
 	$rep_query = fetch_assoc($query);
 
 	$query_contact = 'SELECT acp.*, u.pseudo, u.id_utilisateur
 		FROM peel_admins_contacts_planified acp
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = acp.admin_id
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = acp.admin_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
 		WHERE user_id="' . intval(vn($id_user)) . '"';
 	$Links = new Multipage($query_contact, 'liste_contact');
 	$HeaderTitlesArray = array(' ', $GLOBALS["STR_ADMIN_ADMINISTRATOR"], $GLOBALS["STR_DATE"], $GLOBALS["STR_ADMIN_REASON"], $GLOBALS["STR_COMMENTS"]);
@@ -291,7 +292,7 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	if (!empty($_GET['id_contact_planified'])) {
 		$q_contact_edit = query('SELECT acp.*, u.pseudo
 			FROM peel_admins_contacts_planified acp
-			INNER JOIN peel_utilisateurs u ON u.id_utilisateur = acp.user_id
+			INNER JOIN peel_utilisateurs u ON u.id_utilisateur = acp.user_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
 			WHERE acp.id="' . intval(vn($_GET['id_contact_planified'])) . '"
 			LIMIT 1');
 		if ($r_contact_edit = fetch_assoc($q_contact_edit)) {
@@ -334,7 +335,11 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 function create_or_update_contact_planified($frm)
 {
 	// Si $frm['form_edit_contact_planified_id'] existe, cela signifie que nous somme en mode mise à jour
+
 	if (!empty($frm['form_edit_contact_planified_id'])) {
+		if(empty($frm['form_edit_contact_planified_date'])) {
+			$frm['form_edit_contact_planified_date'] = date('d-m-Y', time());
+		}
 		$timestamp_planified_contact = mktime(0, 0, 0, intval(String::substr($frm['form_edit_contact_planified_date'], 3, 2)), intval(String::substr($frm['form_edit_contact_planified_date'], 0, 2)), intval(String::substr($frm['form_edit_contact_planified_date'], 6, 4)));
 		query('UPDATE peel_admins_contacts_planified
 			SET `timestamp` = "' . nohtml_real_escape_string(vb($timestamp_planified_contact)) . '",
@@ -343,6 +348,9 @@ function create_or_update_contact_planified($frm)
 			WHERE id = "' . intval($frm['form_edit_contact_planified_id']) . '"');
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_UPDATED_OK'], intval(vn($_GET['id_contact_planified'])))))->fetch();
 	} elseif ($frm['form_edit_contact_user_id']) {
+		if(empty($frm['form_contact_planified_date'])) {
+			$frm['form_contact_planified_date'] = date('d-m-Y', time());
+		}
 		$timestamp_planified_contact = mktime(0, 0, 0, intval(String::substr($frm['form_contact_planified_date'], 3, 2)), intval(String::substr($frm['form_contact_planified_date'], 0, 2)), intval(String::substr($frm['form_contact_planified_date'], 6, 4)));
 		query('INSERT INTO peel_admins_contacts_planified (user_id, admin_id, timestamp, reason, comments)
 			VALUES(
@@ -371,4 +379,3 @@ function delete_contact_planified($form_edit_contact_planified_id)
 	}
 }
 
-?>

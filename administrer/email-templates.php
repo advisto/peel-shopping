@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: email-templates.php 43497 2014-12-04 10:22:46Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_content");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE'];
 
 $reportError = array();
 $report = '';
@@ -38,7 +38,7 @@ if (!empty($_GET['id'])) {
 				$added_br = true;
 				$_POST['form_text'] = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), "\n", $_POST['form_text']));
 			}
-			$_POST['form_text'] = String::getCleanHTML($_POST['form_text'], null, true, true, true, null, null);
+			$_POST['form_text'] = String::getCleanHTML($_POST['form_text'], null, true, true, true, null, false);
 			if (!empty($added_br)) {
 				$_POST['form_text'] = str_replace(array("<br />\n"), "\n", $_POST['form_text']);
 			}
@@ -53,6 +53,7 @@ if (!empty($_GET['id'])) {
 			$ok = false;
 		} else {
 			query('UPDATE peel_email_template SET
+					site_id="' . intval(vn($_POST['site_id'])) . '",
 					technical_code="' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
 					name="' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
 					subject="' . trim(real_escape_string($_POST['form_subject'])) . '",
@@ -65,9 +66,9 @@ if (!empty($_GET['id'])) {
 		}
 	}
 
-	$query_update = query('SELECT id, technical_code, name, subject, text, lang, id_cat, default_signature_code
+	$query_update = query('SELECT id, technical_code, name, subject, text, lang, id_cat, default_signature_code, site_id
 		FROM peel_email_template
-		WHERE id="' . intval($_GET['id']) . '"
+		WHERE id="' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('email_template', null, true) . '
 		LIMIT 1');
 	$template_infos = fetch_assoc($query_update);
 	// On va chercher les catégories
@@ -96,7 +97,7 @@ if (!empty($_GET['id'])) {
 	$tpl->assign('name', (isset($_POST['form_name']) ? $_POST['form_name'] : vb($template_infos['name'])));
 	$tpl->assign('subject', vb($template_infos['subject']));
 	$tpl->assign('text', vb($template_infos['text']));
-	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, $template_infos['lang'], $template_infos['default_signature_code'], true));
+	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, vb($template_infos['lang']), vb($template_infos['default_signature_code']), true));
 
 	$tpl_langs = array();
 	$langs_array = $GLOBALS['admin_lang_codes'];
@@ -108,12 +109,14 @@ if (!empty($_GET['id'])) {
 			'issel' => vb($template_infos['lang']) == $lng
 			);
 	}
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($template_infos['site_id'])));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('emailLinksExplanations', emailLinksExplanations());
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_TEXT', $GLOBALS['STR_TEXT']);
 	$tpl->assign('STR_NUMBER', $GLOBALS['STR_NUMBER']);
-	$tpl->assign('STR_ADMIN_CLICK_HERE', $GLOBALS['STR_ADMIN_CLICK_HERE']);
+	$tpl->assign('STR_CLICK_HERE', $GLOBALS['STR_CLICK_HERE']);
 	$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
 	$tpl->assign('STR_ADMIN_SUBJECT', $GLOBALS['STR_ADMIN_SUBJECT']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_UPDATE_TEMPLATE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_UPDATE_TEMPLATE']);
@@ -141,7 +144,8 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 		formErrorPush ($reportError, 'form_text');
 	}
 	if (!count($reportError)) {
-		query('INSERT INTO peel_email_template (technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
+		query('INSERT INTO peel_email_template (site_id, technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
+			"' . trim(nohtml_real_escape_string($_POST['site_id'])) . '",
 			"' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
 			"' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
 			"' . trim(real_escape_string($_POST['form_subject'])) . '",
@@ -156,7 +160,8 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 if (empty($_GET['id'])) {
 	// On va chercher les catégories
 	$result_categories = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name
-		FROM peel_email_template_cat');
+		FROM peel_email_template_cat
+		WHERE ' . get_filter_site_cond('email_template_cat', null, true));
 	$tpl_categories_list = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_categories_list.tpl');
 	$tpl_categories_list->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl_options = array();
@@ -190,7 +195,10 @@ if (empty($_GET['id'])) {
 	$tpl->assign('signature_template_options', get_email_template_options('technical_code', null, null, null, true));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('emailLinksExplanations', emailLinksExplanations());
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($template_infos['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE']);
+	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_MSG_LAYOUT_EXPLAINATION', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_MSG_LAYOUT_EXPLAINATION']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN']);
 	$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
@@ -211,7 +219,8 @@ $tpl_options = array();
 // Récupération des catégories de template email
 $result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name
 	FROM peel_email_template_cat tc
-	INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE"
+	INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't', true) . '
+	WHERE ' . get_filter_site_cond('email_template_cat', 'tc', true) . '
 	GROUP BY tc.id
 	ORDER BY name');
 while ($row_categories = fetch_assoc($result)) {
@@ -242,9 +251,9 @@ $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 $output .= $tpl->fetch();
 
 // Affichage de tous les templates
-$sql = 'SELECT id, technical_code, name, subject, text, lang, active, id_cat
+$sql = 'SELECT id, technical_code, name, subject, text, lang, active, id_cat, site_id
 	FROM peel_email_template
-	WHERE 1';
+	WHERE ' . get_filter_site_cond('email_template', null, true);
 
 if (!empty($_GET['form_lang_template'])) {
 	$sql .= ' AND lang = "' . nohtml_real_escape_string($_GET['form_lang_template']) . '"';
@@ -280,13 +289,14 @@ if (!empty($results_array)) {
 	$tpl_results = array();
 	$i = 0;
 	$bold = 0;
+	$all_sites_name_array = get_all_sites_name_array();
 	foreach ($results_array as $this_template) {
 		// On récupère la catégorie du template (s'il en a une)
 		$category_name = '';
 		if ($this_template['id_cat'] != 0) {
 			$result_category = query('SELECT name_' . $_SESSION['session_langue'] . ' AS name
 			FROM peel_email_template_cat
-			WHERE id=' . intval($this_template['id_cat']));
+			WHERE id=' . intval($this_template['id_cat']) . ' AND ' . get_filter_site_cond('email_template_cat', null, true));
 			$row_category = fetch_assoc($result_category);
 			$category_name = $row_category['name'];
 		}
@@ -301,11 +311,13 @@ if (!empty($results_array)) {
 			'etat_onclick' => 'change_status("email-templates", "' . $this_template['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 			'etat_src' => $GLOBALS['administrer_url'] . '/images/' . ($this_template["active"] != "TRUE" ? 'puce-blanche.gif' : 'puce-verte.gif'),
 			'edit_href' => 'email-templates.php?id=' . $this_template['id'],
+			'site_name' => ($this_template['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$this_template['site_id']]),
 			);
 		$i++;
 	}
 	$tpl->assign('results', $tpl_results);
 }
+$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 $tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TITLE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE']);
 $tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 $tpl->assign('STR_ADMIN_SUBJECT', $GLOBALS['STR_ADMIN_SUBJECT']);
@@ -333,13 +345,13 @@ function emailLinksExplanations()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_emailLinksExplanations.tpl');
 	$tpl->assign('link', $GLOBALS['wwwroot']);
-	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
-	$tpl->assign('is_vitrine_module_active', is_vitrine_module_active());
+	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
+	$tpl->assign('is_vitrine_module_active', check_if_module_active('vitrine'));
 	
-	if(is_vitrine_module_active()) {
+	if(check_if_module_active('vitrine')) {
 		$tpl->assign('explication_tag_windows', get_explication_tag_windows(true));
 	}
-	if(is_annonce_module_active()) {
+	if(check_if_module_active('annonces')) {
 		$tpl->assign('explication_tag_last_ads_verified', get_explication_tag_last_ads_verified(true));
 		$tpl->assign('explication_tag_list_category_ads', get_explication_tag_list_category_ads(true));
 		$tpl->assign('explication_tag_list_ads_by_category', get_explication_tag_list_ads_by_category(true));
@@ -347,7 +359,7 @@ function emailLinksExplanations()
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAG_WWWROOT', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAG_WWWROOT']);
+	$tpl->assign('STR_ADMIN_WWWROOT', $GLOBALS['STR_ADMIN_WWWROOT']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAG_SITE', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAG_SITE']);
 	$tpl->assign('STR_ADMIN_EMAIL_TEMPLATES_TAG_PHP_SELF', $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TAG_PHP_SELF']);
 	$tpl->assign('STR_ADMIN_REMOTE_ADDR', $GLOBALS['STR_ADMIN_REMOTE_ADDR']);
@@ -359,4 +371,3 @@ function emailLinksExplanations()
 	return $tpl->fetch();
 }
 
-?>

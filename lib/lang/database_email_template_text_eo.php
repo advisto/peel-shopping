@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_eo.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_eo.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -60,6 +60,7 @@ Mesaĝaj detaloj senditaj je [DATE] :
 Familinomo: [NOM_FAMILLE]
 Antaŭnomo : [PRENOM]
 Entrepreno: [SOCIETE]
+Adreso: [ADRESSE]
 Telef.: [TELEPHONE]
 Retpoŝtadreso: [EMAIL]
 Disponeblo: [DISPO]
@@ -74,7 +75,7 @@ IP : [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Saluton, 
 
-La mendo n-o [ORDER_ID] ĵus registriĝis ĉe [WWWROOT]",
+La mendo n-o [ORDER_ID] ĵus registriĝis ĉe [WWWROOT]/",
   "admin_info_payment_credit_card_3_times" => "Saluton,
 
 Mendo trioble pagota kun n-o [ORDER_ID] ĵus registriĝis ĉe [SITE]
@@ -234,14 +235,14 @@ Aldonaj komentoj:
 
 [EMAIL_ACHETEUR] deziras regali vin per donac-ĉekon!
 
-Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT] kaj uzi la rabat-kodon [CHECK_NAME].
+Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT]/ kaj uzi la rabat-kodon [CHECK_NAME].
 
 Vi ricevos rabaton je [REMISE_VALEUR], valida por aĉeto je mendo valora minimume [MONTANT_MIN], krom impostoj.",
   "cree_cheque_cadeau_friend" => "Saluton,
 
 Via amiko [PRENOM] [NOM_FAMILLE] deziras regali vin per donac-ĉekon ĉe la retejo [SITE].
 
-Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT] kaj uzi la rabat-kodon [CHECK_NAME].
+Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT]/ kaj uzi la rabat-kodon [CHECK_NAME].
 
 Vi ricevos rabaton por mendo je [PRIX], ĉiujn impostojn inkluzivaj.
 ",
@@ -253,7 +254,7 @@ La rabat-kodo [CODE] pere de la modulo DONAC-ĈEKO ĵus kreiĝis ĉe [SITE].
 
 [SITE] profitigas al vi donac-ĉekon valida dum 30 tagoj je monsumo [MONTANT].
 
-Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT] kaj uzi la rabat-kodon [CHECK_NAME].
+Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT]/ kaj uzi la rabat-kodon [CHECK_NAME].
 ",
   "cree_cheque_cadeau_client_admin" => "Saluton,
 
@@ -278,7 +279,7 @@ Jen la menditaj varoj:
 Detaloj de la mesaĝo sendita je la [DATE].
 
 [PRENOM] [NOM_FAMILLE] sendis al vi sian donac-liston [GIFTLIST_NAME] :
-[WWWROOT]/modules/listecadeau/voir.php?email_liste=[URL_LISTE_CADEAU]
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS]",
   "parrainage" => "Saluton,
@@ -314,12 +315,12 @@ Dato de la konekto: [DATETIME]
 
 Klienta servo
 [SITE]
-[WWWROOT]",
+[WWWROOT]/",
   "cree_cheque_cadeau_client_type1" => "Saluton,
 
 [SITE] profitigas al vi donac-ĉekon valida dum 30 tagoj je monsumo [PERCENT].
 
-Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT] kaj uzi la rabat-kodon [CODE].
+Por profiti ĝin, sufiĉas viziti la retejon [WWWROOT]/ kaj uzi la rabat-kodon [CODE].
 ",
   "warn_admin_user_subscription" => "Je la [DATE], 
 
@@ -363,7 +364,7 @@ Tuj post ricevi la varojn, ni konfirmos ties repagon.",
 
 Notu: se vi jam pagis kaj ricevis konfirmon, bonvolu ne kalkuli pri ĉi mesaĝon, ĉar vian pagon ni baldaŭ mane validigos.
 
-Ĉi mesaĝo temas pri la mendo, kiun vi antaŭ nelonge provis fari ĉe [WWWROOT]
+Ĉi mesaĝo temas pri la mendo, kiun vi antaŭ nelonge provis fari ĉe [WWWROOT]/
 
 Mendaĵo: [PRODUCT_NAME]
 Entuta monsumo de via mendo: [TOTAL_AMOUNT]
@@ -377,7 +378,7 @@ Ni atentas pri vi koncerne vian mendon pere de alia pagmaniero.
 Ni disponigas nin por alporti al vi ĉiajn pliajn informojn.
 Dum ni atendas vian respondon, ni deziras al vi plej bonan tagon.
 
-Ĝis baldaŭ ĉe [WWWROOT]
+Ĝis baldaŭ ĉe [WWWROOT]/
 La skipo de [SITE_NAME]
 
 Notu: ĉi mesaĝo estis aŭtomate sendita. Ni pardonpetas se vi jam provis nin kontakti, kaj ĉi kaze bonvolu ne kalkuli pri ĉi mesaĝo.",
@@ -430,7 +431,6 @@ Ni disponigas nin por alporti al vi ĉiajn pliajn informojn.",
 
 Dankon pri via aliĝo al la novaĵ-bulteno de [SITE_NAME]. Vi de nun ricevos ĉiun semajnon la bultenon ĉe vian retpoŝtan keston [EMAIL].
 
-Ĝis baldaŭ ĉe [WWWROOT]"
+Ĝis baldaŭ ĉe [WWWROOT]/"
 );
 
-?>

@@ -1,34 +1,46 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 39495 2014-01-14 11:08:09Z sdelaporte $
-include("../configuration.inc.php");
-
+// $Id: index.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// Appel possible via prefetch.php
+if(!defined('PEEL_PREFETCH') || substr($_SERVER["SCRIPT_NAME"], -strlen("/prefetch.php")) != "/prefetch.php") {
+	include("../configuration.inc.php");
+}
 define('IN_RUBRIQUE', true);
 
+if (empty($_GET['rubid']) && !empty($GLOBALS['site_parameters']['disallow_main_content_category'])) {
+	// Si pas autorisé de voir /lire/ , retour à la page d'accueil
+	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
+}
+
 $output = '';
-$page_name = 'rubriques';
+$GLOBALS['page_name'] = 'rubriques';
 $rubid = intval(vn($_GET['rubid']));
-$rub_query = query("SELECT r.nom_" . $_SESSION['session_langue'] . " as nom, technical_code
+$sql = "SELECT r.nom_" . $_SESSION['session_langue'] . " as nom, etat, technical_code
 	FROM peel_rubriques r
-	WHERE r.id ='" . intval($rubid) . "' AND r.technical_code NOT IN ('other', 'iphone_content')");
-$rub = fetch_assoc($rub_query);
-if (!empty($rub)) {
-	if ($rub['technical_code'] == 'clients' && is_clients_module_active()) {
-		include($GLOBALS['fonctionsclients']);
+	WHERE r.id ='" . intval($rubid) . "' AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
+	ORDER BY r.position " . (!empty($GLOBALS['site_parameters']['content_category_primary_order_by'])? ", r." . $GLOBALS['site_parameters']['content_category_primary_order_by']  : '') . "
+	";
+$rub_query = query($sql);
+if ($rub = fetch_assoc($rub_query)) {
+	if(!empty($rub['technical_code']) && String::strpos($rub['technical_code'], 'R=') === 0) {
+		// redirection suivie que la rubrique soit active ou non
+		redirect_and_die($GLOBALS['wwwroot'] . '/' . String::substr($rub['technical_code'], 2), true);
 	}
-	if ($rub['technical_code'] == 'creation' && is_references_module_active()) {
-		include($GLOBALS['fonctionsreferences']);
-		include($GLOBALS['dirroot'] . "/modules/references/lang/" . $_SESSION['session_langue'] . ".php");
+	if($rub['etat']==0 && !a_priv('admin_content', false)) {
+		redirect_and_die($GLOBALS['wwwroot'], true);
+	}
+	if ($rub['technical_code'] == 'clients' && check_if_module_active('clients')) {
+		include($GLOBALS['fonctionsclients']);
 	}
 	
 	// Permet de définir l'id de la div principal du site.
@@ -62,5 +74,3 @@ $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['lire_index_page_co
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
-
-?>

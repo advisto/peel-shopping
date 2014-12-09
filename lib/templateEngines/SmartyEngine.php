@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: SmartyEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: SmartyEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -41,6 +41,7 @@ class SmartyEngine extends EngineTpl {
 		$this->smarty->compile_check = (bool)$forceCompile;
 		$this->smarty->force_compile = false;
 		$this->smarty->debugging = (bool)$debugging;
+		$this->smarty->_file_perms = vb($GLOBALS['site_parameters']['chmod_new_files'], null);
 		$this->smarty->registerPlugin("modifier", "filtre_javascript", "filtre_javascript");
 		$this->smarty->registerPlugin("modifier", "html_entity_decode_if_needed", "String::html_entity_decode_if_needed");
 		$this->smarty->registerPlugin("modifier", "str_shorten", "String::str_shorten");
@@ -50,6 +51,7 @@ class SmartyEngine extends EngineTpl {
 		$this->smarty->registerPlugin("modifier", "html_entity_decode", "String::html_entity_decode");
 		$this->smarty->registerPlugin("modifier", "htmlentities", "String::htmlentities");
 		$this->smarty->registerPlugin("modifier", "textEncode", "String::textEncode");
+		$this->smarty->registerPlugin("modifier", "highlight_found_text", "highlight_found_text");
 		$this->smarty->registerDefaultTemplateHandler('SmartyDefaultTemplateHandler');
 	}
 
@@ -79,6 +81,7 @@ class SmartyEngine extends EngineTpl {
 		$data['dirroot'] = $GLOBALS['dirroot'];
 		$data['img_ps_dir'] = $GLOBALS['wwwroot'] . '/images';
 		$data['repertoire_images'] = $GLOBALS['repertoire_images'];
+		$data['repertoire_upload'] = $GLOBALS['repertoire_upload'];
 		$data['img_dir'] = $GLOBALS['repertoire_images'];
 		$data['repertoire_css'] = $GLOBALS['repertoire_css'];
 		$data['css_dir'] = $GLOBALS['repertoire_css'];
@@ -114,4 +117,3 @@ function SmartyDefaultTemplateHandler($resource_type, $resource_name, &$template
 		return false;
 	}
 }
-?>

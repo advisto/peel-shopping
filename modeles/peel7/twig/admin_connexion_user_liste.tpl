@@ -1,34 +1,36 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_connexion_user_liste.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_connexion_user_liste.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_CONNEXION_USER_TITLE }}</div>
 {% if display_search_form %}
 <form class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div class="row">	
 		<div class="col-sm-3 center">
-			<label for="search_date">{{ STR_ADMIN_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
-			<input type="text" class="form-control datepicker" id="search_date" name="date" value="{{ date|str_form_value }}" />
+			<label for="search_date">{{ STR_ADMIN_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</label><br />
+			<input type="text" class="form-control datepicker" id="search_date" name="date" value="{{ date|str_form_value }}" style="width:110px" />
 		</div>
 		<div class="col-sm-3 center">
-			<label for="search_user_ip">{{ STR_ADMIN_REMOTE_ADDR }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+			<label for="search_user_ip">{{ STR_ADMIN_REMOTE_ADDR }}{{ STR_BEFORE_TWO_POINTS }}:</label><br />
 			<input type="text" class="form-control" id="search_user_ip" name="user_ip" value="{{ user_ip|str_form_value }}" />
 		</div>
+	{% if (STR_PSEUDO) %}
 		<div class="col-sm-3 center">
-			<label for="search_client_info">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+			<label for="search_client_info">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</label><br />
 			<input type="text" class="form-control" id="search_client_info" name="client_info" value="{{ client_info|str_form_value }}" />
 		</div>
+	{% endif %}
 		<div class="col-sm-3 center">
-			<label for="search_user_id">{{ STR_ADMIN_USER }}{{ STR_BEFORE_TWO_POINTS }}:</label>
+			<label for="search_user_id">{{ STR_ADMIN_USER }}{{ STR_BEFORE_TWO_POINTS }}:</label><br />
 			<input type="text" class="form-control" id="search_user_id" name="user_id" value="{{ user_id|str_form_value }}" />
 		</div>
 		<div class="clearfix"></div>

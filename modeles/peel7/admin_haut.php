@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_haut.php 43185 2014-11-13 14:17:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -19,10 +19,9 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('admin_haut.tpl');
 $tpl->assign('lang', $_SESSION['session_langue']);
 $tpl->assign('sortie_href', $GLOBALS['wwwroot'] . '/sortie.php');
 $tpl->assign('STR_ADMIN_DISCONNECT', $GLOBALS['STR_ADMIN_DISCONNECT']);
-$tpl->assign('doc_title', String::ucfirst(String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed(str_replace(array("\r", "\n"), '', vb($DOC_TITLE))))), 80, '', '', 65)));
+$tpl->assign('doc_title', String::ucfirst(String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed(str_replace(array("\r", "\n"), '', vb($GLOBALS['DOC_TITLE']))))), 80, '', '', 65)));
 $tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 $tpl->assign('wwwroot_in_admin', $GLOBALS['wwwroot_in_admin']);
-$tpl->assign('wwwroot', $GLOBALS['wwwroot']);
 if($_SESSION['session_langue'] == 'fr') {
 	$tpl->assign('generator', 'https://www.peel.fr/');
 } else{
@@ -33,12 +32,17 @@ if (!IN_INSTALLATION) {
 } else {
 	$admin_welcome = $GLOBALS['STR_HELLO'];
 }
+if (String::strpos($GLOBALS['DOC_TITLE'], '<a ') === false) {
+	$tpl->assign('page_title', str_replace($GLOBALS['site'], '<a href="' . $GLOBALS['wwwroot'] . '/">' . $GLOBALS['site'] . '</a>', $GLOBALS['DOC_TITLE']));
+} else {
+	// Un lien est déjà présent dans DOC_TITLE, il ne faut pas faire de remplacement de lien.
+	$tpl->assign('page_title', $GLOBALS['DOC_TITLE']);
+}
 $tpl->assign('admin_welcome', $admin_welcome);
-$tpl->assign('page_title', str_replace($GLOBALS['site'], '<a href="' . $GLOBALS['wwwroot'] . '/">' . $GLOBALS['site'] . '</a>', $DOC_TITLE));
 $tpl->assign('logo_src', $GLOBALS['wwwroot'] . '/images/logo-peel-admin.png');
 $tpl->assign('admin_menu', get_admin_menu());
 $tpl->assign('is_demo_error', ((empty($_COOKIE['demo_warning_close']) || $_COOKIE['demo_warning_close']!='closed') && a_priv('demo')));
-$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['admin_lang_codes'], true, 26));
+$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['admin_lang_codes'], false, 26));
 $tpl->assign('site', $GLOBALS['site']);
 $tpl->assign('GENERAL_ENCODING', GENERAL_ENCODING);
 $tpl->assign('IN_INSTALLATION', IN_INSTALLATION);
@@ -49,7 +53,7 @@ if (!empty($GLOBALS['site_parameters']['favicon'])) {
 }
 $GLOBALS['js_files'][-10] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery.js';
 $GLOBALS['js_files'][-5] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery-ui.js';
-if (is_annonce_module_active()) {
+if (check_if_module_active('annonces')) {
 	$GLOBALS['css_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/annonces/rating_bar/rating.css';
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/annonces/rating_bar/js/rating.js';
 }
@@ -64,15 +68,7 @@ if(file_exists($GLOBALS['dirroot'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['session_langue'].'.js';
 }
 $datepicker_format = str_replace(array('%d','%m','%Y','%y'), array('dd','mm','yy','y'), $GLOBALS['date_format_short']);
-$GLOBALS['js_ready_content_array'][] = '
-		$(".datepicker").datepicker({
-			dateFormat: "'.$datepicker_format.'",
-			changeMonth: true,
-			changeYear: true,
-			yearRange: "1902:2037"
-		});
-		$(".datepicker").attr("placeholder","'.str_replace(array('d', 'm', 'y'), array(String::substr(String::strtolower($GLOBALS['strDays']), 0, 1), String::substr(String::strtolower($GLOBALS['strMonths']), 0, 1), String::substr(String::strtolower($GLOBALS['strYears']), 0, 1)), str_replace('y', 'yy', $datepicker_format)).'");
-';
+$GLOBALS['js_ready_content_array'][] = get_datepicker_javascript();
 if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 	// Quand on rentre la date on ne veut pas avoir le clavier qui s'affiche car on se sert du datepicker
 	$GLOBALS['js_ready_content_array'][] = '
@@ -118,7 +114,7 @@ if (!IN_INSTALLATION) {
 	if (is_module_forum_active()) {
 		$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/forum/forum.js';
 	}
-	if (is_webmail_module_active()) {
+	if (check_if_module_active('webmail')) {
 		$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/function.js';
 	}
 }
@@ -208,4 +204,3 @@ $tpl->assign('js_files', null);
 output_general_http_header();
 echo $tpl->fetch();
 
-?>

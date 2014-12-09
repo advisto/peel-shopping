@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_commande_details.tpl 43538 2014-12-08 11:28:58Z sdelaporte $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -51,7 +51,7 @@
 							<input type="hidden" name="bdc_code_facture" value="{{ bdc_code_facture|str_form_value }}" />
 							<input type="hidden" name="bdc_id" value="{{ bdc_id|str_form_value }}" />
 							<input type="hidden" name="bdc_mode" value="bdc" />
-							<input type="text" class="form-control" id="bdc_partial" name="bdc_partial" value="{{ bdc_partial|str_form_value }}" style="width:70px" /> {{ bdc_devise }}{{ STR_BEFORE_TWO_POINTS }}:
+							<input type="text" class="form-control" id="bdc_partial" name="bdc_partial" value="{{ bdc_partial|str_form_value }}" style="width:90px" /> {{ bdc_devise }}{{ STR_BEFORE_TWO_POINTS }}:
 							<a id="partial_amount_link" onclick="get_partial_amount_link('{{ partial_amount_link_js }}');" target="{{ partial_amount_link_target }}" class="btn btn-primary" href="{{ partial_amount_link_href|escape('html') }}">{{ STR_ADMIN_COMMANDER_OPEN_IN_BROWSER }}</a>
 							<input type="submit" name="bdc_sendclient" class="btn btn-primary" value="{{ STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value }}" data-confirm="{{ STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|str_form_value }}" /></p>
 						</form>
@@ -80,28 +80,24 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{{ id }}</td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{{ ecom_nom }}</td>
+			<td>{{ order_id }}</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_PAYMENT_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" class="form-control datepicker" name="a_timestamp" value="{{ date_facture|str_form_value }}" />
+				<input type="text" class="form-control datepicker" name="a_timestamp" value="{{ date_facture|str_form_value }}" style="width:110px" />
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_INVOICE_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="f_datetime" class="form-control datepicker" value="{{ f_datetime|str_form_value }}" />
+				<input type="text" name="f_datetime" class="form-control datepicker" value="{{ f_datetime|str_form_value }}" style="width:110px" />
 			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_DELIVERY_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="text" name="e_datetime" class="form-control datepicker" value="{{ e_datetime|str_form_value }}" />
+				<input type="text" name="e_datetime" class="form-control datepicker" value="{{ e_datetime|str_form_value }}" style="width:110px" />
 			</td>
 		</tr>
 		{% if (intracom_for_billing) %}
@@ -118,6 +114,10 @@
 			<td>{{ STR_ADMIN_COMMANDER_ORDER_AUTHOR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input name="email" type="text" class="form-control" value="{{ email|str_form_value }}" /> <a href="{{ email_href|escape('html') }}">{{ email }}</a></td>
 		</tr>
+		<tr>
+			<td>{{ STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" class="form-control" /></td>
+		</tr>
 {% else %}
 </table>
 {% if is_tnt_module_active %}
@@ -133,13 +133,26 @@
 				<div class="alert alert-info"><p>{{ STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN }}</p></div>
 			</td>
 		</tr>
+		{% if internal_order_enable %}
+ 		<tr>
+			<td>{{ STR_REFERENCE_IF_KNOWN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="commande_interne" value="{{ commande_interne|str_form_value }}" /></td>
+		</tr>
+		{% endif %}
+		<tr>
+			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
 		<tr>
 			<td class="form_commande_detail">{{ STR_ADMIN_COMMANDER_TRACKING_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="form_commande_detail">
 				<input id="delivery_tracking" name="delivery_tracking" value="{{ delivery_tracking|trim|str_form_value }}" type="text" class="form-control" />
 				{% if is_icirelais_module_active %}<div id="tracking_url"></div><br /><a href="javascript:setTracking('{{ MODULE_ICIRELAIS_SETUP_TRACKING_URL|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript(true,true,true) }}')">{{ STR_MODULE_ICIRELAIS_CREATE_TRACKING }}</a>{% endif %}
 			</td>
-		</tr>
 		</tr>
 		<tr>
 			<td width="350">{{ STR_PAYMENT_MEAN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -201,8 +214,8 @@
 					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
 				{% endfor %}
 				</select>
-				</td>
-			</tr>
+			</td>
+		</tr>
 		{% endif %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_SMALL_ORDERS_OVERCOST }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -257,6 +270,7 @@
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_GIFT_POINTS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ total_points }} {{ STR_GIFT_POINTS }}<br />
+				<input type="hidden" name="delivery_locationid" value="{{ delivery_locationid|str_form_value }}" />
 				<input type="hidden" name="points" value="{{ total_points|str_form_value }}" />
 				{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:
 				<select class="form-control" name="points_etat" style="width:200px;">
@@ -270,6 +284,14 @@
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
 				<textarea class="form-control" name="commentaires" style="width:100%" rows="5" cols="54">{{ commentaires|trim }}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="2" class="title_label">{{ STR_ADMIN_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
+				<textarea class="form-control" name="commentaires_admin" style="width:100%" rows="5" cols="54">{{ commentaires_admin|trim }}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -377,6 +399,7 @@
 				<input type="hidden" name="action" value="{{ action_name|str_form_value }}" />
 				<input type="hidden" name="id" value="{{ id|str_form_value }}" />
 				<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
+				<input type="hidden" name="lang" value="{{ lang|str_form_value }}" />
 				<p><input id="nb_produits" type="hidden" name="nb_produits" value="{{ nb_produits|str_form_value }}" />
 {% if (get_mode) %}
 	{% if get_mode == "insere" or get_mode == "ajout" %}

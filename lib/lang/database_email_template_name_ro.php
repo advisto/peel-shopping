@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_name_ro.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_name_ro.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -39,7 +39,7 @@ $peel_email_template["name"] = array(
   "send_client_order_pdf" => "Comanda dvs. [ORDER_ID] pe [SITE] cu  factura PDF",
   "send_avis_expedition" => "Avis de expeditie  de la comanda n°[ORDER_ID]",
   "email_commande" => "Confirmare comandă [ORDER_ID]",
-  "send_mail_order_admin" => "[ORDER_ID] Înregistrare de la commanda [SITE]",
+  "send_mail_order_admin" => "Înregistrare de la commanda [ORDER_ID] pe [SITE]",
   "initialise_mot_passe" => "Noua parolă a contului dvs. de client",
   "send_mail_for_account_creation" => "Deschide contul dvs. client",
   "insere_avis" => "Un internaut a adăugat un comentariu pe [SITE]",
@@ -51,8 +51,8 @@ $peel_email_template["name"] = array(
   "cree_cheque_cadeau_client_type2" => "[FRIEND] vă oferă un cec cadou ( valoare )",
   "cree_cheque_cadeau_client_admin" => "Crearea unui cec cadou",
   "gift_list" => "Listă cadouri",
-  "email_ordered_cadeaux" => "Comandă pe  lista dvs. Cadou \"[LIST_NAME]\"",
-  "listecadeau_voir" => "Comandă pe  lista dvs. Cadou \"[LIST_NAME]\"",
+  "email_ordered_cadeaux" => "Comandă pe  lista dvs. Cadou \"[GIFTLIST_NAME]\"",
+  "listecadeau_voir" => "Comandă pe  lista dvs. Cadou \"[GIFTLIST_NAME]\"",
   "parrainage" => "[PSEUDO] dorește să vă sponsorizeze",
   "email_alerte" => "Produs pe stoc pe [SITE]",
   "decremente_stock" => "Notificare alertă de STOC",
@@ -71,4 +71,3 @@ $peel_email_template["name"] = array(
   "cron_update_contact_info" => "Confirmarea validităţii coordonatelor dvs."
 );
 
-?>

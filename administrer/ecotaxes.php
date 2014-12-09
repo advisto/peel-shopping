@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ecotaxes.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ecotaxes.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products,admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_ECOTAXES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_ECOTAXES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $form_error_object = new FormError();
@@ -118,7 +118,7 @@ function affiche_formulaire_modif_ecotaxes($id, &$frm)
 		/* Charge les informations de l'écotaxe */
 		$qid = query("SELECT *
 			FROM peel_ecotaxes
-			WHERE id = " . intval($id));
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('ecotaxes', null, true));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_ECOTAXES_ERR_ECOTAX_NOT_FOUND']))->fetch();
@@ -143,7 +143,7 @@ function affiche_formulaire_ecotaxes(&$frm)
 	if (vb($_REQUEST['mode']) == "modif") {
 		$sql = "SELECT prix_ht, prix_ttc
 			FROM peel_ecotaxes
-			WHERE id ='" . intval($frm['id']) . "'";
+			WHERE id ='" . intval($frm['id']) . "' AND " . get_filter_site_cond('ecotaxes', null, true);
 		$query = query($sql);
 		$result = fetch_assoc($query);
 		$frm["prix_ht"] = $result['prix_ht'];
@@ -164,10 +164,12 @@ function affiche_formulaire_ecotaxes(&$frm)
 			'nom' => $frm['nom_' . $lng]
 			);
 	}
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('prix_ht', $frm["prix_ht"]);
 	$tpl->assign('vat_options', get_vat_select_options($calculated_vat, true));
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 	$tpl->assign('STR_ADMIN_ECOTAXES_FORM_TITLE', $GLOBALS['STR_ADMIN_ECOTAXES_FORM_TITLE']);
@@ -190,12 +192,12 @@ function supprime_ecotaxes($id)
 {
 	$qid = query("SELECT *
 		FROM peel_ecotaxes
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('ecotaxes', null, true));
 	$e = fetch_assoc($qid);
 
 	/* Efface le ecotaxes */
 	query("DELETE FROM peel_ecotaxes
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('ecotaxes', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ECOTAXES_MSG_ECOTAX_DELETED'], $e['nom_'.$_SESSION['session_langue']])))->fetch();
 }
 
@@ -214,6 +216,7 @@ function insere_ecotaxes($frm)
 			, nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "
+			, site_id = '" . intval($frm['site_id']) . "'
 			, prix_ht = '" . nohtml_real_escape_string($frm['prix']) . "'
 			, prix_ttc = '" . nohtml_real_escape_string($frm['prix'] * (1 + $frm['taxes'] / 100)) . "'";
 	$qid = query($sql);
@@ -235,6 +238,7 @@ function maj_ecotaxes($id, $frm)
 			, nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "
+			, site_id = '" . intval($frm['site_id']) . "'
 			, prix_ht = '" . nohtml_real_escape_string($frm['prix']) . "'
 			, prix_ttc = '" . nohtml_real_escape_string($frm['prix'] * (1 + $frm['taxes'] / 100)) . "'
 		WHERE id = '" . intval($id) . "'";
@@ -255,11 +259,13 @@ function affiche_liste_ecotaxes()
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 
 	$result = query("SELECT *
-		FROM peel_ecotaxes
+		FROM peel_ecotaxes 
+		WHERE " . get_filter_site_cond('ecotaxes', null, true) . "
 		ORDER BY code");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -267,12 +273,14 @@ function affiche_liste_ecotaxes()
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'code' => $ligne['code'],
 				'prix_ht' => fprix($ligne['prix_ht'], true, $GLOBALS['site_parameters']['code'], false),
-				'prix_ttc' => fprix($ligne['prix_ttc'], true, $GLOBALS['site_parameters']['code'], false)
+				'prix_ttc' => fprix($ligne['prix_ttc'], true, $GLOBALS['site_parameters']['code'], false),
+				'site_name' => ($ligne['site_id'] == 0 ? $GLOBALS['STR_ADMIN_ALL_SITES'] : $all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_ECOTAXES_TITLE', $GLOBALS['STR_ADMIN_ECOTAXES_TITLE']);
 	$tpl->assign('STR_ADMIN_ECOTAXES_EXPLAIN', $GLOBALS['STR_ADMIN_ECOTAXES_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ECOTAXES_ADD_ECOTAX', $GLOBALS['STR_ADMIN_ECOTAXES_ADD_ECOTAX']);
@@ -289,4 +297,3 @@ function affiche_liste_ecotaxes()
 	echo $tpl->fetch();
 }
 
-?>

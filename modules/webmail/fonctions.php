@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -93,7 +93,8 @@ function save_mail_db($frm)
 		, Ip = "' . nohtml_real_escape_string($Ipclient) . '"
 		, Email = "' . nohtml_real_escape_string(vb($frm['email'])) . '"
 		, Date = "' . nohtml_real_escape_string(date('Y-m-d')) . '"
-		, Heure = "' . nohtml_real_escape_string(date('H:i:s')) . '"';
+		, Heure = "' . nohtml_real_escape_string(date('H:i:s')) . '"
+		, site_id = "' . intval($GLOBALS['site_id']) . '"';
 	if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 		$sql .= "
 		, id_user = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";
@@ -105,4 +106,3 @@ function save_mail_db($frm)
 	query($sql);
 }
 
-?>

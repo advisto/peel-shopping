@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: emails.php 43497 2014-12-04 10:22:46Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,7 +33,7 @@ if (!defined('IN_PEEL')) {
  * @param array $lang 
  * @return
  */
-function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = 'html', $from = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null)
+function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $from = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null)
 {
 	// Suivant les hébergements, on peut remplacer \r\n par \n
 	$eol = "\r\n";
@@ -41,6 +41,9 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	// $eol = "\n";
 	if(empty($lang) || !in_array($lang, $GLOBALS['admin_lang_codes'])){
 		$lang = $_SESSION['session_langue'];
+	}
+	if (empty($format)) {
+		$format = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
 	}
 	if (defined('IN_PEEL_ADMIN') && a_priv('demo')) {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_DEMO_EMAILS_DEACTIVATED']))->fetch();
@@ -116,7 +119,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			$mail_content = String::nl2br_if_needed($mail_content);
 			if ($html_correct_conformity) {
 				// On corrige le HTML si nécessaire
-				$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, null);
+				$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, false);
 			}
 		} else {
 			// Email de texte qu'on va envoyer en HTML, et pour avoir une source d'email lisible on garde le \n à la fin
@@ -211,7 +214,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		} else {
 			if(!IN_INSTALLATION) {
 				// On n'affiche le message de désactivation des envois qu'à l'extérieur de l'installation
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();;
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();
 			}
 		}
 		$i++;
@@ -257,7 +260,7 @@ function prepare_email_tags($user_id, $order_id)
 	if (!empty($order_id)) {
 		$q = 'SELECT o.code_facture
 			FROM peel_commandes o
-			WHERE o.id="' . intval($order_id) . '"';
+			WHERE o.id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes', 'o', defined('IN_PEEL_ADMIN')) . '';
 		$result_orders = query($q);
 		$row_orders = fetch_assoc($result_orders);
 		$template_tags['ORDER'] = '';
@@ -279,11 +282,11 @@ function getTextAndTitleFromEmailTemplateLang($template_technical_code, $templat
 	// Dans le cas de la newsletter, le titre ne doit pas être celui du template, mais le titre renseigné dans la liste des newsletters.
 	$sql = 'SELECT *
 		FROM peel_email_template
-		WHERE active="TRUE"	';
+		WHERE active="TRUE"	AND ' . get_filter_site_cond('email_template', null, true);
 	if(!empty($template_technical_id)) {
-		$sql .= 'AND id="' . intval($template_technical_id) . '"';
+		$sql .= ' AND id="' . intval($template_technical_id) . '"';
 	} else {
-		$sql .= 'AND technical_code="' . nohtml_real_escape_string($template_technical_code) . '" AND (lang="' . word_real_escape_string($template_lang) . '" OR lang="")';
+		$sql .= ' AND technical_code="' . nohtml_real_escape_string($template_technical_code) . '" AND (lang="' . word_real_escape_string($template_lang) . '" OR lang="")';
 	}
 	$sql .= 'LIMIT 1';
 	$query_template = query($sql);
@@ -336,10 +339,9 @@ function get_last_newsletter($id = null, $lang = null) {
 	}
 	$sql = "SELECT id, date, format, template_technical_code, statut, sujet_".$lang.", message_".$lang."
 		FROM peel_newsletter
-		WHERE " . implode(' AND ', $sql_cond_array) . "
+		WHERE " . implode(' AND ', $sql_cond_array) . " AND " . get_filter_site_cond('newsletter', null, defined('IN_PEEL_ADMIN')) . "
 		ORDER BY id DESC
 		LIMIT 1";
 	$res = query($sql);
 	return fetch_assoc($res);
 }
-?>

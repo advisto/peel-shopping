@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_fr.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_fr.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -69,6 +69,7 @@ Détail du message envoyé le [DATE] :
 Nom : [NOM_FAMILLE]
 Prénom : [PRENOM]
 Société : [SOCIETE]
+Adresse : [ADRESSE]
 Tél : [TELEPHONE]
 Email : [EMAIL]
 Disponibilité : [DISPO]
@@ -83,7 +84,7 @@ IP : [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Bonjour, 
 
-Une commande portant le numéro [ORDER_ID] vient d'être enregistrée sur [WWWROOT]",
+Une commande portant le numéro [ORDER_ID] vient d'être enregistrée sur [WWWROOT]/",
   "admin_info_payment_credit_card_3_times" => "Bonjour,
 
 Une commande avec paiement en trois fois portant le numéro [ORDER_ID] vient d'être enregistrée sur [SITE]
@@ -243,14 +244,14 @@ Commentaires supplémentaires :
 
 [EMAIL_ACHETEUR] a souhaité vous offrir un chèque cadeau !
 
-Pour en bénéficier, connectez-vous simplement au site [WWWROOT] et utilisez votre code [CHECK_NAME].
+Pour en bénéficier, connectez-vous simplement au site [WWWROOT]/ et utilisez votre code [CHECK_NAME].
 
 Vous bénéficierez alors d'une remise de [REMISE_VALEUR] pour un montant minimum d'achat de [MONTANT_MIN] HT pour votre commande.",
   "cree_cheque_cadeau_friend" => "Bonjour,
 
 Votre ami [PRENOM] [NOM_FAMILLE] a souhaité vous offrir un chèque cadeau sur le site [SITE].
 
-Pour en bénéficier, connectez-vous simplement au site [WWWROOT] et utilisez votre code [CODE].
+Pour en bénéficier, connectez-vous simplement au site [WWWROOT]/ et utilisez votre code [CODE].
 
 Vous bénéficierez alors d'une remise de [PRIX] TTC sur votre commande.
 ",
@@ -262,7 +263,7 @@ Le code promo [CODE] via le module de CHEQUE CADEAU vient d'être créé sur [SI
 
 [SITE] vous offre un chèque cadeau valable 30 jours d'un montant de [MONTANT].
 
-Pour en bénéficier, connectez-vous simplement au site [WWWROOT] et utilisez votre code [CODE].
+Pour en bénéficier, connectez-vous simplement au site [WWWROOT]/ et utilisez votre code [CODE].
 ",
   "cree_cheque_cadeau_client_admin" => "Bonjour,
 
@@ -287,7 +288,7 @@ Voici les articles commandés :
 Détail du message envoyé le [DATE].
 
 [PRENOM] [NOM_FAMILLE] vous envoie sa liste de cadeaux [GIFTLIST_NAME] :
-[WWWROOT]/modules/listecadeau/voir.php?email_liste=[URL_LISTE_CADEAU]
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS]",
   "parrainage" => "Bonjour,
@@ -323,12 +324,12 @@ Cet email à pour but de vous sensibiliser à la sécurité de votre boutique PE
 
 Le service client
 [SITE]
-[WWWROOT]",
+[WWWROOT]/",
   "cree_cheque_cadeau_client_type1" => "Bonjour,
 
 [SITE] vous offre un chèque cadeau valable 30 jours d'un montant de [PERCENT].
 
-Pour en bénéficier, connectez-vous simplement au site [WWWROOT] et utilisez votre code [CODE].
+Pour en bénéficier, connectez-vous simplement au site [WWWROOT]/ et utilisez votre code [CODE].
 ",
   "warn_admin_user_subscription" => "Le [DATE], 
 
@@ -375,7 +376,7 @@ Dès réception de vos articles, nous validerons le remboursement de ces dernier
 
 NB : Si vous avez bien procédé au paiement et avez eu une confirmation de paiement, ne tenez pas compte de cet email car votre paiement sera validé manuellement très bientôt.
 
-Nous vous écrivons à propos de la commande que vous avez essayé de payer récemment sur [WWWROOT]
+Nous vous écrivons à propos de la commande que vous avez essayé de payer récemment sur [WWWROOT]/
 
 Nature de votre commande : [PRODUCT_NAME]
 Montant total de votre commande : [TOTAL_AMOUNT]
@@ -389,7 +390,7 @@ Nous sommes à votre écoute pour valider cette commande éventuellement via un 
 Nous nous tenons à votre disposition pour toutes informations supplémentaires.
 Dans l''attente de votre réponse, nous vous souhaitons une bonne journée.
 
-A bientôt sur [WWWROOT]
+A bientôt sur [WWWROOT]/
 L''équipe [SITE_NAME]
 
 NB : Ce message vous est envoyé automatiquement. Si vous êtes déjà rentré en contact avec nous à propos de ce paiement, veuillez ne pas tenir compte de cet email.",
@@ -442,7 +443,6 @@ Pour toute information complémentaire, n''hésitez pas à nous contacter.",
 
 Merci pour votre inscription à la newsletter de [SITE_NAME]. Vous recevrez une newsletter hebdomadaire à l'adresse [EMAIL].
 
-A bientôt sur [WWWROOT]"
+A bientôt sur [WWWROOT]/"
 );
 
-?>

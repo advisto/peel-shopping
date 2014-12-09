@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tailles.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: tailles.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_TAILLES_TITRE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_TAILLES_TITRE'];
 
 $output = '';
 $frm = $_POST;
@@ -121,7 +121,7 @@ function affiche_formulaire_modif_taille($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_tailles
-			WHERE id = " . intval($id));
+			WHERE id = " . intval($id) . " AND " .  get_filter_site_cond('tailles', null, true));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_TAILLES_NOT_FOUND']))->fetch();
@@ -153,6 +153,8 @@ function affiche_formulaire_taille(&$frm)
 			'nom' => $frm['nom_' . $lng]
 			);
 	}
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('poids', $frm['poids']);
 	$tpl->assign('prix', str_replace("-", "", $frm["prix"]));
@@ -188,16 +190,17 @@ function supprime_taille($id)
 
 	$qid = query("SELECT nom_" . $_SESSION['session_langue'] . "
 		FROM peel_tailles
-		WHERE id=" . intval($id));
+		WHERE id = " . intval($id) . " AND " .  get_filter_site_cond('tailles', null, true));
+
 	$col = fetch_assoc($qid);
 
 	/* Efface le taille */
-	query("DELETE FROM peel_tailles WHERE id=" . intval($id));
+	query("DELETE FROM peel_tailles WHERE id=" . intval($id) . " AND " . get_filter_site_cond('tailles', null, true));
 	/* Efface ce taille de la table produits_taille */
 	query("DELETE FROM peel_produits_tailles WHERE taille_id=" . intval($id));
 
 	/* Supprime le stock correspondant */
-	if (is_stock_advanced_module_active()) {
+	if (check_if_module_active('stock_advanced')) {
 		query("DELETE FROM peel_stocks WHERE taille_id = '" . intval($id) . "'");
 	}
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_TAILLES_MSG_DELETED_OK'], $col['nom_' . $_SESSION['session_langue']])))->fetch();
@@ -217,6 +220,7 @@ function insere_taille(&$frm)
 		, prix
 		, prix_revendeur
 		, signe
+		, site_id
 		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
@@ -227,7 +231,8 @@ function insere_taille(&$frm)
 		, '" . intval($frm['position']) . "'
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix']) . "'
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix_revendeur']) . "'
-		,'" . nohtml_real_escape_string($frm['signe']) . "'";
+		,'" . nohtml_real_escape_string($frm['signe']) . "'
+		,'" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -251,7 +256,8 @@ function maj_taille($id, &$frm)
 	/* Met à jour la table taille */
 	$sql = "UPDATE peel_tailles
 		SET	poids = '" . nohtml_real_escape_string($frm['poids']) . "'
-			, position = '" . intval($frm['position']) . "'";
+			, position = '" . intval($frm['position']) . "'
+			, site_id = '" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -274,10 +280,12 @@ function affiche_liste_taille()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$result = query("SELECT t.*
 		FROM peel_tailles t
+		WHERE " .  get_filter_site_cond('tailles', 't', true) . "
 		ORDER BY t.position ASC, t.prix ASC");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -285,7 +293,8 @@ function affiche_liste_taille()
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'prix' => ($ligne['prix'] != 0 ? fprix($ligne['prix'], true, $GLOBALS['site_parameters']['code'], false) : "n.a"),
 				'prix_revendeur' => ($ligne['prix_revendeur'] != 0 ? fprix($ligne['prix_revendeur'], true, $GLOBALS['site_parameters']['code'], false) : "n.a"),
-				'position' => $ligne['position']
+				'position' => $ligne['position'],
+				'site_name' => ($ligne['site_id'] == 0 ? $GLOBALS['STR_ADMIN_ALL_SITES'] : $all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
@@ -293,6 +302,7 @@ function affiche_liste_taille()
 	}
 	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=tailles';
 	$tpl->assign('STR_ADMIN_TAILLES_TITRE', $GLOBALS['STR_ADMIN_TAILLES_TITRE']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_TAILLES_LIST_EXPLAIN', $GLOBALS['STR_ADMIN_TAILLES_LIST_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_TAILLES_CREATE', $GLOBALS['STR_ADMIN_TAILLES_CREATE']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
@@ -307,4 +317,3 @@ function affiche_liste_taille()
 	return $tpl->fetch();
 }
 
-?>

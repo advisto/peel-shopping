@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 43077 2014-10-31 15:37:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -96,14 +96,25 @@
 			</td>
 		</tr>
 {% endif %}
+ 		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id"  {% if disable_user_siteweb %}disabled="disabled"{% endif %}>
+					{{ site_id_select_options }}
+				</select>
+				{% if disable_user_siteweb %}<input type="hidden" name="site_id" value="0" />{% endif %}
+			</td>
+		</tr>
 		<tr>
 			<td class="title_label">{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="email" class="form-control" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
 		</tr>
+{% if (STR_PSEUDO) %}
 		<tr>
 			<td class="title_label">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{{ pseudo|str_form_value }}" /></td>
 		</tr>
+{% endif %}
 		<tr>
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -152,6 +163,11 @@
 			{{ STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED }}
 	{% endif %}
 			</td>
+		</tr>
+{% endif %}
+{% if mode == "insere" %}
+		<tr>
+			<td colspan="2"><div class="global_help">{{ STR_ADMIN_UTILISATEURS_CLIENT_CODE_HELP }}</div></td>
 		</tr>
 {% endif %}
 		<tr>
@@ -245,7 +261,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_UTILISATEURS_SUPPLIER_RETURN_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control datepicker" name="on_vacances_date" style="width:150px" value="{{ on_vacances_date|str_form_value }}" /></td>
+			<td><input type="text" class="form-control datepicker" name="on_vacances_date" style="width:110px" value="{{ on_vacances_date|str_form_value }}" /></td>
 		</tr>
 		{% endif %}
 		<tr>
@@ -301,10 +317,18 @@
 			<td>{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</td>
 		</tr>
 		{% for f in specific_fields %}
-		<tr>
-			<td>{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
-		</tr>
+			{% if (f.field_title) %}
+				<tr>
+					<td>{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
+					<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="2">
+						{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+					</td>
+				</tr>
+			{% endif %}
 		{% endfor %}
 		{% if langues|length>1 %}
 		<tr>
@@ -361,7 +385,7 @@
 		</tr>
 	{% endif %}
 		<tr>
-			<td>&nbsp;</td>
+			<td colspan="2">&nbsp;</td>
 		</tr>
 {% endif %}
 		<tr>
@@ -393,7 +417,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_UTILISATEURS_PROJECT_DATE_FORECASTED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control datepicker" name="project_date_forecasted" style="width:100%" value="{{ project_date_forecasted|str_form_value }}" /></td>
+			<td><input type="text" class="form-control datepicker" name="project_date_forecasted" style="width:110px" value="{{ project_date_forecasted|str_form_value }}" /></td>
 		</tr>
 		{% endif %}
 		{% if is_clients_module_active %}
@@ -414,6 +438,30 @@
 			<td>{{ STR_ADMIN_UTILISATEURS_COMMERCIAL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="top"><input type="checkbox" name="commercial" value="1" {% if issel_commercial %} checked="checked"{% endif %} /> {{ STR_ADMIN_UTILISATEURS_COMMERCIAL_CHECKBOX }}</td>
 		</tr>
+		{% if is_devises_module_active and devises_options %}
+		<tr>
+			<td>{{ STR_DEVISE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top">
+				<select class="form-control" name="devise">
+					<option value="">{{ STR_ALL }}...</option>
+				{% for o in devises_options %}
+					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
+				{% endfor %}
+				</select>
+			</td>
+		</tr>
+		{% endif %}
+		{% if STR_ADMIN_SITE_COUNTRY %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_SITE_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}: </td>
+			<td>
+				<select class="form-control" name="site_country">
+					<option value="">{{ STR_ALL }}...</option>
+					{{ site_country_select_options }}
+				</select>
+			</td>
+		</tr>
+		{% endif %}
 		{% if mode == "insere" %}
 		<tr>
 			<td class="top" colspan="2"><input type="checkbox" name="notify" value="1" /> {{ STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD }}</td>
@@ -495,9 +543,7 @@
 						<td>
 							<select class="form-control" id="fonction" name="fonction">
 								<option value="">{{ STR_CHOOSE }}...</option>
-								<option value="leader"{% if fonction=='leader' %} selected="selected"{% endif %}>{{ STR_LEADER }}</option>
-								<option value="manager"{% if fonction=='manager' %} selected="selected"{% endif %}>{{ STR_MANAGER }}</option>
-								<option value="employee"{% if fonction=='employee' %} selected="selected"{% endif %}>{{ STR_EMPLOYEE }}</option>
+								{{ fonction_options }}
 							</select>
 						</td>
 					</tr>
@@ -510,6 +556,7 @@
 		{% if is_vitrine_module_active and is_id_utilisateur %}
 		<tr><td colspan="2"><br />{{ vitrine_admin }}</td></tr>
 		{% endif %}
+		
 		<tr>
 			<td colspan="2"><p class="center"><input class="btn btn-primary" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>
 		</tr>

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_meta.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_meta.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -32,6 +32,16 @@
 			<td><input type="text" class="form-control" name="technical_code" size="70" value="{$technical_code|str_form_value}" placeholder="http://.... {$STR_OR} $GLOBALS['page_name']" /></td>
 		</tr>
 		<tr>
+			<td class="title_label">{$STR_ADMIN_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>
+		</tr>
+		<tr>
+			<td>
+				<select class="form-control" name="site_id">
+					{$site_id_select_options}
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td>&nbsp;</td>
 		</tr>
 		{foreach $langs as $l}
@@ -50,7 +60,7 @@
 		<tr>
 			<td><textarea class="form-control" name="meta_key_{$l.lng}" style="width:100%" rows="5" cols="54">{$l.meta_key|nl2br_if_needed|strip_tags}</textarea></td>
 		</tr>
-		<tr >
+		<tr>
 			<td class="title_label">{$STR_ADMIN_META_DESCRIPTION} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 		</tr>
 		<tr>

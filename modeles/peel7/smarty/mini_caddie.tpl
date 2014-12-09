@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: mini_caddie.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: mini_caddie.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<div id="fly_to_basket_destination"></div>
 <div class="dropdown">
 	<a class="dropdown-toggle btn btn-default caddie-button" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart"></span><span class="badge minicaddie_badge_xs">{$count_products}</span><span class="caret"></span></a>
@@ -19,7 +19,7 @@
 		<table class="minicaddie">
 			{foreach $products as $item}
 			<tr>
-				<td class="product_name"><div class="autocomplete_image"><img src="{$item.picture}" alt="{$item.name|str_form_value}" /></div><div>{$item.quantite} x <a href="{$item.href|escape:'html'}">{$item.name}{if isset($item.color)}<br />{$item.color.label}: {$item.color.value}{/if}{if isset($item.size)}<br />{$item.size.label}: {$item.size.value}{/if}</a></div></td>
+				<td class="product_name">{if !empty($item.picture)}<div class="autocomplete_image"><img src="{$item.picture}" alt="{$item.name|str_form_value}" /></div>{/if}<div>{$item.quantite} x <a href="{$item.href|escape:'html'}">{$item.name}{if isset($item.color)}<br />{$item.color.label}: {$item.color.value}{/if}{if isset($item.size)}<br />{$item.size.label}: {$item.size.value}{/if}</a></div></td>
 				<td class="product_price"><div>{$item.price}</div></td>
 			</tr>
 			{/foreach}

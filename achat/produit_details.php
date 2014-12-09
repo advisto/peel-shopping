@@ -1,28 +1,46 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: produit_details.php 43040 2014-10-29 13:36:21Z sdelaporte $
 include("../configuration.inc.php");
+
+define('IN_CATALOGUE_PRODUIT', true);
+$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_page_columns_count'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_PRODUCT'];
 
 $output = '';
 if (empty($_GET['id'])) {
 	// Si aucun produit n'est spécifié, retour à la page d'accueil
 	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
 }
-$product_infos['categorie_id'] = intval(vn($_GET['catid']));
-$product_infos['categorie'] = get_category_name($product_infos['categorie_id']) ;
+$product_infos = array();
+
+if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'])) {
+	// Autorisation de plusieurs urls pour ce produit dans le cas ou il est associé à plusieurs catégorie. Cette configuration désactivée par défaut
+	// Si le produit est bien associé à $_GET['catid']
+	$query = query("SELECT 1
+		FROM peel_produits_categories pc 
+		WHERE pc.produit_id ='" . intval($_GET['id']) . "' AND pc.categorie_id=" . intval(vn($_GET['catid'])));
+
+	if (num_rows($query)>0) {
+		// le produit appartient à la catégorie demandée dans l'url => on spécifie l'id et le nom de la catégorie pour la classe Product
+		$product_infos['categorie_id'] = intval(vn($_GET['catid']));
+		$product_infos['categorie'] = get_category_name($product_infos['categorie_id']) ;
+	}
+}
+
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
 $url = $product_object->get_product_url();
-if (empty($product_object->id)) {
+if (empty($product_object->id) || ((!a_priv("admin_product") && !a_priv("reve")) && $product_object->on_reseller == 1)) {
 	// Si aucun produit n'est trouvé, retour à la page d'accueil
 	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
 }
@@ -32,12 +50,14 @@ if (is_module_url_rewriting_active() && String::strpos($_SERVER['REQUEST_URI'], 
 	}
 	redirect_and_die($url, true);
 }
-if (is_module_url_rewriting_active ()) {
+if (is_module_url_rewriting_active()) {
 	if (!empty($url) && $url != get_current_url(false)) {
 		// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 		$theoretical_current_url = $url;
 		redirect_and_die($theoretical_current_url, true);
-	} elseif (empty($url)) {
+	} elseif (!empty($product_infos['categorie_id']) && empty($url)) {
+		// si l'url n'a pas été calculé par la class Product
+		// Si un produit n'a pas de catégorie associé (ce qui n'est pas un cas normal) la class Product ne peut pas trouver le produit. Il faut pouvoir consulter un produit même si il n'est pas associé à une catégorie, ce qui peut être utile dans des cas spécifiques.
 		// Si l'url n'a pas été calculée par la class Product pour une raison quelconque
 		redirect_and_die($GLOBALS['wwwroot'] . "/");
 	}
@@ -45,12 +65,12 @@ if (is_module_url_rewriting_active ()) {
 	$_GET['catid'] = $product_object->categorie_id;
 }
 
-if (is_last_views_module_active ()) {
+if (is_last_views_module_active()) {
 	add_product_to_last_views_cookie(intval($_GET['id'])); // on actualiste la liste des produits visités
 }
 // Insertion de la demande d'infos de stock
 $form_error_object = new FormError();
-if ((isset($_POST["validate"]))) { // si on valide le formulaire d'info stock
+if (check_if_module_active('stock_advanced') && (isset($_POST["validate"]))) { // si on valide le formulaire d'info stock
 	$form_error_object->valide_form($_POST,
 		array('email' => $GLOBALS['STR_ERR_EMAIL']));
 	if (!$form_error_object->has_error('email')) {
@@ -76,7 +96,6 @@ if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
 	unset($_SESSION["session_display_popup"]["upload_error_text"]);
 }
 
-define('IN_CATALOGUE_PRODUIT', true);
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_page_columns_count'];
 
 if ($form_error_object->count() > 0) {
@@ -88,10 +107,9 @@ if ($form_error_object->count() > 0) {
 		}
 	}
 }
-$output .= get_produit_details_html(intval($_GET['id']), intval(vb($_GET['cId'])));
+$output .= get_produit_details_html($product_object, intval(vb($_GET['cId'])));
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 
-?>

@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paiement.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: paiement.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_PAIEMENT_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PAIEMENT_TITLE'];
 
 $output = '';
 $frm = $_POST;
@@ -124,7 +124,7 @@ function affiche_formulaire_modif_paiement($id, &$frm)
 		/* Charge les informations du moyen de paiement */
 		$qid = query("SELECT *
 			FROM peel_paiement
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('paiement', null, true));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PAIEMENT_PAYMENT_MEAN_NOT_FOUND']))->fetch();
@@ -165,11 +165,14 @@ function affiche_formulaire_paiement(&$frm)
 	$tpl->assign('totalmax', vb($frm["totalmax"]));
 	$tpl->assign('tva', get_vat_select_options(vb($frm['tva'])));
 	$tpl->assign('position', vb($frm["position"]));
-	$tpl->assign('is_payback_module_active', is_payback_module_active());
-	if (is_payback_module_active()) {
+	$tpl->assign('is_payback_module_active', check_if_module_active('payback'));
+	if (check_if_module_active('payback')) {
 		$tpl->assign('is_retour_possible1', ($frm["retour_possible"] || !isset($frm["retour_possible"])));
 		$tpl->assign('is_retour_possible0', (isset($frm["retour_possible"]) && !$frm["retour_possible"]));
 	}
+	
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('titre_bouton', vb($frm["titre_bouton"]));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_FORM_TITLE', $GLOBALS['STR_ADMIN_PAIEMENT_FORM_TITLE']);
@@ -204,12 +207,12 @@ function supprime_paiement($id)
 {
 	$qid = query("SELECT *
 		FROM peel_paiement
-		WHERE id = " . intval($id) . "");
+		WHERE id = " . intval($id) . " AND " . get_filter_site_cond('paiement', null, true));
 	$p = fetch_assoc($qid);
 
 	/* Efface le paiement */
 	$qid = query("DELETE FROM peel_paiement 
-		WHERE id=" . intval($id));
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('paiement', null, true));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PAIEMENT_MSG_DELETED_OK'], $p['nom_' . $_SESSION['session_langue']])))->fetch();
 }
 
@@ -225,8 +228,9 @@ function insere_paiement(&$frm)
 		position
 		, technical_code
 		, tva
-		, etat";
-	if (is_payback_module_active()) {
+		, etat
+		, site_id";
+	if (check_if_module_active('payback')) {
 		$sql .= ", retour_possible";
 	}
 	$sql .= ", tarif";
@@ -240,8 +244,9 @@ function insere_paiement(&$frm)
 		'" . intval($frm['position']) . "'
 		, '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, '" . nohtml_real_escape_string($frm['tva']) . "'
-		, '" . intval($frm['etat']) . "'";
-	if (is_payback_module_active()) {
+		, '" . intval($frm['etat']) . "'
+		, '" . intval($frm['site_id']) . "'";
+	if (check_if_module_active('payback')) {
 		$sql .= ", '" . intval($frm['retour_possible']) . "'";
 	}
 	$sql .= "
@@ -270,10 +275,11 @@ function maj_paiement($id, $frm)
 		SET position = '" . intval($frm['position']) . "'
 			, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 			, tva = '" . nohtml_real_escape_string($frm['tva']) . "'";
-	if (is_payback_module_active()) {
+	if (check_if_module_active('payback')) {
 		$sql .= ", retour_possible = '" . nohtml_real_escape_string($frm['retour_possible']) . "'";
 	}
-	$sql .= ", etat = '" . nohtml_real_escape_string($frm['etat']) . "'";
+	$sql .= ", etat = '" . nohtml_real_escape_string($frm['etat']) . "'
+			, site_id = '" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -302,11 +308,13 @@ function affiche_liste_paiement()
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$sql = "SELECT p.*
 		FROM peel_paiement p
+		WHERE " . get_filter_site_cond('paiement', 'p', true) . " 
 		ORDER BY p.position";
 	$result = query($sql);
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			if ($ligne['technical_code'] == 'paypal' && empty($GLOBALS['site_parameters']['email_paypal'])) {
 				$explain = '<br /><span class="red">' . String::strtoupper($GLOBALS["STR_ADMIN_DEACTIVATED"]) . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': <a href="'.$GLOBALS['administrer_url'].'/sites.php" style="color:#999999">' . $GLOBALS["STR_ADMIN_SITES_PAYPAL_EMAIL"].'</a></span>';
@@ -324,13 +332,15 @@ function affiche_liste_paiement()
 				'position' => $ligne['position'],
 				'prix' => ($ligne['tarif'] != "0.00000" ? fprix($ligne['tarif'], true, $GLOBALS['site_parameters']['code'], false) . "" : "-"),
 				'etat_onclick' => 'change_status("paiement", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
-				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
+				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
 	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=paiement';
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_TITLE', $GLOBALS['STR_ADMIN_PAIEMENT_TITLE']);
 	$tpl->assign('STR_ADMIN_PAIEMENT_EXPLAIN', $GLOBALS['STR_ADMIN_PAIEMENT_EXPLAIN']);
@@ -353,4 +363,3 @@ function affiche_liste_paiement()
 	return $tpl->fetch();
 }
 
-?>

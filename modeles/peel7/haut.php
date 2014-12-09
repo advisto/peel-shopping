@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: haut.php 43262 2014-11-18 19:20:34Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,17 +20,25 @@ if (empty($GLOBALS['page_name']) && function_exists('get_current_page')) {
 // header_html va être rempli par getHTMLHead
 $GLOBALS['header_html'] = '';
 if (empty($GLOBALS['page_columns_count'])) {
-	$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['site_general_columns_count'];
+	$GLOBALS['page_columns_count'] = vn($GLOBALS['site_parameters']['site_general_columns_count'], 3);
 }
-$GLOBALS['page_columns_count'] = 3;
+
+if(!empty($output) && (String::strpos($output, 'vimeo.') !== false || String::strpos($output, 'youtube.') !== false || String::strpos($output, 'youtube-nocookie.') !== false || String::strpos($output, 'kickstarter.') !== false)) {
+	// Gestion responsive des vidéos
+	$GLOBALS['js_files'][] = $GLOBALS['wwwroot'] . '/lib/js/jquery.fitvid.js';
+	$GLOBALS['js_ready_content_array'][] = '
+		$("#main_content").fitVids();
+';
+}
 
 output_general_http_header();
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('haut.tpl');
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
+$tpl->assign('disable_header_login', !empty($GLOBALS['site_parameters']['disable_header_login']));
 // header-html est passé par référence à getHTMLHead pour être rempli
 $tpl->assign('lang', $_SESSION['session_langue']);
-if (is_facebook_module_active()) {
+if (check_if_module_active('facebook')) {
 	$tpl->assign('facebook_xmls', get_facebook_xmlns());
 }
 $tpl->assign('page_name', vb($GLOBALS['page_name']));
@@ -38,29 +46,37 @@ if (!defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && vb($GLOBALS['si
 	$tpl->assign('update_msg', $GLOBALS['STR_UPDATE_WEBSITE']);
 }
 if (is_facebook_connect_module_active()) {
-	if (empty($_SESSION['session_utilisateur']['email']) && empty($_SESSION['session_utilisateur']['disable_facebook_autologin'])) {
+	if (empty($_SESSION['session_utilisateur']['email']) && empty($_SESSION['disable_facebook_autologin'])) {
 		$tpl->assign('auto_login_with_facebook', auto_login_with_facebook(true));
 	} elseif (!empty($_SESSION['session_utilisateur']['email'])) {
 		$tpl->assign('logout_with_facebook', logout_with_facebook(true));
 	}
 }
 
-if (is_welcome_ad_module_active()) {
+if (check_if_module_active('welcome_ad')) {
 	load_welcome_ad();
 	$tpl->assign('welcome_ad_div', get_welcome_ad_div());
 }
-if (is_cart_popup_module_active() && !empty($_SESSION['session_show_caddie_popup'])) {
-	$tpl->assign('cart_popup_div', get_cart_popup_div());
+if (check_if_module_active('cart_popup') && !empty($_SESSION['session_show_caddie_popup'])) {
+	if (defined('IN_CATALOGUE_PRODUIT') && !empty($_GET['id'])) {
+		$product_added_id = $_GET['id'];
+	}
+	$tpl->assign('cart_popup_div', get_cart_popup_div(vb($product_added_id)));
 }
-$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], true, 26));
+$tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], false, 26));
 
 if (is_devises_module_active()) {
 	$tpl->assign('module_devise', affiche_module_devise(true));
 }
 if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) && $GLOBALS['site_parameters']['on_logo'] == 1) {
+	$this_logo = $GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']];
+	if(String::strpos($this_logo, '//') === false && String::substr($this_logo, 0, 1) == '/') {
+		// Chemin absolu
+		$this_logo = $GLOBALS['wwwroot'] . $this_logo;
+	}
 	$tpl->assign('logo_link',
 		array('href' => $GLOBALS['wwwroot'] . '/',
-			'src' => $GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']])
+			'src' => $this_logo)
 		);
 }
 
@@ -73,18 +89,18 @@ if(empty($_COOKIE['page_warning_close']) || $_COOKIE['page_warning_close']!='clo
 }
 $tpl->assign('CONTENT_SCROLLING', affiche_contenu_html('scrolling', true));
 
-if (is_carrousel_module_active()) {
+if(empty($GLOBALS['site_parameters']['skip_carrousel_categorie']) && check_if_module_active('carrousel')) {
 	$tpl->assign('CARROUSEL_CATEGORIE', affiche_carrousel('categorie', true));
 }
 if ($GLOBALS['page_columns_count'] > 1) {
 	$modules_left = '';
-	if((defined('IN_CATALOGUE_ANNONCE') || defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE_DETAILS')) && is_annonce_module_active()) {
+	if((defined('IN_CATALOGUE_ANNONCE') || defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE_DETAILS')) && check_if_module_active('annonces')) {
 		$modules_left .= get_modules('left_annonce', true, null, vn($_GET['catid'])); 
 	}
 	$modules_left .= get_modules('above_middle', true, null, vn($_GET['catid']));
 	$tpl->assign('MODULES_LEFT', $modules_left);
 }
-if (is_vitrine_module_active() && !empty($GLOBALS['vitrine_and_user_infos'])) {
+if (check_if_module_active('vitrine') && !empty($GLOBALS['vitrine_and_user_infos'])) {
 	if(!empty($GLOBALS['vitrine_and_user_infos']['id_vitrine'])) {
 		$id_vitrine = $GLOBALS['vitrine_and_user_infos']['id_vitrine'];
 	} else {
@@ -93,7 +109,7 @@ if (is_vitrine_module_active() && !empty($GLOBALS['vitrine_and_user_infos'])) {
 	$tpl->assign('user_information_boutique', display_user_information_boutique($id_vitrine));
 }
 
-if (is_module_ariane_panier_active() && (defined('IN_CADDIE') || defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
+if (check_if_module_active('ariane_panier') && (defined('IN_CADDIE') || defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
 	$tpl->assign('ariane_panier', ariane_panier());
 }
 $tpl->assign('MODULES_TOP_MIDDLE', get_modules('top_middle', true, null, vn($_GET['catid'])));
@@ -127,9 +143,8 @@ $tpl->assign('account_register_url', get_account_register_url(false, false));
 $tpl->assign('STR_OPEN_ACCOUNT', $GLOBALS['STR_OPEN_ACCOUNT']);
 
 // A exécuter en dernier dans ce fichier car prend tous les javascripts
-// header_html est passé par référence à getHTMLHead pour être rempli
-$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['header_html']));
-$tpl->assign('header_html', $GLOBALS['header_html']);
+// category_introduction_text est passé par référence à getHTMLHead pour être rempli
+$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['category_introduction_text']));
+$tpl->assign('category_introduction_text', $GLOBALS['category_introduction_text']);
 echo $tpl->fetch();
 
-?>

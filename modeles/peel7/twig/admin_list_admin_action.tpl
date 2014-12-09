@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_list_admin_action.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_list_admin_action.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<table class="full_width" >
 		<tr>
@@ -62,8 +62,8 @@
 					<option value="2"{% if date == '2' %} selected="selected"{% endif %}>{{ STR_ADMIN_DATE_STARTING|capitalize }}</option>
 					<option value="3"{% if date == '3' %} selected="selected"{% endif %}>{{ STR_ADMIN_DATE_BETWEEN_START|capitalize }}</option>
 				</select>
-				<input id="date_input1" name="date_input1" maxlength="10" size="10" type="text" class="form-control datepicker" value="{{ date_input1|str_form_value }}" title="{{ STR_ADMIN_INPUT_SEARCH|str_form_value }}" style="width:100px;" />
-				<span id="date_input2_span" style="display:none"> {{ STR_ADMIN_DATE_BETWEEN_AND }} <input id="date_input2" name="date_input2" maxlength="10" size="10" type="text" class="form-control datepicker" value="{{ date_input2|str_form_value }}" title="" style="width:100px;" /></span>
+				<input id="date_input1" name="date_input1" maxlength="10" size="10" type="text" class="form-control datepicker" value="{{ date_input1|str_form_value }}" title="{{ STR_ADMIN_INPUT_SEARCH|str_form_value }}" style="width:110px;" />
+				<span id="date_input2_span" style="display:none"> {{ STR_ADMIN_DATE_BETWEEN_AND }} <input id="date_input2" name="date_input2" maxlength="10" size="10" type="text" class="form-control datepicker" value="{{ date_input2|str_form_value }}" title="" style="width:110px;" /></span>
 			</td>
 		</tr>
 		<tr>

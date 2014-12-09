@@ -1,20 +1,20 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: order_step1.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
-<h1 class="order_step1">{$STR_STEP1}</h1>
+<h1 property="name" class="order_step1">{$STR_STEP1}</h1>
 <form class="entryform form-inline order_step1_form" role="form" id="entryformstep" method="post" action="{$action|escape:'html'}">
 	<div class="row formulaire-achat">
 		<div class="col-sm-6">
@@ -136,6 +136,9 @@
 				<div><textarea class="form-control" name="commentaires" cols="54" rows="5">{$commentaires}</textarea></div>
 			</fieldset>
 			<p><input type="checkbox" name="cgv" value="1" /> {$STR_CGV_OK}</p>
+			{if $register_during_order_process}
+			<p><input type="checkbox" name="register_during_order_process" value="1" />{$STR_CREATE_ACCOUNT_FUTURE_USE}</p>
+			{/if}
 			<div class="center">
 				<input type="submit" value="{$STR_ETAPE_SUIVANTE|str_form_value}" class="btn btn-lg btn-primary" />
 			</div>

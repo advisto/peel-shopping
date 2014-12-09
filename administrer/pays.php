@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: pays.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_PAYS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PAYS_TITLE'];
 
 $frm = $_POST;
 $form_error_object = new FormError();
@@ -132,7 +132,7 @@ function affiche_formulaire_modif_pays($id, &$frm)
 		/* Charge les informations du pays */
 		$qid = query("SELECT *
 			FROM peel_pays
-			WHERE id = " . intval($id));
+			WHERE id = " . intval($id) . ' AND ' . get_filter_site_cond('pays', null, true));
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PAYS_ERR_NOT_FOUND']))->fetch();
@@ -174,6 +174,7 @@ function affiche_formulaire_pays(&$frm)
 	$tpl_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_zones
+		WHERE " . get_filter_site_cond('zones', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_zone = query($sql_zone);
 	while ($tab_zone = fetch_assoc($res_zone)) {
@@ -182,9 +183,12 @@ function affiche_formulaire_pays(&$frm)
 			'name' => $tab_zone['nom_' . $_SESSION['session_langue']]
 			);
 	}
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('options', $tpl_options);
 	$tpl->assign('position', $frm["position"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PAYS_ADD_COUNTRY', $GLOBALS['STR_ADMIN_PAYS_ADD_COUNTRY']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
@@ -212,12 +216,12 @@ function supprime_pays($id)
 {
 	$qid = query("SELECT pays_" . $_SESSION['session_langue'] . "
 		FROM peel_pays
-		WHERE id = " . intval($id));
+		WHERE id = " . intval($id) . ' AND ' . get_filter_site_cond('pays', null, true));
 	$p = fetch_assoc($qid);
 
 	/* Efface le pays */
 	query("DELETE FROM peel_pays
-		WHERE id = " . intval($id));
+		WHERE id = " . intval($id) . '" AND ' . get_filter_site_cond('pays', null, true));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PAYS_MSG_DELETED_OK'], $p['pays_' . $_SESSION['session_langue']])))->fetch();
 }
 
@@ -235,7 +239,8 @@ function insere_pays(&$frm)
 		, iso
 		, iso3
 		, iso_num
-		, position";
+		, position
+		, site_id";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", pays_" . $lng;
 	}
@@ -246,7 +251,8 @@ function insere_pays(&$frm)
 		, '" . nohtml_real_escape_string($frm['iso']) . "'
 		, '" . nohtml_real_escape_string($frm['iso3']) . "'
 		, '" . intval($frm['iso_num']) . "'
-		, '" . intval($frm['position']) . "'";
+		, '" . intval($frm['position']) . "'
+		, '" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
@@ -271,6 +277,7 @@ function maj_pays($id, $frm)
 		$sql .= " , pays_" . $lng . " = '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
 	$sql .= "
+			, site_id = '" . intval($frm['site_id']) . "'
 			, iso = '" . nohtml_real_escape_string($frm['iso']) . "'
 			, iso3 = '" . nohtml_real_escape_string($frm['iso3']) . "'
 			, iso_num = '" . intval($frm['iso_num']) . "'
@@ -295,7 +302,7 @@ function affiche_liste_pays()
 		}
 		$sql = "UPDATE peel_pays
 			SET etat='" . intval($etat) . "'
-			WHERE zone='" . intval($_POST['zones']) . "'";
+			WHERE zone='" . intval($_POST['zones']) . "' AND " . get_filter_site_cond('pays', null, true);
 		query($sql);
 	}
 
@@ -307,6 +314,7 @@ function affiche_liste_pays()
 	$tpl_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_zones
+		WHERE " . get_filter_site_cond('zones', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_zone = query($sql_zone);
 	while ($result = fetch_assoc($res_zone)) {
@@ -318,7 +326,8 @@ function affiche_liste_pays()
 
 	$result = query("SELECT p.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
 		FROM peel_pays p
-		LEFT JOIN peel_zones z ON z.id=p.zone
+		LEFT JOIN peel_zones z ON z.id=p.zone AND " . get_filter_site_cond('zones', 'z', true) . "
+		WHERE " . get_filter_site_cond('pays', "p", true) . "
 		ORDER BY p.position ASC, p.pays_" . $_SESSION['session_langue'] . " ASC");
 
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
@@ -326,6 +335,7 @@ function affiche_liste_pays()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$zone = String::html_entity_decode_if_needed($ligne['zone_name']);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
@@ -337,13 +347,16 @@ function affiche_liste_pays()
 				'zone' => vb($zone),
 				'position' => $ligne['position'],
 				'etat_onclick' => 'change_status("countries", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
-				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
+				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
 	$GLOBALS['sortable_rpc'] = 'rpc_positions.php?mode=countries';
+	
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PAYS_LIST_EXPLAIN', $GLOBALS['STR_ADMIN_PAYS_LIST_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_PAYS_TITLE', $GLOBALS['STR_ADMIN_PAYS_TITLE']);
@@ -380,8 +393,7 @@ function change_etat($id, $etat)
 	}
 	$req = "UPDATE peel_pays
 		SET etat = '" . intval($set_etat) . "'
-		WHERE id = '" . intval($id) . "'";
+		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('pays', null, true);
 	$res = query($req);
 }
 
-?>

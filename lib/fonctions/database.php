@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -25,9 +25,10 @@ if (!defined('IN_PEEL')) {
  * @param string $serveur_mysql
  * @param string $utilisateur_mysql
  * @param string $mot_de_passe_mysql
+ * @param boolean $continue_if_error
  * @return
  */
-function db_connect(&$database_object, $database_name = null, $serveur_mysql = null, $utilisateur_mysql = null, $mot_de_passe_mysql = null)
+function db_connect(&$database_object, $database_name = null, $serveur_mysql = null, $utilisateur_mysql = null, $mot_de_passe_mysql = null, $continue_if_error = false)
 {
 	// Connexion à la BDD
 	if(empty($serveur_mysql)) {
@@ -79,12 +80,12 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 	} else {
 		$database_object = mysql_connect($serveur_mysql, $utilisateur_mysql, $mot_de_passe_mysql);
 	}
-	if(!empty($error_no)) {
+	if(!empty($error_no) && !$continue_if_error) {
 		$sujet_du_mail = 'MySQL connection problem (' . mysqli_connect_errno() . '): '.mysqli_connect_error();
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL on " . $serveur_mysql . " - the user is " . $utilisateur_mysql . ". Please check if MySQL is currently launched and if the connection parameters are valid.";
 		$contenu_du_mail .= "\n\nLa page " . $_SERVER['REQUEST_URI'] . " a provoqué une erreur lors de sa tentative de connexion à MySQL situé sur le serveur " . $serveur_mysql . " - l'utilisateur est " . $utilisateur_mysql . ". Il faudrait vérifier si le serveur MySQL est actuellement lancé et si les paramètres de connexion sont valides.";
 		if (!empty($GLOBALS['support'])) {
-			send_email($GLOBALS['support'], $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
+			send_email($GLOBALS['support'], $sujet_du_mail, $contenu_du_mail, null, null, null, '', null);
 		}
 		if (!empty($GLOBALS['site_parameters']['display_warning_if_connection_problem'])) {
 			echo $sujet_du_mail;
@@ -93,7 +94,7 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 		die();
 	}
 	if(!empty($database_name)) {
-		$selection_de_la_base = select_db($database_name, $database_object);
+		$GLOBALS['selection_de_la_base'] = select_db($database_name, $database_object, $continue_if_error);
 	}
 	return $database_object;
 }
@@ -109,11 +110,11 @@ function db_connect(&$database_object, $database_name = null, $serveur_mysql = n
 function select_db($database_name, &$database_object, $continue_if_error = false)
 {
 	if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
-		$selection_de_la_base = $database_object->select_db($database_name);
+		$GLOBALS['selection_de_la_base'] = $database_object->select_db($database_name);
 	} else {
-		$selection_de_la_base = mysql_select_db($database_name, $database_object);
+		$GLOBALS['selection_de_la_base'] = mysql_select_db($database_name, $database_object);
 	}
-	if (!$selection_de_la_base && !$continue_if_error) {
+	if (!$GLOBALS['selection_de_la_base'] && !$continue_if_error) {
 		if(is_object($database_object) && !empty($database_object->error)) {
 			$contenu_display = $database_object->error;
 		} else {
@@ -122,7 +123,7 @@ function select_db($database_name, &$database_object, $continue_if_error = false
 		$sujet_du_mail = "Database selection problem";
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL database - " . $contenu_display;
 		if (!empty($support)) {
-			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, 'html', '', null);
+			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, null, '', null);
 		}
 		if (!empty($display_warning_if_database_object_problem)) {
 			echo $contenu_display;
@@ -139,7 +140,7 @@ function select_db($database_name, &$database_object, $continue_if_error = false
 		// Please check if you need to convert GENERAL_ENCODING encoding name to mysql name
 		query("SET NAMES '" . GENERAL_ENCODING . "'", false, $database_object);
 	}
-	return $selection_de_la_base;
+	return $GLOBALS['selection_de_la_base'];
 }
 
 /**
@@ -160,7 +161,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		// L'utilisateur ayant le profil "demo" ne peut pas faire de modification des données
 		return false;
 	}
-	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false)) {
+	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false) || strpos(strtolower($query), 'benchmark(') !== false) {
 		// On empêche l'exécution de requêtes contenant certains mots clé
 		return false;
 	}
@@ -223,14 +224,14 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 	}
 	if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
 		$end_time = microtime_float();
-		$GLOBALS['peel_debug'][] = array('sql' => $query, 'duration' => $end_time - $start_time);
+		$GLOBALS['peel_debug'][] = array('sql' => $query, 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
 	}
 	if (!empty($query_values)) {
 		return $query_values;
 	} else {
 		if (!$silent_if_error || in_array($error_number, array(1118))) {
 			// Si l'erreur est 1118 (Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535.) qui peut arriver lors d'un ALTER TABLE ADD alors on affiche quand même l'erreur pour meilleure gestion par l'administrateur
-			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
+			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . ' ' . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
 			if (empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 				// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur
 				echo '[admin info : ' . $error_message . ']<br />';
@@ -475,7 +476,7 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
 }
 
 /**
- * get_table_fields()
+ * get_table_field_names()
  *
  * @param mixed $table_name
  * @param mixed $link_identifier
@@ -521,6 +522,52 @@ function get_table_index($table_name, $link_identifier = null, $silent_if_error 
 }
 
 /**
+ * Renvoie un tableau avec la liste des tables de la base courante
+ *
+ * @param string $name_part Chaîne de caractère devant faire partie du nom des tables recherchées
+ * @return array liste des tables indexée par leurs noms
+ * @access public
+ */
+function &listTables($name_part = null)
+{
+	// Récupère la liste des tables contenues dans la base courante
+	static $tables_list;
+	if (!isset($tables_list[$name_part])) {
+		$sql = "SHOW TABLES FROM `".word_real_escape_string($GLOBALS['nom_de_la_base']) . "`";
+		$result = query($sql);
+		while ($table_name = fetch_row($result)) {
+			if (empty($name_part) || String::strpos($table_name[0], $name_part) !== false) {
+				$tables_list[$name_part][$table_name[0]] = $table_name[0];
+			}
+		}
+	}
+	return $tables_list[$name_part];
+}
+
+/**
+ * Renvoie un tableau avec la liste des bases de données accessibles
+ *
+ * @param string $name_part Chaîne de caractère devant faire partie du nom des tables recherchées
+ * @return array liste des bases indexée par leurs noms
+ * @access public
+ */
+function &list_dbs($name_part = null)
+{
+	// Récupère la liste des tables contenues dans la base courante
+	static $databases_list;
+	if (!isset($databases_list[$name_part])) {
+		$sql = "SHOW DATABASES";
+		$result = query($sql);
+		while ($table_name = fetch_row($result)) {
+			if ((empty($name_part) || String::strpos($table_name[0], $name_part) !== false) && $table_name[0] != "information_schema" && $table_name[0] != "mysql") {
+				$databases_list[$name_part][$table_name[0]] = $table_name[0];
+			}
+		}
+	}
+	return $databases_list[$name_part];
+}
+
+/**
  * db_close()
  *
  * @return
@@ -539,4 +586,3 @@ function db_close($database_object = null)
 	}
 }
 
-?>

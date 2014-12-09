@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: verifdroits.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: verifdroits.php 43147 2014-11-07 14:47:12Z gboussin $
 define('IN_INSTALLATION', 4);
 include("../configuration.inc.php");
 
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_INSTALL_STEP4_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_INSTALL_STEP4_TITLE'];
 
 unset($_SESSION['session_peel_sql']);
 unset($_SESSION['session_peel_sql_premium']);
@@ -66,13 +66,14 @@ if (num_rows($result) > 0) {
 	$tables_checkup_messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_INSTALL_DATABASE_OK_PREFIX'], $_SESSION['session_install_choixbase'])))->fetch();
 }
 $tpl = $GLOBALS['tplEngine']->createTemplate('installation_verifdroits.tpl');
-$tpl->assign('step_title', $DOC_TITLE);
+$tpl->assign('step_title', $GLOBALS['DOC_TITLE']);
 $tpl->assign('configuration_url', 'configuration.php');
 $tpl->assign('choixbase_value', $_SESSION['session_install_choixbase']);
 $tpl->assign('directories_checkup_messages', $directories_checkup_messages);
 $tpl->assign('files_checkup_messages', $files_checkup_messages);
 $tpl->assign('tables_checkup_messages', $tables_checkup_messages);
 $tpl->assign('error', $error);
+$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 $tpl->assign('STR_REFRESH', $GLOBALS['STR_REFRESH']);
 $tpl->assign('STR_CONTINUE', $GLOBALS['STR_CONTINUE']);
 $tpl->assign('STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS', $GLOBALS['STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS']);
@@ -88,4 +89,3 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

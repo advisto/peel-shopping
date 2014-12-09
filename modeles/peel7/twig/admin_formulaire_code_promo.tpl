@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_code_promo.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_code_promo.tpl 43187 2014-11-13 15:35:30Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -25,13 +25,21 @@
 			<td class="title_label" colspan="2"><div class="alert alert-info">{{ STR_ADMIN_CODES_PROMOS_ALREADY_USED }}</div></td>
 		</tr>
 		{% endif %}
+ 		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
+		</tr>
 		<tr>
 			<td class="title_label">{{ STR_PROMO_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="nom" size="40" value="{{ nom|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_BEGIN_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control datepicker" name="date_debut" size="40" value="{{ date_debut|str_form_value }}" style="width:110px" /></td>
+			<td><input type="text" class="form-control datepicker" name="date_debut" value="{{ date_debut|str_form_value }}" style="width:110px" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_END_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -61,6 +69,19 @@
 						{{ categorie_options }}
 				</select>
 			</td>
+		</tr>
+ 		<tr>
+			<td class="title_label">{{ STR_ADMIN_CATEGORIES_TO_EXCLUDE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+		  		<select class="form-control" name="cat_not_apply_code_promo[]" multiple>
+					<option value="NULL">{{ STR_ADMIN_ALL_CATEGORIES }}</option>
+						{{ cat_not_apply_code_promo_options }}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_PRODUCT_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="product_filter" value="{{ product_filter|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_CODES_PROMOS_NB_FORECASTED }}{{ STR_BEFORE_TWO_POINTS }}:</td>

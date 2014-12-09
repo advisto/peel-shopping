@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: sitemap.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,7 +21,7 @@ if (!empty($_GET['encoding'])) {
 } else {
 	$file_encoding = 'utf-8';
 }
-$DOC_TITLE = $GLOBALS['STR_ADMIN_SITEMAP_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_SITEMAP_TITLE'];
 $form_error_object = new FormError();
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -82,38 +82,86 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	$tpl_products = array();
 	$account_register_url_array = array();
 	$product_category_url_array = array();
+	$content_url_array = array();
 	$content_category_url_array = array();
 	$account_url_array = array();
 	$wwwroot_array = array();
+	$legal_url_array = array();
 	$tpl->assign('date', date("Y-m-d"));
 	foreach($this_wwwroot_lang_array as $this_lang) {
 		// Modification de l'environnement de langue
 		set_lang_configuration_and_texts($this_lang, vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$this_lang]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 
-		// génération des liens
-		$select = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_" . $this_lang . " AS name, c.nom_" . $this_lang . " AS categorie
+		// génération des liens pour les produits 
+		$sql = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this_lang)." AS name, c.nom_" . $this_lang . " AS categorie
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id
-			WHERE p.etat=1";
-		$req = query($select);
-		while ($row = fetch_assoc($req)) {
-			$product_object = new Product($row['produit_id'], $row, true, null, true, !is_micro_entreprise_module_active());
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "
+			ORDER BY p.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$product_object = new Product($result['produit_id'], $result, true, null, true, !is_micro_entreprise_module_active());
 			$tpl_products[] = $product_object->get_product_url();
 			unset($product_object);
 		}
+
+		// génération des liens pour les categories de produit
+		if (empty($GLOBALS['site_parameters']['disallow_main_category'])) {
+			$product_category_url_array[] = get_product_category_url();
+		}
+		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
+			FROM peel_categories c
+			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c', true) . "
+			ORDER BY c.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$product_category_url_array[] = get_product_category_url($result['id'], $result['nom']);
+		}
+		
+		// génération des liens pour les articles de contenu
+		$sql = "SELECT p.id, c.id AS categorie_id, p.titre_".$this_lang." AS name, c.nom_" . $this_lang . " AS categorie
+			FROM peel_articles p
+			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id
+			INNER JOIN peel_rubriques c ON c.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'c', true) . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "
+			ORDER BY p.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$content_url_array[] = get_content_url($result['id'], $result['name'], $result['categorie_id'], $result['categorie']);
+		}
+
+		// génération des liens pour les rubriques de contenu
+		if (empty($GLOBALS['site_parameters']['disallow_main_content_category'])) {
+			$content_category_url_array[] = get_content_category_url();
+		}
+		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
+			FROM peel_rubriques c
+			WHERE c.etat=1 AND " . get_filter_site_cond('rubriques', 'c', true) . "
+			ORDER BY c.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$content_category_url_array[] = get_content_category_url($result['id'], $result['nom']);
+		}
+		$content_url_array[] = $GLOBALS['wwwroot'] . '/utilisateurs/contact.php';
+		$legal_url_array[] = $GLOBALS['wwwroot'] . '/legal.php';
+		$legal_url_array[] = $GLOBALS['wwwroot'] . '/cgv.php';
 		$account_register_url_array[] = get_account_register_url();
-		$product_category_url_array[] = get_product_category_url();
-		$content_category_url_array[] = get_content_category_url();
-		$account_url_array[] = get_account_url();
-		$wwwroot_array[] = $GLOBALS['wwwroot'];
+		$account_url_array[] = get_account_url(false, false, false);
+		$wwwroot_array[] = $GLOBALS['wwwroot'] . '/';
 	}
 	$tpl->assign('account_register_url_array', $account_register_url_array);
 	$tpl->assign('product_category_url_array', $product_category_url_array);
+	$tpl->assign('content_url_array', $content_url_array);
 	$tpl->assign('content_category_url_array', $content_category_url_array);
 	$tpl->assign('account_url_array', $account_url_array);
 	$tpl->assign('wwwroot_array', $wwwroot_array);
 	$tpl->assign('products', $tpl_products);
+	$tpl->assign('legal_url_array', $legal_url_array);
 	$sitemap = $tpl->fetch();
 	// Création du fichier. Ce fichier sera lu par le fichier php /get_sitemap.xml. Une règle de réécriture dans le htaccess rend cet appel transparent pour le client.
 	$xml_filename = $GLOBALS['dirroot'] . "/sitemap_" . substr(md5($this_wwwroot), 0, 4) . ".xml";
@@ -124,7 +172,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	// rétablissement de la langue du back office pour l'affichage du message de confirmation
 	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITEMAP_MSG_CREATED_OK']))->fetch();
-	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . nl2br($select) . '</p>';
+	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . nl2br(implode('<hr />', $created_report)) . '</p>';
 }
 
 /**
@@ -141,4 +189,3 @@ function form2xml()
 	echo $tpl->fetch();
 }
 
-?>

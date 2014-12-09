@@ -1,23 +1,23 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: configuration.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_content");
+necessite_priv("admin_content", true, true);
 $id = vn($_GET['id']);
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_CONFIGURATION_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CONFIGURATION_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
@@ -46,7 +46,7 @@ switch (vb($_REQUEST['mode'])) {
 				// La table peel_sites pour d'anciens sites existe => on charge son contenu pour ensuite mettre les informations dans peel_configuration
 				$query = query("SELECT ps.*, pd.devise, pd.conversion, pd.symbole, pd.symbole_place, pd.code
 					FROM peel_sites ps
-					LEFT JOIN peel_devises pd ON pd.id = ps.devise_defaut
+					LEFT JOIN peel_devises pd ON pd.id = ps.devise_defaut AND " . get_filter_site_cond('devises', null, true) . "
 					WHERE ps.id = '1'");
 				$configuration_fields = fetch_assoc($query);
 			}
@@ -81,7 +81,7 @@ switch (vb($_REQUEST['mode'])) {
 					}
 					$qid = query("SELECT *
 						FROM peel_configuration
-						WHERE technical_code = '" . real_escape_string($this_key) . "'");
+						WHERE technical_code = '" . real_escape_string($this_key) . "' AND " . get_filter_site_cond('configuration', null, true) . "");
 					$select = fetch_assoc($qid);
 					if (!$select) {
 						set_configuration_variable($frm);
@@ -156,6 +156,7 @@ function affiche_formulaire_ajout_configuration(&$frm)
 		$frm['string'] = "";
 		$frm['type'] = "";
 		$frm['lang'] = "";
+		$frm['site_id'] = "";
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
@@ -178,10 +179,10 @@ function affiche_formulaire_modif_configuration($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_configuration
-			WHERE id = '" . intval($id) . "'");
+			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('configuration', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
 		} else {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_CONFIGURATION_ERR_ZONE_NOT_FOUND']))->fetch();
+			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_CONFIGURATION_ERR_NOT_FOUND']))->fetch();
 			return false;
 		}
 	}
@@ -216,14 +217,19 @@ function affiche_formulaire_configuration(&$frm)
 			'name' => $GLOBALS['lang_names'][$lng]
 			);
 	}
+	if(String::strpos(vb($frm['string']), "\r") !== false || String::strpos(vb($frm['string']), "\n") !== false || String::strpos(vb($frm['technical_code']), "tag_") !== false || String::strpos(vb($frm['technical_code']), "_tag") !== false) {
+		$tpl->assign('string_as_textarea', true);
+	}
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('etat', $frm["etat"]);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('origin', vb($frm['origin']));
 	$tpl->assign('type', vb($frm['type']));
 	$tpl->assign('technical_code', vb($frm['technical_code']));
 	$tpl->assign('string', vb($frm['string']));
 	$tpl->assign('explain', vb($frm['explain']));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_CONFIGURATION_FORM_TITLE', $GLOBALS['STR_ADMIN_CONFIGURATION_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGE', $GLOBALS['STR_ADMIN_LANGUAGE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
@@ -234,24 +240,25 @@ function affiche_formulaire_configuration(&$frm)
 	$tpl->assign('STR_ADMIN_CONFIGURATION_TEXT', $GLOBALS['STR_ADMIN_CONFIGURATION_TEXT']);
 	$tpl->assign('STR_ADMIN_CONFIGURATION_ORIGIN', $GLOBALS['STR_ADMIN_CONFIGURATION_ORIGIN']);
 	$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
-	$tpl->assign('STR_ADMIN_COMMENTS', $GLOBALS['STR_ADMIN_COMMENTS']);
+	$tpl->assign('STR_COMMENTS', $GLOBALS['STR_COMMENTS']);
 	echo $tpl->fetch();
 }
 
 /**
- * Supprime la zone HTML spécifié par $id.
+ * Supprime la variable de configuration spécifiée par $id.
  *
  * @param integer $id
  * @return
  */
 function supprime_configuration($id)
 {
-	query("DELETE FROM peel_configuration WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_configuration 
+		WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('configuration', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_CONFIGURATION_MSG_DELETED']))->fetch();
 }
 
 /**
- * affiche_liste_configuration()
+ * Affiche la liste des variables de configuration pour tous les sites
  *
  * @return
  */
@@ -262,16 +269,24 @@ function affiche_liste_configuration()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$result = query("SELECT *
+	$sql = "SELECT *
 		FROM peel_configuration
-		ORDER BY technical_code ASC, lang ASC");
-	if (!(num_rows($result) == 0)) {
+		WHERE " . get_filter_site_cond('configuration', null, true) . "";
+	$Links = new Multipage($sql, 'produits');
+	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'lang' => $GLOBALS['STR_ADMIN_LANGUAGE'], 'type' => $GLOBALS['STR_TYPE'], 'technical_code' => $GLOBALS['STR_ADMIN_TECHNICAL_CODE'], 'string' => $GLOBALS['STR_VALUE'], 'last_update' => $GLOBALS['STR_DATE'], 'origin' => $GLOBALS['STR_ADMIN_CONFIGURATION_ORIGIN'], 'etat' => $GLOBALS['STR_STATUS'], 'site_id' => $GLOBALS['STR_ADMIN_SITE_ID']);
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = "site_id, technical_code, lang";
+	$Links->SortDefault = "ASC";
+	$results_array = $Links->Query();
+	if (!empty($results_array)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		foreach ($results_array as $ligne) {
 			$string = $ligne['string'];
+			$comment = '';
+			$tpl->assign('HeaderRow', $Links->getHeaderRow());
 			if(String::substr($ligne['technical_code'], 0, 4) != 'STR_' && $string != vb($GLOBALS['site_parameters'][$ligne['technical_code']]) && get_string_from_array(get_array_from_string($string)) != get_string_from_array(vb($GLOBALS['site_parameters'][$ligne['technical_code']])) && (empty($_POST['technical_code']) || $_POST['technical_code'] != $ligne['technical_code']) && (!is_bool($GLOBALS['site_parameters'][$ligne['technical_code']]) || !in_array($string, array('false', 'true')))){
-				$string .= '<br />(<span class="red">Current : ' . str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', print_r(vb($GLOBALS['site_parameters'][$ligne['technical_code']]), true))).'</span>)';
+				$comment .= '<br /><span class="text-danger">(Current : ' . str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', String::textEncode(print_r(vb($GLOBALS['site_parameters'][$ligne['technical_code']]), true)))).')</span>';
 			}
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'technical_code' => String::str_shorten_words($ligne['technical_code'], 50),
@@ -280,8 +295,10 @@ function affiche_liste_configuration()
 				'lang' => $ligne['lang'],
 				'date' => get_formatted_date($ligne['last_update'], 'short', 'long'),
 				'origin' => $ligne['origin'],
+				'site_id' => $ligne['site_id'],
 				'type' => $ligne['type'],
 				'string' => String::str_shorten_words($string, 50),
+				'comment' => String::str_shorten_words($comment, 50),
 				'etat_onclick' => 'change_status("configuration", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 				);
@@ -289,8 +306,8 @@ function affiche_liste_configuration()
 		}
 		$tpl->assign('results', $tpl_results);
 	}
-	$tpl->assign('wwwroot', $GLOBALS['wwwroot'] . '/');
-	if (is_welcome_ad_module_active()) {
+	$tpl->assign('Multipage', $Links->GetMultipage());
+	if (check_if_module_active('welcome_ad')) {
 		$tpl->assign('is_welcome_ad_module_active', true);
 		unset($_SESSION['session_info_inter_set']);
 	} else {
@@ -316,4 +333,3 @@ function affiche_liste_configuration()
 	echo $tpl->fetch();
 }
 
-?>

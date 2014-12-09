@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: user.php 43244 2014-11-17 17:03:01Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,6 +36,7 @@ function get_profil_select_options($selected_priv = null)
 	$output = '';
 	$sql_profil = "SELECT id, name_".$_SESSION['session_langue']." AS name, priv
 		FROM peel_profil
+		WHERE " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "
 		ORDER BY name DESC";
 	$res_profil = query($sql_profil);
 	while ($tab_profil = fetch_assoc($res_profil)) {
@@ -55,12 +56,26 @@ function get_profil_select_options($selected_priv = null)
  *
  * @param string $requested_priv
  * @param boolean $demo_allowed
- * @return string
+ * @param boolean $site_configuration_modification
+ * @param integer $user_id
+ * @return boolean
  */
-function a_priv($requested_priv, $demo_allowed = false)
+function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modification = false, $user_id = null)
 {
-	if (isset($_SESSION) && isset($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['priv'])) {
-		if (strpos($requested_priv, ',') !== false) {
+	if(empty($user_id)) {
+		if (isset($_SESSION) && isset($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['priv'])) {
+			$user_priv = $_SESSION['session_utilisateur']['priv'];
+		}
+	} else {
+		$user_infos = get_user_information($user_id);
+		$user_priv = vb($user_infos['priv']);
+	}
+	if (!empty($user_priv)) {
+		 if($site_configuration_modification && !empty($GLOBALS['site_parameters']['admin_configuration_only_by_user_ids']) && !in_array(vn($_SESSION['session_utilisateur']['id_utilisateur']), $GLOBALS['site_parameters']['admin_configuration_only_by_user_ids'])) {
+			// Des droits de modification de la configuration du site sont nécessaires et définis par une variable de configuration qui ne comprends pas dans sa liste l'id de l'utilisateur
+			return false;
+		 }
+		 if (strpos($requested_priv, ',') !== false) {
 			// On autorise plusieurs droits différents => récursif
 			$requested_priv_array = explode(',', $requested_priv);
 			$allowed = false;
@@ -81,7 +96,7 @@ function a_priv($requested_priv, $demo_allowed = false)
 			}
 			return !$not_allowed;
 		} else {
-			$user_priv_array = explode('+', $_SESSION['session_utilisateur']['priv']);
+			$user_priv_array = explode('+', $user_priv);
 			foreach($user_priv_array as $this_user_priv) {
 				if (substr($requested_priv, 0, 5) == 'admin' && $this_user_priv == 'admin') {
 					// admin est un administrateur global qui a tous les droits de type admin*
@@ -118,25 +133,41 @@ function a_priv($requested_priv, $demo_allowed = false)
  */
 function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false)
 {
+	$sql_condition_array = array();
 	if (!empty($frm['priv'])) {
 		if(is_array($frm['priv'])) {
 			$frm['priv'] = implode('+', $frm['priv']);
 		}
 	} else {
-		$frm['priv'] = 'util';
+		if(!empty($GLOBALS['site_parameters']['user_creation_default_profile'])) {
+			// ce paramètre permet de définir depuis le back office un privilège utilisateur dès l'inscription
+			$allowed_profil = array();
+			$query = query("SELECT priv FROM peel_profil WHERE priv NOT LIKE 'admin%' AND " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "");
+			while($result = fetch_assoc($query)) {
+				// Création du tableau des privilèges provenant de la BDD, sans les privilèges admin pour éviter la création non controllée d'administrateur sur la boutique
+				$allowed_profil[] = $result['priv'];
+			}
+			if (in_array($GLOBALS['site_parameters']['user_creation_default_profile'], $allowed_profil)) {
+				$frm['priv'] = $GLOBALS['site_parameters']['user_creation_default_profile'];
+			} else {
+				// privilège par défaut
+				$frm['priv'] = 'util';
+			}
+		} else {
+			$frm['priv'] = 'util';
+		}
 	}
-	$sql_condition_array = array();
 	if (!empty($frm['email'])) {
 		$sql_condition_array[] = "email='" . word_real_escape_string(vb($frm['email'])) . "'";
 	}
-	if (!empty($frm['pseudo'])) {
+	if (empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && !empty($frm['pseudo'])) {
 		$sql_condition_array[] = "pseudo='" . nohtml_real_escape_string(vb($frm['pseudo'])) . "'";
 	}
 	if (!$skip_existing_account_tests && !empty($sql_condition_array)) {
 		// On teste si l'utilisateur existe déjà
 		$sql = "SELECT id_utilisateur
 			FROM peel_utilisateurs
-			WHERE " . implode(' OR ', $sql_condition_array);
+			WHERE (" . implode(' OR ', $sql_condition_array).") AND " . get_filter_site_cond('utilisateurs') . "";
 		$result = query($sql);
 		if ($user_already_exists_infos = fetch_assoc($result)) {
 			// L'utilisateur existe déjà, on donne son id
@@ -152,6 +183,10 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$password_hash = trim($frm['mot_passe']);
 	} elseif (!empty($frm['mot_passe'])) {
 		$password_hash = get_user_password_hash(trim($frm['mot_passe']));
+	} elseif(empty($frm['mot_passe']) && !empty($GLOBALS['site_parameters']['register_during_order_process'])) {
+		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur
+		$frm['mot_passe'] = MDP();
+		$password_hash = get_user_password_hash($frm['mot_passe']);
 	} else {
 		// On crée un utilisateur qui ne pourra pas se connecter avant de demander un mot de passe
 		$password_hash = get_user_password_hash(MDP());
@@ -166,51 +201,83 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	} else {
 		$date_update = date('Y-m-d H:i:s', time());
 	}
-	if (!empty($frm['priv'])) {
-		if(is_array($frm['priv'])) {
-			$priv = implode('+', $frm['priv']);
-		} else {
-			$priv = $frm['priv'];
-		}
-	} else {
-		$priv = 'util';
-	}
 	if (isset($frm['points'])) {
 		$points = $frm['points'];
 	} else {
 		$points = 0;
 	}	
+	if (!isset($frm['etat'])) {
+		$frm['etat'] = 1;
+	}
 	if (!$skip_existing_account_tests) {
 		if (!empty($frm['priv']) && ($frm['priv'] != 'load' && $frm['priv'] != 'newsletter')) {
 			// Si cet utilisateur est déjà inscrit pour un téléchargement, il faut supprimer l'enregistrement correspondant à son email pour permettre la création du compte
 			$sql = 'SELECT id_utilisateur, priv
 				FROM peel_utilisateurs
-				WHERE email="' . word_real_escape_string($frm['email']) . '"';
+				WHERE email="' . word_real_escape_string($frm['email']) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
 			$result = query($sql);
 			$user_already_exists_infos = fetch_assoc($result);
 			if (!empty($user_already_exists_infos) && ($user_already_exists_infos['priv'] == 'load' || $user_already_exists_infos['priv'] == 'newsletter')) {
 				query("DELETE FROM peel_utilisateurs
-					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "'");
+					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 			}
 		}
 	}
-	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
+	if(!empty($GLOBALS['site_parameters']['user_specific_field_titles']) && defined('IN_REGISTER')) {
+		$specific_fields_titles = $GLOBALS['site_parameters']['user_specific_field_titles'];
+		$specific_field_types = $GLOBALS['site_parameters']['user_specific_field_types'];
+	} elseif(!empty($GLOBALS['site_parameters']['reseller_specific_field_titles']) && is_reseller_module_active() && defined('IN_RETAILER')) {
+		$specific_fields_titles = $GLOBALS['site_parameters']['reseller_specific_field_titles'];
+		$specific_field_types = $GLOBALS['site_parameters']['reseller_specific_field_types'];
+	}
+	if (!empty($specific_fields_titles)) {
 		// Paramètre lié à la fonction get_specific_field_infos.
-		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+		// récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
+		$this_table_fields_names = get_table_field_names('peel_utilisateurs');
+		foreach($specific_fields_titles as $this_field => $this_title) {
+			if (!in_array($this_field, $this_table_fields_names)) {
+				// Champ pas présent en BDD, on ne l'ajoute pas à la requête SQL.
+				continue;
+			}
+			if ((defined('IN_REGISTER') || defined('IN_RETAILER')) && !empty($GLOBALS['site_parameters']['disable_user_specific_field_on_register_page']) && in_array($this_field, $GLOBALS['site_parameters']['disable_user_specific_field_on_register_page'])) {
+				// Ne pas prendre en compte les champs absents de la page d'enregistrement
+				continue;
+			}
+			if ($specific_field_types[$this_field] == 'datepicker') {
+				$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
+			}
+			if ($specific_field_types[$this_field] == 'upload') {
+				$frm[$this_field] = upload('logo', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_field]));
+			}
 			if (isset($frm[$this_field])) {
 				if (is_array($frm[$this_field])) {
 					// Si $frm[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
 					$frm[$this_field] = implode(',', $frm[$this_field]);
 				}
-				$user_specific_field[] = $this_field;
+				$user_specific_field[] = word_real_escape_string($this_field);
 				$user_specific_field_values[] = nohtml_real_escape_string($frm[$this_field]);
 			}
 		}
 	}
 	if(empty($frm['lang'])) {
 		$frm['lang'] = $_SESSION['session_langue'];
+	}	
+	if(!isset($frm['site_id'])) {
+		$frm['site_id'] = $GLOBALS['site_id'];
 	}
-	$qid = query("INSERT INTO peel_utilisateurs (
+	if(!defined('PEEL_ADMIN')) {
+		if(!empty($GLOBALS['site_parameters']['devise_force_user_choices']) && is_devises_module_active()) {
+			$frm['devise'] = $_SESSION['session_devise'];
+		}
+		if(!empty($GLOBALS['site_parameters']['site_country_forced_by_user']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			if(in_array(strval(vb($frm['pays'])), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				$frm['site_country'] = $frm['pays'];
+			} else {
+				$frm['site_country'] = $_SESSION['session_site_country'];
+			}
+		}
+	}
+	$sql = "INSERT INTO peel_utilisateurs (
 		date_insert
 		, date_update
 		, email
@@ -270,12 +337,15 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, type
 		, on_client_module
 		, on_photodesk
-		,fonction
+		, site_id
+		, fonction
 		, etat
 		" . (!empty($frm['id_utilisateur'])?', id_utilisateur':'') . "
 		" . (!empty($frm['control_plus'])?', control_plus':'') . "
 		" . (!empty($frm['note_administrateur'])?', note_administrateur':'') . "
-		, logo
+		" . (!in_array('logo', vb($user_specific_field, array()))?', logo':'') . "
+		" . (isset($frm['devise'])? ", devise":'') . "
+		" . (isset($frm['site_country'])? ", site_country":'') . "
 		, description_document
 		" . (!empty($frm['document'])? ", document " : "") . "
 		" . (!empty($user_specific_field)? ',' . implode(',', $user_specific_field) : "") . "
@@ -284,7 +354,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . nohtml_real_escape_string($date_update) . "'
 		, '" . nohtml_real_escape_string(trim($frm['email'])) . "'
 		, '" . nohtml_real_escape_string($password_hash) . "'
-		, '" . nohtml_real_escape_string(vb($priv)) . "'
+		, '" . nohtml_real_escape_string(vb($frm['priv'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['prenom'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['pseudo'])) . "'
@@ -300,7 +370,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . intval(vn($frm['commercial'])) . "'
 		, '" . nohtml_real_escape_string(vb($remise_percent)) . "'
 		, '" . intval(vb($points)) . "'
-		, 'html'
+		, '" . nohtml_real_escape_string(vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html')) . "'
 		, '" . nohtml_real_escape_string(vb($frm['societe'])) . "'
 		, '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
 		, '" . nohtml_real_escape_string(vb($frm['siret'])) . "'
@@ -339,25 +409,30 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		, '" . nohtml_real_escape_string(vb($frm['type'])) . "'
 		, '" . intval(vn($frm['on_client_module'])) . "'
 		, '" . intval(vn($frm['on_photodesk'])) . "'
+		, '" . intval(vn($frm['site_id'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['fonction'])) . "'
-		, '1'
+		, '" . intval($frm['etat']) . "'
 		" . (!empty($frm['id_utilisateur'])?', ' . intval($frm['id_utilisateur']):'') . "
 		" . (!empty($frm['control_plus'])?', ' . intval($frm['control_plus']):'') . "
 		" . (!empty($frm['note_administrateur'])?', ' . intval($frm['note_administrateur']):'') . "
-		, '" . nohtml_real_escape_string(vb($frm['logo'])) . "'
+		" . (!in_array('logo', vb($user_specific_field, array()))?', "' . nohtml_real_escape_string(vb($frm['logo'])).'"':'') . "
+		" . (isset($frm['devise'])? ", '" . nohtml_real_escape_string($frm['devise']) . "'" : "") . "
+		" . (isset($frm['site_country'])? ", '" . nohtml_real_escape_string($frm['site_country']) . "'" : "") . "
 		, '" . nohtml_real_escape_string(vb($frm['description_document'])) . "'
 		" . (!empty($frm['document'])? ", '" . nohtml_real_escape_string(vb($frm['document'])) . "'" : "") . "
 		" . (!empty($user_specific_field_values)? ", '" . implode("','", $user_specific_field_values) . "'" : "") . "
-		)");
+		)";
+	$qid = query($sql);
+
 	$clientid = insert_id();
-	if (is_module_wanewsletter_active()) {
+	if (check_if_module_active('wanewsletter')) {
 		insere_wa_utilisateur($frm);
 	}
 	$code_client = "CLT" . date("Y") . $clientid;
 
 	query("UPDATE peel_utilisateurs
 		SET code_client = '" . nohtml_real_escape_string($code_client) . "'
-		WHERE id_utilisateur = '" . intval($clientid) . "'");
+		WHERE id_utilisateur = '" . intval($clientid) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 
 	if ($send_user_confirmation) {
 		// envoi de l'email de réinitialisation du mot de passe
@@ -367,7 +442,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		// Prévenir l'administrateur d'une création d'utilisateur
 		$qid = query("SELECT name_".$_SESSION['session_langue']." AS name
 			FROM `peel_profil`
-			WHERE priv = '" . nohtml_real_escape_string(vb($frm['priv'])) . "'
+			WHERE priv = '" . nohtml_real_escape_string(vb($frm['priv'])) . "' AND " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "
 			LIMIT 0 , 30");
 		$qid = fetch_assoc($qid);
 		$custom_template_tags['PRIV'] = $qid['name'];
@@ -385,9 +460,12 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		} else {
 			$template_technical_code = 'warn_admin_user_subscription';
 		}
-		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, 'html', $GLOBALS['support_sav_client']);
+		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	}
 
+	if (check_if_module_active('groups_advanced')) {
+		init_default_user_groups($clientid);
+	}
 	return $clientid;
 }
 
@@ -410,12 +488,33 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$priv = $frm['priv'];
 		}
 	}
+	if(!$update_current_session && !a_priv('admin', false, true)) {
+		if(a_priv('admin*', false, false, $frm['id_utilisateur'])) {
+			// L'utilisateur qu'on veut modifier est un administrateur et l'utilisateur loggué n'a pas le droit de le faire
+			return false;
+		} elseif(!empty($priv) && String::strpos($priv, 'admin') === 0) {
+			unset($priv);
+		}
+	}
 	if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
+		// récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
+		$this_table_fields_names = get_table_field_names('peel_utilisateurs');
 		// Paramètre lié à la fonction get_specific_field_infos.
 		foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+			if (!in_array($this_field, $this_table_fields_names)) {
+				// Champ pas présent en BDD, on ne l'ajoute pas à la requête SQL.
+				continue;
+			}
+			if (defined('IN_CHANGE_PARAMS') && !empty($GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page']) && in_array($this_field, $GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page'])) {
+				// Ne pas prendre en compte les champs absents de la page de modification de paramètre.
+				continue;
+			}
 			if (is_array($frm[$this_field])) {
 				// Si $frm[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
 				$frm[$this_field] = implode(',', $frm[$this_field]);
+			}
+			if ($GLOBALS['site_parameters']['user_specific_field_types'][$this_field] == 'datepicker') {
+				$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
 			}
 			$user_specific_field[] = $this_field . ' = "' . nohtml_real_escape_string($frm[$this_field]) . '"';
 		}
@@ -423,24 +522,32 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	if(empty($frm['lang'])) {
 		$frm['lang'] = $_SESSION['session_langue'];
 	}
-	// MAJ du pseudo interdite pour les sites d'annonces, pour éviter problèmes de traçabilité d'utilisateurs
-	query("UPDATE peel_utilisateurs SET
+	if(!isset($frm['site_id'])) {
+		// Si site_id n'est pas défini dans le formulaire, le site_id défini pour l'utilisateur est celui du site en cours de consultation, sauf pour les administrateurs multisite.
+		$this_user = get_user_information($frm['id_utilisateur']);
+		if (empty($this_user) || $this_user['site_id']>0) {
+			// si l'utilisateur est multisite, le champ site_id resera à 0 avec la fonction vn()
+			$frm['site_id'] = $GLOBALS['site_id'];
+		}
+	}
+	// MAJ du pseudo interdite pour les sites d'annonces en front office, pour éviter problèmes de traçabilité d'utilisateurs
+	$sql = "UPDATE peel_utilisateurs SET
 			civilite = '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
 			, prenom = '" . nohtml_real_escape_string($frm['prenom']) . "'
-			" . (isset($frm['pseudo']) && !is_annonce_module_active()?", pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'":"") . "
+			" . (isset($frm['pseudo']) && (!check_if_module_active('annonces') || (check_if_module_active('annonces') && !defined('IN_PEEL_ADMIN')))?", pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'":"") . "
 			, nom_famille = '" . nohtml_real_escape_string($frm['nom_famille']) . "'
-			, societe = '" . nohtml_real_escape_string($frm['societe']) . "'
+			" . (isset($frm['societe'])?", societe = '" . nohtml_real_escape_string($frm['societe']) . "'":"") . "
 			, intracom_for_billing  = '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
-			, telephone = '" . nohtml_real_escape_string($frm['telephone']) . "'
-			, fax = '" . nohtml_real_escape_string($frm['fax']) . "'
-			, portable = '" . nohtml_real_escape_string($frm['portable']) . "'
-			, adresse = '" . nohtml_real_escape_string($frm['adresse']) . "'
-			, code_postal = '" . nohtml_real_escape_string($frm['code_postal']) . "'
+			" . (isset($frm['telephone'])?", telephone = '" . nohtml_real_escape_string(vb($frm['telephone'])) . "'":"") . "
+			" . (isset($frm['fax'])?", fax = '" . nohtml_real_escape_string(vb($frm['fax'])) . "'":"") . "
+			" . (isset($frm['portable'])?", portable = '" . nohtml_real_escape_string(vb($frm['portable'])) . "'":"") . "
+			" . (isset($frm['adresse'])?", adresse = '" . nohtml_real_escape_string($frm['adresse']) . "'":"") . "
+			" . (isset($frm['code_postal'])?", code_postal = '" . nohtml_real_escape_string($frm['code_postal']) . "'":"") . "
 			, ville = '" . nohtml_real_escape_string($frm['ville']) . "'
 			, pays = '" . intval($frm['pays']) . "'
 			, newsletter = '" . intval(vn($frm['newsletter'])) . "'
 			, commercial = '" . intval(vn($frm['commercial'])) . "'
-			, format = 'html'
+			, format = '" . nohtml_real_escape_string(vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html')) . "'
 			, date_update = '" . date('Y-m-d H:i:s', time()) . "'
 			" . (!empty($frm['email'])?", email = '" . nohtml_real_escape_string($frm['email']) . "'":"") . "
 			" . (!empty($frm['email'])?", email_bounce = ''":"") . "
@@ -491,17 +598,22 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			" . (isset($frm['commercial_contact_id'])?", commercial_contact_id = '" . intval(vn($frm['commercial_contact_id'])) . "'":"") . "
 			, on_client_module = '" . intval(vn($frm['on_client_module'])) . "'
 			, on_photodesk = '" . intval(vn($frm['on_photodesk'])) . "'
+			, site_id = '" . intval(vn($frm['site_id'])) . "'
 			, description_document =  '" . nohtml_real_escape_string(vb($frm['description_document'])) . "'
 			" . (!empty($frm['document'])? ", document =  '" . nohtml_real_escape_string($frm['document']) . "'" : "") . "
 			" . (!empty($frm['logo'])? ", logo =  '" . nohtml_real_escape_string($frm['logo']) . "'" : "") . "
-			" . (is_map_module_active()?", address_hash = ''" : "") . "
+			" . (isset($frm['devise'])? ", devise =  '" . nohtml_real_escape_string($frm['devise']) . "'" : "") . "
+			" . (isset($frm['site_country'])? ", site_country =  '" . nohtml_real_escape_string($frm['site_country']) . "'" : "") . "
+			" . (check_if_module_active('maps')?", address_hash = ''" : "") . "
 			" . (!empty($user_specific_field)? "," . implode(',', $user_specific_field) : "") . "
-		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'");
+		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
+		query($sql);
+		
 	if ($update_current_session) {
 		// Mise à jour de la session en cours
 		$requete = "SELECT *
 			FROM peel_utilisateurs
-			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
+			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "";
 		$qid = query($requete);
 		if($user_infos = fetch_assoc($qid)) {
 			$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
@@ -519,8 +631,8 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
 			$_SESSION['session_utilisateur']['newsletter'] = intval(vn($user_infos['newsletter']));
 			$_SESSION['session_utilisateur']['commercial'] = intval(vn($user_infos['commercial']));
-		$_SESSION['session_utilisateur']['format'] = 'html';
-	}
+			$_SESSION['session_utilisateur']['format'] = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
+		}
 	}
 	if (!empty($frm['email'])) {
 		if (file_exists($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php")) {
@@ -528,10 +640,10 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			resolve_bounce($frm['id_utilisateur'], $frm['email']);
 		}
 	}
-	if (is_module_wanewsletter_active()) {
+	if (check_if_module_active('wanewsletter')) {
 		maj_wa_utilisateur($frm);
 	}
-	if (is_vitrine_module_active()) {
+	if (check_if_module_active('vitrine')) {
 		create_or_update_vitrine($frm);
 	}
 
@@ -554,8 +666,8 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 function efface_utilisateur($id_utilisateur)
 {
 	query("DELETE FROM peel_utilisateurs
-		WHERE id_utilisateur = '" . intval($id_utilisateur) . "'");
-	if (is_vitrine_module_active()) {
+		WHERE id_utilisateur = '" . intval($id_utilisateur) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+	if (check_if_module_active('vitrine')) {
 		$frm['id_utilisateur'] = $id_utilisateur;
 		delete_vitrine_admin($frm);
 	}
@@ -572,7 +684,7 @@ function initialise_mot_passe($email)
 	// Chargement des infos de l'utilisateur
 	$qid = query("SELECT id_utilisateur, mot_passe
 		FROM peel_utilisateurs
-		WHERE email='" . nohtml_real_escape_string($email) . "'");
+		WHERE email='" . nohtml_real_escape_string($email) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 
 	if ($utilisateur = fetch_assoc($qid)) {
 		$timestamp = time();
@@ -580,7 +692,7 @@ function initialise_mot_passe($email)
 
 		$custom_template_tags['LINK'] = $GLOBALS['wwwroot'] . '/utilisateurs/oubli_mot_passe.php?hash=' . $hash . '&time=' . $timestamp . '&email=' . $email;
 		$custom_template_tags['SITE'] = $GLOBALS['site'];
-		$result = send_email($email, '', '', 'initialise_mot_passe', $custom_template_tags, 'html', $GLOBALS['support_sav_client']);
+		$result = send_email($email, '', '', 'initialise_mot_passe', $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	} else {
 		$result = null;
 	}
@@ -598,7 +710,7 @@ function maj_mot_passe($user_id, $nouveau_mot_passe)
 {
 	query("UPDATE peel_utilisateurs
 		SET mot_passe = '" . get_user_password_hash($nouveau_mot_passe) . "', date_update='" . date('Y-m-d H:i:s', time()) . "'
-		WHERE id_utilisateur = '" . intval($user_id) . "'");
+		WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 	if (affected_rows()) {
 		return true;
 	} else {
@@ -627,7 +739,7 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 		$utilisateur = verifier_authentification(trim($email_or_pseudo), trim($mot_passe), null, $check_password, $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash);
 		if ($utilisateur) {
 			$_SESSION['session_utilisateur'] = $utilisateur;
-			$_SESSION['session_ip'] = $_SERVER['REMOTE_ADDR'];
+			$_SESSION['session_ip'] = vb($_SERVER['REMOTE_ADDR']);
 			$_SESSION['session_url'] = $_SERVER['HTTP_HOST'];
 			if (!empty($_SESSION['session_caddie'])) {
 				$_SESSION['session_caddie']->update(get_current_user_promotion_percentage());
@@ -636,12 +748,18 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				// Enregistrer la zone d'expedition de l'utilisateur
 				$sqlUserZone = 'SELECT zone
 					FROM peel_pays
-					WHERE id="' . intval($_SESSION['session_utilisateur']['pays']) . '"
+					WHERE id="' . intval($_SESSION['session_utilisateur']['pays']) . '" AND ' . get_filter_site_cond('pays') . '
 					LIMIT 1';
 				$resUserZone = query($sqlUserZone);
 				if ($Zone = fetch_assoc($resUserZone)) {
 					$_SESSION['session_utilisateur']['zoneId'] = $Zone['zone'];
 				}
+			}
+			if (!empty($_SESSION['session_utilisateur']['devise'])) {
+				set_current_devise($_SESSION['session_utilisateur']['devise']);
+			}
+			if (!empty($_SESSION['session_utilisateur']['site_country'])) {
+				$_SESSION['session_site_country'] = intval($_SESSION['session_utilisateur']['site_country']);
 			}
 			if (a_priv('admin*')) {
 				// On met à jour les appels de clients dont l'heure de cloture n'est pas précisée
@@ -649,8 +767,8 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				updateTelContactNotClosed();
 				// On avertit le contact boutique du login d'un administrateur
 				$custom_template_tags['USER'] = $email_or_pseudo;
-				$custom_template_tags['REVERSE_DNS'] = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-				send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, 'html', $GLOBALS['support'], true, false, true, $GLOBALS['support']);
+				$custom_template_tags['REVERSE_DNS'] = gethostbyaddr(vb($_SERVER['REMOTE_ADDR']));
+				send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
 			}
 			// On enregistre la connexion de l'utilisateur
 			if (!empty($_SESSION['session_utilisateur']['pseudo'])) {
@@ -659,8 +777,8 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				$user_pseudo = $_SESSION['session_utilisateur']['email'];
 			}
 
-			query('INSERT INTO peel_utilisateur_connexions(user_id, user_login, user_ip, date)
-				VALUES (' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . ', "' . nohtml_real_escape_string($user_pseudo) . '", "' . ip2long(ipget()) . '", "' . date('Y-m-d H:i:s', time()) . '")');
+			query('INSERT INTO peel_utilisateur_connexions (user_id, user_login, user_ip, date, site_id)
+				VALUES (' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . ', "' . nohtml_real_escape_string($user_pseudo) . '", "' . ip2long(ipget()) . '", "' . date('Y-m-d H:i:s', time()) . '",  "' . intval($GLOBALS['site_id']) . '")');
 
 			$_SESSION['session_login_tried'] = 0;
 		}
@@ -686,7 +804,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 {
 	$requete = "SELECT *
 		FROM peel_utilisateurs
-		WHERE etat=1 AND priv!='newsletter' AND ";
+		WHERE etat=1 AND " . get_filter_site_cond('utilisateurs') . " AND priv!='newsletter' AND ";
 	if (!empty($email_or_pseudo)) {
 		$requete .= "(email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
 	} else {
@@ -695,6 +813,10 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 	$qid = query($requete);
 	$user_infos = fetch_assoc($qid);
 	if (!empty($user_infos) && (!$check_password || get_user_password_hash($mot_passe, $user_infos['mot_passe'], $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash))) {
+		if(!$check_password && String::strpos($user_infos['priv'], 'admin') === 0) {
+			// Utilisateur avec droits d'administration, loggué via processus simplifié => on désactive les droits d'administration
+			$user_infos['priv'] = 'util';
+		}
 		return $user_infos;
 	} else {
 		return false;
@@ -763,7 +885,7 @@ function send_mail_for_account_creation($email, $mot_passe)
 {
 	$custom_template_tags['EMAIL'] = $email;
 	$custom_template_tags['MOT_PASSE'] = $mot_passe;
-	$result = send_email($email, '', '', 'send_mail_for_account_creation', $custom_template_tags, 'html', $GLOBALS['support_sav_client']);
+	$result = send_email($email, '', '', 'send_mail_for_account_creation', $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	return $result;
 }
 
@@ -804,9 +926,9 @@ function get_user_information($user_id = null, $get_full_infos = false)
 		if (!isset($result_array[$cache_id])) {
 			$qid = query("SELECT *
 				FROM peel_utilisateurs
-				WHERE id_utilisateur = '" . intval($user_id) . "'" . $sql_cond);
+				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs', null, defined('IN_PEEL_ADMIN')) . "" . $sql_cond);
 			$result_array[$cache_id] = fetch_assoc($qid);
-			if($get_full_infos && is_annonce_module_active()) {
+			if($get_full_infos && check_if_module_active('annonces')) {
 				if($result_array[$cache_id]['etat']) {
 					$sqlCount = 'SELECT COUNT(*) AS this_count
 						FROM peel_lot_vente plv
@@ -827,24 +949,32 @@ function get_user_information($user_id = null, $get_full_infos = false)
 }
 
 /**
- * get_current_user_promotion_percentage()
+ * Calcule la réduction générale applicable à un utilisateur et garde la valeur en session pour accélérer en cas de formule complexe
  *
  * @return
  */
 function get_current_user_promotion_percentage()
 {
-	$percent_remise_groupe = 0;
-	if (!empty($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['id_groupe']) && is_groups_module_active()) {
-		// Gestion des remises par groupes d'utilisateurs
-		$sqlGroupe = "SELECT remise
-			FROM peel_groupes
-			WHERE id = '" . intval(vn($_SESSION['session_utilisateur']['id_groupe'])) . "'";
-		$resGroupe = query($sqlGroupe);
-		if ($Groupe = fetch_object($resGroupe)) {
-			$percent_remise_groupe = $Groupe->remise;
+	if(empty($_SESSION['session_utilisateur']['calculated_promotion_percentage'])) {
+		$percent_remise_groupe = 0;
+		if (!empty($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['id_groupe']) && check_if_module_active('groups')) {
+			// Gestion des remises par groupes d'utilisateurs
+			$sqlGroupe = "SELECT remise
+				FROM peel_groupes
+				WHERE id = '" . intval(vn($_SESSION['session_utilisateur']['id_groupe'])) . "' AND  " . get_filter_site_cond('groupes') . "";
+			$resGroupe = query($sqlGroupe);
+			if ($Groupe = fetch_object($resGroupe)) {
+				$percent_remise_groupe = $Groupe->remise;
+			}
+		}
+		$user_specific_discount = vn($_SESSION['session_utilisateur']['remise_percent']);
+		if(!empty($GLOBALS['site_parameters']['group_and_user_discount_cumulate_disable'])) {
+			$_SESSION['session_utilisateur']['calculated_promotion_percentage'] = max($user_specific_discount, $percent_remise_groupe);
+		} else {
+			$_SESSION['session_utilisateur']['calculated_promotion_percentage'] = (1 - (1 - $user_specific_discount / 100) * (1 - $percent_remise_groupe / 100)) * 100;
 		}
 	}
-	return (1 - (1 - vn($_SESSION['session_utilisateur']['remise_percent']) / 100) * (1 - $percent_remise_groupe / 100)) * 100;
+	return $_SESSION['session_utilisateur']['calculated_promotion_percentage'];
 }
 
 /**
@@ -861,7 +991,7 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 4 && is_numeric(String::substr(str_replace(' ', '', $user_infos['intracom_for_billing']), 2))) {
+			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 7 && String::strlen(str_replace(' ', '', $user_infos['intracom_for_billing'])) <= 14) {
 				// Utilisateur avec un n° de TVA intracom, en Europe mais pas en France
 				return true;
 			}
@@ -881,7 +1011,8 @@ function get_priv_options($preselectionne, $return_mode = false)
 {
 	$output = '';
 	$resProfil = query("SELECT *, name_".$_SESSION['session_langue']." AS name
-		FROM peel_profil");
+		FROM peel_profil
+		WHERE " . get_filter_site_cond('profil', null, true) . "");
 	$tpl = $GLOBALS['tplEngine']->createTemplate('priv_options.tpl');
 	$tpl_options = array();
 	if (num_rows($resProfil)) {
@@ -915,7 +1046,7 @@ function get_user_id_from_email($email)
 	if (EmailOK($email)) {
 		$q = query('SELECT id_utilisateur
 			FROM peel_utilisateurs
-			WHERE email = "' . word_real_escape_string($email) . '"');
+			WHERE email = "' . word_real_escape_string($email) . '" AND ' . get_filter_site_cond('utilisateurs') . '');
 		if ($user = fetch_assoc($q)) {
 			return $user['id_utilisateur'];
 		} else {
@@ -965,7 +1096,7 @@ function get_trader_select_options($selected_trader_name = null, $selected_trade
 	}
 	$sql_trader = 'SELECT u.id_utilisateur, u.nom_famille , u.prenom
 		FROM peel_utilisateurs u
-		WHERE u.priv LIKE "admin%" ' . $sql_condition . '
+		WHERE u.priv LIKE "admin%" AND ' . get_filter_site_cond('utilisateurs', 'u') . ' ' . $sql_condition . '
 		ORDER BY u.id_utilisateur';
 	$res_trader = query($sql_trader);
 	$tpl_options = array();
@@ -986,4 +1117,3 @@ function get_trader_select_options($selected_trader_name = null, $selected_trade
 	return $tpl->fetch();
 }
 
-?>

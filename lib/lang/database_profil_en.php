@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_profil_en.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_profil_en.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,20 +20,19 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_profil["name"] = array(
-   "1" => "Client",
-   "2" => "Global Administrator",
-   "3" => "Reseller",
-   "4" => "Reseller - waiting",
-   "5" => "Affiliate",
-   "6" => "Affiliate - waiting",
-   "7" => "Provider",
-   "8" => "Newsletter subscriber",
-   "9" => "Reseller certified",
-   "10" => "Content Administrator",
-   "11" => "Sales Administrator",
-   "12" => "Products Administrator",
-   "13" => "Webmastering Administrator",
-   "14" => "Moderation Administrator"
+	"util" => "Client",
+	"admin" => "Global Administrator",
+	"reve" => "Reseller",
+	"stop" => "Reseller - waiting",
+	"affi" => "Affiliate",
+	"stand" => "Affiliate - waiting",
+	"supplier" => "Provider",
+	"newsletter" => "Newsletter subscriber",
+	"reve_certif" => "Reseller certified",
+	"admin_content" => "Content Administrator",
+	"admin_sales" => "Sales Administrator",
+	"admin_products" => "Products Administrator",
+	"admin_webmastering" => "Webmastering Administrator",
+	"admin_moderation" => "Moderation Administrator"
 );
 
-?>

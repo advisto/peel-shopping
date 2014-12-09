@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: product_in_container_html.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: product_in_container_html.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<table class="full_width center product_in_container">
 	<tr>
 		<td {% if (on_estimate) %}colspan="2"{% endif %} class="module_product_title"><a href="{{ href|escape('html') }}" title="{{ name|str_form_value }}">{{ name }}</a></td>
@@ -26,4 +26,9 @@
 			<td class="right" style="width:110px;">{{ on_estimate }}</td>
 		{% endif %}
 	</tr>
+	{% if user is defined %}
+	<tr>
+		<td>{{ user.pseudo }}</td>
+	</tr>
+	{% endif %}
 </table>

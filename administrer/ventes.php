@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ventes.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_sales");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_VENTES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_VENTES_TITLE'];
 $output = '';
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_ventes_information_select.tpl');
@@ -41,10 +41,9 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		} else {
 			$date_field = "o_timestamp";
 		}
-		$sql = "SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
+		$sql = "SELECT c.*
 			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON c.id_statut_paiement=sp.id
-			WHERE c.id_ecom='" . intval($GLOBALS['site_parameters']['id']) . "' AND c." . $date_field . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . $date_field . "<='" . nohtml_real_escape_string($dateAdded2) . "'";
+			WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND c." . word_real_escape_string($date_field) . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . word_real_escape_string($date_field) . "<='" . nohtml_real_escape_string($dateAdded2) . "'";
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$sql .= " AND c.id_statut_paiement = '" . intval($_GET['statut']) . "'";
 			$extra_csv_param = "&id_statut_paiement=" . intval($_GET['statut']);
@@ -52,7 +51,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$extra_csv_param = '';
 		}
 		$sql .= "
-				ORDER BY c." . $date_field;
+				ORDER BY c." . word_real_escape_string($date_field);
 		$query = query($sql);
 
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_ventes.tpl');
@@ -62,22 +61,30 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 
 			$totalVente = $totalVenteHt = 0;
 			$totalTransport = 0;
+			$netapayer = 0;
+			$totalAvoir = 0;
 			$totalTva = $totalTvaTransport = 0;
 			$i = 1;
 			while ($result = fetch_assoc($query)) {
-				$totalVente += $result['montant'];
+				$totalVente += $result['montant']+$result['avoir'];
+				$netapayer += $result['montant'];
+				$totalAvoir += $result['avoir'];
 				$totalVenteHt += $result['montant_ht'];
 				$totalTransport += $result['cout_transport'];
 				$totalTva += $result['total_tva'];
 				$totalTvaTransport += $result['tva_cout_transport'];
 				$vat_arrays[] = get_vat_array($result['code_facture']);
+				$avoir_devise_commande = '';
 				$montant_devise_commande = '';
+				$netapayer_devise_commande = '';
 				$montant_ht_devise_commande = '';
-				$cout_transport_devise_commande = '';
 				$total_tva_devise_commande = '';
+				$cout_transport_devise_commande = '';
 				if ($result['devise'] != $GLOBALS['site_parameters']['code']) {
 					// Si la devise de la commande est différente de la devise de l'admin alors on affiche le prix dans la devise de la commande en plus
-					$montant_devise_commande = '(' . fprix($result['montant'], true, $result['devise'], true, $result['currency_rate']) . ')';
+					$avoir_devise_commande = '(' . fprix($result['avoir'], true, $result['devise'], true, $result['currency_rate']) . ')';
+					$montant_devise_commande = '(' . fprix($result['montant']+$result['avoir'], true, $result['devise'], true, $result['currency_rate']) . ')';
+					$netapayer_devise_commande = '(' . fprix($result['montant'], true, $result['devise'], true, $result['currency_rate']) . ')';
 					$montant_ht_devise_commande = '(' . fprix($result['montant_ht'], true, $result['devise'], true, $result['currency_rate']) . ')';
 					$total_tva_devise_commande = '(' . fprix($result['total_tva'], true, $result['devise'], true, $result['currency_rate']) . ')';
 					if ($result['cout_transport'] != 0) {
@@ -89,14 +96,18 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 					'date' => get_formatted_date($result['o_timestamp']),
 					'id' => $result['id'],
 					'modif_href' => $GLOBALS['administrer_url'] . '/commander.php?commandeid=' . $result['id'] . '&mode=modif',
-					'statut_paiement' => $result['statut_paiement'],
+					'statut_paiement' => get_payment_status_name($result['id_statut_paiement']),
 					'email' => $result['email'],
 					'montant_ht_prix' => fprix($result['montant_ht'], true, $GLOBALS['site_parameters']['code'], false),
 					'montant_ht_devise_commande' => $montant_ht_devise_commande,
 					'total_tva_prix' => fprix($result['total_tva'], true, $GLOBALS['site_parameters']['code'], false),
 					'total_tva_devise_commande' => $total_tva_devise_commande,
-					'montant_prix' => fprix($result['montant'], true, $GLOBALS['site_parameters']['code'], false),
+					'montant_prix' => fprix($result['montant']+$result['avoir'], true, $GLOBALS['site_parameters']['code'], false),
 					'montant_devise_commande' => $montant_devise_commande,
+					'netapayer' => fprix($result['montant'], true, $GLOBALS['site_parameters']['code'], false),
+					'netapayer_devise_commande' => $netapayer_devise_commande,
+					'avoir' => fprix($result['avoir'], true, $GLOBALS['site_parameters']['code'], false),
+					'avoir_devise_commande' => $avoir_devise_commande,
 					'cout_transport_prix' => fprix($result['cout_transport'], true, $GLOBALS['site_parameters']['code'], false),
 					'cout_transport_devise_commande' => $cout_transport_devise_commande,
 					);
@@ -125,8 +136,10 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$tpl->assign('totalVenteHt_prix', fprix($totalVenteHt, true, $GLOBALS['site_parameters']['code'], false));
 			$tpl->assign('totalTva_prix', fprix($totalTva, true, $GLOBALS['site_parameters']['code'], false));
 			$tpl->assign('totalVente_prix', fprix($totalVente, true, $GLOBALS['site_parameters']['code'], false));
+			$tpl->assign('totalNet_a_payer', fprix($netapayer, true, $GLOBALS['site_parameters']['code'], false));
+			$tpl->assign('total_avoir', fprix($totalAvoir, true, $GLOBALS['site_parameters']['code'], false));
 			$tpl->assign('totalTransport_prix', fprix($totalTransport, true, $GLOBALS['site_parameters']['code'], false));
-			$tpl->assign('is_module_export_ventes_active', is_module_export_ventes_active());
+			$tpl->assign('is_module_export_ventes_active', check_if_module_active('export', 'administrer/export_ventes.php'));
 			$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('export_href_one_line_per_order', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=one_line_per_order&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
@@ -138,9 +151,10 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$tpl->assign('are_results', false);
 		}
 		$tpl->assign('only_delivered', false);
-		$tpl->assign('STR_MODULE_KEKOLI_ADMIN_ONLY_DELIVERED', $GLOBALS["STR_MODULE_KEKOLI_ADMIN_ONLY_DELIVERED"]);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
+		$tpl->assign('STR_PDF_AVOIR', $GLOBALS['STR_PDF_AVOIR']);
+		$tpl->assign('STR_PDF_NET', $GLOBALS['STR_PDF_NET']);
 		$tpl->assign('STR_ADMIN_VENTES_FORM_EXPLAIN', $GLOBALS['STR_ADMIN_VENTES_FORM_EXPLAIN']);
 		$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
 		$tpl->assign('STR_ORDER_NAME', $GLOBALS['STR_ORDER_NAME']);
@@ -167,4 +181,3 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
-?>

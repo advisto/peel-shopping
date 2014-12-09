@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_formulaire_categorie.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -25,7 +25,7 @@
 		<tr>
 			<td class="top">{{ STR_ADMIN_CATEGORIES_PARENT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" name="parent_id" style="width:100%" size="5">
+				<select class="form-control" name="parent_id" style="width:100%" size="10">
 					<option value="0"{% if issel_parent_zero %} selected="selected"{% endif %}>{{ STR_ADMIN_AT_ROOT }}</option>
 					{{ categorie_options }}
 				</select>
@@ -48,6 +48,14 @@
 		<tr>
 			<td>{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="number" class="form-control" name="position" value="{{ position|str_form_value }}" /></td>
+		</tr>
+		<tr>
+			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id">
+					{{ site_id_select_options }}
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -126,7 +134,11 @@
 			</td>
  	 	</tr>
 		<tr>
-			<td>{{ STR_ADMIN_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="top">{{ STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="sentence_displayed_on_product_{{ l.lng }}" value="{{ l.sentence_displayed_on_product|str_form_value }}" /></td>
+  	 	</tr>
+ 		<tr>
+			<td>{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 			{% if (l.image) %}
 				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ l.image.nom }}&nbsp;
@@ -149,7 +161,7 @@
 		</tr>
 		{% endif %}
 		{% endfor %}
-	{% if is_category_promotion_module_active and is_lot_module_active %}
+	{% if is_category_promotion_module_active or is_lot_module_active %}
 		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</td></tr>
 		{% if is_category_promotion_module_active %}
 		<tr>

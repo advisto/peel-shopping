@@ -1,23 +1,23 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_livraison.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: statut_livraison.php 43053 2014-10-30 11:31:38Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage,admin_sales");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
@@ -40,12 +40,6 @@ switch (vb($_REQUEST['mode'])) {
 	case "insere" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
-		}
-		if ((num_rows(query("SELECT 1
-			FROM peel_statut_livraison
-			WHERE id = '" . nohtml_real_escape_string($frm['new_id']) . "'")) > 0)) {
-			$frm['new_id']='';
-			$form_error_object->add('new_id', $GLOBALS["STR_IS_EMPTY"]);
 		}
 		if (!$form_error_object->count()) {
 			insere_statut($_POST);
@@ -101,17 +95,6 @@ function affiche_formulaire_ajout_statut(&$frm)
 		}
 	}
 	$frm['nouveau_mode'] = "insere";
-	if(empty($frm['new_id'])) {
-		$query = query("SELECT id
-			FROM peel_statut_livraison
-			ORDER BY id DESC
-			LIMIT 1");
-		if($result = fetch_assoc($query)) {
-			$frm['new_id'] = $result['id']+1;
-		} else {
-			$frm['new_id'] = 0;
-		}
-	}
 	$frm['id'] = "";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_CREATE'];
 
@@ -132,14 +115,16 @@ function affiche_formulaire_modif_statut($id, &$frm)
 		/* Charge les informations du produit */
 		$qid = query("SELECT *
 			FROM peel_statut_livraison
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('statut_livraison', null, true) . "");
 		$frm = fetch_assoc($qid);
 	}
-	$frm['new_id'] = $frm['id'];
-	$frm["nouveau_mode"] = "maj";
-	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-
-	affiche_formulaire_statut($frm);
+	if (!empty($frm)) {
+		$frm["nouveau_mode"] = "maj";
+		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+		affiche_formulaire_statut($frm);
+	} else {
+		redirect_and_die(get_current_url(false).'?mode=ajout');
+	}
 }
 
 /**
@@ -154,7 +139,9 @@ function affiche_formulaire_statut(&$frm)
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
-	$tpl->assign('new_id', intval(vb($frm['new_id'])));
+	$tpl->assign('technical_code', vb($frm['technical_code']));
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
@@ -167,6 +154,7 @@ function affiche_formulaire_statut(&$frm)
 	$tpl->assign('STR_ADMIN_STATUT_FORM_TITLE', $GLOBALS['STR_ADMIN_STATUT_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
@@ -183,7 +171,7 @@ function affiche_formulaire_statut(&$frm)
 function supprime_statut($id)
 {
 	/* Efface le statut */
-	query("DELETE FROM peel_statut_livraison WHERE id=" . intval($id));
+	query("DELETE FROM peel_statut_livraison WHERE id=" . intval($id) . " AND " . get_filter_site_cond('statut_livraison', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_STATUT_LIVRAISON_MSG_DELETED_OK'], get_delivery_status_name($id))))->fetch();
 }
 
@@ -195,12 +183,12 @@ function supprime_statut($id)
  */
 function insere_statut($frm)
 {
-	$sql = "INSERT INTO peel_statut_livraison (position, id";
+	$sql = "INSERT INTO peel_statut_livraison (position, technical_code, site_id";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
-	) VALUES ('" . intval($frm['position']) . "', '" . intval($frm['new_id']) . "'";
+	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . intval($frm['site_id']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -217,7 +205,7 @@ function insere_statut($frm)
  */
 function maj_statut($id, $frm)
 {
-	$sql = "UPDATE peel_statut_livraison SET position='" . intval($frm['position']) . "', id='" . intval($frm['new_id']) . "'";
+	$sql = "UPDATE peel_statut_livraison SET position='" . intval($frm['position']) . "', site_id='" . intval($frm['site_id']) . "', technical_code='" . nohtml_real_escape_string($frm['technical_code']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -234,18 +222,21 @@ function maj_statut($id, $frm)
 function affiche_liste_statut()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_statut_livraison.tpl');
-	$result = query("SELECT id, position, nom_" . $_SESSION['session_langue'] . "
+	$result = query("SELECT id, position, nom_" . $_SESSION['session_langue'] . ", site_id, technical_code
 		FROM peel_statut_livraison
+		WHERE " . get_filter_site_cond('statut_livraison', null, true) . "
 		ORDER BY position ASC, id ASC");
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
-				'id' => $ligne['id'],
+				'technical_code' => $ligne['technical_code'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'nom' => $ligne['nom_' . $_SESSION['session_langue']],
-				'position' => $ligne['position']
+				'position' => $ligne['position'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 				);
 			$i++;
 		}
@@ -257,12 +248,12 @@ function affiche_liste_statut()
 	$tpl->assign('STR_ADMIN_STATUT_LIVRAISON_TITLE', $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_TITLE']);
 	$tpl->assign('STR_ADMIN_STATUT_LIVRAISON_EXPLAIN', $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_STATUT_LIVRAISON_CREATE', $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_CREATE']);
-	$tpl->assign('STR_ADMIN_ID', $GLOBALS['STR_ADMIN_ID']);
+	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_STATUT_STATUS_TYPE', $GLOBALS['STR_ADMIN_STATUT_STATUS_TYPE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_STATUT_UPDATE', $GLOBALS['STR_ADMIN_STATUT_UPDATE']);
 	$tpl->assign('STR_ADMIN_STATUT_NO_STATUS_FOUND', $GLOBALS['STR_ADMIN_STATUT_NO_STATUS_FOUND']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	echo $tpl->fetch();
 }
 
-?>

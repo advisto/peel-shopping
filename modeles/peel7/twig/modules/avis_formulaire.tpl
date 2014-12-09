@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_formulaire.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: avis_formulaire.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<h2>{{ STR_DONNEZ_AVIS }}</h2>
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="avis_formulaire">
@@ -32,6 +32,11 @@
 			<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
 		</tr>
 		<tr>
+			{% if (html_editor) %}
+			<td class="top" colspan="2">
+				{{ html_editor }}
+			</td>
+			{% else %}
 			<td class="top">
 				<b>{{ STR_YOUR_OPINION }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
 				<br /><input type="text" class="form-control compteur" name="compteur" size="4" onfocus="blur()" value="255" /> <span style="margin-left:5px;"> {{ STR_REMINDING_CHAR }}</span>
@@ -40,7 +45,9 @@
 			<td>
 				<textarea class="form-control" name="avis" cols="36" rows="6" onfocus="Compter(this,255,compteur)" onkeypress="Compter(this,255,compteur, false)" onkeyup="Compter(this,255,compteur, false)" onblur="Compter(this,255,compteur, false)">{{ avis|html_entity_decode_if_needed }}</textarea>
 			</td>
+			{% endif %}
 		</tr>
+		{% if not (no_notation) %}
 		<tr>
 			<td class="top"><b>{{ STR_YOUR_NOTE }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
 				<br />{{ error_note }}
@@ -53,6 +60,7 @@
 				<input type="radio" name="note" value="1" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
 			</td>
 		</tr>
+		{% endif %}
 		<tr>
 			<td colspan="2" class="center">
 				<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
@@ -69,7 +77,7 @@
 				<input type="hidden" name="type" value="{{ type|str_form_value }}" />
 				<input type="hidden" name="mode" value="insere" />
 				<input type="hidden" name="langue" value="{{ langue|str_form_value }}" />
-				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" name="validate" />
+				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" />
 			</td>
 		</tr>
 		<tr>

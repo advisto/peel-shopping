@@ -1,18 +1,18 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: search_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="search_form" action="{{ action|escape('html') }}" method="get">
-	<h2>{{ STR_SEARCH }}{{ search }}</h2>
+	{% if display == 'full' %}<h2>{{ STR_SEARCH }}{{ search }}</h2>{% endif %}
 	<ul class="attribute_select_search attribute_select_search_part1">
 		<li class="input">
 			{{ STR_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control"  id="search_" name="search" size="48" value="{{ value|str_form_value }}" placeholder="{{ STR_ENTER_KEY|str_form_value }}" />
@@ -25,7 +25,7 @@
 	</ul>
 {% if is_advanced_search_active %}
 	<ul class="attribute_select_search attribute_select_search_part2">
-	{% if not is_annonce_module_active %}
+	{% if (not is_annonce_module_active) and display != 'module_ads' %}
 		{% if (select_categorie) %}
 		<li class="attribute_categorie">
 			 <select class="form-control" name="categorie">
@@ -38,7 +38,8 @@
 			{{ sa }}
 		{% endfor %}
 		{{ custom_attribute }}
-	{% else %}
+	{% endif %}
+	{% if is_annonce_module_active and display != 'module_products' %}
 		<li class="select_categorie_annonce">
 			{{ STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD }}{{ STR_BEFORE_TWO_POINTS }}: <select class="form-control" name="cat_select">
 				<option value="">{{ STR_MODULE_ANNONCES_AD_CATEGORY }}</option>
@@ -56,29 +57,31 @@
 				<option value="detail"{% if (cat_detail) and cat_detail == 'detail' %} selected="selected"{% endif %}>{{ STR_MODULE_ANNONCES_OFFER_DETAIL }}</option>
 			</select>
 		{% endif %}
-			<input name="cat_statut" type="checkbox" value="1" {% if (cat_statut) and cat_statut == 1 %} checked="checked"{% endif %} /> {{ STR_MODULE_ANNONCES_ALT_VERIFIED_ADS }}
+			{% if display == 'full' %}<input name="cat_statut" type="checkbox" value="1" {% if (cat_statut) and cat_statut == 1 %} checked="checked"{% endif %} /> {{ STR_MODULE_ANNONCES_ALT_VERIFIED_ADS }}{% endif %}
 		</li>
-		{% if (ad_lang_select) %}
-		<li class="ad_lang">
-			{{ ad_lang_select }}
-		</li>
-		{% endif %}
-		<li class="input">
-			{{ STR_TOWN }} / {{ STR_ZIP }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control"  id="city_zip" name="city_zip" size="60" value="{{ city_zip|str_form_value }}" />
-		</li>
-		<li class="select_country_annonce">{{ STR_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:
-			<select class="form-control" name="country">
-				<option value="">{{ STR_CHOOSE }}...</option>
-				{{ country }}
-			</select>
-			{% for c in continent_inputs %}
-				<input type="checkbox" name="continent[]" value="{{ c.value|str_form_value }}"{% if c.issel %} checked="checked"{% endif %} /> {{ c.name }}
-			{% endfor %}
-		</li>
-		{% if (near_position) %}
-		<li class="near_position">
-			{{ near_position }}
-		</li>
+		{% if display == 'full' %}
+			{% if (ad_lang_select) %}
+			<li class="ad_lang">
+				{{ ad_lang_select }}
+			</li>
+			{% endif %}
+			<li class="input">
+				{{ STR_TOWN }} / {{ STR_ZIP }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control"  id="city_zip" name="city_zip" size="60" value="{{ city_zip|str_form_value }}" />
+			</li>
+			<li class="select_country_annonce">{{ STR_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:
+				<select class="form-control" name="country">
+					<option value="">{{ STR_CHOOSE }}...</option>
+					{{ country }}
+				</select>
+				{% for c in continent_inputs %}
+					<input type="checkbox" name="continent[]" value="{{ c.value|str_form_value }}"{% if c.issel %} checked="checked"{% endif %} /> {{ c.name }}
+				{% endfor %}
+			</li>
+			{% if (near_position) %}
+			<li class="near_position">
+				{{ near_position }}
+			</li>
+			{% endif %}
 		{% endif %}
 	{% endif %}
 	</ul>
@@ -87,4 +90,7 @@
 		<input class="btn btn-primary" type="submit" value="{{ STR_SEARCH|str_form_value }}" />
 	</div>
 </form>
+{% if (display_save_search_button) %}
+	{{ display_save_search_button }}
+{% endif %}
 <br />

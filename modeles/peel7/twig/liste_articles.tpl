@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_articles.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: liste_articles.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div style="margin-top:15px; margin-bottom:15px">
@@ -63,6 +63,9 @@
 			<th class="menu">{{ STR_ADMIN_TITLE }}</th>
 			<th class="menu">{{ STR_WEBSITE }}</th>
 			<th class="menu">{{ STR_STATUS }}</th>
+	{% if (STR_ADMIN_SITE_COUNTRY) %}
+			<td class="menu">{{ STR_ADMIN_SITE_COUNTRY }}</td>
+	{% endif %}
 		</tr>
 	{% for li in lignes %}
 		{{ li.tr_rollover }}
@@ -84,15 +87,10 @@
 				{% endif %}
 			</td>
 			<td><a title="{{ STR_ADMIN_ARTICLES_FORM_MODIFY|str_form_value }}" href="{{ li.modif_href|escape('html') }}">{{ li.titre|html_entity_decode_if_needed }}</a></td>
-			<td class="center">
-				{% if not (li.sites) %}
-				<span style="color:red">-</span><br />
-				{% else %}
-					{% for si in li.sites %}
-					{{ si|html_entity_decode_if_needed }}
-					{% endfor %}
-				{% endif %}
-			</td>
+			<td class="center">{{ li.site_name }}</td>
+	{% if (STR_ADMIN_SITE_COUNTRY) %}
+			<td class="center">{{ li.site_country }}</td>
+	{% endif %}
 			<td class="center"><img class="change_status" src="{{ li.modif_etat_src|escape('html') }}" alt="" onclick="{{ li.etat_onclick|escape('html') }}" /></td>
 		</tr>
 	{% endfor %}

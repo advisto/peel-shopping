@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: zones.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: zones.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage");
 
-$DOC_TITLE = $GLOBALS['STR_ADMIN_ZONES_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_ZONES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
@@ -100,6 +100,7 @@ function affiche_formulaire_ajout_zone(&$frm)
 		$frm['on_franco_amount'] = "";
 		$frm['on_franco_nb_products'] = "";
 		$frm['position'] = "";
+		$frm['site_id'] = "";
 		$frm['technical_code'] = "";
 	}
 	$frm['nouveau_mode'] = "insere";
@@ -122,8 +123,8 @@ function affiche_formulaire_modif_zone($id, &$frm)
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
 		/* Charge les informations de la zone */
 		$qid = query("SELECT *
-			FROM peel_zones
-			WHERE id = " . intval($id) . "");
+			FROM peel_zones z
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('zones', 'z', true) . "");
 		if ($frm = fetch_assoc($qid)) {
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_ZONES_NOT_FOUND']))->fetch();
@@ -157,14 +158,16 @@ function affiche_formulaire_zone(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('tva', $frm['tva']);
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('on_franco', $frm['on_franco']);
 	$tpl->assign('on_franco_amount', $frm['on_franco_amount']);
 	$tpl->assign('on_franco_nb_products', $frm['on_franco_nb_products']);
 	$tpl->assign('position', $frm['position']);
-	$tpl->assign('is_fianet_module_active', is_fianet_module_active());
+	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
 	$tpl->assign('technical_code', $frm['technical_code']);
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_ZONES_FORM_TITLE', $GLOBALS['STR_ADMIN_ZONES_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
@@ -179,6 +182,9 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN', $GLOBALS['STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
+	$tpl->assign('STR_ADMIN_VAT_PERCENTAGE', $GLOBALS['STR_ADMIN_VAT_PERCENTAGE']);
+	$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
+	$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
 	echo $tpl->fetch();
 }
 
@@ -191,12 +197,13 @@ function affiche_formulaire_zone(&$frm)
 function supprime_zone($id)
 {
 	$qid = query("SELECT nom_" . $_SESSION['session_langue'] . "
-		FROM peel_zones
-		WHERE id=" . intval($id) . "");
+		FROM peel_zones z
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('zones', 'z', true) . "");
 	$col = fetch_assoc($qid);
 
 	/* Efface la zone */
-	query("DELETE FROM peel_zones WHERE id=" . intval($id));
+	query("DELETE FROM peel_zones 
+		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('zones', null, true) . "");
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ZONES_MSG_DELETED_OK'], $col['nom_' . $_SESSION['session_langue']])))->fetch();
 }
 
@@ -210,11 +217,12 @@ function insere_zone($frm)
 {
 	$sql = "INSERT INTO peel_zones (
 		tva
+		, site_id
 		, position
 		, on_franco
 		, on_franco_amount
 		, on_franco_nb_products";
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", technical_code";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -223,11 +231,12 @@ function insere_zone($frm)
 	$sql .= "
 	) VALUES (
 		'" . nohtml_real_escape_string(vn($frm['tva'])) . "'
+		, '" . intval($frm['site_id']) . "'
 		, '" . intval($frm['position']) . "'
 		, '" . intval(vn($frm['on_franco'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_amount'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_nb_products'])) . "'";
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -248,17 +257,20 @@ function insere_zone($frm)
 function maj_zone($id, $frm)
 {
 	$sql = "UPDATE peel_zones
-		SET tva = '" . nohtml_real_escape_string(vn($frm['tva'])) . "'";
+		SET tva = '" . nohtml_real_escape_string(vn($frm['tva'])) . "'
+		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	if (is_fianet_module_active()) {
+	if (check_if_module_active('fianet')) {
 		$sql .= ", technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'";
 	}
-	$sql .= ", position = '" . nohtml_real_escape_string($frm['position']) . "'
+	$sql .= "
+		, site_id = '" . intval($frm['site_id']) . "'
+		, position = '" . nohtml_real_escape_string($frm['position']) . "'
 		, on_franco_amount = '" . nohtml_real_escape_string($frm['on_franco_amount']) . "'
 		, on_franco_nb_products = '" . nohtml_real_escape_string($frm['on_franco_nb_products']) . "', on_franco = '" . intval(vn($frm['on_franco'])) . "'
-		WHERE id = '" . intval($id) . "'";
+		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('zones', null, true) . "";
 	query($sql);
 }
 
@@ -276,8 +288,10 @@ function affiche_liste_zone()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$result = query("SELECT *
 		FROM peel_zones z
+		WHERE " . get_filter_site_cond('zones', 'z', true) . "
 		ORDER BY position");
 	if (!(num_rows($result) == 0)) {
+		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
@@ -286,8 +300,9 @@ function affiche_liste_zone()
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'tva' => $ligne['tva'],
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
 				'on_franco' => $ligne['on_franco'],
-				'position' => $ligne['position']
+				'position' => $ligne['position'],
 				);
 			$i++;
 		}
@@ -295,6 +310,7 @@ function affiche_liste_zone()
 	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_ZONES_TITLE', $GLOBALS['STR_ADMIN_ZONES_TITLE']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_ZONES_CREATE', $GLOBALS['STR_ADMIN_ZONES_CREATE']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
 	$tpl->assign('STR_SHIPPING_ZONE', $GLOBALS['STR_SHIPPING_ZONE']);
@@ -310,4 +326,3 @@ function affiche_liste_zone()
 	echo $tpl->fetch();
 }
 
-?>

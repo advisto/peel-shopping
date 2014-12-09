@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_de.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_de.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -58,7 +58,8 @@ hierunter sehen Sie die Einzelheiten der am [DATE] versandten Nachricht:
 Name: [NOM_FAMILLE]
 Vorname: [PRENOM]
 Firma: [SOCIETE]
-Tel.: [TELEPHONE]
+Adresse: [ADRESSE]
+Tel: [TELEPHONE]
 E-Mail: [EMAIL]
 Verfügbarkeit [DISPO]
 
@@ -72,7 +73,7 @@ IP : [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Guten Tag, 
 
-eine Bestellung mit der Nummer [ORDER_ID] wurde gerade auf [WWWROOT] registriert.",
+eine Bestellung mit der Nummer [ORDER_ID] wurde gerade auf [WWWROOT]/ registriert.",
   "admin_info_payment_credit_card_3_times" => "Guten Tag,
 
 eine Bestellung mit einer Bezahlung in drei Raten mit der Nummer [ORDER_ID] wurde gerade auf [SITE] registriert.
@@ -232,14 +233,14 @@ Bemerkungen:
 
 [EMAIL_ACHETEUR] möchte Ihnen gern einen Gutschein schenken!
 
-Um ihn einzulösen, gehen Sie zur Website [WWWROOT] und tragen dort Ihren Code ein [CHECK_NAME].
+Um ihn einzulösen, gehen Sie zur Website [WWWROOT]/ und tragen dort Ihren Code ein [CHECK_NAME].
 
 Damit erhalten Sie bei Ihrer nächsten Bestellung mit einer Mindestbestellsumme von [MONTANT_MIN] zzgl. MwSt. einen Rabatt von [REMISE_VALEUR].",
   "cree_cheque_cadeau_friend" => "Guten Tag,
 
 Ihr/e Freund/in [PRENOM] [NOM_FAMILLE] möchte Ihnen einen Gutschein für die Website [SITE] schenken.
 
-Um ihn einzulösen, gehen Sie zur Website [WWWROOT] und tragen dort Ihren Code ein [CODE].
+Um ihn einzulösen, gehen Sie zur Website [WWWROOT]/ und tragen dort Ihren Code ein [CODE].
 
 Damit erhalten Sie bei Ihrer Bestellung einen Rabatt von [PRIX] inkl. MwSt.
 ",
@@ -251,7 +252,7 @@ gerade wurde auf der Website [SITE] über das Modul CHEQUE CADEAU der Rabattcode
 
 [SITE] schenkt Ihnen einen Gutschein über [MONTANT] (30 Tage gültig).
 
-Um ihn einzulösen, gehen Sie zu [WWWROOT] und geben dort den Code ein [CODE].
+Um ihn einzulösen, gehen Sie zu [WWWROOT]/ und geben dort den Code ein [CODE].
 ",
   "cree_cheque_cadeau_client_admin" => "Guten Tag,
 
@@ -275,8 +276,8 @@ Dies sind die bestellten Artikel:
 
 Einzelheiten der am [DATE] versandten Nachricht:
 
-[PRENOM] [NOM_FAMILLE] hat seine Wunschliste versandt: [GIFTLIST_NAME]:
-[WWWROOT]/modules/listecadeau/voir.php?email_liste=[URL_LISTE_CADEAU]
+[PRENOM] [NOM_FAMILLE] hat seine Wunschliste versandt [GIFTLIST_NAME]:
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS]",
   "parrainage" => "Guten Tag,
@@ -312,12 +313,12 @@ Mit dieser E-Mail möchten wir Sie bezüglich der Sicherheit Ihres PEEL-Netzlade
 
 Kundendienst
 [SITE]
-[WWWROOT]",
+[WWWROOT]/",
   "cree_cheque_cadeau_client_type1" => "Guten Tag,
 
 [SITE] schenkt Ihnen einen 30 Tage lang gültigen Gutschein über  [PERCENT].
 
-Um ihn einzulösen, gehen Sie zu [WWWROOT] und geben dort den Code [CODE] ein.
+Um ihn einzulösen, gehen Sie zu [WWWROOT]/ und geben dort den Code [CODE] ein.
 ",
   "warn_admin_user_subscription" => "Am [DATE] 
 
@@ -359,4 +360,3 @@ Wir erinnern Sie daran, dass die zurückzusendenden Artikel in gutem Zustand und
 Nach Eingang Ihrer Artikel werden wir die entsprechende Erstattung validieren."
 );
 
-?>

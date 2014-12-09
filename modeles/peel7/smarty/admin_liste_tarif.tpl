@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_tarif.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_tarif.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_TARIFS_TITLE}</div>
 <div class="alert alert-info">
 	<p>{$STR_ADMIN_TARIFS_CONFIG_STATUS} <b><a href="sites.php" class="alert-link">{if $mode_transport == 1}{$STR_ADMIN_ACTIVATED}{else}{$STR_ADMIN_DEACTIVATED} {"=>"|htmlspecialchars} {$STR_ADMIN_TARIFS_CONFIG_DEACTIVATED_COMMENT}{/if}</a></b></p>
@@ -29,6 +29,7 @@
 			<td class="menu">{$STR_ADMIN_TARIFS_MINIMAL_TOTAL_SHORT} ({$site_symbole} {$STR_TTC})</td>
 			<td class="menu">{$STR_ADMIN_TARIFS_MAXIMAL_TOTAL_SHORT} ({$site_symbole} {$STR_TTC})</td>
 			<td class="menu">{$STR_ADMIN_TARIFS_TARIFS} ({$site_symbole} {$STR_TTC})</td>
+			<td class="menu">{$STR_ADMIN_WEBSITE}</td>
 		</tr>
 		{foreach $results as $res}
 		{$res.tr_rollover}
@@ -40,6 +41,7 @@
 			<td class="center">{$res.totalmin}</td>
 			<td class="center">{$res.totalmax}</td>
 			<td class="center">{$res.tarif} {$site_symbole}</td>
+			<td class="center">{$res.site_name}</td>
 		</tr>
 		{/foreach}
 	</table>

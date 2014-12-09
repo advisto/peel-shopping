@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: modules_handler.php 43428 2014-12-01 09:37:35Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -91,7 +91,7 @@ function is_best_seller_module_active() {
  * @return
  */
 function is_module_precedent_suivant_active() {
-    if (vn($GLOBALS['site_parameters']['module_precedent_suivant']) == '1' && file_exists($GLOBALS['fonctionsprecedentsuivant'])) {
+    if (vn($GLOBALS['site_parameters']['module_precedent_suivant']) == 1 && file_exists($GLOBALS['fonctionsprecedentsuivant'])) {
         // Module présent
         return true;
     } else {
@@ -184,7 +184,7 @@ function is_module_avis_active() {
  * @return
  */
 function is_module_rss_active() {
-    if (vn($GLOBALS['site_parameters']['module_rss']) == '1' && file_exists($GLOBALS['fonctionsrss'])) {
+    if (vn($GLOBALS['site_parameters']['module_rss']) == 1 && file_exists($GLOBALS['fonctionsrss'])) {
         // Module présent ET sélectionné
         return true;
     } else {
@@ -199,7 +199,7 @@ function is_module_rss_active() {
  * @return
  */
 function is_module_pensebete_active() {
-    if (file_exists($GLOBALS['fonctionspensebete'])) {
+    if (vn($GLOBALS['site_parameters']['module_pensebete']) == 1 && file_exists($GLOBALS['fonctionspensebete'])) {
         // Module présent
         return true;
     } else {
@@ -244,7 +244,7 @@ function is_module_direaunami_active() {
  * @return
  */
 function is_module_faq_active() {
-    if (vn($GLOBALS['site_parameters']['module_faq']) == '1' && file_exists($GLOBALS['dirroot'] . "/modules/faq/faq.php")) {
+    if (vn($GLOBALS['site_parameters']['module_faq']) == 1 && file_exists($GLOBALS['dirroot'] . "/modules/faq/faq.php")) {
         // Module présent
         return true;
     } else {
@@ -340,7 +340,7 @@ function is_module_marge_active() {
  * @return
  */
 function is_module_forum_active() {
-    if (vn($GLOBALS['site_parameters']['module_forum']) == '1' && file_exists($GLOBALS['dirroot'] . "/modules/forum/lang/".$_SESSION['session_langue'].'.php') && (empty($GLOBALS['site_parameters']['forum_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters']['forum_allowed_langs_array']))) {
+    if (vn($GLOBALS['site_parameters']['module_forum']) == 1 && file_exists($GLOBALS['dirroot'] . "/modules/forum/lang/".$_SESSION['session_langue'].'.php') && (empty($GLOBALS['site_parameters']['forum_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters']['forum_allowed_langs_array']))) {
         // Module présent
         return true;
     } else {
@@ -355,7 +355,7 @@ function is_module_forum_active() {
  * @return
  */
 function is_giftlist_module_active() {
-    if (vn($GLOBALS['site_parameters']['module_giftlist']) == '1' && file_exists($GLOBALS['dirroot'] . "/modules/listecadeau/fonctions.php")) {
+    if (vn($GLOBALS['site_parameters']['module_giftlist'], 1) == 1 && file_exists($GLOBALS['dirroot'] . "/modules/listecadeau/fonctions.php")) {
         // Module présent
         return true;
     } else {
@@ -451,7 +451,7 @@ function is_birthday_module_active() {
  * @return
  */
 function is_gifts_module_active() {
-    return file_exists($GLOBALS['fonctionsgift']);
+	return (vn($GLOBALS['site_parameters']['module_gifts']) == 1 && file_exists($GLOBALS['fonctionsgift']));
 }
 
 /**
@@ -487,7 +487,7 @@ function is_devises_module_active() {
  * @return
  */
 function display_prices_with_taxes_active() {
-    if (vn($GLOBALS['site_parameters']['display_prices_with_taxes']) == '0' || (is_reseller_module_active() && is_reseller() && !empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes']))) {
+    if (vn($GLOBALS['site_parameters']['display_prices_with_taxes']) == '0' || (is_reseller_module_active() && a_priv('reve') && !empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes']))) {
         return false;
     } else {
         return true;
@@ -510,6 +510,14 @@ function is_download_module_active() {
  */
 function is_groups_module_active() {
     return file_exists($GLOBALS['fonctionsgroups']);
+}
+
+/**
+ *
+ * @return
+ */
+function is_groups_advanced_module_active() {
+    return file_exists($GLOBALS['fonctionsgroupsadvanced']);
 }
 
 /**
@@ -807,7 +815,7 @@ function is_facebook_module_active() {
  * @return
  */
 function is_module_vacances_active() {
-    if (vn($GLOBALS['site_parameters']['module_vacances']) == '1' && file_exists($GLOBALS['fonctionsvacances'])) {
+    if (vn($GLOBALS['site_parameters']['module_vacances']) == 1 && file_exists($GLOBALS['fonctionsvacances'])) {
         // Module présent
         return true;
     } else {
@@ -1037,5 +1045,81 @@ function is_nexway_module_active() {
     return file_exists($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 }
 
+/**
+ * is_bounces_module_active()
+ *
+ * @return
+ */
+function is_bounces_module_active() {
+    return file_exists($GLOBALS['dirroot'] . '/modules/bounces/bounce_driver.php');
+}
 
-?>
+
+/**
+ * is_exaprint_module_active()
+ *
+ * @return
+ */
+function is_exaprint_module_active()
+{
+	 return file_exists($GLOBALS['dirroot'] . '/modules/exaprint/administrer/fonctions.php');
+}
+/**
+ *
+ * @return
+ */
+function is_agenda_module_active() {
+    return file_exists($GLOBALS['fonctionsagenda']);
+}
+/**
+ *
+ * @return
+ */
+function is_participants_module_active() {
+    return file_exists($GLOBALS['fonctionsparticipants']);
+}
+/**
+ *
+ * @return
+ */
+function is_photos_gallery_module_active() {
+    return file_exists($GLOBALS['fonctionsphotosgallery']);
+}
+
+/**
+ * is_sauvegarde_recherche_module_active()
+ *
+ * @return
+ */
+function is_sauvegarde_recherche_module_active() {
+    return file_exists($GLOBALS['fonctionssauvegarde_recherche']);
+}
+
+/**
+ *
+ * @param string $module_name Nom du module à tester. Le nom du module doit être le même que le dossier
+ * @param string $specific_file_name Nom du fichier specifique à tester si nécessaire.
+ *
+ * @return
+ */
+function check_if_module_active($module_name, $specific_file_name=null) {
+	if (empty($module_name)) {
+		// Nom du module vide ou pas renseigné
+		return false;
+	}
+	if (!isset($GLOBALS['site_parameters']['module_' . $module_name]) || (isset($GLOBALS['site_parameters']['module_' . $module_name]) && !empty($GLOBALS['site_parameters']['module_' . $module_name]))) {
+		// Si le paramètre est absent, ou qu'il est activé en back office. La validité de l'absence du paramètre est nécessaire pour des raisons de compatibilité pour certains modules. Donc la désactivation du module est à faire depuis le back office, en passant la valeur à 0 ou false (selon le type de la configuration)
+		if (empty($specific_file_name)) {
+			// cas standard
+			if (file_exists($GLOBALS['dirroot'] . "/modules/".$module_name)) {
+				// dossier trouvé et module actif, la fonction retourne un résultat positif
+				return true;
+			}
+		} elseif (file_exists($GLOBALS['dirroot'] . "/modules/".$module_name."/".$specific_file_name)) {
+			// fichier trouvé et module actif, la fonction retourne un résultat positif
+			return true;
+		}
+	}
+	// Si on passe par ici, les tests qui permettent l'activation du module ont échoués. Soit la désactivation du module est faite depuis l'administration, ou aucun fichier respectant la norme de nommage est présent dans le module
+	return false;
+}

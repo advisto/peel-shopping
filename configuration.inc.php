@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: configuration.inc.php 43546 2014-12-08 18:46:12Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -38,6 +38,12 @@ if (function_exists('ini_set')) {
 }
 // Initialisation de variable de gestion des erreurs
 $GLOBALS['display_errors'] = 0;
+$GLOBALS['script_start_time'] = array_sum(explode(' ', microtime()));
+
+if (strval(floatval('1000.1')) != '1000.1') {
+	// Homogénéisation des configurations serveur : avoir toujours une manipulation interne des décimales sous forme de point (évite notamment des problèmes lors d'insertions de float en SQL)
+	@setlocale(LC_NUMERIC, 'C');
+}
 
 if (!function_exists('ini_get') || @ini_get('register_globals')) {
 	// Code à laisser absolument en début de fichier
@@ -56,7 +62,6 @@ if (!function_exists('ini_get') || @ini_get('register_globals')) {
 		unset($value);
 	}
 }
-
 // ***********************************
 // * DEBUT CONFIGURATION PAR DEFAUT  *
 // Les valeurs ci-dessous sont ensuite remplacées après l'installation par les valeurs contenues dans la table peel_configuration
@@ -87,7 +92,7 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.1.4');
+define('PEEL_VERSION', '7.2.0');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -96,6 +101,10 @@ foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_
 		$GLOBALS['display_errors'] = 1;
 		break;
 	}
+	// Configuration de l'affichage des var_dump. -1 => Supression de la limite des résultats retournés : http://xdebug.org/docs/display
+	@ini_set('xdebug.var_display_max_depth','-1');
+	@ini_set('xdebug.var_display_max_children','-1');
+	@ini_set('xdebug.var_display_max_data','-1');
 }
 if (!defined('PEEL_DEBUG')) {
 	define('PEEL_DEBUG', false);
@@ -116,6 +125,7 @@ if (!defined('IN_INSTALLATION')) {
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
+// Sur 1and1 par exemple les fonctions ci-dessous ne sont pas fonctionnelles, c'est donc via les ini_set que ça marche ci-après
 if (function_exists('mb_internal_encoding')) {
 	@mb_internal_encoding(GENERAL_ENCODING);
 }
@@ -128,11 +138,15 @@ if (function_exists('mb_http_input')) {
 if (function_exists('mb_http_output')) {
 	@mb_http_output(GENERAL_ENCODING);
 }
-// Sur 1and1 par exemple, les fonctions ci-dessus ne fonctionnent pas pour des raisons inconnues, on utilise donc également ini_set ci-dessous
+// En PHP >= 5.6 les ini_set ci-dessous ne sont plus fonctionnels, il faut passer par default_charset ci-après
 @ini_set('mbstring.internal_encoding', GENERAL_ENCODING);
 @ini_set('mbstring.detect_order', GENERAL_ENCODING);
 @ini_set('mbstring.http_input', GENERAL_ENCODING);
 @ini_set('mbstring.http_output', GENERAL_ENCODING);
+@ini_set('mbstring.http_output', GENERAL_ENCODING);
+// Spécial PHP >= 5.6
+@ini_set('default_charset', GENERAL_ENCODING);
+
 // la fonction date_default_timezone_set existe depuis PHP 5.1.0
 if (version_compare(PHP_VERSION, '5.1.0', '>=')) {
 	// Supprimer les warnings dans certains cas de configuration serveur en version PHP >= 5.3
@@ -146,15 +160,19 @@ if (!isset($_SERVER['REQUEST_URI'])) {
 	}
 }
 // Fin compatibilité IIS
+if (empty($_SERVER["HTTP_HOST"])) {
+	// Gestion d'un appel en local sur le serveur ou en cas de bug du serveur web
+	$_SERVER["HTTP_HOST"]='127.0.0.1';
+}
 $GLOBALS['dirroot'] = dirname(__FILE__);
 // On détecte l'URL de base du site pour l'installation uniquement
 // Si $GLOBALS['wwwroot'] est précisé dans /lib/setup/info.inc.php, alors il aura la priorité
-if (!empty($_SERVER['SCRIPT_FILENAME'])) {
-	$file_called_real_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME']));
-} else {
-	$file_called_real_path = str_replace('\\', '/', @realpath('./'));
-}
 $formatted_dirroot = str_replace('\\', '/', $GLOBALS['dirroot']);
+$file_called_real_path = str_replace('\\', '/', @realpath('./'));
+if (!empty($_SERVER['SCRIPT_FILENAME']) && (empty($file_called_real_path) || (strpos($file_called_real_path, $formatted_dirroot) === false && strpos(str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME'])), $formatted_dirroot) !== false))) {
+	// On gère les cas d'incohérences entre realpath et SCRIPT_FILENAME chez certains hébergeurs
+	$file_called_real_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME']));
+}
 if (strpos($file_called_real_path, 'public_html') === false && strpos($formatted_dirroot, 'public_html') !== false) {
 	$file_called_real_path = str_replace('private_html/', 'public_html/', $file_called_real_path);
 }
@@ -178,6 +196,7 @@ $GLOBALS['apparent_folder'] = substr($file_called_relative_path, 0, strlen($file
 if (empty($GLOBALS['apparent_folder']) || substr($GLOBALS['apparent_folder'], strlen($GLOBALS['apparent_folder']) - 1) != '/') {
 	$GLOBALS['apparent_folder'] .= '/';
 }
+$GLOBALS['apparent_folder_main'] = $GLOBALS['apparent_folder'];
 require($GLOBALS['dirroot'] . "/lib/fonctions/fonctions.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/database.php");
 
@@ -191,10 +210,11 @@ if (!IN_INSTALLATION && is_dir($GLOBALS['dirroot'] . '/installation')) {
 if (!empty($_SERVER["HTTP_HOST"])) {
 	$GLOBALS['detected_wwwroot'] = 'http://' . $_SERVER["HTTP_HOST"] . substr($GLOBALS['apparent_folder'], 0, strlen($GLOBALS['apparent_folder']) - 1);
 	if (empty($GLOBALS['wwwroot']) || substr($GLOBALS['wwwroot'], 0, 4) !== 'http') {
-		// Si wwwroot ne semble pas valable, on utilise la valeur détectée automatiquement
+		// Si wwwroot n'est pas défini dans lib/setup/info.inc.php (par exemple pour fonctionnement multisite)
+		// ou si wwwroot ne semble pas valable, on utilise la valeur détectée automatiquement
 		$GLOBALS['wwwroot'] = $GLOBALS['detected_wwwroot'];
 	}
-} else {
+} elseif(!defined('IN_CRON')) {
 	// Si HTTP_HOST pas défini (problème de configuration du serveur a priori - Vu sur serveur avec appel https://xxxx:443/ : le fait de préciser port fait que HTTP_HOST pas défini par Apache)
 	$GLOBALS['detected_wwwroot'] = $GLOBALS['wwwroot'];
 	$temp_array = explode('/', $GLOBALS['wwwroot']);
@@ -212,10 +232,11 @@ if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || (isset($_SERVER
 		// ini_set('session.cookie_secure', '1');
 	}
 }
-// wwwroot sera par la suite potentiellement modifié en cas d'URL rewriting sur la langue en cours
-// On sauvegarde donc son contenu dans wwwroot_main pour s'en reservir dans l'URL Rewriting
-$GLOBALS['wwwroot_main'] = $GLOBALS['wwwroot'];
-
+if(!empty($GLOBALS['wwwroot'])) {
+	$GLOBALS['wwwroot_main'] = $GLOBALS['wwwroot'];
+} else {
+	$GLOBALS['wwwroot_main'] = '';
+}
 $GLOBALS['repertoire_achat'] = $GLOBALS['dirroot'] . "/achat";
 $GLOBALS['libdir'] = $GLOBALS['dirroot'] . "/lib";
 $GLOBALS['invoicedir'] = $GLOBALS['dirroot'] . "/invoice";
@@ -238,28 +259,31 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/emails.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/user.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/format.php");
 
-// A partir de cette ligne vous n'avez a priori pas de variable à modifier.
+
+
 if (!IN_INSTALLATION) {
-	if (empty($_POST)) {
-		if (String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
-			// Dans le cas où un site est accessible via un domaine directement
-			// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
-			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plus complexes de configuration avec plusieurs chemins serveurs)
-			// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
-			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
-		}
-		if (String::strpos(String::strtolower(rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), 'www.' . str_replace(array('http://', 'https://'), '', String::strtolower(rawurldecode($GLOBALS['wwwroot'])))) === 0) {
-			// Si on a www. en trop par rapport à ce qui est prévu dans wwwroot, on retire le www.
-			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
-		}
-	}
 	if (empty($GLOBALS['installation_folder_active'])) {
 		db_connect($GLOBALS['database_object']);
-		// On remplit $GLOBALS['site_parameters'] qui sera ensuite surchargé pour la langue choisie par set_lang_configuration_and_texts()
-		load_site_parameters();
+		if (!$GLOBALS['database_object']) {
+			die('database_object is null');
+		}
+		if(!defined('IN_CRON')) {
+			// Les fichiers de crons sont utilisés en dehors de la logique de multisite. Si des crons spécifiques ont besoin d'utiliser des ressources multisites (templates d'email par exemple), le fichier de cron contiendra la configuration de site et de langue, mais ce n'est pas nécessaire pour les cas standards.
+			// On remplit $GLOBALS['site_parameters'] qui sera ensuite surchargé pour la langue choisie par set_lang_configuration_and_texts()
+			load_site_parameters();
+		} else {
+			// Approche pragmatique, on charge par défaut la configuration pour site_id = 1 pour l'exécution d'un cron. Si le fichier de cron à exécuter s'applique sur d'autres sites, la fonction load_site_parameters sera à nouveau appelé à l'intérieur de ce fichier de cron avec $GLOBALS['site_id'] qui convient.
+			load_site_parameters(null, false, 1);
+		}
+		// A ce stade : $GLOBALS['site_id'] est détecté
 		$parameters_loaded = true;
 	}
-} 
+} else {
+	// Pour l'installation
+	if(empty($GLOBALS['site_id'])) {
+		$GLOBALS['site_id'] = 1;
+	}
+}
 // ***********************************
 // * FORCER DES VALEURS DE SITE_PARAMETERS *
 // Le fonctionnement normal est l'utilisation de variables de configurations stockés dans la table peel_configuration et éditable dans l'administration (section Variables de configuration)
@@ -289,12 +313,37 @@ if (!empty($GLOBALS['site_parameters']['no_display_tag_analytics_for_ip'])) {
 		}
 	}
 }
+if (!empty($GLOBALS['site_parameters']['default_socket_timeout'])) {
+	@ini_set('default_socket_timeout', $GLOBALS['site_parameters']['default_socket_timeout']);
+}
 if (function_exists('ini_set')) {
 	@ini_set("gd.jpeg_ignore_warning", 1); // Ignore les alertes créées par la fonction jpeg2wbmp() et la fonction imagecreatefromjpeg()
 	@ini_set('display_errors', $GLOBALS['display_errors']);
 }
 if (!empty($GLOBALS['site_parameters']['enable_gzhandler'])) {
 	ob_start('ob_gzhandler');
+}
+
+require($GLOBALS['dirroot'] . '/lib/fonctions/modules_handler.php');
+// Module d'URL Rewriting et gestion des modules de sites qui peuvent contenir des définitions d'URL
+// A gérer avant la gestion des langues ci-après
+$GLOBALS['rewritefile'] = $GLOBALS['dirroot'] . "/modules/url_rewriting/rewrite.php";
+
+$GLOBALS['fonctionsannonces'] = $GLOBALS['dirroot'] . "/modules/annonces/fonctions.php";
+$GLOBALS['fonctionsvitrine'] = $GLOBALS['dirroot'] . "/modules/vitrine/fonctions.php";
+
+// Chargement de modules complémentaires
+if (!empty($GLOBALS['site_parameters']['load_site_specific_files_before_others'])) {
+	foreach($GLOBALS['site_parameters']['load_site_specific_files_before_others'] as $this_file_relative_path) {
+		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
+			include($GLOBALS['dirroot'] . $this_file_relative_path);
+		}
+	}
+}
+
+// Module de gestion des annonces
+if (check_if_module_active('annonces')) {
+	include($GLOBALS['dirroot'] . "/modules/annonces/class/Annonce.php");
 }
 
 /*
@@ -308,6 +357,11 @@ if (!empty($GLOBALS['site_parameters']['enable_gzhandler'])) {
 // pour éviter que plusieurs boutiques PEEL tournent dans des sous-domaines différents, on prend
 // un nom de cookie de session différent pour chaque installation de PEEL.
 $GLOBALS['session_cookie_name'] = vb($GLOBALS['site_parameters']['session_cookie_basename']) . substr(md5($GLOBALS['wwwroot_main']), 0, 8);
+
+// Nom pour le cookie qui contiendra les produits du panier. Le nom du cookie est différent pour chaque installation de PEEL.
+// Le cookie sera initialisé dans la fonction update de la classe Caddie, uniquement si la variable de configuration save_caddie_in_cookie === true.
+$GLOBALS['caddie_cookie_name'] = vb($GLOBALS['site_parameters']['caddie_cookie_name']) . substr(md5($GLOBALS['wwwroot_main']), 0, 8);
+
 if (function_exists('ini_set')) {
 	if (!empty($GLOBALS['site_parameters']['sessions_duration'])) {
 		@ini_set('session.gc_maxlifetime', 60 * $GLOBALS['site_parameters']['sessions_duration']);
@@ -322,7 +376,7 @@ if (function_exists('ini_set')) {
 	if (!empty($GLOBALS['site_parameters']['session_save_path'])) {
 		@ini_set('session.save_path', $GLOBALS['site_parameters']['session_save_path']);
 	}
-	if (vb($GLOBALS['site_parameters']['force_sessions_for_subdomains']) && get_site_domain(true)) {
+	if (vb($GLOBALS['site_parameters']['force_sessions_for_subdomains']) && get_site_domain(true) && strpos($GLOBALS['wwwroot'], '://127.0.0.1') === false && strpos($GLOBALS['wwwroot'], '://localhost') === false) {
 		// On ne passe pas ici si l'URL est à la base d'IP et non pas de domaine
 		@ini_set('session.cookie_domain', '.' . get_site_domain());
 	}
@@ -341,11 +395,17 @@ $_SESSION['session_initiated'] = true;
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
 	$_SERVER['HTTP_USER_AGENT'] = '';
 }
-if (isset($_SESSION['session_user_agent'])) {
+if (empty($GLOBALS['site_parameters']['disable_session_user_agent_check']) && isset($_SESSION['session_user_agent'])) {
 	if ($_SESSION['session_user_agent'] != sha1('GcFsD5EOvgSvQFtL4nIy' . $_SERVER['HTTP_USER_AGENT'])) {
 		// On suppose qu'il y a vol de session => on la désactive
 		session_unset();
 		session_destroy();
+		@session_regenerate_id(true);
+		// On redémarre une nouvelle session après une redirection
+		session_start();
+		// On prend le nouveau user_agent comme la référence pour cette session
+		$_SESSION['session_user_agent'] = sha1('GcFsD5EOvgSvQFtL4nIy' . $_SERVER['HTTP_USER_AGENT']);
+		$_SESSION['session_initiated'] = true;
 	}
 } else {
 	$_SESSION['session_user_agent'] = sha1('GcFsD5EOvgSvQFtL4nIy' . $_SERVER['HTTP_USER_AGENT']);
@@ -382,7 +442,7 @@ if (function_exists('array_walk_recursive')) {
 	$_COOKIE = array_map('cleanDataDeep', $_COOKIE);
 	$_REQUEST = array_map('cleanDataDeep', $_REQUEST);
 }
-if (((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($_GET['devise']) || !empty($_GET['nombre'])) && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) {
+if ((!empty($_GET['update']) && $_GET['update'] == 1 && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) || ((!empty($_GET['devise']) || !empty($_GET['nombre'])) && is_user_bot())) {
 	// Page de MAJ du cache : les moteurs ne doivent pas pouvoir activer ou référencer ces pages => redirection 301
 	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre', 'multipage')), true);
 }
@@ -408,41 +468,15 @@ if (IN_INSTALLATION >= 4 && empty($_SESSION['session_install_finished'])) {
 	}
 }
 
-require($GLOBALS['dirroot'] . '/lib/fonctions/modules_handler.php');
-// Module d'URL Rewriting et gestion des modules de sites qui peuvent contenir des définitions d'URL
-// A gérer avant la gestion des langues ci-après
-$GLOBALS['rewritefile'] = $GLOBALS['dirroot'] . "/modules/url_rewriting/rewrite.php";
-
-$GLOBALS['fonctionsannonces'] = $GLOBALS['dirroot'] . "/modules/annonces/fonctions.php";
-$GLOBALS['fonctionsvitrine'] = $GLOBALS['dirroot'] . "/modules/vitrine/fonctions.php";
-
-// Chargement de modules complémentaires
-if (!defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['load_site_specific_files_before_others'])) {
-	foreach($GLOBALS['site_parameters']['load_site_specific_files_before_others'] as $this_file_relative_path) {
-		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
-			include($GLOBALS['dirroot'] . $this_file_relative_path);
-		}
-	}
-}
-if (!defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['load_site_specific_lang_folders'])) {
-	foreach($GLOBALS['site_parameters']['load_site_specific_lang_folders'] as $this_key => $this_file_relative_path) {
-		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
-			// Ces fichiers de langue sont chargés en derniers grâce à leur clé élevée, et sont donc prioritaires
-			$GLOBALS['modules_lang_directory_array'][1000 + $this_key] = $this_file_relative_path;
-		}
-	}
-}
-
 if (is_module_url_rewriting_active()) {
 	// NB: The module has to be loaded even if LOAD_NO_OPTIONAL_MODULE is defined
 	require($GLOBALS['rewritefile']);
 }
 require($GLOBALS['dirroot'] . "/lib/fonctions/url_standard.php");
-
 if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
 	$modeles_dir = $GLOBALS['dirroot'] . "/modeles";
 	if ($handle = opendir($modeles_dir)) {
-		while ($file = readdir($handle)) {
+		while (false !== ($file = readdir($handle))) {
 			if ($file != "." && $file != ".." && is_dir($modeles_dir . '/' . $file)) {
 				if(empty($GLOBALS['repertoire_modele']) || substr($GLOBALS['repertoire_modele'], 0, 4)!='peel') {
 					// On prend de préférence un répertoire de nom différent de peelXXX
@@ -454,91 +488,14 @@ if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GL
 }
 $GLOBALS['repertoire_modele'] = $GLOBALS['dirroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']);
 
-$GLOBALS['lang_codes'] = array(); // Variable de session récuperant les codes Langue
-$GLOBALS['admin_lang_codes'] = array(); // Variable de session récuperant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
-$GLOBALS['lang_flags'] = array(); // Variable de session récuperant l'URL des drapeaux de langues
-$GLOBALS['lang_names'] = array(); // Variable de session récuperant le nom de la langue dans sa propre langue
-$GLOBALS['langs_flags_correspondance'] = array('en'=>'uk.gif');
+$GLOBALS['lang_codes'] = array(); // Variable globale récuperant les codes Langue
+$GLOBALS['admin_lang_codes'] = array(); // Variable globale récuperant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
+$GLOBALS['lang_flags'] = array(); // Variable globale récuperant l'URL des drapeaux de langues
+$GLOBALS['lang_names'] = array(); // Variable globale récuperant le nom de la langue dans sa propre langue
+$GLOBALS['langs_flags_correspondance'] = array(); // Possibilité de mettre correspondance entre langue et drapeau de pays si aucune image de langue n'existe. Par exemple : 'en'=>'uk.gif'
 $GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'] = null;
-if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
-	// We get the activated languages
-	$sqlLng = "SELECT *
-		FROM peel_langues
-		WHERE 1
-		GROUP BY lang
-		ORDER BY IF(etat = '1'". (!empty($_GET['langue'])?" OR lang='" . word_real_escape_string($_GET['langue']) . "'":'') . ", 1, 0) DESC, position ASC";
-	$resLng = query($sqlLng);
-	while ($lng = fetch_assoc($resLng)) {
-		if($lng['etat'] == 1 || (!empty($_GET['langue']) && $lng['lang'] == $_GET['langue'])) {
-			$GLOBALS['lang_codes'][] = $lng['lang'];
-			$GLOBALS['admin_lang_codes'][] = $lng['lang'];
-		} elseif($lng['etat'] == -1) {
-			// Langue administrable mais pas en production
-			$GLOBALS['admin_lang_codes'][] = $lng['lang'];
-		}
-		$GLOBALS['lang_flags'][$lng['lang']] = $lng['flag'];
-		$GLOBALS['lang_names'][$lng['lang']] = $lng["nom_" . $lng['lang']];
-		$GLOBALS['lang_etat'][$lng['lang']] = $lng['etat'];
-		$GLOBALS['lang_url_rewriting'][$lng['lang']] = $lng["url_rewriting"];
-		if(!empty($lng["load_default_lang_files_before_main_lang"])) {
-			$GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$lng['lang']] = explode(',', $lng["load_default_lang_files_before_main_lang"]);
-		}
-	}
-	if(empty($GLOBALS['lang_codes'])){
-		// Si on n'a pas trouvé au moins une langue, on prend les langues même inactives
-		$GLOBALS['lang_codes'] = array_keys($GLOBALS['lang_etat']);
-	}
-	// Initialisation de la SESSION langue
-	foreach($GLOBALS['lang_codes'] as $this_lang) {
-		$GLOBALS['get_lang_rewrited_wwwroot'][$this_lang] = get_lang_rewrited_wwwroot($this_lang);
-		$GLOBALS['langs_array_by_wwwroot'][$GLOBALS['get_lang_rewrited_wwwroot'][$this_lang]][] = $this_lang;
-	}
-} else {
-	// Récupération des langues possibles pour l'installation
-	$lang_dir = $GLOBALS['dirroot'] . "/lib/lang";
-	if ($handle = opendir($lang_dir)) {
-		while ($file = readdir($handle)) {
-			if ($file != "." && $file != ".." && is_file($lang_dir . '/' . $file) && strtolower($file) == $file) {
-				if (substr($file, 0, strlen('admin_install_')) == 'admin_install_' && substr($file, strlen('admin_install_')+2) == '.php') {
-					$lng = substr($file, strlen('admin_install_'), 2);
-					// Fichier du type admin_install_xx.php pour l'interface d'installation
-					$GLOBALS['lang_codes'][] = $lng;
-					$GLOBALS['admin_lang_codes'][] = $lng;
-					if(!empty($GLOBALS['langs_flags_correspondance'][$lng])){
-						$GLOBALS['lang_flags'][$lng] = $GLOBALS['langs_flags_correspondance'][$lng];
-					} else {
-						$GLOBALS['lang_flags'][$lng] = $lng . '.gif';
-					}
-					if(file_exists($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$lng.'.php')) {
-						include($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$lng.'.php');
-					} else {
-						include($GLOBALS['dirroot'] . '/lib/lang/database_langues_en.php');
-					}
-					if(!empty($peel_langues['nom']) && !empty($peel_langues['nom'][$lng])) {
-						// Variable locale et non pas globale pour peel_langues car issue de @include($GLOBALS['dirroot'] . '/lib/lang/database_langues_'.$_SESSION['session_langue'].'.php');
-						$GLOBALS['lang_names'][$lng] = $peel_langues['nom'][$lng];
-					} else {
-						$GLOBALS['lang_names'][$lng] = $lng;
-					}
-					$GLOBALS['lang_etat'][$lng] = 1;
-					$GLOBALS['lang_url_rewriting'][$lng] = '';
-				}elseif (substr($file, 2) == '.php') {
-					$lng = substr($file, 0, 2);
-					// Fichier du type xx.php pour savoir quelles langues on peut installer pour le site
-					$GLOBALS['available_languages'][] = $lng;
-				}
-			}
-		}
-	}
-	sort($GLOBALS['admin_lang_codes']);
-}
-
-foreach($GLOBALS['lang_codes'] as $this_lang) {
-	// Ajout des gros drapeaux
-	if(file_exists($GLOBALS['dirroot'] . '/images/'.$this_lang.'.png')) {
-		$GLOBALS['lang_flags_big'][$this_lang] = $GLOBALS['wwwroot'] . '/images/'.$this_lang.'.png';
-	}
-}
+// We get the activated languages
+load_active_languages_list(vb($GLOBALS['site_id']));
 
 if(defined('IN_PEEL_ADMIN') || IN_INSTALLATION) {
 	// Chargement des fonctions d'administration
@@ -556,40 +513,52 @@ if(!in_array($_SESSION['session_langue'], $GLOBALS['site_parameters']['complete_
 	// => on charge la langue anglaise par défaut avant la langue spécifiée => si il manque une chaine de caractères, c'est la version anglaise qui sera présente
 	$GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']] = array('en');
 }
-// Si SKIP_LANG est défini, seules les variables globales seront définies
-set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+if(!defined('IN_CRON')) {
+	// Les fichiers de crons sont utilisés en dehors de la logique de multisite. Si des crons spécifiques ont besoin d'utiliser des ressources multisites (templates d'email par exemple), le fichier de cron contiendra la configuration de site et de langue, mais ce n'est pas nécessaire pour les cas standards.
+	// Si SKIP_LANG est défini, seules les variables globales seront définies
+	// La fonction suivante va définir $GLOBALS['wwwroot'], wwwroot_in_admin, et toutes les autres variables globales générales qui peuvent être affectées par l'URL rewriting
+	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+	// A ce stade : $GLOBALS['wwwroot'] contient l'URL du domaine avec le sous-domaine de la langue si défini, ou autre domaine
+}
+$_SESSION['session_langue'] = check_language($_SESSION['session_langue'], (defined('IN_PEEL_ADMIN')?$GLOBALS['admin_lang_codes']:$GLOBALS['lang_codes']));
 
 if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
-	// redirections éventuelles si la langue est définie sans cohérence avec ce qui est configuré dans peel_langues
-	if (empty($_POST) && !empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '://') !== false) {
-		if ($GLOBALS['detected_wwwroot'] != $GLOBALS['wwwroot'] && $GLOBALS['detected_wwwroot'] == str_replace(array('www.'), array($_SESSION['session_langue'] . '.'), $GLOBALS['wwwroot_main'])) {
-			// Exemple : on redirige en.domaine.com vers domaine-specifique-pour-langue-en.com
-			redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
-		}
-		if (String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/') {
-			// Exemple : on redirige domaine.com/en vers domaine-specifique-pour-langue-en.com
-			redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], 3 + String::strlen($GLOBALS['apparent_folder']) - 1), true);
-		}
-		if (String::substr_count($GLOBALS['wwwroot'], '/') == 2 && String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
-			// Dans le cas où un site est accesible via un domaine directement (pas via un répertoire) :
+	if (empty($_POST) && !defined('IN_CRON')) {
+		if (String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false && String::strpos(String::strtolower(String::rawurldecode($GLOBALS['wwwroot'] . '/')), String::strtolower(String::rawurldecode($GLOBALS['apparent_folder']))) !== false) {
+			// Dans le cas où un site est accessible via un domaine directement
 			// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
-			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plsu complexes de configuration avec plusieurs chemins serveurs)
+			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plus complexes de configuration avec plusieurs chemins serveurs)
 			// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
-			redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
+			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
 		}
-	}
-	// Initialisation de la devise
-	if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
-		$_SESSION['session_devise']['symbole'] = String::html_entity_decode(str_replace('&euro;', '€', vb($GLOBALS['site_parameters']['symbole'])));
-		$_SESSION['session_devise']['symbole_place'] = vb($GLOBALS['site_parameters']['symbole_place']);
-		$_SESSION['session_devise']['conversion'] = 1;
-		$_SESSION['session_devise']['code'] = vb($GLOBALS['site_parameters']['code']);
+		if (String::strpos(String::strtolower(rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), 'www.' . str_replace(array('http://', 'https://'), '', String::strtolower(rawurldecode($GLOBALS['wwwroot'])))) === 0) {
+			// Si on a www. en trop par rapport à ce qui est prévu dans wwwroot, on retire le www.
+			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
+		}
+		// redirections éventuelles si la langue est définie sans cohérence avec ce qui est configuré dans peel_langues
+		if (!empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '//') !== false) {
+			if ($GLOBALS['detected_wwwroot'] != $GLOBALS['wwwroot'] && $GLOBALS['detected_wwwroot'] == str_replace(array('www.'), array($_SESSION['session_langue'] . '.'), $GLOBALS['wwwroot_main'])) {
+				// Exemple : on redirige en.domaine.com vers domaine-specifique-pour-langue-en.com
+				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
+			}
+			if (String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/') {
+				// Exemple : on redirige domaine.com/en vers domaine-specifique-pour-langue-en.com
+				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], 3 + String::strlen($GLOBALS['apparent_folder']) - 1), true);
+			}
+			if (String::substr_count($GLOBALS['wwwroot'], '/') == 2 && String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
+				// Dans le cas où un site est accesible via un domaine directement (pas via un répertoire) :
+				// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
+				// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plsu complexes de configuration avec plusieurs chemins serveurs)
+				// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
+				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
+			}
+		}
 	}
 	// Détermine les variables en fonction du site
 	if (vb($GLOBALS['site_parameters']['admin_force_ssl'])) {
 		if (defined('IN_PEEL_ADMIN')) {
 			// On ne fait pas la redirection sur sites.php pour éviter de bloquer totalement l'administrateur si https ne marche pas
-			if (strpos($_SERVER['PHP_SELF'], 'sites.php') === false && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
+			if (strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
 				// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
 				redirect_and_die(str_replace('http://', 'https://', get_current_url()));
 			}
@@ -616,15 +585,52 @@ if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 	$GLOBALS['support_sav_client'] = '';
 	$GLOBALS['support_commande'] = '';
 	$GLOBALS['repertoire_images'] = '';
-	$_SESSION['session_devise']['code'] = 'EUR';
-	$_SESSION['session_devise']['symbole'] = ' €';
-	$_SESSION['session_devise']['conversion'] = 1;
-	$_SESSION['session_devise']['symbole_place'] = 1;
 }
 
-if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0) {
+if (!IN_INSTALLATION) {
+	// DEBUT DES MODULES OPTIONNELS :
+	// Ces modules optionnels, non GPL, sont vendus séparément ou dans le module Premium
+	// Contactez PEEL sur https://www.peel.fr/ ou au 01 75 43 67 97 pour obtenir un de ces modules
+	// Module des gestion des devises
+	$GLOBALS['fonctionsdevises'] = $GLOBALS['dirroot'] . "/modules/devises/fonctions.php";
+	if (is_devises_module_active()) {
+		// NB: The module has to be loaded even if LOAD_NO_OPTIONAL_MODULE is defined
+		include($GLOBALS['fonctionsdevises']);
+	}
+}
+// Gestion de la devise de l'utilisateur
+if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
+	// Initialisation de la devise utilisateur car pas encore définie
+	if (is_devises_module_active()) {
+		// On séléctionne de préférence la devise de référence du site - si pas active, alors on prend la première devise qu'on trouve en tenant compte de la variable position croissante
+		set_current_devise(vb($GLOBALS['site_parameters']['code']));
+	}
+	if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
+		if(!empty($GLOBALS['site_parameters']['code'])) {
+			// Site sans module de gestion des devises
+			$_SESSION['session_devise']['symbole'] = String::html_entity_decode(str_replace('&euro;', '€', vb($GLOBALS['site_parameters']['symbole'])));
+			$_SESSION['session_devise']['symbole_place'] = vb($GLOBALS['site_parameters']['symbole_place']);
+			$_SESSION['session_devise']['conversion'] = 1;
+			$_SESSION['session_devise']['code'] = vb($GLOBALS['site_parameters']['code']);
+		} else {
+			// Installation
+			$_SESSION['session_devise']['code'] = 'EUR';
+			$_SESSION['session_devise']['symbole'] = ' €';
+			$_SESSION['session_devise']['conversion'] = 1;
+			$_SESSION['session_devise']['symbole_place'] = 1;
+		}
+	}
+}
+if (!empty($_GET['devise']) && is_devises_module_active()) {
+	set_current_devise($_GET['devise']);
+	// On redirige 302 après avoir défini la devise (les moteurs ont déjà plus tôt eu droit à redirection 301)
+	redirect_and_die(get_current_url(true, false, array('devise')));
+}
+
+if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
+	// On ne souhaite pas faire la redirection si le nom de domaine utilisé n'est pas le domaine principal. Il faut faire la redirection uniquement si le $_SERVER['HTTP_HOST'] est présent dans wwwroot
 	redirect_and_die(str_replace('http://', 'https://', get_current_url()), true);
 }
 
@@ -638,12 +644,13 @@ if($GLOBALS['force_demo_rights']) {
 	$_SESSION['session_utilisateur']['prenom'] = 'demo';
 	$_SESSION['session_utilisateur']['nom_famille'] = 'demo';
 	$_SESSION['session_utilisateur']['pseudo'] = 'demo';
+	$_SESSION['session_utilisateur']['site_id'] = '1';
 }
 
 // Chargement du moteur de template : Smarty ou Twig
 include($GLOBALS['dirroot'] . "/lib/templateEngines/EngineTpl.php");
 /* @var $GLOBALS['tplEngine'] EngineTpl */
-if(DEBUG_TEMPLATES || (!empty($_GET['update']) && $_GET['update'] == 1) || (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false) || !vb($GLOBALS['site_parameters']['smarty_avoid_check_template_files_update'])) {
+if(DEBUG_TEMPLATES || (!empty($_GET['update']) && $_GET['update'] == 1) || (!defined('IN_CRON') && (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false)) || !vb($GLOBALS['site_parameters']['smarty_avoid_check_template_files_update'])) {
 	// On force la mise à jour du cache des templates
 	$templates_force_compile = true;
 } else {
@@ -679,29 +686,18 @@ if (defined('IN_PEEL_ADMIN')) {
 		// On ne redirige pas, on s'arrête
 		die();
 	}
+	if (!isset($_SESSION['session_admin_multisite']) && isset($GLOBALS['site_id'])) {
+		// session_admin_multisite permet de récupérer les données d'un site à administrer. Cette valeur est choisissable par l'admin dans la page administer/index.php.
+		$_SESSION['session_admin_multisite'] = $GLOBALS['site_id'];
+	}
 	$GLOBALS['disable_google_ads'] = true;
 }
 
-if (!IN_INSTALLATION) {
-	if (!defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && vb($GLOBALS['site_parameters']['site_suspended']) && !a_priv('admin*', false)) {
-		echo '<div class="center" style="font-size:14px; font-weight:bold;"><br /><br />' . $GLOBALS['STR_UPDATE_WEBSITE'] . '<br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
-		die();
-	}
-	// DEBUT DES MODULES OPTIONNELS :
-	// Ces modules optionnels, non GPL, sont vendus séparément ou dans le module Premium
-	// Contactez PEEL sur https://www.peel.fr/ ou au 01 75 43 67 97 pour obtenir un de ces modules
-	// Module des gestion des devises
-	$GLOBALS['fonctionsdevises'] = $GLOBALS['dirroot'] . "/modules/devises/fonctions.php";
-	if (is_devises_module_active()) {
-		// NB: The module has to be loaded even if LOAD_NO_OPTIONAL_MODULE is defined
-		include($GLOBALS['fonctionsdevises']);
-		if (!empty($_GET['devise'])) {
-			set_current_devise($_GET['devise']);
-			// On redirige 302 après avoir défini la devise (les moteurs ont déjà plus tôt eu droit à redirection 301)
-			redirect_and_die(get_current_url(true, false, array('devise')));
-		}
-	}
+if (!IN_INSTALLATION && !defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && vb($GLOBALS['site_parameters']['site_suspended']) && !a_priv('admin*', false)) {
+	echo '<div class="center" style="font-size:14px; font-weight:bold;"><br /><br />' . $GLOBALS['STR_UPDATE_WEBSITE'] . '<br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
+	die();
 }
+
 if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	// Module de forum
 	$GLOBALS['fonctionsforum'] = $GLOBALS['dirroot'] . "/modules/forum/functions.php";
@@ -722,12 +718,12 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Affichage en page d'accueil des produits meilleures ventes
 	$GLOBALS['fonctionsbestseller'] = $GLOBALS['dirroot'] . '/modules/best_seller/fonctions.php';
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_best_seller_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('best_seller')) {
 		include($GLOBALS['fonctionsbestseller']);
 	}
 	// Affichage en page d'accueil des produits récemment consultés
 	$GLOBALS['fonctionslastviews'] = $GLOBALS['dirroot'] . '/modules/last_views/fonctions.php';
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_last_views_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('last_views')) {
 		include($GLOBALS['fonctionslastviews']);
 	}
 	// Fonctions de gestion et utilisation de chèques cadeaux
@@ -758,36 +754,36 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Fonctions Thumbs
 	$GLOBALS['fonctionsthumbs'] = $GLOBALS['dirroot'] . "/modules/thumbs/fonctions.php";
-	if (is_thumbs_module_active()) {
+	if (check_if_module_active('thumbs')) {
 		include($GLOBALS['fonctionsthumbs']);
 	}
 	// Module de recherche par catégorie
 	$GLOBALS['fonctionssearch'] = $GLOBALS['dirroot'] . "/modules/search/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_advanced_search_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('search')) {
 		include($GLOBALS['fonctionssearch']);
 	}
 	// Affichage des attributs produits
 	$GLOBALS['fonctionsattributs'] = $GLOBALS['dirroot'] . "/modules/attributs/fonctions.php";
-	if (is_attributes_module_active()) {
+	if (check_if_module_active('attributs')) {
 		// Utilisé par Product => nécessaire pour rpc.php => Pas d'exclusion LOAD_NO_OPTIONAL_MODULE
 		include($GLOBALS['fonctionsattributs']);
 	}
 	// Module de gestion des promotions par marques
 	$GLOBALS['fonctionsmarquepromotions'] = $GLOBALS['dirroot'] . "/modules/marques_promotion/fonctions.php";
-	if (is_marque_promotion_module_active()) {
+	if (check_if_module_active('marques_promotion')) {
 		// Utilisé par Product => nécessaire pour rpc.php => Pas d'exclusion LOAD_NO_OPTIONAL_MODULE
 		include($GLOBALS['fonctionsmarquepromotions']);
 	}
 	// Module de gestion des promotions par catégorie
 	$GLOBALS['fonctionscatpromotions'] = $GLOBALS['dirroot'] . "/modules/category_promotion/fonctions.php";
-	if (is_category_promotion_module_active()) {
+	if (check_if_module_active('category_promotion')) {
 		// Utilisé par Product => nécessaire pour rpc.php => Pas d'exclusion LOAD_NO_OPTIONAL_MODULE
 		include($GLOBALS['fonctionscatpromotions']);
 	}
 	// Module des produits en telechargement
 	$GLOBALS['fonctionsdownload'] = $GLOBALS['dirroot'] . "/modules/download/fonctions.php";
 	$GLOBALS['fonctionsadmindownload'] = $GLOBALS['dirroot'] . "/modules/download/administrer/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_download_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('download')) {
 		include($GLOBALS['fonctionsdownload']);
 		if(defined('IN_PEEL_ADMIN')) {
 			include($GLOBALS['fonctionsadmindownload']);
@@ -816,7 +812,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	// Module de gestion des stocks avancés
 	$GLOBALS['fonctionsstock_advanced_admin'] = $GLOBALS['dirroot'] . "/modules/stock_advanced/administrer/fonctions.php";
 	$GLOBALS['fonctionsstock_advanced'] = $GLOBALS['dirroot'] . "/modules/stock_advanced/fonctions.php";
-	if ((!defined('LOAD_NO_OPTIONAL_MODULE') || defined('FORCE_STOCK_MANAGER')) && is_stock_advanced_module_active()) {
+	if ((!defined('LOAD_NO_OPTIONAL_MODULE') || defined('FORCE_STOCK_MANAGER')) && check_if_module_active('stock_advanced')) {
 		include($GLOBALS['fonctionsstock_advanced']);
 	}
 	// Module liste de cadeaux
@@ -839,7 +835,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	// Module de gestion du lexique
 	$GLOBALS['fonctionslexique_admin'] = $GLOBALS['dirroot'] . "/modules/lexique/administrer/fonctions.php";
 	$GLOBALS['fonctionslexique'] = $GLOBALS['dirroot'] . "/modules/lexique/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_lexique_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('lexique')) {
 		include($GLOBALS['fonctionslexique']);
 	}
 	// Module SoColissimo SIMPLICITE
@@ -862,12 +858,12 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module de Wanewsletter
 	$GLOBALS['fonctionswanewsletter'] = $GLOBALS['dirroot'] . "/modules/newsletter/peel/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_module_wanewsletter_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('wanewsletter')) {
 		include($GLOBALS['fonctionswanewsletter']);
 	}
 	// Module de Blog
 	$GLOBALS['fonctionsblog'] = $GLOBALS['dirroot'] . "/modules/blog/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_module_blog_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('blog')) {
 		include($GLOBALS['fonctionsblog']);
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/blog/lang/';
 	}
@@ -878,7 +874,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module de Payback
 	$GLOBALS['fonctionspayback'] = $GLOBALS['dirroot'] . "/modules/payback/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_payback_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('payback')) {
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/payback/lang/';
 		include($GLOBALS['fonctionspayback']);
 	}
@@ -891,6 +887,12 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	$GLOBALS['fonctionscaptcha'] = $GLOBALS['dirroot'] . "/modules/captcha/fonctions.php";
 	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_captcha_module_active()) {
 		include($GLOBALS['fonctionscaptcha']);
+	}
+	// Module de devis
+	$GLOBALS['fonctionsdevis'] = $GLOBALS['dirroot'] . "/modules/devis/fonctions.php";
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('devis')) {
+		include($GLOBALS['fonctionsdevis']);
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/devis/lang/';
 	}
 	// Module de gestion des promotions par catégorie
 	$GLOBALS['fonctionsfaq'] = $GLOBALS['dirroot'] . "/modules/faq/fonctions.php";
@@ -923,14 +925,10 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	$GLOBALS['fonctionschart'] = $GLOBALS['dirroot'] . "/modules/chart/open-flash-chart.php";
 	// Module KEKOLI
 	$GLOBALS['fonctionskekoli'] = $GLOBALS['dirroot'] . "/modules/kekoli/administrer/fonctions.php";
-	// Module de devis
-	$GLOBALS['fonctionsdevis'] = $GLOBALS['dirroot'] . "/modules/devis/fonctions.php";
 	// Module de téléchargement
 	$GLOBALS['fonctionstelechargement'] = $GLOBALS['dirroot'] . "/modules/telechargement/administrer/fonctions.php";
 	// Module de gestion des partenaires
 	$GLOBALS['fonctionspartenaires'] = $GLOBALS['dirroot'] . "/modules/partenaires/fonctions.php";
-	// Module de gestion des références
-	$GLOBALS['fonctionsreferences'] = $GLOBALS['dirroot'] . "/modules/references/fonctions.php";
 	// Module du google map des revendeurs
 	$GLOBALS['fonctionsresellermap'] = $GLOBALS['dirroot'] . "/modules/reseller_map/fonctions.php";
 	// Module de map
@@ -941,7 +939,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	$GLOBALS['fonctionsphotodesk'] = $GLOBALS['dirroot'] . "/modules/photodesk/fonctions.php";
 	// Module ariane_panier
 	$GLOBALS['fonctionsarianepanier'] = $GLOBALS['dirroot'] . "/modules/ariane_panier/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_module_ariane_panier_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('ariane_panier')) {
 		include($GLOBALS['fonctionsarianepanier']);
 	}
 	// Module de gestion des vacances administrateur / fournisseurs
@@ -955,19 +953,19 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 		include($GLOBALS['fonctionscartpreservation']);
 	}
 
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_welcome_ad_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('welcome_ad')) {
 		include($GLOBALS['fonctionswelcomead']);
 	}
 	// Module d'affichage de popup lors de l'ajout au caddie
 	$GLOBALS['fonctionscartpoup'] = $GLOBALS['dirroot'] . "/modules/cart_popup/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_cart_popup_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('cart_popup')) {
 		include($GLOBALS['fonctionscartpoup']);
 	}
 	// FIN DES MODULES OPTIONNELS COMPRIS DANS PEEL PREMIUM
 	// Module de gestion des moyens de payment par produit
 	$GLOBALS['fonctionspaymentbyproduct'] = $GLOBALS['dirroot'] . "/modules/payment_by_product/fonctions.php";
 	$GLOBALS['fonctionspaymentbyproduct_admin'] = $GLOBALS['dirroot'] . "/modules/payment_by_product/administrer/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_payment_by_product_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('payment_by_product')) {
 		include($GLOBALS['fonctionspaymentbyproduct']);
 	}
 	// Librairies de paiement bancaire en fonction des installations
@@ -990,11 +988,10 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 		include($GLOBALS['newsletterfile']);
 	}
 	// Module de gestion des annonces
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/annonces/lang/';
 		include($GLOBALS['fonctionsannonces']);
 		include($GLOBALS['dirroot'] . "/modules/annonces/display_annonce.php");
-		include($GLOBALS['dirroot'] . "/modules/annonces/class/Annonce.php");
 		if (defined('IN_PEEL_ADMIN') || defined('IN_CRON')) {
 			// On inclue ces fonctions sur toute l'administration pour pouvoir manipuler des notions d'annonces
 			include($GLOBALS['dirroot'] . "/modules/annonces/administrer/fonctions.php");
@@ -1003,7 +1000,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	// Module de gestion des abonnements
 	$GLOBALS['fonctionsabonnement'] = $GLOBALS['dirroot'] . "/modules/abonnement/fonctions.php";
 	$GLOBALS['fonctionsabonnement_admin'] = $GLOBALS['dirroot'] . "/modules/abonnement/administrer/fonctions.php";
-	if (is_abonnement_module_active()) {
+	if (check_if_module_active('abonnement')) {
 		include($GLOBALS['fonctionsabonnement']);
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/abonnement/lang/';
 		if (defined('IN_PEEL_ADMIN')) {
@@ -1013,24 +1010,24 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module sauvegarde recherche
 	$fonctionsuser_alerts = $GLOBALS['dirroot'] . "/modules/user_alerts/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_user_alerts_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('user_alerts')) {
 		include($fonctionsuser_alerts);
 	}
 	// Module relance avancée
 	$GLOBALS['fonctionrelance_avance'] = $GLOBALS['dirroot'] . "/modules/relance_avance/administrer/fonctions.php";
 	// Module spam
 	$GLOBALS['fonctionsspam'] = $GLOBALS['dirroot'] . "/modules/spam/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_spam_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('spam')) {
 		include($GLOBALS['fonctionsspam']);
 	}
 	// Module de gestion des carrousels
 	$GLOBALS['fonctionscarrousel'] = $GLOBALS['dirroot'] . '/modules/carrousel/fonctions.php';
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_carrousel_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('carrousel')) {
 		include($GLOBALS['fonctionscarrousel']);
 	}
 	// Module de fonctionnalités facebook
 	$GLOBALS['fonctionsfacebook'] = $GLOBALS['dirroot'] . '/modules/facebook/fonctions.php';
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_facebook_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('facebook')) {
 		include($GLOBALS['fonctionsfacebook']);
 	}
 	// Module de fonctionnalités facebook
@@ -1046,7 +1043,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module openid
 	$GLOBALS['fonctionsopenid'] = $GLOBALS['dirroot'] . "/modules/openid/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_openid_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('openid')) {
 		include($GLOBALS['fonctionsopenid']);
 	}
 	// Module googlefriendconnect
@@ -1056,7 +1053,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module interconnexion téléphonie
 	$GLOBALS['fonctionsphonecti'] = $GLOBALS['dirroot'] . "/modules/phone_cti/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_phone_cti_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('phone_cti')) {
 		include($GLOBALS['fonctionsphonecti']);
 	}
 	// Module de gestion de la vente en gros
@@ -1066,7 +1063,7 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module vitrine
 	$GLOBALS['fonctionsadministrervitrine'] = $GLOBALS['dirroot'] . "/modules/vitrine/administrer/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_vitrine_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('vitrine')) {
 		$GLOBALS['modules_lang_directory_array'][] = '/modules/vitrine/lang/';
 		include($GLOBALS['fonctionsvitrine']);
 		if (defined('IN_PEEL_ADMIN')) {
@@ -1075,18 +1072,70 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	}
 	// Module Commerciale
 	$GLOBALS['fonctionscommerciale'] = $GLOBALS['dirroot'] . "/modules/commerciale/administrer/fonctions.php";
-	if (defined('IN_PEEL_ADMIN') && !defined('LOAD_NO_OPTIONAL_MODULE') && is_commerciale_module_active()) {
+	if (defined('IN_PEEL_ADMIN') && !defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('commerciale')) {
 		include($GLOBALS['fonctionscommerciale']);
 	}
 	// Module Webmail
 	$GLOBALS['fonctionswebmail'] = $GLOBALS['dirroot'] . "/modules/webmail/fonctions.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_webmail_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('webmail')) {
 		include($GLOBALS['fonctionswebmail']);
 	}
 	// Module Cron
 	$GLOBALS['fonctionscrons'] = $GLOBALS['dirroot'] . "/modules/crons/crons.php";
-	if (!defined('LOAD_NO_OPTIONAL_MODULE') && is_crons_module_active()) {
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('crons')) {
 		include($GLOBALS['dirroot'] . "/modules/crons/functions/emails.php");
+	}
+	// Module de gestion des références
+	$GLOBALS['fonctionsreferences'] = $GLOBALS['dirroot'] . "/modules/references/fonctions.php";
+	if (check_if_module_active('references')) {
+		include($GLOBALS['fonctionsreferences']);
+		include($GLOBALS['dirroot'] . "/modules/references/lang/" . $_SESSION['session_langue'] . ".php");
+	}
+	// Module exaprint
+	$GLOBALS['fonctionsadministrerexaprint'] = $GLOBALS['dirroot'] . "/modules/exaprint/administrer/fonctions.php";
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('exaprint')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/exaprint/lang/';
+		if (defined('IN_PEEL_ADMIN')) {
+			include($GLOBALS['fonctionsadministrerexaprint']);
+		}
+	}
+	// Module Agenda
+	$GLOBALS['fonctionsagenda'] = $GLOBALS['dirroot'] . "/modules/agenda/fonctions.php";
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('agenda')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/agenda/lang/';
+		include($GLOBALS['fonctionsagenda']);
+	}
+	// Module participants
+	$GLOBALS['fonctionsparticipants'] = $GLOBALS['dirroot'] . "/modules/participants/fonctions.php";
+	if (!defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('participants')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/participants/lang/';
+		include($GLOBALS['fonctionsparticipants']);
+	}
+	// Module groupsadvanced
+	$GLOBALS['fonctionsgroupsadvanced'] = $GLOBALS['dirroot'] . "/modules/groups_advanced/fonctions.php";
+	if (!defined('IN_PEEL_ADMIN') && !defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('groups_advanced')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/groups_advanced/lang/';
+		include($GLOBALS['fonctionsgroupsadvanced']);
+	}
+	// Module photos_gallery
+	$GLOBALS['fonctionsphotosgallery'] = $GLOBALS['dirroot'] . "/modules/photos_gallery/fonctions.php";
+	if (!defined('IN_PEEL_ADMIN') && !defined('LOAD_NO_OPTIONAL_MODULE') && check_if_module_active('photos_gallery')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/photos_gallery/lang/';
+		include($GLOBALS['fonctionsphotosgallery']);
+	}
+	// Module sauvegarde recherche
+	$fonctionssauvegarde_recherche = $dirroot . "/modules/sauvegarde_recherche/fonctions.php";
+	if (check_if_module_active('sauvegarde_recherche') && !defined('LOAD_NO_OPTIONAL_MODULE')) {
+		$GLOBALS['modules_lang_directory_array'][] = '/modules/sauvegarde_recherche/lang/';
+		include($fonctionssauvegarde_recherche);
+	}
+	if (check_if_module_active('participants') && est_identifie() && !empty($_POST['product_id']) && (!empty($_POST['trip_unsubscribe']) || !empty($_POST['trip_subscription']))) {
+		// Mise à jour de l'inscription à une sortie. Cette fonction doit être dans configuration.inc.php puisque plusieurs page appel ce script.
+		create_or_update_subscribe($_POST['product_id'], vn($_POST['nb_seats_allowed_per_user']), $_SESSION['session_utilisateur']['id_utilisateur'], !empty($_POST['trip_subscription']));
+	}
+	if (check_if_module_active('groups_advanced') && est_identifie() && !empty($_POST['group_id'])) {
+		// Mise à jour de l'inscription à une sortie. Cette fonction doit être dans configuration.inc.php puisque plusieurs page appel ce script.
+		add_or_delete_users_to_group($_POST['group_id'], $_POST['user_id'], vb($_POST['technical_code']));
 	}
 }
 if (!IN_INSTALLATION) {
@@ -1101,11 +1150,16 @@ if (!IN_INSTALLATION) {
 	// Test pour savoir si une commande est en cours.
 	// Si tel est le cas, on vérifie son statut de paiement et si elle est payée, alors on réinitialise le caddie
 	if (!empty($_SESSION['session_caddie']->commande_id)) {
-		$query_com = query("SELECT *
-			FROM peel_commandes
-			WHERE id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'");
+		$query_com = query("SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
+			FROM peel_commandes c
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', defined('IN_PEEL_ADMIN')) . "
+			WHERE c.id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND c.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "");
 		$result_com = fetch_object($query_com);
-		if ($result_com && in_array($result_com->id_statut_paiement, array('2', '3'))) {
+		if ($result_com && in_array($result_com->statut_paiement, array('being_checked', 'completed'))) {
+			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			}
 			$_SESSION['session_caddie']->init();
 			unset($_SESSION['session_commande']);
 		}
@@ -1119,7 +1173,17 @@ if (!IN_INSTALLATION) {
 		unset($_SESSION['session_redirect_after_login']);
 	}
 }
+
 if (!defined('SKIP_SET_LANG')) {
+	// On charge les fichiers de langue des modules
+	if (!empty($GLOBALS['site_parameters']['load_site_specific_lang_folders'])) {
+		foreach($GLOBALS['site_parameters']['load_site_specific_lang_folders'] as $this_key => $this_file_relative_path) {
+			if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
+				// Ces fichiers de langue sont chargés en derniers grâce à leur clé élevée, et sont donc prioritaires
+				$GLOBALS['modules_lang_directory_array'][1000 + $this_key] = $this_file_relative_path;
+			}
+		}
+	}
 	// On charge les fichiers de langue des modules
 	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), false, true, false);
 }
@@ -1140,9 +1204,45 @@ if (!empty($_POST['password_first_hash']) && !empty($_POST['password_length']) &
 	// Login automatique en POST quand on vient d'une application tierce, avec la première étape de hash appliquée au mot de passe
 	$utilisateur = user_login_now($_POST['email_or_pseudo'], $_POST['password_first_hash'], true, true, $_POST['password_length']);
 	if ($utilisateur) {
-		redirect_and_die(get_current_url(true));
+		if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']])) {
+			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
+			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']]);
+		} else {
+			redirect_and_die(get_current_url(true));
+		}
 	} else {
 		redirect_and_die($GLOBALS['wwwroot'] . '/membre.php');
 	}
 }
-?>
+
+// Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
+if(isset($_GET['site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+	if(!empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
+		if(in_array(strval($_GET['site_country']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$_SESSION['session_site_country'] = intval($_GET['site_country']);
+		}
+	}
+	// On redirige 302 après avoir défini le site_country
+	redirect_and_die(get_current_url(true, false, array('site_country')));
+}
+if(!isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+	// On définit pour quel pays on montre les données du site, lors de la première page vue par l'utilisateur
+	if(!empty($_SESSION['session_utilisateur']['site_country'])) {
+		$_SESSION['session_site_country'] = intval($_SESSION['session_utilisateur']['site_country']);
+		// on essaie de prendre la devise correspondant au pays si elle est disponible sur le site, sinon on laisse session_devise tel que défini plus tôt dans ce fichier
+		set_current_devise(null, $_SESSION['session_site_country']);
+	} elseif (!isset($_SESSION['session_country_detected']) && !empty($_SERVER['REMOTE_ADDR']) && file_exists($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php')) {
+		include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+		$geoIP = new geoIP();
+		$_SESSION['session_country_detected'] = $geoIP->geoIPCountryIDByAddr($_SERVER['REMOTE_ADDR']);
+		$geoIP->geoIPClose();
+		unset($geoIP);
+		if(in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$_SESSION['session_site_country'] = intval($_SESSION['session_country_detected']);
+			// on essaie de prendre la devise correspondant au pays si elle est disponible sur le site, sinon on laisse session_devise tel que défini plus tôt dans ce fichier
+			set_current_devise(null, $_SESSION['session_site_country']);
+		} else {
+			$_SESSION['session_site_country'] = 0;
+		}
+	}
+}

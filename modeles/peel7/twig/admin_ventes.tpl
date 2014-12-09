@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_ventes.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_ventes.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{% if (results) %}
 <br /><div class="alert alert-info">{{ STR_ADMIN_VENTES_FORM_EXPLAIN }}</div><br />
 <p class="title_label center">{{ period_text }}</p>
@@ -26,6 +26,8 @@
 				<td class="center menu">{{ STR_VAT }}</td>
 				<td class="center menu">{{ STR_AMOUNT }} {{ STR_TTC }}</td>
 				<td class="center menu">{{ STR_ADMIN_INCLUDING_DELIVERY_COST }}</td>
+				<td class="center menu">{{ STR_PDF_AVOIR }}</td>
+				<td class="center menu">{{ STR_PDF_NET }}</td>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,6 +41,8 @@
 				<td class="center">{{ res.total_tva_prix }} {{ res.total_tva_devise_commande }}</td>
 				<td class="center">{{ res.montant_prix }} {{ res.montant_devise_commande }}</td>
 				<td class="center">{{ res.cout_transport_prix }} {{ res.cout_transport_devise_commande }} {{ STR_TTC }}</td>
+				<td class="center">{{ res.avoir }} {{ res.avoir_devise_commande }}</td>
+				<td class="center">{{ res.netapayer }} {{ res.netapayer_devise_commande }}</td>
 			</tr>
 			{% endfor %}
 			<tr>
@@ -47,22 +51,18 @@
 				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ totalTva_prix }}</td>
 				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ totalVente_prix }} {{ STR_TTC }}</td>
 				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ totalTransport_prix }}</td>
-			</tr>
-			<tr>
-				<td colspan="8" class="title_label">&nbsp;</td>
+				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ total_avoir }}</td>
+				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ totalNet_a_payer }} {{ STR_TTC }}</td>
 			</tr>
 			{% for v in vats %}
 			<tr>
-				<td colspan="6" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
+				<td colspan="8" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
 				<td class="title_label">{{ STR_ADMIN_TOTAL_VAT }} {% if v.rate == 'transport' %}{{ v.rate }}{% else %}{{ v.rate }}%{% endif %}</td>
 				<td class="center title_label">{{ v.prix }}</td>
 			</tr>
 			{% endfor %}
 			<tr>
-				<td colspan="8" class="title_label">&nbsp;</td>
-			</tr>
-			<tr>
-				<td colspan="6" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
+				<td colspan="8" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
 				<td class="title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ STR_ADMIN_TOTAL_VAT }}</td>
 				<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{{ totalTva_prix }}</td>
 			</tr>

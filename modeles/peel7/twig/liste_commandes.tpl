@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_commandes.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: liste_commandes.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<h2 class="liste_commandes">{{ STR_ORDER_HISTORY }}</h2>
 {% if (STR_NO_ORDER) %}
 <div><p>{{ STR_NO_ORDER }}</p></div>
@@ -24,7 +24,7 @@
 		<th class="center" scope="col">{{ STR_DATE }}</th>
 		<th class="center" scope="col">{{ STR_ORDER_STATUT_PAIEMENT }}</th>
 		<th class="center" scope="col">{{ STR_ORDER_STATUT_LIVRAISON }}</th>
-		<th class="center" scope="col">{{ STR_AMOUNT }}</th>
+		<th class="center" scope="col">{% if display_prices_with_taxes_active %} {{ STR_AMOUNT }}{{ STR_TTC }}{% else %}{{ STR_AMOUNT }}{{ STR_HT }}{% endif %}</th>
 	</tr>
 	{% for o in orders %}
 	<tr style="background-color: #{{ cycle(["F4F4F4,ffffff"],loop.index0) }}">

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: database_profil_ro.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_profil_ro.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,20 +20,19 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_profil["name"] = array(
-  "1" => "Client",
-  "2" => "Administrator Global",
-  "3" => "Revânzător",
-  "4" => "Revânzător - aşteptare",
-  "5" => "Afiliat",
-  "6" => "Afiliat - aşteptare",
-  "7" => "Furnizor",
-  "8" => "Inscris la Newsletter",
-  "9" => "Revânzător certificat",
-  "10" => "Administrator Conţinut",
-  "11" => "Administrator Vânzări",
-  "12" => "Administrator Produse",
-  "13" => "Administrator Webmaster",
-  "14" => "Administrator Moderator"
+	"util" => "Client",
+	"admin" => "Administrator Global",
+	"reve" => "Revânzător",
+	"stop" => "Revânzător - aşteptare",
+	"affi" => "Afiliat",
+	"stand" => "Afiliat - aşteptare",
+	"supplier" => "Furnizor",
+	"newsletter" => "Inscris la Newsletter",
+	"reve_certif" => "Revânzător certificat",
+	"admin_content" => "Administrator Conţinut",
+	"admin_sales" => "Administrator Vânzări",
+	"admin_products" => "Administrator Produse",
+	"admin_webmastering" => "Administrator Webmaster",
+	"admin_moderation" => "Administrator Moderator"
 );
 
-?>

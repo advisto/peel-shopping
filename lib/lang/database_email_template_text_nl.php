@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_nl.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_text_nl.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -60,6 +60,7 @@ details van het bericht verzonden op [DATE] :
 Naam : [NOM_FAMILLE]
 Voornaam : [PRENOM]
 Bedrijfsnaam : [SOCIETE]
+Adres : [ADRESSE]
 Telefoonnummer : [TELEPHONE]
 Emailadres : [EMAIL]
 Beschikbaarheid : [DISPO]
@@ -74,7 +75,7 @@ IP : [REMOTE_ADDR]
 ",
   "admin_info_payment_credit_card" => "Hallo, 
 
-een bestelling met nummer [ORDER_ID] is net geregistreerd op [WWWROOT]",
+een bestelling met nummer [ORDER_ID] is net geregistreerd op [WWWROOT]/",
   "admin_info_payment_credit_card_3_times" => "Hallo, 
 
 een bestelling met betaling in drie termijnen met nummer [ORDER_ID] is geregistreerd op [SITE]
@@ -234,14 +235,14 @@ Aanvullende opmerkingen :
 
 [EMAIL_ACHETEUR] wil u een cadeau geven !
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CHECK_NAME].
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT]/ en gebruikt u uw code [CHECK_NAME].
 
 U ontvangt dan een korting van [REMISE_VALEUR] bij een minimaal orderbedrag van [MONTANT_MIN] exclusief BTW.",
   "cree_cheque_cadeau_friend" => "Hallo,
 
 uw vriend [PRENOM] [NOM_FAMILLE] wil u een cadeau geven op de website [SITE].
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT]/ en gebruikt u uw code [CODE].
 
 U ontvangt dan een korting van [PRIX] inclusief BTW op uw bestelling.
 ",
@@ -253,7 +254,7 @@ een promotiecode [CODE] via de module CADEAU is net aangemaakt op [SITE].
 
 [SITE] biedt u een 30 dagen geldige tegoedbon voor een bedrag van [MONTANT].
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT]/ en gebruikt u uw code [CODE].
 ",
   "cree_cheque_cadeau_client_admin" => "Hallo,
 
@@ -278,7 +279,7 @@ Hier de bestelde artikelen :
 Details van het bericht ontvangen op [DATE].
 
 [PRENOM] [NOM_FAMILLE] zendt u zijn verlanglijstje genaamd [GIFTLIST_NAME] :
-[WWWROOT]/modules/listecadeau/voir.php?email_liste=[URL_LISTE_CADEAU]
+[URL_LISTE_CADEAU]
 
 [GIFTLIST_ITEMS]",
   "parrainage" => "Hallo,
@@ -314,12 +315,12 @@ Deze e-mail is bedoeld om u de beveiliging van uw PEEL winkel beter te maken.",
 
 Klantenservice
 [SITE]
-[WWWROOT]",
+[WWWROOT]/",
   "cree_cheque_cadeau_client_type1" => "Hallo,
 
 [SITE] biedt u een 30 dagen geldige tegoedbon voor een bedrag van [PERCENT].
 
-Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT] en gebruikt u uw code [CODE].
+Om hier gebruik van te maken gaat u naar de volgende website [WWWROOT]/ en gebruikt u uw code [CODE].
 ",
   "warn_admin_user_subscription" => "Op [DATE], 
 
@@ -360,4 +361,3 @@ Houd er rekening mee dat de artikelen teruggestuurd moeten worden in goede staat
 Na ontvangst van uw artikelen, zullen wij de terugbetaling van deze valideren."
 );
 
-?>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_ro.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_subject_ro.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -39,7 +39,7 @@ $peel_email_template["subject"] = array(
   "send_client_order_pdf" => "Comanda dvs.  [ORDER_ID] pe  [SITE]",
   "send_avis_expedition" => "Avis de expeditie  de la comanda n°[ORDER_ID]",
   "email_commande" => "Confirmare comandă [ORDER_ID]",
-  "send_mail_order_admin" => "[ORDER_ID] Înregistrare de la commanda [SITE]",
+  "send_mail_order_admin" => "Înregistrare de la commanda [ORDER_ID] pe [SITE]",
   "initialise_mot_passe" => "Noua parolă a contului dvs. de client",
   "send_mail_for_account_creation" => "Deschide contul dvs. client",
   "insere_avis" => "Un internaut a adăugat un comentariu pe [SITE]",
@@ -68,7 +68,7 @@ $peel_email_template["subject"] = array(
   "email_retour_client" => "Comanda dvs. de retur",
   "cron_order_payment_failure_alerts" => "Ajutor pentru plata dvs.",
   "cron_order_not_paid_alerts" => "Plata comenzii dvs.",
-  "cron_update_contact_info" => "Confirmarea validităţii coordonatelor dvs."
+  "cron_update_contact_info" => "Confirmarea validităţii coordonatelor dvs.",
+  "inscription_newsletter" => "Aboneaza-te la newsletter-ul [SITE]"
 );
 
-?>

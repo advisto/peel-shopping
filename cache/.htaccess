@@ -1,5 +1,5 @@
 Options -Indexes
 Deny from All
-<FilesMatch ".(flv|gif|jpg|jpeg|png|ico|swf|txt|pdf|doc|zip|css|js)$">
+<FilesMatch ".(flv|gif|jpg|jpeg|png|ico|swf|txt|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|css|js)$">
 	Allow from All
 </FilesMatch>

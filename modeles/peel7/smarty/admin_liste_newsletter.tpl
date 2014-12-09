@@ -1,26 +1,26 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_newsletter.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_newsletter.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<table class="full_width">
 	<tr>
-		<td class="entete" colspan="9">{$STR_ADMIN_NEWSLETTERS_TITLE}</td>
+		<td class="entete" colspan="10">{$STR_ADMIN_NEWSLETTERS_TITLE}</td>
 	</tr>
 	<tr>
-		<td colspan="9">{if $is_crons_module_active}<p class="alert alert-success">{$STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN}</p>
+		<td colspan="10">{if $is_crons_module_active}<p class="alert alert-success">{$STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN}</p>
 		{else}<p class="alert alert-danger">{$STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN}</p>{/if}</td>
 	</tr>
 	<tr>
-		<td colspan="9"><p><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_ADMIN_NEWSLETTERS_CREATE}</a></p></td>
+		<td colspan="10"><p><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_ADMIN_NEWSLETTERS_CREATE}</a></p></td>
 	</tr>
 	{if isset($results)}
 	<tr>
@@ -33,6 +33,7 @@
 		<td class="menu">{$STR_ADMIN_NEWSLETTERS_LAST_SENDING}</td>
 		<td class="menu">{$STR_ADMIN_NEWSLETTERS_SEND_TO_USERS}</td>
 		<td class="menu">{$STR_ADMIN_NEWSLETTERS_SENDING_TEST}</td>
+		<td class="menu">{$STR_ADMIN_WEBSITE}</td>
 	</tr>
 	{foreach $results as $res}
 	{$res.tr_rollover}
@@ -45,9 +46,10 @@
 		<td class="center">{$res.date_envoi}</td>
 		<td class="center"><a href="{$res.mail_href|escape:'html'}" data-confirm="{$STR_ADMIN_NEWSLETTERS_SEND_CONFIRM|str_form_value}"><img alt="{$STR_ADMIN_NEWSLETTERS_SEND_ALL_USERS|str_form_value}" src="{$mail_src|escape:'html'}" /></a></td>
 		<td class="center"><a href="{$res.test_href|escape:'html'}">{$STR_ADMIN_NEWSLETTERS_TEST_SENDING_TO_ADMINISTRATORS}</a></td>
+		<td class="center">{$res.site_name}</td>
 	</tr>
 	{/foreach}
 	{else}
-		<tr><td><div class="alert alert-warning">{$STR_ADMIN_NEWSLETTERS_NOTHING_FOUND}</div></td></tr>
+		<tr><td colspan="10"><div class="alert alert-warning">{$STR_ADMIN_NEWSLETTERS_NOTHING_FOUND}</div></td></tr>
 	{/if}
 </table>

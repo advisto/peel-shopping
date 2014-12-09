@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_cat_de.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_cat_de.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,13 +20,12 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template_cat["name"] = array(
-  "1" => "Automatischer Versand",
-  "2" => "Diverse",
-  "3" => "Produkt",
-  "4" => "Verkauf",
-  "5" => "Website-, Kunden- und Kontoinformationen",
-  "6" => "Zahlungsart",
-  "7" => "Rundbrief"
+  "automatic_sending" => "Automatischer Versand",
+  "various" => "Diverse",
+  "product" => "Produkt",
+  "sales" => "Verkauf",
+  "site_and_clients_information" => "Website-, Kunden- und Kontoinformationen",
+  "payment_modes" => "Zahlungsart",
+  "newsletter" => "Rundbrief"
 );
 
-?>

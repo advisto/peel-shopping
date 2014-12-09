@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_cat_ro.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_cat_ro.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -20,13 +20,12 @@ if (!defined("IN_PEEL")) {
 // Les clés doivent avoir des guillemets pour que ce soit traité correctement par Transifex : indiquez "1" => ... et non pas 1 => ...
 
 $peel_email_template_cat["name"] = array(
-  "1" => "Trimiteri automate",
-  "2" => "Diverse",
-  "3" => "Produs",
-  "4" => "Comercial",
-  "5" => "Informaţii situri, clienţi, conturi",
-  "6" => "Mod de plată",
-  "7" => "NewsLetter"
+  "automatic_sending" => "Trimiteri automate",
+  "various" => "Diverse",
+  "product" => "Produs",
+  "sales" => "Comercial",
+  "site_and_clients_information" => "Informaţii situri, clienţi, conturi",
+  "payment_modes" => "Mod de plată",
+  "newsletter" => "NewsLetter"
 );
 
-?>

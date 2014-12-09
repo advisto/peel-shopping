@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: urllist.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: urllist.php 43037 2014-10-29 12:01:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,7 +21,7 @@ if (!empty($_GET['encoding'])) {
 } else {
 	$file_encoding = 'utf-8';
 }
-$DOC_TITLE = $GLOBALS['STR_ADMIN_URLLIST_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_URLLIST_TITLE'];
 $form_error_object = new FormError();
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -84,28 +84,38 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 		$sitemap .= $GLOBALS['wwwroot'] . "\r\n";
 		$sitemap .= $GLOBALS['wwwroot'] . "/membre.php\r\n";
 		$sitemap .= get_product_category_url() . "\r\n";
+		// génération des liens pour les categories 
+		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
+			FROM peel_categories c
+			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c', true);
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$sitemap .= get_product_category_url($result['id'], $result['nom']) . "\r\n";
+		}
 		$sitemap .= get_content_category_url() . "\r\n";
 		$sitemap .= get_account_register_url() . "\r\n";
 		$sitemap .= get_account_url() . "\r\n";
 		
-		$select = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_" . $this_lang . " as produit, c.nom_" . $this_lang . " AS categorie
-			FROM peel_produits p, peel_produits_categories pc, peel_categories c
-			WHERE p.id = pc.produit_id AND c.id = pc.categorie_id AND p.etat=1";
-		$req = query($select);
-		while ($row = fetch_assoc($req)) {
+		$sql = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this_lang)." as produit, c.nom_" . $this_lang . " AS categorie
+			FROM peel_produits p
+			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "";
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
 			$trans_tbl = get_html_translation_table(HTML_ENTITIES);
 			$trans_tbl = array_flip($trans_tbl);
 
-			$texte1 = strtr($row['produit'], $trans_tbl);
+			$texte1 = strtr($result['produit'], $trans_tbl);
 			$texte1 = str_replace("&", "", $texte1);
 
 			$trans_tbl = get_html_translation_table(HTML_ENTITIES);
 			$trans_tbl = array_flip($trans_tbl);
 
-			$texte2 = strtr($row['categorie'], $trans_tbl);
+			$texte2 = strtr($result['categorie'], $trans_tbl);
 			$texte2 = str_replace("&", "", $texte2);
 
-			$sitemap .= get_product_url($row['produit_id'], $row['produit'], $row['categorie_id'], $row['categorie']) . "\r\n";
+			$sitemap .= get_product_url($result['produit_id'], $result['produit'], $result['categorie_id'], $result['categorie']) . "\r\n";
 		}
 	}
 	
@@ -115,6 +125,9 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 	$create_txt = String::fopen_utf8($txt_filename, "wb");
 	fwrite($create_txt, String::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
 	fclose($create_txt);
+	// rétablissement de la langue du back office pour l'affichage du message de confirmation
+	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+
 }
 
 /**
@@ -131,4 +144,3 @@ function form2xml()
 	echo $tpl->fetch();
 }
 
-?>

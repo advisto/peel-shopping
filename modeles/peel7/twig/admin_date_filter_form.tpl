@@ -1,20 +1,21 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_date_filter_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_date_filter_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<table class="main_table">
-		<tr><td class="entete" colspan="2">{{ form_title }}</td></tr>
-		<tr><td class="title_label center" colspan="2"><p>{{ STR_ADMIN_TODAY_DATE }} {{ date }}</p></td></tr>
+		<tr><td class="entete">{{ form_title }}</td></tr>
+		<tr><td class="title_label center"><p>{{ STR_ADMIN_TODAY_DATE }} {{ date }}</p></td></tr>
+		{% if not only_information_select_html_displayed %}
 		<tr>
 			<td class="title_label center">
 				<table class="center" style="margin:auto;">
@@ -70,11 +71,12 @@
 				</select>
 			</td>
 		</tr>
+		{% endif %}
 		<tr>
-			<td colspan="2" class="center label">{{ information_select_html }}</td>
+			<td class="center title_label">{{ information_select_html }}</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center"><p>{% if (submit_html) %}{{ submit_html }}{% else %}<input type="submit" name="submit" value="{{ STR_ADMIN_DISPLAY_RESULTS|str_form_value }}" class="btn btn-primary" />{% endif %}</p></td>
+			<td class="center"><p>{% if (submit_html) %}{{ submit_html }}{% else %}<input type="submit" name="submit" value="{{ STR_ADMIN_DISPLAY_RESULTS|str_form_value }}" class="btn btn-primary" />{% endif %}</p></td>
 		</tr>
 	</table>
 </form>	

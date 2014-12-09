@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: produit.php 43366 2014-11-26 14:51:34Z sdelaporte $
 
 define('LOAD_NO_OPTIONAL_MODULE', true);
 include('../../configuration.inc.php');
 
-if (!is_advanced_search_active()) {
+if (!check_if_module_active('search')) {
 	// This module is not activated => we redirect to the homepage
 	redirect_and_die($GLOBALS['wwwroot']."/");
 }
@@ -24,6 +24,7 @@ $page_encoding='utf-8';
 output_general_http_header($page_encoding);
 $output='';
 $results_array = array();
+$labels_array = array();
 $maxRows = 10;
 $search = trim(vb($_POST['search']));
 $search_category = intval(vb($_POST['search_category']));
@@ -33,7 +34,7 @@ if (String::strlen($search)>0 || !empty($search_category)) {
 	if(!empty($queries_results_array)) {
 		$cat_search_sql = "SELECT pc.produit_id, c.id as categorie_id, c.nom_" . $_SESSION['session_langue'] . " as categorie
 			FROM peel_produits_categories pc
-			LEFT JOIN peel_categories c ON c.id = pc.categorie_id
+			LEFT JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
 			WHERE pc.produit_id IN (" . implode(', ', array_keys($queries_results_array)) . ")";
 		$query = query($cat_search_sql);
 		while ($result = fetch_assoc($query)) {
@@ -46,16 +47,22 @@ if (String::strlen($search)>0 || !empty($search_category)) {
 			$display_picture = $product_object->get_product_main_picture(false);
 			if ($display_picture) {
 				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
-			} else {
+			} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
 				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
+			} else {
+				$product_picture = null;
 			}
-			$results_array[] = array(
-				'id' => $result->id,
-				'reference' => $result->reference,
-				'urlprod' => get_product_url($result->id, $result->nom, $result->categorie_id, $result->categorie),
-				'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images'])?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />',
-				'nom' => $result->nom
-			);
+			$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) || empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />';
+			if(!in_array($this_label, $labels_array)) { 
+				$results_array[] = array(
+					'id' => $result->id,
+					'reference' => $result->reference,
+					'urlprod' => get_product_url($result->id, $result->nom, vn($result->categorie_id), vb($result->categorie)),
+					'label' => $this_label,
+					'name' => $result->nom
+				);
+				$labels_array[] = $this_label;
+			}
 			unset($product_object);
 		}
 	}
@@ -68,5 +75,5 @@ if (!empty($_POST['return_json_array_with_raw_information'])) {
 	$tpl->assign('results', $results_array);
 	$output .= $tpl->fetch();
 }
+// var_dump($_POST);
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
-?>

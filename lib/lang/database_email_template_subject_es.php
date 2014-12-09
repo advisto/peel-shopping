@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_es.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: database_email_template_subject_es.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -68,7 +68,7 @@ $peel_email_template["subject"] = array(
   "email_retour_client" => "Su solicitud de devolución",
   "cron_order_payment_failure_alerts" => "Ayuda para su pago",
   "cron_order_not_paid_alerts" => "El pago de su pedido",
-  "cron_update_contact_info" => "La confirmación de la validez de la información"
+  "cron_update_contact_info" => "La confirmación de la validez de la información",
+  "inscription_newsletter" => "Inscripción a la newsletter sur [SITE]"
 );
 
-?>

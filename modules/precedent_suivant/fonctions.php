@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -45,11 +45,11 @@ function show_preview_next($product_id, $product_position, $prev_next, $category
 		$sql_order = "pp.position ASC, pp.id DESC";
 	}
 	$sql_cond .= " AND pp.etat = 1 AND pp.on_gift = 0";
-	$sql = "SELECT ppc.produit_id AS id, ppc.categorie_id as idC, pp.nom_". $_SESSION['session_langue'] . " AS nom, pp.position
+	$sql = "SELECT ppc.produit_id AS id, ppc.categorie_id as idC, pp.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, pp.position
 		FROM peel_produits pp
 		INNER JOIN peel_produits_categories ppc ON ppc.produit_id = pp.id
-		INNER JOIN peel_categories pc ON ppc.categorie_id = pc.id AND pc.etat = 1
-		WHERE ".$sql_cond."
+		INNER JOIN peel_categories pc ON ppc.categorie_id = pc.id AND pc.etat = 1 AND " . get_filter_site_cond('categories', 'pc', true) . "
+		WHERE ".$sql_cond." AND " . get_filter_site_cond('produits', 'pp') . "
 		ORDER BY ".$sql_order."
 		LIMIT 1";
 	$query = query($sql);
@@ -76,11 +76,10 @@ function get_name_category($idcat){
 	$output="";
 	$sql='SELECT nom_'. $_SESSION['session_langue'] . ' AS nom
 		FROM peel_categories
-		WHERE id = "' . intval(vn($idcat)) . '"';
+		WHERE id = "' . intval(vn($idcat)) . '" AND ' . get_filter_site_cond('categories') . '';
 	$result = query($sql);
 	if($data = fetch_assoc($result)){
 		$output = $data['nom'];
 	}
 	return $output;
 }
-?>

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_form_contact_user.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: commercialeAdmin_form_contact_user.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="full_width">
 		<tr>
@@ -19,7 +19,7 @@
 				<input type="hidden" name="id_utilisateur" value="{{ id_user|str_form_value }}" />
 				<input type="hidden" name="mode" value="add_contact_planified" />
 				<input name="form_edit_contact_user_id" type="hidden" value="{{ id_user|str_form_value }}" />
-				<input name="form_contact_planified_date" size="27" id="contact_planified_date" type="text" class="form-control datepicker" value="" />
+				<input name="form_contact_planified_date" size="27" id="contact_planified_date" type="text" class="form-control datepicker" value="" style="width:110px" />
 			</td>
 		</tr>
 		<tr>
@@ -51,7 +51,7 @@
 			<th style="width:40%;">{{ STR_MODULE_COMMERCIAL_ADMIN_CONTACT_TITLE }}{{ STR_BEFORE_TWO_POINTS }}:</th>
 			<td>
 				<input type="hidden" name="mode" value="update_contact_planified" />
-				<input name="form_edit_contact_planified_date" size="27" value="{{ rce.date|str_form_value }}" id="edit_contact_planified_date" type="text" class="form-control" />
+				<input name="form_edit_contact_planified_date" size="27" value="{{ rce.date|str_form_value }}" id="edit_contact_planified_date" type="text" class="form-control datepicker" style="width:110px" />
 			</td>
 		</tr>
 		<tr>

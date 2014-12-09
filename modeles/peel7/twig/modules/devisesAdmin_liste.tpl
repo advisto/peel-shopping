@@ -1,22 +1,22 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: devisesAdmin_liste.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: devisesAdmin_liste.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<table class="main_table">
 	<tr>
-		<td class="entete" colspan="6">{{ STR_MODULE_DEVISES_ADMIN_LIST_TITLE }}</td>
+		<td class="entete" colspan="7">{{ STR_MODULE_DEVISES_ADMIN_LIST_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="6"><p><a href="{{ ajout_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a> - <a href="{{ update_rates_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN }}</a></p></td>
+		<td colspan="7"><p><a href="{{ ajout_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a> - <a href="{{ update_rates_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN }}</a></p></td>
 	</tr>
 	{% if (results) %}
 		<tr>
@@ -26,6 +26,7 @@
 			<td class="menu">{{ STR_ADMIN_CONVERSION }}</td>
 			<td class="menu">{{ STR_ADMIN_CODE }}</td>
 			<td class="menu">{{ STR_STATUS }}</td>
+			<td class="menu">{{ STR_ADMIN_WEBSITE }}</td>
 		</tr>
 		{% for res in results %}
 		{{ res.tr_rollover }}
@@ -35,10 +36,11 @@
 			<td class="center">{{ res.conversion }}</td>
 			<td class="center">{{ res.code }}</td>
 			<td class="center"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" onclick="{{ res.etat_onclick|escape('html') }}" /></td>
+			<td class="center position">{{ res.site_name }}</td>
 		</tr>
 		{% endfor %}
 	{% else %}
-	<tr><td><b>{{ STR_MODULE_DEVISES_ADMIN_NOTHING_FOUND }}</b></td></tr>
+	<tr><td colspan="7"><b>{{ STR_MODULE_DEVISES_ADMIN_NOTHING_FOUND }}</b></td></tr>
 	{% endif %}
 </table><br />
 <a href="{{ modif_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY }}</a><br />

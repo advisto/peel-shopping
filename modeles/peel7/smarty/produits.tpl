@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: produits.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}{if $is_associated_product}
 	<div class="associated_product">
 {/if}
@@ -49,9 +49,16 @@
 						</td>
 					</tr>
 			{/if}
+			{if isset($prod.gallery_button)}
+					<tr>
+						<td colspan="6" class="col_gallery_button">
+							{$prod.gallery_button}
+						</td>
+					</tr>
+			{/if}
 					<tr>
 						<td class="col_image">
-							<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>
+							{if !empty($prod.image)}<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>{/if}
 						</td>
 						<td class="col_product_description">
 							<table>
@@ -65,7 +72,7 @@
 						</td>
 						<td style="text-align:center; width:22%;">
 			{if isset($prod.on_estimate)}
-							{$prod.on_estimate}
+				{$prod.on_estimate}
 			{/if}
 						</td>
 						<td class="col_zoom" style="width:10%;">
@@ -74,7 +81,7 @@
 			{/if} <br />
 							<p class="col_detail"><a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}">{$details_text}</a></p>
 			{if isset($prod.stock_state)}
-							{$prod.stock_state}
+				{$prod.stock_state}
 			{/if}
 						</td>
 			{if isset($prod.check_critere_stock)}
@@ -89,6 +96,11 @@
 						<td colspan="6"><a href="{$prod.admin.href|escape:'html'}" class="title_label">{$prod.admin.label}</a></td>
 					</tr>
 			{/if}
+			{if isset($prod.modify_product_by_owner)}
+					<tr>
+						<td colspan="6"><a href="{$prod.modify_product_by_owner.href|escape:'html'}" class="title_label">{$prod.modify_product_by_owner.label}</a></td>
+					</tr>
+			{/if}
 				</table>
 		{else}
 				<table class="{$cartridge_product_css_class}">
@@ -100,8 +112,10 @@
 					<tr>
 						<td class="fc_image center middle" style="width:{$small_width}px; height:{$small_height}px;">
 							<span class="image_zoom">
+							{if !empty($prod.image)}
 								<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>
 								{if isset($prod.image.zoom)}<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" {if $prod.image.zoom.is_lightbox}class="lightbox" onclick="return false;"{else}onclick="return(window.open(this.href)?false:true);"{/if} title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>{/if}
+							{/if}
 							</span>
 						</td>
 					</tr>
@@ -113,7 +127,7 @@
 							{if isset($prod.flash)}
 							<div class="alert alert-warning">{$prod.flash}</div>
 							{/if}
-							{if isset($prod.on_estimate)}<div class="fc_prix">{$prod.on_estimate}</div>{/if}
+							{if !empty($prod.on_estimate)}<div class="fc_prix">{$prod.on_estimate}</div>{/if}
 						</td>
 					</tr>
 			{if isset($prod.check_critere_stock)}

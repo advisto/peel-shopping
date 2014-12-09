@@ -1,17 +1,17 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: access_account_form.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
-#}<h1 class="page_title">{{ acces_account_txt }}</h1>
+// $Id: access_account_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+#}<h1 property="name" class="page_title">{{ acces_account_txt }}</h1>
 <div class="row">
 	<div class="col-md-6">
 		<p><b>{{ new_customer }}</b></p>
@@ -32,16 +32,18 @@
 					<td><input type="password" class="form-control" name="mot_passe" size="32" value="{{ password|str_form_value }}" /><br />{{ password_error }}</td>
 				</tr>
 				<tr>
-					<td colspan="2" class="center"><p>{{ token }}<input type="submit" value="{{ login_txt|str_form_value }}" class="btn btn-primary" /></p></td>
+					<td colspan="2" class="center">
+						<p>{{ token }}<input type="submit" value="{{ login_txt|str_form_value }}" class="btn btn-primary" /></p>
+					{% if social.is_any %}
+						<p class="social_link">
+							{% if (social.facebook) %}{{ social.facebook }}{% endif %} &nbsp;
+							{% if (social.twitter) %}{{ social.twitter }}{% endif %} &nbsp;
+							{% if (social.openid) %}{{ social.openid }}{% endif %}
+						</p>
+					{% endif %}
+					</td>
 				</tr>
 			</table>
 		</form>
-		{% if social.is_any %}
-			<p class="social_link">
-				{% if (social.facebook) %}{{ social.facebook }}{% endif %}
-				{% if (social.twitter) %}{{ social.twitter }}{% endif %}
-				{% if (social.openid) %}{{ social.openid }}{% endif %}
-			</p>
-		{% endif %}
 	</div>
 </div>

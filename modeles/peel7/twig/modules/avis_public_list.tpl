@@ -1,18 +1,18 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_public_list.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: avis_public_list.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}
-<h1>{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h1>
+<h1 property="name">{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h1>
 {% if are_results %}
 	<b>{{ STR_MODULE_AVIS_AVERAGE_RATING_GIVEN }}</b> 
 	{% for foo in 1..avisnote %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}
@@ -39,7 +39,7 @@
 	{% endif %}
 	{% for res in results %}
 	<div class="td_avis">
-		<i>{{ STR_MODULE_AVIS_OPINION_POSTED_BY }} {{ res.pseudo }} {{ STR_ON_DATE_SHORT }} {{ res.date }}</i><br />{{ res.avis|html_entity_decode_if_needed|nl2br_if_needed }}
+		<i>{{ STR_MODULE_AVIS_OPINION_POSTED_BY }} {{ res.pseudo }} {% for foo in 1..res.note %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %} {{ STR_ON_DATE_SHORT }} {{ res.date }}</i><br />{{ res.avis|html_entity_decode_if_needed|nl2br_if_needed }}
 	</div>
 	{% endfor %}
 {% else %}

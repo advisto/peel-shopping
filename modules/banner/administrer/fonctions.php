@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -72,7 +72,7 @@ function affiche_formulaire_modif_banniere($id, &$frm)
 		/* Charge les informations de la bannière */
 		$qid = query("SELECT *
 			FROM peel_banniere
-			WHERE id = " . intval($id) . "");
+			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('banniere', null, true));
 		$frm = fetch_assoc($qid);
 	}
 	$frm["nouveau_mode"] = "maj";
@@ -110,16 +110,17 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('banner_help', get_banner_help());
 	$tpl->assign('cette_page_href', $GLOBALS['administrer_url'] . '/sites.php');
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_PLACE_EXPLAIN', sprintf($GLOBALS['STR_MODULE_BANNER_ADMIN_PLACE_EXPLAIN'], $GLOBALS['administrer_url'] . '/sites.php'));
-	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
+	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 	$tpl->assign('date_debut', get_formatted_date(vb($frm["date_debut"])));
 	$tpl->assign('date_fin', get_formatted_date(vb($frm["date_fin"])));
 	$tpl->assign('on_other_page_category', vb($frm["on_other_page_category"]));
 	$tpl->assign('on_home_page', vb($frm["on_home_page"]));
 	$tpl->assign('on_other_page', vb($frm["on_other_page"]));
 	$tpl->assign('on_search_engine_page', vb($frm["on_search_engine_page"]));
+	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('on_first_page_category', vb($frm["on_first_page_category"]));
 
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$tpl->assign('on_ad_creation_page', vb($frm["on_ad_creation_page"]));
 		$tpl->assign('on_ad_page_details', vb($frm["on_ad_page_details"]));
 		$tpl->assign('list_id', vb($frm["list_id"]));
@@ -132,7 +133,8 @@ function affiche_formulaire_banniere(&$frm)
 	} else {
 		// Charge les informations sur les catégorie présentes en base de donnée.
 		$qid = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
-			FROM peel_categories");
+			FROM peel_categories
+			WHERE " . get_filter_site_cond('categories', null, true) . "");
 	}
 	$tpl_cat_opts = array();
 	while ($cat = fetch_assoc($qid)) {
@@ -164,6 +166,7 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('lang', vb($frm["lang"]));
 	$tpl->assign('titre_bouton', vb($frm["titre_bouton"]));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
@@ -223,11 +226,11 @@ function supprime_banniere($id)
 	/* Charge les infos de la commande. */
 	$qid = query("SELECT description
 		FROM peel_banniere
-		WHERE id = " . intval($id) . "");
+		WHERE id = " . intval($id) . " AND " .  get_filter_site_cond('banniere', null, true));
 	$prod = fetch_assoc($qid);
 
 	/* Efface la banniere */
-	query("DELETE FROM peel_banniere WHERE id='" . intval($id) . "'");
+	query("DELETE FROM peel_banniere WHERE id='" . intval($id) . "' AND " .  get_filter_site_cond('banniere', null, true));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_DELETED_OK"], $prod['description'])))->fetch();
 	// Suppression des caches de bannières
 	$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
@@ -255,7 +258,7 @@ function insere_banniere(&$frm)
 			, date_debut
 			, date_fin
 			, etat";
-		if (is_annonce_module_active()) {
+		if (check_if_module_active('annonces')) {
 			$sql .= "
 			, pages_allowed
 			, list_id
@@ -281,13 +284,14 @@ function insere_banniere(&$frm)
 			, on_home_page
 			, on_other_page
 			, keywords
+			, site_id
 		) VALUES (
 			'" . nohtml_real_escape_string($frm['description']) . "'
 			, '" . nohtml_real_escape_string($frm['image']) . "'
 			, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['date_debut'])) . "'
 			, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['date_fin'])) . "'
 			, '" . nohtml_real_escape_string($frm['etat']) . "'";
-		if (is_annonce_module_active()) {
+		if (check_if_module_active('annonces')) {
 			$sql .= "
 			, '" . nohtml_real_escape_string(vb($frm['pages_allowed'])) . "'
 			, '" . nohtml_real_escape_string(vn($frm['list_id'])) . "'
@@ -313,6 +317,7 @@ function insere_banniere(&$frm)
 			, '" . intval(vn($frm['on_home_page'])) . "'
 			, '" . intval(vn($frm['on_other_page'])) . "'
 			, '" . nohtml_real_escape_string(vb($frm['keywords'])) . "'
+			, '" . intval($frm['site_id']) . "'
 		)";
 		$qid = query($sql);
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"], vb($_POST['description']))))->fetch();
@@ -341,7 +346,7 @@ function maj_banniere($id, &$frm)
 		, date_fin = "' . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['date_fin'])) . '"
 		, image = "' . nohtml_real_escape_string($frm['image']) . '"
 		, etat = "' . nohtml_real_escape_string($frm['etat']) . '"';
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$sql .= '
 		, annonce_number = "' . intval(vn($frm['annonce_number'])) . '"
 		, pages_allowed = "' . nohtml_real_escape_string(vb($frm['pages_allowed'])) . '"
@@ -366,6 +371,7 @@ function maj_banniere($id, &$frm)
 		, height = "' . intval(vn($frm['height'])) . '"
 		, rang = "' . intval(vn($frm['rang'])) . '"
 		, keywords = "' . nohtml_real_escape_string(vb($frm['keywords'])) . '"
+		, site_id = "' . intval(vn($frm['site_id'])) . '"
 		WHERE id = "' . intval($id) . '"';
 	if (query($sql)) {
 		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"], $id)))->fetch();
@@ -394,13 +400,14 @@ function affiche_liste_banniere($inner = '', $cond = '')
 	$sql = "SELECT *
 		FROM peel_banniere pb " . $inner . "
 		WHERE 1
-		" . $cond . "
-		ORDER BY date_debut DESC";
+		" . $cond . " AND " .  get_filter_site_cond('banniere', 'pb', true) .
+		" ORDER BY date_debut DESC";
 	$Links = new Multipage($sql, 'utilisateurs');
 	$results_array = $Links->Query();
 	if (!empty($results_array)) {
 		$tpl_results = array();
 		$i = 0;
+		$all_sites_name_array = get_all_sites_name_array();
 		foreach ($results_array as $ligne) {
 			$extension = @pathinfo($ligne['image'], PATHINFO_EXTENSION);
 			$tpl_swf = null;
@@ -425,20 +432,22 @@ function affiche_liste_banniere($inner = '', $cond = '')
 				'vue' => $ligne['vue'],
 				'lang' => $ligne['lang'],
 				'etat_onclick' => 'change_status("banner", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
-				'modif_etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
+				'modif_etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
+				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
 			);
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);
 	}
 	$tpl->assign('links_multipage', $Links->GetMultipage());
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_LIST_TITLE', $GLOBALS['STR_MODULE_BANNER_ADMIN_LIST_TITLE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_CREATE', $GLOBALS['STR_MODULE_BANNER_ADMIN_CREATE']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_PLACE', $GLOBALS['STR_MODULE_BANNER_ADMIN_PLACE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
-	$tpl->assign('STR_ADMIN_IMAGE', $GLOBALS['STR_ADMIN_IMAGE']);
+	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
 	$tpl->assign('STR_ADMIN_BEGIN_DATE', $GLOBALS['STR_ADMIN_BEGIN_DATE']);
 	$tpl->assign('STR_ADMIN_END_DATE', $GLOBALS['STR_ADMIN_END_DATE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_HIT', $GLOBALS['STR_MODULE_BANNER_ADMIN_HIT']);
@@ -466,12 +475,12 @@ function delete_banner_image($id, $file)
 		case "image" :
 			$sql = "SELECT image
 				FROM peel_banniere
-				WHERE id = '" . intval($id) . "'";
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('banniere', null, true);
 			$res = query($sql);
 			$file = fetch_assoc($res);
 			query("UPDATE peel_banniere
 				SET image = ''
-				WHERE id = '" . intval($id) . "'");
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('banniere', null, true));
 			break;
 	}
 	delete_uploaded_file_and_thumbs($file['image']);
@@ -492,9 +501,9 @@ function affiche_filtre_banner($frm)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/bannerAdmin_filtre.tpl');
 	$tpl->assign('action', get_current_url(false));
-	$tpl->assign('is_annonce_module_active', is_annonce_module_active());
+	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 	$tpl_options = array();
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$sql_annonce_categorie = query('SELECT id,nom_' . $_SESSION['session_langue'] . '
 			FROM peel_categories_annonces pca
 			WHERE etat=1
@@ -507,9 +516,9 @@ function affiche_filtre_banner($frm)
 			);
 		}
 	} else {
-		$sql_annonce_categorie = query('SELECT id,nom_' . $_SESSION['session_langue'] . '
+		$sql_annonce_categorie = query('SELECT id, nom_' . $_SESSION['session_langue'] . '
 			FROM peel_categories pc
-			WHERE etat=1
+			WHERE etat=1 AND ' . get_filter_site_cond('categories', 'pc', true) . '
 			ORDER BY nom_' . $_SESSION['session_langue']);
 		while ($this_categorie = fetch_assoc($sql_annonce_categorie)) {
 			$tpl_options[] = array(
@@ -542,4 +551,3 @@ function affiche_filtre_banner($frm)
 	echo $tpl->fetch();
 }
 
-?>

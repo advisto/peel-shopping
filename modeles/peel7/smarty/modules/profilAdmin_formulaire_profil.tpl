@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: profilAdmin_formulaire_profil.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: profilAdmin_formulaire_profil.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
@@ -20,6 +20,14 @@
 		</tr>
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_MODULE_PROFIL_ADMIN_EXPLAIN}</div></td>
+		</tr>
+		<tr>
+			<td class="left">{$STR_ADMIN_WEBSITE}{$STR_BEFORE_TWO_POINTS}: </td>
+			<td>
+				<select class="form-control" name="site_id">
+					{$site_id_select_options}
+				</select>
+			</td>
 		</tr>
 {foreach $langs as $l}
 		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
@@ -37,7 +45,7 @@
 		</tr>
 	{if $l.document}
 		<tr>
-			<td class="title_label">{$STR_ADMIN_FILE} {$l.lng|upper} (zip, pdf ou image){$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="title_label">{$STR_FILE} {$l.lng|upper} (zip, pdf ou image){$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				{$STR_ADMIN_FILE_NAME} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}: {$l.document}<br /><a href="{$l.document_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_MODULE_PROFIL_ADMIN_UPLOAD_DOCUMENT}</a> - <a href="{$l.document_delete_href|escape:'html'}"><img src="{$document_delete_icon_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_THIS_FILE}</a><br />
 				<br />
@@ -49,7 +57,7 @@
 		</tr>
 	{else}
 		<tr>
-			<td class="title_label">{$STR_ADMIN_FILE} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="title_label">{$STR_FILE} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:250px" name="document_{$l.lng}" type="file" value="" /></td>
 		</tr>
 	{/if}

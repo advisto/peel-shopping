@@ -31,19 +31,8 @@ $Config['Enabled'] = true ;
 
 // On va chercher la configuration de PEEL
 define('IN_PEEL', true);
-include('../../../../../../lib/setup/info.inc.php');
-// Paramétrage des sessions
-$session_length = 3;
-$session_cookie_name = "sid" . substr(md5($GLOBALS['wwwroot']), 0, 8);
-ini_set('session.gc_maxlifetime', 3600 * $session_length);
-ini_set('session.use_cookies', '1');
-ini_set('session.use_only_cookies', '1'); // évite les attaques avec session id dans l'URL
-ini_set('session.use_trans_sid', '0'); // empêche la propagation des SESSION_ID dans les URL
-ini_set('url_rewriter.tags', '');
-ini_set('session.name', $session_cookie_name);
-if (!empty($session_save_path)) {
-	ini_set('session.save_path', $session_save_path);
-}
+include('../../../../../../configuration.inc.php');
+
 session_start();
 // Vérification des droits : l'utilisateur doit être un administrateur PEEL
 if(!a_priv('admin*', false)){
@@ -82,11 +71,16 @@ $Config['HtmlExtensions'] = array("html", "htm", "xml", "xsd", "txt", "js") ;
 // If possible, it is recommended to set more restrictive permissions, like 0755.
 // Set to 0 to disable this feature.
 // Note: not needed on Windows-based servers.
-$Config['ChmodOnUpload'] = 0664 ;
+
+// Par défaut dans PEEL, on laisse PHP créer les fichiers avec les droits par défaut
+// Si vous le souhaitez, créez une variable de configuration chmod_new_files de type octal ou integer (c'est converti automatiquement par PEEL) avec pour valeur 644 par exemple
+$Config['ChmodOnUpload'] = vb($GLOBALS['site_parameters']['chmod_new_files'], null);
 
 // See comments above.
 // Used when creating folders that does not exist.
-$Config['ChmodOnFolderCreate'] = 0775 ;
+// Par défaut dans PEEL, on laisse PHP créer les dossiers avec les droits par défaut
+// Si vous le souhaitez, créez une variable de configuration chmod_new_folders de type octal ou integer (c'est converti automatiquement par PEEL) avec pour valeur 755 par exemple
+$Config['ChmodOnFolderCreate'] = vb($GLOBALS['site_parameters']['chmod_new_folders'], null);
 
 /*
 	Configuration settings for each Resource Type
@@ -172,66 +166,5 @@ $Config['QuickUploadPath']['Media']		= $Config['UserFilesPath'] ;
 $Config['QuickUploadAbsolutePath']['Media']= $Config['UserFilesAbsolutePath'] ;
 
 
-/**
- * Renvoie true si l'utilisateur de la session a le privilège $requested_priv ou un droit supérieur
- * Des droits peuvent être combinés :
- * - OU : de type droit1,droit2 : l'un des deux droits suffit
- * - ET : de type droit1+droit2 : les deux droits sont nécessaires
- * La virgule est prioritaire par rapport au + : droit1+droit2,droit3 : droits 1 et 2 nécessaire, ou bien droit3 seulement suffit
- * Si on demande des droits de type admin*, n'importe quel admin, admin_products, etc. a le droit d'accès
- * Si on demande un droit de type admin_xxx, alors un utilisateur de type "admin" a le droit également d'accéder (administrateur superglobal)
- *
- * @param string $requested_priv
- * @param boolean $demo_allowed
- * @return string
- */
-function a_priv($requested_priv, $demo_allowed = false)
-{
-	if (isset($_SESSION) && isset($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['priv'])) {
-		if (strpos($requested_priv, ',') !== false) {
-			// On autorise plusieurs droits différents => récursif
-			$requested_priv_array = explode(',', $requested_priv);
-			$allowed = false;
-			foreach($requested_priv_array as $this_requested_priv) {
-				if (a_priv(trim($this_requested_priv), $demo_allowed)) {
-					$allowed = true;
-				}
-			}
-			return $allowed;
-		} elseif (strpos($requested_priv, '+') !== false) {
-			// On demande plusieurs droits => récursif
-			$requested_priv_array = explode('+', $requested_priv);
-			$not_allowed = false;
-			foreach($requested_priv_array as $this_requested_priv) {
-				if (!a_priv(trim($this_requested_priv), $demo_allowed)) {
-					$not_allowed = true;
-				}
-			}
-			return !$not_allowed;
-		} else {
-			$user_priv_array = explode('+', $_SESSION['session_utilisateur']['priv']);
-			foreach($user_priv_array as $this_user_priv) {
-				if (substr($requested_priv, 0, 5) == 'admin' && $this_user_priv == 'admin') {
-					// admin est un administrateur global qui a tous les droits de type admin*
-					return true;
-				} elseif ($demo_allowed && $this_user_priv == 'demo') {
-					// On a les droits demo qui sont autorisés
-					return true;
-				}
-				if (strpos($requested_priv, '*') !== false) {
-					// Pour admin*, tout droit du type admin ou admin_.... est autorisé
-					if (strpos($requested_priv, substr($this_user_priv, 0, strpos($requested_priv, '*'))) === 0) {
-						return true;
-					}
-				} elseif ($this_user_priv == $requested_priv) {
-					return true;
-				}
-			}
-			return false;
-		}
-	} else {
-		return null;
-	}
-}
 
 ?>

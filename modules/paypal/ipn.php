@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: ipn.php 43464 2014-12-01 16:52:06Z sdelaporte $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -29,12 +29,12 @@ $req = 'cmd=_notify-validate';
 foreach ($_POST as $key => $value) {
 	$req .= "&" . $key . "=" . urlencode($value);
 }
-$q = query('SELECT id, montant
+$q = query('SELECT id, montant, devise, currency_rate
 	FROM peel_commandes
-	WHERE id="' . intval($_POST['item_number']) . '"
+	WHERE id="' . intval($_POST['item_number']) . '" AND ' . get_filter_site_cond('commandes') . '
 	LIMIT 1');
 if ($r = fetch_assoc($q)) {
-	if (round($r['montant'] * 100) == round($_POST['mc_gross'] * 100)) {
+	if (round(fprix($r['montant'], false, $r['devise'], true, $r['currency_rate'], false, false) * 100) == round($_POST['mc_gross'] * 100)) {
 		// post back to PayPal system to validate
 		$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
 		$header .= "Host: " . $paypal_domain . ":443\r\n";
@@ -66,7 +66,7 @@ if ($r = fetch_assoc($q)) {
 			// $pending_reason = $_POST['pending_reason'];
 			// $txn_type = $_POST['txn_type'];
 			fputs ($fp, $header . $req);
-			while (!feof($fp)) {
+			while (!String::feof($fp)) {
 				$res = fgets ($fp, 1024);
 				// $res vaut d'abord des entêtes HTTP, puis VERIFIED ou INVALID, puis d'autres entêtes HTTP pour fermer connexion
 				if (strcmp(trim(strip_tags($res)), "VERIFIED") == 0) {
@@ -102,4 +102,3 @@ if ($r = fetch_assoc($q)) {
 	send_email($GLOBALS['support'], 'Alerte : problème sur transaction Paypal commande non trouvée ' . intval($_POST['item_number']) . '', 'Les informations Paypal semblent incorrectes ' . "\n\n" . print_r($_REQUEST, true));
 }
 
-?>

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: produits.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{% if is_associated_product %}
 	<div class="associated_product">
 {% endif %}
@@ -49,9 +49,16 @@
 						</td>
 					</tr>
 			{% endif %}
+			{% if prod.gallery_button is defined %}
+ 					<tr>
+						<td colspan="6" class="col_gallery_button">
+							{{ prod.gallery_button }}
+						</td>
+					</tr>
+			{% endif %}
 					<tr>
 						<td class="col_image">
-							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width|str_form_value }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height|str_form_value }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>
+							{% if (prod.image) %}<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width|str_form_value }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height|str_form_value }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>{% endif %}
 						</td>
 						<td class="col_product_description">
 							<table>
@@ -65,7 +72,7 @@
 						</td>
 						<td style="text-align:center; width:22%;">
 			{% if (prod.on_estimate) %}
-							{{ prod.on_estimate }}
+				{{ prod.on_estimate }}
 			{% endif %}
 						</td>
 						<td class="col_zoom" style="width:10%;">
@@ -89,6 +96,11 @@
 						<td colspan="6"><a href="{{ prod.admin.href|escape('html') }}" class="title_label">{{ prod.admin.label }}</a></td>
 					</tr>
 			{% endif %}
+			{% if prod.modify_product_by_owner is defined %}
+					<tr>
+						<td colspan="6"><a href="{{ prod.modify_product_by_owner.href|escape('html') }}" class="title_label">{{ prod.modify_product_by_owner.label }}</a></td>
+					</tr>
+			{% endif %}
 				</table><hr />
 		{% else %}
 				<table class="{{ cartridge_product_css_class }}">
@@ -100,8 +112,10 @@
 					<tr>
 						<td class="fc_image center middle" style="width:{{ small_width }}px; height:{{ small_height }}px;">
 							<span class="image_zoom">
+							{% if (prod.image) %}
 								<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt }}" /></a>
 								{% if (prod.image.zoom) %}<span class="fc_zoom"><a href="{{ prod.image.zoom.href|escape('html') }}" {% if prod.image.zoom.is_lightbox %}class="lightbox" onclick="return false;"{% else %}onclick="return(window.open(this.href)?false:true);"{% endif %} title="{{ prod.name|str_form_value }}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>{% endif %}
+							{% endif %}
 							</span>
 						</td>
 					</tr>

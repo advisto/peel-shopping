@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: alertes_24h.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: alertes_24h.php 43390 2014-11-27 14:09:01Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -25,8 +25,8 @@ function warnAdminContactPlanified ()
 	// Condition AND u2.priv LIKE "%admin%" : Sécurité, si un contact planifié venait à être attribué par erreur à un non-admin, pas d'emai envoyé
 	$q = query('SELECT acp.*, u.email AS client_login, u.id_utilisateur AS client_id, u2.email AS admin_login, u2.email AS admin_email
 		FROM `peel_admins_contacts_planified` acp
-		LEFT JOIN `peel_utilisateurs` u  ON u.id_utilisateur = acp.user_id
-		INNER JOIN `peel_utilisateurs` u2 ON u2.id_utilisateur = acp.admin_id AND u2.priv LIKE "%admin%"
+		LEFT JOIN `peel_utilisateurs` u  ON u.id_utilisateur = acp.user_id AND ' . get_filter_site_cond('utilisateurs', 'u') . '
+		INNER JOIN `peel_utilisateurs` u2 ON u2.id_utilisateur = acp.admin_id AND u2.priv LIKE "%admin%" AND ' . get_filter_site_cond('utilisateurs', 'u2') . '
 		WHERE acp.timestamp BETWEEN UNIX_TIMESTAMP("' . date('Y-m-d 00:00:00') . '") AND UNIX_TIMESTAMP("' . date('Y-m-d 23:59:59') . '")');
 
 	while ($result = fetch_assoc($q)) {
@@ -41,7 +41,7 @@ function warnAdminContactPlanified ()
 			$sujet = 'Contacts planifiés sur ' . $GLOBALS['wwwroot'];
 			foreach($admins_contacts_array as $admin_email => $admin_body_email) {
 				send_email($admin_email, $sujet, $admin_body_email);
-				send_email($GLOBALS['contact'], 'Copie de ' . $admin_email . ' - ' . $sujet, $admin_body_email);
+				send_email($GLOBALS['support'], 'Copie de ' . $admin_email . ' - ' . $sujet, $admin_body_email);
 			}
 		}
 	}
@@ -49,4 +49,3 @@ function warnAdminContactPlanified ()
 
 warnAdminContactPlanified ();
 
-?>

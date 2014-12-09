@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: advisto-chart.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: advisto-chart.php 43037 2014-10-29 12:01:40Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -31,15 +31,21 @@ if(vb($GLOBALS['site_parameters']['chart_product']) == 'plot') {
  * @param array $graph_type
  * @param array $colors
  * @param integer $legend_font_size
+ * @param string $force_chart_product
  * @return
  */
-function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type = array(), $colors = array(), $legend_font_size = 12, $width = 300)
+function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type = array(), $colors = array(), $legend_font_size = 12, $width = 300, $force_chart_product = null)
 {
 	if(empty($width)){
 		$width=300;
 	}
+	if(!empty($force_chart_product)) {
+		$chart_product = $force_chart_product;
+	} else {
+		$chart_product = vb($GLOBALS['site_parameters']['chart_product']);
+	}
 	// use the chart class to build the chart:
-	if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+	if($chart_product == 'flot') {
 		$output = '';
 	} else {
 		$graph = new graph();		
@@ -136,7 +142,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				$color = String::strtoupper($r . '0' . $g . '0' . $b . '0');
 			}
 			if (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'bar') {
-				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+				if($chart_product == 'flot') {
 					$i=0;
 					foreach($data_array as $x => $y) {
 						$bar_data[] = array($x, $y);
@@ -148,7 +154,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 					$graph->bar(80, '0x' . $color, $data_title);				
 				}
 			} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'dot') {
-				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+				if($chart_product == 'flot') {
 					$output .= json_encode($points_data_array);
 				} else {
 					$i=0;
@@ -162,7 +168,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 			} elseif (!empty($all_graph_type) && $all_graph_type == 'pie') {
 				$pie_slice_colours[] = '#' . $color;
 			} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'line') {
-				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+				if($chart_product == 'flot') {
 					$output .= json_encode($data_array);
 				} else {
 					$graph->set_data($data_array);
@@ -170,7 +176,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				}
 			} else {
 				// Par défaut line_dot
-				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+				if($chart_product == 'flot') {
 					ksort($data_array);
 					$i=0;
 					foreach($data_array as $x => $y) {
@@ -213,7 +219,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 					$min_y = -2 * $max_y / 8;
 				}
 			}
-			if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+			if($chart_product == 'flot') {
 			} else {
 				$graph->set_y_max($max_y);
 				$graph->set_y_min($min_y);
@@ -224,7 +230,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				$graph->set_x_label_style(10, '0x000000', 0, $steps);
 			}
 		} else {
-			if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+			if($chart_product == 'flot') {
 				foreach($data as $title => $value) {
 					$temp = new stdClass();
 					$temp->label = $title;
@@ -238,11 +244,11 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				$graph->pie_slice_colours($pie_slice_colours);
 			}
 		}
-	} elseif(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+	} elseif($chart_product == 'flot') {
 		$data = array();
 		$output .= json_encode($data);
 	}
-	if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+	if($chart_product == 'flot') {
 		return $output;
 	} else {
 		// display the data
@@ -250,4 +256,3 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 	}
 }
 
-?>

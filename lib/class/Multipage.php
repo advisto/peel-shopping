@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: Multipage.php 43037 2014-10-29 12:01:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: Multipage.php 43037 2014-10-29 12:01:40Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -74,11 +74,12 @@ class Multipage {
 	var $sort_get_variable = 'sort';
 	var $order_get_variable = 'order';
 	var $order_sql_prefix = null;
+	var $no_pagination_displayed = false;
 
 	/**
 	 * Constructeur
 	 */
-	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null)
+	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null, $no_pagination_displayed = false)
 	{
 		if (empty($template_name)) {
 			if(defined('IN_PEEL_ADMIN')) {
@@ -90,6 +91,7 @@ class Multipage {
 			}
 		}
 		$this->tpl_name = $template_name;
+		$this->no_pagination_displayed = $no_pagination_displayed;
 		$this->sqlRequest = $sqlRequest;
 		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
 		if ($this->DefaultResultsPerPage != '*') {
@@ -201,7 +203,7 @@ class Multipage {
 			$this->LimitSQL .= " LIMIT " . $lines_begin . ", " . $lines_count;
 		}
 		$sql = $this->LimitSQL;
-		if (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || String::substr_count($sql, 'SELECT')<2)) {
+		if(($this->sql_count === null || String::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || String::substr_count($sql, 'SELECT')<2))) {
 			// Si nécessaire, on rajoute SQL_CALC_FOUND_ROWS
 			// On ne le fait pas pour une requête de type UNION - le test sur la parenthèse est une sécurité qui évite des hacks lors de recherche utilisateur
 			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($sql, 0, 10)) . String::substr($sql, 10);
@@ -298,7 +300,7 @@ class Multipage {
 	 */
 	function ParseTemplate($show_page_if_only_one = false)
 	{
-		if(empty($this->tpl_name)) {
+		if(empty($this->tpl_name) || $this->no_pagination_displayed) {
 			return false;
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('multipage_template_' . $this->tpl_name . '.tpl');
@@ -391,7 +393,7 @@ class Multipage {
 			}
 			if ($this->allow_get_sort && !empty($_GET[$this->order_get_variable]) && $key === $_GET[$this->order_get_variable]) {
 				$output .= '
-		<th class="menu center"' . $colspan_text . ' style="background-color:#5C5859">';
+		<th class="menu center multipage_selected_field"' . $colspan_text . '>';
 			} else {
 				$output .= '
 		<th class="menu center"' . $colspan_text . '>';
@@ -476,4 +478,3 @@ class Multipage {
 	}
 }
 
-?>

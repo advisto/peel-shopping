@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an     |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: export_produits.php 43040 2014-10-29 13:36:21Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -20,7 +20,7 @@ necessite_priv("admin_products,admin_webmastering");
 // La colonne stock dans peel_produits ne sert pas, donc l'exporter induit en confusion
 $excluded_fields = array('stock');
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']);
-if (is_stock_advanced_module_active()) {
+if (check_if_module_active('stock_advanced')) {
 	$specific_fields_array[] = 'Stock';
 }
 // FIN PARAMETRAGE
@@ -52,6 +52,7 @@ foreach ($specific_fields_array as $this_field) {
 // et on ajoute les colonnes pour chaque attribut
 $sql_n = "SELECT *
 	FROM peel_nom_attributs
+	WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
 	ORDER BY id";
 $nom_attrib = query($sql_n);
 while ($this_attribut = fetch_assoc($nom_attrib)) {
@@ -64,7 +65,7 @@ if (is_lot_module_active()) {
 	$i = 1;
 	$query_produits_lot = query("SELECT * 
 		FROM peel_quantites
-		WHERE produit_id='" . intval($product_object->id) . "'");
+		WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites', null, true));
 	while ($prix_lot = fetch_assoc($query_produits_lot)) {
 		$product_field_names[] = 'quantite§prix§prix_revendeur'.$i;
 		$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
@@ -82,7 +83,8 @@ $output .= implode("\t", $title_line_output) . "\r\n";
 $q = "SELECT p.*, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
 	FROM peel_produits p
 	INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-	INNER JOIN peel_categories c ON c.id = pc.categorie_id
+	INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
+	WHERE " . get_filter_site_cond('produits', 'p', true) . "
 	GROUP BY id
 	ORDER BY id";
 $query = query($q);
@@ -98,7 +100,7 @@ while ($result = fetch_assoc($query)) {
 	unset($possible_sizes);
 	$sql_taille = query('SELECT t.*
 		FROM peel_produits_tailles pt 
-		INNER JOIN peel_tailles t ON t.id=pt.taille_id
+		INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' . get_filter_site_cond('tailles', 't', true) . '
 		WHERE pt.produit_id = "'.intval($product_object->id).'"');
 	while($taille = fetch_assoc($sql_taille)){
 		$temp = $taille['nom_'.$_SESSION['session_langue']];
@@ -118,7 +120,7 @@ while ($result = fetch_assoc($query)) {
 	// Récupération des valeurs pour les attributs
 	$query_produits_attributs = query("SELECT ppa.nom_attribut_id, pa.id, pa.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
 		FROM peel_produits_attributs ppa
-		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id
+		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id AND " . get_filter_site_cond('attributs', 'pa', true)."
 		WHERE produit_id='" . intval($product_object->id) . "'");
 	while ($this_attribut = fetch_assoc($query_produits_attributs)) {
 		if (!empty($attribut_infos_array[$this_attribut['nom_attribut_id']])) {
@@ -134,7 +136,7 @@ while ($result = fetch_assoc($query)) {
 			$result[$attribut_infos_array[$this_attribut['nom_attribut_id']]['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['nom_attribut_id']][] = $this_value;
 		}
 	}
-	if (is_stock_advanced_module_active()) {
+	if (check_if_module_active('stock_advanced')) {
 		$infos_stocks = array();
 		$product_stock_infos = get_product_stock_infos($product_object->id);
 		foreach ($product_stock_infos as $this_stock_info) {
@@ -150,7 +152,7 @@ while ($result = fetch_assoc($query)) {
 		$i = 1;
 		$query_produits_lot = query("SELECT * 
 			FROM peel_quantites
-			WHERE produit_id='" . intval($product_object->id) . "'");
+			WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites', null, true));
 		while ($prix_lot = fetch_assoc($query_produits_lot)) {
 			$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
 			$i++;
@@ -180,4 +182,3 @@ while ($result = fetch_assoc($query)) {
 
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
-?>

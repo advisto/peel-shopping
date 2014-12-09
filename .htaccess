@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.1.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 39495 2014-01-14 11:08:09Z sdelaporte $
+# $Id: .htaccess 43477 2014-12-02 12:23:38Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -118,7 +118,7 @@ AddDefaultCharset UTF-8
 </FilesMatch>
 
 <ifModule mod_headers.c>
-	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc|woff|eot|svg|ttf)$">
+	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc|docx|xls|xlsx|ppt|pptx|woff|eot|svg|ttf)$">
 		# Mise en cache par le navigateur pendant 7j par défaut des images, CSS, Javascript.
 		Header set Cache-Control "max-age=604800, public"
 	</FilesMatch>
@@ -162,6 +162,9 @@ AddDefaultCharset UTF-8
 	# FIN DE EDITION SUR MESURE
 
 	RewriteRule ^(images/|upload|icones|modeles/images)/ - [L]
+
+	# Recuperer toutes les pages se terminant par .htm - à n'activer que si vous activez $GLOBALS['site_parameters']['enable_prefetch'] et n'avez pas de page statique en .htm sur votre site
+	RewriteRule (\.htm)$ prefetch.php [QSA,L]
 
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$

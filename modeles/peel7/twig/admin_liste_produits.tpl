@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_produits.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_produits.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{% if is_empty %}
 	<p><a href="{{ href|escape('html') }}">{{ STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST }}</a></p>
 {% else %}
@@ -18,7 +18,7 @@
 	<div class="entete">{{ STR_ADMIN_SEARCH_CRITERIA }}</div>
 	<div>
 		<div class="row">
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_CATEGORY }}{{ STR_BEFORE_TWO_POINTS }}:
 				<select class="form-control" size="1" name="cat_search" >
 					<option value="null">{{ STR_ADMIN_ALL_CATEGORIES }}</option>
@@ -26,15 +26,25 @@
 					{{ categorie_options }}
 				</select>
 			</div>
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_REFERENCE }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" name="reference_search" size="15" value="" />
 			</div>
 			<div class="clearfix visible-sm"></div>
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+				{{ STR_BRAND }}{{ STR_BEFORE_TWO_POINTS }}:
++ 				<select class="form-control" name="brand_search">
+					<option value="0">{{ STR_CHOOSE }}</option>
+					{% for o in marques_options %}
+					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name|html_entity_decode_if_needed }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUCT_NAME }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" name="name_search" size="15" value="" />
 			</div>
+			<div class="clearfix visible-sm"></div>
 			<div class="clearfix visible-md visible-lg"></div>
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT_IN }} <strong>{{ STR_ADMIN_OUR_SELECTION }}</strong> ?<br />
 				<span>
 					<input type="radio" name="home_search" value="null" checked="checked" /> {{ STR_ADMIN_ANY }}&nbsp;
@@ -42,8 +52,7 @@
 					<input type="radio" name="home_search"{% if home_search_zero_issel %} checked="checked"{% endif %} value="0" /> {{ STR_NO }}
 				</span>
 			</div>
-			<div class="clearfix visible-sm"></div>
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT_IN }} <strong>{{ STR_NOUVEAUTES }}</strong> ?<br />
 				<span>
 					<input type="radio" name="new_search" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
@@ -51,7 +60,7 @@
 					<input type="radio" name="new_search"{% if new_search_zero_issel %} checked="checked"{% endif %} value="0" /> {{ STR_NO }}
 				</span>
 			</div>
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT_IN }} <strong>{{ STR_PROMOTION }}</strong> ?<br />
 				<span>
 					<input type="radio" name="promo_search" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
@@ -59,9 +68,9 @@
 					<input type="radio" name="promo_search"{% if promo_search_zero_issel %} checked="checked"{% endif %} value="0" /> {{ STR_NO }}
 				</span>
 			</div>
-			<div class="clearfix visible-sm visible-md visible-lg"></div>
+			<div class="clearfix visible-md visible-lg"></div>
 		{% if is_best_seller_module_active %}
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT_IN }} <strong>{{ STR_TOP }}</strong> ?<br />
 				<span>
 					<input type="radio" name="top_search" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
@@ -70,8 +79,9 @@
 				</span>
 			</div>
 		{% endif %}
+			<div class="clearfix visible-sm"></div>
 		{% if is_gifts_module_active %}
-			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT }} <strong>{{ STR_MODULE_GIFTS_ADMIN_GIFT }}</strong> ?<br />
 				<span>
 					<input type="radio" name="on_gift" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
@@ -80,7 +90,7 @@
 				</span>
 			</div>
 		{% endif %}
-			<div class="col-md-4 col-sm-6 center" style="padding-top:10px; padding-bottom:10px">
+			<div class="col-md-3 col-sm-6 center pull-right" style="padding-top:10px; padding-bottom:10px">
 				<input class="btn btn-primary" type="submit" value="{{ STR_SEARCH|str_form_value }}" name="action" />
 			</div>
 		</div>
@@ -120,13 +130,7 @@
 			{% endif %}
 		</td>
 		<td class="center">
-			{% if not (li.sites) %}
-				<span style="color:red">-</span><br />
-			{% else %}
-				{% for site in li.sites %}
-				{{ site|html_entity_decode_if_needed }}<br />
-				{% endfor %}
-			{% endif %}
+			{{ li.site_name|html_entity_decode_if_needed }}
 		</td>
 		<td class="center"><a class="title_label" title="{{ STR_ADMIN_PRODUITS_UPDATE|str_form_value }}" href="{{ li.modify_href|escape('html') }}">{{ li.modify_label|html_entity_decode_if_needed }}</a></td>
 		<td class="center">{% if site_parameters_prices=='edit' %}<input type="text" class="form-control" name="price_per_product_id[{{ li.id|str_form_value }}]" value="{{ li.prix|str_form_value }}" style="width:65px" onchange="update_price(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')" />{% else %}{{ li.prix }}{% endif %}</td>
@@ -154,7 +158,7 @@
 		<td class="center">
 			{% if (li.product_src) %}
 				<a href="{{ li.modify_href|escape('html') }}" title="{{ STR_ADMIN_PRODUITS_UPDATE|str_form_value }}"><img src="{{ li.product_src|escape('html') }}" alt="{{ li.product_name|str_form_value }}" /></a>
-			{% else %}
+			{% elseif (photo_not_available_src) %}
 				<a href="{{ li.modify_href|escape('html') }}" title="{{ STR_ADMIN_PRODUITS_UPDATE|str_form_value }}"><img src="{{ photo_not_available_src|escape('html') }}" alt="{{ STR_PHOTO_NOT_AVAILABLE_ALT|str_form_value }}" /></a>
 			{% endif %}
 		</td>
@@ -163,6 +167,6 @@
 	{% endfor %}
 	</table>
 </div>
-<div class="center">{{ Multipage }}</div>
+<div class="center">{{ Multipage }} <a href="{{ delete_all_href|str_form_value }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" class="btn btn-danger">{{ STR_ADMIN_DELETE_ALL_RESULTS }}</a></div>
 	{% endif %}
 {% endif %}

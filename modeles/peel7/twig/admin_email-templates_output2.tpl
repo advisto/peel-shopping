@@ -1,27 +1,36 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_output2.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_email-templates_output2.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{{ action_html }}
 <form class="entryform form-inline" role="form" action="email-templates.php" method="post" name="form_ajout">
 	<div class="entete">{{ STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE }}</div>
 	<div class="alert alert-info">{{ STR_ADMIN_EMAIL_TEMPLATES_TAGS_TABLE_EXPLAIN }}</div>
-	<div class="row">
+	<div class="alert alert-info">{{ STR_ADMIN_EMAIL_TEMPLATES_MSG_LAYOUT_EXPLAINATION }}</div>
+ 	<div class="row">
 		{{ form_token }}
 		<div class="col-md-6">
 			<table class="full_width">
 				<tr>
 					<td style="width:100px">{{ STR_CATEGORY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 					<td>{{ categories_list }}</td>
+				</tr>
+				<tr>
+					<td>{{ STR_ADMIN_WEBSITE}}{{ STR_BEFORE_TWO_POINTS }}: </td>
+					<td>
+						<select class="form-control" name="site_id" style="width:90%">
+							{{ site_id_select_options}}
+						</select>
+					</td>
 				</tr>
 				<tr>
 					<td>{{ STR_SIGNATURE }}{{ STR_BEFORE_TWO_POINTS}}:</td>

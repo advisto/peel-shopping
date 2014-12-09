@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_categorie.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: admin_liste_categorie.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_CATEGORIES_LIST_TITLE }}</div>
 <div><p><img src="{{ add_src|escape('html') }}" alt="" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_CATEGORIES_CREATE }}</a></p></div>
 <div>
@@ -27,7 +27,7 @@
 		<tr>
 			<td class="menu">{{ STR_ADMIN_ACTION }}</td>
 			<td class="menu">{{ STR_ADMIN_ID }}</td>
-			<td class="menu">{{ STR_ADMIN_IMAGE }}</td>
+			<td class="menu">{{ STR_IMAGE }}</td>
 			<td class="menu" style="text-align:left">{{ STR_ADMIN_CATEGORIES }}</td>
 			<td class="menu" style="text-align:left">{{ STR_WEBSITE }}</td>
 	{% if is_category_promotion_module_active %}

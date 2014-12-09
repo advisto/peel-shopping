@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: Caddie.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: Caddie.php 43040 2014-10-29 13:36:21Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -128,7 +128,7 @@ class Caddie {
 	var $total_reduction_code_promo;
 	var $total_reduction_percent_code_promo;
 	// Détermine si un code promo s'applique à une seule catégorie ou toutes
-	var $cat_code_promo;
+	var $code_infos;
 
 	/* Avoir client en EURO */
 	var $avoir;
@@ -257,7 +257,19 @@ class Caddie {
 		$this->commande_hash = '';
 
 		$this->delivery_orderid = String::substr(sha1(mt_rand(1, 10000000)), 0, 16);
-		// Au cas où certaines variables ne seraient pas bien nettoyées, on recalcule l'ensemble pour assurer une parfaite coéhrence
+		if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie']) && !empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+			// Le panier vient d'être initialisé. Si un cookie qui contient des produits n'est pas vide, il faut remplir le panier avec les informations du cookie si le paramétrage de la boutique le permet.
+			$product_in_caddie_cookie = @unserialize($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			foreach ($product_in_caddie_cookie as $this_product_info) {
+				// Il ne faut pas mettre les données stocké dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuse.
+				$product_object = new Product($this_product_info['product_id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+				$product_object->set_configuration($this_product_info['couleurId'], $this_product_info['tailleId'], $this_product_info['id_attribut'], is_reseller_module_active() && is_reseller());
+				$this->add_product($product_object, $this_product_info['quantite'], $email_check, $listcadeaux_owner);
+				unset($product_object);
+			}
+		}
+		
+		// Au cas où certaines variables ne seraient pas bien nettoyées, on recalcule l'ensemble pour assurer une parfaite cohérence
 		$this->update();
 	}
 
@@ -314,7 +326,7 @@ class Caddie {
 			if (is_giftlist_module_active() && $listcadeaux_owner !== null) {
 				// destinataire déjà répertorié
 				// on regarde ses besoins en quantité
-				$quantity_wished = min($this->quantite[$numero_ligne] + $added_quantity_wished, getNessQuantityFromGiftList($this->articles[$numero_ligne], $this->giftlist_owners[$numero_ligne]));
+				$quantity_wished = min($this->quantite[$numero_ligne] + $added_quantity_wished, getNessQuantityFromGiftList($this->articles[$numero_ligne], $product_object->configuration_color_id, $product_object->configuration_size_id, $this->giftlist_owners[$numero_ligne]));
 			} else {
 				$quantity_wished = $this->quantite[$numero_ligne] + $added_quantity_wished;
 			}
@@ -390,7 +402,7 @@ class Caddie {
 		// On appelle update_line pour mettre à jour les autres colonnes, telles que $this->etat_stock[$numero_ligne] qui sert pour les stocks ci-dessous
 		$this->update_line($numero_ligne, $this->get_available_point_for_current_line($numero_ligne));
 		// Que la valeur de commande_id soit définie ou pas, on continue à faire vivre l'évaluation des variables de stock temporaire
-		if(is_stock_advanced_module_active() && $this->etat_stock[$numero_ligne] == 1) {
+		if(check_if_module_active('stock_advanced') && $this->etat_stock[$numero_ligne] == 1) {
 			// Le module de gestion des stocks est activé et le produit a on_stock=1 ($this->etat_stock[$numero_ligne] est la valeur de on_stock du produit)
 			// On réserve des stocks temporaires pour les nouvelles informations de la ligne
 			// Si nécessaire on rectifie la quantité dans le panier en fonction de ce qui a pu être réservé après vérification des stocks temporaires et réels
@@ -447,7 +459,7 @@ class Caddie {
 		if(!empty($product_object->on_gift) && $product_object->on_gift_points > 0) {
 			// Produit cadeau qui est susceptible d'être mis dans caddie gratuitement avec les points disponibles
 			$gift_max_quantity = floor($max_available_gift_points / $product_object->on_gift_points);
-			if($gift_max_quantity>=1 || empty($product_object->prix)) {
+			if($gift_max_quantity>=1 || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) == 0) {
 				// on limite la quantité au max possible payable avec les points dans 2 cas :
 				// - quantité prenable avec les points non nulle => ce mode de paiement a priorité
 				// - OU prix nul => produit pas commandable par ailleurs
@@ -479,10 +491,13 @@ class Caddie {
 			$this->ecotaxe_ttc[$numero_ligne] = $product_object->ecotaxe_ht;
 			$apply_vat = false;
 		}
-		if (is_attributes_module_active()) {
+		if (check_if_module_active('attributs')) {
 			// Ces valeurs servent pour remplir la table peel_commandes, mais pas pour les calculs qui se servent de la classe Product qui gère tout cela
 			$this->total_prix_attribut[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht, $apply_vat, false, false, false);
 			$this->attribut[$numero_ligne] = $product_object->configuration_attributs_description;
+		} else {
+			$this->total_prix_attribut[$numero_ligne] = null;
+			$this->attribut[$numero_ligne] = null;
 		}
 		// Les valeurs des options ne contiennent pas les éventuelles réductions en pourcentage
 		$this->option_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false);
@@ -607,7 +622,7 @@ class Caddie {
 			// Restera à voir ensuite si il est bien valide pour l'utilisateur qui veut l'utiliser
 			$sql = "SELECT *
 				FROM `peel_codes_promos`
-				WHERE nom='" . nohtml_real_escape_string($this->code_promo) . "' AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND '" . date('Y-m-d', time()) . "' BETWEEN `date_debut` AND `date_fin` AND etat = '1'";
+				WHERE " . get_filter_site_cond('codes_promos') . " AND nom='" . nohtml_real_escape_string($this->code_promo) . "' AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND '" . date('Y-m-d', time()) . "' BETWEEN `date_debut` AND `date_fin` AND etat = '1'";
 			$query = query($sql);
 			$code_infos = fetch_assoc($query);
 			if(!empty($code_promo_updated) && !empty($code_infos)) {
@@ -619,40 +634,37 @@ class Caddie {
 		// et donc dans ce cas on ne doit pas traiter maintenant la réduction, mais plus tard lorsque cette fonction sera appelée via update
 		if (!empty($code_infos) && $new_code_promo === null) {
 			// On traite un code promo qui est valide et ne vient pas d'être enregistré (cf. explications ci-dessus)
+			$this->code_infos = $code_infos;
 			if (!empty($code_infos['id_categorie'])) {
 				// Si le code ne s'applique qu'à une catégorie et à ses filles
-				$this->cat_code_promo = $code_infos['id_categorie'];
 				$code_only_for_one_cat_and_sons = true;
-				foreach ($this->articles as $numero_ligne => $product_id) {
-					// On cherche le montant par catégorie de produit pour pouvoir appliquer ensuite
-					// des codes promos avec des seuils minimum sur une catégorie donnée
-					// On fait la somme des produits en faisant attention à ce qu'un produit pourrait apparaître dans plusieurs catégories donc on peut sommer les montants
-					$q_get_product_cat = query('SELECT categorie_id
-						FROM peel_produits_categories ppc
-						WHERE ppc.produit_id = "' . intval($product_id) . '" AND ppc.categorie_id IN ("' . implode('","', nohtml_real_escape_string(get_category_tree_and_itself($this->cat_code_promo, 'sons'))) . '")
-						LIMIT 1');
-					if ($r_get_product_cat = fetch_assoc($q_get_product_cat)) {
-						$found_cat = true;
-						// ATTENTION : la somme de $this->total_produit_related_to_code_promo n'est pas égale au total du caddie si des produits se retrouvent dans plusieurs catégories
-						$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne];
-						// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
-						$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
-					}
-				}
 			} else {
-				$this->cat_code_promo = 0;
 				$code_only_for_one_cat_and_sons = false;
-				$this->total_ecotaxe_ttc_related_to_code_promo = $this->total_ecotaxe_ttc;
-				$this->total_produit_related_to_code_promo = $this->total_produit_avant_code_promo;
+			}
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				// On cherche le montant par catégorie de produit pour pouvoir appliquer ensuite
+				// des codes promos avec des seuils minimum sur une catégorie donnée
+				// On fait la somme des produits en faisant attention à ce qu'un produit pourrait apparaître dans plusieurs catégories donc on peut sommer les montants
+				$found_cat = null;
+				$product_object = new Product($this->articles[$numero_ligne]);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($code_infos['id_categorie'], $code_infos['product_filter'], $found_cat, $code_infos['cat_not_apply_code_promo']);
+				unset($product_object);
+				if($apply_code_on_this_product) {
+					// ATTENTION : la somme de $this->total_produit_related_to_code_promo n'est pas égale au total du caddie si des produits se retrouvent dans plusieurs catégories
+					$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne];
+					// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
+					$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
+				}
 			}
 			if ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat))) {
 				// Si le code s'applique à toutes les catégories OU si le code s'applique à une seule catégorie et qu'il y a au moins un article de la catégorie correspondante dans le panier
 				// On vérifie maintenant que le code est bien valide pour l'utilisateur qui veut l'utiliser
-				$sql_check_cp_use = "SELECT id
-					FROM peel_commandes
-					WHERE code_promo = '" . nohtml_real_escape_string($this->code_promo) . "' AND id_utilisateur ='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'"
-				 . (!empty($this->commande_id)? " AND id !='" . intval($this->commande_id) . "'" : "")
-				 . " AND id_statut_livraison NOT IN ('6','9')";
+				$sql_check_cp_use = "SELECT c.id
+					FROM peel_commandes c
+					LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
+					WHERE c.code_promo = '" . nohtml_real_escape_string($this->code_promo) . "' AND c.id_utilisateur ='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c') . ""
+				 . (!empty($this->commande_id)? " AND c.id !='" . intval($this->commande_id) . "'" : "")
+				 . " AND sl.technical_code NOT IN ('cancelled','reimbursed')";
 				// Le code a-t-il déjà été utilisé par ce client ?
 				$q_check_cp_use = query($sql_check_cp_use);
 				if (($code_infos['nombre_prevue'] == 0 || num_rows($q_check_cp_use) < $code_infos['nombre_prevue']) && ($code_infos['nb_used_per_client'] == 0 || num_rows($q_check_cp_use) < $code_infos['nb_used_per_client'])) {
@@ -695,7 +707,7 @@ class Caddie {
 		
 		if (!empty($cancel_code)) {
 			$this->code_promo = "";
-			$this->cat_code_promo = 0;
+			$this->code_infos = array();
 			$this->percent_code_promo = 0;
 			$this->valeur_code_promo = 0;
 		}
@@ -717,7 +729,7 @@ class Caddie {
 		$total = 0;
 		if (!empty($this->quantite)) {
 			foreach ($this->quantite as $numero_ligne => $qte) {
-				if (!empty($cat_id)) {
+				if ($cat_id !== null) {
 					if(!empty($this->articles[$numero_ligne])) {
 						$product_object = new Product($this->articles[$numero_ligne]);
 						if (!empty($product_object) && $product_object->categorie_id == $cat_id) {
@@ -765,8 +777,8 @@ class Caddie {
 	{
 		$zoneId = intval($zoneId);
 		$sql = "SELECT nom_" . $_SESSION['session_langue'] . " AS nom, tva, on_franco, technical_code
-			FROM peel_zones
-			WHERE id = '" . intval($zoneId) . "'";
+			FROM peel_zones z
+			WHERE id = '" . intval($zoneId) . "' AND " . get_filter_site_cond('zones', 'z') . "";
 		$query = query($sql);
 		if ($Zone = fetch_assoc($query)) {
 			if ($zoneId != $this->zoneId) {
@@ -811,6 +823,12 @@ class Caddie {
 	 */
 	function update($percent_remise_user = null)
 	{
+		static $update_in_process;
+		// Evite les boucles infinies
+		if(!empty($update_in_process)) {
+			$skip_add_products = true;
+		}
+		$update_in_process = true;
 		if ($percent_remise_user !== null) {
 			$this->percent_remise_user = $percent_remise_user;
 		}
@@ -819,7 +837,7 @@ class Caddie {
 		// c'est à dire ceux dont l'identifiant n'est pas numérique ou dont la quantité est < 1
 		foreach ($this->quantite as $numero_ligne => $qte) {
 			if ($qte < 1) {
-				// Attention ici normalement on nettoie si la quantitécommandée est < à 1
+				// Attention ici normalement on nettoie si la quantité commandée est < à 1
 				unset($this->giftlist_owners[$numero_ligne]);
 				unset($this->articles[$numero_ligne]);
 				unset($this->quantite[$numero_ligne]);
@@ -875,22 +893,15 @@ class Caddie {
 		// Recalcul des produits en appliquant correctement les ventilations des codes promos
 		foreach ($this->articles as $numero_ligne => $product_id) {
 			// Gestion du code promo
-			$code_promo_applicable = false;
-			if (!empty($this->total_produit_related_to_code_promo)) {
-				if (!empty($this->cat_code_promo)) {
-					// Si le code ne s'applique qu'à une catégorie et à ses filles
-					$q_get_product_cat = query('SELECT categorie_id
-						FROM peel_produits_categories ppc
-						WHERE ppc.produit_id = "' . intval($product_id) . '" AND ppc.categorie_id IN ("' . implode('","', nohtml_real_escape_string(get_category_tree_and_itself($this->cat_code_promo, 'sons'))) . '")
-						LIMIT 1');
-					if ($r_get_product_cat = fetch_assoc($q_get_product_cat)) {
-						$code_promo_applicable = true;
-					}
-				} else {
-					$code_promo_applicable = true;
-				}
+			if (!empty($this->total_produit_related_to_code_promo) && !empty($this->code_infos)) {
+				$found_cat = null;
+				$product_object = new Product($this->articles[$numero_ligne]);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo']);
+				unset($product_object);
+			} else {
+				$apply_code_on_this_product = false;
 			}
-			if ($code_promo_applicable) {
+			if ($apply_code_on_this_product) {
 				// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles qui concernent au moins un produit du panier
 				$code_promo_ventile_ttc = $this->total_reduction_code_promo * ($this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne]) / $this->total_produit_related_to_code_promo;
 			} else {
@@ -966,6 +977,28 @@ class Caddie {
 		if (!empty($this->typeId) && !empty($this->zoneId)) {
 			$delivery_cost_infos = get_delivery_cost_infos($this->total_poids, $this->total_produit, $this->typeId, $this->zoneId, $this->count_products());
 		}
+		if(!empty($GLOBALS['site_parameters']['user_offers_table_enable']) && !empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				$product_object = new Product($product_id, null, false, null, true, $this->apply_vat);
+				$sql = "SELECT o.*
+					FROM peel_offres o
+					LEFT JOIN peel_utilisateurs_offres uo ON uo.id_utilisateur='" . intval(vn($_SESSION['session_utilisateur']['id_utilisateur'])) . "' AND o.id_offre=uo.id_offre
+					WHERE (o.id_offre=0 OR uo.id_offre IS NOT NULL) AND o.date_limite>='" . date('Y-m-d', time()) . "' AND (" . (!empty($product_object->reference)?"(o.ref='".real_escape_string($product_object->reference)."' AND o.qnte<='".intval($this->quantite[$numero_ligne])."' AND o.seuil<='".max(floatval($this->quantite[$numero_ligne]*$product_object->prix_ht), floatval($value_total))."') OR ":"") . "(o.ref='' AND o.fournisseur IN ('".implode("','", real_escape_string($product_object->get_product_brands(true)))."') AND o.qnte<='".intval($quantity_by_brand['brand_'.$product_object->get_product_brands(false)])."' AND o.seuil<='".max(floatval($total_by_brand['brand_'.$product_object->get_product_brands(false)]), floatval($value_total))."') OR (o.ref='' AND o.fournisseur='' AND o.qnte<='".intval($quantity_total)."' AND o.seuil<='".floatval($value_total)."'))
+					ORDER BY " . (floatval($product_object->prix_ht)>0 ? "IF(o.prix>0 AND o.remise_percent>0, LEAST(o.prix, o.remise_percent*'".floatval($product_object->prix_ht)."'), IF(o.remise_percent>0, o.remise_percent*'".floatval($product_object->prix_ht)."', o.prix))" : "o.prix") . " DESC, o.remise_percent DESC, o.port_offert DESC, o.carbo_offert DESC
+					LIMIT 1";
+				$query = query($sql);
+				if(($result = fetch_object($query)) && $result->port_offert == 1) {
+					$delivery_cost_infos = false;
+					break;
+				}
+				unset($product_object);
+			}
+			// Fin de l'usage des informations pour peel_offer : carboglace et frais de ports ont été étudiés
+			unset($quantity_by_brand);
+			unset($total_by_brand);
+			unset($quantity_total);
+			unset($value_total);
+		}
 		if (!isset($delivery_cost_infos) || $delivery_cost_infos === false) {
 			// Pas de port à calculer pour l'instant, ou pas de frais de port trouvés pour ce poids et ce total (dans ce cas, ce n'est pas ici qu'on présente une erreur au client)
 			$delivery_cost_infos = array('cost_ht' => 0, 'tva' => 0);
@@ -995,6 +1028,28 @@ class Caddie {
 		$this->tva_total_ecotaxe = $this->total_ecotaxe_ttc - $this->total_ecotaxe_ht;
 		$this->total = $this->total_produit - $this->avoir + $this->cout_transport + $this->tarif_paiement + $this->small_order_overcost_amount;
 		$this->total_ht = $this->total_produit_ht + $this->cout_transport_ht + $this->tarif_paiement_ht + $this->small_order_overcost_amount_ht;
+
+		if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie'])) {
+			// ETAPE 7 : Le contenu du panier est stocké dans un cookie, pour que l'utilisateurs puisse retrouver son panier après que la session soit expiré. Le panier est chargé avec les informations du cookie dans la fonction init
+			if (isset($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Le cookie qui contient les produits est vidé à chaque calcul du caddie, c'est plus simple que de mettre à jour ligne par ligne.
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			}
+			$product_in_caddie_cookie = array();
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				// on ajoute le produit à la liste.
+				$product_in_caddie_cookie[] = array('quantite'=>$this->quantite[$numero_ligne],'product_id'=>$product_id,'couleurId'=>$this->couleurId[$numero_ligne],'tailleId'=>$this->tailleId[$numero_ligne],'id_attribut'=>$this->id_attribut[$numero_ligne]);
+			}
+			// on crée le cookie avec 1 an de vie
+			if($GLOBALS['site_parameters']['force_sessions_for_subdomains']){
+				@setcookie($GLOBALS['caddie_cookie_name'], serialize($product_in_caddie_cookie), time() + 365 * 24 * 60 * 60, '/', '.'.get_site_domain());
+			} else {
+				@setcookie($GLOBALS['caddie_cookie_name'], serialize($product_in_caddie_cookie), time() + 365 * 24 * 60 * 60, '/');
+			}
+		}
+		// FIN
+		$update_in_process = false;
+		return true;
 	}
 	
 	/**
@@ -1052,6 +1107,7 @@ class Caddie {
 				$this->total_points += $this->points[$numero_ligne];
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -1062,9 +1118,9 @@ class Caddie {
 	 */
 	function save_in_database(&$order_infos)
 	{
-		// On s'assure des montants avant leurs insertion en BDD
+		// On s'assure des montants avant leur insertion en BDD
 		$this->update();
-		/* Le reversement affilié est calculé sur le total ht des produits */
+		/* Le reversement affilié est calculé sur le total HT des produits */
 		if (is_affiliate_module_active() && !empty($_SESSION['session_affilie']) && is_affiliation_active($_SESSION['session_affilie'])) {
 			$order_infos['affilie'] = 1;
 			$order_infos['statut_affilie'] = 0;
@@ -1115,13 +1171,15 @@ class Caddie {
 		}
 		$order_infos['montant'] = $this->total;
 		$order_infos['montant_ht'] = $this->total_ht;
-		$order_infos['id_utilisateur'] = $_SESSION['session_utilisateur']['id_utilisateur'];
-		$order_infos['id_parrain'] = $_SESSION['session_utilisateur']['id_parrain'];
-		$order_infos['parrain'] = $_SESSION['session_utilisateur']['type'];
-		$order_infos['devise'] = $_SESSION['session_devise']['code'];
-		$order_infos['currency_rate'] = $_SESSION['session_devise']['conversion'];
+		$order_infos['id_utilisateur'] = vb($_SESSION['session_utilisateur']['id_utilisateur']);
+		$order_infos['id_parrain'] = vb($_SESSION['session_utilisateur']['id_parrain']);
+		$order_infos['parrain'] =  vb($_SESSION['session_utilisateur']['type']);
+		$order_infos['devise'] =  vb($_SESSION['session_devise']['code']);
+		$order_infos['currency_rate'] =  vb($_SESSION['session_devise']['conversion']);
 		$order_infos['delivery_tracking'] = null;
-
+		$order_infos['site_id'] = $GLOBALS['site_id'];
+		
+		$articles = array();
 		foreach ($this->articles as $numero_ligne => $product_id) {
 			// Attention ici normalement on nettoie si la quantité commandée est < à 1
 			$articles[$numero_ligne]['product_id'] = $product_id;
@@ -1133,7 +1191,7 @@ class Caddie {
 			$articles[$numero_ligne]['points'] = $this->points[$numero_ligne];
 			$articles[$numero_ligne]['couleurId'] = $this->couleurId[$numero_ligne];
 			$articles[$numero_ligne]['tailleId'] = $this->tailleId[$numero_ligne];
-			if (is_conditionnement_module_active ()) {
+			if (is_conditionnement_module_active()) {
 				$articles[$numero_ligne]['conditionnement'] = $this->conditionnement[$numero_ligne];
 			}
 			$articles[$numero_ligne]['prix'] = $this->prix[$numero_ligne];
@@ -1155,9 +1213,9 @@ class Caddie {
 			$articles[$numero_ligne]['ecotaxe_ttc'] = $this->ecotaxe_ttc[$numero_ligne];
 			$articles[$numero_ligne]['ecotaxe_ht'] = $this->ecotaxe_ht[$numero_ligne];
 			$articles[$numero_ligne]['reference'] = $this->reference[$numero_ligne];
-			$articles[$numero_ligne]['attribut'] = $this->attribut[$numero_ligne];
-			$articles[$numero_ligne]['id_attribut'] = $this->id_attribut[$numero_ligne];
-			$articles[$numero_ligne]['total_prix_attribut'] = $this->total_prix_attribut[$numero_ligne];
+			$articles[$numero_ligne]['attribut'] = vb($this->attribut[$numero_ligne]);
+			$articles[$numero_ligne]['id_attribut'] = vb($this->id_attribut[$numero_ligne]);
+			$articles[$numero_ligne]['total_prix_attribut'] = vb($this->total_prix_attribut[$numero_ligne]);
 		}
 		if (sha1(serialize($order_infos) . serialize($articles)) != $this->commande_hash) {
 			// La commande n'avait jamais été créée, ou les informations de la commande sont différentes
@@ -1169,16 +1227,22 @@ class Caddie {
 			if (!empty($this->commande_id) && $this->commande_id != $order_id) {
 				// On annule la commande précédemment liée à ce caddie car on vient de créer une nouvelle commande lui correspondant
 				// SAUF si elle est déjà payée (=> 3ème argument à false)
-				$GLOBALS['output_create_or_update_order'] = update_order_payment_status($this->commande_id, 6, false);
+				$GLOBALS['output_create_or_update_order'] = update_order_payment_status($this->commande_id, 'cancelled', false);
 			}
 			// On retire les points utilisés lors de la commande.
 			// NB : Cette gestion n'utilise pas "total_points" de peel_commandes, qui est géré ailleurs et concerne les points gagnés lors de la commande
 			query("UPDATE peel_utilisateurs
-				SET points=points-" . $used_gift_points . "
-				WHERE id_utilisateur='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'");
+				SET points=points-" . intval($used_gift_points) . "
+				WHERE id_utilisateur='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 			$user_infos = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
 			$_SESSION['session_utilisateur']['points'] = $user_infos['points'];
 			$this->commande_id = $order_id;
+			// Incrémentation du compteur de code promotionnel
+			if (!empty($this->code_promo)) {
+				query("UPDATE peel_codes_promos
+					SET compteur_utilisation=compteur_utilisation+1
+					WHERE nom = '" . nohtml_real_escape_string($this->code_promo) . "' AND " . get_filter_site_cond('codes_promos') . "");
+			}
 		}
 		// Si le caddie correspond à une commande en cours, alors on met à jour la commande en question
 		// Sinon, on crée la comande
@@ -1197,19 +1261,13 @@ class Caddie {
 		// Annule la remise en % du client, supprimer ces lignes si vous souhaitez que les remises client soient permanentes
 		query("UPDATE peel_utilisateurs
 			SET remise_percent = '0', avoir = GREATEST(0, avoir-'" . nohtml_real_escape_string($_SESSION['session_caddie']->avoir) . "')
-			WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'");
-		// Incrémentation du compteur de code promotionnel
-		if (!empty($this->code_promo)) {
-			query("UPDATE peel_codes_promos
-				SET compteur_utilisation=compteur_utilisation+1
-				WHERE nom = '" . nohtml_real_escape_string($this->code_promo) . "'");
-		}
+			WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+
 		// si il y a des commandes de cadeau on envoie un email
 		if (!empty($this->giftlist_owners[0]) && is_giftlist_module_active()) {
-			email_ordered_cadeaux($this->commande_id);
+			email_ordered_cadeaux($this->commande_id, $order_infos, $this->giftlist_owners[0]);
 		}
 		return $this->commande_id;
 	}
 }
 
-?>

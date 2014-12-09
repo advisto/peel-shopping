@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: Invoice.php 43487 2014-12-02 17:37:29Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 39495 2014-01-14 11:08:09Z sdelaporte $
+ * @version $Id: Invoice.php 43487 2014-12-02 17:37:29Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -42,7 +42,7 @@ class Invoice extends TCPDF {
 	var $remarque_lignes;
 
 	/**
-	 * PRIVATE FUNCTION : Invoice::RoundedRect()
+	 * PRIVATE FUNCTION : Invoice::InvoiceRoundedRect()
 	 *
 	 * @param mixed $x
 	 * @param mixed $y
@@ -52,7 +52,7 @@ class Invoice extends TCPDF {
 	 * @param string $style
 	 * @return
 	 */
-	function RoundedRect($x, $y, $w, $h, $r, $style = '')
+	function InvoiceRoundedRect($x, $y, $w, $h, $r, $style = '')
 	{
 		$k = $this->k;
 		$hp = $this->h;
@@ -244,7 +244,7 @@ class Invoice extends TCPDF {
 				$this->SetFillColor(165, 241, 173);
 			}
 		}
-		$this->RoundedRect($r1, $y1, ($r2 - $r1), $y2, 2.5, 'DF');
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), $y2, 2.5, 'DF');
 		$this->SetXY($r1 + 1, $y1 + 2);
 		$this->Cell($r2 - $r1 -1, 5, $texte, 0, 0, "C");
 	}
@@ -298,20 +298,31 @@ class Invoice extends TCPDF {
 	 *
 	 * @param mixed $tva
 	 * @param mixed $mode Le mode peut être "devis" ou autre valeur
+	 * @param integer $id_utilisateur
 	 * @return
 	 */
-	function addInfoTVA($tva, $mode = null)
+	function addInfoTVA($tva, $mode = null, $id_utilisateur = null)
 	{
 		$r1 = $this->w / 2 - 15;
 		$y1 = $this->h-25;
-
+		
 		$text1 = ($mode != 'devis'?$GLOBALS['STR_INVOICE_BOTTOM_TEXT']:$GLOBALS['STR_INVOICE_BOTTOM_TEXT1']);
-		if (empty($tva)) {
-			$text1 .= ' - ' . $GLOBALS['STR_INVOICE_BOTTOM_TEXT2'];
-		}
 		$this->SetXY($r1, $y1);
 		$this->SetFont("Helvetica", "", 8);
-		$this->Cell(30, 4, $text1, 0, 0, "C");
+		$this->Cell(30, 4, $text1 ,0, 0, "C");
+		if (floatval($tva)==0) {
+			if (is_micro_entreprise_module_active()) {
+				// Pour les entreprises bénéficiant du régime de franchise de base de TVA, il faut obligatoirement porter sur chaque facture la mention suivante : « TVA non applicable, article 293 B du CGI ».
+				// => Déjà géré par l'appel à addTVAs_part_micro
+			} elseif(is_user_tva_intracom_for_no_vat($id_utilisateur)) {
+				// Pour les livraisons de biens intracommunautaires, les factures doivent obligatoirement comporter la mention suivante : « Exonération de TVA, article 262 ter 1 du CGI ».
+				// Lorsqu’il s’agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
+				// => Texte à définir en conséquence en fonction de votre site dans $GLOBALS['STR_INVOICE_BOTTOM_TEXT2']
+				$text2 = $GLOBALS['STR_INVOICE_BOTTOM_TEXT2'];
+				$this->SetXY($r1, $y1+4);
+				$this->Cell(30, 4, $text2, 0, 0, "C");
+			}
+		}
 	}
 
 	/**
@@ -429,7 +440,7 @@ class Invoice extends TCPDF {
 		$y1 = 80;
 		$y2 = $y1 + 10;
 		$mid = $y1 + (($y2 - $y1) / 2);
-		$this->RoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
 		$this->Line($r1, $mid, $r2, $mid);
 		$this->SetXY($r1 + ($r2 - $r1) / 2 - 5 , $y1 + 1);
 		$this->SetFont("Helvetica", "B", 10);
@@ -460,15 +471,15 @@ class Invoice extends TCPDF {
 	/**
 	 * Trace le cadre des colonnes du devis/facture
 	 *
-	 * @param mixed $tab
+	 * @param mixed $y_max_allowed
 	 * @return
 	 */
-	function addCols($tab)
+	function addCols($y_max_allowed)
 	{
 		$r1 = 10;
 		$r2 = $this->w - ($r1 * 2) ;
 		$y1 = 92;
-		$y2 = $this->h - 65 - $this->remarque_lignes * 5 - $y1;
+		$y2 = $y_max_allowed - 10 - $y1;
 		$this->SetXY($r1, $y1);
 		$this->Rect($r1, $y1, $r2, $y2, "D");
 
@@ -476,13 +487,14 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $r2, 5, "DF");
 
 		$colX = $r1;
-		$this->colonnes = $tab;
 		$this->SetFont("Helvetica", "B", 8);
-		while (list($lib, $pos) = each ($tab)) {
-			$this->SetXY($colX, $y1 + 1);
-			$this->Cell($pos, 1, $lib, 0, 0, "C");
-			$colX += $pos;
-			$this->Line($colX, $y1, $colX, $y1 + $y2);
+		if(!empty($this->colonnes)) {
+			foreach($this->colonnes as $lib => $pos) {
+				$this->SetXY($colX, $y1 + 1);
+				$this->Cell($pos, 1, $lib, 0, 0, "C");
+				$colX += $pos;
+				$this->Line($colX, $y1, $colX, $y1 + $y2);
+			}
 		}
 	}
 
@@ -494,9 +506,12 @@ class Invoice extends TCPDF {
 	 */
 	function addLineFormat($tab)
 	{
-		while (list($lib, $pos) = each ($this->colonnes)) {
-			if (isset($tab["$lib"]))
-				$this->format[$lib] = $tab["$lib"];
+		if(!empty($this->colonnes)) {
+			foreach($this->colonnes as $lib => $pos) {
+				if (isset($tab["$lib"])) {
+					$this->format[$lib] = $tab["$lib"];
+				}
+			}
 		}
 	}
 
@@ -508,14 +523,15 @@ class Invoice extends TCPDF {
 	 */
 	function lineVert($tab)
 	{
-		reset($this->colonnes);
 		$max_y_reached = 0;
-		while (list($lib, $pos) = each ($this->colonnes)) {
-			$texte = $tab[ $lib ];
-			$longCell = $pos -2;
-			$size = $this->sizeOfText($texte, $longCell);
-			if ($size > $max_y_reached) {
-				$max_y_reached = $size;
+		if(!empty($this->colonnes)) {
+			foreach($this->colonnes as $lib => $pos) {
+				$texte = $tab[ $lib ];
+				$longCell = $pos -2;
+				$size = $this->sizeOfText($texte, $longCell);
+				if ($size > $max_y_reached) {
+					$max_y_reached = $size;
+				}
 			}
 		}
 		return $max_y_reached;
@@ -533,20 +549,21 @@ class Invoice extends TCPDF {
 		$x = 10;
 		$max_y_reached = $ligne;
 
-		reset($this->colonnes);
-		while (list($lib, $pos) = each ($this->colonnes)) {
-			$longCell = $pos;
-			$texte = $tab[ $lib ];
-			$length = $this->GetStringWidth($texte);
-			$tailleTexte = $this->sizeOfText($texte, $length);
-			$formText = $this->format[ $lib ];
-			$this->SetXY($x, $ligne);
-			$this->SetFont("Helvetica", "", 8);
-			$this->MultiCell($longCell, 3.5, $texte, 0, $formText);
-			if ($max_y_reached < ($this->GetY())) {
-				$max_y_reached = $this->GetY() ;
+		if(!empty($this->colonnes)) {
+			foreach($this->colonnes as $lib => $pos) {
+				$longCell = $pos;
+				$texte = $tab[ $lib ];
+				$length = $this->GetStringWidth($texte);
+				$tailleTexte = $this->sizeOfText($texte, $length);
+				$formText = $this->format[ $lib ];
+				$this->SetXY($x, $ligne);
+				$this->SetFont("Helvetica", "", 8);
+				$this->MultiCell($longCell, 3.5, $texte, 0, $formText);
+				if ($max_y_reached < ($this->GetY())) {
+					$max_y_reached = $this->GetY() ;
+				}
+				$x += $pos;
 			}
-			$x += $pos;
 		}
 		return ($max_y_reached - $ligne);
 	}
@@ -580,12 +597,18 @@ class Invoice extends TCPDF {
 	 */
 	function addRemarque($remarque)
 	{
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("Helvetica", "", 8);
 		$r1 = 10;
-		$this->remarque_lignes = $this->sizeOfText($remarque, $this->w - $r1 * 2);
-		$y1 = $this->h - 62 - $this->remarque_lignes * 5;
-		$y2 = $y1 + 5;
+		$r2 = $this->w - ($r1 * 2) ;
+		$y1 = $this->h - 62 - $this->remarque_lignes * 4 - 5;
+		$y2 = $this->remarque_lignes * 4;
 		$this->SetXY($r1 , $y1);
+		if (!empty($GLOBALS['site_parameters']['bill_pdf_add_color_behind_comments'])) {
+			// On dessine un cadre coloré
+			$this->SetFillColor(240, 240, 240);
+			$this->Rect($r1, $y1-1, $r2, $y2+1, "DF");
+		}
+		// On écrit le texte de commentaire
 		$this->MultiCell($this->w - $r1 * 2, 4, $remarque . "\n");
 	}
 
@@ -636,7 +659,7 @@ class Invoice extends TCPDF {
 		$r2 = $r1 + 60;
 		$y1 = $this->h - 60;
 		$y2 = $y1 + 30;
-		$this->RoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
 		$this->Line($r1, $y1 + 6, $r2, $y1 + 6);
 		$this->SetXY($r1, $y1 + 1);
 		$this->Cell(60, 4, $GLOBALS['STR_ACCORD'], 0, 0, "C");
@@ -660,7 +683,7 @@ class Invoice extends TCPDF {
 		$r2 = $r1 + 55;
 		$y1 = $this->h - 60;
 		$y2 = $y1 + 30;
-		$this->RoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
 	}
 
 	/**
@@ -674,7 +697,7 @@ class Invoice extends TCPDF {
 		$r2 = $r1 + 55;
 		$y1 = $this->h - 60;
 		$y2 = $y1 + 30;
-		$this->RoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
 	}
 
 	/**
@@ -726,7 +749,7 @@ class Invoice extends TCPDF {
 			$this->SetXY($re + 30, $y1 + $k);
 			$this->Cell(25, 4, $params1["montant_ht"], '', '', 'R');
 		} else {
-			addNETs_part_micro($this, $re, $y1 + $k, $params1["montant"]);
+			addNETs_part_micro($this, $re, $y1 + $k, $params1["totalttc"]);
 		}
 		$k = $k + 4;
 		if (abs(get_float_from_user_input($params1["avoir"])) >= 0.01) {
@@ -741,7 +764,7 @@ class Invoice extends TCPDF {
 
 		$this->SetFont("Helvetica", "B", 8);
 		$this->SetXY($re, $y1 + $k);
-		$this->Cell(25, 4, $GLOBALS['STR_PDF_NET']);
+		$this->Cell(25, 4, String::strtoupper($GLOBALS['STR_PDF_NET']) . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
 		$this->SetXY($re + 30, $y1 + $k);
 		$this->Cell(25, 4, $params1["montant"], '', '', 'R');
 	}
@@ -818,7 +841,7 @@ class Invoice extends TCPDF {
 	function FillDocument($code_facture = null, $date_debut = null, $date_fin = null, $id_debut = null, $id_fin = null, $user_id = null, $id_statut_paiement_filter = null, $bill_mode = 'standard', $folder = false)
 	{
 		if (!is_micro_entreprise_module_active()) {
-			$column_sizes = array($GLOBALS['STR_PDF_REFERENCE'] => 22,
+			$this->colonnes = array($GLOBALS['STR_PDF_REFERENCE'] => 22,
 				$GLOBALS['STR_DESIGNATION'] => 53,
 				$GLOBALS['STR_PDF_PRIX_HT'] => 21,
 				$GLOBALS['STR_PDF_PRIX_TTC'] => 22,
@@ -835,42 +858,43 @@ class Invoice extends TCPDF {
 				$GLOBALS['STR_PDFTOTALTTC'] => "R",
 				$GLOBALS['STR_TAXE'] => "R");
 		} else {
-			$column_sizes = define_cols_size('width');
+			$this->colonnes = define_cols_size('width');
 			$column_formats = define_cols_size('alignement');
 		}
 		$societeInfoText = $this->getSocieteInfoText();
 		if (!empty($code_facture)) {
 			// La collation sur la colonne code_facture est fixée à utf8_bin et non plus utf8_general, donc on peut faire une comparaison avec = qui va utiliser l'INDEX plutôt que de passer par HEX(code_facture) = HEX('" . nohtml_real_escape_string($code_facture) . "')
-			$sql_cond_array[] = "code_facture = '" . nohtml_real_escape_string($code_facture) . "'";
+			$sql_cond_array[] = "c.code_facture = '" . nohtml_real_escape_string($code_facture) . "'";
 		}
 		if (!empty($date_debut)) {
-			$sql_cond_array[] = "a_timestamp >= '" . nohtml_real_escape_string($date_debut) . "'";
+			$sql_cond_array[] = "c.a_timestamp >= '" . nohtml_real_escape_string($date_debut) . "'";
 		}
 		if (!empty($date_fin)) {
-			$sql_cond_array[] = "a_timestamp <= '" . nohtml_real_escape_string($date_fin) . "'";
+			$sql_cond_array[] = "c.a_timestamp <= '" . nohtml_real_escape_string($date_fin) . "'";
 		}
 		if (!empty($id_fin)) {
-			$sql_cond_array[] = "id BETWEEN '" . intval($id_debut) . "' AND '" . intval($id_fin) . "'";
+			$sql_cond_array[] = "c.id BETWEEN '" . intval($id_debut) . "' AND '" . intval($id_fin) . "'";
 		} elseif (!empty($id_debut)) {
-			$sql_cond_array[] = "id>='" . intval($id_debut) . "'";
+			$sql_cond_array[] = "c.id>='" . intval($id_debut) . "'";
 		}
 		if (!empty($user_id)) {
-			$sql_cond_array[] = "id_utilisateur = '" . intval($user_id) . "'";
+			$sql_cond_array[] = "c.id_utilisateur = '" . intval($user_id) . "'";
 		}
 		if (is_numeric($id_statut_paiement_filter)) {
-			$sql_cond_array[] = "id_statut_paiement = '" . intval($id_statut_paiement_filter) . "'";
+			$sql_cond_array[] = "c.id_statut_paiement = '" . intval($id_statut_paiement_filter) . "'";
 		}
 		if ($bill_mode == 'standard' || $bill_mode == 'facture') {
 			// Un numéro doit être obligatoirement renseigné dans la facture
-			$sql_cond_array[] = "numero != ''";
+			$sql_cond_array[] = "c.numero != ''";
 		}
 		if (empty($sql_cond_array)) {
 			return null;
 		}
-		$sql_bills = "SELECT *
-			FROM peel_commandes
-			WHERE " . implode(' AND ', $sql_cond_array) . '
-			ORDER BY o_timestamp ASC';
+		$sql_bills = "SELECT c.*, sp.technical_code AS statut_paiement
+			FROM peel_commandes c
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', defined('IN_PEEL_ADMIN')) . "
+			WHERE " . implode(' AND ', $sql_cond_array) . ' AND ' . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "
+			ORDER BY c.o_timestamp ASC";
 		$qid_commande = query($sql_bills);
 		$i = 0;
 		while ($commande = fetch_object($qid_commande)) {
@@ -885,37 +909,79 @@ class Invoice extends TCPDF {
 				$this->AliasNbPages('{nb}');
 			}
 			$this->startPageGroup();
-			$next_product_max_size_forecasted = 20;
+			$next_product_max_size_forecasted = 30;
 			$product_infos_array = get_product_infos_array_in_order($commande->id, $commande->devise, $commande->currency_rate);
 			if (empty($product_infos_array)) {
 				// On rajoute un élément pour pouvoir passer dans la génération de page
 				$product_infos_array[] = false;
 			}
-			foreach ($product_infos_array as $this_ordered_product) {
-				if (empty($y) || $y + $next_product_max_size_forecasted > $this->h - 55 - 5 * vn($this->remarque_lignes)) {
+			$comments = array();
+			if(!empty($order_infos['delivery_infos'])) {
+				$comments[] = $GLOBALS["STR_SHIPPING_TYPE"] . $GLOBALS["STR_BEFORE_TWO_POINTS"]. ': ' . $order_infos['delivery_infos'];
+			}
+			if(!empty($commande->commentaires)) {
+				$comments[] = $commande->commentaires;
+			}
+			$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2);
+			// On refera un test de saut de page juste avant l'affichage des remarques et blocs de fin
+			$product_infos_array[] = null;
+			foreach($product_infos_array as $this_ordered_product) {
+				$y_max_allowed = $this->h - 10;
+				if (empty($this_ordered_product)) {
+					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture
+					$y_max_allowed += -45 - 4 * vn($this->remarque_lignes) - 5;
+				}
+				if (empty($y) || $y + $next_product_max_size_forecasted > $y_max_allowed -5) {
+					if(!empty($y)) {
+						// On dessine les colonnes de la page précédente, maintenant qu'on sait quelle taille cela a pris
+						// La page précédente était avec produits sur hauteur totale
+						$this->addCols($this->h - 10);
+					}
 					// Nécessité de créer une nouvelle page car on ne va plus avoir de place
-					$next_product_max_size_forecasted = (20 + $next_product_max_size_forecasted) / 2;
+					$next_product_max_size_forecasted = (30 + $next_product_max_size_forecasted) / 2;
 					$this->AddPage();
 					$this->addPageNumber($this->getGroupPageNo() . ' / ' . $this->getPageGroupAlias());
 					$this->addSociete($societeInfoText, $societeLogoPath);
 					if ($bill_mode == "bdc") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_ORDER_FORM']) . " ", intval($commande->id));
+						$this->fact_dev(String::strtoupper($GLOBALS['STR_ORDER_FORM']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_ORDER_FORM'], 25, 190);
 					} elseif ($bill_mode == "proforma") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_PROFORMA']) . " ", intval($commande->id));
+						$this->fact_dev(String::strtoupper($GLOBALS['STR_PROFORMA']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_PROFORMA'], 40, 190);
 					} elseif ($bill_mode == "devis") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_PDF_QUOTATION']) . " ", intval($commande->id));
+						$this->fact_dev(String::strtoupper($GLOBALS['STR_PDF_QUOTATION']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_PDF_QUOTATION'], 80, 200);
 					} else {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_INVOICE']), $commande->numero);
-						// À décommenter pour afficher le filigrane
-						// $this->backgoundBigWatermark($GLOBALS['STR_INVOICE'], 80, 200);
+						if(!empty($commande->numero)) {
+							$this->fact_dev(String::strtoupper($GLOBALS['STR_INVOICE']), $commande->numero);
+						} else {
+							$this->fact_dev(String::strtoupper($GLOBALS['STR_ORDER_FORM']) . " ", intval($commande->order_id));
+						}
+						if (!empty($GLOBALS['site_parameters']['show_invoice_filigrane'])) {
+							// Option spécifique show_invoice_filigrane nécessaire pour afficher le filigrane en cas de facture
+							$this->backgoundBigWatermark($GLOBALS['STR_INVOICE'], 80, 200);
+						}
 					}
 					if($commande->id_statut_paiement == 6) {
 						$this->backgoundBigWatermark(get_payment_status_name($commande->id_statut_paiement), 65, 470); 
 					}
-					$this->addDate(get_formatted_date($commande->o_timestamp, 'short', 'long'), $order_infos['displayed_paiement_date']);
+					if(empty($commande->o_timestamp) || substr($commande->o_timestamp, 0, 10) == '0000-00-00') {
+						// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
+						$commande->o_timestamp = date('Y-m-d');
+					}
+					if($bill_mode == "bdc" || $bill_mode == "devis") {
+						$displayed_date = get_formatted_date($commande->o_timestamp, 'short');
+					} else {
+						// On veut une date de facture si possible et pas de commande
+						if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
+							// Une date de facture est définie
+							$displayed_date = get_formatted_date($commande->f_datetime, 'short');
+						} else {
+							// Pas de date de facture, on indique la date de commande
+							$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', 'long');
+						}
+					}
+					$this->addDate($displayed_date, $order_infos['displayed_paiement_date']);
 					$this->addReglement(String::str_shorten(get_payment_name($commande->paiement), 30) . ' - ' . $commande->devise);
 
 					$this->addClientAdresseFacturation($order_infos['client_infos_bill'], $commande->id_utilisateur);
@@ -923,17 +989,6 @@ class Invoice extends TCPDF {
 						// Ajout de l'adresse de livraison seulement si la boutique a une gestion du port
 						$this->addClientAdresseExpedition($order_infos['client_infos_ship']);
 					}
-					$comments = array();
-					if(!empty($order_infos['delivery_infos'])) {
-						$comments[] = $GLOBALS["STR_SHIPPING_TYPE"] . $GLOBALS["STR_BEFORE_TWO_POINTS"]. ': ' . $order_infos['delivery_infos'];
-					}
-					if(!empty($commande->commentaires)) {
-						$comments[] = $commande->commentaires;
-					}
-					if(!empty($comments)) {
-						$this->addRemarque(implode("\n", $comments));
-					}
-					$this->addCols($column_sizes);
 					// Alignement du contenu des cellules de chaque ligne
 					$this->addLineFormat($column_formats);
 					// Initialisation du début de l'affichage des produits
@@ -967,6 +1022,10 @@ class Invoice extends TCPDF {
 					$y += $size + 4;
 				}
 			}
+			if($y > 100) {
+				// La page en cours est avec produits sur hauteur restreinte, pour laisser de la place pour les blocs qui suivent
+				$this->addCols($y_max_allowed);	
+			}
 			if (!empty($order_infos['code_promo_text'])) {
 				foreach($line as $this_key => $this_item) {
 					$line[$this_key] = '';
@@ -975,6 +1034,9 @@ class Invoice extends TCPDF {
 				$size = $this->addLine($y, $line);
 				$y += $size + 4;
 			}
+			if(!empty($comments)) {
+				$this->addRemarque(implode("\n", $comments));
+			}
 			if ($bill_mode == "bdc") {
 				$this->addCadreSignature();
 			}
@@ -982,12 +1044,12 @@ class Invoice extends TCPDF {
 			$this->addNETs($order_infos['net_infos_array']);
 			$this->addCadreTva();
 			$this->addTVAs($order_infos['tva_infos_array']);
-			$this->addInfoTVA($commande->total_tva, $bill_mode);
+			$this->addInfoTVA($commande->total_tva, $bill_mode, $commande->id_utilisateur);
 			if(empty($file_name)) {
-				if(!empty($commande->a_timestamp) && substr($commande->a_timestamp, 0, 10) != '0000-00-00') {
-					$file_name = str_replace(array('/', ' '), '-', get_formatted_date($commande->a_timestamp)) . '_F' . $commande->id . '.pdf';
+				if(!empty($commande->f_timestamp) && substr($commande->f_timestamp, 0, 10) != '0000-00-00') {
+					$file_name = str_replace(array('/', ' '), '-', get_formatted_date($commande->f_timestamp)) . '_F' . $commande->order_id . '.pdf';
 				}else{
-					$file_name = 'F' . $commande->id . '.pdf';
+					$file_name = 'F' . $commande->order_id . '.pdf';
 				}
 			} else {
 				// Plusieurs factures
@@ -1015,7 +1077,9 @@ class Invoice extends TCPDF {
 	 */
 	function getSocieteInfoText()
 	{
-		$qid = query("SELECT * FROM peel_societe");
+		$qid = query("SELECT * 
+			FROM peel_societe
+			WHERE " . get_filter_site_cond('societe', null, true) . "");
 		if ($ligne = fetch_object($qid)) {
 			$pdf_societe = filtre_pdf($ligne->societe) . "\n" ;
 			$pdf_adresse = filtre_pdf($ligne->adresse) . "\n" ;
@@ -1062,16 +1126,19 @@ class Invoice extends TCPDF {
 			if (!empty($GLOBALS['site_parameters']['logo_'.$lang])) {
 				// on découpe le contenu du champs à la recherche du non de l'image fixe
 				// ceci évitera d'envoyer la transmition du logo avec un chemin en http::// (qui n'est pas pris en compte)
-				$pdf_logo = str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $GLOBALS['site_parameters']['logo_'.$lang]);
+				$pdf_logo = String::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $GLOBALS['site_parameters']['logo_'.$lang]));
 				if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
 					// si le logo renseigné n'existe pas, on ne retourne pas d'information
 					$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;
 				} elseif (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/images/' . $pdf_logo)) {
 					// si le logo renseigné n'existe pas, on ne retourne pas d'information
 					$pdf_logo = $GLOBALS['dirroot'] . '/images/' . $pdf_logo;
-				} elseif (empty($pdf_logo) || !file_exists($pdf_logo)) {
+				} elseif (empty($pdf_logo) || !($handle = @String::fopen_utf8($pdf_logo, 'rb'))) {
 					// si le logo renseigné n'existe pas, on ne retourne pas d'information
 					$pdf_logo = false;
+				}
+				if(!empty($handle)) {
+					fclose($handle);
 				}
 			}
 		} elseif (file_exists($GLOBALS['dirroot'] . '/factures/logo.jpg')) {
@@ -1083,4 +1150,3 @@ class Invoice extends TCPDF {
 	}
 }
 
-?>

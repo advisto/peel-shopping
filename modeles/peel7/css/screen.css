@@ -44,6 +44,9 @@ input.form-control[type="file"] {
 	height: auto;
 }
 
+.inline-block {
+	display: inline-block;
+}
 /* Header */
 .main_logo {
 	position: relative;
@@ -114,6 +117,23 @@ input.form-control[type="file"] {
 .module_login_submit {
 	text-align: center;
 }
+.multipage_selected_field {
+	color: #FF9600;
+}
+
+
+/* iframe socolissimo, la taille correspond à la hauteur maximale de l'iframe sur la page de choix de point relais. */
+#SOLivraison {
+	width:100%;
+	height: 1100px;
+	border:none;
+}
+
+/* Affichage des adresses de livraion du module TNT */
+.relaydetail_dialog {
+	height:300px;
+	padding-left: 30px;
+}
 
 /* Gestion de footer qui reste en bas de page avec astuces pour compatibilités avec tous navigateurs */
 @media screen {
@@ -140,15 +160,15 @@ input.form-control[type="file"] {
 		color: #FFFFFF;
 		padding-bottom: 10px;
 	}
-	span.fcb {
-		background: url("../images/fcb.png") no-repeat scroll center center rgba(0, 0, 0, 0);
-		color: #FFFFFF;
-		display: block;
-		font-size: 14px;
-		font-weight: bold;
-		height: 17px;
-		padding-right: 75px;
-	}
+
+
+
+
+
+
+
+
+
 	@media (max-width: 991px) {
 		#total {
 			margin-bottom: 0px;
@@ -161,6 +181,9 @@ input.form-control[type="file"] {
 }
 .footer a, .footer .link a, .footer a:visited, .footer a:hover, .footer a:link {
 	color: #FFFFFF;
+}
+.footer .dropdown-menu a, .footer .dropdown-menu a:visited, .footer .dropdown-menu a:hover, .footer .dropdown-menu a:link {
+	color: #333333;
 }
 
 /* Top menu */
@@ -434,6 +457,9 @@ img {
 .navbar {
 	margin-bottom:0px;
 }
+.navbar-nav {
+	float: none;
+}
 .navbar-inverse .navbar-nav > li > a {
 	color: #CCCCCC;
 }
@@ -495,6 +521,16 @@ img {
 .navbar-default .navbar-toggle .icon-bar {
 	background-color: #FF9600;
 }
+
+span.fcb {
+	background: url("../images/fcb.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+	color: #FFFFFF;
+	font-size: 14px;
+	font-weight: bold;
+	height: 17px;
+	padding-right: 75px;
+}
+
 .header_caddie {
 	margin: 8px 8px 8px 0px;
 	float: right;
@@ -704,7 +740,16 @@ table.table_order .btn-primary {
 .pager li a {
 	margin-bottom: 5px;
 }
-
+/* formulaire d'ajout au panier par référence */
+.add_cart_by_reference {
+	border-collapse: separate;
+	border-spacing: 15px;
+	margin: auto;
+	width: 50%;
+}
+.add_cart_by_reference td {
+	text-align: center;
+}
 /*
  * Yet another megamenu for Bootstrap
  * http://geedmo.github.com/yamm
@@ -1072,6 +1117,11 @@ td.fc_detail {
 	width: 100%;
 	margin: 5px auto 5px auto;
 }
+.addthis_32x32_style {
+  border-collapse: separate;
+  border-spacing: 10px;
+  margin: auto;
+}
 .picto-tell_friends {
 }
 .img-tell_friends {
@@ -1207,6 +1257,13 @@ td.fc_detail {
 }
 .map_canva {
 	min-width: none;
+}
+.references .fc_image {
+	vertical-align: middle !important;
+	height: 210px !important;
+}
+.rubrique, .inside_rubrique {
+	width: 100%;
 }
 /* Page catalogue */
 div.fp_produit del {
@@ -1403,12 +1460,6 @@ a.carousel-control:hover, a.carousel-control:focus {
 	background-image: linear-gradient(to right,rgba(255, 255, 255,0.0001) 0,rgba(255, 255, 255,0.5) 100%);
 	background-repeat:repeat-x;
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#00FFFFFF',endColorstr='#80FFFFFF',GradientType=1);
-}
-.carousel-control .glyphicon-chevron-left {
-	left: 0px;
-}
-.carousel-control .glyphicon-chevron-right {
-	right: 0px;
 }
 
 /* Styles responsive */

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte_login_mini.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: compte_login_mini.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 *}
 <div id="compte_login_mini" class="{if $location=='header'}hidden-xs{elseif $location=='footer'}visible-xs{/if}">
 	<form class="entryform form-inline" role="form" method="post" action="{$wwwroot}/membre.php">
@@ -32,8 +32,8 @@
 				<td class="center" style="padding-top:5px;" colspan="2">
 					{if $social.is_any}
 						<p class="social_link">
-							{if isset($social.facebook)}{$social.facebook}{/if}
-							{if isset($social.twitter)}{$social.twitter}{/if}
+							{if isset($social.facebook)}{$social.facebook}{/if} &nbsp;
+							{if isset($social.twitter)}{$social.twitter}{/if} &nbsp;
 							{if isset($social.openid)}{$social.openid}{/if}
 						</p>
 					{/if}

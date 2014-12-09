@@ -1,59 +1,18 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
-}
-
-if (!function_exists('affiche_rss')) {
-	/**
-	 * affiche_rss()
-	 *
-	 * @param boolean $return_mode
-	 * @return
-	 */
-	function affiche_rss($return_mode = false)
-	{
-		$output = '';
-		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/rss_func.tpl');
-		if (is_annonce_module_active()) {
-			$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/annonces/rss.php');
-			$tpl->assign('rss_new_window', false);
-		} else {
-			$tpl->assign('href', $GLOBALS['wwwroot'] . '/modules/rss/rss.php?critere=on_promo');
-			$tpl->assign('rss_new_window', true);
-		}
-		$tpl->assign('src', $GLOBALS['repertoire_images'] . '/rss.png');
-
-		if (!empty($GLOBALS['site_parameters']['facebook_page_link'])) {
-			$tpl->assign('fb_href', $GLOBALS['site_parameters']['facebook_page_link']);
-			$tpl->assign('fb_src', $GLOBALS['repertoire_images'] . '/facebook.png');
-		}
-		if (!empty($GLOBALS['site_parameters']['twitter_page_link'])) {
-			$tpl->assign('twitter_href', $GLOBALS['site_parameters']['twitter_page_link']);
-			$tpl->assign('twitter_src', $GLOBALS['repertoire_images'] . '/twitter.png');
-		}
-		if (!empty($GLOBALS['site_parameters']['googleplus_page_link'])) {
-			$tpl->assign('googleplus_href', $GLOBALS['site_parameters']['googleplus_page_link']);
-			$tpl->assign('googleplus_src', $GLOBALS['repertoire_images'] . '/googleplus.png');
-		}
-		$output .= $tpl->fetch();
-		if ($return_mode) {
-			return $output;
-		} else {
-			echo $output;
-		}
-	}
 }
 
 /**
@@ -76,7 +35,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 		$limit = min(intval($_GET['limit']), 500);
 	}
 	if(empty($GLOBALS['meta_title'])){
-		if (!is_annonce_module_active()) {
+		if (!check_if_module_active('annonces')) {
 			$GLOBALS['meta_title'] = $GLOBALS['STR_RSS_TITLE'];
 		} else {
 			// Si le module annonce existe alors, on n'affiche ces dernières annonces
@@ -90,7 +49,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 		}
 	}
 	if(empty($GLOBALS['meta_description'])){
-		if (is_annonce_module_active()) {
+		if (check_if_module_active('annonces')) {
 			$GLOBALS['meta_description'] = $GLOBALS['STR_MODULE_ANNONCES_LAST_ADS_PUBLISHED'];
 		} else {
 			$GLOBALS['meta_description'] = $GLOBALS['STR_MODULE_RSS_DESCRIPTION'];
@@ -125,13 +84,13 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	$tpl->assign('pubDate', String::htmlentities(gmdate("r"), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 	$tpl->assign('generator', String::htmlentities('Advisto RSS Generator 2.1', ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 	$tpl_items = array();
-	if (!is_annonce_module_active()) {
+	if (!check_if_module_active('annonces')) {
 		// Récupération et affichage des données
-		$sql = "SELECT p.id, p.prix, p.tva, p.nom_" . $_SESSION['session_langue'] . " AS nom, p.date_maj, p.description_" . $_SESSION['session_langue'] . " AS description, p.promotion, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
+		$sql = "SELECT p.id, p.prix, p.tva, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.date_maj, p.description_" . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']) . " AS description, p.promotion, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id
-			WHERE p.etat='1' " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+			WHERE p.etat='1' AND " . get_filter_site_cond('produits', 'p') . " " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
 			GROUP BY p.id
 			ORDER BY p.date_maj DESC, p.id DESC
 			LIMIT " . intval($limit);
@@ -141,11 +100,32 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($product_object->description, ENT_QUOTES)))));
 			$promotion_rss = $product_object->get_all_promotions_percentage(false, 0, true);
 			$dateRFC = gmdate("r", strtotime($product_object->date_maj));
-			$tpl_items[] = array('title' => String::htmlentities($product_object->name . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $product_object->get_final_price(0, display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'promotion_rss' => String::htmlentities($promotion_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+			if ($product_object->on_estimate) {
+				$product_affiche_prix = display_on_estimate_information(true);
+			} elseif ($product_object->on_gift) {
+				$product_affiche_prix = $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS'];
+			} else {
+				$product_affiche_prix = $product_object->get_final_price(0, display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true);
+			}
+			$this_item = array('title' => String::htmlentities($product_object->name . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $product_affiche_prix, ENT_COMPAT, GENERAL_ENCODING, false, true, true),				'promotion_rss' => String::htmlentities($promotion_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'guid' => String::htmlentities($product_object->get_product_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'pubDate' => String::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'description' => String::htmlentities($desc_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+			$imagename = $product_object->get_product_main_picture();
+			if(!empty($imagename)) {
+				if (pathinfo($imagename, PATHINFO_EXTENSION) == 'pdf') {
+					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
+				} else {
+					$this_thumb = thumbs($imagename, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+				}
+				if (!empty($this_thumb)) {
+					$image_infos = getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . $this_thumb);
+					$this_item['image']['length'] = filesize($GLOBALS['uploaddir'] . '/thumbs/' . $this_thumb);
+					$this_item['image']['url'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb;
+					$this_item['image']['mime'] = $image_infos['mime'];
+				}
+			}
+			$tpl_items[] = $this_item;
 			unset($product_object);
 		}
 	} else {
@@ -172,13 +152,21 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			}
 			$dateRFC = gmdate("r", strtotime($row_rs['date_insertion']));
 			$annonce_object = new Annonce($row_rs['ref'], null, false, true);
-			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), String::strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($annonce_object->description, ENT_QUOTES)))));
+			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), String::strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($annonce_object->get_description(), ENT_QUOTES)))));
 			$promotion_rss = '';
-			$tpl_items[] = array('title' => String::htmlentities(vb($category_text) . String::str_shorten_words(String::str_shorten(String::ucfirst($annonce_object->titre), 120, '', '...', 100), 40), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+			$this_item = array('title' => String::htmlentities(vb($category_text) . String::str_shorten_words(String::str_shorten(String::ucfirst($annonce_object->get_titre()), 120, '', '...', 100), 40), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'promotion_rss' => $promotion_rss,
 				'guid' => String::htmlentities($annonce_object->get_annonce_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'pubDate' => String::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'description' => String::htmlentities(String::str_shorten(String::strip_tags(trim($desc_rss)), 250), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+			$image_url = $annonce_object->get_annonce_picture(true, $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height']);
+			if(!empty($image_url)) {
+				$image_infos = getimagesize(String::rawurldecode(str_replace($GLOBALS['repertoire_upload'], $GLOBALS['uploaddir'], $image_url)));
+				$this_item['image']['length'] = filesize(String::rawurldecode(str_replace($GLOBALS['repertoire_upload'], $GLOBALS['uploaddir'], $image_url)));
+				$this_item['image']['url'] = $image_url;
+				$this_item['image']['mime'] = $image_infos['mime'];
+			}
+			$tpl_items[] = $this_item;
 			unset($annonce_object);
 		}
 	}
@@ -194,4 +182,3 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	close_page_generation(false);
 	die();
 }
-?>

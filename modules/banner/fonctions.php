@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -132,10 +132,10 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 		} else {
 			$queryBanner = query("SELECT *
 				FROM peel_banniere
-				" . $sql_where . " AND date_fin>='" . date('Y-m-d') . "'
+				" . $sql_where . " AND date_fin>='" . date('Y-m-d') . "' AND " . get_filter_site_cond('banniere') . "
 				ORDER BY rang ASC, id_categorie DESC, RAND() ASC");
 			while ($banner = fetch_assoc($queryBanner)) {
-				if(is_annonce_module_active() && defined('IN_CATALOGUE_ANNONCE_DETAILS') && !empty($banner['list_id']) && !empty($ad_id) && (String::strpos($banner['list_id'], String::substr($ad_id, -1)) === false)) {
+				if(check_if_module_active('annonces') && defined('IN_CATALOGUE_ANNONCE_DETAILS') && !empty($banner['list_id']) && !empty($ad_id) && (String::strpos($banner['list_id'], String::substr($ad_id, -1)) === false)) {
 					// Sélection d'annonce en fonction du dernier chiffre de l'id d'une annonce. Si une liste d'id est définie, et que l'id courante n'est pas trouvée dans la liste, on passe
 					continue;
 				}
@@ -147,7 +147,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						// Le champ location contient le nom de l'emplacement du module. L'application pourra ainsi positionner la bannière au bon endroit.
 						$q = query('SELECT location
 							FROM peel_modules
-							WHERE technical_code = "advertising' . intval($banner['position']) . '" AND etat = 1');
+							WHERE technical_code = "advertising' . intval($banner['position']) . '" AND etat = 1 AND ' . get_filter_site_cond('modules'));
 						if($result = fetch_assoc($q)) {
 							$banner_location = $result['location'];
 							// Traitement des positions des bannières. Si la bannière est associée à un module prévu pour se placer en haut d'une page, il contient top dans son nom par convention de nommage. La règle est la même pour les modules en bas de page. Il est donc possible de spécifier les seules positions gérées par l'application
@@ -184,7 +184,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						google_set_via_and_accept();
 						$google_ad_handle = @fopen(google_get_ad_url(), 'r');
 						if ($google_ad_handle) {
-							while (!feof($google_ad_handle)) {
+							while (!String::feof($google_ad_handle)) {
 								$banner['tag_html'] .= fread($google_ad_handle, 8192);
 							}
 							//trigger_error(String::convert_accents(print_r($banner['tag_html'], true).print_r(google_get_ad_url(), true)), E_USER_NOTICE);
@@ -334,7 +334,7 @@ function get_possible_banner_positions_between_ads($position, $cat_id, $page, $p
 		$annonce_number_array = array();
 		$queryBanner = query("SELECT annonce_number
 			FROM peel_banniere
-			" . $sql_where . " AND annonce_number>0 AND date_fin>='" . date('Y-m-d') . "'");
+			" . $sql_where . " AND annonce_number>0 AND date_fin>='" . date('Y-m-d') . "' AND  " . get_filter_site_cond('banniere'));
 		while ($banner = fetch_assoc($queryBanner)) {
 			$annonce_number_array[] = $banner['annonce_number'];
 		}
@@ -357,7 +357,7 @@ function update_viewed_banners()
 		}
 		query("UPDATE peel_banniere
 			SET vue=vue+1
-			WHERE id IN('" . implode("','", real_escape_string($GLOBALS['viewed_banners_array'])) . "')");
+			WHERE id IN('" . implode("','", real_escape_string($GLOBALS['viewed_banners_array'])) . "') AND  " . get_filter_site_cond('banniere'));
 	}
 }
 
@@ -444,4 +444,3 @@ function google_get_ad_url() {
   }
   return $google_ad_url;
 }
-?>

@@ -2,16 +2,16 @@
 
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tagcloud.php 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: tagcloud.php 43037 2014-10-29 12:01:40Z sdelaporte $
 //
 
 define('IN_PEEL_ADMIN', true);
@@ -21,13 +21,13 @@ necessite_priv("admin_content");
 
 include($GLOBALS['dirroot']."/modules/tagcloud/administrer/fonctions.php");
 
-$DOC_TITLE = $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_TITLE"];
+$GLOBALS['DOC_TITLE'] = $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_TITLE"];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $start = intval(vn($_GET['start'])); // Détermine la variable start (début de page)
 $frm = $_POST;
 
-if (is_module_tagcloud_active ()) {
+if (is_module_tagcloud_active()) {
     switch (vb($_REQUEST['mode'])) {
         case "ajout" :
             affiche_formulaire_ajout_recherche($frm);
@@ -63,4 +63,3 @@ if (is_module_tagcloud_active ()) {
 	echo $GLOBALS['tplEngine']->createTemplate('modules/activate_module_first.tpl', array('href' => $GLOBALS['administrer_url'] . '/sites.php'))->fetch();
 }
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
-?>

@@ -1,34 +1,33 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.1.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details_html.tpl 39495 2014-01-14 11:08:09Z sdelaporte $
+// $Id: article_details_html.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
 #}{% if not is_article %}
 	{{ STR_NO_FIND_ART }}
 {% else %}
-	<h1 class="page_title">{{ titre|html_entity_decode_if_needed }}</h1>
+	{% if titre %}<h1 property="name" class="page_title">{{ titre|html_entity_decode_if_needed }}</h1>{% endif %}
 	<div class="rub_content">
 		{% if is_offline %}
 		<p style="color: red;">{{ STR_OFFLINE_ART }}</p>
 		{% endif %}
-		<div style="padding-top:5px;">
 		{% if (main_image) %}
 			{% if main_image.is_pdf %}
 				<a style="margin: 5px;" href="{{ main_image.href|escape('html') }}" onclick="return(window.open(this.href)?false:true);"><img src="{{ wwwroot }}/images/logoPDF_small.png" alt="{{ titre }}" /></a>
 			{% else %}
-				<p><img style="margin: 5px;" src="{{ main_image.href|escape('html') }}" alt="{{ titre }}" /></p>
+				<p><img style="margin: 5px;" src="{{ main_image.src|escape('html') }}" alt="{{ titre }}" /></p>
 			{% endif %}
 		{% endif %}
-			<div style="text-align:justify;">{{ chapo|html_entity_decode_if_needed|nl2br_if_needed }}</div>
-			<div style="text-align:justify;">{{ texte|html_entity_decode_if_needed|nl2br_if_needed }}</div>
+			{% if chapo is defined %}<div style="text-align:justify;">{{ chapo|html_entity_decode_if_needed|nl2br_if_needed }}{% endif %}
+			{{ texte|html_entity_decode_if_needed|nl2br_if_needed }}
 			{% if (share_feature) %}
 				{{ share_feature }}
 			{% elseif (tell_friends) %}
