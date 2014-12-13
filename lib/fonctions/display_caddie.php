@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 43121 2014-11-05 17:44:12Z sdelaporte $
+// $Id: display_caddie.php 43606 2014-12-12 18:03:37Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -577,7 +577,7 @@ if (!function_exists('affiche_resume_commande')) {
 					'conditionnement_qty' => vb($qte_total),
 					'quantite' => $this_ordered_product['quantite'],
 					'total_prix' => fprix($this_ordered_product['total_prix'], true, $commande->devise, true, $commande->currency_rate),
-					'is_form_retour' => (check_if_module_active('payback') && in_array($commande->statut_paiement, array('being_checked', 'completed')) && $commande->statut_livraison == 'completed' && $this_ordered_product['statut'] = 1 && $this_ordered_product['quantite'] > 0),
+					'is_form_retour' => (check_if_module_active('payback') && in_array($commande->statut_paiement, array('being_checked', 'completed')) && $commande->statut_livraison == 'dispatched' && $this_ordered_product['statut'] = 1 && $this_ordered_product['quantite'] > 0),
 					'action' => $GLOBALS['wwwroot'] . '/modules/payback/form_retour.php',
 					'commandeid' => $commande->id,
 					'utilisateurid' => $commande->id_utilisateur,

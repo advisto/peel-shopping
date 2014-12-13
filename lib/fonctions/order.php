@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 43504 2014-12-04 11:56:56Z sdelaporte $
+// $Id: order.php 43608 2014-12-12 18:20:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -176,9 +176,10 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	}
 	// Handling order
 	// defined('IN_PEEL_ADMIN') paramètre $use_admin_rights : Si on est dans l'admin, le site associé à la commande n'est pas obligatoirement le site_id associé au nom de domaine, mais le site_id défini pour l'administrateur par session_admin_multisite
-	$sql = "SELECT c.*, sp.technical_code AS statut_paiement
+	$sql = "SELECT c.*, sp.technical_code AS statut_paiement, sl.technical_code AS statut_livraison
 		FROM peel_commandes c
 		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+		LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
 		WHERE c.id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "";
 	$query = query($sql);
 	// On vérifie si la commande existe déjà
@@ -275,13 +276,13 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		if ($statut_paiement_new !== null && $commande['statut_paiement'] != $statut_paiement_new) {
 			// On vérifie le statut paiement avant la mise à jour de la base avec celui du formulaire. Ils doivent être différents,
 			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisit l'annulation de livraison.
-			if (in_array($statut_paiement_new, array('cancelled', 'reimbursed')) && !in_array($commande['statut_paiement'], array('cancelled', 'reimbursed'))) {
+			if (in_array($statut_paiement_new, array('cancelled', 'refunded')) && !in_array($commande['statut_paiement'], array('cancelled', 'refunded'))) {
 				// La commande passe en annulé ou remboursé
 				if ($statut_paiement_new === null || $statut_paiement_new === '') {
 					// Changement aussi du statut de livraison en annulé s'il n'était pas déjà en statut livré
 					query("UPDATE peel_commandes
 						SET id_statut_livraison=" . intval($delivery_status_id_by_technical_code_array['cancelled']) . "
-						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=" . intval($delivery_status_id_by_technical_code_array['completed']) . " AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "");
+						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=" . intval($delivery_status_id_by_technical_code_array['dispatched']) . " AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "");
 				}
 				// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée
 				// On devrait gérer ici le fait de recréditer les points de la commande de cadeaux, mais ça nécessite de stocker en BDD les informations de points dépensés des commandes
@@ -327,7 +328,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				}
 			}
 		}
-		if ($statut_livraison_new == 'completed' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
+		if ($statut_livraison_new == 'dispatched' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
 			// Le statut de livraison passe à expédié pour la première fois
 			// => on envoie l'email d'expédition (avec ou sans les infos de delivery_tracking qui peut être vide)
 			send_avis_expedition($order_id, $delivery_tracking);
@@ -1219,7 +1220,7 @@ function get_order_infos_array($order_object)
 	if(empty($order_object)){
 		return array();
 	}
-	if (!empty($order_object->a_timestamp) && $order_object->a_timestamp != '0000-00-00' && in_array($order_object->statut_paiement, array(2,3))) {
+	if (!empty($order_object->a_timestamp) && $order_object->a_timestamp != '0000-00-00' && in_array($order_object->statut_paiement, array('discussed', 'completed'))) {
 		$order_infos['displayed_paiement_date'] = get_formatted_date($order_object->a_timestamp);
 	} else {
 		$order_infos['displayed_paiement_date'] = null;

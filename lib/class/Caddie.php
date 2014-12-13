@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: Caddie.php 43608 2014-12-12 18:20:18Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 43040 2014-10-29 13:36:21Z sdelaporte $
+ * @version $Id: Caddie.php 43608 2014-12-12 18:20:18Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -661,10 +661,10 @@ class Caddie {
 				// On vérifie maintenant que le code est bien valide pour l'utilisateur qui veut l'utiliser
 				$sql_check_cp_use = "SELECT c.id
 					FROM peel_commandes c
-					LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
+					LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 					WHERE c.code_promo = '" . nohtml_real_escape_string($this->code_promo) . "' AND c.id_utilisateur ='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c') . ""
 				 . (!empty($this->commande_id)? " AND c.id !='" . intval($this->commande_id) . "'" : "")
-				 . " AND sl.technical_code NOT IN ('cancelled','reimbursed')";
+				 . " AND sp.technical_code NOT IN ('cancelled','refunded')";
 				// Le code a-t-il déjà été utilisé par ce client ?
 				$q_check_cp_use = query($sql_check_cp_use);
 				if (($code_infos['nombre_prevue'] == 0 || num_rows($q_check_cp_use) < $code_infos['nombre_prevue']) && ($code_infos['nb_used_per_client'] == 0 || num_rows($q_check_cp_use) < $code_infos['nb_used_per_client'])) {

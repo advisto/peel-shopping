@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 43136 2014-11-06 15:53:36Z sdelaporte $
+// $Id: index.php 43606 2014-12-12 18:03:37Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -54,14 +54,14 @@ $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_commandes c
 	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
 	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
-	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code <> 'completed' AND " . get_filter_site_cond('commandes', 'c', true) . "");
+	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code <> 'dispatched' AND " . get_filter_site_cond('commandes', 'c', true) . "");
 $paid_orders_to_deliver_count_object = fetch_object($q);
 
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_commandes c
 	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
 	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
-	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code = 'completed' AND " . get_filter_site_cond('commandes', 'c', true) . "");
+	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code = 'dispatched' AND " . get_filter_site_cond('commandes', 'c', true) . "");
 $paid_orders_delivered_count_object = fetch_object($q);
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_index.tpl');
@@ -281,7 +281,7 @@ function get_home_block_content($content_code)
 				FROM peel_commandes c
 				LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
 				LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
-				WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND sp.technical_code IN ('being_checked','completed') AND sl.technical_code!='completed'
+				WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND sp.technical_code IN ('being_checked','completed') AND sl.technical_code!='dispatched'
 				ORDER BY c.id DESC
 				LIMIT 0,5");
 			$i = 0;
