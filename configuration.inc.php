@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 43546 2014-12-08 18:46:12Z gboussin $
+// $Id: configuration.inc.php 43626 2014-12-16 13:04:33Z gboussin $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -92,7 +92,7 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.2.0');
+define('PEEL_VERSION', '7.2.0.2');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -354,7 +354,7 @@ if (check_if_module_active('annonces')) {
  */
 // Paramétrage des sessions
 // Pour permettre d'avoir à la fois des cookies de session valides pour N sous-domaines, et à la fois
-// pour éviter que plusieurs boutiques PEEL tournent dans des sous-domaines différents, on prend
+// permettre que plusieurs boutiques PEEL puissent tourner dans des sous-domaines différents, on prend
 // un nom de cookie de session différent pour chaque installation de PEEL.
 $GLOBALS['session_cookie_name'] = vb($GLOBALS['site_parameters']['session_cookie_basename']) . substr(md5($GLOBALS['wwwroot_main']), 0, 8);
 
