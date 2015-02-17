@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -66,7 +66,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$query_contact = 'SELECT u.id_utilisateur AS contact_id, u.nom_famille AS contact_name, u.prenom AS contact_firstname, u.pseudo AS contact_login, u.etat AS contact_valid, u_admin.pseudo AS pseudo_admin, c.*
 		FROM peel_admins_contacts_planified c
 		LEFT JOIN peel_utilisateurs u_admin ON u_admin.id_utilisateur = c.admin_id AND ' . get_filter_site_cond('utilisateurs', 'u_admin') . '
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = c.user_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = c.user_id AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 		' . (!empty($sql_cond)?'WHERE ' . implode(' AND ', $sql_cond):'');
 
 	$Links = new Multipage($query_contact, 'liste_contact');
@@ -82,7 +82,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl_account_type_options = array();
 	$sql = "SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE  " . get_filter_site_cond('profil', null, true) . "";
+		WHERE  " . get_filter_site_cond('profil') . "";
 	$res = query($sql);
 	// Recherche des profils utilisateur disponible
 	while ($account_type = fetch_assoc($res)) {
@@ -96,7 +96,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl_admin_options = array();
 	$sql = "SELECT *
 		FROM peel_utilisateurs
-		WHERE priv LIKE 'admin%' AND " . get_filter_site_cond('utilisateurs', null, true) . "";
+		WHERE priv LIKE 'admin%' AND " . get_filter_site_cond('utilisateurs') . "";
 	$res = query($sql);
 	// Recherche des profils administrateur
 	while ($account_admin = fetch_assoc($res)) {
@@ -250,12 +250,12 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	$output = '';
 	$query = query("SELECT u.pseudo AS pseudo_user
 		FROM peel_utilisateurs u
-		WHERE u.id_utilisateur='" . intval(vn($id_user)) . "' AND " . get_filter_site_cond('utilisateurs', 'u', true) . "");
+		WHERE u.id_utilisateur='" . intval(vn($id_user)) . "' AND " . get_filter_site_cond('utilisateurs', 'u') . "");
 	$rep_query = fetch_assoc($query);
 
 	$query_contact = 'SELECT acp.*, u.pseudo, u.id_utilisateur
 		FROM peel_admins_contacts_planified acp
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = acp.admin_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = acp.admin_id AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 		WHERE user_id="' . intval(vn($id_user)) . '"';
 	$Links = new Multipage($query_contact, 'liste_contact');
 	$HeaderTitlesArray = array(' ', $GLOBALS["STR_ADMIN_ADMINISTRATOR"], $GLOBALS["STR_DATE"], $GLOBALS["STR_ADMIN_REASON"], $GLOBALS["STR_COMMENTS"]);
@@ -292,7 +292,7 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	if (!empty($_GET['id_contact_planified'])) {
 		$q_contact_edit = query('SELECT acp.*, u.pseudo
 			FROM peel_admins_contacts_planified acp
-			INNER JOIN peel_utilisateurs u ON u.id_utilisateur = acp.user_id AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+			INNER JOIN peel_utilisateurs u ON u.id_utilisateur = acp.user_id AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 			WHERE acp.id="' . intval(vn($_GET['id_contact_planified'])) . '"
 			LIMIT 1');
 		if ($r_contact_edit = fetch_assoc($q_contact_edit)) {

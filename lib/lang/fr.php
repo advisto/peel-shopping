@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 43487 2014-12-02 17:37:29Z sdelaporte $
+// $Id: fr.php 44079 2015-02-17 11:04:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -295,7 +295,6 @@ $GLOBALS["STR_FTP_CHDIR_FAILED"] = "Le changement de répertoire FTP a échoué"
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "La connexion FTP a échoué";
 $GLOBALS["STR_FTP_GET_FAILED"] = "La récupération du contenu du fichier a échoué";
 $GLOBALS["STR_FWRITE_FAILED"] = "Echec de l'écriture dans le fichier";
-$GLOBALS["SITE_GENERATOR"] = "PEEL création de site eCommerce";
 $GLOBALS["STR_GENDER"] = "Civilité";
 $GLOBALS["STR_GET_MY_POSITION"] = "Récupérer ma position (nécessaire pour cette fonctionnalité)";
 $GLOBALS["STR_GET_PASSWORD"] = "Récupérer son mot de passe";
@@ -327,7 +326,7 @@ $GLOBALS["STR_INSERT_LOGIN_AND_PASSWORD"] = "Insérez votre identifiant et votre
 $GLOBALS["STR_INSERT_NEW_PASSWORD"] = "Veuillez renseigner les champs ci-dessous";
 $GLOBALS["STR_INSERT"] = "Insérer";
 $GLOBALS["STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE"] = "Si vous ne souhaitez pas le supprimer (non recommandé), merci de le renommer en utilisant un nom de répertoire complexe";
-$GLOBALS["STR_INSTALLATION_DELETE_EXPLAIN"] = "APRES INSTALLATION : Merci de supprimer le répertoire \"installation\" de votre serveur pour la sécurité de votre boutique en ligne.";
+$GLOBALS["STR_INSTALLATION_DELETE_EXPLAIN"] = "APRES INSTALLATION : Merci de supprimer le répertoire \"installation\" de votre serveur pour la sécurité de votre site.";
 $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "Cliquez ici une fois le répertoire installation supprimé ou renommé";
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "Procédure d'installation";
 $GLOBALS["STR_INSTALLATION"] = "Installation";
@@ -441,10 +440,10 @@ $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "a été créé et envoyé
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Générer le code HTML";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Liste des mots";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "L'adresse email est obligatoire.";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez accéder à votre espace affilié dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez accéder à votre espace affilié dès validation de votre compte.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "n'est pas en stock aujourd'hui.\nNous vous préviendrons par email dès qu'il sera disponible :";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Nous vous remercions pour votre confiance. Vous êtes maintenant inscrit à notre programme de parrainage et vous pouvez bénéficer de votre avoir de %s dès votre première commande.\r\nA bientôt sur {$GLOBALS['site']}.\r\n";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez bénéficier des prix revendeurs dès validation de votre compte. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Pour vous identifier, cliquez ici</a>.";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez bénéficier des prix revendeurs dès validation de votre compte.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "En cliquant sur le bouton ci-dessous, vous envoyez votre inscription au Programme Partenaires du site {$GLOBALS['site']}. Votre inscription terminée, vous serez tenu de respecter les conditions détaillées dans les conditions générales d'adhésion que vous recevrez en 2 exemplaires par courrier à nous retourner signé.";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Cet article n'est pas disponible aujourd'hui mais nous pouvons vous avertir par email dès qu'il est à nouveau en stock.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Cliquez ici pour revenir à votre compte.";
@@ -520,7 +519,7 @@ $GLOBALS["STR_NEW_CUSTOMER"] = "Nouveau client ?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Nouveau mot de passe pour confirmation";
 $GLOBALS["STR_NEW_PASSWORD"] = "Nouveau mot de passe";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Inscription à la newsletter";
-$GLOBALS["STR_NEWSLETTER_YES"] = "Oui, je souhaite être abonné à la newsletter de";
+$GLOBALS["STR_NEWSLETTER_YES"] = "Oui, je souhaite être abonné à la newsletter de {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "Newsletter";
 $GLOBALS["STR_NEXT_PAGE"] = "Suivant";
 $GLOBALS["STR_NEXT"] = "Suivant";
@@ -562,7 +561,7 @@ $GLOBALS["STR_OPTION"] = "Prix des options";
 $GLOBALS["STR_OPTIONS_COST"] = "Coût des options";
 $GLOBALS["STR_OR_COORDINATION"] = "ou";
 $GLOBALS["STR_OR"] = "ou";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = 'Trier';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "Trier";
 $GLOBALS["STR_ORDER_DETAIL"] = "Détail de la commande";
 $GLOBALS["STR_ORDER_FORM"] = "Bon de commande";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historique des commandes";
@@ -715,7 +714,7 @@ $GLOBALS["STR_SEARCH_RESULT_PRODUCT"] = "dans les produits";
 $GLOBALS["STR_SEARCH"] = "Rechercher";
 $GLOBALS["STR_SECOND_CHOICE"] = "2ème choix";
 $GLOBALS["STR_SEE_YOU_SOON"] = "A bientôt sur";
-$GLOBALS["STR_SEND_CHECK"] = "Envoyez votre règlement à";
+$GLOBALS["STR_SEND_CHECK"] = "Envoyez votre règlement de";
 $GLOBALS["STR_SEND_TRANSFER"] = "Effectuez votre règlement d'un montant de";
 $GLOBALS["STR_SEND"] = "Envoyer";
 $GLOBALS["STR_SHIP_ADDRESS"] = "Adresse de livraison";
@@ -731,6 +730,7 @@ $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "Désactiver votre éventuel gestionn
 $GLOBALS["STR_SIGNATURE"] = "Signature";
 $GLOBALS["STR_SIREN"] = "Siren";
 $GLOBALS["STR_SIRET"] = "SIRET (14 chiffres)";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL création de site eCommerce";
 $GLOBALS["STR_SITEMAP"] = "Plan du site";
 $GLOBALS["STR_SIZE"] = "Taille";
 $GLOBALS["STR_SMALL_ORDER_OVERCOST_TEXT"] = "Frais de préparation";

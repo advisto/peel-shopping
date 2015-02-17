@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, http://www.advisto.fr/ |
 // +----------------------------------------------------------------------+
-// $Id: check-integrity.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: check-integrity.php 44067 2015-02-17 08:41:44Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -168,7 +168,12 @@ foreach($dir_array as $type => $dir) {
 					unlink($GLOBALS['dirroot'] . '/' . str_replace(array('0/', '1/', '2/', '3/', '4/', '5/', '6/', '7/', '8/', '9/', '.jpg'), array('0/th_', '1/th_', '2/th_', '3/th_', '4/th_', '5/th_', '6/th_', '7/th_', '8/th_', '9/th_', '.png'), $file));
 					continue;
 				}
-				$output .= '<a href="' . $GLOBALS['wwwroot'] . '/' . $file . '" target="_blank">' . $GLOBALS['wwwroot'] . '/' . $file . '</a> (' . $file_size_ko . ' ko) &nbsp; &nbsp; <a href="check-integrity.php?delete=' . String::str_form_value(rawurlencode($file)) . '" style="color:#FF0000">Supprimer ' . $file . '</a><br />';
+				if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
+					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+				} else {
+					$this_wwwroot =  $GLOBALS['wwwroot'];
+				}
+				$output .= '<a href="' . $this_wwwroot . '/' . $file . '" target="_blank">' . $this_wwwroot . '/' . $file . '</a> (' . $file_size_ko . ' ko) &nbsp; &nbsp; <a href="check-integrity.php?delete=' . String::str_form_value(rawurlencode($file)) . '" style="color:#FF0000">Supprimer ' . $file . '</a><br />';
 				// if(!empty($_GET['delete'])) {
 				// $output .= '<br /><b>Mode succint : affichage seulement des premiers fichiers trouvé - <a href="check-integrity.php">Afficher tout</a></b><br /><br />';
 				// break;

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 43185 2014-11-13 14:17:38Z sdelaporte $
+// $Id: bas.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ if (is_devises_module_active()) {
 
 if (!empty($_SESSION['session_display_popup']['error_text'])) {
 	// Dévelopement de la popup affichant les détails de l'ajout au caddie (si la quantité demandée est supérieure à la quantité disponible en stock) et suppression de la variable de session
-	$GLOBALS['js_content_array'][] = "bootbox.alert('".filtre_javascript($_SESSION['session_display_popup']['error_text'], true, true, false, true, false) ."')";
+	$GLOBALS['js_ready_content_array'][] = "bootbox.alert('".filtre_javascript($_SESSION['session_display_popup']['error_text'], true, true, false, true, false) ."')";
 	unset($_SESSION['session_display_popup']['error_text']);
 }
 // Message d'alerte de problème de téléchargement d'image

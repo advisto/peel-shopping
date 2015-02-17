@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 43407 2014-11-28 11:58:32Z sdelaporte $
+// $Id: produits.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -368,7 +368,7 @@ function affiche_formulaire_modif_produit($id, &$frm)
 	/* Charge les catégories du produit */
 	$qid = query("SELECT categorie_id, nom_" . $_SESSION['session_langue'] . " AS nom_categorie
 		FROM peel_produits_categories pp
-		INNER JOIN peel_categories pc ON pp.categorie_id=pc.id AND " . get_filter_site_cond('categories', 'pc', true) . "
+		INNER JOIN peel_categories pc ON pp.categorie_id=pc.id AND " . get_filter_site_cond('categories', 'pc') . "
 		WHERE produit_id = '" . intval($id) . "'");
 	$frm['categories'] = array();
 	while ($cat = fetch_assoc($qid)) {
@@ -470,7 +470,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	if (!isset($frm['couleurs'])) {
 		$frm['couleurs'] = array();
 	}
-	$categorie_options = get_categories_output(null, 'categories',  vb($frm['categories']), 'option', '&nbsp;&nbsp;', null);
+	$categorie_options = get_categories_output(null, 'categories',  vb($frm['categories']));
 	if (empty($categorie_options)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_produit_table.tpl');
 		$tpl->assign('href', $GLOBALS['administrer_url'] . '/categories.php?mode=ajout');
@@ -525,6 +525,9 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_best_seller_module_active', check_if_module_active('best_seller'));
 		$tpl->assign('is_on_top', !empty($frm['on_top']));
 
+		$tpl->assign('is_conditionnement_module_active', is_conditionnement_module_active());
+		$tpl->assign('conditionnement', vb($frm['conditionnement']));
+	
 		$tpl->assign('is_rollover_module_active', is_rollover_module_active());
 		$tpl->assign('is_on_rollover', !empty($frm['on_rollover']));
 
@@ -568,7 +571,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		if (is_module_ecotaxe_active()) {
 			$sql = "SELECT id, code, nom_" . $_SESSION['session_langue'] . " AS nom, prix_ttc
 				FROM peel_ecotaxes
-				WHERE " . get_filter_site_cond('ecotaxes', null, true) . "
+				WHERE " . get_filter_site_cond('ecotaxes') . "
 				ORDER BY code";
 			$result = query($sql);
 			while ($e = fetch_assoc($result)) {
@@ -605,7 +608,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				include ($GLOBALS['fonctionslot']);
 				$tpl->assign('lot_explanation_table', get_lot_explanation_table($frm['id']));
 				$tpl->assign('lot_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']));
-				if (num_rows(query("SELECT 1 FROM peel_quantites WHERE produit_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites', null, true))) > 0) {
+				if (num_rows(query("SELECT 1 FROM peel_quantites WHERE produit_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites'))) > 0) {
 					$tpl->assign('lot_supprime_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']) . '&mode=supprime');
 				}
 			}
@@ -652,7 +655,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$selectCouleur = "SELECT c.*, pc.default_image, pc.image1, pc.image2, pc.image3, pc.image4, pc.image5, pc.couleur_id as coul
 			FROM peel_couleurs c
 			INNER JOIN peel_produits_couleurs pc ON pc.couleur_id = c.id AND pc.produit_id = '" . intval(vb($frm['id'])) . "'
-			WHERE " .  get_filter_site_cond('couleurs', 'c', true) . "
+			WHERE " .  get_filter_site_cond('couleurs', 'c') . "
 			ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($selectCouleur);
 		// Compteur permettant de fournir l'image par défaut en fonction de chaque couleur
@@ -705,7 +708,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl_util_options = array();
 		$select = query("SELECT id_utilisateur, societe
 			FROM peel_utilisateurs
-			WHERE priv = 'supplier' AND " . get_filter_site_cond('utilisateurs', null, true) . "
+			WHERE priv = 'supplier' AND " . get_filter_site_cond('utilisateurs') . "
 			ORDER BY societe");
 		while ($nom = fetch_assoc($select)) {
 			$tpl_util_options[] = array('value' => intval($nom['id_utilisateur']),
@@ -718,7 +721,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl_marques_options = array();
 		$select = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat
 		   FROM peel_marques
-		   WHERE " . get_filter_site_cond('marques', null, true) . "
+		   WHERE " . get_filter_site_cond('marques') . "
 		   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
 		while ($nom = fetch_assoc($select)) {
 			$tpl_marques_options[] = array('value' => intval($nom['id']),
@@ -763,7 +766,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl_couleurs_options = array();
 		$select = query("SELECT c.*
 			FROM peel_couleurs c
-			WHERE " .  get_filter_site_cond('couleurs', 'c', true) . "
+			WHERE " .  get_filter_site_cond('couleurs', 'c') . "
 			ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC");
 
 		while ($nom = fetch_assoc($select)) {
@@ -782,7 +785,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl_tailles_options = array();
 		$select = query("SELECT t.*
 			FROM peel_tailles t
-			WHERE  " . get_filter_site_cond('tailles', 't', true) . "
+			WHERE  " . get_filter_site_cond('tailles', 't') . "
 			ORDER BY t.position ASC, t.prix ASC, t.nom_" . $_SESSION['session_langue'] . " ASC");
 		while ($nom = fetch_assoc($select)) {
 			if (isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
@@ -861,6 +864,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
 		$tpl->assign('STR_ADMIN_OFFLINE', $GLOBALS['STR_ADMIN_OFFLINE']);
 		$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+		$tpl->assign('STR_CONDITIONNEMENT', $GLOBALS['STR_CONDITIONNEMENT']);
 		$tpl->assign('STR_ADMIN_PRODUITS_EAN_CODE', $GLOBALS['STR_ADMIN_PRODUITS_EAN_CODE']);
 		$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 		$tpl->assign('STR_ADMIN_PRODUITS_PRICE_IN', $GLOBALS['STR_ADMIN_PRODUITS_PRICE_IN']);
@@ -1483,7 +1487,7 @@ function maj_produit($id, $frm)
 	}
 	if(!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
 		foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
-			$sql .= ", " . $this_key . "='" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
+			$sql .= ", " . word_real_escape_string($this_key) . "='" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
 		}
 	}
 	$sql .= " WHERE id =" . intval($id) . "
@@ -1533,8 +1537,8 @@ function maj_produit($id, $frm)
 			$this_field_name = 'imagecouleur' . $this_color_id . '_' . $h;
 			$_POST[$this_field_name] = upload($this_field_name, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST[$this_field_name]));
 			query("UPDATE peel_produits_couleurs
-				SET image" . $h . " = '" . nohtml_real_escape_string($_POST[$this_field_name]) . "'
-				WHERE produit_id = '" . intval($id) . "' AND couleur_id ='" . intval($this_color_id) . "'");
+				SET image" . word_real_escape_string($h) . "='" . nohtml_real_escape_string($_POST[$this_field_name]) . "'
+				WHERE produit_id='" . intval($id) . "' AND couleur_id='" . intval($this_color_id) . "'");
 		}
 	}
 
@@ -1602,7 +1606,7 @@ function affiche_liste_produits_fournisseur()
 			$tpl_cats = array();
 			$sqlCAT = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 				FROM peel_produits_categories pc
-				INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
+				INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
 				WHERE pc.produit_id = " . intval($ligne['id']) . "";
 			$resCAT = query($sqlCAT);
 			if (num_rows($resCAT) > 0) {

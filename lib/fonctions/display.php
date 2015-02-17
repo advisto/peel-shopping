@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 43515 2014-12-05 14:47:03Z gboussin $
+// $Id: display.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -238,7 +238,7 @@ if (!function_exists('affiche_meta')) {
 		$tpl->assign('site', $GLOBALS['site']);
 		if($_SESSION['session_langue'] == 'fr') {
 			$tpl->assign('generator', 'https://www.peel.fr/');
-		} else{
+		} else {
 			$tpl->assign('generator', 'http://www.peel-shopping.com/');
 		}
 		$tpl->assign('description', String::ucfirst($this_description));
@@ -616,21 +616,23 @@ if (!function_exists('get_categories_output')) {
 	 * @param string $display_mode
 	 * @param boolean $add_indent
 	 * @param boolean $input_name
+	 * @param string $technical_code
+	 * @param boolean $use_admin_rights
 	 * @return
 	 */
-	function get_categories_output($location = null, $mode = 'categories', $selected_item = null, $display_mode = 'option', $add_indent = '&nbsp;&nbsp;', $input_name = null, $technical_code = null)
+	function get_categories_output($location = null, $mode = 'categories', $selected_item = null, $display_mode = 'option', $add_indent = '&nbsp;&nbsp;', $input_name = null, $technical_code = null, $use_admin_rights = false)
 	{
 		$output = '';
 		if($mode == 'categories') {
 			// Dans l'admin, il faut pouvoir voir les catégories qui n'ont pas de nom. Cela arrive lorque les information d'une catégorie ne sont pas renseigné pour toutes les langues,dans ce cas l'id entre crochet sera affiché en BO à la place du nom.
 			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom
 				FROM peel_categories c
-				WHERE c.etat="1" '.(!defined('IN_PEEL_ADMIN')?' AND nom_' . $_SESSION['session_langue'] . '!="" ':'').' '.(!empty($technical_code)?' AND technical_code ="' . nohtml_real_escape_string($technical_code) . '"':'').' AND ' . get_filter_site_cond('categories', 'c', defined('IN_PEEL_ADMIN')) . '
+				WHERE c.etat="1" '.(!defined('IN_PEEL_ADMIN')?' AND nom_' . $_SESSION['session_langue'] . '!="" ':'').' '.(!empty($technical_code)?' AND technical_code ="' . nohtml_real_escape_string($technical_code) . '"':'').' AND ' . get_filter_site_cond('categories', 'c', $use_admin_rights) . '
 				ORDER BY c.position ASC, nom ASC';
 		} elseif($mode == 'rubriques') {
 			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom
 				FROM peel_rubriques r
-				WHERE r.etat = "1" AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', defined('IN_PEEL_ADMIN')) . '
+				WHERE r.etat = "1" AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', $use_admin_rights) . '
 				ORDER BY r.position ASC, nom ASC';
 		} elseif($mode == 'categories_annonces') {
 			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom
@@ -857,7 +859,7 @@ if (!function_exists('print_rib')) {
 			if (!empty($tplData)) {
 				$tpl = $GLOBALS['tplEngine']->createTemplate('rib.tpl');
 				$tpl->assign('data', $tplData);
-				$output = $tpl->fetch();
+				$output .= $tpl->fetch();
 			}
 		}
 		if ($return_mode) {
@@ -1168,7 +1170,7 @@ if (!function_exists('print_compte')) {
 			if (check_if_module_active('profil')) {
 				if (!empty($profil['document_'.$_SESSION['session_langue']]) || !empty($profil['description_document_'.$_SESSION['session_langue']])) {
 					$tpl->assign('profile', array('header' => $GLOBALS['STR_ACCOUNT_DOCUMENTATION'],
-							'href' => $GLOBALS['repertoire_upload'] . '/' . $profil['document_'.$_SESSION['session_langue']],
+							'href' => (!empty($profil['document_'.$_SESSION['session_langue']])? $GLOBALS['repertoire_upload'] . '/' . $profil['document_'.$_SESSION['session_langue']]:''),
 							'txt' => $GLOBALS['STR_DOWNLOAD_DOCUMENT'],
 							'content' => $profil['description_document_'.$_SESSION['session_langue']]
 							));
@@ -1542,7 +1544,7 @@ if (!function_exists('affiche_footer')) {
 		} else {
 			$tpl->assign('footer_additional', vb($GLOBALS['site_parameters']['footer_additional']));
 		}
-		$tpl->assign('SITE_GENERATOR', $GLOBALS['SITE_GENERATOR']);
+		$tpl->assign('STR_SITE_GENERATOR', $GLOBALS['STR_SITE_GENERATOR']);
 		if ($return_mode) {
 			return $tpl->fetch();
 		} else {
@@ -1908,6 +1910,13 @@ if (!function_exists('get_menu')) {
 		} else {
 			$item_max_length = 25;
 		}
+		if (!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+			//  bootstrap est actif, l'affichage de l'arborescence des catégories est faite via des sous menu distinct, qui s'affiche au survol de la souris. Il n'est pas nécessaire de mettre une indentation en plus.
+			$indent = '';
+		} else {
+			// Menu sans bootstrap, les sous catégories sont décallées par rapport à la catégorie mère, pour permettre un affichage clair de l'arborescence
+			$indent = '&nbsp;&nbsp;';
+		}
 		if (empty($GLOBALS['main_menu_items'])) {
 			$GLOBALS['main_menu_items']['home'] = array($GLOBALS['wwwroot'] . '/' => $GLOBALS['STR_HOME']);
 			$GLOBALS['main_menu_items']['catalog'] = array(get_product_category_url() => $GLOBALS['STR_CATALOGUE']);
@@ -1917,9 +1926,12 @@ if (!function_exists('get_menu')) {
 			$GLOBALS['main_menu_items']['faq'] = array($GLOBALS['wwwroot'] . '/modules/faq/faq.php' => $GLOBALS['STR_FAQ_TITLE']);
 			$GLOBALS['main_menu_items']['brand'] = array($GLOBALS['wwwroot'] . '/achat/marque.php' => $GLOBALS['STR_ALL_BRAND']);
 			$GLOBALS['main_menu_items']['contact_us'] = array($GLOBALS['wwwroot'] . '/contacts.php' => $GLOBALS['STR_CONTACT_US']);
+			$GLOBALS['main_menu_items']['flash'][$GLOBALS['wwwroot'] . '/modules/flash/flash.php'] = $GLOBALS['STR_FLASH'];
+			$GLOBALS['main_menu_items']['promotions'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
+
 			if (is_module_gift_checks_active()) {
 				$GLOBALS['main_menu_items']['check'][$GLOBALS['wwwroot'] . '/modules/gift_check/cheques.php'] = $GLOBALS['STR_CHEQUE_CADEAU'];
-            }
+			}
 			if (check_if_module_active('annonces')) {
 				$GLOBALS['main_menu_items']['annonces'] = array($GLOBALS['wwwroot'] . '/modules/annonces/index.php' => $GLOBALS['STR_MODULE_ANNONCES_ADS']);
 				if (est_identifie()) {
@@ -1972,7 +1984,7 @@ if (!function_exists('get_menu')) {
 			}
 			$GLOBALS['menu_items']['contact'][$GLOBALS['wwwroot'] . '/plan_acces.php'] = $GLOBALS['STR_ACCESS_PLAN'];
 			if (a_priv('admin*', true)) {
-				$GLOBALS['main_menu_items']['admin'] = array($GLOBALS['administrer_url'] . '/index.php' => $GLOBALS['STR_ADMIN']);
+				$GLOBALS['main_menu_items']['admin'] = array($GLOBALS['administrer_url'] . '/' => $GLOBALS['STR_ADMIN']);
 			}
 			$GLOBALS['menu_items']['news'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
 			if (check_if_module_active('flash') && is_flash_active_on_site()) {
@@ -2017,11 +2029,11 @@ if (!function_exists('get_menu')) {
 			}
 			$submenu_global['catalog'] = '';
 			if(!empty($item_name_array) && !empty($GLOBALS['site_parameters']['product_categories_depth_in_menu'])) {
-				$submenu_global['catalog'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $selected_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), $item_max_length, 'list').'</ul>';
+				$submenu_global['catalog'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $selected_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), $item_max_length, 'list', $indent, null).'</ul>';
 				foreach($item_name_array as $catid => $nom) {
 					if (!empty($all_parents_with_ordered_direct_sons_array[$catid])) {
 						$submenu_global["cat_".$catid] = '<ul class="sousMenu dropdown-menu" role="menu">';
-						$submenu_global["cat_".$catid] .= get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $catid, 0, $selected_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), 50, 'list');
+						$submenu_global["cat_".$catid] .= get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $catid, 0, $selected_item, 'categories', 'left', vn($GLOBALS['site_parameters']['product_categories_depth_in_menu']), 50, 'list', $indent, null);
 						if($avoid_links_when_hover) {
 							// Si le lien n'est pas généré dans le menu pour une catégorie mère, il faut ajouter ce lien dans le sous menu pour que la catégorie mère reste accessible
 							// On utilise array_shift( array_keys() ) car array_keys()[0] n'est disponible qu'à partir de la version 5.4 de PHP
@@ -2077,7 +2089,7 @@ if (!function_exists('get_menu')) {
 			}
 			$submenu_global['content'] = '';
 			if(!empty($item_name_array)) {
-				$submenu_global['content'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $selected_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], $item_max_length).'</ul>';
+				$submenu_global['content'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, 0, 0, $selected_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], $item_max_length, 'list', $indent, null).'</ul>';
 				foreach($item_name_array as $rubid => $nom) {
 					if (!empty($GLOBALS['site_parameters']['insert_content_articles_in_menu'])) {
 						// Affichage des articles de la rubrique dans le sous menu
@@ -2099,7 +2111,7 @@ if (!function_exists('get_menu')) {
 					} elseif (!empty($all_parents_with_ordered_direct_sons_array[$rubid])) {
 						// Affichage des sous-rubriques dans le sous-menu
 						$submenu_global["rub_".$rubid] = '
-							<ul class="sousMenu dropdown-menu" role="menu">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $rubid, 0, $selected_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], 50) . vb($article) .'</ul>';
+							<ul class="sousMenu dropdown-menu" role="menu">' . get_recursive_items_display($all_parents_with_ordered_direct_sons_array, $item_name_array, $rubid, 0, $selected_item, 'rubriques', 'left', $GLOBALS['site_parameters']['content_categories_depth_in_menu'], 50, 'list', $indent, null) . vb($article) .'</ul>';
 					}
 				}
 			}
@@ -2640,6 +2652,7 @@ if (!function_exists('get_newsletter_form')) {
 	function get_newsletter_form()
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('newsletter_form.tpl');
+		$tpl->assign('form_token', get_form_token_input('get_simple_newsletter', true));
 		$tpl->assign('label', $GLOBALS['STR_NEWSLETTER'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('default', $GLOBALS['STR_WRITE_EMAIL_HERE']);
 		return $tpl->fetch();
@@ -2673,14 +2686,15 @@ if (!function_exists('newsletter_validation')) {
 	 *
 	 * @return
 	 */
-	function newsletter_validation($frm)
+	function newsletter_validation($frm, $form_error_object)
 	{
 		if (empty($frm)) {
 			return false;
 		}
+		$message = "";
 		$tpl = $GLOBALS['tplEngine']->createTemplate('newsletter_validation.tpl');
 		$tpl->assign('header', $GLOBALS['STR_NEWSLETTER_TITLE']);
-		if (!empty($frm['email']) && EmailOK($frm['email'])) {
+		if (!$form_error_object->count()) {
 			// MAJ du compte client s'il existe
 			$q_count_users = query("SELECT COUNT(id_utilisateur) AS nb_users
 				FROM peel_utilisateurs
@@ -2694,16 +2708,17 @@ if (!function_exists('newsletter_validation')) {
 				$frm['newsletter'] = 1;
 				$frm['priv'] = 'newsletter';
 				insere_utilisateur($frm);
-				// Envoi d'un email confirmant l'inscription à la newsletter
 			}
 			$custom_template_tags['EMAIL'] = $frm['email'];
+			// Envoi d'un email confirmant l'inscription à la newsletter
 			send_email($frm['email'], '', '', 'inscription_newsletter', $custom_template_tags, null, $GLOBALS['support']);
-			$tpl->assign('is_error', false);
-			$tpl->assign('message', $GLOBALS['STR_REQUEST_OK'] . ' ' . $GLOBALS['STR_SEE_YOU_SOON'] . ' ' . $GLOBALS['wwwroot']);
+			$message .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK'] . ' ' . $GLOBALS['STR_SEE_YOU_SOON'] . ' ' . $GLOBALS['wwwroot']))->fetch();
 		} else {
-			$tpl->assign('is_error', true);
-			$tpl->assign('message', $GLOBALS['STR_ERR_EMAIL_BAD']);
+			foreach ($form_error_object->error as $key => $error) {
+				$message .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
+			}
 		}
+		$tpl->assign('message', $message);
 		return $tpl->fetch();
 	}
 }

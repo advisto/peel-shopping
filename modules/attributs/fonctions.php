@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -59,14 +59,14 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 			// Il ne faut donc pas faire de jointure entre peel_attributs et peel_nom_attributs, mais passer par peel_produits_attributs pour faire les deux jointures indépendemment. Il faut dans ce cas prendre l'id de l'attribut dans peel_produits_attributs et pas dans peel_attributs par cohérence, et résoud un problème dans le cas d'attribut fictif (paramètre attribut_fictive_options_functions_by_technical_codes_array)
 			$sql_select = 'pa.attribut_id';
 			$sql_from_and_where = "FROM peel_produits_attributs pa
-				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id AND " . get_filter_site_cond('attributs', 'a', defined('IN_PEEL_ADMIN')) . "
-				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na', defined('IN_PEEL_ADMIN')) . "
+				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id AND " . get_filter_site_cond('attributs', 'a') . "
+				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na') . "
 				WHERE pa.produit_id = '" . intval($product_id) . "'";
 		} else {
 			$sql_select = 'a.id AS attribut_id';
 			$sql_from_and_where = "FROM peel_nom_attributs na
-				LEFT JOIN peel_attributs a ON a.id_nom_attribut=na.id AND " . get_filter_site_cond('attributs', 'a', defined('IN_PEEL_ADMIN')) . "
-				WHERE na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na', defined('IN_PEEL_ADMIN'));
+				LEFT JOIN peel_attributs a ON a.id_nom_attribut=na.id AND " . get_filter_site_cond('attributs', 'a') . "
+				WHERE na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na');
 		}
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
@@ -77,7 +77,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			if ($result['type_affichage_attribut'] == 3) {
-				// On prend la valeur générale de la boutique
+				// On prend la valeur générale du site
 				$result['type_affichage_attribut'] = $GLOBALS['site_parameters']['type_affichage_attribut'];
 			}
 			$result['descriptif'] = String::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
@@ -268,7 +268,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 					continue;
 				}
 				if ($this_attribut_infos['type_affichage_attribut'] == 3) {
-					// L'administrateur choisi la configuration général du site pour l'affichage de ce paramétre.
+					// L'administrateur choisit la configuration générale du site pour l'affichage de ce paramètre.
 					$type_affichage_attribut = $GLOBALS['site_parameters']['type_affichage_attribut'];
 				} else {
 					$type_affichage_attribut = $this_attribut_infos['type_affichage_attribut'];

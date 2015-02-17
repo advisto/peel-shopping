@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: SmartyEngine.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 43037 2014-10-29 12:01:40Z sdelaporte $
+ * @version $Id: SmartyEngine.php 44077 2015-02-17 10:20:38Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -75,7 +75,12 @@ class SmartyEngine extends EngineTpl {
 		// Variables générales disponibles dans Smarty, et variables de compatibilité partielle avec certains modèles de templates
 		$data['LANG'] = $GLOBALS['LANG'];
 		$data['site_parameters'] = $GLOBALS['site_parameters'];
-		$data['wwwroot'] = $GLOBALS['wwwroot'];
+		if(!isset($data['site_id'])) {
+			$data['site_id'] = $GLOBALS['site_id'];
+		}
+		if(!isset($data['wwwroot'])) {
+			$data['wwwroot'] = $GLOBALS['wwwroot'];
+		}
 		$data['base_dir'] = $GLOBALS['wwwroot'];
 		$data['content_dir'] = $GLOBALS['wwwroot'] . $GLOBALS['apparent_folder'];
 		$data['dirroot'] = $GLOBALS['dirroot'];

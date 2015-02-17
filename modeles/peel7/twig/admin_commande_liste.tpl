@@ -1,23 +1,23 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: admin_commande_liste.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ links_nbRecord }}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div style="margin-top: 15px; margin-bottom: 15px">
 		<div class="row">
 			<div class="col-lg-4 col-md-4 col-sm-6 center">
-				<label for="search_id">{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</label>
-				<input type="number" class="form-control" id="search_id" name="id" value="{{ id|str_form_value }}" />
+				<label for="search_id">{{ STR_ORDER_NUMBER }} {{ STR_BEFORE_TWO_POINTS }}:</label>
+				<input type="text" class="form-control" id="search_id" name="id" value="{{ id|str_form_value }}" />
 			</div>
 			<div class="col-lg-4 col-md-4 col-sm-6 center">
 				<label for="search_client_info">{{ STR_EMAIL }} / {{ STR_LAST_NAME }} / {{ STR_FIRST_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</label>

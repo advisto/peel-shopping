@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 43464 2014-12-01 16:52:06Z sdelaporte $
+// $Id: ipn.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -82,11 +82,11 @@ if ($r = fetch_assoc($q)) {
 					} elseif ($payment_status == "Refunded") {
 						$peel_status = 9;
 					} else {
-						send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" dans votre boutique car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\npayment_status : " . $payment_status . "\n\n" . print_r($_REQUEST, true));
+						send_email($support, 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" sur votre site car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\npayment_status : " . $payment_status . "\n\n" . print_r($_REQUEST, true));
 					}
 				} elseif (strcmp(trim(strip_tags($res)), "INVALID") == 0) {
 					$peel_status = 2;
-					send_email($GLOBALS['support'], 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" dans votre boutique car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
+					send_email($GLOBALS['support'], 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" sur votre site car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
 				}
 				if (!empty($peel_status)) {
 					update_order_payment_status($item_number, $peel_status, true, null, null, false, 'paypal');

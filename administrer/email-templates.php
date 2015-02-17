@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 43497 2014-12-04 10:22:46Z gboussin $
+// $Id: email-templates.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -344,7 +344,12 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 function emailLinksExplanations()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_emailLinksExplanations.tpl');
-	$tpl->assign('link', $GLOBALS['wwwroot']);
+	if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
+		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+	} else {
+		$this_wwwroot =  $GLOBALS['wwwroot'];
+	}
+	$tpl->assign('link', $this_wwwroot);
 	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 	$tpl->assign('is_vitrine_module_active', check_if_module_active('vitrine'));
 	

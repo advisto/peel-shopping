@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rss_func.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: rss_func.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}<div class="rss_bloc col-sm-{$block_columns_width_sm} col-md-{$block_columns_width_md} footer_col">
 {if !empty($fb_href)}
 	<a style="margin-right:5px;" href="{$fb_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$fb_src|escape:'html'}" alt="F" title="Facebook" width="48" height="48" /></a>

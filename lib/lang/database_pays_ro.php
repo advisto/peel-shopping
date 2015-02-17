@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: database_pays_ro.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_pays_ro.php 44072 2015-02-17 09:53:24Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -84,7 +84,6 @@ $peel_pays["pays"] = array(
   "UKR" => "Ucraina",
   "VEN" => "Venezuela",
   "SRB" => "Serbia",
-  "WSM" => "Samoa",
   "AND" => "Andora",
   "AGO" => "Angola",
   "AIA" => "Anguilla",
@@ -160,7 +159,6 @@ $peel_pays["pays"] = array(
   "KAZ" => "Kazakhstan",
   "KEN" => "Kenia",
   "KIR" => "Kiribati",
-  "KOR" => "Coreea (Rep. de) (Sud)",
   "KWT" => "Kuweit",
   "KGZ" => "Kirghizistan",
   "LAO" => "Laos",

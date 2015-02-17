@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ProductsBought.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: ProductsBought.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: ProductsBought.php 43037 2014-10-29 12:01:40Z sdelaporte $
+ * @version $Id: ProductsBought.php 44077 2015-02-17 10:20:38Z sdelaporte $
  * @access public
  */
 class ProductsBought {
@@ -70,15 +70,15 @@ class ProductsBought {
 			IF(p.id IS NOT NULL, 1,0) AS in_catalog
 		FROM peel_commandes_articles ca
 		INNER JOIN peel_commandes c ON ca.commande_id = c.id AND " . get_filter_site_cond('commandes', 'c', true) . "
-		INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-		LEFT JOIN peel_produits p ON p.id = ca.produit_id AND " . get_filter_site_cond('produits', 'p', true) . "
+		INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+		LEFT JOIN peel_produits p ON p.id = ca.produit_id AND " . get_filter_site_cond('produits', 'p') . "
 		WHERE " . get_filter_site_cond('commandes_articles', 'ca', true) . "
 			AND sp.technical_code IN ('being_checked','completed')
 			AND ca.quantite > '0'
 			" . (!empty($id)?" AND ca.produit_id='" . intval($id) . "'":"") . "
 		GROUP BY IF(ca.produit_id>0,ca.produit_id,ca.nom_produit), ca.couleur, ca.taille
 		ORDER BY quantite_totale DESC
-		LIMIT " . $limit;
+		LIMIT " . intval($limit);
 		return $sql;
 	}
 
@@ -131,8 +131,8 @@ class ProductsBought {
 				SUM(ca.quantite) AS total_quantite
 			FROM peel_utilisateurs u
 			RIGHT JOIN peel_commandes c ON c.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('commandes', 'c', true) . "
-			INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-			INNER JOIN peel_commandes_articles ca ON ca.commande_id=c.id AND  " . get_filter_site_cond('commandes_articles', 'ca', true) . " 
+			INNER JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			INNER JOIN peel_commandes_articles ca ON ca.commande_id=c.id AND  " . get_filter_site_cond('commandes_articles', 'ca', true) . "
 			WHERE ca.produit_id = " . intval($this->produit_id) . " AND ca.quantite > 0 AND sp.technical_code IN ('being_checked','completed') AND " . get_filter_site_cond('utilisateurs', 'u', true) . "
 			GROUP BY u.id_utilisateur");
 		while ($tmp = fetch_object($req)) {

@@ -1,18 +1,18 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 42343 2014-08-29 11:08:01Z sdelaporte $
+# $Id: create_new_site.sql 44077 2015-02-17 10:20:38Z sdelaporte $
 #
 
--- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation de la boutique, ou manuelle depuis l'administration.
+-- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
 
 --
 -- Contenu de la table `peel_access_map`
@@ -47,16 +47,16 @@ INSERT INTO `peel_banniere` (`description`, `image`, `date_debut`, `date_fin`, `
 --
 
 INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES
-('compatibility_mode_with_htmlentities_encoding_content', 'core', 'boolean', 'false', '', '2014-01-01 12:00:00', 'Si true : permet de décoder les données en BDD encodées par des versions de PEEL < 5.7.  Mettre à false pour une nouvelle boutique, et à true si des données ont été migrées', 1, "[SITE_ID]"),
+('compatibility_mode_with_htmlentities_encoding_content', 'core', 'boolean', 'false', '', '2014-01-01 12:00:00', 'Si true : permet de décoder les données en BDD encodées par des versions de PEEL < 5.7.  Mettre à false pour une nouveau site, et à true si des données ont été migrées', 1, "[SITE_ID]"),
 ('post_variables_with_html_allowed_if_not_admin', 'core', 'array', '"description"', '', '2014-01-01 12:00:00', 'Protection générale supplémentaire en complément de nohtml_real_escape_string', 1, "[SITE_ID]"),
-('order_article_order_by', 'core', 'string', 'id', '', '2014-01-01 12:00:00', 'Spécifie l''ordre des produits dans une commande, s''applique sur l''ensemble de la boutique', 1, "[SITE_ID]"),
+('order_article_order_by', 'core', 'string', 'id', '', '2014-01-01 12:00:00', 'Spécifie l''ordre des produits dans une commande, s''applique sur l''ensemble du site', 1, "[SITE_ID]"),
 ('allow_command_product_ongift', 'core', 'boolean', 'false', '', '2014-01-01 12:00:00', 'Permet aux produits cadeaux (champ on_gift dans peel_produits) d''être également commandés comme des produits ordinaire, en plus d''être commandé avec les points cadeaux.', 1, "[SITE_ID]"),
 ('uploaded_file_max_size', 'core', 'integer', '4194304', '', '2014-01-01 12:00:00', 'En octets / in bytes => Par défaut 4Mo / Au delà de cette limite, les fichiers ne seront pas acceptés', 1, "[SITE_ID]"),
 ('filesize_limit_keep_origin_file', 'core', 'integer', '300000', '', '2014-01-01 12:00:00', 'Taille limite au delà de laquelle les images téléchargées sont regénérées par PHP et sauvegardées en JPG', 1, "[SITE_ID]"),
 ('image_max_width', 'core', 'integer', '1024', '', '2014-01-01 12:00:00', 'Taille limite au delà de laquelle les images téléchargées sont converties en JPG à cette largeur maximum', 1, "[SITE_ID]"),
 ('image_max_height', 'core', 'integer', '768', '', '2014-01-01 12:00:00', 'Taille limite au delà de laquelle les images téléchargées sont converties en JPG à cette hauteur maximum', 1, "[SITE_ID]"),
 ('jpeg_quality', 'core', 'integer', '88', '', '2014-01-01 12:00:00', 'Qualité pour les JPEG créés par le serveur / PHP default for JPEG quality: 75', 1, "[SITE_ID]"),
-('session_cookie_basename', 'core', 'string', 'sid', '', '2014-01-01 12:00:00', 'Sera complété par un hash de 8 caractères correspondant au chemin d''installation de cette boutique', 1, "[SITE_ID]"),
+('session_cookie_basename', 'core', 'string', 'sid', '', '2014-01-01 12:00:00', 'Sera complété par un hash de 8 caractères correspondant au chemin d''installation de ce site', 1, "[SITE_ID]"),
 ('sha256_encoding_salt', 'core', 'string', 'k)I8#;z=TIxnXmIPdW2TRzt4Ov89|#V~cU@]', '', '2014-01-01 12:00:00', 'Used in password hash calculation. If you change it, old passwords will not be compatible anymore.', 1, "[SITE_ID]"),
 ('backoffice_directory_name', 'core', 'string', 'administrer', '', '2014-01-01 12:00:00', 'Le nom du répertoire d''administration peut être changé, mais dans ce cas il faut aussi le changer manuellement dans l''arborescence du site sur le disque dur', 1, "[SITE_ID]"),
 ('cache_folder', 'core', 'string', 'cache', '', '2014-01-01 12:00:00', 'Le nom du répertoire de cache peut être changé, mais dans ce cas il faut aussi le changer manuellement sur le disque dur.', 1, "[SITE_ID]"),
@@ -268,7 +268,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('short_order_process', 'core', 'boolean', 'false', '', '2014-01-01 12:00:00', 'Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l''absence de paiement et de validation des CGV => Utile pour des demandes de devis', 1, "[SITE_ID]"),
 ('use_ads_as_products', 'core', 'boolean', 'false', '', '2014-01-01 12:00:00', 'Permet d''ajouter des annonces au panier (nécessite le module d''annonce)', 1, "[SITE_ID]"),
 ('tva_annonce', 'core', 'float', '20.00', '', '2014-01-01 12:00:00', 'Spécifie le taux de TVA à appliquer aux annonces lors de leur ajout au panier (fonctionne avec le paramètre use_ads_as_product).', 1, "[SITE_ID]"),
-('used_uploader', 'core', 'boolean', 'fineuploader', '', '2014-01-01 12:00:00', 'Définit quelle technologie d''upload utiliser / Defines which upload technology to use - possible values = standard, fineuploader', 1, "[SITE_ID]"),
+('used_uploader', 'core', 'string', 'fineuploader', '', '2014-01-01 12:00:00', 'Définit quelle technologie d''upload utiliser / Defines which upload technology to use - possible values = standard, fineuploader', 1, "[SITE_ID]"),
 ('chart_product', 'core', 'string', 'flot', '', '2014-09-01 12:00:00', '', 1, "[SITE_ID]"),
 ('insert_product_categories_in_menu', 'core', 'boolean', 'true', '', '2014-09-01 12:00:00', '', 1, "[SITE_ID]"),
 ('enable_gzhandler', 'core', 'boolean', 'false', '', '2014-09-01 12:00:00', 'Si true : force PHP à compresser ses sorties HTTP', 1, "[SITE_ID]"),
@@ -747,7 +747,6 @@ INSERT INTO `peel_profil` (`priv`, `site_id`) VALUES
 ('stand', "[SITE_ID]"),
 ('supplier', "[SITE_ID]"),
 ('newsletter', "[SITE_ID]"),
-('reve_certif', "[SITE_ID]"),
 ('admin_content', "[SITE_ID]"),
 ('admin_sales', "[SITE_ID]"),
 ('admin_products', "[SITE_ID]"),

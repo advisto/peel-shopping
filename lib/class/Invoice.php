@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 43487 2014-12-02 17:37:29Z sdelaporte $
+// $Id: Invoice.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 43487 2014-12-02 17:37:29Z sdelaporte $
+ * @version $Id: Invoice.php 44077 2015-02-17 10:20:38Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -892,8 +892,8 @@ class Invoice extends TCPDF {
 		}
 		$sql_bills = "SELECT c.*, sp.technical_code AS statut_paiement
 			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', defined('IN_PEEL_ADMIN')) . "
-			WHERE " . implode(' AND ', $sql_cond_array) . ' AND ' . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			WHERE " . implode(' AND ', $sql_cond_array) . ' AND ' . get_filter_site_cond('commandes', 'c') . "
 			ORDER BY c.o_timestamp ASC";
 		$qid_commande = query($sql_bills);
 		$i = 0;
@@ -967,10 +967,10 @@ class Invoice extends TCPDF {
 					}
 					if(empty($commande->o_timestamp) || substr($commande->o_timestamp, 0, 10) == '0000-00-00') {
 						// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
-						$commande->o_timestamp = date('Y-m-d');
+						$commande->o_timestamp = date('Y-m-d H:i:s');
 					}
 					if($bill_mode == "bdc" || $bill_mode == "devis") {
-						$displayed_date = get_formatted_date($commande->o_timestamp, 'short');
+						$displayed_date = get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 					} else {
 						// On veut une date de facture si possible et pas de commande
 						if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
@@ -978,7 +978,7 @@ class Invoice extends TCPDF {
 							$displayed_date = get_formatted_date($commande->f_datetime, 'short');
 						} else {
 							// Pas de date de facture, on indique la date de commande
-							$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', 'long');
+							$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 						}
 					}
 					$this->addDate($displayed_date, $order_infos['displayed_paiement_date']);
@@ -1079,7 +1079,7 @@ class Invoice extends TCPDF {
 	{
 		$qid = query("SELECT * 
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe', null, true) . "");
+			WHERE " . get_filter_site_cond('societe') . "");
 		if ($ligne = fetch_object($qid)) {
 			$pdf_societe = filtre_pdf($ligne->societe) . "\n" ;
 			$pdf_adresse = filtre_pdf($ligne->adresse) . "\n" ;

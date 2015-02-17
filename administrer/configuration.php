@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: configuration.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -46,7 +46,7 @@ switch (vb($_REQUEST['mode'])) {
 				// La table peel_sites pour d'anciens sites existe => on charge son contenu pour ensuite mettre les informations dans peel_configuration
 				$query = query("SELECT ps.*, pd.devise, pd.conversion, pd.symbole, pd.symbole_place, pd.code
 					FROM peel_sites ps
-					LEFT JOIN peel_devises pd ON pd.id = ps.devise_defaut AND " . get_filter_site_cond('devises', null, true) . "
+					LEFT JOIN peel_devises pd ON pd.id = ps.devise_defaut AND " . get_filter_site_cond('devises') . "
 					WHERE ps.id = '1'");
 				$configuration_fields = fetch_assoc($query);
 			}
@@ -62,6 +62,7 @@ switch (vb($_REQUEST['mode'])) {
 					$frm['string'] = $this_value;
 					$frm['origin'] = 'auto';
 					$frm['lang'] = '';
+					$frm['site_id'] = 1;
 					if(is_array($this_value)) {
 						$frm['type'] = 'array';
 						$frm['string'] = get_string_from_array($this_value);

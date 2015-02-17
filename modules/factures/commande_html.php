@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an		|
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 43487 2014-12-02 17:37:29Z sdelaporte $
+// $Id: commande_html.php 44077 2015-02-17 10:20:38Z sdelaporte $
 include("../../configuration.inc.php");
 if(!empty($GLOBALS['site_parameters']['require_login_for_html_bill'])) {
 	necessite_identification();
@@ -51,10 +51,10 @@ if ($commande = fetch_object($qid_commande)) {
 	$numero = intval($commande->order_id);
 	if(empty($commande->o_timestamp) || substr($commande->o_timestamp, 0, 10) == '0000-00-00') {
 		// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
-		$commande->o_timestamp = date('Y-m-d');
+		$commande->o_timestamp = date('Y-m-d H:i:s');
 	}
 	if (!empty($_GET['mode']) && $_GET['mode'] == 'bdc') {
-		$displayed_date = get_formatted_date($commande->o_timestamp, 'short');
+		$displayed_date = get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 	} else {
 		// On veut une date de facture si possible et pas de commande
 		if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
@@ -62,7 +62,7 @@ if ($commande = fetch_object($qid_commande)) {
 			$displayed_date = get_formatted_date($commande->f_datetime, 'short');
 		} else {
 			// Pas de date de facture, on indique la date de commande
-			$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', 'long');
+			$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 		}
 	}
 	if (!empty($_GET['partial'])) {

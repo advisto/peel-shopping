@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -29,7 +29,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	if (!empty($frm['id_utilisateur'])) {
 		$q = 'SELECT *
 			FROM peel_utilisateurs
-			WHERE id_utilisateur ="' . intval(vn($frm['id_utilisateur'])) . '" AND ' . get_filter_site_cond('utilisateurs', null, true) . '';
+			WHERE id_utilisateur ="' . intval(vn($frm['id_utilisateur'])) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
 		$result = query($q);
 		$row_account = fetch_assoc($result);
 		$user_id = $row_account['id_utilisateur'];
@@ -61,7 +61,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 			// on récupère les infos persos dans la BDD si l'utilisateur était loggué
 			$q = query('SELECT *
 				FROM peel_utilisateurs
-				WHERE id_utilisateur=' . intval($user_id) . ' AND ' . get_filter_site_cond('utilisateurs', null, true) . '') ;
+				WHERE id_utilisateur=' . intval($user_id) . ' AND ' . get_filter_site_cond('utilisateurs') . '') ;
 			$row_account = fetch_assoc($q);
 			$user_gender = $row_account['civilite'];
 			$user_login = $row_account['pseudo'];
@@ -70,7 +70,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	} elseif (!empty($frm['user_ids'])) {
 		$q = 'SELECT email
 			FROM peel_utilisateurs
-			WHERE id_utilisateur IN("' . implode('","', real_escape_string($frm['user_ids'])) . '") AND ' . get_filter_site_cond('utilisateurs', null, true) . '';
+			WHERE id_utilisateur IN("' . implode('","', real_escape_string($frm['user_ids'])) . '") AND ' . get_filter_site_cond('utilisateurs') . '';
 		$result = query($q);
 		while ($users_email = fetch_assoc($result)) {
 			$users_email_array[] = $users_email['email'];
@@ -131,7 +131,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	$tpl_options = array();
 	$result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name
 		FROM peel_email_template_cat tc
-		INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't', true) . '
+		INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't') . '
 		WHERE ' . get_filter_site_cond('email_template_cat', 'tc', true) . '
 		GROUP BY tc.id
 		ORDER BY name');
@@ -232,7 +232,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	$tpl->assign('STR_MODULE_WEBMAIL_ADMIN_CLIENT_SERVICE_EMAIL', $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_CLIENT_SERVICE_EMAIL']);
 	$tpl->assign('STR_MODULE_WEBMAIL_ADMIN_EMAIL_EXPLAIN', $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_EMAIL_EXPLAIN']);
 	$tpl->assign('STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL', $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL']);
-	$output = $tpl->fetch();
+	$output .= $tpl->fetch();
 
 	if ($return_mode) {
 		return $output;
@@ -286,7 +286,7 @@ function send_mail_admin($frm)
 		if (!empty($frm['submit_send_email_all'])) {
 			// $custom_template_tags ne contient pas d'info utilisateur car on envoie à potentiellement N personnes
 			program_cron_email($_SESSION['request_from_send_email_all'][$_GET['email_all_hash']], $mail_content, $mail_subject, $_SESSION['session_utilisateur']['email'], null, $frm['lang'], $custom_template_tags);
-			$output = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_WILL_SEND_BY_CRON_OK"]))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_WILL_SEND_BY_CRON_OK"]))->fetch();
 			unset($_SESSION['request_from_send_email_all'][$_GET['email_all_hash']]);
 			// on va envoyer plus tard par cron
 			$send_now = false;
@@ -297,7 +297,7 @@ function send_mail_admin($frm)
 				// Récupération des données en fonction d'une adresse email pour les envois direct.
 				$sql = 'SELECT *
 					FROM peel_utilisateurs
-					WHERE email="' . nohtml_real_escape_string($this_destination_mail) . '" AND ' . get_filter_site_cond('utilisateurs', null, true) . '';
+					WHERE email="' . nohtml_real_escape_string($this_destination_mail) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
 				$result_user = query($sql);
 				$user_infos = fetch_assoc($result_user);
 				$user_template_tags = array();
@@ -380,7 +380,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 	// Requete récupérant la liste des admin disponible sur le site
 	$sql = 'SELECT id_utilisateur, nom_famille , prenom
 		FROM peel_utilisateurs
-		WHERE priv = "admin" AND ' . get_filter_site_cond('utilisateurs', null, true) . '
+		WHERE priv = "admin" AND ' . get_filter_site_cond('utilisateurs') . '
 		ORDER BY id_utilisateur ASC';
 	$result_admins = query($sql);
 	while ($admins_array = fetch_assoc($result_admins)) {
@@ -517,7 +517,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 	}
 	$sql = "SELECT w.*, u.pseudo AS login
 		FROM peel_webmail w
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u', true) . "
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u') . "
 		WHERE " . get_filter_site_cond('webmail', 'w', true) . " " . (!empty($sql_cond)?'' . implode(' AND ', $sql_cond):'') . "
 		ORDER BY w.Date DESC, w.Heure DESC";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
@@ -718,7 +718,7 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 {
 	$output = '';
 	if (!empty($id_utilisateur)) {
-		// Requête d'emails à partir de la boutique
+		// Requête d'emails à partir du site
 		$sql_formulaire = 'SELECT *
 			FROM peel_webmail
 			WHERE id_user="' . intval(vn($id_utilisateur)) . '" AND ' . get_filter_site_cond('webmail', null, true) . '
@@ -771,7 +771,7 @@ function list_user_mail($id_utilisateur, $return_mode = false)
 			$sql_annonce = 'SELECT *
 				FROM peel_user_contacts uc
 				LEFT JOIN peel_lot_vente a ON a.ref = uc.annonce_id AND a.id_personne="' . intval(vn($id_utilisateur)) . '"
-				LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = uc.id_expediteur AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+				LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = uc.id_expediteur AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 				WHERE uc.user_id = "' . intval(vn($id_utilisateur)) . '"
 				ORDER BY date DESC';
 			$Links_annonce = new Multipage($sql_annonce, 'affiche_liste_mail_annonce');

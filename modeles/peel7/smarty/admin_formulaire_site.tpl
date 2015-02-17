@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 43225 2014-11-17 09:16:50Z sdelaporte $
+// $Id: admin_formulaire_site.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<table class="main_table">
@@ -551,52 +551,19 @@
 							<table>
 								<tr>
 									<td>
-										<label for="display_mode_{$m.id}_left">{$STR_ADMIN_DISPLAY_MODE}</label>{$STR_BEFORE_TWO_POINTS}:
+										<label for="display_mode_{$m.id}_left">{$STR_ADMIN_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</label>
 									</td>
 									<td>
 										<input type="text" style="max-width:150px" class="form-control" name="display_mode_{$m.id}" value="{$m.display_mode}" size="10" />
 									</td>
 								</tr>
 								<tr>
-									<td>{$STR_ADMIN_PLACE}{$STR_BEFORE_TWO_POINTS}:</td>
+									<td><label for="emplacement_{$m.id}">{$STR_ADMIN_HTML_PLACE}{$STR_BEFORE_TWO_POINTS}:</label></td>
 									<td>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_above_middle" value="above_middle"{if $m.location == 'above_middle'} checked="checked"{/if}{if $m.is_above_middle_off} disabled="disabled"{/if} /> <label for="{$m.id}_above_middle">{$STR_ADMIN_SITES_ABOVE_MIDDLE}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_below_middle" value="below_middle"{if $m.location == 'below_middle'} checked="checked"{/if}{if $m.is_below_middle_off} disabled="disabled"{/if} /> <label for="{$m.id}_below_middle">{$STR_ADMIN_SITES_BELOW_MIDDLE}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_footer" value="footer"{if $m.location == 'footer'} checked="checked"{/if}{if $m.is_footer_off} disabled="disabled"{/if} /> <label for="{$m.id}_footer">{$STR_ADMIN_SITES_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_header" value="header"{if $m.location == 'header'} checked="checked"{/if}{if $m.is_header_off} disabled="disabled"{/if} /> <label for="{$m.id}_header">{$STR_ADMIN_SITES_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_top_middle" value="top_middle"{if $m.location == 'top_middle'} checked="checked"{/if}{if $m.is_top_middle_off} disabled="disabled"{/if} /> <label for="{$m.id}_top_middle">{$STR_ADMIN_SITES_CENTER_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_center_middle" value="center_middle"{if $m.location == 'center_middle'} checked="checked"{/if}{if $m.is_center_middle_off} disabled="disabled"{/if} /> <label for="{$m.id}_center_middle">{$STR_ADMIN_SITES_CENTER_MIDDLE}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_center_middle_home" value="center_middle_home"{if $m.location == 'center_middle_home'} checked="checked"{/if}{if $m.is_center_middle_home_off} disabled="disabled"{/if} /> <label for="{$m.id}_center_middle_home">{$STR_ADMIN_SITES_CENTER_MIDDLE_HOME}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_bottom_middle" value="bottom_middle"{if $m.location == 'bottom_middle'} checked="checked"{/if}{if $m.is_bottom_middle_off} disabled="disabled"{/if} /> <label for="{$m.id}_bottom_middle">{$STR_ADMIN_SITES_CENTER_BOTTOM}</label><br />
-									{if $is_module_banner_active && $is_vitrine_module_active}
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_top_vitrine" value="top_vitrine"{if $m.location == 'top_vitrine'} checked="checked"{/if}{if $m.is_top_vitrine_off} disabled="disabled"{/if} /> <label for="{$m.id}_top_vitrine">{$STR_ADMIN_SITES_USER_SHOPS_TOP}</label><br />
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_bottom_vitrine" value="bottom_vitrine"{if $m.location == 'bottom_vitrine'} checked="checked"{/if}{if $m.is_bottom_vitrine_off} disabled="disabled"{/if} /> <label for="{$m.id}_bottom_vitrine">{$STR_ADMIN_SITES_USER_SHOPS_BOTTOM}</label><br />
-									{/if}
-									{if $is_annonce_module_active}
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_top_annonce" value="top_annonce"{if $m.location == 'top_annonce'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_top_annonce">{$STR_ADMIN_SITES_POSITION_ADS_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_sponso_cat" value="sponso_cat"{if $m.location == 'sponso_cat'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_sponso_cat">{$STR_ADMIN_SITES_POSITION_ADS_SPONSOR}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_ad_detail_bottom" value="ad_detail_bottom"{if $m.location == 'ad_detail_bottom"'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_ad_detail_bottom">{$STR_ADMIN_SITES_POSITION_AD_BOTTOM}</label><br />
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_ad_detail_top" value="ad_detail_top"{if $m.location == 'ad_detail_top"'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_ad_detail_top">{$STR_ADMIN_SITES_POSITION_AD_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_middle_annonce" value="middle_annonce"{if $m.location == 'middle_annonce'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_middle_annonce">{$STR_ADMIN_SITES_POSITION_ADS_MIDDLE}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_bottom_annonce" value="bottom_annonce"{if $m.location == 'bottom_annonce'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_bottom_annonce">{$STR_ADMIN_SITES_POSITION_ADS_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_left_annonce" value="left_annonce"{if $m.location == 'left_annonce'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_left_annonce">{$STR_ADMIN_SITES_POSITION_ADS_LEFT}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_right_annonce" value="right_annonce"{if $m.location == 'right_annonce'} checked="checked"{/if}{if $m.is_annonce_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_right_annonce">{$STR_ADMIN_SITES_POSITION_ADS_RIGHT}</label>
-									{/if}
-									{if $is_iphone_ads_module_active}
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_splashscreen" value="iphone_ads_splashscreen"{if $m.location == 'iphone_ads_splashscreen"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_splashscreen">{$STR_ADMIN_SITES_POSITION_IPHONE_HOME}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_bottom_annonce" value="iphone_ads_bottom_annonce"{if $m.location == 'iphone_ads_bottom_annonce"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_bottom_annonce">{$STR_ADMIN_SITES_POSITION_IPHONE_ADS_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_top_annonce" value="iphone_ads_top_annonce"{if $m.location == 'iphone_ads_top_annonce"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_top_annonce">{$STR_ADMIN_SITES_POSITION_IPHONE_ADS_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_ad_detail_top" value="iphone_ads_ad_detail_top"{if $m.location == 'iphone_ads_ad_detail_top"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_ad_detail_top">{$STR_ADMIN_SITES_POSITION_IPHONE_AD_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_ad_detail_bottom" value="iphone_ads_ad_detail_bottom"{if $m.location == 'iphone_ads_ad_detail_bottom"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_ad_detail_bottom">{$STR_ADMIN_SITES_POSITION_IPHONE_AD_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_favoris_bottom" value="iphone_ads_favoris_bottom"{if $m.location == 'iphone_ads_favoris_bottom"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_favoris_bottom">{$STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_favoris_top" value="iphone_ads_favoris_top"{if $m.location == 'iphone_ads_favoris_top"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_favoris_top">{$STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_account_bottom" value="iphone_ads_account_bottom"{if $m.location == 'iphone_ads_account_bottom"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_account_bottom">{$STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_account_top" value="iphone_ads_account_top"{if $m.location == 'iphone_ads_account_top"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_account_top">{$STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_create_account_top" value="iphone_ads_create_account_top"{if $m.location == 'iphone_ads_create_account_top"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_create_account_top">{$STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_CREATION_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_create_account_bottom" value="iphone_ads_create_account_bottom"{if $m.location == 'iphone_ads_create_account_bottom"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_create_account_bottom">{$STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_CREATION_BOTTOM}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_publish_top" value="iphone_ads_publish_top"{if $m.location == 'iphone_ads_publish_top"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_publish_top">{$STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_TOP}</label>
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_iphone_ads_publish_bottom" value="iphone_ads_publish_bottom"{if $m.location == 'iphone_ads_publish_bottom"'} checked="checked"{/if}{if $m.is_iphone_place_off} disabled="disabled"{/if} /> <label for="{$m.id}_iphone_ads_publish_bottom">{$STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_BOTTOM}</label>
-									{/if}
+									{foreach $emplacement_array as $e_code => $e_name}
+										{assign var="var_name" value="is_{$e_code}_off"}
+										<input type="radio" name="module_{$m.id}" id="{$m.id}_{$e_code}" value="{$e_code}"{if $m.location == $e_code} checked="checked"{/if}{if $m.$var_name} disabled="disabled"{/if} /> <label for="{$m.id}_{$e_code}">{$e_name}</label>
+									{/foreach}
 									</td>
 								</tr>
 								<tr>
@@ -617,7 +584,7 @@
 								</tr>
 								<tr>
 									<td>
-										<label for="position_{$m.id}_left">{$STR_ADMIN_POSITION}</label>{$STR_BEFORE_TWO_POINTS}:
+										<label for="position_{$m.id}_left">{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</label>
 									</td>
 									<td>
 										<input type="text"  style="max-width:50px" class="form-control" name="position_{$m.id}" value="{$m.position|str_form_value}" />

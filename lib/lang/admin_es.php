@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 43320 2014-11-21 18:15:44Z sdelaporte $
+// $Id: admin_es.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -307,7 +307,7 @@ $GLOBALS["STR_ADMIN_DISCONNECT"] = "Cerrar sesión";
 $GLOBALS["STR_ADMIN_DISCOUNT"] = "Descuento";
 $GLOBALS["STR_ADMIN_DISPLAY_MODE"] = "Mostrar";
 $GLOBALS["STR_ADMIN_DISPLAY_ON_HOMEPAGE"] = "Ver página";
-$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "Ver el contenido de la rúbrica como página de inicio";
+$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "Mostrar esté artículo en la página de su rúbrica";
 $GLOBALS["STR_ADMIN_DISPLAY_RESULTS"] = "mostrar resultados";
 $GLOBALS["STR_ADMIN_DONE_OR_CANCELED"] = "Terminado, Cancelado o";
 $GLOBALS["STR_ADMIN_ECOTAX"] = "Entrega";
@@ -1034,7 +1034,7 @@ $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT_EXPLAIN"] = "Si es 
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT"] = "PÚBLICO: Umbral de envío gratis";
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_GENERAL"] = "Dependiendo de las zonas, el peso total y la cantidad total de la orden";
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_HEADER"] = "Administrar envío";
-$GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_METHOD_EXPLAIN"] = "Si desea administrar las entregas (incluso gratis), use la opción \" Dependiendo de las zonas, el peso total y la cantidad total de la orden \".";
+$GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_METHOD_EXPLAIN"] = "Si desea administrar las entregas (incluso gratis), use la opción \"Dependiendo de las zonas, el peso total y la cantidad total de la orden\".";
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_METHOD"] = "Método de cálculo del envío";
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_NONE"] = "No hay gestión de entrega y por lo tanto no hay gastos de envío (servicios / productos virtuales)";
 $GLOBALS["STR_ADMIN_SITES_DELIVERY_COST_RESELLER_FRANCO_LIMIT"] = "CONCESIONARIOS: Umbral envío gratis";
@@ -1201,7 +1201,7 @@ $GLOBALS["STR_ADMIN_SITES_SITE_COUNTRY_PRESELECTED"] = "País preseleccionado en
 $GLOBALS["STR_ADMIN_SITES_SITE_NAME"] = "Nombre del sitio";
 $GLOBALS["STR_ADMIN_SITES_SITE_SUSPENDED"] = "Sitio suspendido";
 $GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS_AMOUNT"] = "Los costos adicionales si la pequeña orden";
-$GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS_EXPLAIN"] = "Los cargos adicionales se llama \" costos de preparación de \"se puede definir para las órdenes hasta una cierta cantidad";
+$GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS_EXPLAIN"] = "Los cargos adicionales \"costos de preparación\" se puede definir para las órdenes hasta una cierta cantidad";
 $GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS_LIMIT"] = "valor por debajo del cual se aplican cargos adicionales";
 $GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS_VAT"] = "IVA de estos gastos";
 $GLOBALS["STR_ADMIN_SITES_SMALL_ORDERS"] = "Gestión de pedidos pequeños";
@@ -1336,7 +1336,7 @@ $GLOBALS["STR_ADMIN_TARIFS_TARIFS"] = "Tasas";
 $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Administrar las tarifas de transporte por modo de entrega / área / peso / cantidad";
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "Editar este precio";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "Código Técnico";
-$GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "";
+$GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "Número técnico de orden";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "Título - El título no será visible en el sitio";
 $GLOBALS["STR_ADMIN_TITLE"] = "Título";
 $GLOBALS["STR_ADMIN_TO_DO"] = "Para hacer";
@@ -1864,56 +1864,55 @@ $GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "Ningún socio registrado en 
 $GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
 $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER_IN_CATEGORY"] = "Añadir un socio en esta categoría";
 $GLOBALS["STR_MODULE_PARTENAIRES_CATEGORIES_LIST"] = "LISTA DE CATEGORÍAS";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALERT"] = "Alerta";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_DETAILS"]  = "Detalle de una advertencia";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"]  = "Elige una categoría y / o el proveedor que desea gestionar el inventario.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_STOCK"]  = "Una alerta de correo electrónico ha sido enviado a %s para indicar que ahora hay de stock de este producto.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_NO_STOCK"]  = "No correo electrónico enviado a %s porque no hay en stock se encuentra para este producto";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_FOR_CLIENT_REMOVED"]  = "La alerta para el cliente <b>%s</b> se ha despejado.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_LIST"]  = "Lista de alertas actuales";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_TREATED"]  = "Esta alerta ha sido tratado y ya no existe";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"]  = "Todos los proveedores";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_PRODUCTS_IN_STOCK"]  = "Todos los productos están en stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHECK_TO_SEE_IF_STOCK"]  = "Marque esta casilla si el producto está fuera de stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"]  = "Seleccione la categoría y / o el proveedor que desea gestionar la acción";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"]  = "Elija su proveedor";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"]  = "Plazo de expedición estimado (en días)";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS"]  = "Mostrar stocks";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS_PRODUCT"]  = "Ver el stock disponible";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_EDIT"]  = "Editar";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ETAT_DELETED"]  = "El estado <b>%s</b> ha sido eliminado.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_INFO_SCALE_JOUR_STOCK"]  = "La escala es en <b>días</b>. Este valor se mostrará en más detalles a medida que el producto se encuentra en stock. <br /> Si desea administrar la visualización de la entrega durante 'la escasez de existencias, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">ver la página de gestión de estado de valores </a>";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_ALL_STOCK_ALL_SUPPLIERS"]  = "Gestionar el inventario de todas las categorías y todos los proveedores";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK"]  = "Gestionar listas de inventario";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_DEACTIVATED"]  = "Gestión de stocks desactivado";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_SINGLE"]  = "Gestión de stocks";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY"]  = "Gestionar los stocks de la categoría";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_AND_SUPPLIER"]  = "y del proveedor";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_FOURNISSEUR"]  = "Gestionar el inventario de todas las categorías y del proveedor";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_GIFT_CHECK"]  = "GESTIÓN DE INVENTARIO (inactivo por vales de regalo)";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_PRODUCT"]  = "Gestionar el stock de este producto";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_ASSOCIATED_PRODUCT"]  = "Gestionar el inventario asociado con el producto";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_MODIFY_STOCK"]  = "Cambie esta estado de stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ALERT_IN_BDD"]  = "No hay alertas registradas en la base de datos.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ETAT"]  = "No estado registrado en la base de datos.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_PRODUCT_IN_CATEGORY_STOCK"]  = "Esta categoría no contiene ningún producto a manejar las acciones.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NEED_SUPPLYING"]  = "ATENCIÓN: Una orden se ha transmitido que requiere unidades de suministro inmediatas %s";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OF_ALERT"]  = "de la alerta";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OPEN_NEW_WINDOW"]  = "(abre una nueva ventana)";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCTS_PHOTOS"]  = "Fotos de los productos";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRICE_PURCHASE"]  = "Precio de compra de los stock sin IVA";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCT_LIST_IS_NULL"]  = "Lista de productos cuyas acciones es cero";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SAVE_STOCKS"]  = "Guarde estos stocks";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SEARCHED_PRODUCT"]  = "Producto descatalogado";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_OF"]  = "Stock de";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_CHANGES_VALIDATED"]  = "Los cambios en el estado de los stocks %s se han tenido en cuenta";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_COMPLETE"]  = "stock ahora completa. Estado de entrega actualizada.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_INCOMPLETE"]  = "stock insuficiente. Restos será condenada";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_TABLE_STOCK_UPDATED"]  = "La gestión del inventario tabla ha sido actualizada";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_UPDATE_STOCK"]  = "Stocks Actualizar";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_CATEGORY_FOURNISSEUR_STOCK"]  = "Si selecciona \"Todas las categorías\" y \"Todos los proveedores\", una lista completa de las 250 productos cuyos stocks son gestionados se mostrará.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_DISPLAY_PRODUCT_STOCK"]  = "Tenga en cuenta que sus productos no aparecen en esta forma, una vez arrancado el almacén del producto.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WITH_PRODUCT"]  = "con el producto";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_DETAILS"] = "Detalle de una advertencia";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Elige una categoría y / o el proveedor que desea gestionar el inventario.";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_STOCK"] = "Una alerta de correo electrónico ha sido enviado a %s para indicar que ahora hay de stock de este producto.";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_NO_STOCK"] = "No correo electrónico enviado a %s porque no hay en stock se encuentra para este producto";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_FOR_CLIENT_REMOVED"] = "La alerta para el cliente <b>%s</b> se ha despejado.";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_LIST"] = "Lista de alertas actuales";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_TREATED"] = "Esta alerta ha sido tratado y ya no existe";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"] = "Todos los proveedores";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_PRODUCTS_IN_STOCK"] = "Todos los productos están en stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHECK_TO_SEE_IF_STOCK"] = "Marque esta casilla si el producto está fuera de stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Seleccione la categoría y / o el proveedor que desea gestionar la acción";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"] = "Elija su proveedor";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"] = "Plazo de expedición estimado (en días)";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS"] = "Mostrar stocks";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS_PRODUCT"] = "Ver el stock disponible";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_EDIT"] = "Editar";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ETAT_DELETED"] = "El estado <b>%s</b> ha sido eliminado.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_INFO_SCALE_JOUR_STOCK"] = "La escala es en <b>días</b>. Este valor se mostrará en más detalles a medida que el producto se encuentra en stock. <br /> Si desea administrar la visualización de la entrega durante 'la escasez de existencias, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">ver la página de gestión de estado de valores </a>";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_ALL_STOCK_ALL_SUPPLIERS"] = "Gestionar el inventario de todas las categorías y todos los proveedores";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK"] = "Gestionar listas de inventario";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_DEACTIVATED"] = "Gestión de stocks desactivado";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_SINGLE"] = "Gestión de stocks";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY"] = "Gestionar los stocks de la categoría";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_AND_SUPPLIER"] = "y del proveedor";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_FOURNISSEUR"] = "Gestionar el inventario de todas las categorías y del proveedor";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_GIFT_CHECK"] = "GESTIÓN DE INVENTARIO (inactivo por vales de regalo)";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_PRODUCT"] = "Gestionar el stock de este producto";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_ASSOCIATED_PRODUCT"] = "Gestionar el inventario asociado con el producto";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_MODIFY_STOCK"] = "Cambie esta estado de stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NEED_SUPPLYING"] = "ATENCIÓN: Una orden se ha transmitido que requiere unidades de suministro inmediatas %s";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ALERT_IN_BDD"] = "No hay alertas registradas en la base de datos.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ETAT"] = "No estado registrado en la base de datos.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_PRODUCT_IN_CATEGORY_STOCK"] = "Esta categoría no contiene ningún producto a manejar las acciones.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OF_ALERT"] = "de la alerta";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OPEN_NEW_WINDOW"] = "(abre una nueva ventana)";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCTS_PHOTOS"] = "Fotos de los productos";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRICE_PURCHASE"] = "Precio de compra de los stock sin IVA";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCT_LIST_IS_NULL"] = "Lista de productos cuyas acciones es cero";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SAVE_STOCKS"] = "Guarde estos stocks";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SEARCHED_PRODUCT"] = "Producto descatalogado";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_OF"] = "Stock de";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_CHANGES_VALIDATED"] = "Los cambios en el estado de los stocks %s se han tenido en cuenta";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_COMPLETE"] = "stock ahora completa. Estado de entrega actualizada.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_INCOMPLETE"] = "stock insuficiente. Restos será condenada";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_TABLE_STOCK_UPDATED"] = "La gestión del inventario tabla ha sido actualizada";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_UPDATE_STOCK"] = "Stocks Actualizar";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_CATEGORY_FOURNISSEUR_STOCK"] = "Si selecciona \"Todas las categorías\" y \"Todos los proveedores\", una lista completa de las 250 productos cuyos stocks son gestionados se mostrará.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_DISPLAY_PRODUCT_STOCK"] = "Tenga en cuenta que sus productos no aparecen en esta forma, una vez arrancado el almacén del producto.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WITH_PRODUCT"] = "con el producto";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_ABBREVIATE"] = "Abreviatura";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_CREATE"] = "Añadir perfil";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN"] = "que aparece en la cuenta del usuario";
@@ -1998,7 +1997,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Firma";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "La respuesta";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "El correo electrónico webmaster / support";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Añadir un método de envío";
-$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Puede establecer esta página los nombres de los modos de prestación Estos modos de entrega se unirá a las <a class='alert-link' href='".$GLOBALS['administrer_url']."/tarifs.php'>tarifas de envío</a>.";
+$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Puede establecer esta página los nombres de los modos de prestación Estos modos de entrega se unirá a las <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">tarifas de envío</a>.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Añadir o modificar un método de envío";
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "PAGO Kwixo";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Enlace a este modo de entrega a ICI relais";

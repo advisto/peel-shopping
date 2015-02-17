@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 43061 2014-10-30 16:54:39Z sdelaporte $
+// $Id: compte.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}<h1 property="name" class="page_title">{$compte}</h1>
 <div class="page_content">
 <p>{$msg_support}</p>
@@ -131,7 +131,9 @@
 		{if isset($profile)}
 		<h3>{$profile.header}</h3>
 		{$profile.content}<br />
-		- <a href="{$profile.href|escape:'html'}">{$profile.txt}</a><br />
+			{if !empty($profile.href)}
+			- <a href="{$profile.href|escape:'html'}">{$profile.txt}</a><br />
+			{/if}
 		{/if}
 		{if isset($user_alerts)}
 		- <a href="{$user_alerts.href|escape:'html'}">{$user_alerts.txt}</a><br />

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: specific_field.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}{if $f.field_type == "radio"}
 	{foreach $f.options as $o}
 		<input type="radio" value="{$o.value|str_form_value}"{if $o.issel} checked="checked"{/if} id="{$f.field_name|str_form_value}#{$o.value|str_form_value}" name="{$f.field_name}[]" /> <label for="{$f.field_name}#{$o.value|str_form_value}">{$o.name}</label><br />
@@ -18,10 +18,6 @@
 {elseif $f.field_type == "checkbox"}
 	{foreach $f.options as $o}
 	<input type="checkbox" value="{$o.value|str_form_value}"{if $o.issel} checked="checked"{/if} id="{$f.field_name|str_form_value}#{$o.value|str_form_value}" name="{$f.field_name}[]" /> <label for="{$f.field_name}#{$o.value|str_form_value}">{$o.name}</label><br />
-	{/foreach}
-{elseif $f.field_type == "text"}
-	{foreach $f.options as $o}
-		<input type="text" value="{$o.value|str_form_value}" id="{$f.field_name}#{$o.value|str_form_value}" name="{$f.field_name}" class="form-control" /><br />
 	{/foreach}
 {elseif $f.field_type == "password"}
 	{foreach $f.options as $o}
@@ -48,11 +44,15 @@
 	{foreach $f.options as $o}
 		<{$o.name}>{$o.value}</{$o.name}>
 	{/foreach}
-{else}
+{elseif $f.field_type == "select"}
 <select class="form-control" id="{$f.field_name}" name="{$f.field_name}">
 	<option value="">{$f.STR_CHOOSE}...</option>
 	{foreach $f.options as $o}
 	<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
 	{/foreach}
 </select>
+{elseif $f.field_type == "text" || empty($f.field_type)}
+	{foreach $f.options as $o}
+		<input type="text" value="{$o.value|str_form_value}" id="{$f.field_name}#{$o.value|str_form_value}" name="{$f.field_name}" class="form-control" /><br />
+	{/foreach}
 {/if}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_fr.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_text_fr.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -174,6 +174,8 @@ Articles commandés
 [BOUGHT_ITEMS]
 Frais d'expédition :
 [COUT_TRANSPORT]
+Type d'expédition :
+[TYPE]
 
 Vous pouvez suivre en temps réel l'état d'avancement de votre commande :
 une fois votre commande réglée, la facture apparaîtra dans votre compte client au niveau du détail de la commande
@@ -319,7 +321,7 @@ IP de connexion : [REMOTE_ADDR]
 Reverse DNS : [REVERSE_DNS]
 Heure de connexion : [DATETIME]
 
-Cet email à pour but de vous sensibiliser à la sécurité de votre boutique PEEL pour mieux la protéger.",
+Cet email à pour but de vous sensibiliser à la sécurité de votre site PEEL pour mieux la protéger.",
   "signature" => "
 
 Le service client
@@ -345,7 +347,7 @@ L'utilisateur suivant vient de s'inscrire :
 ",
   "warn_admin_reve_subscription" => "Nous vous informons que le revendeur [link=\"[ADMIN_URL]\"][CIVILITE] [PRENOM] [NOM_FAMILLE] [/link] s'est inscrit sur [SITE].
 
-Ce compte est actuellement en statut \"Revendeur en attente\". Ce compte est actif, mais ne bénéficiera des tarifs revendeur que lorsque vous l'aurez passé en statut \"Revendeur\". 
+Ce compte est actuellement en statut \"Revendeur en attente\". Ce compte est inactif, et ne bénéficiera des tarifs revendeur que lorsque vous l'aurez passé en statut \"Revendeur\". 
 ",
 "email_retour_virement" => "Bonjour,
 
@@ -443,6 +445,26 @@ Pour toute information complémentaire, n''hésitez pas à nous contacter.",
 
 Merci pour votre inscription à la newsletter de [SITE_NAME]. Vous recevrez une newsletter hebdomadaire à l'adresse [EMAIL].
 
-A bientôt sur [WWWROOT]/"
+A bientôt sur [WWWROOT]/",
+  "send_mail_for_account_creation_stop" => "Bonjour,
+
+Votre inscription a bien été prise en compte sur [SITE] et doit être validée par un administrateur. Vous serez averti par email de la validation de votre compte et la connexion à votre compte ne sera possible qu'après cette validation.
+
+Cordialement,",
+  "send_mail_for_account_creation_reve" => "Bonjour,
+
+Votre compte [EMAIL] sur [SITE] a été activé par un administrateur. Vous bénéficiez maintenant du statut \"[STATUT]\" et des avantages associés, et vous pouvez vous connecter à votre compte.
+
+Cordialement,",
+  "send_mail_for_account_creation_stand" => "Bonjour,
+
+Votre inscription a bien été prise en compte sur [SITE] et doit être validée par un administrateur. Vous serez averti par email de la validation de votre compte et la connexion à votre compte ne sera possible qu'après cette validation.
+
+Cordialement,",
+  "send_mail_for_account_creation_affi" => "Bonjour,
+
+Votre compte [EMAIL] sur [SITE] a été activé par un administrateur. Vous bénéficiez maintenant du statut \"[STATUT]\" et des avantages associés, et vous pouvez vous connecter à votre compte.
+
+Cordialement,"
 );
 

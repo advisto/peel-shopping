@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 43320 2014-11-21 18:15:44Z sdelaporte $
+// $Id: admin_en.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,7 +34,7 @@ $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_NO_ACTION_FOUND"] = "No moderation action has 
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_NO_MODERATOR_WITH_ACTIONS_FOUND"] = "No moderator doing an action has been found";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_TEMPLATE"] = "TEMPLATE";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_TITLE"] = "Actions of moderation";
-$GLOBALS["STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES"] = "Use the postal address from this user account to complete the billing and shipping addresses fields";
+$GLOBALS["STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES"] = "Use the postal address from this user account to complete the billing and shipping addresses";
 $GLOBALS["STR_ADMIN_ADMINISTRATOR"] = "Administrator";
 $GLOBALS["STR_ADMIN_ALL_CATEGORIES"] = "All categories";
 $GLOBALS["STR_ADMIN_ALL_ORDERS"] = "All orders";
@@ -307,7 +307,7 @@ $GLOBALS["STR_ADMIN_DISCONNECT"] = "Logout";
 $GLOBALS["STR_ADMIN_DISCOUNT"] = "Save";
 $GLOBALS["STR_ADMIN_DISPLAY_MODE"] = "Display";
 $GLOBALS["STR_ADMIN_DISPLAY_ON_HOMEPAGE"] = "View on homepage";
-$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "View on this article content category page";
+$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "View this article on its category page";
 $GLOBALS["STR_ADMIN_DISPLAY_RESULTS"] = "Show results";
 $GLOBALS["STR_ADMIN_DONE_OR_CANCELED"] = "Done, or Cancelled";
 $GLOBALS["STR_ADMIN_ECOTAX"] = "Delivery";
@@ -1854,56 +1854,6 @@ $GLOBALS["STR_MODULE_MARGES_ADMIN_MARGIN"] = "Gross";
 $GLOBALS["STR_MODULE_MARGES_ADMIN_MARGIN_COEFFICIENT"] = "Margin coefficient";
 $GLOBALS["STR_MODULE_PARRAINAGE_ADMIN_FORM_TITLE"] = "Modify the conditions of sponsorship";
 $GLOBALS["STR_MODULE_PARRAINAGE_ADMIN_TEXT"] = "Full text of sponsorship requirements";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALERT"] = "Alert";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_DETAILS"]  = "Alert details";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"]  = "Select the category and/or the supplier you want to manage stocks.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_STOCK"]  = "An email alert has been sent to %s to indicate that there are now stock for this product.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_NO_STOCK"]  = "No email sent to %s because no stock was found for this product";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_FOR_CLIENT_REMOVED"]  = "The alert for the client <b>%s</b> has been cleared";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_LIST"]  = "List of current alerts";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_TREATED"]  = "This alert has already been treated and no longer exists";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"]  = "All suppliers";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_PRODUCTS_IN_STOCK"]  = "All products are in stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHECK_TO_SEE_IF_STOCK"]  = "Check this box if the product is out of stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"]  = "Select the category and/or the supplier you want to manage the stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"]  = "Choose your supplier";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"]  = "Estimated delivery time (in days)";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS"]  = "View stocks";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS_PRODUCT"]  = "View product stock";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_EDIT"]  = "Edit";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ETAT_DELETED"]  = "The state <b>%s</b> has been deleted.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_INFO_SCALE_JOUR_STOCK"]  = "The scale is in <b>days</b>. This value will display on more details as the product is in stock.<br />If you want to manage the display of delivery's delay in case of stock shortages, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">see the page for state management of stock</a>";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_ALL_STOCK_ALL_SUPPLIERS"]  = "Manage stock of all categories and all suppliers";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK"]  = "Manage stock status list";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_DEACTIVATED"]  = "Stock management disabled";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_SINGLE"]  = "Stock management";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY"]  = "Manage stock of category";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_AND_SUPPLIER"]  = "and from supplier";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_FOURNISSEUR"]  = "Manage stock of all categories and from supplier";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_GIFT_CHECK"]  = "STOCK MANAGEMENT (inactive for gift vouchers)";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_PRODUCT"]  = "Manage the stock of this product";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_ASSOCIATED_PRODUCT"]  = "Manage inventory associated with the product";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_MODIFY_STOCK"]  = "Change this stock status";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ALERT_IN_BDD"]  = "No alert registered in the database.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ETAT"]  = "No status registered in the database.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_PRODUCT_IN_CATEGORY_STOCK"]  = "This category does not contain any product for which you manage the stock.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NEED_SUPPLYING"]  = "WARNING: An order has been passed requiring immediate supply of %s units";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OF_ALERT"]  = "of alert";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OPEN_NEW_WINDOW"]  = "(opens new window)";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCTS_PHOTOS"]  = "Product photos";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRICE_PURCHASE"]  = "Purchase price of stock excl. VAT";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCT_LIST_IS_NULL"]  = "ist of products whose stock is zero";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SAVE_STOCKS"]  = "Save these stocks";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SEARCHED_PRODUCT"]  = "Searched Product";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_OF"]  = "Stock of";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_CHANGES_VALIDATED"]  = "Changes in stock status %s have been taken into account";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_COMPLETE"]  = "stock now complete. Delivery status updated.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_INCOMPLETE"]  = "insufficient stock. Remains to be ordered";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_TABLE_STOCK_UPDATED"]  = "he stock information has been updated";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_UPDATE_STOCK"]  = "Update stocks";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_CATEGORY_FOURNISSEUR_STOCK"]  = "If you select \"All Categories\" and \"All suppliers\", a comprehensive list of the top 250 products whose stocks are managed will be displayed.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_DISPLAY_PRODUCT_STOCK"]  = "Note that your products appear in this form only if their stocks have been initialized in the product page.";
-$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WITH_PRODUCT"]  = "with product";
 $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Add a partner";
 $GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Update the partner";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "The category has been deleted.";
@@ -1914,6 +1864,55 @@ $GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "No partner registered in the
 $GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
 $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER_IN_CATEGORY"] = "Add a partner in this category";
 $GLOBALS["STR_MODULE_PARTENAIRES_CATEGORIES_LIST"] = "LIST OF CATEGORIES";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_DETAILS"] = "Alert details";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Select the category and/or the supplier you want to manage stocks.";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_STOCK"] = "An email alert has been sent to %s to indicate that there are now stock for this product.";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_NO_STOCK"] = "No email sent to %s because no stock was found for this product";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_FOR_CLIENT_REMOVED"] = "The alert for the client <b>%s</b> has been cleared";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_LIST"] = "List of current alerts";
+$GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_TREATED"] = "This alert has already been treated and no longer exists";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"] = "All suppliers";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_PRODUCTS_IN_STOCK"] = "All products are in stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHECK_TO_SEE_IF_STOCK"] = "Check this box if the product is out of stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Select the category and/or the supplier you want to manage the stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"] = "Choose your supplier";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"] = "Estimated delivery time (in days)";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS"] = "View stocks";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS_PRODUCT"] = "View product stock";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_EDIT"] = "Edit";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ETAT_DELETED"] = "The state <b>%s</b> has been deleted.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_INFO_SCALE_JOUR_STOCK"] = "The scale is in <b>days</b>. This value will display on more details as the product is in stock.<br />If you want to manage the display of delivery's delay in case of stock shortages, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">see the page for state management of stock</a>";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_ALL_STOCK_ALL_SUPPLIERS"] = "Manage stock of all categories and all suppliers";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK"] = "Manage stock status list";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_DEACTIVATED"] = "Stock management disabled";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_SINGLE"] = "Stock management";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY"] = "Manage stock of category";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_AND_SUPPLIER"] = "and from supplier";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_CATEGORY_FOURNISSEUR"] = "Manage stock of all categories and from supplier";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_GIFT_CHECK"] = "STOCK MANAGEMENT (inactive for gift vouchers)";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_PRODUCT"] = "Manage the stock of this product";
+$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ADMIN_STOCK_ASSOCIATED_PRODUCT"] = "Manage inventory associated with the product";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_MODIFY_STOCK"] = "Change this stock status";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NEED_SUPPLYING"] = "WARNING: An order has been passed requiring immediate supply of %s units";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ALERT_IN_BDD"] = "No alert registered in the database.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_ETAT"] = "No status registered in the database.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_NO_PRODUCT_IN_CATEGORY_STOCK"] = "This category does not contain any product for which you manage the stock.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OF_ALERT"] = "of alert";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_OPEN_NEW_WINDOW"] = "(opens new window)";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCTS_PHOTOS"] = "Product photos";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRICE_PURCHASE"] = "Purchase price of stock excl. VAT";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_PRODUCT_LIST_IS_NULL"] = "ist of products whose stock is zero";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SAVE_STOCKS"] = "Save these stocks";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_SEARCHED_PRODUCT"] = "Searched Product";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_OF"] = "Stock of";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_CHANGES_VALIDATED"] = "Changes in stock status %s have been taken into account";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_COMPLETE"] = "stock now complete. Delivery status updated.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_STOCK_INCOMPLETE"] = "insufficient stock. Remains to be ordered";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_TABLE_STOCK_UPDATED"] = "he stock information has been updated";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_UPDATE_STOCK"] = "Update stocks";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_CATEGORY_FOURNISSEUR_STOCK"] = "If you select \"All Categories\" and \"All suppliers\", a comprehensive list of the top 250 products whose stocks are managed will be displayed.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_DISPLAY_PRODUCT_STOCK"] = "Note that your products appear in this form only if their stocks have been initialized in the product page.";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_WITH_PRODUCT"] = "with product";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_ABBREVIATE"] = "Abbreviation";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_CREATE"] = "Add Profile";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN"] = "displayed on the users account";
@@ -1998,7 +1997,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Signature";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "To be answered";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "Email webmaster / support";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Add a shipping method";
-$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "You can set this page the names of the modes of delivery. These modes of delivery will then bind to the <a class='alert-link' href='".$GLOBALS['administrer_url']."/tarifs.php'>shipping rates</a>.";
+$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "You can set this page the names of the modes of delivery. These modes of delivery will then bind to the <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">shipping rates</a>.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Add or edit a shipping method";
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "PAYMENT Kwixo";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Link to this mode of delivery ICI relay";

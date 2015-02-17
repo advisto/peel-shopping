@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ function affiche_select_marque($return_mode = false) {
 	$output = '';
 	$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
 		FROM peel_marques
-		WHERE etat=1 AND " . get_filter_site_cond('marques', null) . "
+		WHERE etat=1 AND " . get_filter_site_cond('marques') . "
 		ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
 	if (num_rows($query) > 0) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_select_marque.tpl');
@@ -62,7 +62,7 @@ function affiche_select_marque($return_mode = false) {
 			);
 		}
 		$tpl->assign('options', $tpl_options);
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 	}
 	if ($return_mode) {
 		return $output;
@@ -104,7 +104,7 @@ function display_select_attribute($categorie, $attribute) {
 		);
 	}
 	$tpl->assign('options', $tpl_options);
-	$output = $tpl->fetch();
+	$output .= $tpl->fetch();
 	return $output;
 }
 
@@ -129,15 +129,15 @@ function display_custom_attribute($selected_attributes=null, $technical_code = n
 		// On ne prend que les choix multiples
 		$sql_technical_code_condition = 'a.`texte_libre`=0 ';
 	}
-	$sql = 'SELECT DISTINCT o.`id`, o.`id_nom_attribut`, a.`nom_' . $_SESSION['session_langue'] . '` AS `attribut`, o.`descriptif_' . $_SESSION['session_langue'] . '` AS `nom`
-		FROM `peel_nom_attributs`  a
+	$sql = 'SELECT DISTINCT o.`id`, a.`id` AS `id_nom_attribut`, a.`nom_' . $_SESSION['session_langue'] . '` AS `attribut`, o.`descriptif_' . $_SESSION['session_langue'] . '` AS `nom`
+		FROM `peel_nom_attributs` a
 		LEFT JOIN `peel_attributs` o ON a.`id` = o.`id_nom_attribut` AND ' . get_filter_site_cond('attributs', 'o') . ' 
 		'.(!$show_all? 'INNER JOIN `peel_produits_attributs` pa ON o.`id` = pa.`attribut_id`':'').'
 		WHERE '.$sql_technical_code_condition.' AND a.`etat`=1 AND a.technical_code NOT IN ("duration", "categorie_number")  AND ' . get_filter_site_cond('nom_attributs', 'a');
-
 	$result = query($sql);
 	while ($this_attribute = fetch_assoc($result)) {
 		$tpl_attrs[$this_attribute['id_nom_attribut']]['name'] = $this_attribute['attribut'];
+		$tpl_attrs[$this_attribute['id_nom_attribut']]['value'] = vb($selected_attributes[$this_attribute['id_nom_attribut']]);
 		if(!empty($this_attribute['id'])) {
 			$tpl_attrs[$this_attribute['id_nom_attribut']]['options'][] = array(
 				'value' => intval($this_attribute['id']),

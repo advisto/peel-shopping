@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: urllist.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: urllist.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -87,7 +87,7 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 		// génération des liens pour les categories 
 		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
 			FROM peel_categories c
-			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c', true);
+			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c');
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			$sitemap .= get_product_category_url($result['id'], $result['nom']) . "\r\n";
@@ -99,8 +99,8 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 		$sql = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this_lang)." as produit, c.nom_" . $this_lang . " AS categorie
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
-			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "";
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p') . "";
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			$trans_tbl = get_html_translation_table(HTML_ENTITIES);

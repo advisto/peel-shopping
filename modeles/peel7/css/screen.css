@@ -120,7 +120,10 @@ input.form-control[type="file"] {
 .multipage_selected_field {
 	color: #FF9600;
 }
-
+/* Champ d'inscription à la newsletter, module optionnel subscribe_newsletter */
+.header_subscribe_newsletter, .footer_subscribe_newsletter {
+	margin: 10px 0 7px 10px;
+}
 
 /* iframe socolissimo, la taille correspond à la hauteur maximale de l'iframe sur la page de choix de point relais. */
 #SOLivraison {
@@ -901,7 +904,7 @@ ul.attribute_select_search {
 .attribute_select_search select {
 	width: 300px;
 }
-.attribute_select_search li.input input {
+.attribute_select_search input[type=text] {
 	width: 300px;
 }
 
@@ -1715,11 +1718,11 @@ a.carousel-control:hover, a.carousel-control:focus {
 	a[href]:after, abbr[title]:after{
 		content:"";
 	}
+	.container {
+		width: 100%;
+	}
 	.bottom_middle, .right_column {
 		display:none !important;
-	}
-	body {
-		width:1024px;
 	}
 	[class*="col-sm-"]{
 		float: left;

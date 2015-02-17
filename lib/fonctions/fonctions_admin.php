@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 43498 2014-12-04 11:28:07Z gboussin $
+// $Id: fonctions_admin.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -324,8 +324,11 @@ function get_admin_menu()
 			if (check_if_module_active('comparateur')) {
 				$menu_items['webmastering_seo'][$GLOBALS['wwwroot_in_admin'] . '/modules/comparateur/administrer/mysql2comparateur.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_COMPARATORS"];
 			}
-			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/sitemap.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP"];
-			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/urllist.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP_URLLIST"];
+			if (!empty($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite']==$GLOBALS['site_id']) {
+				// Possibilité de générer le sitemap uniquement pour le domaine en cours d'utilisation, et pas pour le site administré.
+				$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/sitemap.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP"];
+				$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/urllist.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP_URLLIST"];
+			}
 			$menu_items['webmastering_seo'][$GLOBALS['administrer_url'] . '/meta.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_META"];
 			if (is_affiliate_module_active()) {
 				$menu_items['webmastering']['webmastering_affiliate'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_AFFILIATE"];
@@ -558,10 +561,10 @@ function sendclient($commandeid, $prefered_mode = 'html', $mode = 'bdc', $partia
 	$custom_template_tags['MODE'] = $mode;
 	if ($prefered_mode == 'html' && check_if_module_active('factures', 'commande_html.php')) {
 		$template_technical_code = 'send_client_order_html';
-		$custom_template_tags['URL_FACTURE'] = '<a href="' . $GLOBALS['wwwroot'] . '/modules/factures/commande_html.php?code_facture=' . urlencode($C['code_facture']) . '&currency_rate=' . vn($C['currency_rate']) . '&partial=' . urlencode($partial) . '&mode=' . $mode . '" title="">' . $GLOBALS['STR_BOUGHT_FACTURE'] . '</a>';
+		$custom_template_tags['URL_FACTURE'] = '<a href="' . get_site_wwwroot($C['site_id']) . '/modules/factures/commande_html.php?code_facture=' . urlencode($C['code_facture']) . '&currency_rate=' . vn($C['currency_rate']) . '&partial=' . urlencode($partial) . '&mode=' . $mode . '" title="">' . $GLOBALS['STR_BOUGHT_FACTURE'] . '</a>';
 	} else {
 		$template_technical_code = 'send_client_order_pdf';
-		$custom_template_tags['URL_FACTURE'] = $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . urlencode($C['code_facture']) . '&mode=' . $mode;
+		$custom_template_tags['URL_FACTURE'] = get_site_wwwroot($C['site_id']) . '/factures/commande_pdf.php?code_facture=' . urlencode($C['code_facture']) . '&mode=' . $mode;
 	}
 	send_email($C['email'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support_commande']);
 }
@@ -577,7 +580,7 @@ function send_avis_expedition($commandeid, $delivery_tracking)
 {
 	$resCom = query("SELECT c.*, sp.technical_code AS statut_paiement
 		FROM peel_commandes c
-		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
+		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 		WHERE c.id='" . intval($commandeid) . "' AND " . get_filter_site_cond('commandes', 'c', true) . "");
 	$commande = fetch_object($resCom);
 	$order_infos = get_order_infos_array($commande);
@@ -894,7 +897,7 @@ function envoie_client_code_promo($id_utilisateur, $id_codepromo)
 		// on envoi un email à la personne demandée
 		$sql = "SELECT pcp.*, pc.nom_" . $_SESSION['session_langue'] . " AS nom_cat, DATE_FORMAT(date_fin, '%d/%m/%Y') AS date_fin, nombre_prevue, nb_used_per_client
 			FROM peel_codes_promos pcp
-			LEFT JOIN peel_categories pc ON pc.id=pcp.id_categorie AND " . get_filter_site_cond('categories', 'pc', true) . "
+			LEFT JOIN peel_categories pc ON pc.id=pcp.id_categorie AND " . get_filter_site_cond('categories', 'pc') . "
 			WHERE pcp.id = '" . intval($id_codepromo) . "' AND " . get_filter_site_cond('codes_promos', 'pcp', true) . "";
 		$query = query($sql);
 		$cp = fetch_assoc($query);
@@ -908,7 +911,7 @@ function envoie_client_code_promo($id_utilisateur, $id_codepromo)
 			$requete = query("SELECT 1
 				FROM peel_utilisateurs_codes_promos
 				WHERE id_utilisateur = '" . intval($id_utilisateur) . "' AND id_code_promo = '" . intval($id_codepromo) . "'");
-			if (num_rows($requete) == 0) {
+			if ((num_rows($requete) == 0) || (num_rows($requete) > 0 && !empty($GLOBALS['site_parameters']['disable_limitation_promotional_code_sending']))) {
 				// si le code n'a pas déjà été associé à l'utilisateur : on veut se souvenir qu'on lui a envoyé
 				// ATTENTION : cette table peel_utilisateurs_codes_promos est pour la gestion commerciale, et n'a pas pour vocation à lister tous les usages de tous les codes promos
 				query("INSERT INTO peel_utilisateurs_codes_promos (id_utilisateur, id_code_promo, nom_code, la_date, utilise, valeur)
@@ -972,7 +975,7 @@ function affiche_liste_commandes_admin($frm = null)
 				$sql_cond .= ' OR c.prenom'.$this_item.' LIKE "%' . nohtml_real_escape_string($frm['client_info']) . '%"';
 			}
 			$sql_cond .= ')';
-			$sql_inner .= ' INNER JOIN peel_utilisateurs u ON c.id_utilisateur=u.id_utilisateur AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '';
+			$sql_inner .= ' INNER JOIN peel_utilisateurs u ON c.id_utilisateur=u.id_utilisateur AND ' . get_filter_site_cond('utilisateurs', 'u') . '';
 		}
 		if (!empty($frm['searchProd'])) {
 			$sql_cond .= ' AND ca.nom_produit LIKE "%' . nohtml_real_escape_string(String::strtolower(trim($frm['searchProd']))) . '%"';
@@ -1164,7 +1167,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$is_order_modification_allowed = is_order_modification_allowed(vb($commande['o_timestamp']));
 
 		if (!empty($user_id)) {
-			// Dans le cas ou l'on crée une commande, on initialise à partir des donnée de l'utilisateur. Sinon on recupère les informations de l'utilsateur par la commande
+			// Dans le cas où on crée une commande, on initialise à partir des données de l'utilisateur. Sinon on recupère les informations de l'utilsateur par la commande
 			$user_array = get_user_information($user_id);
 			// Répétition pour les différente adresse de l'utilisateur
 			for($i = 0;$i < 2;$i++) {
@@ -1182,14 +1185,25 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				$commande['zip_' . $state] = vb($user_array['code_postal']);
 				$commande['ville_' . $state] = vb($user_array['ville']);
 				$commande['pays_' . $state] = get_country_name(vn($user_array['pays']));
+				if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
+					// Paramètre lié à la fonction get_specific_field_infos.
+					$user_table_fields_names = get_table_field_names('peel_utilisateurs');
+					$order_table_fields_names = get_table_field_names('peel_commandes');
+					foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
+						if (((String::substr($this_field, -5) == '_bill') || (String::substr($this_field, -5) == '_ship')) && in_array($this_field, $user_table_fields_names) && in_array($this_field, $order_table_fields_names)) {
+							// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de livraison ou de facturation => Il faut préremplir les champs du formulaire d'adresse avec ces infos.
+							$commande[$this_field] = vb($user_array[$this_field]);
+						}
+					}
+				}
 			}
 			$commande['id_utilisateur'] = vn($user_id);
 			$commande['intracom_for_billing'] = vb($user_array['intracom_for_billing']);
 			// La TVA est-elle applicable pour cet utilisateur.
 			$sqlPays = 'SELECT p.id, p.pays_' . $_SESSION['session_langue'] . ' as pays, p.zone, z.tva, z.on_franco
 				FROM peel_pays p
-				LEFT JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z', true) . '
-				WHERE p.etat = "1" AND p.id ="' . nohtml_real_escape_string($user_array['pays']) . '" AND ' . get_filter_site_cond('pays', 'p', true) . '
+				LEFT JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z') . '
+				WHERE p.etat = "1" AND p.id ="' . nohtml_real_escape_string($user_array['pays']) . '" AND ' . get_filter_site_cond('pays', 'p') . '
 				LIMIT 1';
 			$query = query($sqlPays);
 			if ($result = fetch_assoc($query)) {
@@ -1204,7 +1218,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				// ADAPTATION POUR TABLES ANCIENNES avec paiement qui contient nom et pas technical_code
 				$sql = 'SELECT technical_code
 					FROM peel_paiement
-					WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($commande['paiement']) . '" AND ' .  get_filter_site_cond('paiement', null, true) . '
+					WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($commande['paiement']) . '" AND ' .  get_filter_site_cond('paiement') . '
 					LIMIT 1';
 				$query = query($sql);
 				if ($result = fetch_assoc($query)) {
@@ -1233,6 +1247,12 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		if (empty($commande['devise'])) {
 			$commande['devise'] = $GLOBALS['site_parameters']['code'];
 		}
+		if (!empty($commande['zone_tva'])) {
+			$default_vat = get_default_vat();
+		} else {
+			// pas de TVA
+			$default_vat = 0;
+		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_commande_details.tpl');
 		$tpl->assign('action_name', $action);
 		$tpl->assign('id', vn($id));
@@ -1244,15 +1264,15 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('pdf_src', $GLOBALS['wwwroot_in_admin'] . '/images/view_pdf.gif');
 		if ($action != "insere" && $action != "ajout") {
 			$tpl->assign('allow_display_invoice_link', !empty($commande['numero']));
-			$tpl->assign('facture_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
+			$tpl->assign('facture_pdf_href', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
 			$tpl->assign('sendfacture_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=facture');
-			$tpl->assign('proforma_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=proforma');
+			$tpl->assign('proforma_pdf_href', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=proforma');
 			$tpl->assign('sendproforma_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=proforma');
-			$tpl->assign('devis_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=devis');
+			$tpl->assign('devis_pdf_href', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=devis');
 			$tpl->assign('senddevis_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=devis');
-			$tpl->assign('bdc_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
-			$tpl->assign('duplicate', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
-			$tpl->assign('bdc_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
+			$tpl->assign('bdc_pdf_href', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
+			$tpl->assign('duplicate', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
+			$tpl->assign('bdc_pdf_href', get_site_wwwroot($commande['site_id']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
 			
 			$tpl->assign('is_duplicate_module_active', check_if_module_active('duplicate'));
 			$tpl->assign('dup_href', get_current_url(false) . '?mode=duplicate&id=' . $commande['id']);
@@ -1262,20 +1282,20 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			
 			$tpl->assign('is_module_factures_html_active', check_if_module_active('factures', 'commande_html.php'));
 			if (check_if_module_active('factures', 'commande_html.php')) {
-				$tpl->assign('facture_html_href', $GLOBALS['wwwroot'] . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
+				$tpl->assign('facture_html_href', get_site_wwwroot($commande['site_id']) . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
 				$tpl->assign('bdc_action', $GLOBALS['administrer_url'] . '/commander.php?mode=modif&commandeid=' . vn($commande['id']));
 				$tpl->assign('bdc_code_facture', vb($commande['code_facture']));
 				$tpl->assign('bdc_id', vn($commande['id']));
 				$tpl->assign('bdc_partial', fprix(vn($commande['montant']), false, vb($commande['devise']), true, vn($commande['currency_rate']), false, false, ',', false, true));
 				$tpl->assign('bdc_devise', vb($commande['devise']));
-				$tpl->assign('partial_amount_link_js', $GLOBALS['wwwroot'] . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc&currency_rate=' . vn($commande['currency_rate']) . '&partial=');
-				$tpl->assign('partial_amount_link_href', $GLOBALS['wwwroot'] . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc&partial=' .get_float_from_user_input(fprix(vn($commande['montant']), false, $GLOBALS['site_parameters']['code'], false, $commande['currency_rate'], false, false)) );
+				$tpl->assign('partial_amount_link_js', get_site_wwwroot($commande['site_id']) . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc&currency_rate=' . vn($commande['currency_rate']) . '&partial=');
+				$tpl->assign('partial_amount_link_href', get_site_wwwroot($commande['site_id']) . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc&partial=' .get_float_from_user_input(fprix(vn($commande['montant']), false, $GLOBALS['site_parameters']['code'], false, $commande['currency_rate'], false, false)) );
 				$tpl->assign('partial_amount_link_target', 'facture' . $commande['code_facture']);
 			}
 			if (is_tnt_module_active()) {
 				$q_type = query('SELECT * 
 					FROM peel_types 
-					WHERE is_tnt="1" AND ' . get_filter_site_cond('types', null, true) . ' AND nom_' . $commande['lang'] . ' = "' . nohtml_real_escape_string($commande['type']) . '"');
+					WHERE is_tnt="1" AND ' . get_filter_site_cond('types') . ' AND nom_' . $commande['lang'] . ' = "' . nohtml_real_escape_string($commande['type']) . '"');
 				$result = fetch_assoc($q_type);
 				if (!empty($result)) {
 					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b><a target="_blank" href="' . $GLOBALS['wwwroot'] . '/modules/tnt/administrer/etiquette.php?order_id='.$commande['id'] .'">Imprimer l\'étiquette tnt (ouvre une nouvelle fenêtre)</a>');
@@ -1341,7 +1361,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl_devises_options = array();
 			$res_devise = query("SELECT p.code
 				FROM peel_devises p
-				WHERE etat='1' AND " . get_filter_site_cond('devises', 'p', true) . "");
+				WHERE etat='1' AND " . get_filter_site_cond('devises', 'p') . "");
 			while ($tab_devise = fetch_assoc($res_devise)) {
 				$tpl_devises_options[] = array('value' => $tab_devise['code'],
 					'issel' => $tab_devise['code'] == vb($commande['devise']),
@@ -1383,6 +1403,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('commande_interne', vb($commande['commande_interne']));
 		$tpl->assign('commentaires', vb($commande['commentaires']));
 		$tpl->assign('commentaires_admin', vb($commande['commentaires_admin']));
+		$tpl->assign('specific_fields', get_specific_field_infos($commande, false, null, 'order'));
 
 		$tpl_client_infos = array();
 		for ($i = 1; $i < 3; $i++) {
@@ -1523,7 +1544,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		}
 		$tpl->assign('is_order_modification_allowed', $is_order_modification_allowed);
 		$tpl->assign('zone_tva', vb($commande['zone_tva']));
-		$tpl->assign('default_vat_select_options', get_vat_select_options('20.00'));
+		$tpl->assign('default_vat_select_options', get_vat_select_options($default_vat));
 		$tpl->assign('STR_ADMIN_TECHNICAL_ORDER_NUMBER', $GLOBALS['STR_ADMIN_TECHNICAL_ORDER_NUMBER']);
 		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -1704,10 +1725,23 @@ function save_commande_in_database($frm)
 		$frm['nom2'] = vb($frm['nom1']);
 		$frm['prenom2'] = vb($frm['prenom1']);
 	}
+	
+	$adresses_fields_array = array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
+	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+		// Paramètre lié à la fonction get_specific_field_infos.
+		// récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
+		$this_table_fields_names = get_table_field_names('peel_commandes');
+		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
+			if ((String::substr($this_field, -5) == '_ship' ||  String::substr($this_field, -5) == '_bill') && !in_array(String::substr($this_field, 0, -5), $adresses_fields_array) && in_array($this_field, $this_table_fields_names)) {
+				$adresses_fields_array[] = String::substr($this_field, 0, -5);
+			}
+		}
+	}
+	
 	if (is_delivery_address_necessary_for_delivery_type($frm['type_transport'])) {
 		// Le type de transport nécessite une adresse de livraison.
 		// Il faut compléter les champs de l'adresse de livraison uniquement si le mode de livraison n'est pas "Retrait en boutique"
-		foreach (array('societe', 'prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact') as $this_item) {
+		foreach ($adresses_fields_array as $this_item) {
 			if (empty($frm[$this_item . '2'])) {
 				$frm[$this_item . '2'] = vb($frm[$this_item . '1']);
 			}
@@ -1722,7 +1756,7 @@ function save_commande_in_database($frm)
 	if (empty($frm['site_id'])) {
 		// Site id absent pour cette commande, il ne faut pas avoir de valeur vide ou à 0 pour une commande, elle est forcement associée à un site.
 		if (!empty($_SESSION['session_admin_multisite'])) {
-			// L'administrateur à choisi un site à administrer spécifiquement
+			// L'administrateur a choisi un site à administrer spécifiquement
 			$frm['site_id'] = $_SESSION['session_admin_multisite'];
 		} else {
 			// on utilise l'id du site courant
@@ -1766,16 +1800,16 @@ function save_commande_in_database($frm)
 		// Recherche d'information sur la commande avant modification
 		$query = query('SELECT email
 			FROM peel_commandes
-			WHERE ' . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . ' AND id = ' . intval(vn($frm['commandeid'])));
+			WHERE ' . get_filter_site_cond('commandes') . ' AND id = ' . intval(vn($frm['commandeid'])));
 		$result = fetch_assoc($query);
 		if((!empty($frm['autocomplete_order_adresses_with_account_info_if_order_email_change']) && $result['email'] != $frm['email']) || !empty($frm['autocomplete_order_adresses_with_account_info'])) {
 			// L'auteur de la commande a changé. On change les informations relative à l'utilisateur de cette commande.
 			// Utile pour modifier une commande après une duplication de commande (module duplicate du module premium.)
 			$query = query('SELECT societe, prenom, nom_famille AS nom, adresse, code_postal, ville, pays, email, telephone AS contact
 				FROM peel_utilisateurs
-				WHERE email = "' . nohtml_real_escape_string($frm['email']) . '" AND ' . get_filter_site_cond('utilisateurs', null, true));
+				WHERE email = "' . nohtml_real_escape_string($frm['email']) . '" AND ' . get_filter_site_cond('utilisateurs'));
 			if($result = fetch_assoc($query)) {
-				foreach(array('societe', 'prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact') as $this_item) {
+				foreach($adresses_fields_array as $this_item) {
 					$frm[$this_item . '1'] = $result[$this_item];
 					$frm[$this_item . '2'] = $result[$this_item];
 				}
@@ -1788,7 +1822,7 @@ function save_commande_in_database($frm)
 			// Si la devise de la commande n'est pas celle de la boutique, alors on récupère le taux de change de la devise
 			$res = query("SELECT p.conversion
 				FROM peel_devises p
-				WHERE p.code = '" . nohtml_real_escape_string($frm['devise']) . "' AND " . get_filter_site_cond('devises', 'p', true) . "");
+				WHERE p.code = '" . nohtml_real_escape_string($frm['devise']) . "' AND " . get_filter_site_cond('devises', 'p') . "");
 		}
 		if (!empty($res) && $tab = fetch_assoc($res)) {
 			$frm['currency_rate'] = $tab['conversion'];
@@ -1801,8 +1835,8 @@ function save_commande_in_database($frm)
 	// On récupère les informations sur les zones
 	$sqlPays = 'SELECT p.id, p.pays_' . $frm['lang'] . ' as pays, p.zone, z.tva, z.on_franco
 		FROM peel_pays p
-		LEFT JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z', true) . '
-		WHERE p.etat = "1" AND p.pays_' . $frm['lang'] . '="' . nohtml_real_escape_string($frm['pays2']) . '"  AND ' . get_filter_site_cond('pays', 'p', true) . '
+		LEFT JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z') . '
+		WHERE p.etat = "1" AND p.pays_' . $frm['lang'] . '="' . nohtml_real_escape_string($frm['pays2']) . '"  AND ' . get_filter_site_cond('pays', 'p') . '
 		LIMIT 1';
 	$query = query($sqlPays);
 	if ($result = fetch_assoc($query)) {
@@ -1942,8 +1976,8 @@ function save_commande_in_database($frm)
 		if (is_module_ecotaxe_active()) {
 			$product_ecotaxe_infos_query = query("SELECT e.*
 				FROM peel_ecotaxes e
-				INNER JOIN peel_produits p ON e.id = p.id_ecotaxe AND " . get_filter_site_cond('produits', 'p', true) . "
-				WHERE p.id='" . intval($this_article['product_id']) . "' AND " . get_filter_site_cond('ecotaxes', 'e', true) . "");
+				INNER JOIN peel_produits p ON e.id = p.id_ecotaxe AND " . get_filter_site_cond('produits', 'p') . "
+				WHERE p.id='" . intval($this_article['product_id']) . "' AND " . get_filter_site_cond('ecotaxes', 'e') . "");
 			if ($product_ecotaxe_infos = fetch_assoc($product_ecotaxe_infos_query)) {
 				if (!empty($product_ecotaxe_infos['id'])) {
 					$this_article['ecotaxe_ttc'] = $product_ecotaxe_infos['prix_ttc'];
@@ -2158,7 +2192,7 @@ function affiche_actions_moderations_user($user_id)
 	$output = '';
 	$q = query('SELECT a.id_user, a.id_membre, a.action, a.data, a.raison, a.remarque, a.date, u.id_utilisateur, u.pseudo, u.email
 		FROM peel_admins_actions a
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur=a.id_user AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur=a.id_user AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 		WHERE a.id_membre="' . intval($user_id) . '" AND ' . get_filter_site_cond('admins_actions', 'a', true) . '
 		ORDER BY a.date DESC
 		LIMIT 500');
@@ -2186,7 +2220,7 @@ function affiche_actions_moderations_user($user_id)
 				if (is_numeric($template_id)) {
 					$result_template = query('SELECT name
 						FROM peel_email_template
-						WHERE id="' . intval($template_id) . '" AND ' . get_filter_site_cond('email_template', null, true) . '
+						WHERE id="' . intval($template_id) . '" AND ' . get_filter_site_cond('email_template') . '
 						LIMIT 1');
 					$template_text = fetch_assoc($result_template);
 					$res['data'] = '<b>'.$GLOBALS['STR_ADMIN_EMAIL_TEMPLATE'].'</b> : <br />' . (strpos($res['remarque'], $GLOBALS['STR_ADMIN_MUTIPLE_SENDING']) !== false?'<i style="color:red;">'.$GLOBALS['STR_ADMIN_MUTIPLE_SENDING'].'</i><br />':'') . $template_text["name"];
@@ -2246,7 +2280,7 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 	if (!empty($frm)) {
 		if (!empty($frm['client_info'])) {
 			$sql_cond .= ' AND (u.pseudo LIKE "%' . nohtml_real_escape_string($frm['client_info']) . '%")';
-			$sql_inner .= ' INNER JOIN peel_utilisateurs u ON c.user_id=u.id_utilisateur AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '';
+			$sql_inner .= ' INNER JOIN peel_utilisateurs u ON c.user_id=u.id_utilisateur AND ' . get_filter_site_cond('utilisateurs', 'u') . '';
 		}
 		if (!empty($frm['user_ip'])) {
 			$sql_cond .= ' AND CONCAT(FLOOR(c.user_ip/(256*256*256)), ".", (FLOOR(c.user_ip/(256*256)))%256, ".", (FLOOR(c.user_ip/256))%256, ".", c.user_ip%256) LIKE "%' . nohtml_real_escape_string($frm['user_ip']) . '%"';
@@ -2318,7 +2352,7 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 					foreach(array('country_ip' => $country_id, 'country_account' => vn($current_user['pays'])) as $this_key => $this_value) {
 						$sql = 'SELECT iso, pays_' . $_SESSION['session_langue'] . '
 							FROM peel_pays
-							WHERE id="' . intval($this_value) . '" AND ' . get_filter_site_cond('pays', null, true) . '
+							WHERE id="' . intval($this_value) . '" AND ' . get_filter_site_cond('pays') . '
 							LIMIT 1';
 						$query = query($sql);
 						if ($result = fetch_assoc($query)) {
@@ -2376,7 +2410,7 @@ function affiche_phone_event($user_id)
 	$output = '';
 	$q = query('SELECT paa.*,u.pseudo AS pseudo_membre
 		FROM peel_admins_actions paa
-		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur= ' . intval($user_id) . ' AND ' . get_filter_site_cond('utilisateurs', 'u', true) . '
+		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur= ' . intval($user_id) . ' AND ' . get_filter_site_cond('utilisateurs', 'u') . '
 		WHERE paa.id_user= ' . $_SESSION['session_utilisateur']['id_utilisateur'] . ' AND paa.id_membre = ' . intval($user_id) . ' AND ((paa.action = "PHONE_EMITTED") OR (paa.action = "PHONE_RECEIVED")) AND paa.data="NOT_ENDED_CALL" AND ' . get_filter_site_cond('admins_actions', 'paa', true) . '
 		ORDER BY paa.date DESC
 		LIMIT 1');
@@ -2689,7 +2723,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_ADMIN_LANGUES_ERR_LANGUAGE_TWO_CHARS"]))->fetch();
 		return $output;
 	}
-	if (num_rows(query("SELECT * FROM peel_langues WHERE lang='" . word_real_escape_string($new_lang) . "' AND " . get_filter_site_cond('langues', null, true) . " AND site_id=".intval($frm['site_id'])))) {
+	if (num_rows(query("SELECT * FROM peel_langues WHERE lang='" . word_real_escape_string($new_lang) . "' AND " . get_filter_site_cond('langues') . " AND site_id=".intval($frm['site_id'])))) {
 		// La langue existe déjà : on se met automatiquement en mode réparation des tables pour créer d'éventuelles colonnes manquantes
 		$repair = true;
 	} else {
@@ -3184,7 +3218,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_TODAY_DATE', $GLOBALS['STR_ADMIN_TODAY_DATE']);
 		$tpl->assign('STR_ADMIN_DISPLAY_RESULTS', $GLOBALS['STR_ADMIN_DISPLAY_RESULTS']);
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 		return $output;
 	}
 }
@@ -3227,7 +3261,7 @@ if (!function_exists('affiche_liste_produits')) {
 	 */
 	function affiche_liste_produits($frm)
 	{		
-		$categorie_options = get_categories_output(null, 'categories', vb($_GET['cat_search']), 'option', '&nbsp;&nbsp;', null);
+		$categorie_options = get_categories_output(null, 'categories', vb($_GET['cat_search']));
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_produits.tpl');
 		if (empty($categorie_options)) {
 			$tpl->assign('is_empty', true);
@@ -3333,8 +3367,8 @@ if (!function_exists('affiche_liste_produits')) {
 					}
 					$sqlCAT = "SELECT c.id, c.nom_" . $_SESSION['session_langue'] . ", c2.nom_" . $_SESSION['session_langue'] . " AS parent_nom_" . $_SESSION['session_langue'] . "
 						FROM peel_produits_categories pc
-						INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
-						LEFT JOIN peel_categories c2 ON c2.id=c.parent_id AND " . get_filter_site_cond('categories', 'c2', true) . "
+						INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+						LEFT JOIN peel_categories c2 ON c2.id=c.parent_id AND " . get_filter_site_cond('categories', 'c2') . "
 						WHERE pc.produit_id = " . intval($ligne['id']);
 					$resCAT = query($sqlCAT);
 					if (num_rows($resCAT) > 0) {
@@ -3345,7 +3379,6 @@ if (!function_exists('affiche_liste_produits')) {
 							);
 						}
 					}
-					// $tmpLigne['sites'] = get_all_site_names();
 					$tmpLigne['site_id'] = $ligne['site_id'];
 					if (check_if_module_active('stock_advanced')) {
 						if ($ligne['on_stock'] == 1) {
@@ -3377,7 +3410,7 @@ if (!function_exists('affiche_liste_produits')) {
 			$tpl_marques_options = array();
 			$select = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat
 			   FROM peel_marques
-			   WHERE " . get_filter_site_cond('marques', null, true) . "
+			   WHERE " . get_filter_site_cond('marques') . "
 			   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
 			while ($nom = fetch_assoc($select)) {
 				$tpl_marques_options[] = array('value' => intval($nom['id']),
@@ -3523,7 +3556,7 @@ if (!function_exists('affiche_liste_produits_acommander')) {
 
 		$sql = "SELECT p.id, oi.nom_produit as nom, oi.couleur, oi.taille, oi.delai_stock, oi.commande_id, oi.order_stock
 			FROM peel_commandes_articles oi
-			INNER JOIN peel_produits p ON oi.produit_id = p.id AND " . get_filter_site_cond('produits', 'p', true) . "
+			INNER JOIN peel_produits p ON oi.produit_id = p.id AND " . get_filter_site_cond('produits', 'p') . "
 			WHERE oi.order_stock>0 AND  " . get_filter_site_cond('commandes_articles', 'oi', true);
 		$Links = new Multipage($sql, 'affiche_liste_produits_acommander');
 		$Links->OrderDefault = "position, nom_" . $_SESSION['session_langue'] . ", prix";
@@ -3609,7 +3642,7 @@ if (!function_exists('affiche_liste_articles')) {
 			if (vn($frm['cat_search']) != "null") {
 				$inner .= "
 				LEFT JOIN peel_articles_rubriques ar ON ar.article_id = a.id
-				LEFT JOIN peel_rubriques r ON ar.rubrique_id = r.id AND " . get_filter_site_cond('rubriques', 'r', true) . "";
+				LEFT JOIN peel_rubriques r ON ar.rubrique_id = r.id AND " . get_filter_site_cond('rubriques', 'r') . "";
 				if ($frm['cat_search'] === '0') {
 					// recherche des articles sans association
 					$rubrique_condition = ' ar.rubrique_id IS NULL OR ar.rubrique_id=0';
@@ -3632,7 +3665,7 @@ if (!function_exists('affiche_liste_articles')) {
 
 		$tpl = $GLOBALS['tplEngine']->createTemplate('liste_articles.tpl');
 		$tpl->assign('action', get_current_url(false) . '?start=0&mode=recherche');
-		$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['rubriques']), 'option', '&nbsp;&nbsp;', null));
+		$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['rubriques'])));
 		$tpl->assign('text_in_title', vb($_POST['text_in_title']));
 		$tpl->assign('text_in_article', vb($_POST['text_in_article']));
 		$tpl->assign('cat_search', vb($_GET['cat_search']));
@@ -3667,8 +3700,8 @@ if (!function_exists('affiche_liste_articles')) {
 				);
 				$sql = "SELECT r.id, r.nom_" . $_SESSION['session_langue'] . ", r2.nom_" . $_SESSION['session_langue'] . " AS parent_nom_" . $_SESSION['session_langue'] . "
 					FROM peel_articles_rubriques pr
-					LEFT JOIN peel_rubriques r ON r.id = pr.rubrique_id AND " . get_filter_site_cond('rubriques', 'r', true) . "
-					LEFT JOIN peel_rubriques r2 ON r2.id=r.parent_id AND " . get_filter_site_cond('rubriques', 'r2', true) . "
+					LEFT JOIN peel_rubriques r ON r.id = pr.rubrique_id AND " . get_filter_site_cond('rubriques', 'r') . "
+					LEFT JOIN peel_rubriques r2 ON r2.id=r.parent_id AND " . get_filter_site_cond('rubriques', 'r2') . "
 					WHERE pr.article_id = " . intval($ligne['id']);
 				$query = query($sql);
 				if (num_rows($query) > 0) {
@@ -3683,7 +3716,6 @@ if (!function_exists('affiche_liste_articles')) {
 						}
 					}
 				} 
-				// $tmpLigne['sites'] = get_all_site_names();
 				$tmpLigne['site_id'] = $ligne['site_id'];
 				$i++;
 				$lignes[] = $tmpLigne;
@@ -3754,14 +3786,14 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				// Par défaut on considère qu'une marque donnée est une id de marque, sinon on gère comme si c'était un nom si pas trouvée et non numérique
 				$q = query('SELECT id
 					FROM peel_marques
-					WHERE id=' . intval($this_field_value) . " AND " . get_filter_site_cond('marques', null, true));
+					WHERE id=' . intval($this_field_value) . " AND " . get_filter_site_cond('marques'));
 				if ($brand = fetch_assoc($q)) {
 					// Marque existante
 					$this_brand_id_array = $brand['id'];
 				} else {
 					$sql_select_brand = 'SELECT id 
 						FROM peel_marques
-						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_field_value).'" AND ' . get_filter_site_cond('marques', null, true);
+						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_field_value).'" AND ' . get_filter_site_cond('marques');
 					$query_brand = query($sql_select_brand);
 					if($brand = fetch_assoc($query_brand)){
 						$this_brand_id_array = $brand['id'];
@@ -3850,7 +3882,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 					if(!is_numeric($this_value)) {
 						$sql_select_color = 'SELECT * 
 							FROM peel_couleurs
-							WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' .  get_filter_site_cond('couleurs', null, true);
+							WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' .  get_filter_site_cond('couleurs');
 						$query_color = query($sql_select_color);
 						if($color = fetch_assoc($query_color)){
 							$this_value = $color['id'];
@@ -3887,18 +3919,18 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 					// Donc obligatoirement, on considère qu'une taille est rentrée par son nom
 					$sql_size = 'SELECT * 
 						FROM peel_tailles 
-						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($size_name).'"  AND ' . get_filter_site_cond('tailles', null, true);
+						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($size_name).'"  AND ' . get_filter_site_cond('tailles');
 					$query_size = query($sql_size);
 					if($size = fetch_assoc($query_size)){
 						if(isset($this_list_size_and_price[1]) && get_float_from_user_input($size_price) != $size['prix']){
 							query('UPDATE peel_tailles 
 								SET prix = "'.real_escape_string(get_float_from_user_input($size_price)).'" 
-								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles', null, true));
+								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
 						}
 						if(isset($this_list_size_and_price[2]) && get_float_from_user_input($size_price_reseller) != $size['prix_revendeur']){
 							query('UPDATE peel_tailles 
 								SET prix_revendeur = "'.real_escape_string(get_float_from_user_input($size_price_reseller)).'" 
-								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles', null, true));
+								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
 						}
 						$this_size_id = $size['id'];
 					}else{
@@ -3934,7 +3966,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				if (is_lot_module_active()) {
 					$sql_prix_lot = 'SELECT * 
 						FROM peel_quantites 
-						WHERE produit_id="' . intval($product_id) . '" AND quantite = "' . intval($quantity) . '" AND ' . get_filter_site_cond('quantites', null, true);
+						WHERE produit_id="' . intval($product_id) . '" AND quantite = "' . intval($quantity) . '" AND ' . get_filter_site_cond('quantites');
 					$query_prix_lot = query($sql_prix_lot);
 					if(fetch_assoc($query_prix_lot)){
 						$sql_update = 'UPDATE peel_quantites 
@@ -3973,7 +4005,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			$nom_attrib = explode('#', $this_field_name);
 			$q = query('SELECT id
 				FROM peel_nom_attributs
-				WHERE id=' . intval($nom_attrib[1]) . " AND " . get_filter_site_cond('nom_attributs', null, true));
+				WHERE id=' . intval($nom_attrib[1]) . " AND " . get_filter_site_cond('nom_attributs'));
 			if(!empty($nom_attrib[1])) {
 				// attribut existant
 				if ($att = fetch_assoc($q)) {
@@ -4013,16 +4045,16 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 							$attribute_ids[] = $attribut['id'];
 						}
 						if(empty($attribute_ids)) {
-							// Option inexistante et différente d'upload ou de texte libre, on l'insère en base de donnée sinon on modifie l'attribut.
+							// Option inexistante et différente d'upload ou de texte libre, on l'insère en base de données sinon on modifie l'attribut.
 							if ($desc_option[1] == '__upload') {
 								$q = query('UPDATE peel_nom_attributs
 									SET upload=1
-									WHERE id="' . intval($nom_attrib[1]) . '" AND ' . get_filter_site_cond('nom_attributs', null, true));
+									WHERE id="' . intval($nom_attrib[1]) . '" AND ' . get_filter_site_cond('nom_attributs'));
 								$attribute_ids[] = $desc_option[0];
 							} elseif ($desc_option[1] == '__texte_libre') {
 								$q = query('UPDATE peel_nom_attributs
 									SET texte_libre=1
-									WHERE id="' . intval($nom_attrib[1]) . '" AND ' . get_filter_site_cond('nom_attributs', null, true));
+									WHERE id="' . intval($nom_attrib[1]) . '" AND ' . get_filter_site_cond('nom_attributs'));
 								$attribute_ids[] = $desc_option[0];
 							} else {
 								$q = query('INSERT INTO peel_attributs
@@ -4082,7 +4114,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				// le champ Categorie n'est pas un nombre, on tente une recherche dans la BDD sur le nom de la catégorie.
 				$q = query('SELECT id
 					FROM peel_categories
-					WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '" AND ' . get_filter_site_cond('categories', null, true) . '');
+					WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '" AND ' . get_filter_site_cond('categories') . '');
 				// Catégorie existante, ou le champ Categorie du fichier n'est ni un ID, ni le nom de la catégorie
 				if ($categorie = fetch_assoc($q)) {
 					$this_categorie_id = $categorie['id'];
@@ -4138,7 +4170,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			} elseif(!empty($this_value) && !is_numeric($this_value)) {
 				$sql_select_color = 'SELECT * 
 					FROM peel_couleurs
-					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' . get_filter_site_cond('couleurs', null, true);
+					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' . get_filter_site_cond('couleurs');
 				$query_color = query($sql_select_color);
 				if($color = fetch_assoc($query_color)){
 					$stock_frm["couleur_id"][$this_id] = $color['id'];
@@ -4148,7 +4180,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				// Taille donnée forcément par son nom
 				$sql_size = 'SELECT * 
 					FROM peel_tailles 
-					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_list_infos[2]).'"  AND ' . get_filter_site_cond('tailles', null, true);
+					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_list_infos[2]).'"  AND ' . get_filter_site_cond('tailles');
 				$query_size = query($sql_size);
 				if($size = fetch_assoc($query_size)){
 					$stock_frm["taille_id"][$this_id] = $size['id'];
@@ -4256,7 +4288,7 @@ function get_site_id_select_options($selected_site_id = null, $selected_site_nam
 
 /**
  * Retourne un tableau des urls des sites configurés en fonction des droits de l'administrateur. La valeur de wwwroot sera utilisé pour définir la variable GLOBAL['wwwroot'].
- * wwwroot est l'URL de base de votre site, sans mettre de / à la fin. Par exemple : wwwroot = "http://www.example.com";  ou wwwroot = "http://www.example.com/repertoiredemaboutique";
+ * wwwroot est l'URL de base de votre site, sans mettre de / à la fin. Par exemple : wwwroot = "http://www.example.com";  ou wwwroot = "http://www.example.com/monrepertoiredesite";
  *
  * @return
  */
@@ -4282,13 +4314,30 @@ function get_sites_wwwroot_array() {
 function get_all_sites_name_array($admin_force_multisite_if_allowed = false, $allow_null_site_id = false) {
 	$all_sites_name_array = array();
 	// site_id>0 est utile pour ne pas lister les sites avec site_id = 0 qui est en théorie impossible en dehors d'une erreur d'administration
-	$sql = 'SELECT site_id, string
+	// Sélection des site_id qui existe en base de donnée.
+	$sql = 'SELECT site_id
 		FROM peel_configuration
-		WHERE ' . (!$allow_null_site_id?'site_id!="0" AND ':'') . 'technical_code="nom_' . $_SESSION['session_langue'] . '" AND ' . get_filter_site_cond('configuration', null, true, null, false, $admin_force_multisite_if_allowed) . '
-		ORDER BY string ASC';
+		WHERE ' . (!$allow_null_site_id?'site_id!="0" AND ':'') . ' ' . get_filter_site_cond('configuration', null, true, null, false, $admin_force_multisite_if_allowed) . '
+		GROUP BY site_id';
 	$query = query($sql);
 	while($result = fetch_assoc($query)) {
-		$all_sites_name_array[$result['site_id']] = $result['string'];
+		// Sélection du nom du site.
+		$query_name = query('SELECT string
+		FROM peel_configuration
+		WHERE site_id="' . intval($result['site_id']).'" AND technical_code="nom_' . $_SESSION['session_langue'] . '"
+		LIMIT 1');
+		$result_name = fetch_assoc($query_name);
+		if (!empty($result_name['string'])) {
+			$all_sites_name_array[$result['site_id']] = $result_name['string'];
+		} else {
+			// Le nom du site n'a pas été trouvé. On récupère le wwwroot pour ce site afin d'afficher quand même une valeur.
+			$query_wwwroot = query('SELECT string
+				FROM peel_configuration
+				WHERE site_id="' . intval($result['site_id']).'" AND technical_code="wwwroot"
+				LIMIT 1');
+			$result_wwwroot = fetch_assoc($query_wwwroot);
+			$all_sites_name_array[$result['site_id']] = str_replace(array('http://' ,'https://'), '', $result_wwwroot['string']);
+		}
 	}
 	return $all_sites_name_array;
 }
@@ -4339,7 +4388,7 @@ function get_all_site_countries_array($admin_force_multisite_if_allowed = false,
 	$sites_name_array = array();
 	$sql_pays = 'SELECT id, pays_' . $_SESSION['session_langue'] . ' ' . $sql_select_add_fields . '
 		FROM peel_pays
-		WHERE etat=1 AND id IN ("' . implode('","', $GLOBALS['site_parameters']['site_country_allowed_array']) . '") AND ' . get_filter_site_cond('pays', null, true) . '
+		WHERE etat=1 AND id IN ("' . implode('","', $GLOBALS['site_parameters']['site_country_allowed_array']) . '") AND ' . get_filter_site_cond('pays') . '
 		ORDER BY position, pays_' . $_SESSION['session_langue'];
 	$res_pays = query($sql_pays);
 	while($result = fetch_assoc($res_pays)) {
@@ -4448,7 +4497,7 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 	$output = '';
 	$sql_paiement = 'SELECT id, tva, site_id
 		FROM peel_tva
-		WHERE ' . get_filter_site_cond('tva', null, defined('IN_PEEL_ADMIN')).  '
+		WHERE ' . get_filter_site_cond('tva').  '
 		ORDER BY tva DESC';
 	$res_paiement = query($sql_paiement);
 	
@@ -4507,10 +4556,10 @@ function get_children_cat_list($catid, $preselectionne = array(), $destination =
 	$site_cond = "";
 	if ($destination == 'categories') {
 		$table = 'peel_categories';
-		$site_cond .= " AND " . get_filter_site_cond($destination, 't', defined('IN_PEEL_ADMIN')) . "";
+		$site_cond .= " AND " . get_filter_site_cond($destination, 't') . "";
 	} elseif($destination == 'rubriques') {
 		$table = 'peel_rubriques';
-		$site_cond .= " AND " . get_filter_site_cond($destination, 't', defined('IN_PEEL_ADMIN')) . "";
+		$site_cond .= " AND " . get_filter_site_cond($destination, 't') . "";
 	} else {
 		return false;
 	}
@@ -4548,7 +4597,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 	$output = '';
 	if ($mode == 'insere') {
 		// Création du contenu et de la configuration spécifique au nouveau site.
-		$output = execute_sql($GLOBALS['dirroot'] . "/lib/sql/create_new_site.sql", null, true, $site_id);
+		$output .= execute_sql($GLOBALS['dirroot'] . "/lib/sql/create_new_site.sql", null, true, $site_id);
 	}
 	if(!empty($frm['wwwroot']) && String::substr($frm['wwwroot'], -1) === '/') {
 		$frm['wwwroot'] = String::substr($frm['wwwroot'], 0, String::strlen($frm['wwwroot']) - 1);
@@ -4594,7 +4643,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 					, etat=" . (empty($frm['etat_' . $key]) ? 0 : 1) . "
 					, in_home=" . (empty($frm['home_' . $key]) ? 0 : 1) . "
 					, site_id=" . intval($site_id) . "
-				WHERE id='" . intval($key) . "' AND " . get_filter_site_cond('modules', null, true);
+				WHERE id='" . intval($key) . "' AND " . get_filter_site_cond('modules');
 			query($sql);
 		}
 	}
@@ -4606,7 +4655,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		// Le pays par défaut est la france (anciennement id=1). Le pays france est le premier a être inséré en BDD (via le fichier create_new_site.sql) il possède donc le plus petit id de la liste des pays pour un site.
 		$query = query("SELECT id
 			FROM peel_pays
-			WHERE  " . get_filter_site_cond('pays', null, true) . " AND site_id = " . intval($site_id) . "
+			WHERE  " . get_filter_site_cond('pays', null, false, $site_id) . " AND site_id = " . intval($site_id) . "
 			ORDER BY id ASC
 			LIMIT 1");
 		$result = fetch_assoc($query);
@@ -4615,13 +4664,13 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		// Définition de devise_defaut pour le nouveau site. Lors d'une mise à jour la devise par défaut est défini dans le formulaire.
 		$query = query("SELECT id
 			FROM peel_devises
-			WHERE id=".intval(vn($frm['devise_defaut']))." AND site_id=".intval($site_id)." AND " . get_filter_site_cond('devises', null, true));
+			WHERE id=".intval(vn($frm['devise_defaut']))." AND site_id=".intval($site_id)." AND " . get_filter_site_cond('devises', null, false, $site_id));
 		$result = fetch_assoc($query);
 		if(empty($result['id'])) {
 			// La devise par défaut configurée n'est pas trouvé dans la table des devises pour ce site => il faut définir une devise
 			$query = query('SELECT id
 				FROM peel_devises
-				WHERE code="EUR" AND ' . get_filter_site_cond('devises', null, true) . " AND site_id=" . intval($site_id));
+				WHERE code="EUR" AND ' . get_filter_site_cond('devises', null, false, $site_id) . " AND site_id=" . intval($site_id));
 			if($result = fetch_assoc($query)) {
 				// Définition de la devise EUR pour le site nouvellement créé. 
 				set_configuration_variable(array('technical_code' => 'devise_defaut', 'string' => $result['id'], 'site_id' => $site_id, 'origin' => 'sites.php'), true);
@@ -4674,7 +4723,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		$zone_to_coutry = array('france_mainland' => array('FRA'), 'europe'=> array('DEU','AUT','BEL','BGR','DNK','ESP','FIN','GRC','HUN','IRL','ITA','NLD','POL','PRT','CZE','ROU','GBR','SWE','CYP','EST','LVA','LTU','LUX','MLT','SVK','SVN'), 'france_and_overseas' => array('GUF','PYF','ATF','GLP','MTQ','MYT','NCL','REU','SPM','WLF'), 'world'=>array('AFG','ZAF','ALB','DZA','SAU','ARG','AUS','BRA','CAN','CHL','CHN','COL','KOR','CRI','HRV','EGY','ARE','ECU','USA','SLV','HKG','IND','IDN','ISR','JPN','JOR','LBN','MYS','MAR','MEX','NOK','NZL','PER','PAK','PHL','PRI','RUS','SGP','CHE','TWN','THA','TUR','UKR','VEN','SRB','WSM','AND','AGO','AIA','ATA','ATG','ARM','ABW','AZE','BHS','BHR','BGD','BLR','BLZ','BEN','BMU','BTN','BOL','BIH','BWA','BVT','IOT','VGB','BRN','BFA','BDI','KHM','CMR','CPV','CYM','CAF','TCD','CXR','CCK','COM','COG','COK','CUB','DJI','DMA','DOM','TLS','GNQ','ERI','ETH','FLK','FRO','FJI','GAB','GMB','GEO','GHA','GIB','GRL','GRD','GUM','GTM','GIN','GNB','HTI','HMD','HND','ISL','IRN','IRQ','CIV','JAM','KAZ','KEN','KIR','KOR','KWT','KGZ','LAO','LSO','LBR','LBY','LIE','MAC','MKD','MDG','MWI','MDV','MLI','MHL','MRT','MUS','FSM','MDA','MCO','MNG','MSR','MOZ','MMR','NAM','NRU','NPL','NIC','NER','NGA','NIU','NFK','MNP','OMN','PLW','PAN','PNG','PRY','PCN','QAT','RWA','SGS','KNA','LCA','VCT','WSM','SMR','STP','SEN','SYC','SLE','SOM','LKA','SHN','SDN','SUR','SJM','SWZ','SYR','TJK','TZA','TGO','TKL','TON','TTO','TUN','TKM','TCA','TUV','UMI','UGA','URY','UZB','VUT','VAT','VNM','VIR','ESH','YEM','COD','ZMB','ZWE','BRB','MNE'));
 		$query = query('SELECT *
 			FROM peel_zones
-			WHERE technical_code!="" AND ' . get_filter_site_cond('zones', null, true) . ' AND site_id='.intval($site_id));
+			WHERE technical_code!="" AND ' . get_filter_site_cond('zones', null, false, $site_id));
 		$zones_availables = array();
 		while($result = fetch_assoc($query)) {
 			$zones_availables[$result['id']] = $zone_to_coutry[$result['technical_code']];
@@ -4686,20 +4735,29 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		foreach ($zones_availables as $this_zone_id => $this_zone_country_array_by_technical_code) {
 			query('UPDATE peel_pays
 				SET zone='.intval($this_zone_id).'
-				WHERE iso3 IN ("'.implode('","',nohtml_real_escape_string($this_zone_country_array_by_technical_code)).'") AND ' . get_filter_site_cond('pays', null, true) . ' AND site_id='.intval($site_id));
+				WHERE iso3 IN ("'.implode('","',nohtml_real_escape_string($this_zone_country_array_by_technical_code)).'") AND ' . get_filter_site_cond('pays', null, false, $site_id));
 			
 			if ($france_zone_id == $this_zone_id) {
 				// Il faut completer les tarifs créés pour le nouveau site avec la zone. Les types de transport rempli par défaut ne concerne que la zone france et les modes de livraison colissimo et retrait en boutique
 				// tarif > 0 correspond à colissimo. Si tarif = 0 c'est le type pickup.
 				$query = query('SELECT * 
 					FROM peel_types
-					WHERE (technical_code="colissimo_without_signature" OR technical_code="pickup") AND ' . get_filter_site_cond('types', null, true) . ' AND site_id='.intval($site_id));
+					WHERE (technical_code="colissimo_without_signature" OR technical_code="pickup") AND ' . get_filter_site_cond('types', null, false, $site_id));
 				while ($result = fetch_assoc($query)) {
 					query('UPDATE peel_tarifs 
 						SET `zone`=' . intval($france_zone_id) . ', `type`="' . nohtml_real_escape_string($result['id']).'"
-						WHERE ' . ($result['technical_code'] == "pickup"?'tarif = 0.00':'tarif > 0') . ' AND ' . get_filter_site_cond('tarifs', null, true) . ' AND site_id='.intval($site_id));
+						WHERE ' . ($result['technical_code'] == "pickup"?'tarif = 0.00':'tarif > 0') . ' AND ' . get_filter_site_cond('tarifs', null, false, $site_id));
 				}
 			}
+		}
+		// Les templates d'emails par défaut ont été insérés avec l'id de catégorie par défaut (1), il faut mettre à jour cette id de catégorie. Les emails installés par defaut sont tous dans la catégories automatic_sending.
+		$query = query('SELECT id 
+			FROM peel_email_template_cat
+			WHERE technical_code="automatic_sending" AND ' . get_filter_site_cond('email_template_cat', null, false, $site_id));
+		while ($result = fetch_assoc($query)) {
+			query('UPDATE peel_email_template 
+				SET `id_cat`=' . intval($result['id']) . '
+				WHERE ' . get_filter_site_cond('email_template', null, false, $site_id));
 		}
 	}
 	return $output;

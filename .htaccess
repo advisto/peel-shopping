@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 43477 2014-12-02 12:23:38Z gboussin $
+# $Id: .htaccess 44077 2015-02-17 10:20:38Z sdelaporte $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -16,11 +16,11 @@
 # - Chez OVH, activez les lignes suivantes en retirant le # en début de ligne :
 # SetEnv PHP_VER 5
 # SetEnv REGISTER_GLOBALS 0
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez 1&1, activez les lignes suivantes en retirant le # en début de ligne :
 # Options +FollowSymLinks
-# RewriteBase / ou /monrepertoiredeboutique/ # présente et expliquée aussi plus loin dans le fichier
+# RewriteBase / ou /monrepertoiredesite/ # présente et expliquée aussi plus loin dans le fichier
 # ... et pour PHP 5 :
 # AddType x-mapp-php5 .php
 #   ou
@@ -50,7 +50,7 @@
 # - Chez Nuxit, activez les lignes suivantes en retirant le # en début de ligne :
 # AddHandler x-httpd-php5 .php
 # AddType application/x-httpd-php5 .php
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez Produweb, activez les lignes suivantes en retirant le # en début de ligne :
 # SetEnv DEFAULT_PHP_VERSION 5
@@ -81,7 +81,7 @@
 # Une erreur 404 est associé à une mauvaise recherche (désactivée par défaut).
 # ATTENTION : configurez le ErrorDocument en précisant le bon chemin en cas d'installation dans un répertoire
 # Le code est à adapter en cas de site multilingue.
-# ErrorDocument 404 /monrepertoiredeboutique/search.php?type=error404
+# ErrorDocument 404 /monrepertoiredesite/search.php?type=error404
 ErrorDocument 404 /search.php?type=error404
 
 <FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">
@@ -145,10 +145,10 @@ AddDefaultCharset UTF-8
 	RewriteEngine on
 	
 	# CONFIGURATION : Sur certains hébergements (OVH, Amen, ...) il faut parfois configurer le RewriteBase en retirant le # en début de ligne
-	# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredeboutique/
+	# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredesite/
 	# RewriteBase /
 	# ...ou... :
-	# RewriteBase /monrepertoiredeboutique/
+	# RewriteBase /monrepertoiredesite/
 
 	# DEBUT DE EDITION SUR MESURE
 	# Redirection des demandes qui auraient dues être faites via un CDN

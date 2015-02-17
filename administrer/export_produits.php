@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an     |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: export_produits.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -52,7 +52,7 @@ foreach ($specific_fields_array as $this_field) {
 // et on ajoute les colonnes pour chaque attribut
 $sql_n = "SELECT *
 	FROM peel_nom_attributs
-	WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
+	WHERE " . get_filter_site_cond('nom_attributs') . "
 	ORDER BY id";
 $nom_attrib = query($sql_n);
 while ($this_attribut = fetch_assoc($nom_attrib)) {
@@ -65,7 +65,7 @@ if (is_lot_module_active()) {
 	$i = 1;
 	$query_produits_lot = query("SELECT * 
 		FROM peel_quantites
-		WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites', null, true));
+		WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites'));
 	while ($prix_lot = fetch_assoc($query_produits_lot)) {
 		$product_field_names[] = 'quantite§prix§prix_revendeur'.$i;
 		$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
@@ -83,7 +83,7 @@ $output .= implode("\t", $title_line_output) . "\r\n";
 $q = "SELECT p.*, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
 	FROM peel_produits p
 	INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
-	INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
+	INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
 	WHERE " . get_filter_site_cond('produits', 'p', true) . "
 	GROUP BY id
 	ORDER BY id";
@@ -100,7 +100,7 @@ while ($result = fetch_assoc($query)) {
 	unset($possible_sizes);
 	$sql_taille = query('SELECT t.*
 		FROM peel_produits_tailles pt 
-		INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' . get_filter_site_cond('tailles', 't', true) . '
+		INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' . get_filter_site_cond('tailles', 't') . '
 		WHERE pt.produit_id = "'.intval($product_object->id).'"');
 	while($taille = fetch_assoc($sql_taille)){
 		$temp = $taille['nom_'.$_SESSION['session_langue']];
@@ -120,7 +120,7 @@ while ($result = fetch_assoc($query)) {
 	// Récupération des valeurs pour les attributs
 	$query_produits_attributs = query("SELECT ppa.nom_attribut_id, pa.id, pa.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
 		FROM peel_produits_attributs ppa
-		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id AND " . get_filter_site_cond('attributs', 'pa', true)."
+		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id AND " . get_filter_site_cond('attributs', 'pa')."
 		WHERE produit_id='" . intval($product_object->id) . "'");
 	while ($this_attribut = fetch_assoc($query_produits_attributs)) {
 		if (!empty($attribut_infos_array[$this_attribut['nom_attribut_id']])) {
@@ -152,7 +152,7 @@ while ($result = fetch_assoc($query)) {
 		$i = 1;
 		$query_produits_lot = query("SELECT * 
 			FROM peel_quantites
-			WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites', null, true));
+			WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites'));
 		while ($prix_lot = fetch_assoc($query_produits_lot)) {
 			$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
 			$i++;

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: order_step1.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
@@ -49,6 +49,18 @@
 					<textarea class="form-control" cols="50" rows="3" name="adresse1" id="adresse1">{$adresse1}</textarea>
 					{$adresse1_error}
 				</div>
+				{foreach $specific_fields as $f}
+					{if $f.field_position=='adresse_bill'}
+						<div>
+						{if !empty($f.field_title)}
+							<label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label>
+							{include file="specific_field.tpl" f=$f}{$f.error_text}
+						{else}
+							{include file="specific_field.tpl" f=$f}{$f.error_text}
+						{/if}
+						</div>
+					{/if}
+				{/foreach}
 				<div>
 					<label for="code_postal1">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
 					<input class="form-control" type="text" name="code_postal1" id="code_postal1" size="32" value="{$code_postal1|str_form_value}" />
@@ -102,6 +114,18 @@
 					<textarea class="form-control" cols="50" rows="3" name="adresse2" id="adresse2">{$adresse2}</textarea>
 					{$adresse2_error}
 				</div>
+				{foreach $specific_fields as $f}
+					{if $f.field_position=='adresse_ship'}
+						<div>
+						{if !empty($f.field_title)}
+							<label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label>
+							{include file="specific_field.tpl" f=$f}{$f.error_text}
+						{else}
+							{include file="specific_field.tpl" f=$f}{$f.error_text}
+						{/if}
+						</div>
+					{/if}
+				{/foreach}
 				<div>
 					<label for="code_postal2">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
 					<input class="form-control" type="text" name="code_postal2" id="code_postal2" size="32" value="{$code_postal2|str_form_value}" />
@@ -123,6 +147,18 @@
 		</div>
 		{/if}
 	</div>
+	{foreach $specific_fields as $f}
+		{if $f.field_position!='adresse_ship' && $f.field_position!='adresse_bill'}
+			<div>
+			{if !empty($f.field_title)}
+				<label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label>
+				{include file="specific_field.tpl" f=$f}{$f.error_text}
+			{else}
+				{include file="specific_field.tpl" f=$f}{$f.error_text}
+			{/if}
+			</div>
+		{/if}
+	{/foreach}
 	<div class="row">
 		<div class="col-sm-12">
 			{if $is_payment_cgv}

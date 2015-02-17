@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 43488 2014-12-02 18:02:14Z gboussin $
+// $Id: sites.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -29,7 +29,7 @@ if (!empty($frm['logo']) && strpos($frm['logo'], 'http') === false) {
 	$frm['logo'] = $GLOBALS['wwwroot'] . $frm['logo'];
 }
 if (!empty($_GET['mode']) && in_array($_GET['mode'], array('insere', 'ajout', 'duplicate', 'suppr')) && $_SESSION['session_utilisateur']['site_id']>0) {
-	// la création/duplication/suppression de nouveau site est réservé aux admin multisite. Dans le cas de l'affichage du formulaire ou de l'intertion de donnée et si l'admin n'a pas les droits, on modifie le GET['mode'] pour afficher affiche_liste_site
+	// La création/duplication/suppression de nouveau site est réservée aux administrateurs multisite. Dans le cas de l'affichage du formulaire ou de l'insertion de données et si l'administrateur n'a pas les droits, on modifie le GET['mode'] pour afficher affiche_liste_site
 	// Le lien de création de site ne s'affiche pas aux administrateurs multisite.
 	$_GET['mode'] = 'default';
 }
@@ -378,7 +378,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl_zones = array();
 	$qid = query("SELECT *
 		FROM peel_zones
-		WHERE on_franco=1 AND " . get_filter_site_cond('zones', null, true) . "");
+		WHERE on_franco=1 AND " . get_filter_site_cond('zones') . "");
 	while ($result = fetch_assoc($qid)) {
 		$tpl_zones[] = array('href' => $GLOBALS['administrer_url'] . '/zones.php?mode=modif&id=' . $result['id'],
 			'nom' => $result['nom_' . $_SESSION['session_langue']]
@@ -392,7 +392,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode']));
 	$tpl->assign('site_suspended', vb($frm['site_suspended']));
 
-	$tpl->assign('membre_admin_href', $GLOBALS['wwwroot'] . '/membre.php');
+	if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
+		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+	} else {
+		$this_wwwroot =  $GLOBALS['wwwroot'];
+	}
+	$tpl->assign('membre_admin_href', $this_wwwroot . '/membre.php');
 
 	// Contenu multilingue
 	$tpl_langs = array();
@@ -446,7 +451,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('popup_width', vb($frm['popup_width']));
 	$tpl->assign('popup_height', vb($frm['popup_height']));
 	$tpl->assign('admin_force_ssl', vb($frm['admin_force_ssl']));
-	$tpl->assign('membre_href', str_replace('http://', 'https://', $GLOBALS['wwwroot'] . '/membre.php'));
+	$tpl->assign('membre_href', str_replace('http://', 'https://', $this_wwwroot . '/membre.php'));
 
 	$tpl->assign('display_nb_product', vb($frm['display_nb_product']));
 	$tpl->assign('small_width', vb($frm['small_width']));
@@ -479,7 +484,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	if (file_exists($GLOBALS['fonctionsdevises'])) {
 		$req = "SELECT *
 		FROM peel_devises
-		WHERE etat = '1' AND " . get_filter_site_cond('devises', null, true) . " AND site_id = " . intval(vn($frm['id']));
+		WHERE etat = '1' AND " . get_filter_site_cond('devises') . " AND site_id = " . intval(vn($frm['id']));
 		$res = query($req);
 		while ($tab_devise = fetch_assoc($res)) {
 			$tpl_devices_options[] = array('value' => intval($tab_devise['id']),
@@ -490,13 +495,50 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	}
 	$tpl->assign('devices_options', $tpl_devices_options);
 	
-	$tpl->assign('is_module_banner_active', is_module_banner_active());
-	$tpl->assign('is_vitrine_module_active', check_if_module_active('vitrine'));
-	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
-	$tpl->assign('is_iphone_ads_module_active', check_if_module_active('iphone-ads', 'ads.php'));
 	$tpl_modules = array();
 	$i = 0;
+	$emplacement_array['above_middle'] = $GLOBALS['STR_ADMIN_SITES_ABOVE_MIDDLE'];
+	$emplacement_array['below_middle'] = $GLOBALS['STR_ADMIN_SITES_BELOW_MIDDLE'];
+	$emplacement_array['footer'] = $GLOBALS['STR_ADMIN_SITES_BOTTOM'];
+	$emplacement_array['header'] = $GLOBALS['STR_ADMIN_SITES_TOP'];
+	$emplacement_array['top_middle'] = $GLOBALS['STR_ADMIN_SITES_CENTER_TOP'];
+	$emplacement_array['center_middle'] = $GLOBALS['STR_ADMIN_SITES_CENTER_MIDDLE'];
+	$emplacement_array['center_middle_home'] = $GLOBALS['STR_ADMIN_SITES_CENTER_MIDDLE_HOME'];
+	$emplacement_array['bottom_middle'] = $GLOBALS['STR_ADMIN_SITES_CENTER_BOTTOM'];
+	if (is_module_banner_active() && check_if_module_active('vitrine')) {
+		$emplacement_array['top_vitrine'] = $GLOBALS['STR_ADMIN_SITES_USER_SHOPS_TOP'];
+		$emplacement_array['bottom_vitrine'] = $GLOBALS['STR_ADMIN_SITES_USER_SHOPS_BOTTOM'];
+	}
+	if (is_annonce_module_active()) {
+		$emplacement_array['top_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_TOP'];
+		$emplacement_array['sponso_cat'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_SPONSOR'];
+		$emplacement_array['ad_detail_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_AD_BOTTOM'];
+		$emplacement_array['ad_detail_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_AD_TOP'];
+		$emplacement_array['middle_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_MIDDLE'];
+		$emplacement_array['bottom_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_BOTTOM'];
+		$emplacement_array['left_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_LEFT'];
+		$emplacement_array['right_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_RIGHT'];
+	}
+	if (is_iphone_ads_module_active()) {
+		$emplacement_array['iphone_ads_splashscreen'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_HOMEs'];
+		$emplacement_array['iphone_ads_bottom_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ADS_BOTTOM'];
+		$emplacement_array['iphone_ads_top_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ADS_TOP'];
+		$emplacement_array['iphone_ads_ad_detail_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_TOP'];
+		$emplacement_array['iphone_ads_ad_detail_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_BOTTOM'];
+		$emplacement_array['iphone_ads_favoris_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_BOTTOM'];
+		$emplacement_array['iphone_ads_favoris_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_TOP'];
+		$emplacement_array['iphone_ads_account_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_BOTTOM'];
+		$emplacement_array['iphone_ads_account_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_TOP'];
+		$emplacement_array['iphone_ads_create_account_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_CREATION_TOP'];
+		$emplacement_array['iphone_ads_create_account_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ACCOUNT_CREATION_BOTTOM'];
+		$emplacement_array['iphone_ads_publish_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_TOP'];
+		$emplacement_array['iphone_ads_publish_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_BOTTOM'];
+	}
+	asort($emplacement_array);
 	foreach ($frm_modules as $this_module_infos) {
+		if(empty($emplacement_array[vb($this_module_infos['location'])])){
+			$emplacement_array[vb($this_module_infos['location'])] = str_replace('_', ' ', ucfirst(vb($this_module_infos['location'])));
+		}
 		$tpl_modules[] = array('tr_rollover' => tr_rollover($i, true),
 			'title' => $this_module_infos['title_' . $_SESSION['session_langue']],
 			'id' => $this_module_infos['id'],
@@ -520,6 +562,8 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			);
 		$i++;
 	}
+	
+	$tpl->assign('emplacement_array', $emplacement_array);
 	$tpl->assign('modules', $tpl_modules);
 
 	$tpl->assign('is_fonctionstagcloud', file_exists($GLOBALS['fonctionstagcloud']));
@@ -672,6 +716,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_WWWROOT', $GLOBALS['STR_ADMIN_WWWROOT']);
 	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
+	$tpl->assign('STR_ADMIN_HTML_PLACE', $GLOBALS['STR_ADMIN_HTML_PLACE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_UPDATE_WEBSITE', $GLOBALS['STR_UPDATE_WEBSITE']);
 	$tpl->assign('STR_ADMIN_SITES_TITLE', $GLOBALS['STR_ADMIN_SITES_TITLE']);
@@ -1024,7 +1069,7 @@ function supprime_site($id)
 		$delete_table_array[] = 'carrousels';
 		$delete_table_array[] = 'vignettes_carrousels';
 	}
-	// Exécution de la suppression.
+	// Exécution de la suppression
 	foreach ($delete_table_array as $this_table_short_name) {
 		$qid = query("DELETE 
 			FROM peel_".word_real_escape_string($this_table_short_name)."
@@ -1064,7 +1109,7 @@ function affiche_liste_site()
 	}
 	// Récupération des infos que l'on a pour chaque site pour l'afficher dans la liste des sites
 	// noms
-	$all_sites_name_array = get_all_sites_name_array(false, true);
+	$all_sites_name_array = get_all_sites_name_array();
 	// URL
 	$sites_wwwroot_array = get_sites_wwwroot_array();
 	if (count($all_sites_name_array) == 0) {
@@ -1121,7 +1166,7 @@ function affiche_liste_site()
  */
 function supprime_favicon($id, $file)
 {
-	set_configuration_variable(array('technical_code' => 'favicon', 'string' => '', 'origin' => 'sites.php'), true);
+	set_configuration_variable(array('technical_code' => 'favicon', 'string' => '', 'origin' => 'sites.php', 'site_id' => $id), true);
 	return delete_uploaded_file_and_thumbs($file);
 }
 
@@ -1134,7 +1179,7 @@ function supprime_favicon($id, $file)
  */
 function supprime_default_picture($id, $file)
 {
-	set_configuration_variable(array('technical_code' => 'default_picture', 'string' => '', 'origin' => 'sites.php'), true);
+	set_configuration_variable(array('technical_code' => 'default_picture', 'string' => '', 'origin' => 'sites.php', 'site_id' => $id), true);
 	return delete_uploaded_file_and_thumbs($file);
 }
 

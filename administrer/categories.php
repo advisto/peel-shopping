@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 43096 2014-11-04 10:10:26Z sdelaporte $
+// $Id: categories.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -379,7 +379,7 @@ function insere_categorie(&$frm)
 			, '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['image_' . $lng]) . "'
 			, '" . real_escape_string($frm['header_html_' . $lng]) . "'
-			, '" . nohtml_real_escape_string($frm['sentence_displayed_on_product_' . $lng]) . "'";
+			, '" . real_escape_string(vb($frm['sentence_displayed_on_product_' . $lng])) . "'";
 		}
 		$sql .= ')';
 		query($sql);
@@ -442,7 +442,7 @@ function maj_categorie($id, $frm)
 		, meta_key_" . $lng . "='" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
 		, meta_desc_" . $lng . "='" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'
 		, header_html_" . $lng . " = '" . real_escape_string($frm['header_html_' . $lng]) . "'
-		, sentence_displayed_on_product_" . $lng . " = '" . nohtml_real_escape_string($frm['sentence_displayed_on_product_' . $lng]) . "'";
+		, sentence_displayed_on_product_" . $lng . " = '" . real_escape_string(vb($frm['sentence_displayed_on_product_' . $lng])) . "'";
 	}
 	$sql .= " WHERE id=" . intval($id). " AND " . get_filter_site_cond('categories', null, true) . "";
 
@@ -517,7 +517,7 @@ function affiche_formulaire_categorie(&$frm)
 		$tpl->assign('cat_href', get_product_category_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']]), false, false, vb($frm['site_id']));
 	}
 	$tpl->assign('issel_parent_zero', vb($frm['parent_id']) == 0);
-	$tpl->assign('categorie_options', get_categories_output(null, 'categories', $frm['parent_id'], 'option', '&nbsp;&nbsp;', null));
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories', $frm['parent_id'], 'option', '&nbsp;&nbsp;', null, null, true));
 	$tpl->assign('is_on_special', !empty($frm['on_special']));
 	$tpl->assign('technical_code', vb($frm["technical_code"]));
 	$tpl->assign('is_carrousel_module_active', check_if_module_active('carrousel'));
@@ -536,7 +536,7 @@ function affiche_formulaire_categorie(&$frm)
 			include ($GLOBALS['fonctionslot']);
 			$tpl->assign('lot_explanation_table', get_lot_explanation_table(null, $frm['id']));
 			$tpl->assign('lot_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?cat_id=' . vb($frm['id']));
-			if (num_rows(query("SELECT 1 FROM peel_quantites WHERE cat_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites', null, true))) > 0) {
+			if (num_rows(query("SELECT 1 FROM peel_quantites WHERE cat_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites'))) > 0) {
 				$tpl->assign('lot_supprime_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?cat_id=' . vb($frm['id']) . '&mode=supprime');
 			}
 		}
@@ -575,6 +575,7 @@ function affiche_formulaire_categorie(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 
+	$tpl->assign('enable_categorie_sentence_displayed_on_product', vb($GLOBALS['site_parameters']['enable_categorie_sentence_displayed_on_product']));
 	$tpl->assign('is_category_promotion_module_active', check_if_module_active('category_promotion'));
 	$tpl->assign('promotion_devises', vb($frm["promotion_devises"]));
 	$tpl->assign('site_symbole', vb($GLOBALS['site_parameters']['symbole']));

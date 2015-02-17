@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 43307 2014-11-21 11:53:42Z sdelaporte $
+// $Id: newsletter.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -284,7 +284,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 	// Récupération de la liste des emails
 	if (!empty($message)) {
 		foreach(array_keys($message) as $this_lang) {
-			$sql_cond = "etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND " . get_filter_site_cond('utilisateurs', 'u', true) . " AND ";
+			$sql_cond = "etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND " . get_filter_site_cond('utilisateurs', 'u') . " AND ";
 			if (!$test) {
 				$sql_cond .= "newsletter='1' AND (lang='" . nohtml_real_escape_string($this_lang) . "' OR lang='')";
 			} else {
@@ -383,7 +383,7 @@ function affiche_liste_newsletter()
 			$titre = '[' . String::strtoupper(implode(",", $this_langs_array)) . '] ' . $titre;
 			$sql_u = "SELECT email
 				FROM peel_utilisateurs
-				WHERE newsletter = '1' AND " . get_filter_site_cond('utilisateurs', null, true) . " AND etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND lang IN ('" . implode("','", $this_langs_array) . "')";
+				WHERE newsletter = '1' AND " . get_filter_site_cond('utilisateurs') . " AND etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND lang IN ('" . implode("','", $this_langs_array) . "')";
 			$res_u = query($sql_u);
 			$subscribers_number = num_rows($res_u);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),

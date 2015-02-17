@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 43606 2014-12-12 18:03:37Z sdelaporte $
+// $Id: display_caddie.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -75,7 +75,8 @@ if (!function_exists('get_caddie_content_html')) {
 			$tpl->assign('shipping_text', $shipping_text);
 			$tpl->assign('STR_UPDATE', $GLOBALS['STR_UPDATE']);
 			
-			if (est_identifie() && (a_priv('util') || a_priv('reve') || a_priv('admin*') || a_priv('demo'))) {
+			if (est_identifie()) {
+				// Test sur l'identification, il faut obligatoirement être connecté à son compte pour renseigner un code promo. Les utilisateurs 'stop' (attente revendeur) ou 'stand' (attente affiliation) ne peuvent pas se connecter à leur compte, ne peuvent donc pas passer commande et ne bénéficient donc pas des avantages liés au statut final 'reve' (revendeur confirmé) ou 'affi' (affilié confirmé). Les utilisateurs 'load' (téléchargement) ou 'newsletter' (abonné newsletter) ne peuvent pas se connecter, et donc ne peuvent pas non plus passer commande.
 				$tpl->assign('code_promo', array(
 					'txt' => $GLOBALS['STR_CODE_PROMO'],
 					'value' => vb($_SESSION['session_caddie']->code_promo),
@@ -182,9 +183,7 @@ if (!function_exists('get_caddie_content_html')) {
 				$tpl->assign('STR_REQUIRED_VALIDATE_ORDER', $GLOBALS['STR_REQUIRED_VALIDATE_ORDER']);
 			} else {
 				$tpl->assign('is_minimum_error', false);
-				if(!est_identifie() || (a_priv('util') || a_priv('reve') || a_priv('admin*') || a_priv('demo'))) {
-					$tpl->assign('STR_ORDER', $GLOBALS['STR_ORDER']);
-				}
+				$tpl->assign('STR_ORDER', $GLOBALS['STR_ORDER']);
 			}
 			$tpl->assign('shopping_href', $GLOBALS['wwwroot'] . '/achat/');
 			$tpl->assign('empty_list_href', get_current_url(false) . '?func=vide');
@@ -282,6 +281,7 @@ if (!function_exists('get_order_step1')) {
 			} else {
 				$tpl->assign('is_payment_cgv', false);
 			}
+			$tpl->assign('specific_fields', get_specific_field_infos($frm, false, $form_error_object, "order"));
 			$tpl->assign('STR_CGV_OK', $GLOBALS['STR_CGV_OK']);
 			$tpl->assign('STR_REFERENCE_IF_KNOWN', $GLOBALS['STR_REFERENCE_IF_KNOWN']);
 			$tpl->assign('commande_interne', vb($frm['commande_interne']));
@@ -290,7 +290,7 @@ if (!function_exists('get_order_step1')) {
 			$tpl->assign('STR_CREATE_ACCOUNT_FUTURE_USE', $GLOBALS['STR_CREATE_ACCOUNT_FUTURE_USE']);
 			$tpl->assign('STR_COMMENTS', $GLOBALS['STR_COMMENTS']);
 			$tpl->assign('STR_ETAPE_SUIVANTE', $GLOBALS['STR_ETAPE_SUIVANTE']);
-			$output = $tpl->fetch();
+			$output .= $tpl->fetch();
 		}
 		return $output;
 	}
@@ -363,6 +363,7 @@ if (!function_exists('get_order_step2')) {
 				$tpl->assign('is_mode_transport', false);
 			}
 			$tpl->assign('action', $GLOBALS['wwwroot'] . '/achat/fin_commande.php');
+			$tpl->assign('specific_fields', get_specific_field_infos($frm, false, null, "order"));
 			
 			if (is_icirelais_module_active() && !empty($_SESSION['session_commande']['is_icirelais_order'])) {
 				$tpl->assign('icirelais_id_delivery_points_radio_inputs', get_icirelais_id_delivery_points_radio_inputs($is_delivery_address_necessary_for_delivery_type));
@@ -378,7 +379,7 @@ if (!function_exists('get_order_step2')) {
 			$tpl->assign('caddie_products_summary_table', get_caddie_products_summary_table(false, true, $mode_transport, null));
 			$tpl->assign('STR_ORDER', $GLOBALS['STR_ORDER']);
 			$tpl->assign('STR_BACK_TO_CADDIE_TXT', $GLOBALS['STR_BACK_TO_CADDIE_TXT']);
-			$output = $tpl->fetch();
+			$output .= $tpl->fetch();
 		}
 		return $output;
 	}
@@ -981,7 +982,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 			$tpl->assign('prix_total', fprix($_SESSION['session_caddie']->total, true));
 			$tpl->assign('total_points', $_SESSION['session_caddie']->total_points);
 		}
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 		return $output;
 	}
 }

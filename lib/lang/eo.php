@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 43407 2014-11-28 11:58:32Z sdelaporte $
+// $Id: eo.php 44079 2015-02-17 11:04:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -294,7 +294,7 @@ $GLOBALS["STR_FTP_CHDIR_FAILED"] = "La ŝanĝo de FTP-dosierujo fiaskis";
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "La FTP-konektiĝo fiaskis";
 $GLOBALS["STR_FTP_GET_FAILED"] = "La repreno de la dosiera enhavo fiaskis";
 $GLOBALS["STR_FWRITE_FAILED"] = "Skribo de la dosiero fiaskis";
-$GLOBALS["SITE_GENERATOR"] = "PEEL eCommerce retejo kreo";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL eCommerce retejo kreo";
 $GLOBALS["STR_GENDER"] = "Ĝentileco";
 $GLOBALS["STR_GET_MY_POSITION"] = "Rehavi mian pozicion (necesa por ĉi funkcio)";
 $GLOBALS["STR_GET_PASSWORD"] = "Rehavi sian pasvorton";
@@ -440,10 +440,10 @@ $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Krei la HTML-kodon";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Listo de vortoj";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "Retpoŝta adreso estas malfakultativa.";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Dankon pri via konfido.\n\nBonvolu skribi kaj konservi viajn salutnomon kaj pasvorton sekretaj.\n\nEblos viziti vian partneran paĝon tuj post validigo de via konto. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Ensalutu ĉe ĉi paĝo</a>.\n\nViaj salutinformoj estas la jenaj:";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Dankon pri via konfido.\n\nBonvolu skribi kaj konservi viajn salutnomon kaj pasvorton sekretaj.\n\nEblos viziti vian partneran paĝon tuj post validigo de via konto.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "ne ĉeestas la stokon hodiaŭ.\nNi avertos vin per retmesaĝo kiam ĝi disponeblos:";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Ni dankas vin pro via konfido. Vi nun aliĝas nian partner-rondon kaj povos profiti rabaton je %s tuj post via unua ensaluto.\r\nĜis tre baldaŭ ĉe {$GLOBALS['site']}.\r\n";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Dankon pri via konfido.\n\nBonvolu skribi kaj konservi viajn salutnomon kaj pasvorton sekretaj.\n\nEblos viziti vian profiti la prezojn specialaj al revendistoj tuj post validigo de via konto. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Ensalutu ĉe ĉi paĝo</a>.\n\nViaj salutinformoj estas la jenaj:";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Dankon pri via konfido.\n\nBonvolu skribi kaj konservi viajn salutnomon kaj pasvorton sekretaj.\n\nEblos viziti vian profiti la prezojn specialaj al revendistoj tuj post validigo de via konto.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "Per klako de la ĉi suba butono, vi sendas vian aliĝon al la Partnera Programo de la retejo {$GLOBALS['site']}. Post fini la aliĝon, vi devos sekvi la detalajn kondiĉojn el la ĝeneralaj aliĝaj kondiĉoj, kiujn vi ricevos poŝte en 2 ekzempleroj subskribotaj kaj resendotaj al ni.";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Ĉi varo ne disponas hodiaŭ, sed ni povas averti vin per retmesaĝo tuj post alveno en nia stoko.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Klaku ĉi tie por reviziti vian konton.";
@@ -519,7 +519,7 @@ $GLOBALS["STR_NEW_CUSTOMER"] = "Ĉu nova kliento?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Nova pasvorto por konfirmo";
 $GLOBALS["STR_NEW_PASSWORD"] = "Nova pasvorto";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Aliĝo al la novaĵ-bulteno";
-$GLOBALS["STR_NEWSLETTER_YES"] = "Jes, mi bonvolas aliĝi la novaĵ-bultenon de";
+$GLOBALS["STR_NEWSLETTER_YES"] = "Jes, mi bonvolas aliĝi la novaĵ-bultenon de {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "Novaĵ-bulteno";
 $GLOBALS["STR_NEXT_PAGE"] = "Sekva";
 $GLOBALS["STR_NEXT"] = "Sekva";
@@ -561,7 +561,7 @@ $GLOBALS["STR_OPTION"] = "Prezo de rezervoj";
 $GLOBALS["STR_OPTIONS_COST"] = "Kosto de rezervoj";
 $GLOBALS["STR_OR_COORDINATION"] = "aŭ";
 $GLOBALS["STR_OR"] = "aŭ";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = '';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detaloj de la mendo";
 $GLOBALS["STR_ORDER_FORM"] = "Mendilo";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historio pri mendoj";

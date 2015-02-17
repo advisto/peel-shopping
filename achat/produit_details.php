@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: produit_details.php 44077 2015-02-17 10:20:38Z sdelaporte $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -25,7 +25,7 @@ if (empty($_GET['id'])) {
 $product_infos = array();
 
 if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'])) {
-	// Autorisation de plusieurs urls pour ce produit dans le cas ou il est associé à plusieurs catégorie. Cette configuration désactivée par défaut
+	// Autorisation de plusieurs urls pour ce produit dans le cas où il est associé à plusieurs catégories. Cette configuration est désactivée par défaut
 	// Si le produit est bien associé à $_GET['catid']
 	$query = query("SELECT 1
 		FROM peel_produits_categories pc 

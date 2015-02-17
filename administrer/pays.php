@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: pays.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -174,7 +174,7 @@ function affiche_formulaire_pays(&$frm)
 	$tpl_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_zones
-		WHERE " . get_filter_site_cond('zones', null, true) . "
+		WHERE " . get_filter_site_cond('zones') . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_zone = query($sql_zone);
 	while ($tab_zone = fetch_assoc($res_zone)) {
@@ -314,7 +314,7 @@ function affiche_liste_pays()
 	$tpl_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
 		FROM peel_zones
-		WHERE " . get_filter_site_cond('zones', null, true) . "
+		WHERE " . get_filter_site_cond('zones') . "
 		ORDER BY nom_" . $_SESSION['session_langue'];
 	$res_zone = query($sql_zone);
 	while ($result = fetch_assoc($res_zone)) {
@@ -326,7 +326,7 @@ function affiche_liste_pays()
 
 	$result = query("SELECT p.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
 		FROM peel_pays p
-		LEFT JOIN peel_zones z ON z.id=p.zone AND " . get_filter_site_cond('zones', 'z', true) . "
+		LEFT JOIN peel_zones z ON z.id=p.zone AND " . get_filter_site_cond('zones', 'z') . "
 		WHERE " . get_filter_site_cond('pays', "p", true) . "
 		ORDER BY p.position ASC, p.pays_" . $_SESSION['session_langue'] . " ASC");
 

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_text_es.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -173,8 +173,10 @@ Dirección de entrega
 Los artículos pedidos
 ---------------------------
 [BOUGHT_ITEMS]
-Envío:
+Los costos de envío:
 [COUT_TRANSPORT]
+Typo de expedición:
+[TYPE]
 
 Usted puede seguir en tiempo real el estado de su pedido:
 Una vez pagado su pedido, la factura aparecerá en su cuenta en los detalles de la orden
@@ -346,7 +348,7 @@ El siguiente usuario acaba de registrarse:
 ",
   "warn_admin_reve_subscription" => "Le informamos que el distribuidor [link=\"[ADMIN_URL]\"] [CIVILITE] [PRENOM] [NOM_FAMILLE]] [/link] está registrado en [SITE].
 
-Esta cuenta está actualmente en estado de \"Vendedor en espera\". Esta cuenta está activa, pero beneficiará a distribuidor de tasas cuando lo pasa en estado \"Revendedor\". 
+Esta cuenta está actualmente en estado de \"Vendedor en espera\". Esta cuenta está inactiva, y beneficiará a distribuidor de tasas cuando lo pasa en estado \"Revendedor\". 
 ",
 "email_retour_virement" => "Hola,
 
@@ -438,6 +440,26 @@ Para más información, póngase en contacto con nosotros.",
 
 Gracias por su suscripción al boletín de [SITE_NAME]. Usted recibirá un boletín semanal a la dirección [EMAIL].
 
-Pronto en [WWWROOT]/."
+Pronto en [WWWROOT]/.",
+  "send_mail_for_account_creation_stop" => "Hola,
+
+Su inscripción se ha tenido en cuenta en [SITE] y debe ser validado por un administrador. Usted será notificado por correo electrónico de la validación de su cuenta, y acceder a su cuenta sera posible sólo después de esta validación.
+
+Atentamente,",
+  "send_mail_for_account_creation_reve" => "Hola,
+
+Su cuenta [EMAIL] en [SITE] se ha activado por un administrador. Ahora recibe el estado \"[STATUT]\" y los beneficios asociados, y se puede acceder a su cuenta.
+
+Atentamente,",
+  "send_mail_for_account_creation_stand" => "Hola,
+
+Su inscripción se ha tenido en cuenta en [SITE] y debe ser validado por un administrador. Usted será notificado por correo electrónico de la validación de su cuenta, y acceder a su cuenta sera posible sólo después de esta validación.
+
+Atentamente,",
+  "send_mail_for_account_creation_affi" => "Hola,
+
+Su cuenta [EMAIL] en [SITE] se ha activado por un administrador. Ahora recibe el estado \"[STATUT]\" y los beneficios asociados, y se puede acceder a su cuenta.
+
+Atentamente,"
 );
 

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: kekoli.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: kekoli.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -45,8 +45,8 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		}
 		$sql = "SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
 			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON c.id_statut_paiement=sp.id AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-			LEFT JOIN peel_types t ON t.id=c.typeId AND " . get_filter_site_cond('types', 't', true) . "
+			LEFT JOIN peel_statut_paiement sp ON c.id_statut_paiement=sp.id AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			LEFT JOIN peel_types t ON t.id=c.typeId AND " . get_filter_site_cond('types', 't') . "
 			WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND t.without_delivery_address!='1' AND c." . word_real_escape_string($date_field) . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . word_real_escape_string($date_field) . "<='" . nohtml_real_escape_string($dateAdded2) . "'";
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$sql .= " AND c.id_statut_paiement = '" . intval($_GET['statut']) . "'";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: search.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -151,7 +151,7 @@ if (!check_if_module_active('annonces') || (check_if_module_active('annonces') &
 	// recherche dans les produits : on teste d'abord si il existe des produits affichables
 	$sql = "SELECT id
 		FROM peel_produits p
-		WHERE p.etat = '1' AND p.nom_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "
+		WHERE p.etat = '1' AND p.nom_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('produits', 'p') . "
 		LIMIT 1";
 	$query = query($sql);
 	if (fetch_assoc($query)) {
@@ -184,15 +184,15 @@ if(!empty($launch_product_search)) {
 		}
 		if (!empty($_GET['custom_attribut']) && is_array($_GET['custom_attribut'])) {
 			foreach($_GET['custom_attribut'] as $this_attribut_id) {
-				if (!empty($this_attribut_id)) {
-					$attributs_array[$this_attribut_id] = true;
+				if (!empty($this_attribut_id) && is_numeric($this_attribut_id)) {
+					$attributs_array[intval($this_attribut_id)] = true;
 				}
 			}
 		}
 		if (!empty($_GET['custom_nom_attribut']) && is_array($_GET['custom_nom_attribut'])) {
 			foreach($_GET['custom_nom_attribut'] as $this_nom_attribut_id) {
-				if (!empty($this_nom_attribut_id)) {
-					$nom_attributs_array[$this_nom_attribut_id] = true;
+				if (!empty($this_nom_attribut_id) && is_numeric($this_nom_attribut_id)) {
+					$nom_attributs_array[intval($this_nom_attribut_id)] = true;
 				}
 			}
 		}

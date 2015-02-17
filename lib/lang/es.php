@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 43487 2014-12-02 17:37:29Z sdelaporte $
+// $Id: es.php 44079 2015-02-17 11:04:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -294,7 +294,6 @@ $GLOBALS["STR_FTP_AUTHENTIFICATION_FAILED"] = "Autenticación FTP ha fallado";
 $GLOBALS["STR_FTP_CHDIR_FAILED"] = "El Cambio del directorio FTP ha fallado";
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "La conexión FTP ha fallado";
 $GLOBALS["STR_FTP_GET_FAILED"] = "La recuperación de los contenidos del archivo ha fallado";
-$GLOBALS["SITE_GENERATOR"] = "PEEL creación de sitios web de comercio electrónico";
 $GLOBALS["STR_FWRITE_FAILED"] = "No se pudo escribir en el archivo";
 $GLOBALS["STR_GENDER"] = "Civilidad";
 $GLOBALS["STR_GET_MY_POSITION"] = "Obtener mi posición (obligatorio para esta consulta)";
@@ -422,34 +421,16 @@ $GLOBALS["STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP"] = "nuestro sitio web";
 $GLOBALS["STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT"] = "Mi productos recordatorio";
 $GLOBALS["STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB"] = "Su recuerdo está en la sección";
 $GLOBALS["STR_MODULE_PREMIUM_ACCUEIL_AFFILIATION"] = "Pagamos a nuestros afiliados a {$GLOBALS['site_parameters']['commission_affilie']} % sobre las ventas generadas en el {$GLOBALS['site']} por los visitantes que provienen de vuestro sitio.\r\nPor ello es preciso que integrar un enlace a los productos de su elección o una banner en su sitio web.\r\nUna vez que su nombre de usuario (e-mail + contraseña) validado por nuestro webmaster, se puede acceder en la sección\"Mi cuenta\"a todos los códigos HTML específicos de su cuenta para que usted puede pegar en su sitio web.\r\nPara unirse a nuestro programa de afiliados, <a href=\"{$GLOBALS['wwwroot']}/modules/affiliation/conditions.php\">lea las condiciones de afiliación </a> y completa el siguiente formulario.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT"] = "Alerta";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_DETAILS"] = "Detalle de una advertencia";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Elige una categoría y / o el proveedor que desea gestionar el inventario.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_EMAIL_SENDED_FOR_STOCK"] = "Una alerta de correo electrónico ha sido enviado a %s para indicar que ahora hay de stock de este producto.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_EMAIL_SENDED_FOR_NO_STOCK"] = "No correo electrónico enviado a %s porque no hay en stock se encuentra para este producto";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_FOR_CLIENT_REMOVED"] = "La alerta para el cliente <b>%s</b> se ha despejado.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_LIST"] = "Lista de alertas actuales";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_TREATED"] = "Esta alerta ha sido tratado y ya no existe";
-$GLOBALS["STR_MODULE_PREMIUM_ALL_SUPPLIER"] = "Todos los proveedores";
-$GLOBALS["STR_MODULE_PREMIUM_ALL_PRODUCTS_IN_STOCK"] = "Todos los productos están en stock";
 $GLOBALS["STR_MODULE_PREMIUM_APE"] = "APE código";
 $GLOBALS["STR_MODULE_PREMIUM_BAREME"] = "Su baremo decreciente";
 $GLOBALS["STR_MODULE_PREMIUM_BECOME_PARTNER"] = "Volverse socio";
-$GLOBALS["STR_MODULE_PREMIUM_CHECK_TO_SEE_IF_STOCK"] = "Marque esta casilla si el producto está fuera de stock";
-$GLOBALS["STR_MODULE_PREMIUM_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Seleccione la categoría y / o el proveedor que desea gestionar la acción";
-$GLOBALS["STR_MODULE_PREMIUM_CHOOSE_SUPPLIER"] = "Elija su proveedor";
 $GLOBALS["STR_MODULE_PREMIUM_COME_FROM"] = "de";
-$GLOBALS["STR_MODULE_PREMIUM_DELIVERY_DELAY_DAYS"] = "Plazo de expedición estimado (en días)";
-$GLOBALS["STR_MODULE_PREMIUM_DISPLAY_STOCKS"] = "Mostrar stocks";
-$GLOBALS["STR_MODULE_PREMIUM_DISPLAY_STOCKS_PRODUCT"] = "Ver el stock disponible";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_CONTACT"] = "Se presenta el error a través de este <a href=\"{$GLOBALS['wwwroot']}/comprar/anuncio-mayorista.php\">formulario>";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_GO_HOME"] = "para volver a la página de inicio";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_NOT_EXIST"] = "Este pedido no existe, gracias por comprobar la validez de la clave de descarga";
-$GLOBALS["STR_MODULE_PREMIUM_EDIT"] = "Editar";
 $GLOBALS["STR_MODULE_PREMIUM_EMAIL_CHECK"] = "Inserta el correo electrónico del destinatario de este regalo:";
 $GLOBALS["STR_MODULE_PREMIUM_EMPTY_TEXT_AFFILI"] = "Las condiciones de la afiliación al sitio {$GLOBALS['site']} aún no están definidos";
 $GLOBALS["STR_MODULE_PREMIUM_EMPTY_TEXT_SPONSOR"] = "Las condiciónes del patrocinio del sitio {$GLOBALS['site']} aún no están definidos";
-$GLOBALS["STR_MODULE_PREMIUM_ETAT_DELETED"] = "El estado <b>%s</b> ha sido eliminado.";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_ANSWER"] = "Respuesta";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_NO_QUESTION"] = "Nadie pone en duda dejó";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTION"] = "Pregunta";
@@ -457,33 +438,14 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "Preguntas";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "Para descargar su archivo de pedido número";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "ha sido creada y enviado a";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Generarde el código HTML";
-$GLOBALS["STR_MODULE_PREMIUM_INFO_SCALE_JOUR_STOCK"] = "La escala es en <b>días</b>. Este valor se mostrará en más detalles a medida que el producto se encuentra en stock. <br /> Si desea administrar la visualización de la entrega durante 'la escasez de existencias, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">ver la página de gestión de estado de valores </a>";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Lista des palabras";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ALL_STOCK_ALL_SUPPLIERS"] = "Gestionar el inventario de todas las categorías y todos los proveedores";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK"] = "Gestionar listas de inventario";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_DEACTIVATED"] = "Gestión de stocks desactivado";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_SINGLE"] = "Gestión de stocks";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY"] = "Gestionar los stocks de la categoría";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY_AND_SUPPLIER"] = "y del proveedor";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY_FOURNISSEUR"] = "Gestionar el inventario de todas las categorías y del proveedor";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_GIFT_CHECK"] = "GESTIÓN DE INVENTARIO (inactivo por vales de regalo)";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_PRODUCT"] = "Gestionar el stock de este producto";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_ASSOCIATED_PRODUCT"] = "Gestionar el inventario asociado con el producto";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "El correo electrónico es obligatorio.";
-$GLOBALS["STR_MODULE_PREMIUM_MODIFY_STOCK"] = "Cambie esta estado de stock";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Gracias por su confianza.\n\nGracias de mantener su login y contraseña secreta.\n\nUsted puede Vous pourrez acceder a su à votre espacio afiliado desde validación de su cuenta. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Para iniciar sesión, clic aquí</a>.\n\nLos parámetros de conexión son los siguiente:";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Gracias por su confianza.\n\nGracias de mantener su login y contraseña secreta.\n\nUsted puede Vous pourrez acceder a su à votre espacio afiliado desde validación de su cuenta.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "no está en stock en la actualidad. Nosotros le notificaremos por correo electrónico cuando esté disponible:";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Gracias por su confianza. Ahora está inscrito en nuestro programa de patrocinio y usted puede beneficiarse de un abono de %s desde su primer pedido.\r\nHasta pronto en {$GLOBALS['site']}.\r\n";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Gracias por su confianza.\n\nGracias de mantener su login y contraseña secreta.\n\nUsted puede baprovechar de los precio de distribuidor desde validación de su cuenta. <a href=\"{$GLOBALS['wwwroot']}/membre.php\">Para iniciar sesión, clic aquí</a>.\n\nLos parámetros de conexión son los siguiente:";
-$GLOBALS["STR_MODULE_PREMIUM_NO_ALERT_IN_BDD"] = "No hay alertas registradas en la base de datos.";
-$GLOBALS["STR_MODULE_PREMIUM_NO_ETAT"] = "No estado registrado en la base de datos.";
-$GLOBALS["STR_MODULE_PREMIUM_NO_PRODUCT_IN_CATEGORY_STOCK"] = "Esta categoría no contiene ningún producto a manejar las acciones.";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Gracias por su confianza.\n\nGracias de mantener su login y contraseña secreta.\n\nUsted puede baprovechar de los precio de distribuidor desde validación de su cuenta.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "Al hacer clic en el botón de abajo, le enviaremos su registro al Programa socio del $ sitio. Una vez registrado, estará sujeto a las condiciones detalladas en los términos y condiciones de afiliación, recibirá dos copias por correo a devolver firmada.";
-$GLOBALS["STR_MODULE_PREMIUM_NEED_SUPPLYING"] = "ATENCIÓN: Una orden se ha transmitido que requiere unidades de suministro inmediatas %s";
-$GLOBALS["STR_MODULE_PREMIUM_OF_ALERT"] = "de la alerta";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Este artículo no está disponible en la actualidad pero puede notificarte por correo electrónico cuando vuelva a estar en stock.";
-$GLOBALS["STR_MODULE_PREMIUM_OPEN_NEW_WINDOW"] = "(abre una nueva ventana)";
-$GLOBALS["STR_MODULE_PREMIUM_PRODUCTS_PHOTOS"] = "Fotos de los productos";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Haga clic aquí para volver a su cuenta.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Este correo electrónico no pueden ser patrocinados, ya que ya está en nuestra base de datos";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Gracias de llenar los campos necesarios para invitar a tus amigos.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Cliquez ici pour revenir à la page précédente</a>.";
@@ -491,21 +453,11 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Sus amigos han recibido su so
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Gracias por confirmar su inscripción con los identificadores que se han enviado por correo electrónico. Al confirmar su inscripción con los identificadores que se han enviado por correo electrónico, usted puede beneficiarse de un abono de %s acreditado a su primer pedido en nuestro sitio.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmación de registro al programa de patrocinio del sitio {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "TOTAL IVA:";
-$GLOBALS["STR_MODULE_PREMIUM_PRICE_PURCHASE"] = "Precio de compra de los stock sin IVA";
-$GLOBALS["STR_MODULE_PREMIUM_PRODUCT_LIST_IS_NULL"] = "Lista de productos cuyas acciones es cero";
 $GLOBALS["STR_MODULE_PREMIUM_PRODUCT_UNIT"] = "unidad";
 $GLOBALS["STR_MODULE_PREMIUM_SAVE_CART_SUCCESS"] = "El carro ha sido guardado con éxito";
 $GLOBALS["STR_MODULE_PREMIUM_SAVED_CART_DELETED"] = "La cesta guardada ha sido borrado.";
-$GLOBALS["STR_MODULE_PREMIUM_SAVE_STOCKS"] = "Guarde estos stocks";
-$GLOBALS["STR_MODULE_PREMIUM_SEARCHED_PRODUCT"] = "Producto descatalogado";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_OF"] = "Stock de";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_CHANGES_VALIDATED"] = "Los cambios en el estado de los stocks %s se han tenido en cuenta";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_COMPLETE"] = "stock ahora completa. Estado de entrega actualizada.";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_INCOMPLETE"] = "stock insuficiente. Restos será condenada";
-$GLOBALS["STR_MODULE_PREMIUM_TABLE_STOCK_UPDATED"] = "La gestión del inventario tabla ha sido actualizada";
 $GLOBALS["STR_MODULE_PREMIUM_THANKS_CHECK_DOWNLOAD"] = "Gracias por comprobar la validez de su enlace de descarga.";
 $GLOBALS["STR_MODULE_PREMIUM_TOP_PAGE"] = "arriba de pagina";
-$GLOBALS["STR_MODULE_PREMIUM_UPDATE_STOCK"] = "Stocks Actualizar";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "comprar";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD"] = "busqueda-proveedor";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ANNOTATION_SYSTEM"] = "sistema-anotacion";
@@ -516,9 +468,6 @@ $GLOBALS["STR_MODULE_PREMIUM_URL_SPONSOR"] = "patrocinador-categoría";
 $GLOBALS["STR_MODULE_PREMIUM_URL_TELL_A_FRIEND"] = "haga-conocer-a-amigos";
 $GLOBALS["STR_MODULE_PREMIUM_URL_VITRINE_VERIFIED"] = "tiendas-verificadas";
 $GLOBALS["STR_MODULE_PREMIUM_URL_WEBSITE"] = "URL";
-$GLOBALS["STR_MODULE_PREMIUM_WARNING_CATEGORY_FOURNISSEUR_STOCK"] = "Si selecciona \"Todas las categorías\" y \"Todos los proveedores\", una lista completa de las 250 productos cuyos stocks son gestionados se mostrará.";
-$GLOBALS["STR_MODULE_PREMIUM_WARNING_DISPLAY_PRODUCT_STOCK"] = "Tenga en cuenta que sus productos no aparecen en esta forma, una vez arrancado el almacén del producto.";
-$GLOBALS["STR_MODULE_PREMIUM_WITH_PRODUCT"] = "con el producto";
 $GLOBALS["STR_MODULE_REFERENCES_BY_CATEGORY"] = "Buscar por categoría";
 $GLOBALS["STR_MODULE_RSS_DESCRIPTION"] = "{$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_RSS_META_RSS"] = "{$GLOBALS['site']}";
@@ -570,7 +519,7 @@ $GLOBALS["STR_NEW_CUSTOMER"] = "¿Nuevo cliente?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Nueva contraseña para confirmación";
 $GLOBALS["STR_NEW_PASSWORD"] = "Nueva contraseña";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Suscríbete al boletín de noticias";
-$GLOBALS["STR_NEWSLETTER_YES"] = "Si, deseo recibir la newsletter de";
+$GLOBALS["STR_NEWSLETTER_YES"] = "Si, deseo recibir la newsletter de {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "Boletín de noticias";
 $GLOBALS["STR_NEXT_PAGE"] = " Siguiente";
 $GLOBALS["STR_NEXT"] = "Siguiente";
@@ -612,7 +561,7 @@ $GLOBALS["STR_OPTION"] = "Precios de las opciones";
 $GLOBALS["STR_OPTIONS_COST"] = "Costo de las opciones";
 $GLOBALS["STR_OR_COORDINATION"] = "o";
 $GLOBALS["STR_OR"] = "o";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = 'Clasificar';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "Clasificar";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detalle del pedido";
 $GLOBALS["STR_ORDER_FORM"] = "nota de pedido";
 $GLOBALS["STR_ORDER_HISTORY"] = "Histórico de los pedidos";
@@ -771,7 +720,7 @@ $GLOBALS["STR_SEND"] = "Enviar";
 $GLOBALS["STR_SHIP_ADDRESS"] = "Dirección de entraga";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Elegir su typo de expedición";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Elegir su zona de expedición";
-$GLOBALS["STR_SHIPPING_COST"] = "Envío";
+$GLOBALS["STR_SHIPPING_COST"] = "Los costos de envío";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Typo de expedición";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Zona de expedición";
 $GLOBALS["STR_SHOPPING"] = "Continuar mis compras";
@@ -781,6 +730,7 @@ $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "Desactivar su eventual gestor de des
 $GLOBALS["STR_SIGNATURE"] = "Firma";
 $GLOBALS["STR_SIREN"] = "Siren";
 $GLOBALS["STR_SIRET"] = "SIRET (14 chiffres)";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL creación de sitios web";
 $GLOBALS["STR_SITEMAP"] = "Plan de la pagína web";
 $GLOBALS["STR_SIZE"] = "Tamaño";
 $GLOBALS["STR_SMALL_ORDER_OVERCOST_TEXT"] = "Gastos de preparación";

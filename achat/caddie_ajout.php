@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: caddie_ajout.php 44077 2015-02-17 10:20:38Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -111,7 +111,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 				$can_add_to_cart = false;
 				if(!est_identifie()) {
 					$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_PLEASE_LOGIN'];
-				} else{
+				} else {
 					$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_CONTACT_US'];
 				}
 			}
@@ -120,6 +120,23 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 				// Pas de problème => on ajoute le produit
 				$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $email_check, $listcadeaux_owner);
 				if (!empty($added_quantity) && check_if_module_active('cart_popup')) {
+					if (!empty($_POST['save_cart_id'])) {
+						// le produit a été ajouté depuis la page de sauvegarde du panier. Il faut mettre à jour la quantité ou supprimer le produit
+						$query = query("SELECT quantite
+							FROM peel_save_cart 
+							WHERE id = ".intval($_POST['save_cart_id']));
+						if($result = fetch_assoc($query)) {
+							if ($added_quantity<$result['quantite']) {
+								// La quantité ajoutée au panier est strictement inférieur à la quantité sauvegardée. Il reste donc au moins une unité pour ce produit donc on met à jour l'enregistrement .
+								query("UPDATE peel_save_cart 
+									SET quantite = quantite-".intval($added_quantity) . " WHERE id = ".intval($_POST['save_cart_id']) . " AND  id_utilisateur = " . intval($_SESSION['session_utilisateur']['id_utilisateur']));
+							} else {
+								// La quantité ajoutée au panier est égal ou supérieur (quantité modifiée manuellement), on supprime l'enregistrement.
+								query("DELETE FROM peel_save_cart 
+									WHERE id = " . intval($_POST['save_cart_id']) . " AND id_utilisateur = " . intval($_SESSION['session_utilisateur']['id_utilisateur']));
+							}
+						}
+					}
 					$_SESSION['session_show_caddie_popup'] = true;
 					unset($_SESSION['session_taille_id']);
 				}

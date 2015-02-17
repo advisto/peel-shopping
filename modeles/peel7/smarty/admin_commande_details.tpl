@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 43320 2014-11-21 18:15:44Z sdelaporte $
+// $Id: admin_commande_details.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -120,7 +120,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" class="form-control" /></td>
+			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" /></td>
 		</tr>
 {else}
 </table>
@@ -361,6 +361,16 @@
 			</td>
 		</tr>
 {/foreach}
+	{foreach $specific_fields as $f}
+		<tr>
+			{if !empty($f.field_title)}
+				<td>{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</td>
+				<td>{include file="specific_field.tpl" f=$f}{$f.error_text}</td>
+			{else}
+				<td colspan="2">{include file="specific_field.tpl" f=$f}{$f.error_text}</td>
+			{/if}
+		</tr>
+	{/foreach}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>

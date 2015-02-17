@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 43102 2014-11-04 15:40:20Z sdelaporte $
+// $Id: oubli_mot_passe.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
@@ -63,7 +63,7 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
 		} elseif ((num_rows(query("SELECT 1
 				FROM peel_utilisateurs
-				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "' AND priv!='newsletter' AND etat=1 AND " . get_filter_site_cond('utilisateurs') . "")) == 0)) {
+				WHERE email = '" . nohtml_real_escape_string($frm["email"]) . "' AND priv NOT IN ('" . implode("','", $GLOBALS['disable_login_by_privilege']) . "') AND etat=1 AND " . get_filter_site_cond('utilisateurs') . "")) == 0)) {
 				// Compte inexistant, ou désactivé. Un compte désactivé n'est pas censé pouvoir retrouver son mot de passe.
 			$form_error_object->add('email', $GLOBALS['STR_ERR_NOEMAIL']);
 		}

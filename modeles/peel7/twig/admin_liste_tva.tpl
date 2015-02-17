@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_tva.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: admin_liste_tva.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_TVA_TITLE }}</div>
 <div class="alert alert-info">{{ STR_ADMIN_TVA_FORM_EXPLAIN }}</div>
 <div><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" /> <a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_TVA_CREATE }}</a></div>

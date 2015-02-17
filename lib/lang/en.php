@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 43487 2014-12-02 17:37:29Z sdelaporte $
+// $Id: en.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -295,7 +295,6 @@ $GLOBALS["STR_FTP_CHDIR_FAILED"] = "FTP change directory failed";
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "FTP connection failed";
 $GLOBALS["STR_FTP_GET_FAILED"] = "Get file content failed";
 $GLOBALS["STR_FWRITE_FAILED"] = "File writing failed";
-$GLOBALS["SITE_GENERATOR"] = "PEEL creating eCommerce Site";
 $GLOBALS["STR_GENDER"] = "Title";
 $GLOBALS["STR_GET_MY_POSITION"] = "Get my position (mandatory for this query)";
 $GLOBALS["STR_GET_PASSWORD"] = "Forgot password?";
@@ -422,35 +421,16 @@ $GLOBALS["STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP"] = "of our website";
 $GLOBALS["STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT"] = "My product reminder";
 $GLOBALS["STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB"] = "Your reminder can be found on category";
 $GLOBALS["STR_MODULE_PREMIUM_ACCUEIL_AFFILIATION"] = "We pay our affiliates to the tune of {$GLOBALS['site_parameters']['commission_affilie']} % on sales generated on {$GLOBALS['site']} by visitors from your site.\r\nTo do this it will be enough to include a link to the products of your choice or banner on your website.\r\nOnce your identifiers (email + password) validated by our webmaster, you can access under the heading \"My Account\" to all the HTML codes specific to your account for you to paste on your website.\r\nTo join our affiliate program, <a href=\"{$GLOBALS['wwwroot']}/modules/affiliation/conditions.php\">read the terms of affilisation</a> and complete the form below...";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT"] = "Alert";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_DETAILS"] = "Alert details";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Select the category and/or the supplier you want to manage stocks.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_EMAIL_SENDED_FOR_STOCK"] = "An email alert has been sent to %s to indicate that there are now stock for this product.";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_EMAIL_SENDED_FOR_NO_STOCK"] = "No email sent to %s because no stock was found for this product";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_FOR_CLIENT_REMOVED"] = "The alert for the client <b>%s</b> has been cleared.
-";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_LIST"] = "List of current alerts";
-$GLOBALS["STR_MODULE_PREMIUM_ALERT_TREATED"] = "This alert has already been treated and no longer exists";
-$GLOBALS["STR_MODULE_PREMIUM_ALL_SUPPLIER"] = "All suppliers";
-$GLOBALS["STR_MODULE_PREMIUM_ALL_PRODUCTS_IN_STOCK"] = "All products are in stock";
 $GLOBALS["STR_MODULE_PREMIUM_APE"] = "Sector";
 $GLOBALS["STR_MODULE_PREMIUM_BAREME"] = "Your degressive scale";
 $GLOBALS["STR_MODULE_PREMIUM_BECOME_PARTNER"] = "Become partner";
-$GLOBALS["STR_MODULE_PREMIUM_CHECK_TO_SEE_IF_STOCK"] = "Check this box if the product is out of stock";
-$GLOBALS["STR_MODULE_PREMIUM_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Select the category and/or the supplier you want to manage the stock";
-$GLOBALS["STR_MODULE_PREMIUM_CHOOSE_SUPPLIER"] = "Choose your supplier";
 $GLOBALS["STR_MODULE_PREMIUM_COME_FROM"] = "Come from";
-$GLOBALS["STR_MODULE_PREMIUM_DELIVERY_DELAY_DAYS"] = "Estimated delivery time (in days)";
-$GLOBALS["STR_MODULE_PREMIUM_DISPLAY_STOCKS"] = "View stocks";
-$GLOBALS["STR_MODULE_PREMIUM_DISPLAY_STOCKS_PRODUCT"] = "View product stock";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_CONTACT"] = "Report us the error using this <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">form</a>";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_GO_HOME"] = "to return to the home page";
 $GLOBALS["STR_MODULE_PREMIUM_DOWNLOAD_NOT_EXIST"] = "This command does not exist, thank you to check your download key";
-$GLOBALS["STR_MODULE_PREMIUM_EDIT"] = "Edit";
 $GLOBALS["STR_MODULE_PREMIUM_EMAIL_CHECK"] = "Type in the email of the recipient of the gift check:";
 $GLOBALS["STR_MODULE_PREMIUM_EMPTY_TEXT_AFFILI"] = "The affiliation terms for the website {$GLOBALS['site']} are not yet defined";
 $GLOBALS["STR_MODULE_PREMIUM_EMPTY_TEXT_SPONSOR"] = "The sponsorship terms for the website {$GLOBALS['site']} are not yet defined";
-$GLOBALS["STR_MODULE_PREMIUM_ETAT_DELETED"] = "The state <b>%s</b> has been deleted.";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_ANSWER"] = "Answer";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_NO_QUESTION"] = "Nobody questions put down";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTION"] = "Question";
@@ -458,33 +438,14 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "Questions";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "To download your order number";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "has been created and sent to";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Create HTML code";
-$GLOBALS["STR_MODULE_PREMIUM_INFO_SCALE_JOUR_STOCK"] = "The scale is in <b>days</b>. This value will display on more details as the product is in stock.<br />If you want to manage the display of delivery's delay in case of stock shortages, <a href=\"{$GLOBALS['wwwroot']}/modules/stock_advanced/administrer/etatstock.php\">see the page for state management of stock</a>";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Word list";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_ALL_STOCK_ALL_SUPPLIERS"] = "Manage stock of all categories and all suppliers";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK"] = "Manage stock status list";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_DEACTIVATED"] = "Stock management disabled";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_SINGLE"] = "Stock management";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY"] = "Manage stock of category";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY_AND_SUPPLIER"] = "and from supplier";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_CATEGORY_FOURNISSEUR"] = "Manage stock of all categories and from supplier";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_GIFT_CHECK"] = "STOCK MANAGEMENT (inactive for gift vouchers)";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_PRODUCT"] = "Manage the stock of this product";
-$GLOBALS["STR_MODULE_PREMIUM_MANAGE_STOCK_ASSOCIATED_PRODUCT"] = "Manage inventory associated with the product";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "The email field is mandatory!";
-$GLOBALS["STR_MODULE_PREMIUM_MODIFY_STOCK"] = "Change this stock status";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Thanks for your confidence.\n\nPlease, keep your password secret. Never send it by email.\n\nYou will be able to profit from your affiliate account dice which your account will be validated. Click on the next link to <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/membre.php\">identify.</a>.\n\nPlease don't forget your credentials:";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Thanks for your confidence.\n\nPlease, keep your password secret. Never send it by email.\n\nYou will be able to profit from your affiliate account dice which your account will be validated.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "is not presently in stock.\nPlease complete the form below to be notified when stock arrives:";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Thanks your for your confidance. Your are now registered on our sponsoring program and you are able to profit from a credit certificate of %s on your first order.\r\nSee you soon on {$GLOBALS['site']}.\r\n";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Thanks for your confidence.\n\nPlease, keep your password secret. Never send it by email.\n\nYou will be able to profit from the prices retailers dice which your account will be validated. Click on the next link to <a href=\"{$GLOBALS['wwwroot']}/membre.php\">identify.</a>.\n\nPlease don't forget your credentials:";
-$GLOBALS["STR_MODULE_PREMIUM_NO_ALERT_IN_BDD"] = "No alert registered in the database.";
-$GLOBALS["STR_MODULE_PREMIUM_NO_ETAT"] = "No status registered in the database.";
-$GLOBALS["STR_MODULE_PREMIUM_NO_PRODUCT_IN_CATEGORY_STOCK"] = "This category does not contain any product for which you manage the stock.";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Thanks for your confidence.\n\nPlease, keep your password secret. Never send it by email.\n\nYou will be able to profit from the prices retailers dice which your account will be validated.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "A click on the buttom below will automatically register you in the partner program of {$GLOBALS['site']}. Once registered, you must respect the conditions detailed in the general Conditions, witch you will receive in duplicate form by email. Please return duly signed;.";
-$GLOBALS["STR_MODULE_PREMIUM_NEED_SUPPLYING"] = "WARNING: An order has been passed requiring immediate supply of %s units";
-$GLOBALS["STR_MODULE_PREMIUM_OF_ALERT"] = "of alert";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "This product is currently unavailable, we can notify you by email as soon as this product arrives in stock.";
-$GLOBALS["STR_MODULE_PREMIUM_OPEN_NEW_WINDOW"] = "(opens new window)";
-$GLOBALS["STR_MODULE_PREMIUM_PRODUCTS_PHOTOS"] = "Product photos";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Click here to return to your account.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "This email address cannot be sponsored: already in our database";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Please fill in the mandatory fields in order to sponsor your friends.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Click here to return to the previous page</a>.";
@@ -492,21 +453,11 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Your friends have received yo
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Please confirm your registration with the reference ID you receive by email! You will receive a credit certificate of %s usable on your first order on our website.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmation of registration to the sposoring program of {$GLOBALS['site']} website";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "TOTAL:";
-$GLOBALS["STR_MODULE_PREMIUM_PRICE_PURCHASE"] = "Purchase price of stock excl. VAT";
-$GLOBALS["STR_MODULE_PREMIUM_PRODUCT_LIST_IS_NULL"] = "List of products whose stock is zero";
 $GLOBALS["STR_MODULE_PREMIUM_PRODUCT_UNIT"] = "unit";
 $GLOBALS["STR_MODULE_PREMIUM_SAVE_CART_SUCCESS"] = "The cart has been saved successfully!";
 $GLOBALS["STR_MODULE_PREMIUM_SAVED_CART_DELETED"] = "Safeguard has been cleared.";
-$GLOBALS["STR_MODULE_PREMIUM_SAVE_STOCKS"] = "Save these stocks";
-$GLOBALS["STR_MODULE_PREMIUM_SEARCHED_PRODUCT"] = "Searched Product";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_OF"] = "Stock of";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_CHANGES_VALIDATED"] = "Changes in stock status %s have been taken into account";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_COMPLETE"] = "stock now complete. Delivery status updated.";
-$GLOBALS["STR_MODULE_PREMIUM_STOCK_INCOMPLETE"] = "insufficient stock. Remains to be ordered";
-$GLOBALS["STR_MODULE_PREMIUM_TABLE_STOCK_UPDATED"] = "The stock information has been updated";
 $GLOBALS["STR_MODULE_PREMIUM_THANKS_CHECK_DOWNLOAD"] = "Thank you to check your download link.";
 $GLOBALS["STR_MODULE_PREMIUM_TOP_PAGE"] = "Top of page";
-$GLOBALS["STR_MODULE_PREMIUM_UPDATE_STOCK"] = "Update stocks";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "buy";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD"] = "supplier-research";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ANNOTATION_SYSTEM"] = "annotation-system";
@@ -517,9 +468,6 @@ $GLOBALS["STR_MODULE_PREMIUM_URL_SPONSOR"] = "sponsor-category";
 $GLOBALS["STR_MODULE_PREMIUM_URL_TELL_A_FRIEND"] = "tell-a-friend";
 $GLOBALS["STR_MODULE_PREMIUM_URL_VITRINE_VERIFIED"] = "shops-verified";
 $GLOBALS["STR_MODULE_PREMIUM_URL_WEBSITE"] = "URL";
-$GLOBALS["STR_MODULE_PREMIUM_WARNING_CATEGORY_FOURNISSEUR_STOCK"] = "If you select \"All Categories\" and \"All suppliers\", a comprehensive list of the top 250 products whose stocks are managed will be displayed.";
-$GLOBALS["STR_MODULE_PREMIUM_WARNING_DISPLAY_PRODUCT_STOCK"] = "Note that your products appear in this form only if their stocks have been initialized in the product page.";
-$GLOBALS["STR_MODULE_PREMIUM_WITH_PRODUCT"] = "with product";
 $GLOBALS["STR_MODULE_REFERENCES_BY_CATEGORY"] = "Select by category";
 $GLOBALS["STR_MODULE_RSS_DESCRIPTION"] = "{$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_RSS_META_RSS"] = "{$GLOBALS['site']}";
@@ -613,7 +561,7 @@ $GLOBALS["STR_OPTION"] = "Options price";
 $GLOBALS["STR_OPTIONS_COST"] = "Options's price";
 $GLOBALS["STR_OR_COORDINATION"] = "or";
 $GLOBALS["STR_OR"] = "or";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = 'Sort out';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "Sort out";
 $GLOBALS["STR_ORDER_DETAIL"] = "Order details";
 $GLOBALS["STR_ORDER_FORM"] = "Order form";
 $GLOBALS["STR_ORDER_HISTORY"] = "Follow-up of order";
@@ -782,6 +730,7 @@ $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "Disable your download manager";
 $GLOBALS["STR_SIGNATURE"] = "Signature";
 $GLOBALS["STR_SIREN"] = "ID Number";
 $GLOBALS["STR_SIRET"] = "Entreprise identification number";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL eCommerce solution";
 $GLOBALS["STR_SITEMAP"] = "Sitemap";
 $GLOBALS["STR_SIZE"] = "Size";
 $GLOBALS["STR_SMALL_ORDER_OVERCOST_TEXT"] = "Preparation costs";

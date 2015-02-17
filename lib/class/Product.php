@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 43407 2014-11-28 11:58:32Z sdelaporte $
+// $Id: Product.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 43407 2014-11-28 11:58:32Z sdelaporte $
+ * @version $Id: Product.php 44077 2015-02-17 10:20:38Z sdelaporte $
  * @access public
  */
 class Product {
@@ -138,7 +138,7 @@ class Product {
 			if(!is_numeric($id)) {
 				$sql = "SELECT p.id
 					FROM peel_produits p
-					WHERE p.technical_code = '" . real_escape_string($id) . "' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "
+					WHERE p.technical_code = '" . real_escape_string($id) . "' AND " . get_filter_site_cond('produits', 'p') . "
 					LIMIT 1";
 				$query = query($sql);
 				if($result = fetch_assoc($query)) {
@@ -164,7 +164,7 @@ class Product {
 			// Il faut déterminer si le produit est un chèque cadeaux. Les chèques cadeaux n'ont pas de catégorie associée, donc il faut modifier la requête SQL de cette classe en conséquence pour ne pas faire de jointure INNER sur les catégories (même effet que la variable global allow_products_without_category)
 			$query = query("SELECT on_check
 				FROM peel_produits
-				WHERE id = '" . intval($id) . "'");
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('produits'));
 			if ($result = fetch_assoc($query)) {
 				$this->on_check = $result['on_check'];
 			}
@@ -242,8 +242,8 @@ class Product {
 				}
 				$sql .= " FROM peel_produits p
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_produits_categories pc ON pc.produit_id=p.id
-					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', defined('IN_PEEL_ADMIN')) . "
-					WHERE p.id = '" . intval($this->id) . "' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . " " . (empty($show_all)?($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') :'') . "
+					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+					WHERE p.id = '" . intval($this->id) . "' AND " . get_filter_site_cond('produits', 'p') . " " . (empty($show_all)?($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') :'') . "
 					LIMIT 1";
 				// Le limit 1 est nécessaire car le produit peut être associé à plusieurs catégories => on ne récupère que la première catégorie trouvée
 				$query = query($sql);
@@ -393,8 +393,8 @@ class Product {
 				$query = query("SELECT p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this->lang)." AS name, pc.categorie_id, r.nom_" . $this->lang . " AS categorie
 					FROM peel_produits p
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_produits_categories pc ON p.id = pc.produit_id
-					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_categories r ON r.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'r', defined('IN_PEEL_ADMIN')) . "
-					WHERE p.id ='" . intval($this->id) . "' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "
+					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_categories r ON r.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'r') . "
+					WHERE p.id ='" . intval($this->id) . "' AND " . get_filter_site_cond('produits', 'p') . "
 					LIMIT 1");
 				if ($prod = fetch_assoc($query)) {
 					$this->categorie_id = $prod['categorie_id'];
@@ -446,7 +446,7 @@ class Product {
 			$possible_colors[$cache_id] = array();
 			$query = query('SELECT pc.couleur_id, c.nom_' . $this->lang . '
 				FROM peel_produits_couleurs pc
-				INNER JOIN peel_couleurs c ON c.id = pc.couleur_id AND ' .  get_filter_site_cond('couleurs', 'c', defined('IN_PEEL_ADMIN')) . ' 
+				INNER JOIN peel_couleurs c ON c.id = pc.couleur_id AND ' .  get_filter_site_cond('couleurs', 'c') . ' 
 				WHERE pc.produit_id  = "' . intval($this->id) . '" 
 				ORDER BY c.position ASC, c.nom_' . $this->lang . ' ASC');
 			while ($result = fetch_assoc($query)) {
@@ -497,7 +497,7 @@ class Product {
 			$possible_sizes[$this->id . '-' . $this->lang] = array();
 			$query = query('SELECT t.*, pt.taille_id
 				FROM peel_produits_tailles pt
-				INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' .  get_filter_site_cond('tailles', 't', defined('IN_PEEL_ADMIN')) . '
+				INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' .  get_filter_site_cond('tailles', 't') . '
 				WHERE pt.produit_id="' . intval($this->id) . '"
 				ORDER BY t.position ASC, t.prix ASC, t.nom_' . $this->lang . ' ASC');
 			while ($result = fetch_assoc($query)) {
@@ -611,7 +611,7 @@ class Product {
 			$brands_array[$cache_id] = array();
 			$query = query("SELECT pm.nom_" . $this->lang . "
 				FROM peel_marques pm
-				WHERE pm.id='" . intval($this->id_marque) . "' AND " . get_filter_site_cond('marques', 'pm', defined('IN_PEEL_ADMIN')));
+				WHERE pm.id='" . intval($this->id_marque) . "' AND " . get_filter_site_cond('marques', 'pm'));
 			while ($result = fetch_assoc($query)) {
 				$brands_array[$cache_id][$this->id_marque] = $result['nom_' . $this->lang];
 			}
@@ -637,7 +637,7 @@ class Product {
 		$query = query('SELECT pa.descriptif_' . $this->lang . '
 			FROM peel_attributs pa
 			INNER JOIN peel_produits_attributs ppa ON ppa.attribut_id = pa.id
-			WHERE ppa.produit_id = ' . intval($this->id) .' AND ' . get_filter_site_cond('attributs', 'pa', defined('IN_PEEL_ADMIN')));
+			WHERE ppa.produit_id = ' . intval($this->id) .' AND ' . get_filter_site_cond('attributs', 'pa'));
 		while ($result = fetch_assoc($query)) {
 			$options_array[] = $result['descriptif_' . $this->lang];
 		}
@@ -706,7 +706,7 @@ class Product {
 					// Produit chargé à partir de données transmises de l'extérieur => nécessite de compléter les informations
 					$sql = 'SELECT default_image, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10
 						FROM peel_produits
-						WHERE id=' . intval($this->id). " AND " . get_filter_site_cond('produits', null, defined('IN_PEEL_ADMIN')) . "";
+						WHERE id=' . intval($this->id). " AND " . get_filter_site_cond('produits') . "";
 					$q = query($sql);
 					if ($result = fetch_assoc($q)) {
 						foreach($result as $this_item => $this_value) {
@@ -826,7 +826,7 @@ class Product {
 				// => on met en cache global (pas static car l'objet sera peut-être recréé entre temps)
 				$query = query("SELECT quantite, prix, prix_revendeur
 					FROM peel_quantites q
-					WHERE produit_id = '" . intval($this->id) . "' AND " . (is_reseller_module_active() && is_reseller()?'q.prix_revendeur>0':'q.prix>0') . " AND " . get_filter_site_cond('quantites', 'q', defined('IN_PEEL_ADMIN')) . " 
+					WHERE produit_id = '" . intval($this->id) . "' AND " . (is_reseller_module_active() && is_reseller()?'q.prix_revendeur>0':'q.prix>0') . " AND " . get_filter_site_cond('quantites', 'q') . " 
 					ORDER BY quantite ASC");
 				while ($Qte = fetch_assoc($query)) {
 					$GLOBALS['cache']['lot_price_by_id'][$this->id][] = $Qte;
@@ -952,7 +952,7 @@ class Product {
 		if(empty($promotion_by_product_id_array) || !in_array($this->id, array_keys($promotion_by_product_id_array))){
 			$sql = 'SELECT *
 				FROM peel_codes_promos cp
-				WHERE ' . get_filter_site_cond('codes_promos', 'cp', defined('IN_PEEL_ADMIN')) . ' AND nom="" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin) AND ("' . nohtml_real_escape_string(trim(String::substr($this->description,0,1024))) . '" LIKE CONCAT("%", product_filter, "%") OR "' . nohtml_real_escape_string(trim($this->reference)) . '" LIKE CONCAT("%", product_filter, "%")) 
+				WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nom="" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin) AND ("' . nohtml_real_escape_string(trim(String::substr($this->description,0,1024))) . '" LIKE CONCAT("%", product_filter, "%") OR "' . nohtml_real_escape_string(trim($this->reference)) . '" LIKE CONCAT("%", product_filter, "%")) 
 				ORDER BY remise_percent DESC
 				LIMIT 1';
 			$query = query($sql);
@@ -1199,7 +1199,7 @@ class Product {
 		$categories_array = array();
 		$query = query('SELECT pc.categorie_id, c.nom_' . $this->lang . '
 			FROM peel_produits_categories pc
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND ' . get_filter_site_cond('categories', 'c', defined('IN_PEEL_ADMIN')) . '
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND ' . get_filter_site_cond('categories', 'c') . '
 			WHERE pc.produit_id  = "' . intval($this->id) . '"
 			ORDER BY c.position ASC, c.nom_' . $this->lang . ' ASC');
 		while ($result = fetch_assoc($query)) {
@@ -1242,7 +1242,7 @@ class Product {
 		// recherche dans les prix par lot
 		$sql = "SELECT MIN(prix) AS prix, MIN(prix_revendeur) AS prix_revendeur
 			FROM peel_quantites
-			WHERE produit_id = '" . intval($this->id) . "' AND "  . get_filter_site_cond('quantites', null, defined('IN_PEEL_ADMIN'));
+			WHERE produit_id = '" . intval($this->id) . "' AND "  . get_filter_site_cond('quantites');
 		$query = query($sql);
 		$Qte = fetch_assoc($query);
 		$price_Qte_ht = (is_reseller_module_active() && is_reseller() && $Qte['prix_revendeur'] != 0? $Qte['prix_revendeur'] / (1 + $this->tva / 100) : $Qte['prix'] / (1 + $this->tva / 100));

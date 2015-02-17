@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_nl.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_text_nl.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -146,7 +146,7 @@ Uw bestelling met nummer [ORDER_ID] gedaan op [DATE] is geregistreerd op de webs
 OVERZICHT VAN UW BESTELLING
 ---------------------------
 
-Bedrag : [MONTANT] EUR inclusief BTW 
+Bedrag : [MONTANT] inclusief BTW 
 Betalingswijze: [PAIEMENT]
 
 ---------------------------
@@ -165,6 +165,8 @@ Bestelde artikelen
 [BOUGHT_ITEMS]
 Verzendkosten: 
 [COUT_TRANSPORT] 
+verzending soort:
+[TYPE]
 
 U kunt de actuele status van uw bestelling volgen: 
 zodra uw bestelling is betaald, wordt de factuur weergegeven in uw account 
@@ -358,6 +360,10 @@ Stuur ons nu de artikelen naar het volgende adres :
 RETOURNUMMER [RETURN_ID].
 
 Houd er rekening mee dat de artikelen teruggestuurd moeten worden in goede staat en in de originele verpakking.
-Na ontvangst van uw artikelen, zullen wij de terugbetaling van deze valideren."
+Na ontvangst van uw artikelen, zullen wij de terugbetaling van deze valideren.",
+  "send_mail_for_account_creation_stop" => "",
+  "send_mail_for_account_creation_reve" => "",
+  "send_mail_for_account_creation_stand" => "",
+  "send_mail_for_account_creation_affi" => ""
 );
 

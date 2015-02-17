@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 43626 2014-12-16 13:04:33Z gboussin $
+// $Id: configuration.inc.php 44077 2015-02-17 10:20:38Z sdelaporte $
 // Toutes les configurations de base qui sont à modifier lorsqu'on change d'hébergement
 // sont stockées dans /lib/setup/info.inc.php
 // Le présent fichier de configuration est standard et n'a pas besoin d'être modifié.
@@ -92,7 +92,7 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 }
-define('PEEL_VERSION', '7.2.0.2');
+define('PEEL_VERSION', '7.2.1');
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
@@ -647,6 +647,13 @@ if($GLOBALS['force_demo_rights']) {
 	$_SESSION['session_utilisateur']['site_id'] = '1';
 }
 
+// Liste par défaut des privilèges qui ne peuvent pas se connecter à leur compte :
+//	- Les revendeurs en attente de validation
+//	- Les affiliés en attente de validation
+//	- Les inscrits à la newsletter
+//	- Les inscrits aux téléchargements
+$GLOBALS['disable_login_by_privilege'] = vb($GLOBALS['site_parameters']['disable_login_by_privilege'], array('load', 'newsletter', 'stop', 'stand'));
+
 // Chargement du moteur de template : Smarty ou Twig
 include($GLOBALS['dirroot'] . "/lib/templateEngines/EngineTpl.php");
 /* @var $GLOBALS['tplEngine'] EngineTpl */
@@ -1152,8 +1159,8 @@ if (!IN_INSTALLATION) {
 	if (!empty($_SESSION['session_caddie']->commande_id)) {
 		$query_com = query("SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
 			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', defined('IN_PEEL_ADMIN')) . "
-			WHERE c.id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND c.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "");
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			WHERE c.id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND c.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c') . "");
 		$result_com = fetch_object($query_com);
 		if ($result_com && in_array($result_com->statut_paiement, array('being_checked', 'completed'))) {
 			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {

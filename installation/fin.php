@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 43147 2014-11-07 14:47:12Z gboussin $
+// $Id: fin.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 
@@ -51,10 +51,10 @@ if(empty($_SESSION['session_install_finished'])) {
 	$id_utilisateur = insere_utilisateur($new_user_infos, false, true, false);
 	foreach($_SESSION['session_install_langs'] as $this_lang) {
 		// Le nom du site est inséré pour toutes les langues par défaut. L'administrateur peux changer les noms des langues par la suite dans le back office.
-		set_configuration_variable(array('technical_code' => 'nom_' . $this_lang, 'string' => $_SESSION['session_install_site_name'], 'type' => 'string'), true);
+		set_configuration_variable(array('technical_code' => 'nom_' . $this_lang, 'string' => $_SESSION['session_install_site_name'], 'type' => 'string', 'site_id' => 1), true);
 	}
 	set_configuration_variable(array('technical_code' => 'site_id_showed_by_default_if_domain_not_found', 'string' => "1", 'type' => 'integer', 'origin' => 'core', 'explain' => 'For multisite : to allow any alias on a hosting to reach the main site - Put 0 if you want to only allow configured domains', 'site_id' => 0), true);
-	set_configuration_variable(array('technical_code' => 'email_webmaster', 'string' => $_SESSION['session_install_email_webmaster'], 'type' => 'string'), true);
+	set_configuration_variable(array('technical_code' => 'email_webmaster', 'string' => $_SESSION['session_install_email_webmaster'], 'type' => 'string', 'site_id' => 1), true);
 	set_configuration_variable(array('technical_code' => 'wwwroot', 'string' => $GLOBALS['wwwroot'], 'type' => 'string', 'site_id' => 1), true);
 	set_configuration_variable(array('technical_code' => 'email_commande', 'string' => $_POST['email'], 'type' => 'string', 'site_id' => 1), true);
 	set_configuration_variable(array('technical_code' => 'email_webmaster', 'string' => $_POST['email'], 'type' => 'string', 'site_id' => 1), true);

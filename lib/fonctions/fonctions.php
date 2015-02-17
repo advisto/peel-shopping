@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43488 2014-12-02 18:02:14Z gboussin $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -315,7 +315,7 @@ function get_currency_rate($currency)
 			$sql_query = "
 				SELECT `conversion`
 				FROM `peel_devises`
-				WHERE `code`='" . nohtml_real_escape_string($currency) . "' AND " . get_filter_site_cond('devises', null, defined('IN_PEEL_ADMIN')) . "
+				WHERE `code`='" . nohtml_real_escape_string($currency) . "' AND " . get_filter_site_cond('devises') . "
 				LIMIT 1";
 			// echo $sql_query;
 			query($sql_query);
@@ -420,6 +420,8 @@ function get_modules_array($only_active = false, $location = null, $technical_co
 	$static_hash .= $location . '_' . $technical_code . '_' . vb($GLOBALS['page_columns_count']). '_' . vb($GLOBALS['wwwroot']);
 	if (!isset($modules_array[$static_hash]) || $force_update_cache_information) {
 		$modules = array();
+		// defined('IN_PEEL_ADMIN') pour get_filter_site_cond : Cette fonction est appelée en front office pour l'affichage des modules mais aussi en back office pour l'administration des modules. 
+		// Pour l'édition des modules on exclut (ou pas) les éléments publiques en fonction de la configuration de l'administrateur.
 		$sql = 'SELECT *
 			FROM peel_modules
 			WHERE ' . get_filter_site_cond('modules', null, defined('IN_PEEL_ADMIN')) . ' AND ' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?'(':'') . '(1' . ($technical_code ? ' AND technical_code="' . nohtml_real_escape_string($technical_code) . '"' : '') . ($location ? ' AND location="' . nohtml_real_escape_string($location) . '"' : '') . ')' . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ? ' OR (technical_code="caddie" AND location="below_middle")' : '') . ($location == 'header' && vn($GLOBALS['page_columns_count']) == 2 ?')':'') . ($only_active ? ' AND etat="1"' : '') . ($force_site_id ? ' AND site_id="'.intval($force_site_id).'"' : '') . '
@@ -550,7 +552,27 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					}
 				}
 			} elseif (String::substr($this_module['technical_code'], 0, String::strlen('advertising')) == 'advertising' && is_module_banner_active()) {
+				/* Explication du fonctionnement des bannières publicitaires */
+				
+				// A NE PAS CONFONDRE
+				// Location	: Correspond à l'emplacement 'physique' de la fonction get_module sur la page (left, top, right, etc ...). Cette valeur est administrable dans la page d'administration des modules, via des boutons radios qui représente chaque emplacement prévu dans le site. Ce paramètre est utilisé par get_module seulement.
+				// Espace : C'est un emplacement publicitaire, qui est administrable en back office. Ce chiffre permet de faire le lien entre le module de la table peel_modules et la bannière pub. Dans peel_modules, le numéro de l'espace pour la bannière pub est concaténé avec code technique du module dans le champ technical_code.
+				// ATTENTION => l'espace est stocké dans le champ POSITION de peel_banniere ! Il faudra refondre le module pour rendre tout ça cohérent.
+				// Position : La position d'une bannière est défini par le champ 'rang' de peel_banniere. Cela permet de trier les bannières entre elles dans un même espace publicitaire.
+
+				// ROLE DE GET_MODULE POUR L'AFFICHAGE DES PUB
+				// Défini l'emplacement sur la page où la publicité s'affichera. La fonction récupère dans un premier temps les modules dont la 'location' choisi par l'administrateur en back office est égal au paramètre location get_module
+				// Pour chaque résultat, un technical_code indique la fonction associé au module. Pour les pubs ce technical_code commence par advertising
+
+				// UTILITE DE LA VALEUR TECHNICAL_CODE DE PEEL_MODULES
+				// => cette valeur est une association de deux valeurs : 
+					// - advertising, qui indique que le module doit afficher une pub
+					// - l'espace, qui permet de faire le lien avec la bannière publicitaire lié au module.
+
+				// ROLE DE AFFICHE_BANNER
+				// affiche_banner rècupère l'espace publicitaire qui a été fourni par le technical_code du module. La fonction retourne la(les) bannière(s) associée(s) à cet espace par l'administrateur en back office, en plus des critères de dates, de contrainte sur les pages, etc....
 				// Exemple : advertising5 affiche la publicité en position 5
+
 				// Définition du type de page pour ne sélectionner que les bannières adéquates
 				if (defined('IN_HOME')) {
 					$page_type = 'home_page';
@@ -744,7 +766,7 @@ function get_country_name($id)
 {
 	$sql = 'SELECT pays_' . $_SESSION['session_langue'] . '
 		FROM peel_pays
-		WHERE id=' . intval($id) . " AND " .  get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN'));
+		WHERE id=' . intval($id) . " AND " .  get_filter_site_cond('pays');
 	$q = query($sql);
 	if ($result = fetch_assoc($q)) {
 		return String::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
@@ -821,10 +843,10 @@ function get_category_tree_and_itself($id_or_ids_array, $mode = 'sons', $table_t
 		$site_cond = "";
 		if ($table_to_use == 'rubriques') {
 			$table = 'peel_rubriques';
-			$site_cond .= " AND " . get_filter_site_cond($table_to_use, null, defined('IN_PEEL_ADMIN')) . "";
+			$site_cond .= " AND " . get_filter_site_cond($table_to_use) . "";
 		} elseif ($table_to_use == 'categories') {
 			$table = 'peel_categories';
-			$site_cond .= " AND " . get_filter_site_cond($table_to_use, null, defined('IN_PEEL_ADMIN')) . "";
+			$site_cond .= " AND " . get_filter_site_cond($table_to_use) . "";
 		} elseif ($table_to_use == 'annonces') {
 			$table = 'peel_categories_annonces';
 		} else {
@@ -903,7 +925,7 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 	}
 	$sql_pays = 'SELECT id, pays_' . $_SESSION['session_langue'] . ' ' . $sql_select_add_fields . '
 		FROM peel_pays
-		WHERE 1 ' . $sql_condition . '  AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
+		WHERE 1 ' . $sql_condition . '  AND ' . get_filter_site_cond('pays') . '
 		ORDER BY position, pays_' . $_SESSION['session_langue'];
 
 	$res_pays = query($sql_pays);
@@ -1914,7 +1936,7 @@ function load_active_languages_list($site_id = null)
 			WHERE (" . implode(" OR ", $sql_or_array) . ")";
 		if (!empty($GLOBALS['site_parameters']['restricted_languages_array'])) {
 			// La requête va chercher toutes les langues disponibles selon la configuration en BDD. Il est possible avec restricted_languages_array de restreindre les langues retournées par la requête.
-			// C'est pratique par exemple dans le cas d'un site multi boutique, et qu'il est nécessaire de configurer des langues pour une quelques sites. Il faut dans ce cas associer les langues pour 'Tous les sites' sur la page d'administration des langues, et définir la variable restricted_languages_array pour chaque site.
+			// C'est pratique par exemple dans le cas d'un site multisite, et qu'il est nécessaire de configurer des langues pour certains sites. Il faut dans ce cas associer les langues pour 'Tous les sites' sur la page d'administration des langues, et définir la variable restricted_languages_array pour chaque site.
 			$sqlLng .= " AND (lang IN ('" . implode("','", $GLOBALS['site_parameters']['restricted_languages_array']) . "'))";
 		}
 		$sqlLng .= "
@@ -2042,12 +2064,12 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 		// On récupère l'id du site si on est en multisite
 		$sql = "SELECT c.site_id, c.string
 			FROM peel_configuration c
-			LEFT JOIN peel_langues l ON l.etat = '1' AND l.url_rewriting LIKE '%.%' AND " . get_filter_site_cond('langues', 'l', null, $forced_site_id) . "
+			LEFT JOIN peel_langues l ON l.etat = '1' AND l.url_rewriting LIKE '%.%' AND " . get_filter_site_cond('langues', 'l', false, $forced_site_id) . "
 			WHERE c.technical_code='wwwroot' AND ";
 			if ($forced_site_id === null) {
 				$sql .= "(c.string='".real_escape_string($GLOBALS['wwwroot'])."' OR REPLACE(c.string,'www.','')='".real_escape_string($GLOBALS['wwwroot'])."' OR (l.url_rewriting LIKE '%.%' AND (REPLACE(c.string,'www.',l.url_rewriting)='".real_escape_string($GLOBALS['wwwroot'])."' OR l.url_rewriting='".real_escape_string($GLOBALS['wwwroot'])."')))";
 			} else {
-				$sql .= get_filter_site_cond('configuration', 'c', null, $forced_site_id);
+				$sql .= get_filter_site_cond('configuration', 'c', false, $forced_site_id);
 			}
 			$sql .= "
 			ORDER BY IF(c.technical_code='wwwroot',1,0) DESC, l.position ASC
@@ -2111,14 +2133,14 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 			$GLOBALS['wwwroot_main'] = str_replace('http://', 'https://', $GLOBALS['wwwroot_main']);
 		}
 	}
-	// Initialisation des paramètres de la boutique
+	// Initialisation des paramètres du site
 	$sql = "SELECT *
 		FROM peel_configuration
 		WHERE etat='1' AND ";
 	if ($forced_site_id === null) {
 		$sql .= get_filter_site_cond('configuration') . " AND ";
 	} else {
-		$sql .= get_filter_site_cond('configuration', null, null, $forced_site_id) . " AND ";
+		$sql .= get_filter_site_cond('configuration', null, false, $forced_site_id) . " AND ";
 	}
 	if(empty($lang)) {
 		$sql .= "lang='' AND technical_code NOT LIKE 'STR_%'";
@@ -2156,7 +2178,7 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 			$result['string'] = floatval($result['string']);
 		} elseif($result['type'] == 'octal') {
 			$result['string'] = octdec(intval($result['string']));
-		} elseif($result['type'] == 'string'){
+		} elseif($result['type'] == 'string' || (empty($result['type']) && String::strpos($result['string'], ':')===false)){
 			$result['string'] = str_replace(array('{$GLOBALS[\'repertoire_images\']}', '{$GLOBALS[\'wwwroot\']}', '{$GLOBALS[\'dirroot\']}', ), array(vb($GLOBALS['repertoire_images']), vb($GLOBALS['wwwroot']), $GLOBALS['dirroot']), $result['string']);
 		} else {
 			$result['string'] = unserialize($result['string']);
@@ -2278,7 +2300,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$params_list['affiche_filtre'] = affiche_filtre(null, true);
 		$titre = $GLOBALS['STR_NOUVEAUTES'];
 	} elseif ($type == 'promotion') {
-		// Si l'option est activée dans les paramètres de la boutique
+		// Si l'option est activée dans les paramètres du site
 		if (vn($GLOBALS['site_parameters']['auto_promo']) == 1) {
 			// Si une promotion est appliquée au produit
 			$this_sql_cond = "p.promotion>0";
@@ -2645,7 +2667,7 @@ function get_xml_value($filename, $filter_string)
 			}
 		}
 		$tpl->assign('links', $tpl_links);
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 	}
 	return $output;
 }
@@ -3316,6 +3338,7 @@ function nettoyer_dir($dir, $older_than_seconds = 3, $filename_beginning = null,
 
 /**
  * Suppression des anciennes infos de connexion utilisateurs
+ * Fonction associée à une notion de nettoyage automatisé de données, comme une fonction technique de cron. L'application de get_filter_site_cond est hors sujet pour cette fonction.
  *
  * @param integer $days_max
  * @return
@@ -3330,14 +3353,14 @@ function clean_utilisateur_connexions($days_max = 730)
 		$q = query('SELECT *, MAX(date) AS max_date, MIN(date) AS min_date
 			FROM peel_utilisateur_connexions uc
 			GROUP BY uc.user_id
-			HAVING max_date>"' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '"  AND min_date<"' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '" AND ' . get_filter_site_cond('utilisateur_connexions', 'uc', true) . '');
+			HAVING max_date>"' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '"  AND min_date<"' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '"');
 		$users_ids_array = array();
 		while ($result = fetch_assoc($q)) {
 			$users_ids_array[] = $result['user_id'];
 		}
 		if (!empty($users_ids_array)) {
 			query('DELETE FROM peel_utilisateur_connexions
-				WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '" AND user_id IN ("' . implode('","', nohtml_real_escape_string($users_ids_array)) . '") AND ' . get_filter_site_cond('utilisateur_connexions', null, true) . '');
+				WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max2 * 24 * 3600) . '" AND user_id IN ("' . implode('","', nohtml_real_escape_string($users_ids_array)) . '")');
 		}
 		$GLOBALS['contentMail'] .= 'Ok - ' . count($users_ids_array) . ' utilisateurs concernés' . "\r\n\r\n";
 		sleep(1);
@@ -3345,22 +3368,23 @@ function clean_utilisateur_connexions($days_max = 730)
 	$GLOBALS['contentMail'] .= 'Suppression des infos de connexion utilisateurs de plus de ' . $days_max . ' jours dans la BDD : ';
 	// On supprime tout ce qui dépasse 2 ans
 	query('DELETE FROM peel_utilisateur_connexions
-		WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max * 24 * 3600) . '" AND ' . get_filter_site_cond('utilisateur_connexions', null, true) . '');
+		WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max * 24 * 3600) . '"');
 	$GLOBALS['contentMail'] .= 'Ok - ' . affected_rows() . ' lignes effacées' . "\r\n\r\n";
 }
 
 /**
- * 'Suppression des anciennes actions administrateur
+ * Suppression des anciennes actions administrateur
+ * Fonction associée à une notion de nettoyage automatisé de données, comme une fonction technique de cron. L'application de get_filter_site_cond est hors sujet pour cette fonction.
  *
  * @param integer $days_max
  * @return
  */
-function clean_admins_actions($days_max = 730)
+function clean_admins_actions($days_max = 1460)
 {
 	$GLOBALS['contentMail'] .= 'Suppression des actions administrateur de plus de ' . $days_max . ' jours dans la BDD : ';
-	// On supprime tout ce qui dépasse 2 ans
+	// On supprime tout ce qui dépasse 4 ans
 	query('DELETE FROM peel_admins_actions
-		WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max * 24 * 3600) . '" AND ' . get_filter_site_cond('admins_actions') . '');
+		WHERE date<="' . date('Y-m-d H:i:s', time() - $days_max * 24 * 3600) . '"');
 	$GLOBALS['contentMail'] .= 'Ok - ' . affected_rows() . ' lignes effacées' . "\r\n\r\n";
 }
 
@@ -3611,7 +3635,7 @@ function update_configuration_variable($id_or_technical_code, $frm)
 	} else {
 		$sql .= "technical_code = '" . real_escape_string($id_or_technical_code) . "'";
 	}
-	$sql .= " AND " . get_filter_site_cond('configuration', null, defined('IN_PEEL_ADMIN'));
+	$sql .= " AND " . get_filter_site_cond('configuration', null, true);
 	// MAJ pour la page en cours de génération
 	$GLOBALS['site_parameters'][$frm['technical_code']] = vb($frm['string']);
 	return query($sql);
@@ -3732,7 +3756,10 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 			if($files_type == 'css') {
 				require_once($GLOBALS['dirroot'] . '/lib/class/Minify_CSS.php');
 			} elseif($files_type == 'js') {
-				require_once($GLOBALS['dirroot'] . '/lib/class/JShrink.php');
+				if(!version_compare(PHP_VERSION, '5.3.0', '<')) {
+					// JShrink non compatible si PHP < 5.3 => on désactive la minification
+					require_once($GLOBALS['dirroot'] . '/lib/class/JShrink.php');
+				}
 			}
 			foreach($files_to_minify_array as $this_key => $this_file) {
 				if($files_type == 'css') {
@@ -3752,9 +3779,9 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 					$css_content = String::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					if(!empty($css_content) && strlen(trim($css_content))>5) {
 						if(String::strpos(str_replace('@import url(http://fonts.googleapis.com', '', $css_content), '@import')!==false) {
-							// On rajoute à la liste des exclusions le fichier concerné siil y a @import dedans pour éviter les dysfonctionnements, sauf si c'est l'import d'une font externe
+							// On rajoute à la liste des exclusions le fichier concerné si il y a @import dedans pour éviter les dysfonctionnements, sauf si c'est l'import d'une font externe
 							$GLOBALS['site_parameters']['minify_css_exclude_array'][] = $this_file;
-							set_configuration_variable(array('technical_code' => 'minify_css_exclude_array', 'string' => get_string_from_array($GLOBALS['site_parameters']['minify_css_exclude_array']), 'type' => 'array', 'origin' => 'auto '.date('Y-m-d')), true);
+							set_configuration_variable(array('technical_code' => 'minify_css_exclude_array', 'string' => get_string_from_array($GLOBALS['site_parameters']['minify_css_exclude_array']), 'type' => 'array', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
 							continue;
 						}
 						if(strlen($css_content)/max(1,substr_count($css_content, "\n"))>50) {
@@ -3782,11 +3809,11 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 					$js_content = String::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					if(!empty($js_content) && strlen(trim($js_content))>5) {
 						// Le fichier n'est pas vide, on le prend
-						if(strlen($js_content)/max(1,substr_count($js_content, "\n"))>50) {
+						if(strlen($js_content)/max(1,substr_count($js_content, "\n"))>50 || version_compare(PHP_VERSION, '5.3.0', '<')) {
 							// NB : Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
 							$output .= "\n\n\n" . $js_content;
 						}else {
-							$output .= "\n\n\n" . (\JShrink\Minifier::minify($js_content));
+							$output .= "\n\n\n" . Minifier::minify($js_content);
 						}
 					}
 				} else {
@@ -3801,7 +3828,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				$write_result = fwrite($fp, $output, strlen($output));
 				@flock($fp, LOCK_UN);
 				fclose($fp);
-				set_configuration_variable(array('technical_code' => 'minify_id_increment', 'string' => $GLOBALS['site_parameters']['minify_id_increment'], 'type' => 'integer', 'origin' => 'auto '.date('Y-m-d')), true);
+				set_configuration_variable(array('technical_code' => 'minify_id_increment', 'string' => $GLOBALS['site_parameters']['minify_id_increment'], 'type' => 'integer', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
 			}
 			if(!$write_result) {
 				return $files_array;
@@ -3868,7 +3895,7 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 		if(is_numeric($search)) {
 			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 				FROM peel_produits p
-				WHERE p.id='" . nohtml_real_escape_string($search) . "' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "" . $sql_additional_cond . "
+				WHERE p.id='" . nohtml_real_escape_string($search) . "' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
 				LIMIT 1";
 		}
 		if(!empty($search_category)) {
@@ -3878,18 +3905,18 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 		$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 			FROM peel_produits p
 			".$sql_additional_join."
-			WHERE p." . word_real_escape_string($name_field) . " LIKE '" . nohtml_real_escape_string($search) . "%' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "" . $sql_additional_cond . "
+			WHERE p." . word_real_escape_string($name_field) . " LIKE '" . nohtml_real_escape_string($search) . "%' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
 			ORDER BY p." . word_real_escape_string($name_field) . " ASC";
 		$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 			FROM peel_produits p
 			".$sql_additional_join."
-			WHERE p.reference LIKE '" . nohtml_real_escape_string($search) . "%' AND p." . word_real_escape_string($name_field) . "!='' AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "" . $sql_additional_cond . "
+			WHERE p.reference LIKE '" . nohtml_real_escape_string($search) . "%' AND p." . word_real_escape_string($name_field) . "!='' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
 			ORDER BY IF(p.reference LIKE '" . nohtml_real_escape_string($search) . "',1,0) DESC, p." . word_real_escape_string($name_field) . " ASC";
 		if(empty($GLOBALS['site_parameters']['autocomplete_fast_partial_search'])) {
 			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 				FROM peel_produits p
 				".$sql_additional_join."
-				WHERE (p." . word_real_escape_string($name_field) . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($search) . "%' AND p." . word_real_escape_string($name_field) . "!=''))" . $sql_additional_cond . " AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "
+				WHERE (p." . word_real_escape_string($name_field) . " LIKE '%" . nohtml_real_escape_string($search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($search) . "%' AND p." . word_real_escape_string($name_field) . "!=''))" . $sql_additional_cond . " AND " . get_filter_site_cond('produits', 'p') . "
 				ORDER BY p." . word_real_escape_string($name_field) . " ASC";
 		}
 		foreach($queries_sql_array as $this_query_sql) {
@@ -3918,7 +3945,7 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 	} elseif($mode=='offer_add_user') {
 		$sql = 'SELECT id_utilisateur, prenom, nom_famille, societe, laboratoire, email, ville
 			FROM peel_utilisateurs
-			WHERE prenom LIKE "%'.nohtml_real_escape_string($search).'%" OR nom_famille LIKE "%'.nohtml_real_escape_string($search).'%" AND ' . get_filter_site_cond('utilisateurs', null, defined('IN_PEEL_ADMIN')) . '
+			WHERE prenom LIKE "%'.nohtml_real_escape_string($search).'%" OR nom_famille LIKE "%'.nohtml_real_escape_string($search).'%" AND ' . get_filter_site_cond('utilisateurs') . '
 			LIMIT '.$maxRows;
 		$query = query($sql);
 		while ($result = fetch_object($query)) {
@@ -3933,7 +3960,7 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
  *
  * @param string $table_technical_code	Nom de la table sans prefix.
  * @param string $table_alias Alias de la table
- * @param boolean $use_admin_rights L'administrateur traite les données d'un seul site si il a site_id=N dans ses propriétés d'utilisateur, ou tous les sites si son site_id=0
+ * @param boolean $use_admin_rights Ne renvoyer que les éléments qu'on peut éditer avec les droits d'administrateur en cours
  * @param integer $specific_site_id	Id du site concerné
  * @param boolean $exclude_public_items	Exclue les résultats concernant la configuration générique
  * @param boolean $admin_force_multisite_if_allowed
@@ -3965,7 +3992,7 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_a
 		$prefix = '';
 	}
 	if ($specific_site_id !== null) {
-		// Utilise le site_id spécifié en paramètre, utile pour manipuler des données qui ne concerne pas le site qui exécute la page. $specific_site_id peut être égal à 0.
+		// Utilise le site_id spécifié en paramètre, utile pour manipuler des données qui ne concernent pas le site qui exécute la page. $specific_site_id peut être égal à 0.
 		$site_id = $specific_site_id;
 	} else {
 		if(empty($GLOBALS['site_id']) && defined('IN_CRON') && $use_admin_rights === false && $exclude_public_items === false) {
@@ -3976,24 +4003,29 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_a
 		// Utilise l'id du site en cours de consultation (cas général). $GLOBALS['site_id'] est défini au chargement du site
 		$site_id = vn($GLOBALS['site_id']);
 	}
-	if ($use_admin_rights) {
+	if (defined('IN_PEEL_ADMIN')) {
 		if(isset($_SESSION['session_utilisateur']['site_id']) && $_SESSION['session_utilisateur']['site_id'] == 0) {
 			// L'administrateur a les droits sur tous les sites
 			if($admin_force_multisite_if_allowed) {
 				// Lorsque l'ensemble des sites est concerné par la requête et pas seulement un site, ou que la configuration général, aucun filtre sur site_id ne doit être ajouté.
 				return 1;
-			} elseif(isset($_SESSION['session_admin_multisite'])) {
+			} elseif(isset($_SESSION['session_admin_multisite']) && $specific_site_id === null) {
 				if(intval($_SESSION['session_admin_multisite'])==0) {
 					// on administre tous les sites en même temps
 					return 1;
 				} else {
 					// on administre un autre site, d'après la préférence de l'administrateur mise en session
 					$site_id = intval($_SESSION['session_admin_multisite']);
+					if($use_admin_rights) {
+						$exclude_public_items = true;
+					}
 				}
 			}
-		} else {
+		} elseif($specific_site_id === null) {
 			// L'administrateur ne peut administrer que son propre site
-			$exclude_public_items = true;
+			if($use_admin_rights) {
+				$exclude_public_items = true;
+			}
 			if(((!est_identifie() || !isset($_SESSION['session_utilisateur']['site_id'])) && $site_id != vn($GLOBALS['site_id'])) || (est_identifie() && $_SESSION['session_utilisateur']['site_id'] != $site_id && $_SESSION['session_utilisateur']['site_id'] != 0)) {
 				// problème de droit : sécurité, on empêche l'administrateur d'agir sur un site qui ne le concerne pas. Si l'administrateur est associé à site_id = 0, il peux administrer tous les sites, donc cette contrainte ne s'applique pas
 				return 0;
@@ -4072,10 +4104,10 @@ function get_site_wwwroot($site_id)
 	if(!empty($site_id)) {
 		$query = query('SELECT string 
 			FROM peel_configuration 
-			WHERE technical_code = "wwwroot" AND ' . get_filter_site_cond('configuration', null, defined('IN_PEEL_ADMIN'), $site_id) . ' AND etat=1');
+			WHERE technical_code = "wwwroot" AND ' . get_filter_site_cond('configuration', null, false, $site_id) . ' AND etat=1');
 		$result = fetch_assoc($query);
-		if(!empty($result['wwwroot'])) {
-			$output = $result['wwwroot'];
+		if(!empty($result['string'])) {
+			$output = $result['string'];
 		}
 	}
 	return $output;
@@ -4228,7 +4260,7 @@ function insere_code_promo($frm)
 {
 	$qid = query("SELECT *
 		FROM peel_codes_promos
-		WHERE nom = '" . nohtml_real_escape_string(String::strtoupper($frm['nom'])) . "' AND " . get_filter_site_cond('codes_promos', null, true) . "");
+		WHERE nom = '" . nohtml_real_escape_string(String::strtoupper($frm['nom'])) . "' AND " . get_filter_site_cond('codes_promos') . "");
 	if ($result = fetch_assoc($qid)) {
 		return false;
 	}
@@ -4294,4 +4326,130 @@ function insere_code_promo($frm)
 		)";
 	query($sql);
 	return insert_id();
+}
+
+
+/**
+ * Retourne le taux de TVA le plus élevé, que l'on considère comme le taux de tva par défaut. Cette valeur est utilisée notamment pour la création de commande ou d'attribut.
+ *
+ * @return
+ */
+function get_default_vat()
+{
+	$query = query("SELECT max(tva) as default_vat
+		FROM peel_tva 
+		WHERE " . get_filter_site_cond('tva'));
+	if ($result = fetch_assoc($query)) {
+		return $result['default_vat'];
+	} else {
+		// table TVA vide.
+		return null;
+	}
+}
+if (!function_exists('get_specific_field_infos')) {
+	/**
+	 * Permet de définir de nouveaux champs dans le formulaire d'inscription / modification d'utilisateur depuis le back office (page "variables de configuration").
+	 *
+	 * @param array $frm Array with all fields data
+	 * @param class $form_error_object
+	 * @return
+	 *
+	 */
+	function get_specific_field_infos($frm, $reseller_form = false, $form_error_object = null, $form_usage="user") {
+		$specific_fields = array();
+		$one_possible_value_field_type_array = array('hidden','text','datepicker','textarea','upload','password');
+		
+		if ($form_usage=="user") {
+			$mandatory_fields = vb($GLOBALS['site_parameters']['user_mandatory_fields'], array());
+			if (!empty($reseller_form) && is_reseller_module_active()) {
+				// Champ spécifique pour le formulaire revendeur
+				$specific_field_titles = vb($GLOBALS['site_parameters']['reseller_specific_field_titles']);
+				$specific_field_types = vb($GLOBALS['site_parameters']['reseller_specific_field_types']);
+				$specific_field_names = vb($GLOBALS['site_parameters']['reseller_specific_field_names']);
+				$specific_field_values = vb($GLOBALS['site_parameters']['reseller_specific_field_values']);
+				$specific_field_positions = vb($GLOBALS['site_parameters']['reseller_specific_field_positions']);
+			} else {
+				$specific_field_titles = vb($GLOBALS['site_parameters']['user_specific_field_titles']);
+				$specific_field_types = vb($GLOBALS['site_parameters']['user_specific_field_types']);
+				$specific_field_names = vb($GLOBALS['site_parameters']['user_specific_field_names']);
+				$specific_field_values = vb($GLOBALS['site_parameters']['user_specific_field_values']);
+				$specific_field_positions = vb($GLOBALS['site_parameters']['user_specific_field_positions']);
+			}
+		} elseif ($form_usage=="order") {
+			$mandatory_fields = vb($GLOBALS['site_parameters']['order_mandatory_fields'], array());
+			$specific_field_titles = vb($GLOBALS['site_parameters']['order_specific_field_titles']);
+			$specific_field_types = vb($GLOBALS['site_parameters']['order_specific_field_types']);
+			$specific_field_names = vb($GLOBALS['site_parameters']['order_specific_field_names']);
+			$specific_field_values = vb($GLOBALS['site_parameters']['order_specific_field_values']);
+			$specific_field_positions = vb($GLOBALS['site_parameters']['order_specific_field_positions']);
+		} else {
+			return false;
+		}
+		if(!empty($specific_field_titles)) {
+			foreach($specific_field_titles as $this_field => $this_title) {
+				unset($tpl_options);
+				if(String::substr($this_title, 0, 4)== 'STR_') {
+					// Le titre est une variabe de langue
+					$this_title = $GLOBALS[$this_title];
+				}
+				if (defined('IN_CHANGE_PARAMS') && !empty($GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page']) &&  in_array($this_field, $GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page'])) {
+					// permet d'avoir des champs spécifiques qui seront utilisé lors de l'inscription, et ne pas les afficher sur la page de changement de paramètres
+					continue;
+				}
+				$this_position = vb($specific_field_positions[$this_field]);
+				$field_type = vb($specific_field_types[$this_field], 'text');
+
+
+				if(in_array($specific_field_types[$this_field], $one_possible_value_field_type_array)) {
+					// Le champ paramétré fait partie des champs valide. Ca évite les erreurs de saisie, et d'avoir un affichage incohérent.
+					if (empty($specific_field_values[$this_field]) && in_array($specific_field_types[$this_field], array('radio','hidden','checkbox'))) {
+						// La valeur est obligatoire pour un champ hidden, checkbox ou radio.
+						continue;
+					}
+					$this_field_values = explode(',', $specific_field_values[$this_field]);
+					$this_field_names = explode(',', $specific_field_names[$this_field]);
+
+					if ($field_type == 'checkbox') {
+						if (!empty($frm[$this_field])) {
+							if (is_array($frm[$this_field])) {
+								// Si $frm vient directement du formulaire, les valeurs pour les checkbox sont sous forme de tableau.
+								$frm_this_field_values_array = $frm[$this_field];
+							} else {
+								// pour les checkbox, $frm[$this_field] peux contenir plusieurs valeurs séparées par des virgules si les données viennent de la BDD
+								$frm_this_field_values_array = explode(',', $frm[$this_field]);
+							}
+						}
+					} else {
+						// Pour les autres champ, $frm[$this_field] contient une valeur unique.
+						$frm_this_field_values_array = array(vb($frm[$this_field]));
+					}
+					foreach($this_field_values as $this_key => $this_value) {
+						if(String::substr($this_value, 0, 4)== 'STR_') {
+							// Variable de langue
+							$this_value = $GLOBALS[$this_value];
+						}
+						if (in_array($field_type, $one_possible_value_field_type_array) && !empty($frm_this_field_values_array[0])) {
+							// Pour récuperer la valeur d'un champ text. la valeur du formulaire $frm_this_field_values_array a priorité sur la valeur prédéfini en back office.
+							$this_value = $frm_this_field_values_array[0];
+						}
+						$tpl_options[] = array('value' => $this_value,
+								'issel' => in_array($this_value, $frm_this_field_values_array),
+								'name' => vb($this_field_names[$this_key])
+							);
+					}
+					$specific_fields[] = array('options' => $tpl_options,
+							'field_type' => $field_type,
+							'field_name' => $this_field,
+							'field_title' => $this_title,
+							'field_value' => vb($frm[$this_field]),
+							'field_position' => $this_position,
+							'mandatory_fields' => (!empty($mandatory_fields[$this_field])),
+							'error_text' => (!empty($form_error_object)?$form_error_object->text($this_field):''),
+							'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
+						);
+				}
+			}
+		}
+		return $specific_fields;
+	}
 }

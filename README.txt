@@ -1,14 +1,14 @@
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an     |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: README.txt 43141 2014-11-07 10:37:09Z sdelaporte $
+// $Id: README.txt 44077 2015-02-17 10:20:38Z sdelaporte $
 
 English: 
 
@@ -58,7 +58,7 @@ Renommez également en FTP le répertoire d'administration avec le nom que vous 
 $backoffice_directory_name='administrer';
 => remplacez administrer par le nom que vous avez choisi
 
-6. **FIN** : Rendez vous sur votre page d'accueil de votre boutique et si tout c'est bien déroulé, elle devrait s'afficher correctement
+6. **FIN** : Rendez vous sur votre page d'accueil de votre site et si tout c'est bien déroulé, elle devrait s'afficher correctement
 
 
 EN CAS DE PROBLEME DE FONCTIONNEMENT DE L'INSTALLATION
@@ -72,13 +72,13 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 # - Chez OVH, activez les lignes suivantes :
 # SetEnv PHP_VER 5
 # SetEnv REGISTER_GLOBALS 0
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez 1&1, activez la ligne suivante :
 # AddType x-mapp-php5 .php
 # ou la ligne suivante :
 # AddHandler x-mapp-php5 .php
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez Free, activez la ligne suivante :
 # php 1
@@ -101,7 +101,7 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 # - Chez Nuxit, activez les lignes suivantes :
 # AddHandler x-httpd-php5 .php
 # AddType application/x-httpd-php5 .php
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez Produweb, activez les lignes suivantes :
 # SetEnv DEFAULT_PHP_VERSION 5
@@ -124,10 +124,10 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 * Si vous avez des problèmes d'URL Rewriting :
 
 # Sur certains hébergements (OVH, Amen, ...) il faut parfois configurer le RewriteBase :
-# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredeboutique/
+# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredesite/
 # RewriteBase /
 # ...ou... :
-# RewriteBase /monrepertoiredeboutique/
+# RewriteBase /monrepertoiredesite/
 
 
 INSTALLATION MANUELLE (UNIQUEMENT SI L'INSTALLATION ECHOUE)
@@ -190,7 +190,7 @@ Pour faire fonctionner une langue, il faut :
 
 1. Traduire le fichier /lib/lang/fr.php dans la langue de votre choix (exemple création d'un fichier es.php contenant toutes les variables de langue traduite en espagnol)
 2. Créer un fichier équivalent à /lib/lang/datetime_fr.php dans la langue de votre choix (exemple création d'un fichier datetime_es.php contenant tous les formats de dates en espagnol)
-3. Créer la langue dans l'interface d'administration : Mon compte > Configuration de la boutique > Gérer les langues > Ajouter une langue
+3. Créer la langue dans l'interface d'administration : Administration > Configuration > Configuration > Gestion des langues > Ajouter une langue
    Pour info, Des modèles de drapeaux sont à disposition dans le dossier /lib/flag/. Si toutefois vous voulez ajouter votre propre drapeau, envoyez le par FTP sur votre serveur et indiquez l'URL complète de l'image dans le champ correspondant. Si juste un nom d'image est précisé, il prendra par défaut le dossier /lib/flag/ .
 
 Les traducteurs peuvent procéder aux traductions sur https://www.transifex.com/projects/p/peel-shopping/ sur lequel tous les fichiers de langue de PEEL Shopping et de ses modules sont indiqués.

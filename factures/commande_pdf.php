@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commande_pdf.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: commande_pdf.php 44077 2015-02-17 10:20:38Z sdelaporte $
 include("../configuration.inc.php");
 
 if (!empty($_GET['code_facture']) && !empty($_GET['mode']) && in_array($_GET['mode'], array('standard', 'facture', 'bdc', 'proforma', 'devis')) && !is_user_bot()) {

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -148,7 +148,7 @@ function insere_profil(&$frm)
 		$sql .= "
 		, '" . nohtml_real_escape_string(vb($frm['name_' . $lng])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['document_' . $lng])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['description_document_' . $lng])) . "'
+		, '" . real_escape_string(vb($frm['description_document_' . $lng])) . "'
 		";
 	}
 	$sql .= "
@@ -173,7 +173,7 @@ function maj_profil($id, &$frm)
 		$sql .= "
 		, name_" . $lng." = '" . nohtml_real_escape_string($frm['name_' . $lng]) . "'
 		, document_" . $lng." = '" . nohtml_real_escape_string(vb($frm['document_' . $lng])) . "'
-		, description_document_" . $lng." = '" . nohtml_real_escape_string(vb($frm['description_document_' . $lng])) . "'
+		, description_document_" . $lng." = '" . real_escape_string(vb($frm['description_document_' . $lng])) . "'
 		";
 	}
 	$sql .= "
@@ -192,7 +192,7 @@ function get_profil($technical_code)
 	/* Charge les informations du produit */
 	$qid = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE priv = '" . $technical_code . "' AND " . get_filter_site_cond('profil', null, true) . "");
+		WHERE priv = '" . nohtml_real_escape_string($technical_code) . "' AND " . get_filter_site_cond('profil') . "");
 	$profil = fetch_assoc($qid);
 	return $profil;
 }

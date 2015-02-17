@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 43320 2014-11-21 18:15:44Z sdelaporte $
+// $Id: admin_fr.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,7 +34,7 @@ $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_NO_ACTION_FOUND"] = "Aucune action de modérat
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_NO_MODERATOR_WITH_ACTIONS_FOUND"] = "Aucun modérateur ayant accompli une action n'a été trouvé";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_TEMPLATE"] = "TEMPLATE";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_TITLE"] = "Actions de modération";
-$GLOBALS["STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES"] = "Utiliser l'adresse postal de l'utilisateur pour compléter les champs d'adresses de facturation et de livraison.";
+$GLOBALS["STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES"] = "Utiliser l'adresse postale de l'utilisateur pour compléter les adresses de facturation et de livraison";
 $GLOBALS["STR_ADMIN_ADMINISTRATOR"] = "Administrateur";
 $GLOBALS["STR_ADMIN_ALL_CATEGORIES"] = "Toutes les catégories";
 $GLOBALS["STR_ADMIN_ALL_ORDERS"] = "Toutes les commandes";
@@ -307,7 +307,7 @@ $GLOBALS["STR_ADMIN_DISCONNECT"] = "Déconnexion";
 $GLOBALS["STR_ADMIN_DISCOUNT"] = "Remise";
 $GLOBALS["STR_ADMIN_DISPLAY_MODE"] = "Mode d'affichage";
 $GLOBALS["STR_ADMIN_DISPLAY_ON_HOMEPAGE"] = "Afficher en page d'accueil";
-$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "Afficher sur la page de la rubrique de l'article";
+$GLOBALS["STR_ADMIN_DISPLAY_ON_CONTENT_CATEGORY_PAGE"] = "Afficher cet article sur la page de sa rubrique";
 $GLOBALS["STR_ADMIN_DISPLAY_RESULTS"] = "Afficher les résultats";
 $GLOBALS["STR_ADMIN_DONE_OR_CANCELED"] = "Fait, ou annulé";
 $GLOBALS["STR_ADMIN_ECOTAX"] = "Ecotaxe";
@@ -451,7 +451,7 @@ $GLOBALS["STR_ADMIN_INDEX_ORDERS_DESC1"] = "Gérez les commandes passées sur vo
 $GLOBALS["STR_ADMIN_INDEX_ORDERS_DESC2"] = "Les 5 dernières commandes passées";
 $GLOBALS["STR_ADMIN_INDEX_ORDERS_LIST"] = "Liste des commandes";
 $GLOBALS["STR_ADMIN_INDEX_PEEL_BLOCK_TITLE"] = "Les avantages PEEL";
-$GLOBALS["STR_ADMIN_INDEX_PEEL_DESC1"] = "Faites évoluer votre site en y intégrant de nouveaux modules et fonctionnalités. N'hésitez pas à contacter l'équipe PEEL par email ou par téléphone pour assurer la maintenance technique de votre boutique et la mise en place d'évolutions fonctionnelles.";
+$GLOBALS["STR_ADMIN_INDEX_PEEL_DESC1"] = "Faites évoluer votre site en y intégrant de nouveaux modules et fonctionnalités. N'hésitez pas à contacter l'équipe PEEL par email ou par téléphone pour assurer la maintenance technique de votre site et la mise en place d'évolutions fonctionnelles.";
 $GLOBALS["STR_ADMIN_INDEX_PEEL_LAST_OFFERS"] = "Voir nos dernières offres";
 $GLOBALS["STR_ADMIN_INDEX_PRODUCTS_DESC1"] = "Gérez les catégories et les produits de votre catalogue. Trouvez dans cet espace tous les outils nécessaires pour gérer simplement vos produits.";
 $GLOBALS["STR_ADMIN_INDEX_PRODUCTS_REPORT"] = "Gestion des produits";
@@ -1434,7 +1434,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_LAST_LOGIN_DATE"] = "Date de dernière connexio
 $GLOBALS["STR_ADMIN_UTILISATEURS_LAST_ORDER"] = "Dernière commande";
 $GLOBALS["STR_ADMIN_UTILISATEURS_LAST_PAYMENT_DATE"] = "Date de dernier paiement";
 $GLOBALS["STR_ADMIN_UTILISATEURS_LAST_UPDATE"] = "Dernière mise à jour";
-$GLOBALS["STR_ADMIN_UTILISATEURS_LIST_EXPLAIN"] = "Voici le tableau présentant les utilisateurs de votre boutique. <br />Vous pouvez ajouter, modifier ou supprimer un utilisateur. En plus de cela vous avez la possibilité de remettre à zéro son mot de passe mais aussi de lui envoyer un code promo et de lui créer une facture.";
+$GLOBALS["STR_ADMIN_UTILISATEURS_LIST_EXPLAIN"] = "Voici le tableau présentant les utilisateurs de votre site. <br />Vous pouvez ajouter, modifier ou supprimer un utilisateur. En plus de cela vous avez la possibilité de remettre à zéro son mot de passe mais aussi de lui envoyer un code promo et de lui créer une facture.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_LOGO_DELETED"] = "Logo effacé du serveur.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_MANAGE_CALLS"] = "Gestion des appels téléphoniques entrants / sortants";
 $GLOBALS["STR_ADMIN_UTILISATEURS_MANAGED_BY"] = "Géré par";
@@ -1704,7 +1704,7 @@ $GLOBALS["STR_MODULE_BUTTERFLIVE_USE_TITLE"] = "Utiliser Butterflive";
 $GLOBALS["STR_MODULE_BUTTERFLIVE_USER_ANOTHER_EMAIL"] = "Alternativement, veuillez utiliser une autre adresse email";
 $GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN_ACTIVATE"] = "Afin d'activer le suivi des visiteurs et le chat, vous devez vous inscrire à Butterflive, puis télécharger la console de suivi. L'inscription est totalement gratuite. Vous aurez par la suite la possibilité de souscrire un abonnement auprès de Butterflive pour disposer de fonctionnalités exclusives : <ul><li>Support de plusieurs conseillers simultanés,</li><li>Gestion de plusieurs sites web,</li><li>Score adapté au panier du visiteur.</li></ul>";
 $GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN"] = "Grâce à ce module, vous pouvez utiliser très simplement et rapidement Butterflive. Créez simplement un compte en remplissant le formulaire ci dessous et activez le grâce au lien envoyé à votre adresse e-mail. Vous n'avez pas à vous soucier d'installer vous-même le code de suivi ni quoi que ce soit d'autre, PEEL s'en charge !";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME"] = "En association avec <a href=\"http://www.butterflive.fr?o=afpee01\">Butterflive</a>, PEEL vous offre la possibilité de <strong>suivre en direct vos visiteurs</strong> sur votre boutique eCommerce.Un module de scoring note vos visiteurs selon leur activité sur le site pour détecter les clients potentiels. Un <strong>module de chat</strong> vous permet de rentrer en contact avec vos visiteurs en chat classique, ou en <strong>chat vidéo</strong>.";
+$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME"] = "En association avec <a href=\"http://www.butterflive.fr?o=afpee01\">Butterflive</a>, PEEL vous offre la possibilité de <strong>suivre en direct vos visiteurs</strong> sur votre site.Un module de scoring note vos visiteurs selon leur activité sur le site pour détecter les clients potentiels. Un <strong>module de chat</strong> vous permet de rentrer en contact avec vos visiteurs en chat classique, ou en <strong>chat vidéo</strong>.";
 $GLOBALS["STR_MODULE_BUTTERFLIVE_YOU_HAVE_ALREADY_ACCOUNT"] = "Vous disposez déjà d'un <a href=\"http://www.butterflive.fr/\">compte Butterflive</a> ? Entrez vos identifiants pour utiliser votre compte Butterflive sur ce site";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_TITLE"] = "Gestion des carrousels";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_MSG_IMAGE_CREATED_OK"] = "Insertion de la vignette effectuée.";
@@ -1854,6 +1854,16 @@ $GLOBALS["STR_MODULE_MARGES_ADMIN_MARGIN"] = "Marge brute";
 $GLOBALS["STR_MODULE_MARGES_ADMIN_MARGIN_COEFFICIENT"] = "Coefficient de marge";
 $GLOBALS["STR_MODULE_PARRAINAGE_ADMIN_FORM_TITLE"] = "Modifier les conditions de parrainage";
 $GLOBALS["STR_MODULE_PARRAINAGE_ADMIN_TEXT"] = "Texte complet des conditions de parrainage";
+$GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Ajouter un partenaire";
+$GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Modifier le partenaire";
+$GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "La catégorie a été effacée.";
+$GLOBALS["STR_MODULE_PARTENAIRES_MSG_DELETED_OK"] = "Le partenaire <b>%s</b> a été effacé.";
+$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (précisez le protocol.<br />Exemple : http://)";
+$GLOBALS["STR_MODULE_PARTENAIRES_LIST_TITLE"] = "Gérer les partenaires";
+$GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "Aucun partenaire enregistré dans la base.";
+$GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
+$GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER_IN_CATEGORY"] = "Ajouter un partenaire dans cette catégorie";
+$GLOBALS["STR_MODULE_PARTENAIRES_CATEGORIES_LIST"] = "LISTE DES CATEGORIES";
 $GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_DETAILS"] = "Détail d'une alerte";
 $GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Choisissez la catégorie et/ou le fournisseur dont vous voulez gérer les stocks.";
 $GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_EMAIL_SENDED_FOR_STOCK"] = "Un email d'alerte a bien été envoyé à %s pour indiquer qu'il y a maintenant du stock pour ce produit.";
@@ -1903,16 +1913,6 @@ $GLOBALS["STR_MODULE_PREMIUM_ADMIN_UPDATE_STOCK"] = "Mettre à jour les stocks";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_CATEGORY_FOURNISSEUR_STOCK"] = "Si vous sélectionnez \"Toutes les catégories\" et \"Tous les fournisseurs\", une liste exhaustive des 250 premiers produits dont les stocks sont gérés sera affichée.";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_WARNING_DISPLAY_PRODUCT_STOCK"] = "Attention, vos produits n'apparaissent dans ce formulaire qu'une fois le stock initialisé dans la fiche produit.";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_WITH_PRODUCT"] = "avec produit";
-$GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Ajouter un partenaire";
-$GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Modifier le partenaire";
-$GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "La catégorie a été effacée.";
-$GLOBALS["STR_MODULE_PARTENAIRES_MSG_DELETED_OK"] = "Le partenaire <b>%s</b> a été effacé.";
-$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (précisez le protocol.<br />Exemple : http://)";
-$GLOBALS["STR_MODULE_PARTENAIRES_LIST_TITLE"] = "Gérer les partenaires";
-$GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "Aucun partenaire enregistré dans la base.";
-$GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
-$GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER_IN_CATEGORY"] = "Ajouter un partenaire dans cette catégorie";
-$GLOBALS["STR_MODULE_PARTENAIRES_CATEGORIES_LIST"] = "LISTE DES CATEGORIES";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_ABBREVIATE"] = "Abbréviation";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_CREATE"] = "Ajouter un profil";
 $GLOBALS["STR_MODULE_PROFIL_ADMIN_DESCRIPTION_EXPLAIN"] = "affichée sur le compte des utilisateurs";
@@ -1997,7 +1997,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Signature";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "A répondre";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "Email webmaster / support";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Ajouter un mode de livraison";
-$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Vous pouvez définir sur cette page les noms des modes de livraison. Ces modes de livraison seront ensuite à lier aux <a class='alert-link' href='".$GLOBALS['administrer_url']."/tarifs.php'>tarifs de livraison</a>. L'ordre d'affichage est administrable en déplaçant la ligne correspondant à un mode de livraison à la position souhaitée.";
+$GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Vous pouvez définir sur cette page les noms des modes de livraison. Ces modes de livraison seront ensuite à lier aux <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">tarifs de livraison</a>. L'ordre d'affichage est administrable en déplaçant la ligne correspondant à un mode de livraison à la position souhaitée.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Ajouter ou modifier un mode de livraison";
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "PAIEMENT KWIXO";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Relier ce mode de livraison à ICI relais";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_pays_eo.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_pays_eo.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -84,7 +84,6 @@ $peel_pays["pays"] = array(
   "UKR" => "Ukrainio",
   "VEN" => "Venezuelo",
   "SRB" => "Serbio",
-  "WSM" => "Samoo",
   "AND" => "Andoro",
   "AGO" => "Angolo",
   "AIA" => "Angvilo",
@@ -160,7 +159,6 @@ $peel_pays["pays"] = array(
   "KAZ" => "Kazaĥio",
   "KEN" => "Kenjo",
   "KIR" => "Kiribato",
-  "KOR" => "Sud-Koreio",
   "KWT" => "Kuvajto",
   "KGZ" => "Kirgizio",
   "LAO" => "Laoso",

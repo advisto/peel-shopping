@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 43408 2014-11-28 12:02:23Z sdelaporte $
+// $Id: display_product.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -199,6 +199,29 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			}
 			if (!empty($product_images) && count($product_images) > 1) {
 				$tmp_imgs = array();
+				if (!empty($GLOBALS['site_parameters']['order_product_images_per_ratio']))  {
+					// Tri des images en fonction du ratio d'image. 
+					$tmp = array();
+					$new_product_images_array = array();
+					foreach ($product_images as $key => $name) {
+						// Récupération de la taille de l'image.
+						$imgInfo = @getimagesize($GLOBALS['uploaddir'].'/'.$name);
+						// Calcul du ratio Height/Width
+						if (!empty($imgInfo) && !empty($imgInfo[0])) {
+							$tmp[$key] = $imgInfo[1]/$imgInfo[0];
+						} else {
+							$tmp[$key] = 0;
+						}
+					}
+					// tri par ordre croissant => asort : sans modifier les index
+					asort($tmp);
+					foreach ($tmp as $key=>$ratio) {
+						// Le tableau d'image de produit est reconsitué à partir du tableau qui contient les ratio, dans l'ordre.
+						$new_product_images_array[] = $product_images[$key];
+					}
+					// Le précédent tableau non trié est remplacé par le nouveau, avec les images classées par ordre de ratio
+					$product_images = $new_product_images_array;
+				}
 				foreach ($product_images as $key => $name) {
 					if (!$display_first_image_on_mini_pictures_list && $key == 0) {
 						// On n'affiche pas l'image principale pour Jq zoom, puisque l'image principal est intervertit avec l'image secondaire.
@@ -448,6 +471,7 @@ if (!function_exists('get_products_list_brief_html')) {
 			foreach(explode(' ', $cat_infos['meta_titre']) as $this_word) {
 				if ((String::strlen($this_word)>=3 && String::strpos(String::strtolower(' '.$page_title.' '), String::strtolower(' '.$this_word.' ')) === false) && String::strlen($page_title . ' ' . $this_word) < 80) {
 					if (empty($GLOBALS['site_parameters']['get_straight_category_page_title'])) {
+						// On retouche la méta titre de la page
 						if(String::strpos($page_title, ' - ') === false) {
 							$page_title .= ' - ';
 						}
@@ -575,7 +599,7 @@ if (!function_exists('affiche_prix')) {
 			}
 			$tpl->assign('hide_price', !empty($GLOBALS['site_parameters']['price_hide_if_not_loggued']) && !est_identifie());
 			$tpl->assign('STR_PLEASE_LOGIN', $GLOBALS['STR_PLEASE_LOGIN']);
-			$output = $tpl->fetch();
+			$output .= $tpl->fetch();
 		}
 		if ($return_mode) {
 			return $output;
@@ -928,6 +952,10 @@ if (!function_exists('affiche_critere_stock')) {
 		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('critere_stock.tpl');
 		
+		if (!empty($GLOBALS['site_parameters']['remove_product_after_adding_to_cart'])) {
+			// cette valeur save_cart_id sera envoyée en POST à caddie_ajout, qui supprimera le produit du panier sauvegardé.
+			$tpl->assign('save_cart_id', $save_cart_id);
+		}
 		$tpl->assign('save_suffix_id', $save_suffix_id);
 		$tpl->assign('urlprod_with_cid', $urlprod_with_cid);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', str_replace(' ', '&nbsp;', $GLOBALS['STR_BEFORE_TWO_POINTS']));
@@ -944,7 +972,7 @@ if (!function_exists('affiche_critere_stock')) {
 			$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
 			$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
 			
-			if($product_object->on_estimate || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) == 0 && empty($colors_array) && empty($sizes_infos_array) && empty($attributs_infos_array) && !empty($GLOBALS['site_parameters']['disable_add_to_cart_section_if_null_base_price_and_no_option']) || (!empty($GLOBALS['site_parameters']['disable_add_to_cart_section_for_products']))) {
+			if(empty($GLOBALS['site_parameters']['show_add_to_cart_on_free_products']) && ($product_object->on_estimate || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) == 0 && empty($colors_array) && empty($sizes_infos_array) && empty($attributs_infos_array) && !empty($GLOBALS['site_parameters']['disable_add_to_cart_section_if_null_base_price_and_no_option']) || (!empty($GLOBALS['site_parameters']['disable_add_to_cart_section_for_products'])))) {
 				// Si le produit est "sur devis", cette fonction affiche_critere_stock ne doit pas être utilisé, de la même façon que si le produit n'a pas de prix
 				return false;
 			}
@@ -1259,7 +1287,7 @@ if (!function_exists('get_subcategories_table')) {
 			}
 			
 			$tpl->assign('cats', $cats);
-			$output = $tpl->fetch();
+			$output .= $tpl->fetch();
 		}
 		if ($return_mode) {
 			return $output;
@@ -1306,7 +1334,7 @@ if (!function_exists('affiche_categorie_accueil')) {
 			$tpl->assign('nb_col_md', $nb_col_md);
 			$tpl->assign('nb_col_sm', $nb_col_sm);
 			$tpl->assign('cats', $cats);
-			$output = $tpl->fetch();
+			$output .= $tpl->fetch();
 		}
 		if ($return_mode) {
 			return $output;
@@ -1339,9 +1367,10 @@ if (!function_exists('affiche_arbre_categorie')) {
 		$nom = '';
 		if(empty($categories_treated[$catid])) {
 			// On évite les cas de boucles entre catégories qui ont pour Nème parent une catégorie dont elles sont elles-même parents => sinon boucle sans fin
+			// Fonction utilisée également en back office pour le module comparateur => utilisation de use_admin_right inutile, on veux pouvoir récupérer les catégories ste_id = 0 dans l'export pour les comparateurs également.
 			$qid = query('SELECT parent_id, nom_' . $_SESSION['session_langue'] . ' AS nom
 				FROM peel_categories
-				WHERE id = "' . intval($catid) . '" AND etat = "1" AND ' . get_filter_site_cond('categories', null, defined('IN_PEEL_ADMIN')) . '');
+				WHERE id = "' . intval($catid) . '" AND etat = "1" AND ' . get_filter_site_cond('categories') . '');
 			if ($result = fetch_assoc($qid)) {
 				$tpl = $GLOBALS['tplEngine']->createTemplate('arbre_categorie.tpl');
 				$tpl->assign('href', get_product_category_url($catid, $result['nom']));
@@ -1421,7 +1450,7 @@ if (!function_exists('get_product_in_container_html')) {
 					$tpl->assign('on_estimate', $product_object->affiche_prix(display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, false, null, false, false, 'full_width', true, false, !display_prices_with_taxes_active(), $display_minimal_price));
 				}
 
-				$output = $tpl->fetch();
+				$output .= $tpl->fetch();
 			}
 		}
 		return $output;
@@ -1536,7 +1565,7 @@ function update_product_price' . ($save_suffix_id) . '(){
 
 if (!function_exists('get_recommanded_product_on_cart_page')) {
 	/*
-	 * Affiche les produits choisi par l'administrateur dans une popup qui apparait lors du clique sur le bouton "finaliser votre commande" sur la page panier. Les produits sont affichés les uns en dessous des autres.
+	 * Affiche les produits choisis par l'administrateur dans une popup qui apparait lors du clique sur le bouton "finaliser votre commande" sur la page panier. Les produits sont affichés les uns en dessous des autres.
 	 *
 	 * @return
 	 *
@@ -1563,7 +1592,7 @@ if (!function_exists('get_recommanded_product_on_cart_page')) {
 		}
 		if (!empty($product_html)) {
 			// Création du javascript qui affiche les produits.
-			$output = '
+			$output .= '
 		<script>
 			var product_liste_html = "'.filtre_javascript($product_html, true, false, true, true, false).'";
 			product_liste_html += "<br /><div style=\"width:100%; text-align:center;\"><a href=\"#\" onclick=\"$(\'#caddieFormArticle\').submit();return false;\"  class=\"tooltip_link btn btn-lg btn-primary\">'.$GLOBALS['STR_ORDER'].'</a></div>"
@@ -1583,7 +1612,7 @@ if (!function_exists('get_recommanded_product_on_cart_page')) {
 
 if (!function_exists('get_next_product_flash')) {
 	/*
-	 * Affiche la prochaine vente flash dans un container HTML. Fonction utilisée dans le module peel_modules avec le technical code next_product_flash
+	 * Affiche la prochaine vente flash dans un container HTML. Fonction appelée si configuration du module avec le technical code "next_product_flash" dans peel_modules
 	 *
 	 * @return
 	 *

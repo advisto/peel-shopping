@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 43606 2014-12-12 18:03:37Z sdelaporte $
+// $Id: index.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -37,12 +37,12 @@ if (isset($_POST['admin_multisite'])){
 }
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_produits p
-	WHERE " . get_filter_site_cond('produits', 'p', true) . "");
+	WHERE " . get_filter_site_cond('produits', 'p') . "");
 $products_count_object = fetch_object($q);
 
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_utilisateurs u
-	WHERE " . get_filter_site_cond('utilisateurs', 'u', true) . "");
+	WHERE " . get_filter_site_cond('utilisateurs', 'u') . "");
 $users_count_object = fetch_object($q);
 
 $q = query("SELECT COUNT(*) AS this_count
@@ -52,15 +52,15 @@ $orders_count_object = fetch_object($q);
 
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_commandes c
-	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
+	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
 	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code <> 'dispatched' AND " . get_filter_site_cond('commandes', 'c', true) . "");
 $paid_orders_to_deliver_count_object = fetch_object($q);
 
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_commandes c
-	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
+	LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+	LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
 	WHERE sp.technical_code IN ('being_checked','completed') AND sl.technical_code = 'dispatched' AND " . get_filter_site_cond('commandes', 'c', true) . "");
 $paid_orders_delivered_count_object = fetch_object($q);
 
@@ -279,8 +279,8 @@ function get_home_block_content($content_code)
 			$tpl_results = array();
 			$qid = query("SELECT c.*
 				FROM peel_commandes c
-				LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
-				LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl', true) . "
+				LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+				LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
 				WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND sp.technical_code IN ('being_checked','completed') AND sl.technical_code!='dispatched'
 				ORDER BY c.id DESC
 				LIMIT 0,5");

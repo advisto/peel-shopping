@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_en.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: admin_install_en.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -43,7 +43,7 @@ $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN_EXPLAIN"] = "If you want to force the use 
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_SERVER"] = "MySQL";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_SERVER_EXPLAIN"] = "(example: localhost or server name when SQL shared hosting in particular)";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_USERNAME"] = "Username";
-$GLOBALS["STR_ADMIN_INSTALL_DATABASE_ADVISE_SPECIFIC"] = "To install PEEL we recommend that you use a database devoted solely to PEEL. Nevertheless, as all the tables have the prefix \" peel_ \", it is possible to use a database that already other tables. ";
+$GLOBALS["STR_ADMIN_INSTALL_DATABASE_ADVISE_SPECIFIC"] = "To install PEEL we recommend that you use a database devoted solely to PEEL. Nevertheless, as all the tables have the prefix \"peel_\", it is possible to use a database that already other tables. ";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_ADVISE_HOW_TO_CREATE"] = "If your database is not already created, create, or contact your hosting provider.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_SELECT"] = "Please choose your database that will store your PEEL:";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_PLEASE_CLEAN_BEFORE_INSTALL"] = "CAUTION: If the database already contains tables \"peel_\", delete them before proceeding";

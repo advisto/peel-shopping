@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: format.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -342,7 +342,7 @@ function get_country_iso_2_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -369,7 +369,7 @@ function get_country_iso_3_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso3
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"  AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"  AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -395,7 +395,7 @@ function get_country_iso_num_code($country_id_or_name)
 {
 	$sql = 'SELECT iso_num
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays', null, defined('IN_PEEL_ADMIN')) . '
+		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -602,6 +602,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
 		$template_tags['DATETIME'] = get_formatted_date(time(), 'long', true);
 		$template_tags['DATE'] = get_formatted_date(time(), 'long', false);
+		$template_tags['DATE_SHORT'] = get_formatted_date(time(), 'short', false);
 		$template_tags['TIMESTAMP'] = time();
 		// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
 		$tag_begin = -1;
@@ -615,7 +616,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
 			$sql = 'SELECT id, nom
 				FROM peel_codes_promos cp
-				WHERE ' . get_filter_site_cond('codes_promos', 'cp', defined('IN_PEEL_ADMIN')) . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($tag_name_array[1]).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
+				WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($tag_name_array[1]).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
 				ORDER BY id ASC
 				LIMIT 1';
 			$query = query($sql);
@@ -623,7 +624,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$template_tags[$this_tag] = $obj->nom;
 				$sql = 'UPDATE peel_codes_promos
 					SET nb_valide=nb_valide-1
-					WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos', null, defined('IN_PEEL_ADMIN'));
+					WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos');
 				$query = query($sql);
 			}
 		}
@@ -1071,4 +1072,15 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 function userAgeFormat ($date)
 {
  return floor((date('Ymd') - str_replace("-", "", $date)) / 10000);
+}
+
+/**
+ * Supprime les caractères entre et autour des chiffres dans un numéro de téléphone.
+ *
+ * @param mixed $phone_number
+ * @return
+ */
+function get_formatted_phone_number($phone_number)
+{
+	return str_replace(array(' ','/','.','-',')','(','_'), "", $phone_number);
 }

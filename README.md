@@ -48,7 +48,7 @@ Renommez également en FTP le répertoire d'administration avec le nom que vous 
 $backoffice\_directory\_name='administrer';
 => remplacez administrer par le nom que vous avez choisi
 
-6. **FIN** : Rendez vous sur votre page d'accueil de votre boutique et si tout c'est bien déroulé, elle devrait s'afficher correctement
+6. **FIN** : Rendez vous sur votre page d'accueil de votre site et si tout c'est bien déroulé, elle devrait s'afficher correctement
 
 
 EN CAS DE PROBLEME DE FONCTIONNEMENT DE L'INSTALLATION
@@ -63,13 +63,13 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 # - Chez OVH, activez les lignes suivantes :
 # SetEnv PHP_VER 5
 # SetEnv REGISTER_GLOBALS 0
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez 1&1, activez la ligne suivante :
 # AddType x-mapp-php5 .php
 # ou la ligne suivante :
 # AddHandler x-mapp-php5 .php
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez Free, activez la ligne suivante :
 # php 1
@@ -92,7 +92,7 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 # - Chez Nuxit, activez les lignes suivantes :
 # AddHandler x-httpd-php5 .php
 # AddType application/x-httpd-php5 .php
-# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredeboutique/
+# et activez aussi plus loin dans le fichier la ligne RewriteBase / ou /monrepertoiredesite/
 #
 # - Chez Produweb, activez les lignes suivantes :
 # SetEnv DEFAULT_PHP_VERSION 5
@@ -117,10 +117,10 @@ Vous avez dans le fichier .htaccess (dans le répertoire racine de l'application
 
 <pre><code>
 # Sur certains hébergements (OVH, Amen, ...) il faut parfois configurer le RewriteBase :
-# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredeboutique/
+# Attention : si vous n'êtes pas à la racine de votre domaine, indiquez /monrepertoiredesite/
 # RewriteBase /
 # ...ou... :
-# RewriteBase /monrepertoiredeboutique/
+# RewriteBase /monrepertoiredesite/
 </code></pre>
 
 INSTALLATION MANUELLE (UNIQUEMENT SI L'INSTALLATION ECHOUE)
@@ -183,7 +183,7 @@ Pour faire fonctionner une langue, il faut :
 
 1. Traduire le fichier /lib/lang/fr.php dans la langue de votre choix (exemple création d'un fichier es.php contenant toutes les variables de langue traduite en espagnol)
 2. Créer un fichier équivalent à /lib/lang/datetime\_fr.php dans la langue de votre choix (exemple création d'un fichier datetime\_es.php contenant tous les formats de dates en espagnol)
-3. Créer la langue dans l'interface d'administration : Mon compte > Configuration de la boutique > Gérer les langues > Ajouter une langue
+3. Créer la langue dans l'interface d'administration : Administration > Configuration > Configuration > Gestion des langues > Ajouter une langue
    Pour info, Des modèles de drapeaux sont à disposition dans le dossier /lib/flag/. Si toutefois vous voulez ajouter votre propre drapeau, envoyez le par FTP sur votre serveur et indiquez l'URL complète de l'image dans le champ correspondant. Si juste un nom d'image est précisé, il prendra par défaut le dossier /lib/flag/ .
 
 Les traducteurs peuvent procéder aux traductions sur https://www.transifex.com/projects/p/peel-shopping/ sur lequel tous les fichiers de langue de PEEL Shopping et de ses modules sont indiqués.

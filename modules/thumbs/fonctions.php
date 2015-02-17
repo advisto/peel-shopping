@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -165,8 +165,6 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 			}
 			// Création de l'image de sortie
 			$outImg = imagecreatetruecolor ($outWidth, $outHeight);
-			// Applique un fond blanc à l'image
-			imagefill($outImg, 0, 0, imagecolorallocate($outImg, 255, 255, 255));
 			// Load src image
 			switch ($srcType) {
 				case "png":
@@ -179,6 +177,16 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 					break;
 				case "gif":
 					$srcImg = imagecreatefromgif($source_path);
+					// On récupère la couleur transparente de l'image source si elle existe
+					$src_transparent_index = imagecolortransparent($srcImg);
+					if($src_transparent_index!=(-1)) {
+						$transparent_color = imagecolorsforindex($srcImg,$src_transparent_index);
+					}
+					if(!empty($transparent_color))
+					{
+						$out_transparent = imagecolorallocate($outImg, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+						$background = imagecolortransparent($outImg, $out_transparent);
+					}
 					break;
 				case "jpeg":
 					$srcImg = imagecreatefromjpeg($source_path);
@@ -190,6 +198,11 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 					return false;
 			}
 			if(!empty($srcImg)) {
+				if(empty($background)) {
+					// Applique un fond blanc à l'image
+					$background = imagecolorallocate($outImg, 255, 255, 255);
+				}
+				imagefill($outImg, 0, 0, $background);
 				// Retaille l'image
 				imagecopyresampled($outImg, $srcImg, 0, 0, 0, 0, $outWidth, $outHeight, $srcWidth, $srcHeight);
 				if(!empty($use_subfolders)) {

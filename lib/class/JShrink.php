@@ -16,8 +16,6 @@
  * @author     Robert Hafner <tedivm@tedivm.com>
  */
 
-namespace JShrink;
-
 /**
  * Minifier
  *

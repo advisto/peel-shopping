@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: list_admin_actions.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: list_admin_actions.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -186,8 +186,8 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 
 	$sql = 'SELECT paa.id AS id, paa.action AS action, paa.data AS data, paa.raison AS raison, paa.remarque AS remarque, paa.date as date, pu1.pseudo AS pseudo_admin, pu2.pseudo AS pseudo_membre, pu1.id_utilisateur AS id_admin, pu1.email AS email_admin, pu2.id_utilisateur AS id_membre, pu2.email AS email_membre
 		FROM peel_admins_actions paa
-		LEFT JOIN peel_utilisateurs pu1 ON pu1.id_utilisateur = paa.id_user AND ' . get_filter_site_cond('utilisateurs', 'pu1', true) . '
-		LEFT JOIN peel_utilisateurs pu2 ON pu2.id_utilisateur = paa.id_membre AND ' . get_filter_site_cond('utilisateurs', 'pu2', true) . '
+		LEFT JOIN peel_utilisateurs pu1 ON pu1.id_utilisateur = paa.id_user AND ' . get_filter_site_cond('utilisateurs', 'pu1') . '
+		LEFT JOIN peel_utilisateurs pu2 ON pu2.id_utilisateur = paa.id_membre AND ' . get_filter_site_cond('utilisateurs', 'pu2') . '
 		' . (!empty($search_array)?'WHERE ' . implode(' AND ', $search_array) . ' AND ' . get_filter_site_cond('admins_actions', 'paa', true):'');
 	$Links = new Multipage($sql, 'affiche_liste_action_moderation', 50);
 	$HeaderTitlesArray = array('', 'date' => $GLOBALS['STR_DATE'], 'id_user' => $GLOBALS['STR_BY'], 'action' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATE_ACTION_TYPE'], 'id_membre' => $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_CONCERNED_ACCOUNT'], $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_DATA']);
@@ -231,7 +231,7 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 		}
 		$tpl->assign('results', $tpl_results);
 	}
-	$output = $tpl->fetch();
+	$output .= $tpl->fetch();
 
 	if ($return_mode) {
 		return $output;

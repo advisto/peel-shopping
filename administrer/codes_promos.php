@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 43187 2014-11-13 15:35:30Z sdelaporte $
+// $Id: codes_promos.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -185,8 +185,8 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('remise_valeur', vn($frm['remise_valeur']));
 	$tpl->assign('montant_min', vn($frm['montant_min']));
-	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie']), 'option', '&nbsp;&nbsp;', null));
-	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo'])), 'option', '&nbsp;&nbsp;', null));
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie'])));
+	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo']))));
 	$tpl->assign('nombre_prevue', vb($frm["nombre_prevue"]));
 	$tpl->assign('nb_used_per_client', vb($frm["nb_used_per_client"]));
 	$tpl->assign('product_filter', vb($frm['product_filter']));
@@ -274,7 +274,7 @@ function affiche_liste_code_promo()
 {
 	$sql = "SELECT cp.*, nom_" . $_SESSION['session_langue'] . " AS category_name
 		FROM peel_codes_promos cp
-		LEFT JOIN peel_categories c ON c.id=cp.id_categorie AND " . get_filter_site_cond('categories', 'c', true) . "
+		LEFT JOIN peel_categories c ON c.id=cp.id_categorie AND " . get_filter_site_cond('categories', 'c') . "
 		WHERE " . get_filter_site_cond('codes_promos', 'cp', true) . "";
 	$Links = new Multipage($sql, 'codes_promos');
 	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_ACTION'], 'nom' => $GLOBALS['STR_ADMIN_CODE'], 'date_debut' => $GLOBALS['STR_ADMIN_BEGIN_DATE'], 'date_fin' => $GLOBALS['STR_ADMIN_END_DATE'], 'remise_percent,remise_valeur' => $GLOBALS['STR_ADMIN_DISCOUNT'], 'montant_min' => $GLOBALS['STR_ADMIN_DATE_STARTING'], 'category_name' => $GLOBALS['STR_CATEGORY'], 'etat' => $GLOBALS['STR_STATUS'], 'source' => $GLOBALS['STR_ADMIN_SOURCE'], 'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']);

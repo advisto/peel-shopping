@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 43407 2014-11-28 11:58:32Z sdelaporte $
+// $Id: it.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -290,7 +290,7 @@ $GLOBALS["STR_FTP_CHDIR_FAILED"] = "";
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "";
 $GLOBALS["STR_FTP_GET_FAILED"] = "";
 $GLOBALS["STR_FWRITE_FAILED"] = "";
-$GLOBALS["SITE_GENERATOR"] = "PEEL creazione di siti web";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL creazione di siti web";
 $GLOBALS["STR_GENDER"] = "";
 $GLOBALS["STR_GET_MY_POSITION"] = "";
 $GLOBALS["STR_GET_PASSWORD"] = "";
@@ -541,7 +541,7 @@ $GLOBALS["STR_OPTION"] = "";
 $GLOBALS["STR_OPTIONS_COST"] = "";
 $GLOBALS["STR_OR_COORDINATION"] = "ou";
 $GLOBALS["STR_OR"] = "ou";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = '';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "Buono d'ordine";
 $GLOBALS["STR_ORDER_HISTORY"] = "";

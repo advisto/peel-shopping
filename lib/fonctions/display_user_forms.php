@@ -1,108 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: display_user_forms.php 44080 2015-02-17 11:09:47Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
-if (!function_exists('get_specific_field_infos')) {
-	/**
-	 * Permet de définir de nouveaux champs dans le formulaire d'inscription / modification d'utilisateur depuis le back office (page "variables de configuration").
-	 *
-	 * @param array $frm Array with all fields data
-	 * @param class $form_error_object
-	 * @return
-	 *
-	 */
-	function get_specific_field_infos($frm, $reseller_form = false, $form_error_object = null) {
-		$specific_fields = array();
-		$one_possible_value_field_type_array = array('hidden','text','datepicker','textarea','upload','password');
-		
-		if (!empty($reseller_form) && is_reseller_module_active()) {
-			// Champ spécifique pour le formulaire revendeur
-			$specific_field_titles = vb($GLOBALS['site_parameters']['reseller_specific_field_titles']);
-			$specific_field_types = vb($GLOBALS['site_parameters']['reseller_specific_field_types']);
-			$specific_field_names = vb($GLOBALS['site_parameters']['reseller_specific_field_names']);
-			$specific_field_values = vb($GLOBALS['site_parameters']['reseller_specific_field_values']);
-		} else {
-			$specific_field_titles = vb($GLOBALS['site_parameters']['user_specific_field_titles']);
-			$specific_field_types = vb($GLOBALS['site_parameters']['user_specific_field_types']);
-			$specific_field_names = vb($GLOBALS['site_parameters']['user_specific_field_names']);
-			$specific_field_values = vb($GLOBALS['site_parameters']['user_specific_field_values']);
-		}
-		
-		if(!empty($specific_field_titles)) {
-			foreach($specific_field_titles as $this_field => $this_title) {
-				unset($tpl_options);
-				if(String::substr($this_title, 0, 4)== 'STR_') {
-					// Le titre est une variabe de langue
-					$this_title = $GLOBALS[$this_title];
-				}
-				if (defined('IN_CHANGE_PARAMS') && !empty($GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page']) &&  in_array($this_field, $GLOBALS['site_parameters']['disable_user_specific_field_on_change_params_page'])) {
-					// permet d'avoir des champs spécifiques qui seront utilisé lors de l'inscription, et ne pas les afficher sur la page de changement de paramètres
-					continue;
-				}
-				$this_position = vb($GLOBALS['site_parameters']['user_specific_field_positions'][$this_field]);
-				$field_type = vb($specific_field_types[$this_field], 'text');
-
-				if(in_array($specific_field_types[$this_field], $one_possible_value_field_type_array)&& !empty($specific_field_values[$this_field])) {
-					$this_field_values = explode(',', $specific_field_values[$this_field]);
-					$this_field_names = explode(',', $specific_field_names[$this_field]);
-
-					if ($field_type == 'checkbox') {
-						if (!empty($frm[$this_field])) {
-							if (is_array($frm[$this_field])) {
-								// Si $frm vient directement du formulaire, les valeurs pour les checkbox sont sous forme de tableau.
-								$frm_this_field_values_array = $frm[$this_field];
-							} else {
-								// pour les checkbox, $frm[$this_field] peux contenir plusieurs valeurs séparées par des virgules si les données viennent de la BDD
-								$frm_this_field_values_array = explode(',', $frm[$this_field]);
-							}
-						}
-					} else {
-						// Pour les autres champ, $frm[$this_field] contient une valeur unique.
-						$frm_this_field_values_array = array(vb($frm[$this_field]));
-					}
-					foreach($this_field_values as $this_key => $this_value) {
-						if(String::substr($this_value, 0, 4)== 'STR_') {
-							// Variable de langue
-							$this_value = $GLOBALS[$this_value];
-						}
-						if (in_array($field_type, $one_possible_value_field_type_array) && !empty($frm_this_field_values_array[0])) {
-							// Pour récuperer la valeur d'un champ text. la valeur du formulaire $frm_this_field_values_array a priorité sur la valeur prédéfini en back office.
-							$this_value = $frm_this_field_values_array[0];
-						}
-						$tpl_options[] = array('value' => $this_value,
-								'issel' => in_array($this_value, $frm_this_field_values_array),
-								'name' => vb($this_field_names[$this_key])
-							);
-					}
-					$specific_fields[] = array('options' => $tpl_options,
-							'field_type' => $field_type,
-							'field_name' => $this_field,
-							'field_title' => $this_title,
-							'field_value' => vb($frm[$this_field]),
-							'field_position' => $this_position,
-							'mandatory_fields' => (!empty($GLOBALS['site_parameters']['user_mandatory_fields'][$this_field])),
-							'error_text' => (!empty($form_error_object)?$form_error_object->text($this_field):''),
-							'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
-						);
-				}
-			}
-		}
-		return $specific_fields;
-	}
-}
 
 if (!function_exists('get_user_change_params_form')) {
 	/**
@@ -294,7 +206,7 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('STR_USER_ORIGIN', $GLOBALS['STR_USER_ORIGIN']);
 		$tpl->assign('STR_COMMERCIAL_AGENT', $GLOBALS['STR_COMMERCIAL_AGENT']);
 		$tpl->assign('STR_LANGUAGE_FOR_AUTOMATIC_EMAILS', $GLOBALS['STR_LANGUAGE_FOR_AUTOMATIC_EMAILS']);
-		$tpl->assign('STR_NEWSLETTER_YES', (!empty($GLOBALS['STR_NEWSLETTER_YES'])?$GLOBALS['STR_NEWSLETTER_YES'] . ' ' . $GLOBALS['site']:''));
+		$tpl->assign('STR_NEWSLETTER_YES', (!empty($GLOBALS['STR_NEWSLETTER_YES'])?$GLOBALS['STR_NEWSLETTER_YES']:''));
 		$tpl->assign('STR_COMMERCIAL_YES', $GLOBALS['STR_COMMERCIAL_YES']);
 		$tpl->assign('STR_ACTIVITY', $GLOBALS['STR_ACTIVITY']);
 		$tpl->assign('STR_YOU_ARE', $GLOBALS['STR_YOU_ARE']);
@@ -417,6 +329,7 @@ if (!function_exists('get_user_register_form')) {
 			'error_text' => $form_error_object->text('origin'),
 			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
 			));
+
 		$tpl->assign('enable_display_only_user_specific_field', !empty($GLOBALS['site_parameters']['enable_display_only_user_specific_field']));
 		$tpl->assign('specific_fields', get_specific_field_infos($frm, false, $form_error_object));
 		if (is_captcha_module_active()) {
@@ -500,7 +413,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
 		$tpl->assign('STR_USER_ORIGIN', $GLOBALS['STR_USER_ORIGIN']);
 		$tpl->assign('STR_COMMERCIAL_AGENT', $GLOBALS['STR_COMMERCIAL_AGENT']);
-		$tpl->assign('STR_NEWSLETTER_YES', (!empty($GLOBALS['STR_NEWSLETTER_YES'])?$GLOBALS['STR_NEWSLETTER_YES'] . ' ' . $GLOBALS['site']:''));
+		$tpl->assign('STR_NEWSLETTER_YES', (!empty($GLOBALS['STR_NEWSLETTER_YES'])?$GLOBALS['STR_NEWSLETTER_YES']:''));
 		$tpl->assign('STR_COMMERCIAL_YES', $GLOBALS['STR_COMMERCIAL_YES']);
 		$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 		$tpl->assign('STR_FONCTION', $GLOBALS['STR_FONCTION']);

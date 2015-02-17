@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 43291 2014-11-20 14:37:46Z sdelaporte $
+// $Id: rubriques.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -72,7 +72,11 @@ switch (vb($_REQUEST['mode'])) {
 			maj_rubrique(vn($_REQUEST['id']), $frm);
 
 			if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
-				upload_rubrique_diaporama(vn($_REQUEST['id']), $_FILES); // ajout des images du diaporama
+				if($GLOBALS['site_parameters']['used_uploader'] == 'html') {
+					upload_rubrique_diaporama(vn($_REQUEST['id']), $_POST); // ajout des images du diaporama
+				} else {
+					upload_rubrique_diaporama(vn($_REQUEST['id']), $_FILES); // ajout des images du diaporama
+				}
 			}
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_UPDATED_OK'], vn($_REQUEST['id']))))->fetch();
 			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
@@ -438,7 +442,7 @@ function affiche_formulaire_rubrique(&$frm)
 	$tpl->assign('nom', $frm['nom_' . $_SESSION['session_langue']]);
 	$tpl->assign('category_href', get_content_category_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], false, false, null, vb($frm['site_id'])));
 	$tpl->assign('empty_parent_id', empty($frm['parent_id']));
-	$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['id']), 'option', '&nbsp;&nbsp;', null));
+	$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['id']), 'option', '&nbsp;&nbsp;', null, null, true));
 	$tpl->assign('etat', vb($frm['etat']));
 	$tpl->assign('position', vb($frm['position']));
 	if(empty($frm['id'])){
@@ -598,10 +602,10 @@ function supprime_fichier_diaporama($id, $file)
 function upload_rubrique_diaporama($id_rubrique, $frm)
 {
 	for($i = 1;$i < 6;$i++) {
-		if (!empty($frm['image' . $i]['name'])) {
+		if (!empty($frm['image' . $i])) {
 			$img = upload('image' . $i, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image' . $i]));
 			if (!empty($img) && !empty($id_rubrique)) {
-				query('INSERT INTO `peel_diaporama` VALUES(null,' . $id_rubrique . ',"' . nohtml_real_escape_string($img) . '")');
+				query('INSERT INTO `peel_diaporama` VALUES(NULL, "' . intval($id_rubrique) . '", "' . nohtml_real_escape_string($img) . '")');
 			}
 		}
 	}

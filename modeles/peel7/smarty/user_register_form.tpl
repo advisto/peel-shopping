@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: user_register_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 *}<h1 property="name" class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form">
 	{if !empty($STR_FIRST_REGISTER_TEXT)}<p>{$STR_FIRST_REGISTER_TEXT}</p>{/if}
@@ -154,6 +154,18 @@
 			<span class="enregistrementgauche"><label for="adresse">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite"><textarea class="form-control mono-colonne" rows="3" cols="54" id="adresse" name="adresse">{$adresse|html_entity_decode_if_needed}</textarea></span>{$adresse_error}
 		</div>
+	{foreach $specific_fields as $f}
+		{if $f.field_position=='adresse'}
+			<div class="enregistrement">
+			{if !empty($f.field_title)}
+				<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+				<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
+			{else}
+				{include file="specific_field.tpl" f=$f}{$f.error_text}
+			{/if}
+			</div>
+		{/if}
+	{/foreach}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code_postal">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 			<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="{$zip|str_form_value}" /></span>{$zip_error}
@@ -226,7 +238,7 @@
 	{/if}
 {/if}
 {foreach $specific_fields as $f}
-	{if $f.field_position!='company'}
+	{if $f.field_position!='company' && $f.field_position!='adresse'}
 		<div class="enregistrement">
 		{if !empty($f.field_title)}
 			<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>

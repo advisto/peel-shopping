@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 43407 2014-11-28 11:58:32Z sdelaporte $
+// $Id: pt.php 44079 2015-02-17 11:04:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -295,7 +295,7 @@ $GLOBALS["STR_FTP_CHDIR_FAILED"] = "";
 $GLOBALS["STR_FTP_CONNECT_FAILED"] = "";
 $GLOBALS["STR_FTP_GET_FAILED"] = "";
 $GLOBALS["STR_FWRITE_FAILED"] = "";
-$GLOBALS["SITE_GENERATOR"] = "PEEL creating eCommerce Site";
+$GLOBALS["STR_SITE_GENERATOR"] = "PEEL creating eCommerce Site";
 $GLOBALS["STR_GENDER"] = "Título";
 $GLOBALS["STR_GET_MY_POSITION"] = "";
 $GLOBALS["STR_GET_PASSWORD"] = "Recuperar o seu password";
@@ -437,17 +437,17 @@ $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Obrigado da sua confiança.\n\nObrigado de notar e conservar o vosso identificador e a vosso password.\n\nPoderá beneficiar dos preços afilados depois da validação da vossa conta. Identificá-se <a class=\"normal\" href=\"{$GLOBALS['wwwroot']}/membre.php\">clique aqui</a>.\n\seus parâmetros de conexão são os seguintes :";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Obrigado da sua confiança.\n\nObrigado de notar e conservar o vosso identificador e a vosso password.\n\nPoderá beneficiar dos preços afilados depois da validação da vossa conta.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Obrigado, agradecemo-los para a vossa confiança. Agora é inscrita ao nosso programa de patrocínio et pode beneficiar de um cheque prendas de %s EUROS a partir da vossa primeira encomenda. O código cheque associado à vossa encomenda foi-vos enviado ao e-mail da vossa conta cliente.\n\r A bientôt sur {$GLOBALS['site']}.\n\r";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Obrigado da sua confiança.\n\nObrigado de notar e conservar o vosso identificador e a vosso password.\n\nPoderá beneficiar dos preços revendedores depois da validação da vossa conta. Agora você deve validar sua conta clicando no link que foi enviado pelo correio.\n\seus parâmetros de conexão são os seguintes :";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Obrigado, agradecemo-los para a vossa confiança. Agora é inscrita ao nosso programa de patrocínio et pode beneficiar de um cheque prendas de %s a partir da vossa primeira encomenda. O código cheque associado à vossa encomenda foi-vos enviado ao e-mail da vossa conta cliente.\n\r A bientôt sur {$GLOBALS['site']}.\n\r";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Obrigado da sua confiança.\n\nObrigado de notar e conservar o vosso identificador e a vosso password.\n\nPoderá beneficiar dos preços revendedores depois da validação da vossa conta. Agora você deve validar sua conta clicando no link que foi enviado pelo correio.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "En cliquant sur le bouton ci-dessous, vous envoyez votre inscription au Programme Partenaires du site {$GLOBALS['site']}. Votre inscription terminée, vous serez tenu de respecter les conditions détaillées dans les conditions générales d'adhésion que vous recevrez en 2 exemplaires par courrier à nous retourner signé.";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Este produto não é disponível no momento.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = " Cliquem aqui para voltar à vossa conta.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Este e-mail não pode mais ser patrocinar porque figura já na nossa base de dados.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Obrigado preencher os campos obrigatórios para patrocinar os vossos amigos.\n\r<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Cliquem aqui</a> para voltar à página precedente.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Os vossos amigos receberam o seu pedido de patrocínio. Dados de validação da sua conta cliente, poderá beneficiar de um cheque prendas de %s € sobre a sua primeira encomenda. Poderão, eles beneficiar do seu cheque prendas de %s € a valer sobre a sua primeira encomenda.";
-$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Obrigado confirmar a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail! Confirmando a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail, poderá beneficiar de uma nota de credito de %s EUROS a valer sobre a vossa primeira encomenda sobre o nosso sítio Internet.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Obrigado confirmar a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail! Confirmando a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail, poderá beneficiar de uma nota de credito de %s a valer sobre a vossa primeira encomenda sobre o nosso sítio Internet.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmação de inscrição ao programa de patrocínio do sítio {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PRODUCT_UNIT"] = "";
@@ -504,7 +504,7 @@ $GLOBALS["STR_NEW_CUSTOMER"] = "";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Novo password para confirmar";
 $GLOBALS["STR_NEW_PASSWORD"] = "Novo password";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "";
-$GLOBALS["STR_NEWSLETTER_YES"] = "Sim, quero subscrever a newsletter de";
+$GLOBALS["STR_NEWSLETTER_YES"] = "Sim, quero subscrever a newsletter de {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "Newsletter";
 $GLOBALS["STR_NEXT_PAGE"] = "";
 $GLOBALS["STR_NEXT"] = "";
@@ -546,7 +546,7 @@ $GLOBALS["STR_OPTION"] = "Preço das opções";
 $GLOBALS["STR_OPTIONS_COST"] = "";
 $GLOBALS["STR_OR_COORDINATION"] = "";
 $GLOBALS["STR_OR"] = "";
-$GLOBALS['STR_ORDER_BY_BUTTON'] = '';
+$GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detalhe da encomenda";
 $GLOBALS["STR_ORDER_FORM"] = "";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historial das encomendas";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_es.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_subject_es.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -69,6 +69,10 @@ $peel_email_template["subject"] = array(
   "cron_order_payment_failure_alerts" => "Ayuda para su pago",
   "cron_order_not_paid_alerts" => "El pago de su pedido",
   "cron_update_contact_info" => "La confirmación de la validez de la información",
-  "inscription_newsletter" => "Inscripción a la newsletter sur [SITE]"
+  "inscription_newsletter" => "Suscripción al boletín de noticias de [SITE]",
+  "send_mail_for_account_creation_stop" => "Su cuenta de revendedor",
+  "send_mail_for_account_creation_reve" => "El cambio de estado de su cuenta de revendedor",
+  "send_mail_for_account_creation_stand" => "Su cuenta de afiliado",
+  "send_mail_for_account_creation_affi" => "Cambio en el estado de su cuenta de afiliado"
 );
 

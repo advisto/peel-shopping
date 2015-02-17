@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 43456 2014-12-01 15:49:18Z sdelaporte $
+// $Id: utilisateurs.php 44078 2015-02-17 11:01:30Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -128,6 +128,7 @@ switch (vb($_REQUEST['mode'])) {
 		} elseif ((num_rows(query("SELECT 1
 			FROM peel_utilisateurs
 			WHERE email = '" . nohtml_real_escape_string($frm['email']) . "' AND " . get_filter_site_cond('utilisateurs', null, true) . "")) > 0)) {
+			// Test d'unicité de l'email. On ne veut pas plusieurs comptes avec le même email en base de données
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_STILL']);
 		}
 		if (empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && (num_rows(query("SELECT 1
@@ -144,7 +145,7 @@ switch (vb($_REQUEST['mode'])) {
 			}
 			// Envoi de l'e-mail
 			if (isset($frm['notify'])) {
-				$output .= send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']));
+				$output .= send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']), vb($frm['priv']));
 			}
 			$output .= afficher_liste_utilisateurs($priv, $cle);
 		} else {
@@ -169,6 +170,11 @@ switch (vb($_REQUEST['mode'])) {
 		if (!EmailOk($frm['email'])) {
 			// si il y a un email on teste l'email
 			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
+		} elseif ((num_rows(query("SELECT 1
+			FROM peel_utilisateurs
+			WHERE email = '" . nohtml_real_escape_string($frm['email']) . "' AND " . get_filter_site_cond('utilisateurs', null, true) . " AND id_utilisateur!='" . intval($frm['id_utilisateur']) . "'")) > 0)) {
+			// Test d'unicité de l'email. On ne veut pas plusieurs comptes avec le même email en base de données
+			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_STILL']);
 		}
 		if(!empty($frm['id_offre'])) {
 			foreach($frm['id_offre'] as $id_offre){
@@ -221,8 +227,8 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "init_mdp" :
 		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
-			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
-			$output .= initialise_mot_passe($_REQUEST['email']);
+			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier. initialise_mot_passe retourne un boolean
+			initialise_mot_passe($_REQUEST['email']);
 			$qid = query("SELECT email
 				FROM peel_utilisateurs
 				WHERE email = '" . nohtml_real_escape_string($_REQUEST['email']) . "' AND " . get_filter_site_cond('utilisateurs', null, true) . "");
@@ -450,10 +456,16 @@ switch (vb($_REQUEST['mode'])) {
 				} else {
 					include($GLOBALS['dirroot'] . '/modules/chart/open_flash_chart_object.php');
 				}
-				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
-					$output .=  '<div class="center">' . get_flot_chart('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', 'line', $GLOBALS['wwwroot'] . '/modules/chart/', 'date_format_veryshort') . '</div>';
+
+				if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
+					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
 				} else {
-					$output .=  '<div class="center">' . open_flash_chart_object_str('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', true, $GLOBALS['wwwroot'] . '/modules/chart/') . '</div>';
+					$this_wwwroot =  $GLOBALS['wwwroot'];
+				}
+				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
+					$output .=  '<div class="center">' . get_flot_chart('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', 'line', $this_wwwroot . '/modules/chart/', 'date_format_veryshort') . '</div>';
+				} else {
+					$output .=  '<div class="center">' . open_flash_chart_object_str('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', true, $this_wwwroot . '/modules/chart/') . '</div>';
 				}
 			}
 		}
@@ -622,14 +634,14 @@ function afficher_formulaire_utilisateur(&$frm)
 	}
 	$resPriv = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE " . get_filter_site_cond('profil', null, true) ." 
+		WHERE " . get_filter_site_cond('profil') ." 
 		ORDER BY name");
 	if (num_rows($resPriv)) {
 		$user_priv_array = explode('+', vb($frm['priv']));
 		// Sélection du privilège du l'utilisateur. Si le privilège de l'utilisateur n'est pas défini dans la table, le privilège 'util' est présélectionné
 		$res_user_priv = query("SELECT name_".$_SESSION['session_langue']." AS name
 			FROM peel_profil
-			WHERE " . get_filter_site_cond('profil', null, true) ." AND priv IN ('" . implode("','", real_escape_string($user_priv_array)) . "')");
+			WHERE " . get_filter_site_cond('profil') ." AND priv IN ('" . implode("','", real_escape_string($user_priv_array)) . "')");
 		$user_priv = fetch_assoc($res_user_priv);
 		while ($Priv = fetch_assoc($resPriv)) {
 			if (isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
@@ -675,7 +687,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	if (check_if_module_active('groups')) {
 		$resGroupe = query("SELECT *
 			FROM peel_groupes
-			WHERE " . get_filter_site_cond('groupes', null, true) . "
+			WHERE " . get_filter_site_cond('groupes') . "
 			ORDER BY nom");
 		if (num_rows($resGroupe)) {
 			$tpl_groupes_options = array();
@@ -741,7 +753,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl_langues = array();
 	$resLng = query("SELECT *, nom_" . $_SESSION['session_langue'] . " AS nom_lang
 		FROM peel_langues
-		WHERE etat = '1'" . (!empty($_GET['langue']) ? " OR lang='" . word_real_escape_string($_GET['langue']) . "'" : '') . " AND " . get_filter_site_cond('langues', null, true) . "
+		WHERE etat = '1'" . (!empty($_GET['langue']) ? " OR lang='" . word_real_escape_string($_GET['langue']) . "'" : '') . " AND " . get_filter_site_cond('langues') . "
 		GROUP BY lang
 		ORDER BY position");
 	while ($lng = fetch_assoc($resLng)) {
@@ -831,7 +843,7 @@ function afficher_formulaire_utilisateur(&$frm)
 		if (!empty($_SESSION['session_site_country'])) {
 			$query = query("SELECT pays_" . $_SESSION['session_langue'] . "
 				FROM peel_pays
-				WHERE id='" . intval($_SESSION['session_site_country']) . "' AND " .  get_filter_site_cond('pays', null, true) . "");
+				WHERE id='" . intval($_SESSION['session_site_country']) . "' AND " .  get_filter_site_cond('pays') . "");
 			$result = fetch_assoc($query);
 			$country_name = vb($result['pays_' . $_SESSION['session_langue']]);
 		}
@@ -877,7 +889,7 @@ function afficher_formulaire_utilisateur(&$frm)
 		$tpl_devises_options = array();
 		$res_devise = query("SELECT p.id, p.code
 			FROM peel_devises p
-			WHERE etat='1' AND " . get_filter_site_cond('devises', 'p', true) . "");
+			WHERE etat='1' AND " . get_filter_site_cond('devises', 'p') . "");
 		while ($tab_devise = fetch_assoc($res_devise)) {
 			$tpl_devises_options[] = array('value' => $tab_devise['id'],
 				'issel' => $tab_devise['id'] == vb($frm['devise']),
@@ -1050,6 +1062,11 @@ function afficher_formulaire_utilisateur(&$frm)
 
 			$total_ttc = $total_ht = 0;
 			$i = 0;
+			if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
+				$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+			} else {
+				$this_wwwroot =  $GLOBALS['wwwroot'];
+			}
 			while ($order_infos = fetch_object($query)) {
 				$total_ttc += $order_infos->montant;
 				$total_ht += $order_infos->montant_ht;
@@ -1060,7 +1077,7 @@ function afficher_formulaire_utilisateur(&$frm)
 				}
 				$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 					'modif_href' => $GLOBALS['administrer_url'] . '/commander.php?mode=modif&commandeid=' . $order_infos->id,
-					'print_href' => $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?mode=details&code_facture=' . $order_infos->code_facture,
+					'print_href' => $this_wwwroot . '/factures/commande_pdf.php?mode=details&code_facture=' . $order_infos->code_facture,
 					'drop_href' => $GLOBALS['administrer_url'] . '/commander.php?mode=suppr&id=' . $order_infos->id,
 					'id' => $order_infos->order_id,
 					'date' => get_formatted_date($order_infos->o_timestamp),
@@ -1187,7 +1204,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			$frm['continent'][] = 6;
 		}
 		$sql_where_array[] = 'pays.continent_id IN ("' . implode('","', nohtml_real_escape_string($frm['continent'])) . '")';
-		$sql_inner_array['peel_pays'] = 'INNER JOIN peel_pays pays ON pays.id=u.pays AND  ' .  get_filter_site_cond('pays', 'pays', true);
+		$sql_inner_array['peel_pays'] = 'INNER JOIN peel_pays pays ON pays.id=u.pays AND  ' .  get_filter_site_cond('pays', 'pays');
 	}
 	if (!empty($frm['seg_who']) && $frm['seg_who'] != '0') {
 		$sql_where_array[] = 'u.seg_who = "' . nohtml_real_escape_string($frm['seg_who']) . '"';
@@ -1421,9 +1438,9 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 	}
 	$sql = "SELECT " . implode(', ', $sql_columns_array) . ", p.name_".$_SESSION['session_langue']." AS profil_name, SUM(".(display_prices_with_taxes_active()?'montant':'montant_ht').") AS total_ordered, COUNT(c.id) AS count_ordered
 		FROM peel_utilisateurs u
-		LEFT JOIN peel_profil p ON p.priv=u.priv AND " . get_filter_site_cond('profil', 'p', true) . "
+		LEFT JOIN peel_profil p ON p.priv=u.priv AND " . get_filter_site_cond('profil', 'p') . "
 		LEFT JOIN peel_commandes c ON c.id_utilisateur=u.id_utilisateur AND " . get_filter_site_cond('commandes', 'c', true) . " 
-		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp', true) . "
+		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 		" . implode(' ', $sql_inner_array) . "
 		WHERE  " . implode(' AND ', $sql_where_array) . '
 		GROUP BY u.id_utilisateur';
@@ -1518,7 +1535,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		// sélection des continents
 		$query_continent = query("SELECT id, name_" . $_SESSION['session_langue'] . " AS name
 			FROM peel_continents
-			WHERE " . get_filter_site_cond('continents', null, true) . "
+			WHERE " . get_filter_site_cond('continents') . "
 			ORDER BY name_".$_SESSION['session_langue']);
 		$tpl_continent_inps = array();
 		while ($continent = fetch_assoc($query_continent)) {
@@ -1571,7 +1588,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		if (check_if_module_active('groups')) {
 			$resGroupe = query("SELECT *
 				FROM peel_groupes
-				WHERE " . get_filter_site_cond('groupes', null, true) . "
+				WHERE " . get_filter_site_cond('groupes') . "
 				ORDER BY nom");
 			if (num_rows($resGroupe)) {
 				$tpl_groupes_options = array();
@@ -1603,7 +1620,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl_produits_opts = array();
 		$prod_query = query("SELECT id, nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name
 			FROM peel_produits
-			WHERE " . get_filter_site_cond('produits', null, true) . "
+			WHERE " . get_filter_site_cond('produits') . "
 			ORDER BY name
 			LIMIT 200");
 		while ($this_product = fetch_assoc($prod_query)) {
@@ -1699,7 +1716,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 				if (check_if_module_active('groups')) {
 					$sqlG = "SELECT *
 						FROM peel_groupes
-						WHERE id = '" . intval($user['id_groupe']) . "' AND  " . get_filter_site_cond('groupes', null, true) . "";
+						WHERE id = '" . intval($user['id_groupe']) . "' AND  " . get_filter_site_cond('groupes') . "";
 					$resG = query($sqlG);
 					if ($G = fetch_object($resG)) {
 						$tpl_group_nom = $G->nom;

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: product_in_container_html.tpl 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: product_in_container_html.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
 #}<table class="full_width center product_in_container">
 	<tr>
 		<td {% if (on_estimate) %}colspan="2"{% endif %} class="module_product_title"><a href="{{ href|escape('html') }}" title="{{ name|str_form_value }}">{{ name }}</a></td>

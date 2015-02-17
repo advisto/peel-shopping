@@ -1,20 +1,25 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: sitemap.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_webmastering");
+
+if (empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite']!=$GLOBALS['site_id']) {
+	// Possibilité de générer le sitemap uniquement pour le domaine en cours d'utilisation, et pas pour le site administré.
+	redirect_and_die($GLOBALS['administrer_url'] . '/');
+}
 
 if (!empty($_GET['encoding'])) {
 	$file_encoding = $_GET['encoding'];
@@ -40,7 +45,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			// Création d'un fichier sitemap.xml par sous-domaine et domaine. Le fichier sitemap sera appeler en front office via le fichier php get_sitemap.php
-			// Les urls des boutiques dans un sous-dossier ne sont pas correctement généré.
+			// Les urls des sites dans un sous-dossier ne sont pas correctement générées.
 			$langs_array_by_subdomain = array();
 			foreach($GLOBALS['langs_array_by_wwwroot'] as $this_wwwroot=>$this_lang_array) {
 				// Création du tableau langue par sous domaine
@@ -96,8 +101,8 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		$sql = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this_lang)." AS name, c.nom_" . $this_lang . " AS categorie
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c', true) . "
-			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p') . "
 			ORDER BY p.position ASC";
 		$created_report[] = $sql;
 		$query = query($sql);
@@ -113,7 +118,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		}
 		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
 			FROM peel_categories c
-			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c', true) . "
+			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c') . "
 			ORDER BY c.position ASC";
 		$created_report[] = $sql;
 		$query = query($sql);
@@ -125,8 +130,8 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		$sql = "SELECT p.id, c.id AS categorie_id, p.titre_".$this_lang." AS name, c.nom_" . $this_lang . " AS categorie
 			FROM peel_articles p
 			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id
-			INNER JOIN peel_rubriques c ON c.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'c', true) . "
-			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p', true) . "
+			INNER JOIN peel_rubriques c ON c.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'c') . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p') . "
 			ORDER BY p.position ASC";
 		$created_report[] = $sql;
 		$query = query($sql);
@@ -140,7 +145,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		}
 		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
 			FROM peel_rubriques c
-			WHERE c.etat=1 AND " . get_filter_site_cond('rubriques', 'c', true) . "
+			WHERE c.etat=1 AND " . get_filter_site_cond('rubriques', 'c') . "
 			ORDER BY c.position ASC";
 		$created_report[] = $sql;
 		$query = query($sql);

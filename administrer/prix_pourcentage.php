@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix_pourcentage.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: prix_pourcentage.php 44077 2015-02-17 10:20:38Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -86,7 +86,7 @@ $tpl_cats_options[] = array('value' => 'all',
 	);
 $q_select_cats = query('SELECT id, nom_' . $_SESSION['session_langue'] . '
 	FROM peel_categories
-	WHERE etat = "1" AND ' . get_filter_site_cond('categories', null, true) . '
+	WHERE etat = "1" AND ' . get_filter_site_cond('categories') . '
 	ORDER BY nom_' . $_SESSION['session_langue'] . '');
 while ($r_select_cats = fetch_assoc($q_select_cats)) {
 	$tpl_cats_options[] = array('value' => intval($r_select_cats['id']),

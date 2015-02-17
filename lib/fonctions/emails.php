@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 43497 2014-12-04 10:22:46Z gboussin $
+// $Id: emails.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -56,7 +56,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $lang);
 		if (!empty($template_infos)) {
 			// Si l'on envoi un email avec un sujet, un message et un template d'email, le template n'est pas prioritaire.
-			// Ce fonctionnement est utile au module webmail lors de l'envoi d'email depuis la boutique.
+			// Ce fonctionnement est utile au module webmail lors de l'envoi d'email depuis le site.
 			if (empty($mail_subject)) {
 				$mail_subject = $template_infos['subject'];
 			}
@@ -260,7 +260,7 @@ function prepare_email_tags($user_id, $order_id)
 	if (!empty($order_id)) {
 		$q = 'SELECT o.code_facture
 			FROM peel_commandes o
-			WHERE o.id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes', 'o', defined('IN_PEEL_ADMIN')) . '';
+			WHERE o.id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes', 'o') . '';
 		$result_orders = query($q);
 		$row_orders = fetch_assoc($result_orders);
 		$template_tags['ORDER'] = '';
@@ -339,7 +339,7 @@ function get_last_newsletter($id = null, $lang = null) {
 	}
 	$sql = "SELECT id, date, format, template_technical_code, statut, sujet_".$lang.", message_".$lang."
 		FROM peel_newsletter
-		WHERE " . implode(' AND ', $sql_cond_array) . " AND " . get_filter_site_cond('newsletter', null, defined('IN_PEEL_ADMIN')) . "
+		WHERE " . implode(' AND ', $sql_cond_array) . " AND " . get_filter_site_cond('newsletter') . "
 		ORDER BY id DESC
 		LIMIT 1";
 	$res = query($sql);

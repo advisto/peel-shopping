@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clients_segmentation.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: clients_segmentation.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
-include($dirroot . '/lib/fonctions/fonctions_admin.php');
+include($GLOBALS['dirroot'] . '/lib/fonctions/fonctions_admin.php');
 
 /**
  * updateClientsSegBuy()
@@ -85,6 +85,7 @@ function updateClientsContactDates()
 	}
 	$query = query('SELECT user_id, timestamp
 		FROM peel_admins_contacts_planified
+		WHERE timestamp >= UNIX_TIMESTAMP(NOW())
 		ORDER BY timestamp ASC');
 	while ($contact = fetch_assoc($query)) {
 		$planified_contact_timestamps[$contact['user_id']][] = $contact['timestamp'];
@@ -175,10 +176,10 @@ function updateClientsContactDates()
 			if (!empty($planified_contact_timestamps) && !empty($planified_contact_timestamps[$user_id])) {
 				// On regarde si un contact a été planifié spécifiquement pour cet utilisateur
 				foreach($planified_contact_timestamps[$user_id] as $this_timestamp) {
-					if ((empty($next_contact_time['planified']) || $this_timestamp < $next_contact_time['planified']) && $this_timestamp > $contact_time_basis) {
+					if ((empty($next_contact_time['already_planified']) || $this_timestamp < $next_contact_time['already_planified']) && $this_timestamp > $contact_time_basis) {
 						// Si l'annonce GOLD vient à expiration, on veut contacter l'auteur une semaine à l'avance
 						// mais on ne le fait que si on ne l'a pas contacté dans la semaine précédente
-						$next_contact_time['planified'] = $this_timestamp;
+						$next_contact_time['already_planified'] = $this_timestamp;
 						break;
 					}
 				}
@@ -189,13 +190,15 @@ function updateClientsContactDates()
 			asort($next_contact_time);
 			// On prend la clé pour la première valeur, donc la plus faible
 			$next_contact_reason = key($next_contact_time);
-			$next_contact_timestamp = $next_contact_time[$next_contact_reason];
-			// var_dump($user_id,$next_contact_time); echo '<br />';
-			query('INSERT INTO peel_admins_contacts_planified (`user_id`, `timestamp`, `reason`)
-				VALUES(
-					' . intval($user['id_utilisateur']) . ',
-					"' . nohtml_real_escape_string(vb($next_contact_timestamp)) . '",
-					"' . nohtml_real_escape_string(vb($next_contact_reason)) . '")');
+			if($next_contact_reason != 'already_planified') {
+				$next_contact_timestamp = $next_contact_time[$next_contact_reason];
+				// var_dump($user_id,$next_contact_time); echo '<br />';
+				query('INSERT INTO peel_admins_contacts_planified (`user_id`, `timestamp`, `reason`)
+					VALUES(
+						' . intval($user['id_utilisateur']) . ',
+						"' . nohtml_real_escape_string(vb($next_contact_timestamp)) . '",
+						"' . nohtml_real_escape_string(vb($next_contact_reason)) . '")');
+			}
 		} else {
 			$next_contact_reason = '';
 			$next_contact_timestamp = 0;

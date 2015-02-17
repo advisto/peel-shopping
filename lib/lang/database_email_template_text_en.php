@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_en.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_text_en.php 44077 2015-02-17 10:20:38Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -145,7 +145,7 @@ Your order #[ORDER_ID] made on [DATE] has been saved on the website [SITE].
 YOUR ORDER SUMMARY
 ---------------------------
 
-amount: [MONTANT] EUR VAT INCLUDED
+Amount: [MONTANT] VAT INCLUDED
 Payment means [PAIEMENT]: 
 
 ---------------------------
@@ -165,6 +165,8 @@ Bought items
 
 Shipping fees
 [COUT_TRANSPORT]
+Shipping type
+[TYPE]
 
 You can follow the status of your order:
 
@@ -330,7 +332,7 @@ The following user just opened an account:
 ",
   "warn_admin_reve_subscription" => "We inform you that the reseller [link=\"[ADMIN_URL]\"] [CIVILITE] [PRENOM] [NOM_FAMILLE] [/link] is registered on [SITE].
 
-This account is currently in status \"Reseller waiting \". This account is active but does benefit from reseller prices when you have spent in status \"reseller\"
+This account is currently in status \"Reseller waiting \". This account is not active and does benefit from reseller prices when you have spent in status \"reseller\"
 ",
   "email_retour_virement" => "Hello,
 
@@ -422,6 +424,26 @@ For any further information, please contact us.",
 
 Thank you for signing up for the newsletter [SITE_NAME]. You will receive a weekly newsletter to [EMAIL].
 
-Soon on [WWWROOT]/"
+Soon on [WWWROOT]/",
+  "send_mail_for_account_creation_stop" => "Hello,
+
+Your registration has been taken into account in [SITE] and must be validated by an administrator. You will be notified by email of the account's validation, and login to your account will only be possible after this validation.
+
+Best Regards,",
+  "send_mail_for_account_creation_reve" => "Hello,
+
+Your account [EMAIL] on [SITE] has been activated by an administrator. You now get the status \"[STATUT]\" and associated benefits, and you can login to your account.
+
+Best Regards,",
+  "send_mail_for_account_creation_stand" => "Hello,
+
+Your registration has been taken into account in [SITE] and must be validated by an administrator. You will be notified by email of the account's validation, and login to your account will only be possible after this validation.
+
+Best Regards,",
+  "send_mail_for_account_creation_affi" => "Hello,
+
+Your account [EMAIL] on [SITE] has been activated by an administrator. You now get the status \"[STATUT]\" and associated benefits, and you can login to your account.
+
+Best Regards,"
 );
 

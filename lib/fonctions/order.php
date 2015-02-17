@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 43608 2014-12-12 18:20:18Z sdelaporte $
+// $Id: order.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -55,7 +55,7 @@ function get_bill_number($bill_number_format, $id, $generate_bill_number_if_empt
 				// On va chercher les valeurs dans les champ de la table qui correspondent aux texte entre crochet du format de facture.
 				$sql = "SELECT " . implode(',', word_real_escape_string($column_names)) . "
 					FROM peel_commandes
-					WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "";
+					WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('commandes') . "";
 				$q = query($sql, false, null, true);
 				if ($result = fetch_assoc($q)) {
 					foreach($result as $this_column => $this_value) {
@@ -80,7 +80,7 @@ function get_bill_number($bill_number_format, $id, $generate_bill_number_if_empt
 				$bill_number_format_end = String::substr($bill_number_format, String::strpos($bill_number_format, ']') + 1);
 				$sql = "SELECT MAX(0+SUBSTRING(numero,1+" . String::strlen($bill_number_format_begin) . ",LENGTH(numero)-" . (String::strlen($bill_number_format_begin) + String::strlen($bill_number_format_end)) . ")) AS max_numero_part
 					FROM peel_commandes
-					WHERE id<>'" . intval($id) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . " AND numero LIKE '" . real_escape_string($bill_number_format_begin) . "%" . real_escape_string($bill_number_format_end) . "' AND SUBSTRING(numero,1+" . String::strlen($bill_number_format_begin) . ",LENGTH(numero)-" . (String::strlen($bill_number_format_begin) + String::strlen($bill_number_format_end)) . ") REGEXP ('^([0-9]+)$')";
+					WHERE id<>'" . intval($id) . "' AND " . get_filter_site_cond('commandes') . " AND numero LIKE '" . real_escape_string($bill_number_format_begin) . "%" . real_escape_string($bill_number_format_end) . "' AND SUBSTRING(numero,1+" . String::strlen($bill_number_format_begin) . ",LENGTH(numero)-" . (String::strlen($bill_number_format_begin) + String::strlen($bill_number_format_end)) . ") REGEXP ('^([0-9]+)$')";
 				$q = query($sql);
 				if ($result = fetch_assoc($q)) {
 					$last_number = $result['max_numero_part'];
@@ -132,7 +132,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		// conversion de l'id du statut de paiement par son technical_code pour sa bonne prise en compte par update_order_payment_status
 		$sql = 'SELECT p.technical_code
 			FROM peel_statut_paiement p
-			WHERE technical_code!="" AND id=' . intval($status_or_is_payment_validated) . ' AND ' . get_filter_site_cond('statut_paiement', 'p', defined('IN_PEEL_ADMIN'));
+			WHERE technical_code!="" AND id=' . intval($status_or_is_payment_validated) . ' AND ' . get_filter_site_cond('statut_paiement', 'p');
 		$query = query($sql);
 		if ($result = fetch_assoc($query) ) {
 			$statut_paiement_new = $result['technical_code'];
@@ -147,7 +147,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	}
 	$sql = 'SELECT p.id, p.technical_code
 		FROM peel_statut_paiement p
-		WHERE ' . get_filter_site_cond('statut_paiement', 'p', defined('IN_PEEL_ADMIN'));
+		WHERE ' . get_filter_site_cond('statut_paiement', 'p');
 	$query = query($sql);
 	while ($result = fetch_assoc($query)) {
 		$payment_status_id_by_technical_code_array[$result['technical_code']] = $result['id'];
@@ -158,7 +158,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			// conversion de l'id du statut de paiement par son technical_code pour sa bonne prise en compte par update_order_payment_status
 		$sql = 'SELECT l.technical_code
 			FROM peel_statut_livraison l
-			WHERE technical_code!="" AND id=' . intval($statut_livraison_new) . ' AND ' . get_filter_site_cond('statut_livraison', 'l', defined('IN_PEEL_ADMIN'));
+			WHERE technical_code!="" AND id=' . intval($statut_livraison_new) . ' AND ' . get_filter_site_cond('statut_livraison', 'l');
 		$query = query($sql);
 		if ($result = fetch_assoc($query) ) {
 			$statut_livraison_new = $result['technical_code'];
@@ -169,7 +169,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	}
 	$sql = 'SELECT l.id, l.technical_code
 		FROM peel_statut_livraison l
-		WHERE ' . get_filter_site_cond('statut_livraison', 'l', defined('IN_PEEL_ADMIN'));
+		WHERE ' . get_filter_site_cond('statut_livraison', 'l');
 	$query = query($sql);
 	while ($result = fetch_assoc($query)) {
 		$delivery_status_id_by_technical_code_array[$result['technical_code']] = $result['id'];
@@ -180,23 +180,28 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		FROM peel_commandes c
 		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 		LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND " . get_filter_site_cond('statut_livraison', 'sl') . "
-		WHERE c.id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . "";
+		WHERE c.id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', 'c') . "";
 	$query = query($sql);
 	// On vérifie si la commande existe déjà
 	if ($commande = fetch_assoc($query)) {
 		if (empty($GLOBALS['site_parameters']['payment_status_create_bill']) || in_array($statut_paiement_new, explode(',', $GLOBALS['site_parameters']['payment_status_create_bill']))) {
-			// On crée un numéro de facture si il n'existe pas déjà
-			// f_datetime contient la date d'émission de facture, et est éditable en back office.
+			// Quel que soit l'ancien statut, si la facture est souhaitée dans un statut qui doit avoir la génération de facture, alors on s'assure que le numéro et la date sont bien remplis 
+			// get_bill_number crée un numéro de facture si il n'existe pas déjà à partir de $GLOBALS['site_parameters']['format_numero_facture']
+			// Si il existe déjà, get_bill_number le transforme en remplaçant les tags si pas déjà remplacés auparavant, et si il n'y en a pas alors le numéro sera inchangé au final
 			query("UPDATE peel_commandes
-				SET numero = '" . nohtml_real_escape_string(get_bill_number(null, $order_id, true)) . "',
-				f_datetime = '" . date('Y-m-d H:i:s', time()) . "'
-				WHERE id = '" . intval($order_id) . "' AND numero='' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "");
+				SET numero = '" . nohtml_real_escape_string(get_bill_number($commande['numero'], $order_id, true)) . "'
+				WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes') . "");
+			// f_datetime contient la date d'émission de facture, et est éditable en back office.
+			// On la remplie si elle est vide
+			query("UPDATE peel_commandes
+				SET f_datetime = '" . date('Y-m-d H:i:s', time()) . "'
+				WHERE id = '" . intval($order_id) . "' AND f_datetime LIKE '0000-00-00%' AND " . get_filter_site_cond('commandes') . "");
 		}
 		if (!empty($payment_technical_code)) {
 			// Changement du moyen de paiement si celui ci est renseigné et que la commande est payé (statut 2 ou 3), même si elle était déjà en payé avant, ou si l'info paiement était vide avant
 			$sql="UPDATE peel_commandes
 				SET paiement='" . word_real_escape_string($payment_technical_code) . "'
-				WHERE id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "";
+				WHERE id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes') . "";
 			if(!in_array($statut_paiement_new, array('being_checked', 'completed'))){
 				$sql.=" AND paiement=''";
 			}
@@ -217,9 +222,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				// On gère les crédits d'annonces GOLD
 				$sql = "SELECT pp.technical_code, pca.attributs_list, pca.reference
 					FROM peel_produits pp
-					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND " . get_filter_site_cond('commandes_articles', 'pca', defined('IN_PEEL_ADMIN')) . " 
-					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND " . get_filter_site_cond('commandes', 'pc', defined('IN_PEEL_ADMIN')) . "
-					WHERE pc.id = " . intval($order_id) . " AND " . get_filter_site_cond('produits', 'pp', defined('IN_PEEL_ADMIN')) . "";
+					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND " . get_filter_site_cond('commandes_articles', 'pca') . " 
+					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND " . get_filter_site_cond('commandes', 'pc') . "
+					WHERE pc.id = " . intval($order_id) . " AND " . get_filter_site_cond('produits', 'pp') . "";
 				$query_t = query($sql);
 				while ($product_ordered_infos = fetch_assoc($query_t)) {
 					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_') {
@@ -240,9 +245,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				// On gère les crédits d'abonnement platinum
 				$sql = 'SELECT technical_code
 					FROM peel_produits pp
-					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND ' . get_filter_site_cond('commandes_articles', 'pca', defined('IN_PEEL_ADMIN')) . ' 
-					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND ' . get_filter_site_cond('commandes', 'pc', defined('IN_PEEL_ADMIN')) . '
-					WHERE pc.id = ' . intval($order_id). " AND " . get_filter_site_cond('produits', 'pp', defined('IN_PEEL_ADMIN')) . "";
+					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND ' . get_filter_site_cond('commandes_articles', 'pca') . ' 
+					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND ' . get_filter_site_cond('commandes', 'pc') . '
+					WHERE pc.id = ' . intval($order_id). " AND " . get_filter_site_cond('produits', 'pp') . "";
 				$query_t = query($sql);
 				while ($product_ordered_infos = fetch_assoc($query_t)) {
 					if (substr($product_ordered_infos['technical_code'], 0, strlen('forfait_p_')) == 'forfait_p_') {
@@ -250,7 +255,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 						$n_days = 30 * substr($product_ordered_infos['technical_code'], strlen('forfait_p_'));
 						$update_credit = 'UPDATE peel_utilisateurs
 							SET platinum_status ="YES", platinum_activation_date ="' . date('Y-m-d H:i:s') . '", platinum_until =GREATEST(' . time() . ',platinum_until)+' . (3600 * 24 * $n_days).'
-							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '" AND ' . get_filter_site_cond('utilisateurs', null, defined('IN_PEEL_ADMIN')) . '';
+							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
 						query($update_credit);
 					}
 				}
@@ -271,7 +276,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		if (!empty($sql_set_array) && ($allow_update_paid_orders || !in_array($commande['statut_paiement'], array('being_checked', 'completed')))) {
 			query('UPDATE peel_commandes
 				SET ' . implode(', ', $sql_set_array) . '
-				WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')));
+				WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes'));
 		}
 		if ($statut_paiement_new !== null && $commande['statut_paiement'] != $statut_paiement_new) {
 			// On vérifie le statut paiement avant la mise à jour de la base avec celui du formulaire. Ils doivent être différents,
@@ -282,7 +287,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 					// Changement aussi du statut de livraison en annulé s'il n'était pas déjà en statut livré
 					query("UPDATE peel_commandes
 						SET id_statut_livraison=" . intval($delivery_status_id_by_technical_code_array['cancelled']) . "
-						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=" . intval($delivery_status_id_by_technical_code_array['dispatched']) . " AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "");
+						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=" . intval($delivery_status_id_by_technical_code_array['dispatched']) . " AND " . get_filter_site_cond('commandes') . "");
 				}
 				// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée
 				// On devrait gérer ici le fait de recréditer les points de la commande de cadeaux, mais ça nécessite de stocker en BDD les informations de points dépensés des commandes
@@ -320,7 +325,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 							if(isset($this_order_stock)){
 								query("UPDATE peel_commandes_articles
 									SET order_stock='".intval($this_order_stock)."'
-									WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles', null, defined('IN_PEEL_ADMIN')));
+									WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles'));
 								unset($this_order_stock);
 							}
 						}
@@ -335,7 +340,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			// Création de la date d'expédition pour la commande. Cette date est administrable par l'administrateur en back office.
 			query("UPDATE peel_commandes
 				SET e_datetime = '" . date('Y-m-d H:i:s', time()) . "'
-				WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')) . "");
+				WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes') . "");
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande['email'])))->fetch();
 		}
 	}
@@ -373,6 +378,16 @@ function put_session_commande(&$frm)
 			$_SESSION['session_commande']['code_postal2'] = (empty($frm['code_postal2'])? $frm['code_postal1']:$frm['code_postal2']);
 			$_SESSION['session_commande']['ville2'] = (empty($frm['ville2'])? $frm['ville1']:$frm['ville2']);
 			$_SESSION['session_commande']['pays2'] = (empty($frm['pays2'])? $frm['pays1']:$frm['pays2']);
+		}
+	}
+
+	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+		// Paramètre lié à la fonction get_specific_field_infos.
+		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
+			if (isset($frm[$this_field])) {
+				// On a ajouter dans la table utilisateur un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
+				$_SESSION['session_commande'][$this_field] = $frm[$this_field];
+			}
 		}
 	}
 	$_SESSION['session_commande']['commande_interne'] = vb($frm['commande_interne']);
@@ -429,7 +444,37 @@ function create_or_update_order(&$order_infos, &$articles_array)
 			unset($order_infos[$key]);
 		}
 	}
-	foreach(array('prenom', 'nom', 'adresse', 'zip', 'ville', 'pays', 'email', 'telephone', 'societe') as $this_item) {
+
+	$adresses_fields_array = array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
+	if(!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+		$specific_fields_titles = $GLOBALS['site_parameters']['order_specific_field_titles'];
+		$specific_field_types = $GLOBALS['site_parameters']['order_specific_field_types'];
+	}
+	if (!empty($specific_fields_titles)) {
+		// Paramètre lié à la fonction get_specific_field_infos.
+		// récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
+		$this_table_fields_names = get_table_field_names('peel_commandes');
+		foreach($specific_fields_titles as $this_field => $this_title) {
+			if ((String::substr($this_field,-5) == '_ship' ||  String::substr($this_field,-5) == '_bill') && !in_array(String::substr($this_field, 0, -5), $adresses_fields_array)) {
+				$adresses_fields_array[] = String::substr($this_field,0,-5);
+			}
+			if (!in_array($this_field, $this_table_fields_names)) {
+				// Champ pas présent en BDD, on ne l'ajoute pas à la requête SQL.
+				continue;
+			}
+			if ($specific_field_types[$this_field] == 'datepicker') {
+				$order_infos[$this_field] = get_mysql_date_from_user_input($order_infos[$this_field]);
+			}
+			if (isset($order_infos[$this_field])) {
+				if (is_array($order_infos[$this_field])) {
+					// Si $order_infos[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
+					$order_infos[$this_field] = implode(',', $order_infos[$this_field]);
+				}
+				$order_specific_field[] = word_real_escape_string($this_field) . " = '" . nohtml_real_escape_string($order_infos[$this_field]) ."'";
+			}
+		}
+	}
+	foreach($adresses_fields_array as $this_item) {
 		// En complément de name_compatibility_array
 		if ($this_item == 'zip') {
 			$this_field = 'code_postal';
@@ -447,7 +492,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	}
 	// On complète les données si nécessaire
 	if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($order_infos['typeId']) || is_delivery_address_necessary_for_delivery_type($order_infos['typeId']))) {
-		foreach(array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact') as $this_item) {
+		foreach($adresses_fields_array as $this_item) {
 			if (empty($order_infos[$this_item . '2']) && isset($order_infos[$this_item . '1'])) {
 				$order_infos[$this_item . '2'] = $order_infos[$this_item . '1'];
 			}
@@ -457,8 +502,8 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	if (!empty($order_infos['id'])) {
 		$statut_q = query('SELECT c.id_statut_paiement, c.total_points, c.points_etat, c.o_timestamp, sp.technical_code AS statut_paiement
 			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp', defined('IN_PEEL_ADMIN')) . '
-			WHERE c.id=' . intval($order_infos['id']) . ' AND ' . get_filter_site_cond('commandes', 'c', defined('IN_PEEL_ADMIN')) . '');
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . '
+			WHERE c.id=' . intval($order_infos['id']) . ' AND ' . get_filter_site_cond('commandes', 'c') . '');
 		$order_infos_ex = fetch_assoc($statut_q);
 	} else {
 		$order_infos_ex = null;
@@ -647,11 +692,14 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		, expedition_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'
 		, shipping_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'";
 	}
+	if (!empty($order_specific_field)) {
+		$set_sql .= ',' . implode(',', $order_specific_field);
+	}
 	if (!empty($order_infos['commandeid'])) {
 		// On met à jour la commande
 		$sql = "UPDATE peel_commandes
 			SET " . $set_sql . "
-			WHERE id_utilisateur='" . intval($old_id_utilisateur) . "' AND id='" . intval($order_infos['commandeid']) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN'), $order_infos['site_id'], true) . "";
+			WHERE id_utilisateur='" . intval($old_id_utilisateur) . "' AND id='" . intval($order_infos['commandeid']) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "";
 		$order_infos['o_timestamp'] = $order_infos_ex['o_timestamp'];
 	} else {
 		// On crée la commande - pour cela, on définit le code facture, et l'id utilisateur
@@ -661,7 +709,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 			$code_facture = MDP(10);
 			$qid_commande = query("SELECT *
 				FROM peel_commandes
-				WHERE code_facture = '" . nohtml_real_escape_string($code_facture) . "' AND " . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN'), $order_infos['site_id'], true) . "");
+				WHERE code_facture = '" . nohtml_real_escape_string($code_facture) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "");
 		}
 		// Attention : on ne doit pas mettre de "a_timestamp" ici, car ça dépend de si la commande est à passer en payer ou non => c'est géré dans update_order_payment_status
 		$sql = "INSERT INTO peel_commandes
@@ -700,7 +748,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 					// On initialise les demande de réassort de stock lié à ce produit commandé en supprimant ensuite les lignes de peel_commandes_articles, donc pas besoin de faire :
 					// query("UPDATE peel_commandes_articles
 					// 	SET order_stock='0'
-					// 	WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles', null, defined('IN_PEEL_ADMIN')) . "");
+					// 	WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles') . "");
 				}
 			}
 		}
@@ -710,7 +758,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		}
 	}
 	query("DELETE FROM peel_commandes_articles
-		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles', null, defined('IN_PEEL_ADMIN')));
+		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles'));
 	// On ajoute les articles à la table commandes_articles
 	foreach ($articles_array as $article_infos) {
 		// On rend compatible des entrées du tableau 
@@ -853,7 +901,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		// conversion de l'id du statut de livraison par son technical_code pour sa bonne prise en compte par update_order_payment_status
 		$sql = 'SELECT l.technical_code
 			FROM peel_statut_livraison l
-			WHERE id=' . intval($order_infos['statut_livraison']) . ' AND ' . get_filter_site_cond('statut_livraison', 'l', true);
+			WHERE id=' . intval($order_infos['statut_livraison']) . ' AND ' . get_filter_site_cond('statut_livraison', 'l');
 		$query = query($sql);
 		$result = fetch_assoc($query);
 		$order_infos['statut_livraison'] = $result['technical_code'];
@@ -955,7 +1003,7 @@ function get_payment_name($id_or_code)
 {
 	$sql_paiement = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom
 		FROM peel_paiement p
-		WHERE p.id="' . intval($id_or_code) . '" OR p.technical_code="' . nohtml_real_escape_string($id_or_code) . '"  AND ' .  get_filter_site_cond('paiement', 'p', defined('IN_PEEL_ADMIN')) . '';
+		WHERE p.id="' . intval($id_or_code) . '" OR p.technical_code="' . nohtml_real_escape_string($id_or_code) . '"  AND ' .  get_filter_site_cond('paiement', 'p') . '';
 	$res_paiement = query($sql_paiement);
 	if ($tab_paiement = fetch_assoc($res_paiement)) {
 		return $tab_paiement['nom'];
@@ -976,7 +1024,7 @@ function get_payment_status_name($id)
 	if (!isset($payment_status_name_by_id[$id])) {
 		$sql_paiement = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom
 			FROM peel_statut_paiement p
-			WHERE p.id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_paiement', 'p', defined('IN_PEEL_ADMIN'));
+			WHERE p.id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_paiement', 'p');
 		$res_paiement = query($sql_paiement);
 		if ($tab_paiement = fetch_assoc($res_paiement)) {
 			$payment_status_name_by_id[$id] = String::html_entity_decode_if_needed($tab_paiement['nom']);
@@ -997,7 +1045,7 @@ function get_delivery_status_name($id)
 {
 	$sql_livraison = 'SELECT nom_' . $_SESSION['session_langue'] . ' AS nom
 		FROM peel_statut_livraison
-		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_livraison', null, defined('IN_PEEL_ADMIN'));
+		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_livraison');
 	$res_livraison = query($sql_livraison);
 	if ($tab_livraison = fetch_assoc($res_livraison)) {
 		return String::html_entity_decode_if_needed($tab_livraison['nom']);
@@ -1016,7 +1064,7 @@ function get_delivery_type_name($id)
 {
 	$sql_delivery = 'SELECT nom_' . $_SESSION['session_langue'] . ' AS nom
 		FROM peel_types
-		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('types', null, defined('IN_PEEL_ADMIN'));
+		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('types');
 	$res_delivery = query($sql_delivery);
 	if ($tab_delivery = fetch_assoc($res_delivery)) {
 		return $tab_delivery['nom'];
@@ -1088,7 +1136,11 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 }
 
 /**
- * get_delivery_cost_infos()
+ * Calcul des frais de livraison
+ * Si type_id est vide, on récupère les tarifs en excluant les tarifs=0 qui correspondent a priori à des points de retrait => si on ne trouve pas de tarif on prendra 0 par défaut
+ * Remarques : 
+ * - si des tranches tarifaires sont définies, il faut configurer par exemple 200g à 299g puis 300g à 399g si on veut qu'un colis de 300g ait le second tarif et non pas le premier. 
+ * - si on veut mixer des règles entre poids et montant, il n'y a aucun problème, dans le mode par défaut de calcul c'est le tarif le moins cher qui est appliqué (et gratuité si 0). Si en revanche GLOBALS['site_parameters']['delivery_cost_calculation_mode'] == 'nearest', alors dans ce cas on identifie la tranche qui semble correspondre le mieux (mode particulier de calcul, a priori à ne pas utiliser)
  *
  * @param float $total_weight
  * @param float $total_price
@@ -1105,15 +1157,14 @@ function get_delivery_cost_infos($total_weight, $total_price, $type_id = null, $
 	$delivery_cost_infos = array('cost_ht' => 0, 'tva' => 0);
 	if ($add_for_free_delivery !== null && !empty($GLOBALS['site_parameters']['mode_transport'])) {
 		if (!isset($delivery_cost_infos_by_weight_and_price_array[$key_weight_and_price])) {
-			// Si type est vide, on récupère les tarifs en excluant les tarifs=0 qui correspondent a priori à des points de retrait => si on ne trouve pas de tarif on prendra 0 par défaut
 			// Frais de port calculés en fonction du poids total et du montant total
 			if($GLOBALS['site_parameters']['delivery_cost_calculation_mode'] == 'nearest'){
-				// On ne prend pas les frais de port les moins chers trouvés, mais ceux à la tranche la plus proche : par poids en priorité, et par tarif
+				// On ne prend pas les frais de port les moins chers trouvés, mais ceux correspondant à la tranche la plus proche : par poids en priorité, et par tarif
 				// => Permet d'avoir des frais de port dégressifs
-				$order_by = 'IF(poids_max>0, poids_max, 100000000) ASC, IF(total_max>0, total_max, 100000000) ASC';
+				$order_by = 'IF(poids_max>0, poids_max, 100000000) ASC, IF(total_max>0, total_max, 100000000) ASC, tarif ASC';
 			} else {
 				// Par défaut : On prend le tarif le moins cher pour un poids et un montant donné
-				// Cela permet d'avoir des règles complexes entre poids et montant du caddie, mais ne permet pas des frais dégressifs
+				// Cela permet d'avoir des règles complexes entre poids et montant du caddie, mais oblige à définir des tranches précises qui ne se recouvrent pas si on veut configurer des frais progressifs (frais qui montent en fonction du poids et/ou du montant)
 				$order_by = 'tarif ASC';
 			}
 			$tarifs_sql = 'SELECT tarif, poidsmax, totalmax, tva
@@ -1152,7 +1203,7 @@ function get_payment_technical_code($id_or_code)
 {
 	$sql_paiement = 'SELECT technical_code
 		FROM peel_paiement
-		WHERE id="' . intval($id_or_code) . '" OR technical_code="' . nohtml_real_escape_string($id_or_code) . '" AND ' .  get_filter_site_cond('paiement', null, defined('IN_PEEL_ADMIN')) . '';
+		WHERE id="' . intval($id_or_code) . '" OR technical_code="' . nohtml_real_escape_string($id_or_code) . '" AND ' .  get_filter_site_cond('paiement') . '';
 	$res_paiement = query($sql_paiement);
 	if ($tab_paiement = fetch_assoc($res_paiement)) {
 		return $tab_paiement['technical_code'];
@@ -1171,8 +1222,8 @@ function get_vat_array($code_facture)
 {
 	$sql = 'SELECT SUM(pca.tva) AS products_tva_for_this_percent, pca.tva_percent, pc.tva_cout_transport, ROUND(pc.tva_cout_transport/pc.cout_transport_ht*100,2) AS cout_transport_tva_percent, pc.tva_tarif_paiement, ROUND(pc.tva_tarif_paiement/pc.tarif_paiement_ht*100,2) AS tarif_paiement_tva_percent, tva_small_order_overcost, ROUND(tva_small_order_overcost/(small_order_overcost_amount-tva_small_order_overcost)*100,2) AS small_order_overcost_tva_percent
 		FROM peel_commandes_articles pca
-		INNER JOIN peel_commandes pc ON pca.commande_id = pc.id AND ' . get_filter_site_cond('commandes', 'pc', defined('IN_PEEL_ADMIN')) . '
-		WHERE pc.code_facture = "' . nohtml_real_escape_string($code_facture) . '" AND ' . get_filter_site_cond('commandes_articles', 'pca', defined('IN_PEEL_ADMIN')) . '
+		INNER JOIN peel_commandes pc ON pca.commande_id = pc.id AND ' . get_filter_site_cond('commandes', 'pc') . '
+		WHERE pc.code_facture = "' . nohtml_real_escape_string($code_facture) . '" AND ' . get_filter_site_cond('commandes_articles', 'pca') . '
 		GROUP BY pc.id, pca.tva_percent';
 	$query = query($sql);
 	$total_tva = array();
@@ -1225,22 +1276,79 @@ function get_order_infos_array($order_object)
 	} else {
 		$order_infos['displayed_paiement_date'] = null;
 	}
+	// Limitation du nombre de lignes de l'adresse
+	$separator_before_country = "\n";
+	$separator_before_email = "\n";
+	if(String::substr_count($order_object->adresse_bill, "\n")>0) {
+		if(String::strlen($order_object->adresse_bill)<40) {
+			// Adresse courte mais sur plusieurs lignes : on gagne de la place en retirant les sauts de ligne
+ 			$order_object->adresse_bill = str_replace("\n", ' - ', $order_object->adresse_bill);
+		} else {
+			// Adresse longue sur plusieurs lignes : on gagne de la place en mettant le pays à côté de la ville
+			$separator_before_country = ' - ';
+			if(String::substr_count($order_object->adresse_bill, "\n") >= 2) {
+				$separator_before_email = ' - ';
+			}
+		}
+	}
 	$order_infos['client_infos_bill'] = (!empty($order_object->societe_bill)?$order_object->societe_bill . "\n":'')
 	 . trim($order_object->nom_bill . " " . $order_object->prenom_bill)
-	 . "\n" . $order_object->adresse_bill
-	 . "\n" . trim($order_object->zip_bill . " " . $order_object->ville_bill)
-	 . "\n" . $order_object->pays_bill
-	 . "\n" . $order_object->telephone_bill
-	 . "\n" . $order_object->email_bill;
+	 . "\n" . $order_object->adresse_bill;
+	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
+			if(String::substr($this_title, 0, 4) == 'STR_' && isset($GLOBALS[$this_title])) {
+				$this_text = $GLOBALS[$this_title];
+			} else {
+				$this_text = $this_title;
+			}
+			if ((String::substr($this_field, -5) == '_bill') && !empty($order_object->$this_field)) {
+				// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
+				$order_infos['client_infos_bill'] .= "\n" . $this_title . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . vb($order_object->$this_field);
+			}
+		}
+	}
+	$order_infos['client_infos_bill'] .= "\n" . trim($order_object->zip_bill . " " . $order_object->ville_bill)
+	 . $separator_before_country . $order_object->pays_bill
+	 . "\n" . get_formatted_phone_number($order_object->telephone_bill)
+	 . $separator_before_email . $order_object->email_bill;
+ 
 	$order_infos['client_infos_bill'] = trim(str_replace(array("\n ", "\n\n\n\n", "\n\n\n", "\n\n"), "\n", $order_infos['client_infos_bill']));
 
+	// Limitation du nombre de lignes de l'adresse
+	$separator_before_country = "\n";
+	$separator_before_email = "\n";
+	if(String::substr_count($order_object->adresse_ship, "\n")>0) {
+		if(String::strlen($order_object->adresse_ship)<40) {
+			// Adresse courte mais sur plusieurs lignes : on gagne de la place en retirant les sauts de ligne
+ 			$order_object->adresse_ship = str_replace("\n", ' - ', $order_object->adresse_ship);
+		} else {
+			// Adresse longue sur plusieurs lignes : on gagne de la place en mettant le pays à côté de la ville
+			$separator_before_country = ' - ';
+			if(String::substr_count($order_object->adresse_ship, "\n") >= 2) {
+				$separator_before_email = ' - ';
+			}
+		}
+	}
 	$order_infos['client_infos_ship'] = (!empty($order_object->societe_ship)?$order_object->societe_ship . "\n":'')
 	 . trim($order_object->nom_ship . " " . $order_object->prenom_ship)
-	 . "\n" . $order_object->adresse_ship
-	 . "\n" . trim($order_object->zip_ship . " " . $order_object->ville_ship)
-	 . "\n" . $order_object->pays_ship
-	 . "\n" . $order_object->telephone_ship
-	 . "\n" . $order_object->email_ship;
+	 . "\n" . $order_object->adresse_ship;
+	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
+			if(String::substr($this_title, 0, 4) == 'STR_' && isset($GLOBALS[$this_title])) {
+				$this_text = $GLOBALS[$this_title];
+			} else {
+				$this_text = $this_title;
+			}
+			if ((String::substr($this_field, -5) == '_ship') && !empty($order_object->$this_field)) {
+				// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
+				$order_infos['client_infos_ship'] .= "\n" . $this_text . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . vb($order_object->$this_field);
+			}
+		}
+	}
+	$order_infos['client_infos_ship'] .= "\n" . trim($order_object->zip_ship . " " . $order_object->ville_ship)
+	 . $separator_before_country . $order_object->pays_ship
+	 . "\n" . get_formatted_phone_number($order_object->telephone_ship)
+	 . $separator_before_email . $order_object->email_ship;
 	if (String::strpos($order_infos['client_infos_bill'], 'TVA') === false) {
 		$client = get_user_information($order_object->id_utilisateur);
 		if (!empty($client) && !empty($client['intracom_for_billing'])) {
@@ -1306,15 +1414,21 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 	} else {
 		$order_by = 'oi.id ASC';
 	}
+	
 	$product_infos_array = array();
-	$sql = "SELECT oi.*, p.technical_code
+	$sql = "SELECT oi.*, p.technical_code, c.nom_".$_SESSION['session_langue']." AS category_name, m.nom_".$_SESSION['session_langue']." AS brand_name
 		FROM peel_commandes_articles oi
-		LEFT JOIN peel_produits p ON p.id=oi.produit_id AND " . get_filter_site_cond('produits', 'p', defined('IN_PEEL_ADMIN')) . "
-		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi', defined('IN_PEEL_ADMIN')) . "
+		LEFT JOIN peel_produits p ON p.id=oi.produit_id AND " . get_filter_site_cond('produits', 'p') . "
+		LEFT JOIN peel_produits_categories pc ON p.id = pc.produit_id
+		LEFT JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+		LEFT JOIN peel_marques m ON m.id = p.id_marque AND " . get_filter_site_cond('marques', 'm') . "
+		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi') . "
 		ORDER BY " . $order_by;
 	$qid_items = query($sql);
 	while ($prod = fetch_assoc($qid_items)) {
 		// On crée la description d'un produit facturé
+		$category_text = (!empty($prod['category_name']) && !empty($GLOBALS['site_parameters']['display_category_name_in_product_infos_in_order']) ? "\r\n" . $GLOBALS['STR_CATEGORY'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . String::htmlspecialchars_decode($prod["category_name"], ENT_QUOTES) : "");
+		$brand_text = (!empty($prod['brand_name']) && !empty($GLOBALS['site_parameters']['display_brand_name_in_product_infos_in_order']) ? "\r\n" . $GLOBALS['STR_BRAND'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . String::htmlspecialchars_decode($prod["brand_name"], ENT_QUOTES) : "");
 		$reference_text = (!empty($prod['reference']) ? "\r\n" . $GLOBALS['STR_REFERENCE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . String::htmlspecialchars_decode($prod["reference"], ENT_QUOTES) : "");
 		$couleur_text = (!empty($prod['couleur']) ? "\r\n" . $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . String::html_entity_decode_if_needed($prod['couleur']) : "");
 		$taille_text = (!empty($prod['taille']) ? "\r\n" . $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . String::html_entity_decode_if_needed($prod['taille']) : "");
@@ -1338,8 +1452,8 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 			// On affiche le montant de l'écotaxe dans la colonne dénomination du produit et non pas prix pour des raisons de largeur de colonne
 			$ecotaxe_text = ($prod['ecotaxe_ttc'] > 0) ? "\r\n" . $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ttc'], true, $devise, true, $currency_rate) : "";
 		}
-		$prod['product_technical_text'] = String::html_entity_decode_if_needed($prod['nom_produit'] . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text));
-		$prod['product_text'] = String::html_entity_decode_if_needed($prod['nom_produit'] . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text));
+		$prod['product_technical_text'] = String::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text));
+		$prod['product_text'] = String::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text));
 		$product_infos_array[] = $prod;
 	}
 	return $product_infos_array;
@@ -1380,7 +1494,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// Affichage de tous les modes de paiement si aucun défini (seulement si commande passée dans l'administration)
 		$sql_paiement = 'SELECT p.technical_code
 			FROM peel_paiement p
-			WHERE p.etat = "1" AND ' .  get_filter_site_cond('paiement', 'p', defined('IN_PEEL_ADMIN')) . '
+			WHERE p.etat = "1" AND ' .  get_filter_site_cond('paiement', 'p') . '
 			ORDER BY p.position';
 		$res_paiement = query($sql_paiement);
 		while ($tab_paiement = fetch_assoc($res_paiement)) {
@@ -1395,7 +1509,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('payment_form.tpl');
 	$tpl->assign('type', $type);
-	$tpl->assign('commande_pdf_href', $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
+	$tpl->assign('commande_pdf_href', get_site_wwwroot($com->site_id) . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
 	$tpl->assign('amount_to_pay_formatted', fprix($amount_to_pay, true, $com->devise, true, get_float_from_user_input(vn($com->currency_rate))));
 	$tpl->assign('disable_address_payment_by_check', !empty($GLOBALS['site_parameters']['disable_address_payment_by_check']));
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -1653,7 +1767,7 @@ function get_order_id($id = null)
 		// Recherche si le numéro de commande est déjà défini.
 		$query = query('SELECT order_id
 			FROM peel_commandes
-			WHERE id='.intval($id).' AND '. get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')));
+			WHERE id='.intval($id).' AND '. get_filter_site_cond('commandes'));
 		if($result = fetch_assoc($query)) {
 			if (!empty($result['order_id'])) {
 				// order_id est déjà défini pour la commande, la fonction retourne la valeur déjà calculée
@@ -1669,7 +1783,7 @@ function get_order_id($id = null)
 		// Récuperation du numéro de commande le plus élevé pour le site. 
 		$query = query('SELECT MAX(order_id) as max_order_id
 			FROM peel_commandes
-			WHERE ' . get_filter_site_cond('commandes', null, defined('IN_PEEL_ADMIN')));
+			WHERE ' . get_filter_site_cond('commandes'));
 		$result = fetch_assoc($query);
 		return $result['max_order_id']+1;
 	}

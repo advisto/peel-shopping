@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 43244 2014-11-17 17:03:01Z sdelaporte $
+// $Id: user.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,7 +36,7 @@ function get_profil_select_options($selected_priv = null)
 	$output = '';
 	$sql_profil = "SELECT id, name_".$_SESSION['session_langue']." AS name, priv
 		FROM peel_profil
-		WHERE " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "
+		WHERE " . get_filter_site_cond('profil') . "
 		ORDER BY name DESC";
 	$res_profil = query($sql_profil);
 	while ($tab_profil = fetch_assoc($res_profil)) {
@@ -134,6 +134,12 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
 function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false)
 {
 	$sql_condition_array = array();
+	// Si un compte a un privilège ci-dessous, et qu'un utilisateur veut créer un nouveau compte avec le même email, alors il est remplacé automatiquement par le nouveau compte
+	// Sinon, tout autre compte empêche la création d'un compte avec le même email, et la fonction renvoie l'id du compte déjà existant.
+	$user_low_priviledges_array = vb($GLOBALS['site_parameters']['user_low_priviledges_array'], array('load', 'newsletter'));
+	// L'inscription de certains utilisateurs  nécessite d'être validée manuellement par l'administrateur. Le compte est désactivé en attendant la validation manuelle du compte.
+	$manual_validation_registration = vb($GLOBALS['site_parameters']['manual_validation_registration'], array());
+
 	if (!empty($frm['priv'])) {
 		if(is_array($frm['priv'])) {
 			$frm['priv'] = implode('+', $frm['priv']);
@@ -142,7 +148,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		if(!empty($GLOBALS['site_parameters']['user_creation_default_profile'])) {
 			// ce paramètre permet de définir depuis le back office un privilège utilisateur dès l'inscription
 			$allowed_profil = array();
-			$query = query("SELECT priv FROM peel_profil WHERE priv NOT LIKE 'admin%' AND " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "");
+			$query = query("SELECT priv FROM peel_profil WHERE priv NOT LIKE 'admin%' AND " . get_filter_site_cond('profil') . "");
 			while($result = fetch_assoc($query)) {
 				// Création du tableau des privilèges provenant de la BDD, sans les privilèges admin pour éviter la création non controllée d'administrateur sur la boutique
 				$allowed_profil[] = $result['priv'];
@@ -163,15 +169,30 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	if (empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && !empty($frm['pseudo'])) {
 		$sql_condition_array[] = "pseudo='" . nohtml_real_escape_string(vb($frm['pseudo'])) . "'";
 	}
-	if (!$skip_existing_account_tests && !empty($sql_condition_array)) {
-		// On teste si l'utilisateur existe déjà
-		$sql = "SELECT id_utilisateur
-			FROM peel_utilisateurs
-			WHERE (" . implode(' OR ', $sql_condition_array).") AND " . get_filter_site_cond('utilisateurs') . "";
-		$result = query($sql);
-		if ($user_already_exists_infos = fetch_assoc($result)) {
-			// L'utilisateur existe déjà, on donne son id
-			return $user_already_exists_infos['id_utilisateur'];
+	if (!empty($sql_condition_array)) {
+		if (!empty($frm['priv']) && !in_array($frm['priv'], $user_low_priviledges_array)) {
+			// On veut créer un vrai compte
+			// Si cet utilisateur est déjà inscrit pour un téléchargement ou une newsletter, il faut supprimer l'enregistrement correspondant à son email pour permettre la création du nouveau compte
+			$sql = "SELECT id_utilisateur, priv
+				FROM peel_utilisateurs
+				WHERE (" . implode(' OR ', $sql_condition_array).") AND priv IN ('" . implode("', '", real_escape_string($user_low_priviledges_array)) . "') AND " . get_filter_site_cond('utilisateurs') . '';
+			$result = query($sql);
+			if ($user_already_exists_infos = fetch_assoc($result)) {
+				query("DELETE FROM peel_utilisateurs
+					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+			}
+		}
+		if (!$skip_existing_account_tests) {
+			// On veut créer un compte normal, ou même newsletter ou load : n'importe quel type de compte
+			// On teste si l'utilisateur existe déjà (si ses droits étaient inférieurs, le compte existant déjà vient d'être supprimé ci-dessus)
+			$sql = "SELECT id_utilisateur
+				FROM peel_utilisateurs
+				WHERE (" . implode(' OR ', $sql_condition_array).") AND " . get_filter_site_cond('utilisateurs') . "";
+			$result = query($sql);
+			if ($user_already_exists_infos = fetch_assoc($result)) {
+				// L'utilisateur existe déjà, on donne son id
+				return $user_already_exists_infos['id_utilisateur'];
+			}
 		}
 	}
 	if (!isset($frm['remise_percent'])) {
@@ -205,23 +226,14 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$points = $frm['points'];
 	} else {
 		$points = 0;
-	}	
-	if (!isset($frm['etat'])) {
-		$frm['etat'] = 1;
 	}
-	if (!$skip_existing_account_tests) {
-		if (!empty($frm['priv']) && ($frm['priv'] != 'load' && $frm['priv'] != 'newsletter')) {
-			// Si cet utilisateur est déjà inscrit pour un téléchargement, il faut supprimer l'enregistrement correspondant à son email pour permettre la création du compte
-			$sql = 'SELECT id_utilisateur, priv
-				FROM peel_utilisateurs
-				WHERE email="' . word_real_escape_string($frm['email']) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
-			$result = query($sql);
-			$user_already_exists_infos = fetch_assoc($result);
-			if (!empty($user_already_exists_infos) && ($user_already_exists_infos['priv'] == 'load' || $user_already_exists_infos['priv'] == 'newsletter')) {
-				query("DELETE FROM peel_utilisateurs
-					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
-			}
-		}
+
+	if (in_array($frm['priv'], $manual_validation_registration)) {
+		// L'état d'activation par défaut lors de l'inscription d'un utilisateur dépend du statut. Pour les utilisateurs revendeur en attente, ou les affiliés en attente on ne souhaite pas qu'ils puissent se connecter à leur compte pendant le délai de validation. L'utilisateur est informé de ce fonctionnement via l'email qui a pour code technique "send_mail_for_account_creation_" . $priv (cf. à la fin de cette fonction) 
+		$frm['etat'] = 0;
+	} elseif (!isset($frm['etat'])) {
+		// Par sécurité on fait ce test. On ne peux pas laisser le champs etat sans valeur.
+		$frm['etat'] = 1;
 	}
 	if(!empty($GLOBALS['site_parameters']['user_specific_field_titles']) && defined('IN_REGISTER')) {
 		$specific_fields_titles = $GLOBALS['site_parameters']['user_specific_field_titles'];
@@ -436,13 +448,13 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 
 	if ($send_user_confirmation) {
 		// envoi de l'email de réinitialisation du mot de passe
-		send_mail_for_account_creation($frm['email'], $frm['mot_passe']);
+		send_mail_for_account_creation($frm['email'], $frm['mot_passe'], vb($frm['priv']));
 	}
 	if ($warn_admin_if_template_active) {
 		// Prévenir l'administrateur d'une création d'utilisateur
 		$qid = query("SELECT name_".$_SESSION['session_langue']." AS name
 			FROM `peel_profil`
-			WHERE priv = '" . nohtml_real_escape_string(vb($frm['priv'])) . "' AND " . get_filter_site_cond('profil', null, defined('IN_PEEL_ADMIN')) . "
+			WHERE priv = '" . nohtml_real_escape_string(vb($frm['priv'])) . "' AND " . get_filter_site_cond('profil') . "
 			LIMIT 0 , 30");
 		$qid = fetch_assoc($qid);
 		$custom_template_tags['PRIV'] = $qid['name'];
@@ -804,7 +816,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 {
 	$requete = "SELECT *
 		FROM peel_utilisateurs
-		WHERE etat=1 AND " . get_filter_site_cond('utilisateurs') . " AND priv!='newsletter' AND ";
+		WHERE etat=1 AND " . get_filter_site_cond('utilisateurs') . " AND priv NOT IN ('".implode("','", $GLOBALS['disable_login_by_privilege'])."') AND ";
 	if (!empty($email_or_pseudo)) {
 		$requete .= "(email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
 	} else {
@@ -879,13 +891,23 @@ function get_user_password_hash($password, $tested_hash = null, $password_given_
  *
  * @param string $email
  * @param string $mot_passe
+ * @param string $priv
  * @return
  */
-function send_mail_for_account_creation($email, $mot_passe)
+function send_mail_for_account_creation($email, $mot_passe, $priv)
 {
 	$custom_template_tags['EMAIL'] = $email;
 	$custom_template_tags['MOT_PASSE'] = $mot_passe;
-	$result = send_email($email, '', '', 'send_mail_for_account_creation', $custom_template_tags, null, $GLOBALS['support_sav_client']);
+
+	// Template d'email spécifique pour le profil d'utilisateur. Cet email est envoyé en plus de l'email d'inscription. L'email d'inscription contient les identifiants du compte.
+	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.$priv, $_SESSION['session_langue']);
+	if (!empty($template_infos) && (!empty($template_infos['subject']) || !empty($template_infos['text']))) {
+		// Le template d'email existe, il faut l'utiliser
+		send_email($email, $template_infos['subject'], $template_infos['text'], "", $custom_template_tags, null, $GLOBALS['support_sav_client']);
+	}
+
+	// Il faut utiliser le template de création de compte standard.
+	$result = send_email($email, "", "",  'send_mail_for_account_creation', $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	return $result;
 }
 
@@ -926,7 +948,7 @@ function get_user_information($user_id = null, $get_full_infos = false)
 		if (!isset($result_array[$cache_id])) {
 			$qid = query("SELECT *
 				FROM peel_utilisateurs
-				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs', null, defined('IN_PEEL_ADMIN')) . "" . $sql_cond);
+				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
 			$result_array[$cache_id] = fetch_assoc($qid);
 			if($get_full_infos && check_if_module_active('annonces')) {
 				if($result_array[$cache_id]['etat']) {
@@ -1012,7 +1034,7 @@ function get_priv_options($preselectionne, $return_mode = false)
 	$output = '';
 	$resProfil = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE " . get_filter_site_cond('profil', null, true) . "");
+		WHERE " . get_filter_site_cond('profil') . "");
 	$tpl = $GLOBALS['tplEngine']->createTemplate('priv_options.tpl');
 	$tpl_options = array();
 	if (num_rows($resProfil)) {

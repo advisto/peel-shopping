@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2014 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 43040 2014-10-29 13:36:21Z sdelaporte $
+// $Id: display_article.php 44077 2015-02-17 10:20:38Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -200,7 +200,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 		$sqlrub = "SELECT image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom, articles_review, etat, technical_code
 			FROM peel_rubriques r
 			WHERE id = '" . intval($rubid) . "' AND nom_" . $_SESSION['session_langue'] . " != '' AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
-			ORDER BY position";
+			ORDER BY r.position ASC, r.id DESC";
 		$resrub = query($sqlrub);
 		$rowrub = fetch_assoc($resrub);
 		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_list_brief_html.tpl');
@@ -265,7 +265,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 				INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id AND pc.rubrique_id = '" . intval($rubid) . "'
 				INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'r') . "
 				WHERE p.etat = '1' AND p.on_special = 1 AND titre_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('articles', 'p') . "
-				ORDER BY p.position ASC, p.id ASC";
+				ORDER BY p.position ASC, p.id DESC";
 			$res = query($sql);
 			if (num_rows($res) > 0) {
 				$plus = array(
@@ -414,7 +414,7 @@ if (!function_exists('get_articles_in_container_html')) {
 					$tpl->assign('src', null);
 				}
 				$tpl->assign('more_detail_label', $GLOBALS['STR_MORE_DETAILS']);
-				$output = $tpl->fetch();
+				$output .= $tpl->fetch();
 			}
 		}
 		return $output;

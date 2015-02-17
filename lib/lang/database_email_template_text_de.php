@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_de.php 43037 2014-10-29 12:01:40Z sdelaporte $
+// $Id: database_email_template_text_de.php 44072 2015-02-17 09:53:24Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -163,6 +163,8 @@ Bestellte Artikel
 [BOUGHT_ITEMS]
 Versandkosten:
 [COUT_TRANSPORT]
+Die Versandkosten:
+[TYPE]
 
 Sie können den Status Ihrer Bestellung in Echtzeit verfolgen:
 Sobald Ihre Bestellung bezahlt ist, erscheint die Rechnung in Ihrem Konto.
@@ -357,6 +359,10 @@ Senden Sie die Artikel an folgende Adresse:
 RÜCKSENDENUMMER [RETURN_ID].
 
 Wir erinnern Sie daran, dass die zurückzusendenden Artikel in gutem Zustand und in ihrer Originalverpackung sein müssen.
-Nach Eingang Ihrer Artikel werden wir die entsprechende Erstattung validieren."
+Nach Eingang Ihrer Artikel werden wir die entsprechende Erstattung validieren.",
+  "send_mail_for_account_creation_stop" => "",
+  "send_mail_for_account_creation_reve" => "",
+  "send_mail_for_account_creation_stand" => "",
+  "send_mail_for_account_creation_affi" => ""
 );
 
