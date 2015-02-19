@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_site.tpl 44112 2015-02-19 16:22:03Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<table class="main_table">
@@ -562,7 +562,7 @@
 									<td>
 									{foreach $emplacement_array as $e_code => $e_name}
 										{assign var="var_name" value="is_{$e_code}_off"}
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_{$e_code}" value="{$e_code}"{if $m.location == $e_code} checked="checked"{/if}{if $m.$var_name} disabled="disabled"{/if} /> <label for="{$m.id}_{$e_code}">{$e_name}</label>
+										<input type="radio" name="module_{$m.id}" id="{$m.id}_{$e_code}" value="{$e_code}"{if $m.location == $e_code} checked="checked"{/if}{if isset($m.$var_name) && !empty($m.$var_name)} disabled="disabled"{/if} /> <label for="{$m.id}_{$e_code}">{$e_name}</label>
 									{/foreach}
 									</td>
 								</tr>

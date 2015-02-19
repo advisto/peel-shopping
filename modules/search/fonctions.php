@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 44091 2015-02-18 07:02:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -148,6 +148,7 @@ function display_custom_attribute($selected_attributes=null, $technical_code = n
 	}
 	if(!empty($tpl_attrs)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_custom_attribute.tpl');
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('select_attrib_txt', $GLOBALS['STR_MODULE_SEARCH_SELECT_ATTRIB']);
 		$tpl->assign('attributes', $tpl_attrs);
 		$output .= $tpl->fetch();
