@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: order.php 46023 2015-06-03 14:59:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1423,6 +1423,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		LEFT JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
 		LEFT JOIN peel_marques m ON m.id = p.id_marque AND " . get_filter_site_cond('marques', 'm') . "
 		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi') . "
+        GROUP BY oi.nom_attribut, oi.attributs_list, oi.produit_id, oi.reference, oi.nom_produit, oi.prix, oi.couleur_id, oi.taille_id
 		ORDER BY " . $order_by;
 	$qid_items = query($sql);
 	while ($prod = fetch_assoc($qid_items)) {
