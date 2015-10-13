@@ -32,7 +32,7 @@ Dézippez le sur votre ordinateur.
 Connectez-vous à votre hébergement web et accédez à votre base de données MySQL.
 Votre base de données MySql est protégée par un ***nom d'utilisateur*** et un ***mot de passe***, procurez-les vous (dans les infos de votre compte d'hébergement web) 
 pour vous connecter à votre base de données MySQL. NB : vous aurez besoin de ces renseignements plus tard lors de l'installation.
-Créez une nouvelle base de donnée en lui donnant le ***nom de base*** que vous souhaitez, dans mon exemple elle s'appelle nomdemabase.
+Créez une nouvelle base de données en lui donnant le ***nom de base*** que vous souhaitez, dans mon exemple elle s'appelle nomdemabase.
 Il se peut que vous ne pourrez pas créer une nouvelle base de données et/ou qu'un nom de base de données y soit existante et/ou imposé,
 ce n'est pas grave, l'essentiel est de connaître ce nom car vous en aurez besoin plus tard lors de l'installation.
 

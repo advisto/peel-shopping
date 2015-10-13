@@ -3,21 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributs.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: attributs.php 47090 2015-10-01 16:54:52Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products");
-
-
-include($GLOBALS['dirroot'] . "/modules/attributs/administrer/fonctions.php");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_TITLE"];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");

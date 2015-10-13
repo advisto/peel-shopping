@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_tarif.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_tarif.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<p>{{ STR_ADMIN_TARIFS_CONFIG_STATUS }}<b><a href="sites.php">{% if mode_transport == 1 %}{{ STR_ADMIN_ACTIVATED }}{% else %}{{ STR_ADMIN_DEACTIVATED }} {"=>"|htmlspecialchars }} {{ STR_ADMIN_TARIFS_CONFIG_DEACTIVATED_COMMENT }}{% endif %}</a></b></p>
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
@@ -69,7 +69,7 @@
 		<tr>
 			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
 			</td>

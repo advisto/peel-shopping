@@ -67,10 +67,9 @@ class Minify_CSS {
 		if ($options['removeCharsets']) {
 			$css = preg_replace('/@charset[^;]+;\\s*/', '', $css);
 		}
-		if ($options['do_compress']) {
-			require_once $GLOBALS['dirroot'].'/lib/class/Minify_CSS_Compressor.php';
-			$css = Minify_CSS_Compressor::process($css, $options);
-		}
+		require_once $GLOBALS['dirroot'].'/lib/class/Minify_CSS_Compressor.php';
+		$css = Minify_CSS_Compressor::process($css, $options);
+		
 		if (! $options['currentDir'] && ! $options['prependRelativePath']) {
 			return $css;
 		}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: couleurs.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: couleurs.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -166,15 +166,14 @@ function affiche_formulaire_couleur(&$frm)
  */
 function supprime_couleur($id)
 {
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COULEURS_MSG_COLOR_DELETED'], get_color_name($id))))->fetch();
 	/* Efface la couleur */
 	query("DELETE FROM peel_couleurs WHERE id = '" . intval($id) . "' AND " .  get_filter_site_cond('couleurs', null, true));
 	/* Efface cette couleur de la table produits_couleur */
 	query("DELETE FROM peel_produits_couleurs WHERE couleur_id = '" . intval($id) . "'");
-	/* Supprime le stock correspondant */
-	if (check_if_module_active('stock_advanced')) {
-		query("DELETE FROM peel_stocks WHERE couleur_id = '" . intval($id) . "'");
-	}
+	$message = sprintf($GLOBALS['STR_ADMIN_COULEURS_MSG_COLOR_DELETED'], get_color_name($id));
+	/* Supprime le stock correspondant si module de gestion de stock activé */
+	$message .= call_module_hook('product_color_delete', array('id' => $id), 'output');
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $message))->fetch();
 }
 
 /**
@@ -194,7 +193,7 @@ function insere_couleur($frm)
 	}
 	$sql .= "
 	) VALUES (
-		'" . intval($frm['site_id']) . "'
+		'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		,'" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
@@ -215,7 +214,7 @@ function maj_couleur($id, $frm)
 {
 	/* Met à jour la table couleur */
 	$sql = "UPDATE peel_couleurs
-			SET site_id = '" . intval($frm['site_id']) . "'
+			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, position = '" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
@@ -244,14 +243,13 @@ function affiche_liste_couleur()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'position' => $ligne['position'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

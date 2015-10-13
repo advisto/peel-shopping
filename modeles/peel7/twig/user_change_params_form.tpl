@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: user_change_params_form.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}<h1 property="name" class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
@@ -51,7 +51,7 @@
 	{% for f in specific_fields %}
 		{% if f.field_position=='company' %}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory_fields) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
 	</div>
 		{% endif %}
@@ -87,6 +87,14 @@
 			</select>
 		</span>{{ activity_error }}
 	</div>
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span>{{ siret_error }}
+	</div>
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="tva">{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ intracom_form_error }}
+	</div>
 {% endif %}
 {% if (STR_FONCTION) %}
 	<div class="enregistrement">
@@ -97,16 +105,6 @@
 				{{ fonction_options }}
 			</select>
 		</span>{{ fonction_error }}
-	</div>
-{% endif %}
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="tva">{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ intracom_form_error }}
-	</div>
-{% if is_annonce_module_active %} 
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span>{{ siret_error }}
 	</div>
 {% endif %}
 	<div class="enregistrement">
@@ -162,7 +160,7 @@
 			</select>
 		</span>
 	</div>
-{% if is_annonce_module_active %}
+{% if STR_PROMO_CODE %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="promo_code">{{ STR_PROMO_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="promo_code" name="promo_code" value="{{ promo_code|str_form_value }}" /></span>
@@ -170,22 +168,22 @@
 	<div class="enregistrement">
 		<span>{{ STR_ANNOUNCEMENT_INDICATION }}</span>
 	</div>
-	{% if favorite_category %}
+	{% if id_categories %}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="favorite_category">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementgauche"><label for="id_categories">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
-			<select class="form-control" id="favorite_category" name="favorite_category">
-				{{ favorite_category }}
+			<select class="form-control" id="id_categories" name="id_categories">
+				{{ id_categories }}
 			</select>
 		</span>
 	</div>
-		{{ favorite_category_error }}
-	{% else %}
+		{{ id_categories_error }}
+	{% elseif id_cat_1 %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_1">{{ STR_FIRST_CHOICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_1" name="id_cat_1">
-				{{ favorite_category_1 }}
+				{{ id_cat_1 }}
 			</select>
 		</span>
 		{{ id_cat_1_error }}
@@ -194,7 +192,7 @@
 		<span class="enregistrementgauche"><label for="id_cat_2">{{ STR_SECOND_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_2" name="id_cat_2">
-				{{ favorite_category_2 }}
+				{{ id_cat_2 }}
 			</select>
 		</span>
 		{{ id_cat_2_error }}
@@ -203,7 +201,7 @@
 		<span class="enregistrementgauche"><label for="id_cat_3">{{ STR_THIRD_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_3" name="id_cat_3">
-				{{ favorite_category_3 }}
+				{{ id_cat_3 }}
 			</select>
 		</span>
 		{{ id_cat_3_error }}
@@ -219,7 +217,7 @@
 	{% for f in specific_fields %}
 		{% if f.field_position!='company' %}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
 	</div>
 		{% endif %}
@@ -236,6 +234,17 @@
 		</span>
 	</div>
 	{% endif %}
+	{% if STR_LOGO %}
+		<div class="enregistrement">
+			<span class="enregistrementgauche"><label for="logo">{{ STR_LOGO }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementdroite">
+			{% if logo not empty %}
+				{% include file="specific_field.tpl" with {'f':f} %}
+			{% else %}
+				<input name="logo" type="file" value="" />
+			{% endif %}
+		</div>
+	{% endif %}
 	{% if (STR_NEWSLETTER_YES) %}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="newsletter" value="1"{% if newsletter_issel %} checked="checked"{% endif %} /> {{ STR_NEWSLETTER_YES }}</span>
@@ -248,7 +257,7 @@
 	{% endif %}
 </div>
 	<p class="center">
-		{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="btn btn-primary" />
+		{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="btn btn-primary btn-lg" />
 		<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
 	</p>
 	<p>{{ cnil_txt|textEncode }}</p>

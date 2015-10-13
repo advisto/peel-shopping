@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: ventes.php 47003 2015-09-22 15:53:34Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -41,14 +41,13 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		} else {
 			$date_field = "o_timestamp";
 		}
+		$extra_csv_param = '&date_field='.$date_field;
 		$sql = "SELECT c.*
 			FROM peel_commandes c
 			WHERE " . get_filter_site_cond('commandes', 'c', true) . " AND c." . word_real_escape_string($date_field) . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . word_real_escape_string($date_field) . "<='" . nohtml_real_escape_string($dateAdded2) . "'";
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$sql .= " AND c.id_statut_paiement = '" . intval($_GET['statut']) . "'";
-			$extra_csv_param = "&id_statut_paiement=" . intval($_GET['statut']);
-		} else {
-			$extra_csv_param = '';
+			$extra_csv_param .= "&id_statut_paiement=" . intval($_GET['statut']);
 		}
 		$sql .= "
 				ORDER BY c." . word_real_escape_string($date_field);

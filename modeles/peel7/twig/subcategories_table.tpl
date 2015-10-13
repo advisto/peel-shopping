@@ -3,29 +3,28 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: subcategories_table.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: subcategories_table.tpl 47249 2015-10-08 17:24:40Z gboussin $
 #}<div class="sub_category row">
 {% for cat in cats %}
 	{% if cat.href %}
 		<div class="center col-md-{{ (12 // nb_col_md) }} col-sm-{{ (12 // nb_col_sm) }}">
 			{% if (cat.src) %}
-				<a href="{{ cat.href|escape('html') }}"><img src="{{ cat.src|escape('html') }}" alt="{{ cat.name|html_entity_decode_if_needed }}" /></a>
-				<br />
+				<a href="{{ cat.href|escape('html') }}"><img src="{{ cat.src|escape('html') }}" alt="{{ cat.name|html_entity_decode_if_needed }}" /></a><br />
 			{% endif %}
 			<a href="{{ cat.href|escape('html') }}" class="sub_category_title">{{ cat.name|html_entity_decode_if_needed }}</a>
 		</div>
 	{% endif %}
-	{% if cat.i%nb_col_md==0 %}
+	{% if cat.i%(12/(12 // nb_col_md))==0 %}
 	<div class="clearfix visible-md visible-lg"></div>
 	{% endif %}
-	{% if cat.i%nb_col_sm==0 %}
+	{% if cat.i%(12/(12 // nb_col_md))==0 %}
 	<div class="clearfix visible-sm"></div>
 	{% endif %}
 {% endfor %}

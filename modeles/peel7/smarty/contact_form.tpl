@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: contact_form.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}{if !$skip_introduction_text}<h1 property="name" class="page_title">{$STR_CONTACT}</h1>
 {if isset($token_error)}{$token_error}{/if}
 <div id="contact">
@@ -20,7 +20,7 @@
 		<div class="contact_intro">{$STR_CONTACT_INTRO}</div>
 			<form class="entryform form-inline well" role="form" method="post" action="{$action|escape:'html'}#contact_form" name="form_contact" id="form_contact">
 			{$extra_field}
-			<table class="contact_form_table">
+			<table style="width:75%">
 				<tr>
 					<td {if $short_form} colspan="2"{/if}><label for="sujet">{$STR_CONTACT_SUBJECT} <span class="etoile{if $short_form} no-display{/if}">*</span>{$STR_BEFORE_TWO_POINTS}:</label>
 		{if $short_form}
@@ -94,7 +94,7 @@
 				{/if}
 				<tr>
 					<td></td>
-					<td>{$token}<div style="text-align:center; margin-top: 10px; margin-bottom: 10px;"><input type="submit" class="btn btn-primary btn-lg" value="{$STR_SEND|str_form_value}" /></div></td>
+					<td>{$token}<div style="text-align:center; margin-top: 10px; margin-bottom: 10px;"><input type="submit" class="btn btn-primary btn-lg" value="{$STR_SEND|str_form_value}" />{if !empty($ssl_image_src)}<img alt="SSL" src="{$ssl_image_src}" class="image_ssl right" />{/if}</div></td>
 				</tr>
 			</table>
 		</form>

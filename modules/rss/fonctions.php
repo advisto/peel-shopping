@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -62,7 +62,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	// Recherche du logo du site
 	if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) && $GLOBALS['site_parameters']['on_logo'] == 1) {
 		$image_thumb = thumbs($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']], 144, 144, 'fit');
-		$size_array = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . $image_thumb);
+		$size_array = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($image_thumb));
 		$image_xml .= '
 		<image>
 			<url>' . String::htmlentities($GLOBALS['repertoire_upload'] . '/thumbs/' . $image_thumb, ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</url>
@@ -96,7 +96,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			LIMIT " . intval($limit);
 		$result = query($sql);
 		while ($prod = fetch_assoc($result)) {
-			$product_object = new Product($prod['id'], $prod, false, null, true, !is_micro_entreprise_module_active());
+			$product_object = new Product($prod['id'], $prod, false, null, true, !check_if_module_active('micro_entreprise'));
 			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($product_object->description, ENT_QUOTES)))));
 			$promotion_rss = $product_object->get_all_promotions_percentage(false, 0, true);
 			$dateRFC = gmdate("r", strtotime($product_object->date_maj));
@@ -105,7 +105,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			} elseif ($product_object->on_gift) {
 				$product_affiche_prix = $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS'];
 			} else {
-				$product_affiche_prix = $product_object->get_final_price(0, display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true);
+				$product_affiche_prix = $product_object->get_final_price(0, display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true);
 			}
 			$this_item = array('title' => String::htmlentities($product_object->name . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $product_affiche_prix, ENT_COMPAT, GENERAL_ENCODING, false, true, true),				'promotion_rss' => String::htmlentities($promotion_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'guid' => String::htmlentities($product_object->get_product_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
@@ -113,14 +113,10 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 				'description' => String::htmlentities($desc_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 			$imagename = $product_object->get_product_main_picture();
 			if(!empty($imagename)) {
-				if (pathinfo($imagename, PATHINFO_EXTENSION) == 'pdf') {
-					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
-				} else {
-					$this_thumb = thumbs($imagename, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
-				}
+				$this_thumb = thumbs($imagename, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
 				if (!empty($this_thumb)) {
-					$image_infos = getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . $this_thumb);
-					$this_item['image']['length'] = filesize($GLOBALS['uploaddir'] . '/thumbs/' . $this_thumb);
+					$image_infos = getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($this_thumb));
+					$this_item['image']['length'] = filesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($this_thumb));
 					$this_item['image']['url'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb;
 					$this_item['image']['mime'] = $image_infos['mime'];
 				}
@@ -130,16 +126,17 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 		}
 	} else {
 		// Définit les limites des annonces à afficher
-		$sql_cond = "enligne = 'OK' AND `date_insertion`<'" . date('Y-m-d H:i:s', time()) . "'";
+		// date_insertion NOT LIKE '0000%' : la date d'insertion est vide si l'affichage de l'annonce a été désactivé par le propriétaire de l'annonce
+		$sql_cond = "enligne='OK' " . (!empty($GLOBALS['site_parameters']['extra_ad_database_fields_array']) && in_array('date_end', $GLOBALS['site_parameters']['extra_ad_database_fields_array']) ?" AND (date_end LIKE '0000%' OR date_end>'" . date('Y-m-d H:i:00', time()) . "')":'') . " AND (date_insertion NOT LIKE '0000%' AND date_insertion<'" . date('Y-m-d H:i:00', time() + 60) . "')";
 		if (!empty($category_id)) {
-			$sql_cond .= " AND id_categorie = " . intval($category_id);
+			$sql_cond .= " AND id_categorie=" . intval($category_id);
 		}
 		if (!empty($seller_id)) {
-			$sql_cond .= " AND id_personne = " . intval($seller_id);
+			$sql_cond .= " AND id_personne=" . intval($seller_id);
 		}
 		$sql = "SELECT *
 			FROM peel_lot_vente
-			WHERE " . $sql_cond . "
+			WHERE " . $sql_cond . " AND " . get_filter_site_cond('lot_vente') . "
 			ORDER BY date_insertion DESC
 			LIMIT 10";
 		$rs = query($sql);

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -49,7 +49,7 @@
 		<tr>
 			<td class="title_label">{$STR_ADMIN_WEBSITE}{$STR_BEFORE_TWO_POINTS}: </td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" {if $site_id_select_multiple} name="site_id[]" multiple="multiple" size="5"{else} name="site_id"{/if}>
 					{$site_id_select_options}
 				</select>
 			</td>
@@ -72,9 +72,9 @@
 		{foreach $products_table_additionnal_fields_array as $field}
 		<tr>
 			<td class="title_label top">{$field.title}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" class="form-control" value="{$field.value|str_form_value}" id="{$field.name|str_form_value}" name="{$field.name|str_form_value}" /></td>
+			<td><input type="{$field.type|str_form_value}" class="form-control" value="{$field.value|str_form_value}" id="{$field.name|str_form_value}" name="{$field.name|str_form_value}" /></td>
 		</tr>
-		{/foreach} 
+		{/foreach}
 	{/if}
 	{if empty($skip_home_special_products)}
 		<tr>
@@ -147,6 +147,10 @@
 			<td class="title_label">{$STR_ADMIN_PRODUITS_PRICE_IN} <b>{$site_symbole} {$ttc_ht}</b>{$STR_BEFORE_TWO_POINTS}:</td>
 			<td class="left"><input type="text" class="form-control" name="prix" value="{$prix|str_form_value}" /></td>
 		</tr>
+		<tr>
+			<td class="title_label">{$STR_ADMIN_PRODUITS_PRICE_PROMOTION} <b>{$site_symbole} {$ttc_ht}</b>{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="left"><input type="text" class="form-control" name="prix_promo" value="{$prix_promo|str_form_value}" /></td>
+		</tr>
 	{if $is_reseller_module_active}
 		<tr>
 			<td class="title_label">{$STR_ADMIN_PRODUITS_RESELLER_PRICE_IN} <b>{$site_symbole} {$reseller_price_taxes_txt}</b>{$STR_BEFORE_TWO_POINTS}:</td>
@@ -157,6 +161,10 @@
 		<tr>
 			<td class="title_label">{$STR_CONDITIONNEMENT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td class="left"><input type="text" class="form-control" name="conditionnement" value="{$conditionnement|str_form_value}" /></td>
+		</tr>
+		<tr>
+			<td class="title_label">{$STR_ADMIN_PRODUITS_UNIT_PER_PALLET}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="left"><input type="text" class="form-control" name="unit_per_pallet" value="{$unit_per_pallet|str_form_value}" /></td>
 		</tr>
 	{/if}
 		<tr>
@@ -312,7 +320,7 @@
 	{if $is_attributes_module_active}
 		<tr>
 			<td colspan="2">
-				<div class="alert alert-info">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO}{$STR_BEFORE_TWO_POINTS}: {if $mode == "maj"}<a href="{$produits_attributs_href|escape:'html'}" class="alert-link">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK}</a>{else}{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER} <a href="{$nom_attributs_href|escape:'html'}">{$nom_attributs_href}</a>{/if}</div></td>
+				<div class="alert alert-info">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO}{$STR_BEFORE_TWO_POINTS}: {if $mode == "maj"}<a href="{$produits_attributs_href|escape:'html'}" class="alert-link" onclick="return(window.open(this.href)?false:true);">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK}</a>{else}{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER} <a href="{$nom_attributs_href|escape:'html'}">{$nom_attributs_href}</a>{/if}</div></td>
 		</tr>
 	{/if}
 		<tr>
@@ -423,8 +431,8 @@
 	{foreach $files as $i => $f}
 		{if !empty($f)}
 		<tr>
-			<td class="title_label">{if $f.type == 'img'}{$STR_IMAGE} {else}{$STR_FILE} {/if}{$i}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>{include file="uploaded_file.tpl" f=$f STR_DELETE=$STR_ADMIN_DELETE_THIS_FILE}</td>
+			<td class="title_label">{if $f.type == 'img'}{$STR_IMAGE}{else}{$STR_FILE}{/if}{$i}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{include file="uploaded_file.tpl" f=$f STR_DELETE=$STR_DELETE_THIS_FILE}</td>
 		</tr>
 		{else}
 		<tr>
@@ -448,27 +456,16 @@
 		</tr>
 		{if !empty($c.images)}
 		{foreach $c.images as $i => $f}
+		<tr>
+			<td class="title_label">{$STR_IMAGE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
 		{if !empty($f)}
-		<tr>
-			<td class="title_label">{$STR_IMAGE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				{$STR_ADMIN_FILE_NAME}{$STR_BEFORE_TWO_POINTS}: {$f.nom} &nbsp;
-				<a href="{$f.sup_href|escape:'html'}">
-				<img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_IMAGE}</a>
-				<input type="hidden" name="imagecouleur{$c.id}_{$i}" value="{$f.nom|str_form_value}" />
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2" class="center">{if $f.is_pdf}<img src="{$pdf_logo_src|escape:'html'}" alt="pdf" width="100" height="100" />{else}<img src="{$f.src|escape:'html'}" alt="" />{/if}</td>
-		</tr>
+				{include file="uploaded_file.tpl" f=$f STR_DELETE=$STR_DELETE_THIS_FILE}
 		{else}
-		<tr>
-			<td class="title_label">{$STR_IMAGE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
 				<input name="imagecouleur{$c.id}_{$i}" type="file" value="" />
+		{/if}
 			</td>
 		</tr>
-		{/if}
 		{/foreach}
 		{else}
 		<tr>

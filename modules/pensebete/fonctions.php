@@ -3,16 +3,28 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les tableaux d'informations à afficher dans Mon compte
+ *
+ * @param array $params
+ * @return
+ */
+function pensebete_hook_account_show($params) {
+	$result['modules_data_group']['pensebete'] = array('header' => $GLOBALS['STR_PENSE_BETE'], 'position' => 11);
+	$result['modules_data']['pensebete'][] = array('txt' => '<span class="fa fa-list fa-5x"></span><br />' . $GLOBALS['STR_VOIR_PENSE_BETE'], 'href' => get_url('/modules/pensebete/voir.php'));
+	return $result;
 }
 
 /**
@@ -27,7 +39,7 @@ function insere_pense($item_id = null, $type = null)
 	}
 	$url_prod = vb($_SERVER['HTTP_REFERER']);
 	if ($type == 'produit') {
-		$product_object = new Product($item_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+		$product_object = new Product($item_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 		$this_url = $product_object->get_product_url();
 		$this_name = $product_object->name;
 		$this_item = $GLOBALS['STR_THE_PRODUCT'];
@@ -66,7 +78,7 @@ function insere_pense($item_id = null, $type = null)
 	$tpl->assign('STR_MODULE_PENSEBETE_HAS_BEEN_ADD_REMINDER', $GLOBALS['STR_MODULE_PENSEBETE_HAS_BEEN_ADD_REMINDER']);
 	$tpl->assign('STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB', $GLOBALS['STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB']);
 	$tpl->assign('STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP', $GLOBALS['STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP']);
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }
 
 /**
@@ -84,7 +96,7 @@ function display_product_in_reminder($return_mode = false)
 		GROUP BY p.id";
 	$query = query($sql);
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/pensebete_display.tpl');
-	$tpl->assign('del_src', $GLOBALS['wwwroot'] . '/images/suppression.png');
+	$tpl->assign('del_src', get_url('/images/suppression.png'));
 	$tpl->assign('STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT', $GLOBALS['STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT']);
 	$tpl->assign('STR_MODULE_PENSEBETE_NO_PRODUCT_IN_REMINDER', $GLOBALS['STR_MODULE_PENSEBETE_NO_PRODUCT_IN_REMINDER']);
 	$tpl->assign('STR_TABLE_SUMMARY_CADDIE', $GLOBALS['STR_TABLE_SUMMARY_CADDIE']);
@@ -92,7 +104,7 @@ function display_product_in_reminder($return_mode = false)
 	$tpl->assign('STR_REMISE', $GLOBALS['STR_REMISE']);
 	$tpl->assign('STR_UNIT_PRICE', $GLOBALS['STR_UNIT_PRICE']);
 	$tpl->assign('STR_DELETE_PROD_CART', $GLOBALS['STR_DELETE_PROD_CART']);
-	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+	$tpl->assign('ttc_ht', (display_prices_with_taxes_active() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 	$user_info = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
 	$tpl->assign('pseudo', $user_info['pseudo']);
 	
@@ -100,13 +112,15 @@ function display_product_in_reminder($return_mode = false)
 		$tpl->assign('are_prods', true);
 		$tpl_prods = array();
 		while ($prod = fetch_assoc($query)) {
-			$product_object = new Product($prod['id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-			$prod_image = $product_object->get_product_main_picture($product_object->id, $product_object->default_color_id);
+			$product_object = new Product($prod['id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+			$display_picture = $product_object->get_product_main_picture($product_object->id, $product_object->default_color_id);
 			$urlprod = get_product_url($prod['id'], $prod['name'], $prod['categorie_id'], $prod['categorie']);
 			
 			$tpl_img = null;
-			if (!empty($prod_image)) {
-				$tpl_img = $GLOBALS['repertoire_upload'] . '/' . $prod_image;
+			if ($display_picture) {
+				$tpl_img = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
+			} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
+				$tpl_img = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
 			}
 			$tpl_promo = null;
 			if($prod['promotion'] > 0) {
@@ -119,7 +133,7 @@ function display_product_in_reminder($return_mode = false)
 				'urlprod' => $urlprod,
 				'name' => $prod['name'],
 				'promotion' => $tpl_promo,
-				'prix' => fprix($prod['prix'], true)
+				'prix' => $product_object->affiche_prix(display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true)
 			);
 		}
 		$tpl->assign('prods', $tpl_prods);

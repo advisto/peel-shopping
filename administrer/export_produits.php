@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: export_produits.php 47345 2015-10-12 17:59:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -20,9 +20,10 @@ necessite_priv("admin_products,admin_webmastering");
 // La colonne stock dans peel_produits ne sert pas, donc l'exporter induit en confusion
 $excluded_fields = array('stock');
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']);
-if (check_if_module_active('stock_advanced')) {
-	$specific_fields_array[] = 'Stock';
-}
+
+$hook_result = call_module_hook('export_products_get_configuration_array', array(), 'array');
+$specific_fields_array = array_merge_recursive($specific_fields_array, vb($hook_result['product_field_names'], array()));
+
 // FIN PARAMETRAGE
 if (!empty($_GET['encoding'])) {
 	$page_encoding = $_GET['encoding'];
@@ -37,42 +38,20 @@ $filename = "export_produits_" . str_replace('/', '-', date($GLOBALS['date_basic
 @ini_set('display_errors', 0);
 output_csv_http_export_header($filename, 'csv', $page_encoding);
 // On récupère les noms des champs de la table de produits
-$product_fields_infos = get_table_fields('peel_produits');
-foreach($product_fields_infos as $this_field_infos) {
-	if (!in_array($this_field_infos['Field'], $excluded_fields)) {
-		$product_field_names[] = $this_field_infos['Field'];
+$product_field_names = get_table_field_names('peel_produits');
+
+// On rajoute ensuite des colonnes calculées
+foreach ($specific_fields_array as $this_field) {
+	$product_field_names[] = $this_field;
+}
+// On retire les colonnes non désirées
+foreach($product_field_names as $this_key => $this_field) {
+	if (in_array($this_field, $excluded_fields)) {
+		unset($product_field_names[$this_key]);
 	}
 }
 // On trie les colonnes
 sort($product_field_names);
-// et on rajoute ensuite des colonnes calculées
-foreach ($specific_fields_array as $this_field) {
-	$product_field_names[] = $this_field;
-}
-// et on ajoute les colonnes pour chaque attribut
-$sql_n = "SELECT *
-	FROM peel_nom_attributs
-	WHERE " . get_filter_site_cond('nom_attributs') . "
-	ORDER BY id";
-$nom_attrib = query($sql_n);
-while ($this_attribut = fetch_assoc($nom_attrib)) {
-	$attribut_infos_array[$this_attribut['id']] = $this_attribut;
-	$product_field_names[] = $this_attribut['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['id'];
-}
-
-if (is_lot_module_active()) {
-	// Gestion des prix par lots
-	$i = 1;
-	$query_produits_lot = query("SELECT * 
-		FROM peel_quantites
-		WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites'));
-	while ($prix_lot = fetch_assoc($query_produits_lot)) {
-		$product_field_names[] = 'quantite§prix§prix_revendeur'.$i;
-		$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
-		$i++;
-	}
-}
-
 // On construit la ligne des titres
 $title_line_output = array();
 foreach($product_field_names as $this_field_name) {
@@ -92,72 +71,18 @@ $i = 0;
 while ($result = fetch_assoc($query)) {
 	// On récupère les infos liées à chaque produit
 	$product_attributs_id_array = array();
-	$product_object = new Product($result['id'], $result, true, null, true, !is_micro_entreprise_module_active());
+	$product_object = new Product($result['id'], $result, true, null, true, !check_if_module_active('micro_entreprise'));
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT']] = fxsl($product_object->get_original_price(true, false, false));
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT']] = fxsl($product_object->get_original_price(false, false, false));
-	//gestion de taille
-	$infos_taille = array();
-	unset($possible_sizes);
-	$sql_taille = query('SELECT t.*
-		FROM peel_produits_tailles pt 
-		INNER JOIN peel_tailles t ON t.id=pt.taille_id AND ' . get_filter_site_cond('tailles', 't') . '
-		WHERE pt.produit_id = "'.intval($product_object->id).'"');
-	while($taille = fetch_assoc($sql_taille)){
-		$temp = $taille['nom_'.$_SESSION['session_langue']];
-		if($taille['prix']!=0 || $taille['prix_revendeur']!=0) {
-			// Ajout d'informations sur le prix si adapté
-			$temp .= '§'.$taille['prix'].'§'.$taille['prix_revendeur'];
-		}
-		$infos_taille[] = $temp;
-		$possible_sizes[$taille['id']] = $taille['nom_'.$_SESSION['session_langue']];
-	}
-	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES']] = implode(',', $infos_taille);
-	$possible_colors = $product_object->get_possible_colors();
-	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']] = implode(',', $possible_colors);
+	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES']] = implode(',', $product_object->get_possible_sizes('export'));
+	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']] = implode(',', $product_object->get_possible_colors());
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND']] = implode(',', $product_object->get_product_brands());
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS']] = implode(',', $product_object->get_product_references());
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']] = implode(',', $product_object->get_possible_categories());
-	// Récupération des valeurs pour les attributs
-	$query_produits_attributs = query("SELECT ppa.nom_attribut_id, pa.id, pa.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
-		FROM peel_produits_attributs ppa
-		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id AND " . get_filter_site_cond('attributs', 'pa')."
-		WHERE produit_id='" . intval($product_object->id) . "'");
-	while ($this_attribut = fetch_assoc($query_produits_attributs)) {
-		if (!empty($attribut_infos_array[$this_attribut['nom_attribut_id']])) {
-			if ($attribut_infos_array[$this_attribut['nom_attribut_id']]['upload'] == 1) {
-				// L'attribut concerné est un champ d'upload => on exporte cette info, sans notion d'id d'attribut car il n'y en a pas
-				$this_value = '0#__upload';
-			} elseif ($attribut_infos_array[$this_attribut['nom_attribut_id']]['texte_libre'] == 1) {
-				// L'attribut concerné est un champ de texte libre => on exporte cette info, sans notion d'id d'attribut car il n'y en a pas
-				$this_value = '0#__texte_libre';
-			} else {
-				$this_value = $this_attribut['id'] . '#' . $this_attribut['descriptif'];
-			}
-			$result[$attribut_infos_array[$this_attribut['nom_attribut_id']]['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['nom_attribut_id']][] = $this_value;
-		}
-	}
-	if (check_if_module_active('stock_advanced')) {
-		$infos_stocks = array();
-		$product_stock_infos = get_product_stock_infos($product_object->id);
-		foreach ($product_stock_infos as $this_stock_info) {
-			if ($this_stock_info['stock'] != 0) {
-				$infos_stocks[] = $this_stock_info['stock'].'§'.vb($possible_colors[$this_stock_info['couleur_id']]).'§'.vb($possible_sizes[$this_stock_info['taille_id']]);
-			}
-		}
-		$result['Stock'] = implode(',', $infos_stocks);
-	}
+
+	$hook_result = call_module_hook('export_products_get_line_infos_array', array('id' => $product_object->id), 'array');
+	$result = array_merge_recursive($result, $hook_result);
 	
-	if (is_lot_module_active()) {
-		// Gestion des prix par lots
-		$i = 1;
-		$query_produits_lot = query("SELECT * 
-			FROM peel_quantites
-			WHERE produit_id='" . intval($product_object->id) . "' AND " . get_filter_site_cond('quantites'));
-		while ($prix_lot = fetch_assoc($query_produits_lot)) {
-			$result['quantite§prix§prix_revendeur'.$i] = $prix_lot['quantite'].'§'.$prix_lot['prix'].'§'.$prix_lot['prix_revendeur'];
-			$i++;
-		}
-	}
 	// On génère la ligne
 	$this_line_output = array();
 	foreach($product_field_names as $this_field_name) {

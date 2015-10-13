@@ -3,16 +3,25 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_site.tpl 47319 2015-10-12 13:53:33Z gboussin $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
+	<div class="tabbable">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#tab1" data-toggle="tab">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</a></li>
+			<li><a href="#tab2" data-toggle="tab">{$STR_ADMIN_MODULES}</a></li>
+			<li><a href="#tab3" data-toggle="tab">{$STR_ADMIN_SITES_MODULES_POSITIONS}</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="tab1">
+				
 	<table class="main_table">
 		<tr>
 			<td class="entete" colspan="2">{$STR_ADMIN_SITES_TITLE}</td>
@@ -105,7 +114,7 @@
 			<td>
 			{if isset($favicon)}
 				<img src="{$favicon.src|escape:'html'}" alt="{$favicon.favicon|str_form_value}" width="32" /> &nbsp; &nbsp; &nbsp;
-				<a href="{$favicon.sup_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_THIS_FILE}</a>
+				<a href="{$favicon.sup_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_DELETE_THIS_FILE}</a>
 				<input type="hidden" name="favicon" value="{$favicon.favicon|str_form_value}" />
 			{else}
 				<input style="max-width:250px" type="file" name="favicon" value="" />
@@ -270,7 +279,7 @@
 			<td>
 			{if $default_picture}
 				<img src="{$default_picture_url|escape:'html'}" alt="{$default_picture|str_form_value}" width="32" /> &nbsp; &nbsp; &nbsp;
-				<a href="{$default_picture_delete_url|escape:'html'}"><img src="{$default_picture_delete_icon_url|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_THIS_FILE}</a>
+				<a href="{$default_picture_delete_url|escape:'html'}"><img src="{$default_picture_delete_icon_url|escape:'html'}" width="16" height="16" alt="" />{$STR_DELETE_THIS_FILE}</a>
 				<input type="hidden" name="default_picture" value="{$default_picture|str_form_value}" />
 			{else}
 				<input style="max-width:250px" type="file" name="default_picture" value="{$default_picture|str_form_value}" />
@@ -368,6 +377,10 @@
 			<td><input style="width:100px" type="text" class="form-control" name="minimal_amount_to_order" value="{$minimal_amount_to_order|str_form_value}" /> {$site_symbole} {$STR_TTC}</td>
 		</tr>
 		<tr>
+			<td>{$LANG.STR_ADMIN_SITES_MINIMUM_ORDER_REVE_AMOUNT_ALLOWED}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input style="width:100px" type="text" class="form-control" name="minimal_amount_to_order_reve" value="{$minimal_amount_to_order_reve|str_form_value}" /> {$site_symbole} {$STR_TTC}</td>
+		</tr>
+		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN}</div></td>
 		</tr>
 		<tr>
@@ -438,48 +451,6 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_ECOTAX_MODULE}</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_ecotaxe" value="1" {if $module_ecotaxe == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_ecotaxe" value="0" {if $module_ecotaxe == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-	{if $nouveau_mode == "modif"}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_CURRENCIES_MODULE}</td>
-		</tr>
-		{if $is_fonctionsdevises}
-			{* La devise n'est pas affichée lors de la création d'un site puisque la liste des devises pour ce site n'est pas encore présente en BDD. La devise par défaut sera l'euro *}
-			<tr>
-				<td>{$STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY}{$STR_BEFORE_TWO_POINTS}:</td>
-				<td>
-					<input type="radio" name="module_devise" value="1" {if $module_devise == 1} checked="checked"{/if} /> {$STR_YES}
-					<input type="radio" name="module_devise" value="0" {if $module_devise == 0} checked="checked"{/if} /> {$STR_NO}
-				</td>
-			</tr>
-			<tr>
-				<td colspan="2">{$STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN}</td>
-			</tr>
-			<tr>
-				<td>{$STR_ADMIN_SITES_DEFAULT_CURRENCY}{$STR_BEFORE_TWO_POINTS}:</td>
-				<td>
-					<select class="form-control" name="devise_defaut" style="max-width:250px">
-					{foreach $devices_options as $o}
-					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
-					{/foreach}		
-					</select> {$STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING} - <a href="{$devises_href|escape:'html'}">{$STR_ADMIN_SITES_CURRENCIES_LINK}</a>
-				</td>
-			</tr>
-		{else}
-			<tr>
-				<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-			</tr>
-		{/if}
-	{/if}
-		<tr>
 			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_TEXT_EDITOR}</td>
 		</tr>
 		<tr>
@@ -528,87 +499,73 @@
 			<td>{$STR_MODULE_WEBMAIL_ADMIN_CLIENT_SERVICE_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="max-width:250px" type="text" class="form-control" name="email_client" value="{$email_client|str_form_value}" /> {$STR_ADMIN_SITES_EMAIL_EMPTY_DEFAULT_EXPLAIN}</td>
 		</tr>
-	{if $nouveau_mode == "modif"}
-		{* Les modules ne sont pas affichés lors de la création d'un site puisque la liste des modules pour ce site n'est pas encore présente en BDD. La configurations de module sera celle par défaut, comme défini dans create_new_site.sql *}
 		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULES_POSITIONS}</td>
+			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_ANALYTICS_TAG}</td>
 		</tr>
 		<tr>
-			<td colspan="2">
-				<div class="alert alert-info">{$STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN}</div>
+			<td>{$STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN|htmlspecialchars}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><textarea class="form-control" name="tag_analytics" style="width:100%" rows="5" cols="54">{$tag_analytics}</textarea></td>
+		</tr>
+	</table>
+				</div>
+	
+	
+	
+	
+				<div class="tab-pane" id="tab2">
+	<table class="main_table">
+	{foreach $modules_infos as $m}
+		<tr>
+			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$m.name} {$m.package} {$m.version}{$STR_BEFORE_TWO_POINTS}</td>
+		</tr>
+		{if empty($m.contact)}
+			{if $m.type == "light"}
+		<tr>
+			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
+		</tr>
+			{else}
+		<tr>
+			<td>{$STR_ADMIN_SITES_MODULE_INSTALL}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="install[{$m.technical_code}]" value="1" {if $m.installed} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="install[{$m.technical_code}]" value="0" {if !$m.installed} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
+			{/if}
+			{if !empty($m.configuration_variable)}
 		<tr>
-			<td colspan="2">
-				<table class="full_width">
-			{foreach $modules as $m}
-				{$m.tr_rollover}
-					<td>
-						<div class="edit_module_title">{$m.title}{$STR_BEFORE_TWO_POINTS}:</div>
-					</td>
-					<td>
-						<div class="edit_module_attribut">
-							<table>
-								<tr>
-									<td>
-										<label for="display_mode_{$m.id}_left">{$STR_ADMIN_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</label>
-									</td>
-									<td>
-										<input type="text" style="max-width:150px" class="form-control" name="display_mode_{$m.id}" value="{$m.display_mode}" size="10" />
-									</td>
-								</tr>
-								<tr>
-									<td><label for="emplacement_{$m.id}">{$STR_ADMIN_HTML_PLACE}{$STR_BEFORE_TWO_POINTS}:</label></td>
-									<td>
-									{foreach $emplacement_array as $e_code => $e_name}
-										{assign var="var_name" value="is_{$e_code}_off"}
-										<input type="radio" name="module_{$m.id}" id="{$m.id}_{$e_code}" value="{$e_code}"{if $m.location == $e_code} checked="checked"{/if}{if $m.$var_name} disabled="disabled"{/if} /> <label for="{$m.id}_{$e_code}">{$e_name}</label>
-									{/foreach}
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<label for="etat_{$m.id}">{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</label>
-									</td>
-									<td>
-										<input type="checkbox" name="etat_{$m.id}" id="etat_{$m.id}" value="1"{if $m.etat == '1'} checked="checked"{/if} />
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<label for="home_{$m.id}">{$STR_ADMIN_SITES_ON_HOMEPAGE_ONLY}{$STR_BEFORE_TWO_POINTS}:</label>
-									</td>
-									<td>
-										<input type="checkbox" name="home_{$m.id}" id="home_{$m.id}" value="1"{if $m.in_home == '1'} checked="checked"{/if} />
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<label for="position_{$m.id}_left">{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</label>
-									</td>
-									<td>
-										<input type="text"  style="max-width:50px" class="form-control" name="position_{$m.id}" value="{$m.position|str_form_value}" />
-									</td>
-								</tr>
-							</table>
-						</div>
-					</td>
-				</tr>
-			{/foreach}
-				</table>
+			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="{$m.configuration_variable}" value="1" {if $m.enabled} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="{$m.configuration_variable}" value="0" {if !$m.enabled} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
-	{/if}
+			{/if}
+			{if $m.technical_code == "devises"}
+				{if $nouveau_mode == "modif"}
+				{* La devise n'est pas affichée lors de la création d'un site puisque la liste des devises pour ce site n'est pas encore présente en BDD. La devise par défaut sera l'euro *}
 		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_PAYPAL_MODULE}</td>
+			<td colspan="2">{$STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN}</td>
 		</tr>
+		<tr>
+			<td>{$STR_ADMIN_SITES_DEFAULT_CURRENCY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<select class="form-control" name="devise_defaut" style="max-width:250px">
+				{foreach $devices_options as $o}
+				<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
+				{/foreach}		
+				</select> {$STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING} - <a href="{$devises_href|escape:'html'}">{$STR_ADMIN_SITES_CURRENCIES_LINK}</a>
+			</td>
+		</tr>
+				{/if}
+			{/if}
+			{if $m.technical_code == "paypal"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_PAYPAL_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="max-width:250px" type="text" class="form-control" name="email_paypal" value="{$email_paypal|str_form_value}" /></td>
 		</tr>
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_MONEYBOOKERS_MODULE}</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "moneybookers"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_MONEYBOOKERS_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="max-width:250px" type="text" class="form-control" name="email_moneybookers" value="{$email_moneybookers|str_form_value}" /></td>
@@ -621,82 +578,16 @@
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN}</div></td>
 		</tr>
-
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_KEKOLI_MODULE}</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "kekoli"}
  		<tr>
 			<td>{$STR_ADMIN_SITES_DELIVERY_CARRIER_DELAY}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:50px" type="text" class="form-control" name="availability_of_carrier" value="{$availability_of_carrier|str_form_value}" /> jours</td>
 		</tr>
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_ANALYTICS_TAG}</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN|htmlspecialchars}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><textarea class="form-control" name="tag_analytics" style="width:100%" rows="5" cols="54">{$tag_analytics}</textarea></td>
-		</tr>
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_TAG_CLOUD_MODULE}</td>
-		</tr>
-		{if $is_fonctionstagcloud}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_nuage" value="1" {if $module_nuage == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_nuage" value="0" {if $module_nuage == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_FLASH_SALES_MODULE}</td>
-		</tr>
-		{if $is_flash_sell_module_active}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_flash" id="module_flash1" value="1" {if $module_flash == 1} checked="checked"{/if} />{$STR_YES}
-				<input type="radio" name="module_flash" id="module_flash0" value="0" {if $module_flash == 0} checked="checked"{/if} />{$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_CONTACT_PEEL_FOR_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_ADVERTISING}</td>
-		</tr>
-		{if $is_fonctionsbanner}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_pub" value="1" {if $module_pub == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_pub" value="0" {if $module_pub == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_ROLLOVER_HEADER}</td>
-		</tr>
-		{if $is_fonctionsmenus}
+			{/if}
+			{if $m.technical_code == "menus"}
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_ROLLOVER_EXPLAIN}</div></td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_SITES_ROLLOVER_DISPLAY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_rollover" value="1" {if $module_rollover == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_rollover" value="0" {if $module_rollover == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_SITES_ROLLOVER_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -705,87 +596,22 @@
 				<input type="radio" name="type_rollover" value="2" {if $type_rollover == 2} checked="checked"{/if} /> {$STR_ADMIN_SITES_ROLLOVER_DISPLAY_SCROLLING}
 			</td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_RSS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsrss}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_rss" value="1" {if $module_rss == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_rss" value="0" {if $module_rss == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_OPINIONS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsavis}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_avis" value="1" {if $module_avis == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_avis" value="0" {if $module_avis == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_CAPTCHA_ACTIVATION}</td>
-		</tr>
-		<tr>
-			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_CAPTCHA_EXPLAIN}</div></td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_SITES_CAPTCHA_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_captcha" value="1" {if $module_captcha == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_captcha" value="0" {if $module_captcha == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{if $is_fonctionsprecedentsuivant}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION}</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "precedent_suivant"}
 {if	!empty($STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN)}
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN}</div></td>
 		</tr>
 {/if}
 		<tr>
-			<td>{$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_precedent_suivant" value="1" {if $module_precedent_suivant == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_precedent_suivant" value="0" {if $module_precedent_suivant == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<input type="radio" name="in_category" value="1" {if $in_category == 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_DIRECT_PARENT}<br />
 				<input type="radio" name="in_category" value="0" {if $in_category == 0} checked="checked"{/if} /> {$STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS}
 			</td>
 		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_STOCKS_MODULE}</td>
-		</tr>
-	{if $is_stock_advanced_module_active}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "stock_advanced"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_ALLOW_ORDERS_WITHOUT_STOCKS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -814,58 +640,8 @@
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS_EXPLAIN}</div></td>
 		</tr>
-	{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-	{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_CART_SAVE_MODULE}</td>
-		</tr>
-		{if $is_fonctionscartpreservation}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_cart_preservation" id="module_cart_preservation1" value="1" {if $module_cart_preservation == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_cart_preservation" id="module_cart_preservation0" value="0" {if $module_cart_preservation == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_RESELLER_MANAGE}</td>
-		</tr>
-		{if $is_fonctionsreseller}
-		<tr>
-			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_RESELLER_MANAGE_EXPLAIN}</div>
-			</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_retail" value="1" {if $module_retail == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_retail" value="0" {if $module_retail == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_AFFILIATION_MODULE}</td>
-		</tr>
-		{if $is_fonctionsaffiliate}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_affilie" value="1" {if $module_affilie == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_affilie" value="0" {if $module_affilie == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "affiliation"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_AFFILIATION_COMMISSION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" maxlength="2" type="text" class="form-control" name="commission_affilie" value="{$commission_affilie|str_form_value}" /> %</td>
@@ -874,209 +650,14 @@
 			<td>{$STR_ADMIN_SITES_AFFILIATION_LOGO}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" type="text" class="form-control" name="logo_affiliation" value="{$logo_affiliation|str_form_value}" /></td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_PRODUCT_LOTS_MODULE}</td>
-		</tr>
-		{if $is_fonctionslot}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_lot" value="1" {if $module_lot == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_lot" value="0" {if $module_lot == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_SPONSOR_MODULE}</td>
-		</tr>
-		{if $is_fonctionsparrain}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_parrain" value="1" {if $module_parrain == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_parrain" value="0" {if $module_parrain == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "parrainage"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_SPONSOR_COMMISSION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" maxlength="3" type="text" class="form-control" name="avoir" value="{$avoir|str_form_value}" /> {$site_symbole}</td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_GIFT_CHECKS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsgiftcheck}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_cadeau" value="1" {if $module_cadeau == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_cadeau" value="0" {if $module_cadeau == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_FAQ_MODULE}</td>
-		</tr>
-		{if $is_fonctionsfaq}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_faq" value="1" {if $module_faq == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_faq" value="0" {if $module_faq == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_URL_REWRITING_MODULE}</td>
-		</tr>
-		{if $is_rewritefile}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_url_rewriting" value="1" {if $module_url_rewriting == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_url_rewriting" value="0" {if $module_url_rewriting == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_MICROBUSINESS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsmicro}
-		<tr>
-			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN}</div></td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_entreprise" value="1" {if $module_entreprise == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_entreprise" value="0" {if $module_entreprise == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_BIRTHDAY_MODULE}</td>
-		</tr>
-		{if $is_fonctionsbirthday}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_CATEGORIES_PROMOTION}</td>
-		</tr>
-		{if $is_fonctionscatpromotions}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_TRADEMARK_PROMOTION}</td>
-		</tr>
-		{if $is_fonctionsmarquepromotions}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_PREMIUM_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_COMPARATOR_EXPLAIN}</td>
-		</tr>
-		{if $is_fonctionscomparateur}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE}</td>
-		</tr>
-		{if $fonctionsconditionnement}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_conditionnement" value="1" {if $module_conditionnement == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_conditionnement" value="0" {if $module_conditionnement == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE}</td>
-		</tr>
-		{if $is_fonctionsgooglefriendconnect}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="googlefriendconnect" value="1" {if $googlefriendconnect == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="googlefriendconnect" value="0" {if $googlefriendconnect == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_SITE_ID}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input style="" type="text" class="form-control" name="googlefriendconnect_site_id" value="{$googlefriendconnect_site_id|str_form_value}" /> </td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_TWITTER_SIGN_IN}</td>
-		</tr>
-		{if $is_fonctionssignintwitter}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="sign_in_twitter" value="1" {if $sign_in_twitter == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="sign_in_twitter" value="0" {if $sign_in_twitter == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "sign_in_twitter"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_TWITTER_CONSUMER_KEY}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="" type="text" class="form-control" name="twitter_consumer_key" value="{$twitter_consumer_key|str_form_value}" /></td>
@@ -1089,25 +670,8 @@
 			<td>{$STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="" type="text" class="form-control" name="twitter_oauth_callback" value="{$twitter_oauth_callback|str_form_value}" /></td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_VACANCY_MODULE}</td>
-		</tr>
-	{if $is_fonctionsvacances}
-		<tr>
-			<td colspan="2"></td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_vacances" value="1" {if $module_vacances == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_vacances" value="0" {if $module_vacances == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "vacances"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_VACANCY_MODULE_TYPE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -1115,60 +679,14 @@
 				<input type="radio" name="module_vacances_type" value="1" {if $module_vacances_type == 1} checked="checked"{/if} /> {$STR_ADMIN_SITES_VACANCY_MODULE_TYPE_SUPPLIER}
 			</td>
 		</tr>
-		{foreach $langs as $l}
+				{foreach $langs as $l}
 		<tr>
 			<td>{$STR_ADMIN_SITES_VACANCY_ADMIN_MESSAGE} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" value="{$l.module_vacances_value|str_form_value}" name="module_vacances_client_msg_{$l.lng}" id="module_vacances_client_msg_{$l.lng}" size="100" /></td>
 		</tr>
-		{/foreach}
-	{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-	{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_FORUM_MODULE}</td>
-		</tr>
-		{if $is_fonctionsforum}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_forum" value="1" {if $module_forum == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_forum" value="0" {if $module_forum == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_GIFTS_LIST}</td>
-		</tr>
-		{if $is_fonctionsgiftlist}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_giftlist" value="1" {if $module_giftlist == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_giftlist" value="0" {if $module_giftlist == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_SO_COLISSIMO_MODULE}</td>
-		</tr>
-		{if $is_fonctionssocolissimo}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_socolissimo" value="1" {if $module_socolissimo == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_socolissimo" value="0" {if $module_socolissimo == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+				{/foreach}
+			{/if}
+			{if $m.technical_code == "socolissimo"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_SO_COLISSIMO_FOID}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:200px" type="text" class="form-control" name="socolissimo_foid" value="{$socolissimo_foid|str_form_value}" /></td>
@@ -1201,50 +719,8 @@
 			<td>{$STR_ADMIN_SITES_SO_COLISSIMO_DYFORWARDINGCHARGESCMT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:50px" type="text" class="form-control" name="socolissimo_dyForwardingChargesCMT" value="{$socolissimo_dyForwardingChargesCMT|str_form_value}" /></td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_EXPEDITOR_MODULE}</td>
-		</tr>
-		{if $is_fonctionsexpeditor}
-		<tr>
-			<td colspan="2">{$STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT}</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_ICI_RELAIS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsicirelais}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="module_icirelais" value="1" {if $module_icirelais == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="module_icirelais" value="0" {if $module_icirelais == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_TNT_MODULE}</td>
-		</tr>
-		{if $is_fonctionstnt}
-			<tr>
-				<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-				<td>
-					<input type="radio" name="module_tnt" value="1" {if $module_tnt == 1} checked="checked"{/if} /> {$STR_YES}
-					<input type="radio" name="module_tnt" value="0" {if $module_tnt == 0} checked="checked"{/if} /> {$STR_NO}
-				</td>
-			</tr>
+			{/if}
+			{if $m.technical_code == "tnt"}
 			<tr>
 				<td>{$STR_ADMIN_SITES_TNT_USERNAME}{$STR_BEFORE_TWO_POINTS}:</td>
 				<td><input style="width:100%" type="text" class="form-control" name="tnt_username" value="{$tnt_username|str_form_value}" /></td>
@@ -1261,15 +737,8 @@
 				<td>{$STR_ADMIN_SITES_TNT_EXPEDITION_DELAY}{$STR_BEFORE_TWO_POINTS}:</td>
 				<td><input style="width:100%" type="text" class="form-control" name="expedition_delay" value="{$expedition_delay|str_form_value}" /></td>
 			</tr>
-		{else}
-			<tr>
-				<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-			</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_SIPS_MODULE}</td>
-		</tr>
-		{if $is_fonctionsatos}
+			{/if}
+			{if $m.technical_code == "sips"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_SIPS_CERTIFICATE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100%" type="text" class="form-control" name="sips" value="{$sips|str_form_value}" /></td>
@@ -1277,16 +746,8 @@
 		<tr>
 			<td colspan="2">{$STR_ADMIN_SITES_SIPS_EXPLAIN}</td>
 		</tr>
-		{else}
-		<input type="hidden" name="sips" value="{$sips|str_form_value}" />
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_PAYBOX_MODULE}</td>
-		</tr>
-		{if $is_fonctionspaybox}
+			{/if}
+			{if $m.technical_code == "paybox"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_PAYBOX_CGI}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100%" type="text" class="form-control" name="paybox_cgi" placeholder="http://" value="{$paybox_cgi|str_form_value}" /></td>
@@ -1306,15 +767,8 @@
 		<tr>
 			<td colspan="2">{$STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN}</td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_SYSTEMPAY}</td>
-		</tr>
-		{if $is_fonctionssystempay}
+			{/if}
+			{if $m.technical_code == "systempay"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_SYSTEMPAY_CERTIFICATE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100%" type="text" class="form-control" name="systempay_cle_prod" value="{$systempay_cle_prod|str_form_value}" /></td>
@@ -1342,29 +796,15 @@
 				<label for="oui">{$STR_YES}</label><input type="radio" name="systempay_test_mode" value="true" id="oui" {if $systempay_test_mode} checked="checked"{/if} />
 			</td>
 		</tr>
-		{else}
-			<tr>
-				<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-			</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_PARTNERS_MODULE}</td>
-		</tr>
-		{if $is_fonctionspartenaires}
+			{/if}
+			{if $m.technical_code == "partenaires"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_PARTNERS_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="radio" value="individual" name="partner_count_method" {if $partner_count_method == 'individual'} checked="checked"{/if} /> {$STR_ADMIN_SITES_PARTNERS_INDIVIDUAL}
 			<input type="radio" value="global" name="partner_count_method" {if $partner_count_method == 'global'} checked="checked"{/if} /> {$STR_ADMIN_SITES_PARTNERS_GLOBAL}</td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_FACEBOOK_MODULE}</td>
-		</tr>
-		{if $is_fonctionsfacebook}
+			{/if}
+			{if $m.technical_code == "facebook"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_FACEBOOK_ADMIN}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100%" type="text" class="form-control" name="fb_admins" value="{$fb_admins|str_form_value}" /></td>
@@ -1373,22 +813,8 @@
 			<td>{$STR_ADMIN_SITES_FACEBOOK_PAGE_LINK}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100%" type="text" class="form-control" name="facebook_page_link" placeholder="http://" value="{$facebook_page_link|str_form_value}" /></td>
 		</tr>
-		{else}
-		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
-		</tr>
-		{/if}
-		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULE}{$STR_BEFORE_TWO_POINTS}: {$STR_ADMIN_SITES_FACEBOOK_CONNECT}</td>
-		</tr>
-		{if $is_fonctionfacebookconnect}
-		<tr>
-			<td>{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<input type="radio" name="facebook_connect" value="1" {if $facebook_connect == 1} checked="checked"{/if} /> {$STR_YES}
-				<input type="radio" name="facebook_connect" value="0" {if $facebook_connect == 0} checked="checked"{/if} /> {$STR_NO}
-			</td>
-		</tr>
+			{/if}
+			{if $m.technical_code == "facebook_connect"}
 		<tr>
 			<td>{$STR_ADMIN_SITES_FACEBOOK_APPID}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="" type="text" class="form-control" name="fb_appid" value="{$fb_appid|str_form_value}" /> </td>
@@ -1401,13 +827,99 @@
 			<td>{$STR_ADMIN_SITES_FACEBOOK_BASEURL}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="" type="text" class="form-control" name="fb_baseurl" value="{$fb_baseurl|str_form_value}" /></td>
 		</tr>
+			{/if}
+			{if $m.technical_code == "facebook_connect"}
+			{/if}
+			{if $m.technical_code == "facebook_connect"}
+			{/if}
+			{if $m.technical_code == "facebook_connect"}
+			{/if}
 		{else}
 		<tr>
-			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE}</a></td>
+			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{$STR_ADMIN_CONTACT_PEEL_FOR_MODULE}</a></td>
 		</tr>
 		{/if}
-		<tr>
-			<td colspan="2" class="center"><input class="btn btn-primary" type="submit" value="{$titre_bouton|str_form_value}" /></td>
-		</tr>
+	{/foreach}
 	</table>
+			</div>
+	{if $nouveau_mode == "modif"}
+		{* Les modules ne sont pas affichés lors de la création d'un site puisque la liste des modules pour ce site n'est pas encore présente en BDD. La configurations de module sera celle par défaut, comme défini dans create_new_site.sql *}
+			<div class="tab-pane" id="tab3">
+	<table class="main_table">
+		<tr>
+			<td class="bloc" colspan="2">{$STR_ADMIN_SITES_MODULES_POSITIONS}</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="alert alert-info">{$STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN}</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table class="full_width">
+			{foreach $modules as $m}
+					{$m.tr_rollover}
+						<td>
+							<div class="edit_module_title">{$m.title}{$STR_BEFORE_TWO_POINTS}:</div>
+						</td>
+						<td>
+							<div class="edit_module_attribut">
+								<table>
+									<tr>
+										<td>
+											<label for="display_mode_{$m.id}_left">{$STR_ADMIN_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</label>
+										</td>
+										<td>
+											<input type="text" style="max-width:150px" class="form-control" name="display_mode_{$m.id}" value="{$m.display_mode}" size="10" />
+										</td>
+									</tr>
+									<tr>
+										<td><label for="emplacement_{$m.id}">{$STR_ADMIN_HTML_PLACE}{$STR_BEFORE_TWO_POINTS}:</label></td>
+										<td>
+										{foreach $emplacement_array as $e_code => $e_name}
+											{assign var="var_name" value="is_{$e_code}_off"}
+											<input type="radio" name="module_{$m.id}" id="{$m.id}_{$e_code}" value="{$e_code}"{if $m.location == $e_code} checked="checked"{/if}{if isset($m.$var_name) && !empty($m.$var_name)} disabled="disabled"{/if} /> <label for="{$m.id}_{$e_code}">{$e_name}</label>
+										{/foreach}
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<label for="etat_{$m.id}">{$STR_ADMIN_ACTIVATE}{$STR_BEFORE_TWO_POINTS}:</label>
+										</td>
+										<td>
+											<input type="checkbox" name="etat_{$m.id}" id="etat_{$m.id}" value="1"{if $m.etat == '1'} checked="checked"{/if} />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<label for="home_{$m.id}">{$STR_ADMIN_SITES_ON_HOMEPAGE_ONLY}{$STR_BEFORE_TWO_POINTS}:</label>
+										</td>
+										<td>
+											<input type="checkbox" name="home_{$m.id}" id="home_{$m.id}" value="1"{if $m.in_home == '1'} checked="checked"{/if} />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<label for="position_{$m.id}_left">{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</label>
+										</td>
+										<td>
+											<input type="text"  style="max-width:50px" class="form-control" name="position_{$m.id}" value="{$m.position|str_form_value}" />
+										</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+			{/foreach}
+				</table>
+			</td>
+		</tr>
+				</table>
+			</div>
+	{/if}
+
+		</div>
+		<br />
+		<p class="center"><input class="btn btn-primary btn-lg" type="submit" value="{$titre_bouton|str_form_value}" /></p>
+	</div>
 </form>

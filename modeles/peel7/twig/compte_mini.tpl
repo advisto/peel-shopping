@@ -3,20 +3,23 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte_mini.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: compte_mini.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}<div class="{% if location=='header' %}hidden-xs{% elseif location=='footer' %}visible-xs{% endif %}">
 	<div style="padding:5px;">
 		{{ STR_HELLO }}&nbsp;{{ prenom|html_entity_decode_if_needed }} {{ nom_famille|html_entity_decode_if_needed }}
 {% if (admin) %}
 		<br /><a href="{{ admin.href|escape('html') }}">{{ admin.txt|escape('html') }}</a>
 {% endif %}
+	{% if quick_add_product_from_search_page_href %}
+			<br /><a href="{{ quick_add_product_from_search_page_href|escape('html') }}">{{ LANG.STR_EASY_LIST }}</a>
+	{% endif %}
 	<br /><a href="{{ sortie_href|escape('html') }}">{{ STR_DECONNECT }}</a>
 	<br /><a href="{{ compte_href|escape('html') }}">{{ STR_COMPTE }}</a>
 	<br /><a href="{{ history_href|escape('html') }}">{{ STR_ORDER_HISTORY }}</a>

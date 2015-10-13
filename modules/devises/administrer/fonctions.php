@@ -3,16 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 47146 2015-10-04 12:21:16Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les éléments de menu affichables
+ *
+ * @param array $params
+ * @return
+ */
+function devises_hook_admin_menu_items($params) {
+	$result['menu_items']['manage_payments'][$GLOBALS['wwwroot_in_admin'] . '/modules/devises/administrer/devises.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DEVISES"];
+	return $result;
 }
 
 /**
@@ -82,6 +93,7 @@ function affiche_formulaire_devise($frm)
 	$tpl->assign('conversion', $frm["conversion"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_TITLE', $GLOBALS['STR_MODULE_DEVISES_ADMIN_TITLE']);
@@ -132,7 +144,7 @@ function insere_devise($frm)
 			, code
 		) VALUES (
 			'" . intval($frm['etat']) . "'
-			, '" . intval($frm['site_id']) . "'
+			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, '" . nohtml_real_escape_string($frm['symbole']) . "'
 			, '" . nohtml_real_escape_string($frm['symbole_place']) . "'
 			, '" . nohtml_real_escape_string($frm['devise']) . "'
@@ -161,7 +173,7 @@ function maj_devise($id, $frm)
 			, devise = '" . nohtml_real_escape_string($frm['devise']) . "'
 			, conversion = '" . nohtml_real_escape_string($conversion) . "'
 			, code = '" . nohtml_real_escape_string($frm['code']) . "'
-			, site_id = '" . intval($frm['site_id']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('devises', null, true) . "";
 
 	query($sql);
@@ -187,7 +199,6 @@ function affiche_liste_devise($start)
 		ORDER BY devise");
 	if (!(num_rows($result) == 0)) {
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
@@ -197,7 +208,7 @@ function affiche_liste_devise($start)
 				'symbole' => $ligne['symbole'],
 				'conversion' => $ligne['conversion'],
 				'code' => $ligne['code'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id']),
 				'etat_onclick' => 'change_status("devises", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 			);

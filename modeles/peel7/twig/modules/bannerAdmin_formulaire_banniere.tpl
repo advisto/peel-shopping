@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_formulaire_banniere.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: bannerAdmin_formulaire_banniere.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
@@ -21,7 +21,7 @@
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}: </td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
 			</td>
@@ -40,6 +40,10 @@
 		<tr>
 			<td>{{ STR_ADMIN_LINK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="lien" style="width:100%" value="{{ lien|str_form_value }}" /></td>
+		</tr>
+		<tr>
+			<td>{{ STR_MODULE_BANNER_ADMIN_KEYWORDS }}{{ STR_BEFORE_TWO_POINTS }}: <br /></td>
+			<td><input type="text" class="form-control" name="keywords" style="width:100%" value="{{ keywords|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td>{{ STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT }}{{ STR_BEFORE_TWO_POINTS }}: <br /></td>

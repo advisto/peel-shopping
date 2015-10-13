@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fin.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 
@@ -50,7 +50,7 @@ if(empty($_SESSION['session_install_finished'])) {
 		'mot_passe' => $_POST['motdepasse']);
 	$id_utilisateur = insere_utilisateur($new_user_infos, false, true, false);
 	foreach($_SESSION['session_install_langs'] as $this_lang) {
-		// Le nom du site est inséré pour toutes les langues par défaut. L'administrateur peux changer les noms des langues par la suite dans le back office.
+		// Le nom du site est inséré pour toutes les langues par défaut. L'administrateur peut changer les noms des langues par la suite dans le back office.
 		set_configuration_variable(array('technical_code' => 'nom_' . $this_lang, 'string' => $_SESSION['session_install_site_name'], 'type' => 'string', 'site_id' => 1), true);
 	}
 	set_configuration_variable(array('technical_code' => 'site_id_showed_by_default_if_domain_not_found', 'string' => "1", 'type' => 'integer', 'origin' => 'core', 'explain' => 'For multisite : to allow any alias on a hosting to reach the main site - Put 0 if you want to only allow configured domains', 'site_id' => 0), true);
@@ -61,12 +61,16 @@ if(empty($_SESSION['session_install_finished'])) {
 	set_configuration_variable(array('technical_code' => 'email_client', 'string' => $_POST['email'], 'type' => 'string', 'site_id' => 1), true);
 	set_configuration_variable(array('technical_code' => 'admin_force_ssl', 'string' => vn($_SESSION['session_install_admin_force_ssl']), 'type' => 'string', 'site_id' => 1), true);
 	set_configuration_variable(array('technical_code' => 'display_errors_for_ips', 'string' => $_SERVER['REMOTE_ADDR'], 'type' => 'string', 'site_id' => 1), true);
+	set_configuration_variable(array('technical_code' => 'peel_database_version', 'string' => PEEL_VERSION, 'type' => 'string', 'site_id' => 0), true);
+	
 	$error_msg = ob_get_contents();
 	ob_end_clean();
+
 	if(!empty($error_msg)) {
 		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
 	}
 }
+
 $_SESSION['session_install_site_name'] = "";
 $_SESSION['session_install_email_webmaster'] = "";
 $_SESSION['session_install_wwwroot'] = "";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_bas.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_bas.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}				</div>
 			</div>
 		</div>
@@ -28,7 +28,7 @@
 	{{ js_output }}
 	{% if (peel_debug) %}
 		{% for key,value in peel_debug %}
-			<span {% if value.duration<0.010 %}style="color:grey"{% else %}{% if value.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ (value.duration*1000)|number_format(2) }} ms - Start{{ STR_BEFORE_TWO_POINTS }}{{ value.start*1000|number_format(2) }} ms  - {% if (value.sql) %}{{ value.sql }}{% endif %} {% if (value.template) %}{{ value.template }}{% endif %}</span><br />
+			<span {% if value.duration<0.010 %}style="color:grey"{% else %}{% if value.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ (value.duration*1000)|number_format(2) }} ms - Start{{ STR_BEFORE_TWO_POINTS }}{{ value.start*1000|number_format(2) }} ms  - {% if (value.sql) %}{{ value.sql }}{% endif %}{% if (value.template) %}{{ value.template }}{% endif %}{% if (value.text) %}{{ value.text }}{% endif %}</span><br />
 		{% endfor %}
 	{% endif %}
 </body>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: caddie_content_html.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -42,6 +42,17 @@
 							<a class="notice" href="{$membre_href|escape:'html'}" title="{$STR_LOGIN_FOR_REBATE|str_form_value}">{$STR_PLEASE_LOGIN}</a> {$STR_REBATE_NOW}
 						</div>
 					{/if}
+				{if !empty($user_tva_intracom)}
+					<br />
+					<div class="input-group">
+						<span class="input-group-addon"><label for="intracom_for_billing">{$user_tva_intracom.txt}{$STR_BEFORE_TWO_POINTS}: </label></span>
+						<input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{$user_tva_intracom.value|upper|str_form_value}" />
+						<span class="input-group-addon"><a href="#" onclick="return frmsubmit('recalc')"><span class="glyphicon glyphicon-refresh"></span></a></span>
+					</div>
+					{if $intracom_for_billing_error}
+						<div>{$intracom_for_billing_error}</div>
+					{/if}
+				{/if}
 						<div style="padding-top:15px; padding-bottom:15px">
 							<a href="#" onclick="return frmsubmit('recalc')"{if !empty($shipping_text)} data-toggle="tooltip" title="{$shipping_text|str_form_value}"{/if} class="tooltip_link btn btn-success"><span class="glyphicon glyphicon-refresh"></span> {$STR_UPDATE}</a>
 						</div>
@@ -111,6 +122,13 @@
 						<tr>
 							<td colspan="2">
 								<a class="cart_preservation_link btn btn-info" href="{$preservation_href|escape:'html'}" ><span class="glyphicon glyphicon-save"></span> {$STR_SAVE_CART}</a>
+							</td>
+						</tr>
+					{/if}
+					{if $export_product_list_to_pdf}
+						<tr>
+							<td colspan="2">
+								<a class="cart_preservation_link btn btn-info" href="{$genere_pdf_href|escape:'html'}" target="_blank" ><img src="{$wwwroot}/images/logoPDF_small.png" style="width:50px;" target="_blank" /> {$STR_MODULE_FACTURES_ADVANCED_EXPORT_LIST_PDF}</a>
 							</td>
 						</tr>
 					{/if}

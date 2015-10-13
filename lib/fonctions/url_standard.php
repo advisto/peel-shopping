@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: url_standard.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: url_standard.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -27,7 +27,7 @@ if (!function_exists('get_product_url')) {
 	 */
 	function get_product_url($id, $name=null, $category_id=null, $category_name=null, $add_get_suffixe = false, $html_encode = false)
 	{
-		$url_prod = $GLOBALS['wwwroot'] . "/achat/produit_details.php?id=" . intval($id);
+		$url_prod = get_url("/achat/produit_details.php", array('id' => intval($id)));
 		if ($add_get_suffixe) {
 			if ($html_encode) {
 				$url_prod .= '&amp;';
@@ -51,10 +51,11 @@ if (!function_exists('get_product_category_url')) {
 	 */
 	function get_product_category_url($id = null, $name = null, $add_get_suffixe = false, $html_encode = false)
 	{
-		$url_cat = $GLOBALS['wwwroot'] . '/achat/';
+		$get_array = array();
 		if (!empty($id)) {
-			$url_cat .= '?catid=' . intval($id);
+			$get_array['catid'] = intval($id);
 		}
+		$url_cat = get_url('/achat/', $get_array, null);
 		if ($add_get_suffixe) {
 			if (empty($id)) {
 				$url_cat .= '?';
@@ -77,11 +78,10 @@ if (!function_exists('get_content_url')) {
 	 * @param integer $rub_id
 	 * @param string $rub_name
 	 * @return
-	 */
-								
-	function get_content_url($id, $title=null, $category_id=null, $category_name=null, $add_get_suffixe = false, $html_encode = false)
+	 */						
+	function get_content_url($id, $title = null, $category_id = null, $category_name = null, $add_get_suffixe = false, $html_encode = false)
 	{
-		$url_art = $GLOBALS['wwwroot'] . "/lire/article_details.php?rubid=" . $id;
+		$url_art = get_url("/lire/article_details.php", array('rubid' => $id));
 		if ($add_get_suffixe) {
 			if ($html_encode) {
 				$url_art .= '&amp;';
@@ -106,7 +106,7 @@ if (!function_exists('get_content_category_url')) {
 	function get_content_category_url($id = null, $name = null, $add_get_suffixe = false, $html_encode = false)
 	{
 		if(!empty($id)) {
-			$url_rub = $GLOBALS['wwwroot'] . '/lire/?rubid=' . intval($id);
+			$url_rub = get_url('/lire/', array('rubid' => intval($id)));
 			if ($add_get_suffixe) {
 				if ($html_encode) {
 					$url_rub .= '&amp;';
@@ -115,7 +115,7 @@ if (!function_exists('get_content_category_url')) {
 				}
 			}
 		}else{
-			$url_rub = $GLOBALS['wwwroot'] . '/lire/';
+			$url_rub = get_url('/lire/');
 			if ($add_get_suffixe) {
 				$url_rub .= '?';
 			}
@@ -128,12 +128,14 @@ if (!function_exists('get_lang_rewrited_wwwroot')) {
 	/**
 	 * get_lang_rewrited_wwwroot()
 	 *
-	 * @param mixed $this_lang
+	 * @param string $this_lang
+	 * @param string $this_wwwroot
+	 * @param string $this_rewriting
 	 * @return
 	 */
-	function get_lang_rewrited_wwwroot($this_lang)
+	function get_lang_rewrited_wwwroot($this_lang, $this_wwwroot = null, $this_rewriting = null)
 	{
-		return $GLOBALS['wwwroot_main'];
+		return vb($this_wwwroot, $GLOBALS['wwwroot_main']);
 	}
 }
 
@@ -148,7 +150,7 @@ if (!function_exists('get_map_site_url')) {
 
 	function get_map_site_url($add_get_suffixe = false, $html_encode = false)
 	{
-		$url_map_site_url = $GLOBALS['wwwroot'] . '/sitemap.php';
+		$url_map_site_url = get_url('sitemap');
 
 		if ($add_get_suffixe) {
 			$url_map_site_url .= '?';
@@ -168,7 +170,7 @@ if (!function_exists('get_contact_url')) {
 	 */
 	function get_contact_url($add_get_suffixe = false, $html_encode = false)
 	{
-		$url_contact_url = $GLOBALS['wwwroot'] . '/utilisateurs/contact.php';
+		$url_contact_url = get_url('/utilisateurs/contact.php');
 
 		if ($add_get_suffixe) {
 			$url_contact_url .= '?';
@@ -186,9 +188,9 @@ if (!function_exists('get_account_url')) {
 	function get_account_url($add_get_suffixe = false, $html_encode = false, $force_logged_in_status = null)
 	{
 		if($force_logged_in_status || ($force_logged_in_status === null && est_identifie())){
-			$url_account_url = $GLOBALS['wwwroot'] . '/compte.php';
+			$url_account_url = get_url('compte');
 		} else {
-			$url_account_url = $GLOBALS['wwwroot'] . '/membre.php';
+			$url_account_url = get_url('membre');
 		}
 		if ($add_get_suffixe) {
 			$url_account_url .= '?';
@@ -208,7 +210,7 @@ if (!function_exists('get_account_register_url')) {
 	 */
 	function get_account_register_url($add_get_suffixe = false, $html_encode = false)
 	{
-		$url_account_register = $GLOBALS['wwwroot'] . "/utilisateurs/enregistrement.php";
+		$url_account_register = get_url('/utilisateurs/enregistrement.php');
 		if ($add_get_suffixe) {
 			$url_account_register .= '?';
 		}
@@ -225,7 +227,7 @@ if (!function_exists('get_cgv_url')) {
 	 */
 	function get_cgv_url($html_encode = false)
 	{
-		$url_cgv = $GLOBALS['wwwroot'] . '/cgv.php';
+		$url_cgv = get_url('cgv');
 		return $url_cgv;
 	}
 }
@@ -239,21 +241,50 @@ if (!function_exists('get_tell_friends_url')) {
 	 */
 	function get_tell_friends_url($html_encode = false)
 	{
-		$url_tell_friends = $GLOBALS['wwwroot'] . '/modules/direaunami/direaunami.php';
+		$url_tell_friends = get_url('/modules/direaunami/direaunami.php');
 		return $url_tell_friends;
 	}
 }
 
-if (!function_exists('get_search_url')) {
+if (!function_exists('get_url')) {
 	/**
-	 * get_search_url
-	 *
-	 * @return
+	 * Renvoie l'URL réécrite et optimisée
+	 * 
+	 * @param string $uri Page souhaitée (chemin du fichier php)
+	 * @param array $get_array tableau GET
+	 * @param string $lang langue 
+	 * @param intger $forced_site_id 
+	 * @return string URL tenant compte des redirections
+	 * @access public
 	 */
-	function get_search_url()
-	{
-		$url = $GLOBALS['wwwroot'] . '/search.php';
+	function get_url($uri, $get_array = array(), $lang = null, $forced_site_id = null) {
+		$uri_by_technical_code = array('caddie_affichage' => '/achat/caddie_affichage.php', 'achat_maintenant' => '/achat/achat_maintenant.php');
+		if(!empty($uri_by_technical_code[$uri])){
+			$uri = $uri_by_technical_code[$uri];
+		}
+		if(empty($lang)) {
+			$lang = $_SESSION['session_langue'];
+		}
+		if(empty($get_array)) {
+			$get_array = array();
+		}
+		if(strpos($uri, '/') === false && strpos($uri, '.') === false) {
+			$uri .= '.php';
+		}
+		if(function_exists('convertHrefUri') && empty($forced_site_id)) {
+			$url = convertHrefUri($uri, $get_array, $lang);
+		} else {
+			if(substr($uri, 0, 1) !== '/') {
+				$uri = '/' . $uri;
+			}
+			if (count($get_array) > 0) {
+				foreach ($get_array as $key => $value) {
+					$queryString[] = $key . '=' . urlencode($value);
+				}
+				$uri .= '?' . implode('&', $queryString);
+			}
+			$url = handle_setup_redirections(get_site_wwwroot($forced_site_id, $lang) . $uri, 'value');
+		}
 		return $url;
 	}
 }
-

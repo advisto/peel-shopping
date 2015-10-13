@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_formulaire.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: avis_formulaire.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<h2>{{ STR_DONNEZ_AVIS }}</h2>
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="avis_formulaire">
@@ -23,14 +23,16 @@
 			{% endif %}
 			</td>
 		</tr>
-		<tr>
-			<td class="title_label top"> {{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{{ prenom }} {{ nom_famille }}</td>
-		</tr>
-		<tr>
-			<td class="title_label top"> {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
-		</tr>
+		{% if not ad_owner_opinion %}
+			<tr>
+				<td class="title_label top"> {{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td>{{ prenom }} {{ nom_famille }}</td>
+			</tr>
+			<tr>
+				<td class="title_label top"> {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
+			</tr>
+		{% endif %}
 		<tr>
 			{% if (html_editor) %}
 			<td class="top" colspan="2">
@@ -47,19 +49,21 @@
 			</td>
 			{% endif %}
 		</tr>
-		{% if not (no_notation) %}
-		<tr>
-			<td class="top"><b>{{ STR_YOUR_NOTE }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
-				<br />{{ error_note }}
-			</td>
-			<td>
-				<input type="radio" name="note" value="5" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-				<input type="radio" name="note" value="4" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-				<input type="radio" name="note" value="3" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-				<input type="radio" name="note" value="2" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-				<input type="radio" name="note" value="1" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-			</td>
-		</tr>
+		{% if not ad_owner_opinion %}
+			{% if not (no_notation) %}
+			<tr>
+				<td class="top"><b>{{ STR_YOUR_NOTE }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
+					<br />{{ error_note }}
+				</td>
+				<td>
+					<input type="radio" name="note" value="5" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+					<input type="radio" name="note" value="4" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+					<input type="radio" name="note" value="3" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+					<input type="radio" name="note" value="2" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+					<input type="radio" name="note" value="1" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+				</td>
+			</tr>
+			{% endif %}
 		{% endif %}
 		<tr>
 			<td colspan="2" class="center">
@@ -80,8 +84,10 @@
 				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" />
 			</td>
 		</tr>
+		{% if not ad_owner_opinion %}
 		<tr>
 			<td colspan="2"><p><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p></td>
 		</tr>
+		{% endif %}
 	</table>
 </form>

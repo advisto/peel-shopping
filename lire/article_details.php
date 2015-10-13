@@ -3,20 +3,22 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: article_details.php 47245 2015-10-08 16:47:28Z gboussin $
 
 define('IN_RUBRIQUE_ARTICLE', true);
-
-if(!defined('PEEL_PREFETCH') || substr($_SERVER["SCRIPT_NAME"], -strlen("/prefetch.php")) != "/prefetch.php") {
+if (defined('PEEL_PREFETCH')) {
+	call_module_hook('configuration_end', array());
+} else {
 	include("../configuration.inc.php");
 }
+
 if (!empty($_GET['artid']) && empty($_GET['rubid']) && empty($_GET['id'])) {
 	// Compatibilité avec anciennes URL
 	$_GET['id'] = intval($_GET['artid']);
@@ -24,7 +26,7 @@ if (!empty($_GET['artid']) && empty($_GET['rubid']) && empty($_GET['id'])) {
 	// Compatibilité avec anciennes URL
 	$_GET['id'] = intval($_GET['rubid']);
 } elseif (empty($_GET['id'])) {
-	redirect_and_die($GLOBALS['wwwroot'] . "/");
+	redirect_and_die(get_url('/'));
 } else {
 	$_GET['id'] = intval($_GET['id']);
 }
@@ -40,15 +42,22 @@ $art_query = query($sql);
 if ($art = fetch_assoc($art_query)) {
 	if(!empty($art['technical_code']) && String::strpos($art['technical_code'], 'R=') === 0) {
 		// redirection suivie que l'article soit actif ou non
-		redirect_and_die($GLOBALS['wwwroot'] . '/' . String::substr($art['technical_code'], 2), true);
+		$url_art = String::substr($art['technical_code'], 2);
+		if(strpos($url_art, '://') === false) {
+			if(String::substr($url_art, 0, 1) != '/') {
+				$url_art = '/' . $url_art;
+			}
+			$url_art = $GLOBALS['wwwroot'] . $url_art;
+		}
+		redirect_and_die($url_art, true);
 	}
 	if($art['on_reseller'] == 1 && !a_priv("admin_product") && !a_priv("reve")) {
-		redirect_and_die($GLOBALS['wwwroot'] . "/");
+		redirect_and_die(get_url('/'));
 	}
 	// Si on passe ici et que $art['etat']=0 : on continue quand même, et on affichera dans get_article_details_html que l'article n'a pas été trouvé
 } else {
 	// Article n'existe pas
-	redirect_and_die($GLOBALS['wwwroot'] . "/");
+	redirect_and_die(get_url('/'));
 }
 
 // Permet de définir l'id de la div principal du site.
@@ -58,7 +67,7 @@ if ($art['technical_code'] == 'tradefair') {
 	$GLOBALS['main_div_id'] = 'tradefloor';
 }
 
-if (is_module_url_rewriting_active()) {
+if (check_if_module_active('url_rewriting')) {
 	// Attention la redirection ne sera effectuée que si il n'y a pas de / sur le REQUEST_URI car cela permet de crée des urls courtes par le htaccess sans rediriger par la suite.
 	// Exemple redirection htaccess pour un article avec l'url /patrocinador-categoría.html
 	if (get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]) != get_current_url(false) && String::strpos(substr($_SERVER['REQUEST_URI'], 1), '/') !== false) {

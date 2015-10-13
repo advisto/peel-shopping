@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tarifs.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: tarifs.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -151,6 +151,7 @@ function affiche_formulaire_tarif(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vn($frm['id'])));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 
 	$tpl_zones_options = array();
 	$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . "
@@ -246,7 +247,7 @@ function insere_tarif($frm)
 		,'" . nohtml_real_escape_string($frm['totalmax']) . "'
 		,'" . nohtml_real_escape_string($frm['tarif']) . "'
 		,'" . nohtml_real_escape_string($frm['tva']) . "'
-		,'" . intval($frm['site_id']) . "'
+		,'" . real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 	)");
 }
 
@@ -268,7 +269,7 @@ function maj_tarif($id, $frm)
 		,totalmax = '" . nohtml_real_escape_string($frm['totalmax']) . "'
 		,tarif = '" . nohtml_real_escape_string($frm['tarif']) . "'
 		,tva = '" . nohtml_real_escape_string($frm['tva']) . "'
-		,site_id = '" . intval($frm['site_id']) . "'
+		,site_id = '" . real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 	WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('tarifs', null, true) . "");
 }
 
@@ -293,7 +294,6 @@ function affiche_liste_tarif()
 		WHERE " . get_filter_site_cond('tarifs', 't', true) . "
 		ORDER BY zone_name ASC, t.type ASC, t.tarif ASC");
 	if (!(num_rows($result) == 0)) {
-		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
@@ -307,7 +307,7 @@ function affiche_liste_tarif()
 				'delivery_type_name' => get_delivery_type_name($ligne['type']),
 				'totalmin' => $ligne['totalmin'],
 				'totalmax' => $ligne['totalmax'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

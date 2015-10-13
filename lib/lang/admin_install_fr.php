@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_fr.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_install_fr.php 46935 2015-09-18 08:49:48Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -55,7 +55,7 @@ $GLOBALS["STR_ADMIN_INSTALL_FILE_NOK"] = "Le fichier %s n'est pas accessible en 
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_OK_PREFIX"] = "La base %s ne contient pas de table PEEL (c'est parfait).";
 $GLOBALS["STR_ADMIN_INSTALL_CHECK_ACCESS_RIGHTS"] = "Vérification des droits d'accès sur les fichiers et les répertoires";
 $GLOBALS["STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN"] = "NB : La prochaine étape 5/6 va créer votre structure de données et peut prendre quelques secondes";
-$GLOBALS["STR_ADMIN_INSTALL_RIGHTS_OK"] = "Les droits sont donc corrects";
+$GLOBALS["STR_ADMIN_INSTALL_RIGHTS_OK"] = "Les droits d'accès semblent tous corrects";
 $GLOBALS["STR_ADMIN_INSTALL_RIGHTS_NOK"] = "Veuillez corriger les erreurs avant de continuer";
 $GLOBALS["STR_ADMIN_INSTALL_CONTINUE_WITH_ERRORS_BUTTON"] = "Continuer malgré les erreurs";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_RENAME_TABLES"] = "Si vous continuez, les tables déjà existantes ne vont pas être effacées, mais si la structure de données n'est pas celle attendue, cela va créer des erreurs. Par ailleurs, les données de bases vont y être ajoutées, et créer potentiellement des doublons. Vous DEVEZ renommer ou supprimer les tables déjà existantes.";
@@ -76,5 +76,5 @@ $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Choisissez les langues à insta
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Il vous faut activer PHP >= 5.2 sur votre site : éditez le fichier .htaccess à la racine du site pour activer les lignes correspondant à votre hébergement en retirant le # en début de ligne, ou contactez votre hébergeur - Pour avoir un hébergement chez PEEL, contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
-$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Le fonctionnement sera normal hormis le module Butterflive qui ne pourra pas fonctionner";
+$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Le fonctionnement sera normal hormis certains modules qui pourraient ne pas fonctionner";
 

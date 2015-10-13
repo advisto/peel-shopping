@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: database_email_template_text_es.php 46950 2015-09-18 13:50:43Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -460,6 +460,8 @@ Atentamente,",
 
 Su cuenta [EMAIL] en [SITE] se ha activado por un administrador. Ahora recibe el estado \"[STATUT]\" y los beneficios asociados, y se puede acceder a su cuenta.
 
-Atentamente,"
+Atentamente,",
+  "validating_registration_by_admin" => "Su suscripción en [SITE] ha sido validado por un administrador."
+
 );
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: sitemap.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -93,8 +93,10 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	$wwwroot_array = array();
 	$legal_url_array = array();
 	$tpl->assign('date', date("Y-m-d"));
+	$current_lang = $_SESSION['session_langue'];
 	foreach($this_wwwroot_lang_array as $this_lang) {
 		// Modification de l'environnement de langue
+		$_SESSION['session_langue'] = $this_lang;
 		set_lang_configuration_and_texts($this_lang, vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$this_lang]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 
 		// génération des liens pour les produits 
@@ -107,7 +109,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		$created_report[] = $sql;
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
-			$product_object = new Product($result['produit_id'], $result, true, null, true, !is_micro_entreprise_module_active());
+			$product_object = new Product($result['produit_id'], $result, true, null, true, !check_if_module_active('micro_entreprise'));
 			$tpl_products[] = $product_object->get_product_url();
 			unset($product_object);
 		}
@@ -152,13 +154,18 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		while ($result = fetch_assoc($query)) {
 			$content_category_url_array[] = get_content_category_url($result['id'], $result['nom']);
 		}
-		$content_url_array[] = $GLOBALS['wwwroot'] . '/utilisateurs/contact.php';
-		$legal_url_array[] = $GLOBALS['wwwroot'] . '/legal.php';
-		$legal_url_array[] = $GLOBALS['wwwroot'] . '/cgv.php';
+		$content_url_array[] = get_url('/utilisateurs/contact.php');
+		$legal_url_array[] = get_url('legal');
+		$legal_url_array[] = get_url('cgv');
 		$account_register_url_array[] = get_account_register_url();
 		$account_url_array[] = get_account_url(false, false, false);
-		$wwwroot_array[] = $GLOBALS['wwwroot'] . '/';
+		$account_url_array[] = get_url('/utilisateurs/oubli_mot_passe.php');
+		$wwwroot_array[] = get_url('/');
 	}
+	// rétablissement de la langue du back office pour l'affichage du message de confirmation
+	$_SESSION['session_langue'] = $current_lang;
+	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+
 	$tpl->assign('account_register_url_array', $account_register_url_array);
 	$tpl->assign('product_category_url_array', $product_category_url_array);
 	$tpl->assign('content_url_array', $content_url_array);
@@ -174,8 +181,6 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	fwrite($create_xml, String::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
 	fclose($create_xml);
 
-	// rétablissement de la langue du back office pour l'affichage du message de confirmation
-	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITEMAP_MSG_CREATED_OK']))->fetch();
 	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . nl2br(implode('<hr />', $created_report)) . '</p>';
 }

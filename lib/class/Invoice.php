@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: Invoice.php 47345 2015-10-12 17:59:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 44077 2015-02-17 10:20:38Z sdelaporte $
+ * @version $Id: Invoice.php 47345 2015-10-12 17:59:08Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -40,6 +40,8 @@ class Invoice extends TCPDF {
 	var $format;
 	var $angle = 0;
 	var $remarque_lignes;
+	var $document_name;
+	var $document_id;
 
 	/**
 	 * PRIVATE FUNCTION : Invoice::InvoiceRoundedRect()
@@ -182,23 +184,30 @@ class Invoice extends TCPDF {
 	 * @param mixed $logo
 	 * @return
 	 */
-	function addSociete($adresse, $logo)
+	function addSociete($adresse, $logo, $bill_mode)
 	{
-		$x1 = 10;
-		$y1 = 6;
+		if ($bill_mode == 'user_custom_products_list') {
+			$x1 = 90;
+			$y1 = 3;
+		} else {
+			$x1 = 10;
+			$y1 = 6;
+		}
 		if (!empty($logo)) {
 			// Positionnement du logo à droite des informations sur la société
 			$this->Image($logo, $x1 + 50, $y1, 35);
 		}
-		$this->SetXY($x1, $y1);
-		// $this->SetFont('Helvetica', 'B', 12);
-		// $length = $this->GetStringWidth( $nom );
-		// $this->Cell( $length, 2, $nom);
-		$this->SetFont('Helvetica', '', 10);
-		$length = $this->GetStringWidth($adresse);
-		// Coordonnées de la société
-		$lignes = $this->sizeOfText($adresse, $length) ;
-		$this->MultiCell($length, 4, $adresse);
+		if ($bill_mode != 'user_custom_products_list') {
+			$this->SetXY($x1, $y1);
+			// $this->SetFont('Helvetica', 'B', 12);
+			// $length = $this->GetStringWidth( $nom );
+			// $this->Cell( $length, 2, $nom);
+			$this->SetFont('Helvetica', '', 10);
+			$length = $this->GetStringWidth($adresse);
+			// Coordonnées de la société
+			$lignes = $this->sizeOfText($adresse, $length) ;
+			$this->MultiCell($length, 4, $adresse);
+		}
 	}
 
 	/**
@@ -210,12 +219,19 @@ class Invoice extends TCPDF {
 	 * @param booelan $change_background_color_by_type
 	 * @return
 	 */
-	function fact_dev($libelle, $num, $change_background_color_by_type = false)
+	function fact_dev($libelle, $num, $change_background_color_by_type = false, $bill_mode = null)
 	{
-		$r1 = $this->w - 100;
-		$r2 = $r1 + 90;
-		$y1 = 6;
-		$y2 = $y1 + 2;
+		if ($bill_mode == 'user_custom_products_list') {
+			$y1 = 25;
+			$r1 = $this->w - 100;
+			$r2 = $r1 + 90;
+			$y2 = 9;
+		} else {
+			$y1 = 6;
+			$r1 = $this->w - 100;
+			$r2 = $r1 + 90;
+			$y2 = $y1 + 2;
+		}
 		$mid = ($r1 + $r2) / 2;
 
 		$texte = $libelle . " N° : " . $num;
@@ -268,10 +284,15 @@ class Invoice extends TCPDF {
 	 * @param mixed $date_a
 	 * @return
 	 */
-	function addDate($date, $date_a)
+	function addDate($date, $date_a, $bill_mode)
 	{
-		$r1 = $this->w - 100;
-		$y1 = 17;
+		if ($bill_mode == 'user_custom_products_list') {
+			$r1 = $this->w - 100;
+			$y1 = 38;
+		} else {
+			$r1 = $this->w - 100;
+			$y1 = 17;
+		}
 		$width = 90;
 		$height = 12;
 		$header_height = 5;
@@ -311,12 +332,12 @@ class Invoice extends TCPDF {
 		$this->SetFont("Helvetica", "", 8);
 		$this->Cell(30, 4, $text1 ,0, 0, "C");
 		if (floatval($tva)==0) {
-			if (is_micro_entreprise_module_active()) {
+			if (check_if_module_active('micro_entreprise')) {
 				// Pour les entreprises bénéficiant du régime de franchise de base de TVA, il faut obligatoirement porter sur chaque facture la mention suivante : « TVA non applicable, article 293 B du CGI ».
 				// => Déjà géré par l'appel à addTVAs_part_micro
 			} elseif(is_user_tva_intracom_for_no_vat($id_utilisateur)) {
 				// Pour les livraisons de biens intracommunautaires, les factures doivent obligatoirement comporter la mention suivante : « Exonération de TVA, article 262 ter 1 du CGI ».
-				// Lorsqu’il s’agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
+				// Lorsqu'il s'agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
 				// => Texte à définir en conséquence en fonction de votre site dans $GLOBALS['STR_INVOICE_BOTTOM_TEXT2']
 				$text2 = $GLOBALS['STR_INVOICE_BOTTOM_TEXT2'];
 				$this->SetXY($r1, $y1+4);
@@ -348,10 +369,15 @@ class Invoice extends TCPDF {
 	 * @param integer $id_utilisateur
 	 * @return
 	 */
-	function addClientAdresseFacturation($pdf_facturation, $id_utilisateur)
+	function addClientAdresseFacturation($pdf_facturation, $id_utilisateur, $bill_mode)
 	{
-		$r1 = $this->w - 200;
-		$y1 = 40;
+		if ($bill_mode == 'user_custom_products_list') {
+			$r1 = $this->w - 200;
+			$y1 = 6;
+		} else {
+			$r1 = $this->w - 200;
+			$y1 = 40;
+		}
 		$width = 90;
 		$height = 45;
 		$header_height = 5;
@@ -474,26 +500,40 @@ class Invoice extends TCPDF {
 	 * @param mixed $y_max_allowed
 	 * @return
 	 */
-	function addCols($y_max_allowed)
+	function addCols($y_max_allowed, $bill_mode=null)
 	{
+
 		$r1 = 10;
 		$r2 = $this->w - ($r1 * 2) ;
-		$y1 = 92;
+		if($bill_mode == 'user_custom_products_list') {
+			$y1 = 60;
+			$height = 8;
+		} else {
+			$y1 = 92;
+			$height = 5;
+		}
 		$y2 = $y_max_allowed - 10 - $y1;
 		$this->SetXY($r1, $y1);
 		$this->Rect($r1, $y1, $r2, $y2, "D");
 
 		$this->SetFillColor(240, 240, 240);
-		$this->Rect($r1, $y1, $r2, 5, "DF");
+		$this->Rect($r1, $y1, $r2, $height, "DF");
 
 		$colX = $r1;
 		$this->SetFont("Helvetica", "B", 8);
 		if(!empty($this->colonnes)) {
 			foreach($this->colonnes as $lib => $pos) {
 				$this->SetXY($colX, $y1 + 1);
-				$this->Cell($pos, 1, $lib, 0, 0, "C");
+				if($bill_mode != 'user_custom_products_list') {
+					$this->Cell($pos, 1, $lib, 0, 0, "C");
+				} else {
+					$this->MultiCell($pos, $height-1, $lib, 0, 0, "C");
+				}
 				$colX += $pos;
-				$this->Line($colX, $y1, $colX, $y1 + $y2);
+				if($bill_mode != 'user_custom_products_list') {
+					// pour l'affichage des listes de produits, les lignes sont horizontales (cf addLine)
+					$this->Line($colX, $y1, $colX, $y1 + $y2);
+				}
 			}
 		}
 	}
@@ -544,11 +584,19 @@ class Invoice extends TCPDF {
 	 * @param mixed $tab
 	 * @return
 	 */
-	function addLine($ligne, $tab)
+	function addLine($ligne, $tab, $bill_mode = null)
 	{
 		$x = 10;
 		$max_y_reached = $ligne;
-
+		if($bill_mode == 'user_custom_products_list') {
+			$this->SetFont("Helvetica", "", 7);
+		} else {
+			$this->SetFont("Helvetica", "", 8);
+		}
+		$line_height = 3.5;
+		if($bill_mode == 'user_custom_products_list') {
+			$ligne = $ligne-3;
+		}
 		if(!empty($this->colonnes)) {
 			foreach($this->colonnes as $lib => $pos) {
 				$longCell = $pos;
@@ -557,12 +605,16 @@ class Invoice extends TCPDF {
 				$tailleTexte = $this->sizeOfText($texte, $length);
 				$formText = $this->format[ $lib ];
 				$this->SetXY($x, $ligne);
-				$this->SetFont("Helvetica", "", 8);
-				$this->MultiCell($longCell, 3.5, $texte, 0, $formText);
+				$this->MultiCell($longCell, $line_height, $texte, 0, $formText);
 				if ($max_y_reached < ($this->GetY())) {
 					$max_y_reached = $this->GetY() ;
 				}
 				$x += $pos;
+			}
+			if($bill_mode == 'user_custom_products_list') {
+				$y = $ligne-4;
+				// pour l'affichage des listes de produits, les lignes de séparations tracées sont horizontales. La séparation s'affiche au dessus des lignes.
+				$this->Line(10, $y, $x, $y);
 			}
 		}
 		return ($max_y_reached - $ligne);
@@ -673,6 +725,37 @@ class Invoice extends TCPDF {
 	}
 
 	/**
+	 * Invoice::addCadreRib()
+	 *
+	 * @return
+	 */
+	function addCadreRib()
+	{
+		$this->SetFont("Helvetica", "B", 10);
+		$r1 = 10;
+		$r2 = $r1 + 65;
+		$y1 = $this->h - 60;
+		$y2 = $y1 + 35;
+		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
+		$this->Line($r1, $y1 + 6, $r2, $y1 + 6);
+		$this->SetXY($r1, $y1 + 1);
+		$this->Cell(60, 4, $GLOBALS['STR_TRANSFER'], 0, 0, "C");
+		
+		$sql="SELECT code_banque, code_guichet, numero_compte, cle_rib, iban, swift
+			FROM peel_societe
+			WHERE " . get_filter_site_cond('societe') . "
+			LIMIT 1";
+		$query = query($sql);
+		$result = fetch_assoc($query);
+		
+		$this->SetXY($r1, $y1+6);
+		$this->SetFont('Helvetica', '', 10);
+		$rib = $GLOBALS['STR_BANK_ACCOUNT_CODE'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $result['code_banque'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_COUNTER'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $result['code_guichet'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_NUMBER'].$GLOBALS['STR_BEFORE_TWO_POINTS'] .  ':'.$result['numero_compte'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_RIB_KEY'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['cle_rib'] . "\r\n" .  $GLOBALS['STR_IBAN'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['iban'] . "\r\n" . $GLOBALS['STR_SWIFT'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['swift']; 
+		// $length = $this->GetStringWidth($rib);
+		$this->MultiCell(66, 7, $rib, 0, "L");
+	}
+
+	/**
 	 * trace le cadre des totaux
 	 *
 	 * @return
@@ -721,7 +804,7 @@ class Invoice extends TCPDF {
 			$k = $k + 3;
 		}
 
-		if (is_module_ecotaxe_active()) {
+		if (check_if_module_active('ecotaxe')) {
 			$this->SetXY($re, $y1 + $k);
 			$this->Cell(25, 4, $GLOBALS['STR_PDF_ECOTAXE_HT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
 			$this->SetXY($re + 30, $y1 + $k);
@@ -743,7 +826,7 @@ class Invoice extends TCPDF {
 			$this->Cell(25, 4, $params1["small_order_overcost_amount"], '', '', 'R');
 			$k = $k + 3;
 		}
-		if (!is_micro_entreprise_module_active()) {
+		if (!check_if_module_active('micro_entreprise')) {
 			$this->SetXY($re, $y1 + $k);
 			$this->Cell(25, 4, $GLOBALS['STR_PDF_TOTAL_HT']);
 			$this->SetXY($re + 30, $y1 + $k);
@@ -782,7 +865,7 @@ class Invoice extends TCPDF {
 		$this->SetFont("Helvetica", "B", 7);
 		$k = 0;
 
-		if (is_micro_entreprise_module_active()) {
+		if (check_if_module_active('micro_entreprise')) {
 			addTVAs_part_micro($this, $re, $y1 + $k);
 		} else {
 			if (!empty($params2["distinct_total_vat"])) {
@@ -825,7 +908,6 @@ class Invoice extends TCPDF {
 	 * Cette fonction génère :
 	 * - une facture pdf avec $code_facture
 	 * - ou une compilation de factures avec ($date_debut, $date_fin) ou ($id_debut et $id_fin) et $user_id.
-	 * Le paramètre $folder definit la direction de sortie du pdf => Il faut mettre false pour l'affichage à l'écran ou le chemin du dossier de stockage pour l'enregistrement.
 	 *
 	 * @param string $code_facture
 	 * @param string $date_debut
@@ -835,172 +917,294 @@ class Invoice extends TCPDF {
 	 * @param integer $user_id
 	 * @param integer $id_statut_paiement_filter
 	 * @param string $bill_mode
-	 * @param mixed $folder
+	 * @param mixed $folder Définit la direction de sortie du pdf => Il faut mettre false pour l'affichage à l'écran ou le chemin du dossier de stockage pour l'enregistrement.
 	 * @return
 	 */
-	function FillDocument($code_facture = null, $date_debut = null, $date_fin = null, $id_debut = null, $id_fin = null, $user_id = null, $id_statut_paiement_filter = null, $bill_mode = 'standard', $folder = false)
+	function FillDocument($code_facture = null, $date_debut = null, $date_fin = null, $id_debut = null, $id_fin = null, $user_id = null, $id_statut_paiement_filter = null, $bill_mode = 'standard', $folder = false, $order_object=null, $product_infos_array = null, $order_array = null, $document_title = null, $ids_array=null)
 	{
-		if (!is_micro_entreprise_module_active()) {
-			$this->colonnes = array($GLOBALS['STR_PDF_REFERENCE'] => 22,
-				$GLOBALS['STR_DESIGNATION'] => 53,
-				$GLOBALS['STR_PDF_PRIX_HT'] => 21,
-				$GLOBALS['STR_PDF_PRIX_TTC'] => 22,
-				$GLOBALS['STR_QUANTITY'] => 14,
-				$GLOBALS['STR_PDFTOTALHT'] => 21,
-				$GLOBALS['STR_PDFTOTALTTC'] => 23,
-				$GLOBALS['STR_TAXE'] => 14);
-			$column_formats = array($GLOBALS['STR_PDF_REFERENCE'] => "L",
-				$GLOBALS['STR_DESIGNATION'] => "L",
-				$GLOBALS['STR_PDF_PRIX_HT'] => "R",
-				$GLOBALS['STR_PDF_PRIX_TTC'] => "R",
-				$GLOBALS['STR_QUANTITY'] => "C",
-				$GLOBALS['STR_PDFTOTALHT'] => "R",
-				$GLOBALS['STR_PDFTOTALTTC'] => "R",
-				$GLOBALS['STR_TAXE'] => "R");
+		$hook_result = call_module_hook('bill_get_configuration_array', array('bill_mode' => $bill_mode), 'array');
+		if(count($hook_result)) {
+			// Par exemple le module micro_-_entreprise définit le format des factures ici
+			$this->colonnes = $hook_result['width'];
+			$column_formats = $hook_result['alignement'];
 		} else {
-			$this->colonnes = define_cols_size('width');
-			$column_formats = define_cols_size('alignement');
+			if ($bill_mode!='user_custom_products_list') {
+				$this->colonnes = array($GLOBALS['STR_PDF_REFERENCE'] => 22,
+					$GLOBALS['STR_DESIGNATION'] => 53,
+					$GLOBALS['STR_PDF_PRIX_HT'] => 21,
+					$GLOBALS['STR_PDF_PRIX_TTC'] => 22,
+					$GLOBALS['STR_QUANTITY'] => 14,
+					$GLOBALS['STR_PDFTOTALHT'] => 21,
+					$GLOBALS['STR_PDFTOTALTTC'] => 23,
+					$GLOBALS['STR_TAXE'] => 14);
+				$column_formats = array($GLOBALS['STR_PDF_REFERENCE'] => "L",
+					$GLOBALS['STR_DESIGNATION'] => "L",
+					$GLOBALS['STR_PDF_PRIX_HT'] => "R",
+					$GLOBALS['STR_PDF_PRIX_TTC'] => "R",
+					$GLOBALS['STR_QUANTITY'] => "C",
+					$GLOBALS['STR_PDFTOTALHT'] => "R",
+					$GLOBALS['STR_PDFTOTALTTC'] => "R",
+					$GLOBALS['STR_TAXE'] => "R");
+			} else {
+				$this->colonnes = array($GLOBALS['STR_PHOTO'] => 25,
+					$GLOBALS['STR_DESIGNATION'] => 35,
+					$GLOBALS['STR_EAN_CODE'] => 62,
+					$GLOBALS['STR_BRAND'] => 16,
+					$GLOBALS['STR_CATEGORY'] => 20,
+					$GLOBALS['STR_QUANTITY_SHORT'] => 7,
+					$GLOBALS['STR_PDF_PRIX_TTC'] => 12,
+					$GLOBALS['STR_START_PRICE'].' '.$GLOBALS['STR_TTC'] => 13);
+				$column_formats = array($GLOBALS['STR_PHOTO'] => "C",
+					$GLOBALS['STR_DESIGNATION'] => "L",
+					$GLOBALS['STR_EAN_CODE'] => "C",
+					$GLOBALS['STR_BRAND'] => "C",
+					$GLOBALS['STR_CATEGORY'] => "L",
+					$GLOBALS['STR_QUANTITY_SHORT'] => "R",
+					$GLOBALS['STR_PDF_PRIX_TTC'] => "R",
+					$GLOBALS['STR_START_PRICE'].' '.$GLOBALS['STR_TTC'] => "R");
+			}
 		}
-		$societeInfoText = $this->getSocieteInfoText();
-		if (!empty($code_facture)) {
-			// La collation sur la colonne code_facture est fixée à utf8_bin et non plus utf8_general, donc on peut faire une comparaison avec = qui va utiliser l'INDEX plutôt que de passer par HEX(code_facture) = HEX('" . nohtml_real_escape_string($code_facture) . "')
-			$sql_cond_array[] = "c.code_facture = '" . nohtml_real_escape_string($code_facture) . "'";
-		}
-		if (!empty($date_debut)) {
-			$sql_cond_array[] = "c.a_timestamp >= '" . nohtml_real_escape_string($date_debut) . "'";
-		}
-		if (!empty($date_fin)) {
-			$sql_cond_array[] = "c.a_timestamp <= '" . nohtml_real_escape_string($date_fin) . "'";
-		}
-		if (!empty($id_fin)) {
-			$sql_cond_array[] = "c.id BETWEEN '" . intval($id_debut) . "' AND '" . intval($id_fin) . "'";
-		} elseif (!empty($id_debut)) {
-			$sql_cond_array[] = "c.id>='" . intval($id_debut) . "'";
-		}
-		if (!empty($user_id)) {
-			$sql_cond_array[] = "c.id_utilisateur = '" . intval($user_id) . "'";
-		}
-		if (is_numeric($id_statut_paiement_filter)) {
-			$sql_cond_array[] = "c.id_statut_paiement = '" . intval($id_statut_paiement_filter) . "'";
-		}
-		if ($bill_mode == 'standard' || $bill_mode == 'facture') {
-			// Un numéro doit être obligatoirement renseigné dans la facture
-			$sql_cond_array[] = "c.numero != ''";
-		}
-		if (empty($sql_cond_array)) {
-			return null;
-		}
-		$sql_bills = "SELECT c.*, sp.technical_code AS statut_paiement
-			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
-			WHERE " . implode(' AND ', $sql_cond_array) . ' AND ' . get_filter_site_cond('commandes', 'c') . "
-			ORDER BY c.o_timestamp ASC";
-		$qid_commande = query($sql_bills);
 		$i = 0;
-		while ($commande = fetch_object($qid_commande)) {
-			$_SESSION['session_last_bill_viewed'] = $commande->id;
-			$societeLogoPath = $this->getSocieteLogoPath($commande->lang);
-			unset($y);
-			$order_infos = get_order_infos_array($commande);
-			if (empty($i)) {
-				$this->Open();
-				$this->cMargin = 2;
-				$this->SetAutoPageBreak(false, 10);
-				$this->AliasNbPages('{nb}');
+		$file_name = '';
+		$societeInfoText = $this->getSocieteInfoText();
+		if ($bill_mode != "user_custom_products_list") {
+			if (!empty($product_infos_array) || !empty($order_object)) {
+				// Dans un mode de commande standard, order_object et product_infos_array ne doivent pas être défini, ce n'est pas cohérent. order_object et product_infos_array sont défini uniquement si bill_mode = user_custom_products_list
+				return null;
 			}
-			$this->startPageGroup();
-			$next_product_max_size_forecasted = 30;
-			$product_infos_array = get_product_infos_array_in_order($commande->id, $commande->devise, $commande->currency_rate);
-			if (empty($product_infos_array)) {
-				// On rajoute un élément pour pouvoir passer dans la génération de page
-				$product_infos_array[] = false;
+			if (!empty($code_facture)) {
+				// La collation sur la colonne code_facture est fixée à utf8_bin et non plus utf8_general, donc on peut faire une comparaison avec = qui va utiliser l'INDEX plutôt que de passer par HEX(code_facture) = HEX('" . nohtml_real_escape_string($code_facture) . "')
+				$sql_cond_array[] = "c.code_facture = '" . nohtml_real_escape_string($code_facture) . "'";
 			}
-			$comments = array();
-			if(!empty($order_infos['delivery_infos'])) {
-				$comments[] = $GLOBALS["STR_SHIPPING_TYPE"] . $GLOBALS["STR_BEFORE_TWO_POINTS"]. ': ' . $order_infos['delivery_infos'];
+			if (!empty($date_debut)) {
+				$sql_cond_array[] = "c.a_timestamp >= '" . nohtml_real_escape_string($date_debut) . "'";
 			}
-			if(!empty($commande->commentaires)) {
-				$comments[] = $commande->commentaires;
+			if (!empty($date_fin)) {
+				$sql_cond_array[] = "c.a_timestamp <= '" . nohtml_real_escape_string($date_fin) . "'";
 			}
-			$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2);
-			// On refera un test de saut de page juste avant l'affichage des remarques et blocs de fin
-			$product_infos_array[] = null;
-			foreach($product_infos_array as $this_ordered_product) {
+			if (!empty($id_fin)) {
+				$sql_cond_array[] = "c.id BETWEEN '" . intval($id_debut) . "' AND '" . intval($id_fin) . "'";
+			} elseif (!empty($id_debut)) {
+				$sql_cond_array[] = "c.id>='" . intval($id_debut) . "'";
+			}
+			if (!empty($user_id)) {
+				$sql_cond_array[] = "c.id_utilisateur = '" . intval($user_id) . "'";
+			}
+			if (is_numeric($id_statut_paiement_filter)) {
+				$sql_cond_array[] = "c.id_statut_paiement = '" . intval($id_statut_paiement_filter) . "'";
+			}
+			if ($bill_mode == 'standard' || $bill_mode == 'facture') {
+				// Un numéro doit être obligatoirement renseigné dans la facture
+				$sql_cond_array[] = "c.numero != ''";
+			}
+			if (is_array($ids_array)) {
+				$sql_cond_array[] = "c.id IN (" . implode(',', $ids_array) . ")";
+			}
+			if (empty($sql_cond_array)) {
+				return null;
+			}
+			$sql_bills = "SELECT c.*, sp.technical_code AS statut_paiement
+				FROM peel_commandes c
+				LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+				WHERE " . implode(' AND ', $sql_cond_array) . ' AND ' . get_filter_site_cond('commandes', 'c') . "
+				ORDER BY c.o_timestamp ASC";
+			$query = query($sql_bills);
+			while ($order_object = fetch_object($query)) {
+				$product_infos_array = get_product_infos_array_in_order($order_object->id, $order_object->devise, $order_object->currency_rate);
+				$this->generatePdfOrderContent($column_formats, $bill_mode, $i, $order_object, $product_infos_array);				
+				if(empty($file_name)) {
+					$file_name = $this->document_name . '_' . $this->document_id;
+					if(!empty($commande->f_datetime) && substr($commande->f_datetime, 0, 10) != '0000-00-00') {
+						$file_name .= '_' . get_formatted_date($commande->f_datetime);
+					}
+					$file_name .= '.pdf';
+				} else {
+					// Plusieurs factures
+					$file_name = 'F-' . md5($sql_bills) . '.pdf';
+				}
+				$i++;
+			}
+		} else {
+			// Affichage d'une liste de produit dans un document PDF sans que les produits ne soient associés à une commande
+			$this->generatePdfOrderContent($column_formats, $bill_mode, 0, $order_object, $product_infos_array, $document_title);
+			$file_name = $GLOBALS['STR_LIST_PRODUCT'] . ' ' . vb($order_object->nom_ship) . '.pdf';
+			$i++;
+		}
+		if (!empty($i)) {
+			$this->lastPage();
+			$file_name = String::convert_accents(str_replace(array('/', ' '), '-', $file_name));
+			if ($folder === false) {
+				$this->Output($file_name);
+			} else {
+				$this->Output($folder . $file_name, "F");
+			}
+			return $file_name;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * generatePdfOrderContent()
+	 *
+	 * @return string
+	 */
+	function generatePdfOrderContent($column_formats, $bill_mode, $i, &$order_object, &$product_infos_array, $document_title = null) {
+		if (!empty($order_object->id)) {
+			$_SESSION['session_last_bill_viewed'] = vn($order_object->id);
+		}
+
+		$order_infos = get_order_infos_array($order_object, $product_infos_array);
+		$societeLogoPath = $this->getSocieteLogoPath($order_object->lang);
+		$societeInfoText = $this->getSocieteInfoText();
+		unset($y);
+		if (empty($i)) {
+			$this->Open();
+			$this->cMargin = 2;
+			$this->SetAutoPageBreak(false, 10);
+			$this->AliasNbPages('{nb}');
+		}
+		$this->startPageGroup();
+		$next_product_max_size_forecasted = 30;
+		if (empty($product_infos_array)) {
+			// On rajoute un élément pour pouvoir passer dans la génération de page
+			$product_infos_array[] = false;
+		}
+		$comments = array();
+		if(!empty($order_infos['delivery_infos'])) {
+			$comments[] = $GLOBALS["STR_SHIPPING_TYPE"] . $GLOBALS["STR_BEFORE_TWO_POINTS"]. ': ' . $order_infos['delivery_infos'];
+		}
+		if(!empty($order_object->commentaires)) {
+			$comments[] = $order_object->commentaires;
+		}
+		$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2);
+		if(!empty($GLOBALS['site_parameters']['billing_as_transaction_receipt'])) {
+			$sql_transaction = "SELECT t.reference
+				FROM peel_transactions t
+				LEFT JOIN peel_commandes c ON c.id = t.orders_id
+				WHERE t.orders_id='".intval($order_object->id)."'
+				LIMIT 1";
+			$query = query($sql_transaction);
+		}
+		$this->document_name = '';
+		if(!empty($GLOBALS['site_parameters']['billing_as_transaction_receipt']) && $result = fetch_assoc($query)) {
+			$this->document_name = String::strtoupper($GLOBALS['STR_TRANSACTION']);
+			$this->document_id = $result['reference'];
+		} else {
+			if ($bill_mode == "user_custom_products_list") {
+				$this->document_id = 0;
+			} elseif ($bill_mode == "bdc") {
+				$this->document_name = String::strtoupper($GLOBALS['STR_ORDER_FORM']);
+				$this->document_id = intval($order_object->order_id);
+			} elseif ($bill_mode == "proforma") {
+				$this->document_name = String::strtoupper($GLOBALS['STR_PROFORMA']);
+				$this->document_id = intval($order_object->order_id);
+			} elseif ($bill_mode == "devis") {
+				$this->document_name = String::strtoupper($GLOBALS['STR_PDF_QUOTATION']);
+				$this->document_id = intval($order_object->order_id);
+			} else {
+				if(!empty($order_object->numero)) {
+					$this->document_name = String::strtoupper($GLOBALS['STR_INVOICE']);
+					$this->document_id = $order_object->numero;
+				} else {
+					$this->document_name = String::strtoupper($GLOBALS['STR_ORDER_FORM']);
+					$this->document_id = intval($order_object->order_id);
+				}
+			}
+		}
+		if(!empty($document_title)) {
+			$this->document_name = String::strtoupper($document_title);
+		}
+		// On refera un test de saut de page juste avant l'affichage des remarques et blocs de fin
+		$product_infos_array[] = null;
+		foreach($product_infos_array as $this_ordered_product) {
+			if ($bill_mode == "user_custom_products_list") {
+				// on peut descendre plus bas et afficher plus de produits dans ce mode
+				$y_max_allowed = $this->h + 5;
+				if (empty($this_ordered_product)) {
+					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture. L'affichage des blocs de fin de facture dépend du mode
+					$y_max_allowed += -13 - 4 * vn($this->remarque_lignes) - 5;
+				}
+			} else {
 				$y_max_allowed = $this->h - 10;
 				if (empty($this_ordered_product)) {
-					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture
+					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture. L'affichage des blocs de fin de facture dépend du mode
 					$y_max_allowed += -45 - 4 * vn($this->remarque_lignes) - 5;
 				}
-				if (empty($y) || $y + $next_product_max_size_forecasted > $y_max_allowed -5) {
-					if(!empty($y)) {
-						// On dessine les colonnes de la page précédente, maintenant qu'on sait quelle taille cela a pris
-						// La page précédente était avec produits sur hauteur totale
-						$this->addCols($this->h - 10);
-					}
+			}
+			if (empty($y) || $y + $next_product_max_size_forecasted > $y_max_allowed -5) {
+				if(!empty($y) && ($bill_mode !='user_custom_products_list' || ($bill_mode =='user_custom_products_list' &&  !empty($this_ordered_product)))) {
+					// On dessine les colonnes de la page précédente, maintenant qu'on sait quelle taille cela a pris
+					// La page précédente était avec produits sur hauteur totale
+					$this->addCols($this->h - 10, $bill_mode);
+				}
+				if ($bill_mode !='user_custom_products_list' || ($bill_mode=='user_custom_products_list' &&  !empty($this_ordered_product))) {
 					// Nécessité de créer une nouvelle page car on ne va plus avoir de place
 					$next_product_max_size_forecasted = (30 + $next_product_max_size_forecasted) / 2;
 					$this->AddPage();
 					$this->addPageNumber($this->getGroupPageNo() . ' / ' . $this->getPageGroupAlias());
-					$this->addSociete($societeInfoText, $societeLogoPath);
+					$this->addSociete($societeInfoText, $societeLogoPath, $bill_mode);
 					if ($bill_mode == "bdc") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_ORDER_FORM']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_ORDER_FORM'], 25, 190);
 					} elseif ($bill_mode == "proforma") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_PROFORMA']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_PROFORMA'], 40, 190);
 					} elseif ($bill_mode == "devis") {
-						$this->fact_dev(String::strtoupper($GLOBALS['STR_PDF_QUOTATION']) . " ", intval($commande->order_id));
 						$this->backgoundBigWatermark($GLOBALS['STR_PDF_QUOTATION'], 80, 200);
 					} else {
-						if(!empty($commande->numero)) {
-							$this->fact_dev(String::strtoupper($GLOBALS['STR_INVOICE']), $commande->numero);
-						} else {
-							$this->fact_dev(String::strtoupper($GLOBALS['STR_ORDER_FORM']) . " ", intval($commande->order_id));
-						}
 						if (!empty($GLOBALS['site_parameters']['show_invoice_filigrane'])) {
 							// Option spécifique show_invoice_filigrane nécessaire pour afficher le filigrane en cas de facture
 							$this->backgoundBigWatermark($GLOBALS['STR_INVOICE'], 80, 200);
 						}
 					}
-					if($commande->id_statut_paiement == 6) {
-						$this->backgoundBigWatermark(get_payment_status_name($commande->id_statut_paiement), 65, 470); 
-					}
-					if(empty($commande->o_timestamp) || substr($commande->o_timestamp, 0, 10) == '0000-00-00') {
-						// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
-						$commande->o_timestamp = date('Y-m-d H:i:s');
-					}
-					if($bill_mode == "bdc" || $bill_mode == "devis") {
-						$displayed_date = get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
-					} else {
-						// On veut une date de facture si possible et pas de commande
-						if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
-							// Une date de facture est définie
-							$displayed_date = get_formatted_date($commande->f_datetime, 'short');
-						} else {
-							// Pas de date de facture, on indique la date de commande
-							$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
+					$this->fact_dev($this->document_name, $this->document_id, false, $bill_mode);
+					if ($bill_mode != "user_custom_products_list") {
+						if(in_array($order_object->statut_paiement, array('cancelled', 'refunded'))) { 
+							$this->backgoundBigWatermark(get_payment_status_name($order_object->id_statut_paiement), 65, 470); 
 						}
 					}
-					$this->addDate($displayed_date, $order_infos['displayed_paiement_date']);
-					$this->addReglement(String::str_shorten(get_payment_name($commande->paiement), 30) . ' - ' . $commande->devise);
-
-					$this->addClientAdresseFacturation($order_infos['client_infos_bill'], $commande->id_utilisateur);
-					if (!empty($GLOBALS['site_parameters']['mode_transport']) && !empty($order_infos['client_infos_ship'])) {
+					if(empty($order_object->o_timestamp) || substr($order_object->o_timestamp, 0, 10) == '0000-00-00') {
+						// On a besoin d'une date à afficher par défaut : si pas de date de commande, alors on prend la date du jour
+						$order_object->o_timestamp = date('Y-m-d H:i:s');
+					}
+					if($bill_mode == "bdc" || $bill_mode == "devis" || $bill_mode == "user_custom_products_list") {
+						$displayed_date = get_formatted_date($order_object->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
+					} else {
+						// On veut une date de facture si possible et pas de commande
+						if(!empty($order_object->f_datetime) && String::substr($order_object->f_datetime, 0, 10) != '0000-00-00') {
+							// Une date de facture est définie
+							$displayed_date = get_formatted_date($order_object->f_datetime, 'short');
+						} else {
+							// Pas de date de facture, on indique la date de commande
+							$displayed_date = $GLOBALS['STR_ORDER_NAME'] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' . get_formatted_date($order_object->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
+						}
+					}
+					$this->addDate($displayed_date, $order_infos['displayed_paiement_date'], $bill_mode);
+					if ($bill_mode != "user_custom_products_list") {
+						$this->addReglement(String::str_shorten(get_payment_name($order_object->paiement), 30) . ' - ' . $order_object->devise);
+					}
+					$this->addClientAdresseFacturation($order_infos['client_infos_bill'], $order_object->id_utilisateur, $bill_mode);
+					if ($bill_mode != "user_custom_products_list" && !empty($GLOBALS['site_parameters']['mode_transport']) && !empty($order_infos['client_infos_ship'])) {
 						// Ajout de l'adresse de livraison seulement si la boutique a une gestion du port
 						$this->addClientAdresseExpedition($order_infos['client_infos_ship']);
 					}
 					// Alignement du contenu des cellules de chaque ligne
 					$this->addLineFormat($column_formats);
 					// Initialisation du début de l'affichage des produits
-					$y = 100;
+					if ($bill_mode == "user_custom_products_list") {
+						$y = 75;
+					} else {
+						$y = 100;
+					}
 				}
-				if (!empty($this_ordered_product)) {
-					$prix = fprix($this_ordered_product["prix"], true, $commande->devise, true, $commande->currency_rate);
-					$prix_ht = fprix($this_ordered_product["prix_ht"], true, $commande->devise, true, $commande->currency_rate);
-					$total_prix_ht = fprix($this_ordered_product["total_prix_ht"], true, $commande->devise, true, $commande->currency_rate);
-					$total_prix = fprix($this_ordered_product["total_prix"], true, $commande->devise, true, $commande->currency_rate);
-					$product_text = filtre_pdf($this_ordered_product["product_text"]);
-					if (!is_micro_entreprise_module_active()) {
+			}
+			if (!empty($this_ordered_product)) {
+				$prix = fprix($this_ordered_product["prix"], ($bill_mode != "user_custom_products_list"), $order_object->devise, true, $order_object->currency_rate);
+				$prix_ht = fprix($this_ordered_product["prix_ht"], true, $order_object->devise, true, $order_object->currency_rate);
+				$total_prix_ht = fprix($this_ordered_product["total_prix_ht"], true, $order_object->devise, true, $order_object->currency_rate);
+				$total_prix = fprix($this_ordered_product["total_prix"], true, $order_object->devise, true, $order_object->currency_rate);
+				$product_text = filtre_pdf($this_ordered_product["product_text"]);
+				if ($bill_mode != "user_custom_products_list") {
+					if (!check_if_module_active('micro_entreprise')) {
 						$line = array($GLOBALS['STR_PDF_REFERENCE'] => $this_ordered_product["reference"],
 							$GLOBALS['STR_DESIGNATION'] => $product_text,
 							$GLOBALS['STR_PDF_PRIX_HT'] => $prix_ht,
@@ -1016,60 +1220,74 @@ class Invoice extends TCPDF {
 							$GLOBALS['STR_QUANTITY'] => $this_ordered_product["quantite"],
 							$GLOBALS['STR_PDFTOTALTTC'] => $total_prix);
 					}
-
-					$size = $this->addLine($y, $line);
-					$next_product_max_size_forecasted = max($next_product_max_size_forecasted, min(60, $size));
-					$y += $size + 4;
+				} else {
+					if (!empty($this_ordered_product["photo"]) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.thumbs($this_ordered_product["photo"],50, 35))) {
+						// Positionnement du logo à droite des informations sur la société
+						$this->Image($GLOBALS['uploaddir'].'/thumbs/'.thumbs($this_ordered_product["photo"], 50, 35), 15, $y-4);
+					}
+					if (!empty($this_ordered_product["barcode_image_src"])) {
+						// Positionnement du logo à droite des informations sur la société
+						$this->Image($this_ordered_product['barcode_image_src'], 73, $y-6, 58, 12);
+					}
+					$line = array($GLOBALS['STR_PHOTO'] => "",
+						$GLOBALS['STR_DESIGNATION'] => $this_ordered_product["reference"]."\r\n".$product_text,
+						$GLOBALS['STR_EAN_CODE'] => "\r\n\r\n\r\n".$this_ordered_product["ean_code"],
+						$GLOBALS['STR_BRAND'] => $this_ordered_product["brand"],
+						$GLOBALS['STR_CATEGORY'] => $this_ordered_product["category"],
+						$GLOBALS['STR_PDF_PRIX_TTC'] => $prix,
+						$GLOBALS['STR_QUANTITY_SHORT'] => $this_ordered_product["quantite"],
+						$GLOBALS['STR_START_PRICE'].' '.$GLOBALS['STR_TTC'] => $this_ordered_product["minimal_price"]);
 				}
-			}
-			if($y > 100) {
-				// La page en cours est avec produits sur hauteur restreinte, pour laisser de la place pour les blocs qui suivent
-				$this->addCols($y_max_allowed);	
-			}
-			if (!empty($order_infos['code_promo_text'])) {
-				foreach($line as $this_key => $this_item) {
-					$line[$this_key] = '';
-				}
-				$line[$GLOBALS['STR_DESIGNATION']] = $order_infos['code_promo_text'];
-				$size = $this->addLine($y, $line);
+				$size = $this->addLine($y, $line, $bill_mode);
+				$next_product_max_size_forecasted = max($next_product_max_size_forecasted, min(60, $size));
 				$y += $size + 4;
 			}
-			if(!empty($comments)) {
-				$this->addRemarque(implode("\n", $comments));
+		}
+		if($y > ($bill_mode != "user_custom_products_list" ?100: 70)) {
+			// La page en cours est avec produits sur hauteur restreinte, pour laisser de la place pour les blocs qui suivent
+			$this->addCols($y_max_allowed, $bill_mode);	
+		}
+		if (!empty($order_infos['code_promo_text'])) {
+			foreach($line as $this_key => $this_item) {
+				$line[$this_key] = '';
 			}
+			$line[$GLOBALS['STR_DESIGNATION']] = $order_infos['code_promo_text'];
+			$size = $this->addLine($y, $line);
+			$y += $size + 4;
+		}
+		if(!empty($comments)) {
+			$this->addRemarque(implode("\n", $comments));
+		}
+		if (empty($GLOBALS['site_parameters']['pdf_invoice_display_rib_on_invoice_bottom'])) {
 			if ($bill_mode == "bdc") {
 				$this->addCadreSignature();
 			}
+		} else {
+			$this->addCadreRib();
+		}
+		if ($bill_mode != "user_custom_products_list") {
 			$this->addCadreNet();
 			$this->addNETs($order_infos['net_infos_array']);
 			$this->addCadreTva();
 			$this->addTVAs($order_infos['tva_infos_array']);
-			$this->addInfoTVA($commande->total_tva, $bill_mode, $commande->id_utilisateur);
-			if(empty($file_name)) {
-				if(!empty($commande->f_timestamp) && substr($commande->f_timestamp, 0, 10) != '0000-00-00') {
-					$file_name = str_replace(array('/', ' '), '-', get_formatted_date($commande->f_timestamp)) . '_F' . $commande->order_id . '.pdf';
-				}else{
-					$file_name = 'F' . $commande->order_id . '.pdf';
-				}
-			} else {
-				// Plusieurs factures
-				$file_name = 'F-' . md5($sql_bills) . '.pdf';
-			}
-			$i++;
-		}
-		if (!empty($i)) {
-			$this->lastPage();
-			if ($folder === false) {
-				$this->Output($file_name);
-			} else {
-				$this->Output($folder . $file_name, "F");
-			}
-			return $file_name;
+			$this->addInfoTVA($order_object->total_tva, $bill_mode, $order_object->id_utilisateur);
 		} else {
-			return false;
+			$y1 = $this->h-21;
+			if (!empty($GLOBALS['site_parameters']['add_copyright_on_pdf_file'])) {
+				$qid = query("SELECT * 
+					FROM peel_societe
+					WHERE " . get_filter_site_cond('societe') . "
+					LIMIT 1");
+				$ligne = fetch_assoc($qid);
+				$text = '<a href="' .get_url('/') . '">' . get_url('/') . '</a> Copyright ' . $GLOBALS['site'] . ' ' . date('Y').' / '.$GLOBALS['STR_TEL'].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$ligne['tel'].' / '.$GLOBALS['STR_FAX'].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$ligne['fax'].' / '.$ligne['email'] ;
+				$this->writeHTMLCell("", 4, 10, $y1, $text, 0, 1, false, true, "C");
+				$this->SetFont("Helvetica", "", 6);
+				$text = template_tags_replace($GLOBALS['STR_INVOICE_BOTTOM_TEXT2']);
+				$this->writeHTMLCell("", 4, 10, $y1+4, $text, 0, 1, false, true,"C");
+			}
 		}
 	}
-
+	
 	/**
 	 * getSocieteInfoText()
 	 *
@@ -1079,7 +1297,8 @@ class Invoice extends TCPDF {
 	{
 		$qid = query("SELECT * 
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe') . "");
+			WHERE " . get_filter_site_cond('societe') . "
+			LIMIT 1");
 		if ($ligne = fetch_object($qid)) {
 			$pdf_societe = filtre_pdf($ligne->societe) . "\n" ;
 			$pdf_adresse = filtre_pdf($ligne->adresse) . "\n" ;
@@ -1123,28 +1342,32 @@ class Invoice extends TCPDF {
 	{
 		$pdf_logo = '';
 		if (!empty($lang)) {
-			if (!empty($GLOBALS['site_parameters']['logo_'.$lang])) {
-				// on découpe le contenu du champs à la recherche du non de l'image fixe
-				// ceci évitera d'envoyer la transmition du logo avec un chemin en http::// (qui n'est pas pris en compte)
-				$pdf_logo = String::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $GLOBALS['site_parameters']['logo_'.$lang]));
-				if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
-					// si le logo renseigné n'existe pas, on ne retourne pas d'information
-					$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;
-				} elseif (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/images/' . $pdf_logo)) {
-					// si le logo renseigné n'existe pas, on ne retourne pas d'information
-					$pdf_logo = $GLOBALS['dirroot'] . '/images/' . $pdf_logo;
-				} elseif (empty($pdf_logo) || !($handle = @String::fopen_utf8($pdf_logo, 'rb'))) {
-					// si le logo renseigné n'existe pas, on ne retourne pas d'information
-					$pdf_logo = false;
-				}
-				if(!empty($handle)) {
-					fclose($handle);
-				}
+			if (!empty($GLOBALS['site_parameters']['logo_bill_'.$lang])) {
+				$pdf_logo = $GLOBALS['site_parameters']['logo_bill_'.$lang];
+			} elseif (!empty($GLOBALS['site_parameters']['logo_'.$lang])) {
+				$pdf_logo = $GLOBALS['site_parameters']['logo_'.$lang];
 			}
-		} elseif (file_exists($GLOBALS['dirroot'] . '/factures/logo.jpg')) {
+		}
+		if(empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/factures/logo.jpg')) {
 			$pdf_logo = $GLOBALS['dirroot'] . '/factures/logo.jpg';
-		} else {
-			$pdf_logo = false;
+		}
+		if(!empty($pdf_logo) && strpos($pdf_logo, $GLOBALS['dirroot']) === false) {
+			// on découpe le contenu du champs à la recherche du non de l'image fixe
+			// ceci évitera d'envoyer la transmition du logo avec un chemin en http::// (qui n'est pas pris en compte)
+			$pdf_logo = String::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $pdf_logo));
+			if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
+				// si le logo renseigné n'existe pas, on ne retourne pas d'information
+				$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;
+			} elseif (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/images/' . $pdf_logo)) {
+				// si le logo renseigné n'existe pas, on ne retourne pas d'information
+				$pdf_logo = $GLOBALS['dirroot'] . '/images/' . $pdf_logo;
+			} elseif (empty($pdf_logo) || !($handle = @String::fopen_utf8($pdf_logo, 'rb'))) {
+				// si le logo renseigné n'existe pas, on ne retourne pas d'information
+				$pdf_logo = false;
+			}
+			if(!empty($handle)) {
+				fclose($handle);
+			}
 		}
 		return $pdf_logo;
 	}

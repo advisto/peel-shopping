@@ -3,15 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: products_list_brief.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: products_list_brief.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}{if isset($cat)}
+	{if isset($main_categories)}
+		<div class="well list_main_categorie">
+			{$main_categories}
+		</div>
+	{/if}
 	<div>
 		{if isset($cat.image)}
 		<div style="padding-left:10px; padding-bottom:10px;" class="pull-right"><img alt="{$cat.image.name}" src="{$cat.image.src|escape:'html'}" style="max-height: 110px;" /></div>

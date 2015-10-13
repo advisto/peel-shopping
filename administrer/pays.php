@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: pays.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -68,11 +68,6 @@ switch (vb($_REQUEST['mode'])) {
 			}
 			$output .= affiche_formulaire_modif_pays(null, $frm);
 		}
-		break;
-
-	case "etat" :
-		$output .= change_etat($_GET['id'], $_GET['etat']);
-		$output .= affiche_liste_pays();
 		break;
 
 	default :
@@ -252,7 +247,7 @@ function insere_pays(&$frm)
 		, '" . nohtml_real_escape_string($frm['iso3']) . "'
 		, '" . intval($frm['iso_num']) . "'
 		, '" . intval($frm['position']) . "'
-		, '" . intval($frm['site_id']) . "'";
+		, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
@@ -277,7 +272,7 @@ function maj_pays($id, $frm)
 		$sql .= " , pays_" . $lng . " = '" . nohtml_real_escape_string($frm['pays_' . $lng]) . "'";
 	}
 	$sql .= "
-			, site_id = '" . intval($frm['site_id']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, iso = '" . nohtml_real_escape_string($frm['iso']) . "'
 			, iso3 = '" . nohtml_real_escape_string($frm['iso3']) . "'
 			, iso_num = '" . intval($frm['iso_num']) . "'
@@ -335,7 +330,6 @@ function affiche_liste_pays()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$zone = String::html_entity_decode_if_needed($ligne['zone_name']);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
@@ -348,7 +342,7 @@ function affiche_liste_pays()
 				'position' => $ligne['position'],
 				'etat_onclick' => 'change_status("countries", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}
@@ -376,24 +370,3 @@ function affiche_liste_pays()
 	$tpl->assign('STR_ADMIN_PAYS_NOTHING_FOUND', $GLOBALS['STR_ADMIN_PAYS_NOTHING_FOUND']);
 	return $tpl->fetch();
 }
-
-/**
- * change_etat()
- *
- * @param integer $id
- * @param mixed $etat
- * @return
- */
-function change_etat($id, $etat)
-{
-	if ($etat == '1') {
-		$set_etat = '0';
-	} else {
-		$set_etat = '1';
-	}
-	$req = "UPDATE peel_pays
-		SET etat = '" . intval($set_etat) . "'
-		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('pays', null, true);
-	$res = query($req);
-}
-

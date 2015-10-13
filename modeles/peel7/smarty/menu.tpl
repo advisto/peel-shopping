@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: menu.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: menu.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}
 			</div>
 		</div>
@@ -24,7 +24,7 @@
 							{if $item.label=='divider'}
 						<li role="presentation" class="divider"></li>
 							{else}
-						<li class="menu_main_item menu_{$item.name}{if $item.selected} active{/if}{if !empty($item.submenu) || !empty($item.submenu_global)} dropdown{/if}">
+						<li class="menu_main_item menu_{$item.name}{if $item.selected} active{/if}{if !empty($item.submenu) || !empty($item.submenu_global)} dropdown{/if}{if $item.class} {$item.class}{/if}">
 								{if $item.href}
 							<a id="{$item.id|str_form_value}" {if !empty($item.submenu) || !empty($item.submenu_global)}href="{$item.href|htmlspecialchars}" class="dropdown-toggle" data-toggle="dropdown" role="button"{else}href="{$item.href|htmlspecialchars}"{/if}>{if $item.name == 'home'}<span class="glyphicon glyphicon-home"></span>{else}{$item.label}{/if}{if !empty($item.submenu) || !empty($item.submenu_global)} <span class="caret"></span>{/if}</a>
 								{else}

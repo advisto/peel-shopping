@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -94,7 +94,7 @@ function save_mail_db($frm)
 		, Email = "' . nohtml_real_escape_string(vb($frm['email'])) . '"
 		, Date = "' . nohtml_real_escape_string(date('Y-m-d')) . '"
 		, Heure = "' . nohtml_real_escape_string(date('H:i:s')) . '"
-		, site_id = "' . intval($GLOBALS['site_id']) . '"';
+		, site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id'])) . '"';
 	if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 		$sql .= "
 		, id_user = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";

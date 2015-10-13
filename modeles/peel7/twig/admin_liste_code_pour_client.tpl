@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_code_pour_client.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_liste_code_pour_client.tpl 47249 2015-10-08 17:24:40Z gboussin $
 #}<div class="entete">{{ STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL_TITLE }}</div>
 <div>{{ STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL_SUBTITLE }}{{ STR_BEFORE_TWO_POINTS }}: <a title="{{ STR_ADMIN_UTILISATEURS_UPDATE|str_form_value }}" href="{{ modif_util_href|escape('html') }}">{{ civilite }} {{ prenom }} {{ nom_famille }} - {{ email }}</a></div>
 {% if (options) %}
@@ -19,7 +19,7 @@
 	{{ form_token }}
 	<select class="form-control" name="code_promo_id">
 		{% for o in options %}
-		<option value="{{ o.value|str_form_value }}">{{ STR_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.nom }} - {% if o.on_type == 1 %}{{ STR_ADMIN_DISCOUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.percent }} % {% else %}{{ STR_VALUE }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.valeur }}{% endif %}{% if o.montant_min>0 }} - {{ STR_ADMIN_CODES_PROMOS_MIN }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.montant_min }}{% endif %}</option>
+		<option value="{{ o.value|str_form_value }}">{{ STR_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.nom }} - {% if o.on_type == 1 %}{{ STR_ADMIN_DISCOUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.percent }} % {% else %}{{ STR_VALUE }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.valeur }}{% endif %}{% if o.montant_min>0 %} - {{ STR_ADMIN_CODES_PROMOS_MIN }}{{ STR_BEFORE_TWO_POINTS }}: {{ o.montant_min }}{% endif %}</option>
 		{% endfor %}
 	</select>
 	<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />

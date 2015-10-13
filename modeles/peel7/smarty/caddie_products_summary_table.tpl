@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: caddie_products_summary_table.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}
 <div class="col-sm-12">
 	<div class="table-responsive">
@@ -21,7 +21,7 @@
 				<th scope="col">{$STR_UNIT_PRICE} {$taxes_displayed}</th>
 				<th scope="col">{$STR_OPTION_PRICE}</th>
 				<th scope="col">{$STR_QUANTITY}</th>
-				{if $is_conditionnement_module_active}<td class="center">{$STR_CONDITIONNEMENT}</td><td class="center">{$STR_CONDITIONNEMENT_QTY}</td>{/if}
+				{if $is_conditionnement_module_active}<th scope="col">{$STR_CONDITIONNEMENT}</th><th class="center">{$STR_CONDITIONNEMENT_QTY}</th>{/if}
 				<th scope="col">{$STR_REMISE} {$taxes_displayed}</th>
 				<th scope="col">{$STR_TOTAL_PRICE} {$taxes_displayed}</th>
 			</tr>
@@ -113,7 +113,7 @@
 						<input type="hidden" name="quantite[{$p.numero_ligne}]" value="{if $p.on_download == 1}1{else}{$p.quantite|str_form_value}{/if}" />
 					{/if}
 				</td>
-				{if $is_conditionnement_module_active}<td class="lignecaddie_prix center">{$STR_CONDITIONNEMENT}</td><td class="lignecaddie_prix center">{$STR_CONDITIONNEMENT_QTY}</td>{/if}
+				{if $is_conditionnement_module_active}<td class="lignecaddie_prix center"> {if isset($p.conditionnement)}{$p.conditionnement}{/if} </td><td class="lignecaddie_prix center">{$p.conditionnement_qty}</td>{/if}
 				<td class="lignecaddie_prix center">- {if isset($p.remise)}{$p.remise}{/if}</td>
 				<td class="lignecaddie_prix center">{$p.total_prix}</td>
 			</tr>
@@ -124,6 +124,12 @@
 </div>
 {if $with_totals_summary}
 <div id="step2caddie" class="col-sm-6 pull-right">
+	{if isset($pallet_count)}
+	<p>
+		<label>{$STR_TOTAL_PALETTE}{$STR_BEFORE_TWO_POINTS}:</label>
+		{$pallet_count}
+	</p>
+	{/if}
 	{if isset($tarif_paiement)}
 	<p>
 		<label>{$STR_FRAIS_GESTION}{$STR_BEFORE_TWO_POINTS}:</label>

@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: banner.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: banner.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}{foreach $banners as $ban}
 <div class="ba_pu" style="margin-top:3px;">
 {if isset($ban.html)}
-{$ban.html}
+	{$ban.html}
 {else}
 	{if !empty($ban.lien)}
 	<a href="{$ban.href|escape:'html'}" {$ban.extra_javascript}{if !empty($ban.target) && $ban.target != 'self'} {if $ban.target == '_blank'}onclick="return(window.open(this.href)?false:true);"{else}target="{$ban.target}"{/if}{/if}>
@@ -22,7 +22,7 @@
 	{if isset($ban.swf)}
 		{$ban.swf}
 	{else}
-		<img src="{$ban.src|escape:'html'}" alt="{$ban.lien}"{if $ban.width != $max_banner_width} width="{$ban.width}px"{if $ban.height != $max_banner_height} height="{$ban.height}px"{/if} />
+		<img src="{$ban.src|escape:'html'}" alt="{$ban.lien}"{if $ban.width != $max_banner_width} width="{$ban.width}px"{/if}{if $ban.height != $max_banner_height} height="{$ban.height}px"{/if} />
 	{/if}
 	{if !empty($ban.lien)}
 	</a>

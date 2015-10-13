@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,18 +23,18 @@ if (!defined('IN_PEEL')) {
 function ariane_panier()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/ariane_panier.tpl');
-	$tpl->assign('cart_logo_src', $GLOBALS['wwwroot'] . '/modules/ariane_panier/images/caddie_command.jpg');
+	$tpl->assign('cart_logo_src', get_url('/modules/ariane_panier/images/caddie_command.jpg'));
 	$tpl->assign('in_caddie', defined('IN_CADDIE'));
 	$tpl->assign('was_in_caddie', $_SESSION['session_ariane_panier']['in_caddie']);
 	$tpl->assign('STR_CADDIE', $GLOBALS['STR_CADDIE']);
-	$tpl->assign('caddie_affichage_href', $GLOBALS['wwwroot'] . '/achat/caddie_affichage.php');
+	$tpl->assign('caddie_affichage_href', get_url('caddie_affichage'));
 	if (defined('IN_CADDIE') || $_SESSION['session_ariane_panier']['in_caddie']) {
 		$_SESSION['session_ariane_panier']['in_caddie'] = true;
 	}
 	$tpl->assign('in_step1', defined('IN_STEP1'));
 	$tpl->assign('was_in_step1', $_SESSION['session_ariane_panier']['in_step1']);
 	$tpl->assign('STR_PAYMENT_MEAN', $GLOBALS['STR_PAYMENT_MEAN']);
-	$tpl->assign('achat_maintenant_href', $GLOBALS['wwwroot'] . '/achat/achat_maintenant.php');
+	$tpl->assign('achat_maintenant_href', get_url('achat_maintenant'));
 	if (defined('IN_STEP1') || $_SESSION['session_ariane_panier']['in_step1']) {
 		$_SESSION['session_ariane_panier']['in_step1'] = true;
 	}

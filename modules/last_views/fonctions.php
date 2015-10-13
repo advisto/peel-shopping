@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,23 +21,23 @@ if (!empty($GLOBALS['site_parameters']['nb_last_views'])) {
 	// nombre par défaut
 	$GLOBALS['nb_last_views'] = 5;
 }
+
 /**
- * Fonction ajoutant les produits consultés dans la liste du client
+ * On actualiste la liste des produits visités avec le produit qui vient d'être vu
  *
- * @param integer $product_id
+ * @param array $params
  * @return
  */
-function add_product_to_last_views_cookie($product_id)
-{
+function last_views_hook_product_details_show($params) {
 	if (isset($_COOKIE['last_views'])) {
 		$tab_last_views = @unserialize($_COOKIE['last_views']);
 	}
 	if(empty($tab_last_views) || !is_array($tab_last_views)) {
 		$tab_last_views = array();
 	}
-	if (!in_array($product_id, $tab_last_views)) {
+	if (!in_array($params['id'], $tab_last_views)) {
 		// on ajoute le produit à la liste
-		$tab_last_views[] = $product_id;
+		$tab_last_views[] = $params['id'];
 		if (count($tab_last_views) > $GLOBALS['nb_last_views']) {
 			// si on a dépassé la taille de la réserve, on supprime le premier produit
 			$tab_last_views = array_reverse($tab_last_views);
@@ -76,7 +76,7 @@ function affiche_last_views($location)
 			}
 		}
 		for ($i = count($tab_last_views) - 1; $i >= 0; $i--) {
-			$product_object = new Product($tab_last_views[$i], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+			$product_object = new Product($tab_last_views[$i], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 			$product_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 			if (!empty($product_html) && $product_object->on_gift == 0) {
 				// si le produit existe et est activé (en ligne)
@@ -93,7 +93,7 @@ function affiche_last_views($location)
 			unset($product_object);
 		}
 	}
-	if (is_rollover_module_active()) {
+	if (check_if_module_active('menus')) {
 		if (vn($GLOBALS['site_parameters']['type_rollover']) == 1) {
 			$output .= affiche_menu_deroulant_1('scrollerdiv_last_views', $products_html_array);
 		} elseif (vn($GLOBALS['site_parameters']['type_rollover']) == 2) {

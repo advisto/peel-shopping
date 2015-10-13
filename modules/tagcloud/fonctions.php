@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 //
 
 if (!defined('IN_PEEL')) {
@@ -58,7 +58,7 @@ function affiche_tagcloud($return_mode = false)
 		ksort($tags);
 		foreach ($tags as $key => $value) {
 			$tpl_tags[] = array(
-				'href' => get_search_url() . '?match=1&search=' . $key,
+				'href' => get_url('search') . '?match=1&search=' . $key,
 				'value' => $value,
 				'key' => $key,
 				'level' => intval(($value-$min) / max(1, $max-$min) * 10)
@@ -94,7 +94,7 @@ function sql_tagcloud($motclef)
 				WHERE `id`="'.intval($enr['id']).'" AND ' . get_filter_site_cond('tag_cloud'));
 		} else {
 			query('INSERT INTO `peel_tag_cloud` (`tag_name`,`nbsearch`,`lang`,`site_id`) 
-				VALUES ("'.nohtml_real_escape_string($motclef).'","1","'.nohtml_real_escape_string($_SESSION['session_langue']).'","'.intval($GLOBALS['site_id']).'")');
+				VALUES ("'.nohtml_real_escape_string($motclef).'","1","'.nohtml_real_escape_string($_SESSION['session_langue']).'","'.nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id'])).'")');
 		}
 	}
 }

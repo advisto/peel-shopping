@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: codes_promos.php 47024 2015-09-24 13:35:43Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -192,6 +192,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('product_filter', vb($frm['product_filter']));
 	$tpl->assign('etat', vn($frm['etat']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('titre_bouton', vn($frm['titre_bouton']));
 	if($frm["nouveau_mode"] != "insere") {
 		$tpl->assign('STR_ADMIN_CODES_PROMOS_ALREADY_USED', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ALREADY_USED'], vn($frm['compteur_utilisation'])));
@@ -213,7 +214,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_VALUE', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_VALUE'], $GLOBALS['site_parameters']['symbole']));
 	$tpl->assign('STR_ADMIN_BEGIN_DATE', $GLOBALS['STR_ADMIN_BEGIN_DATE']);
 	$tpl->assign('STR_ADMIN_END_DATE', $GLOBALS['STR_ADMIN_END_DATE']);
-	$tpl->assign('STR_PROMO_CODE', $GLOBALS['STR_PROMO_CODE']);
+	$tpl->assign('STR_CODE_PROMO', $GLOBALS['STR_CODE_PROMO']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER', $GLOBALS['STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_STATUS', $GLOBALS['STR_ADMIN_CODES_PROMOS_STATUS']);
 	$tpl->assign('STR_ADMIN_PRODUCT_NAME', $GLOBALS['STR_ADMIN_PRODUCT_NAME']);
@@ -254,13 +255,13 @@ function maj_code_promo($id, $frm)
 			, on_type = '" . intval($frm['on_type']) . "'
 			, montant_min = '" . floatval(get_float_from_user_input($frm['montant_min'])) . "'
 			, etat = '" . intval($frm['etat']) . "'
-			, site_id = '" . intval($frm['site_id']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, id_site = '" . $GLOBALS['site_parameters']['id'] . "'
 			, id_categorie = '" . intval($frm['id_categorie']) . "'
 			, nombre_prevue = '" . intval($frm['nombre_prevue']) . "'
-			, nb_used_per_client ='" . intval($frm['nb_used_per_client']) . "'
+			, nb_used_per_client = '" . intval($frm['nb_used_per_client']) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
-			, cat_not_apply_code_promo ='" . get_string_from_array(nohtml_real_escape_string(vn($frm['cat_not_apply_code_promo']))) . "'
+			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true), true) . "'
 		WHERE id='" . intval($id) . "'";
 	query($sql);
 }
@@ -290,7 +291,6 @@ function affiche_liste_code_promo()
 	if (empty($results_array)) {
 		$tpl->assign('are_results', false);
 	} else {
-		$all_sites_name_array = get_all_sites_name_array();
 		$tpl->assign('are_results', true);
 		$tpl->assign('links_header_row', $Links->getHeaderRow());
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
@@ -313,7 +313,7 @@ function affiche_liste_code_promo()
 				'etat_onclick' => 'change_status("codes_promos", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'source' => $ligne['source'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

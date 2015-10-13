@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: user_change_params_form.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<h1 property="name" class="page_title">{$STR_CHANGE_PARAMS}</h1>
 {if isset($token_error)}{$token_error}{/if}
 <form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
@@ -50,7 +50,7 @@
 	{foreach $specific_fields as $f}
 		{if $f.field_position=='company'}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
 	</div>
 		{/if}
@@ -86,6 +86,14 @@
 			</select>
 		</span>{$activity_error}
 	</div>
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="siret">{$siret_txt}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span>{$siret_error}
+	</div>
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="tva">{$STR_INTRACOM_FORM}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} /></span>{$intracom_form_error}
+	</div>
 {/if}
 {if !empty($STR_FONCTION)}
 	<div class="enregistrement">
@@ -96,16 +104,6 @@
 				{$fonction_options}
 			</select>
 		</span>{$fonction_error}
-	</div>
-{/if}
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="tva">{$STR_INTRACOM_FORM}{$STR_BEFORE_TWO_POINTS}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" {$content_rows_info} /></span>{$intracom_form_error}
-	</div>
-{if $is_annonce_module_active} 
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="siret">{$siret_txt}{$STR_BEFORE_TWO_POINTS}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span>{$siret_error}
 	</div>
 {/if}
 	<div class="enregistrement">
@@ -148,7 +146,7 @@
 	{foreach $specific_fields as $f}
 		{if $f.field_position=='adresse'}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
 	</div>
 		{/if}
@@ -169,30 +167,34 @@
 			</select>
 		</span>
 	</div>
-{if $is_annonce_module_active}
+{if !empty($STR_PROMO_CODE)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="promo_code">{$STR_PROMO_CODE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" id="promo_code" name="promo_code" value="{$promo_code|str_form_value}" /></span>
 	</div>
+{/if}
+{if $is_annonce_module_active}
+	{if !empty($id_categories) || !empty($id_cat_1)}
 	<div class="enregistrement">
 		<span>{$STR_ANNOUNCEMENT_INDICATION}</span>
 	</div>
-	{if !empty($favorite_category)}
+	{/if}
+	{if !empty($id_categories)}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="favorite_category">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementgauche"><label for="id_categories">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
-			<select class="form-control" id="favorite_category" name="favorite_category">
-				{$favorite_category}
+			<select class="form-control" id="id_categories" name="id_categories">
+				{$id_categories}
 			</select>
 		</span>
-		{$favorite_category_error}
+		{$id_categories_error}
 	</div>
-	{else}
+	{elseif !empty($id_cat_1)}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="id_cat_1">{$STR_FIRST_CHOICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_1" name="id_cat_1">
-				{$favorite_category_1}
+				{$id_cat_1}
 			</select>
 		</span>
 		{$id_cat_1_error}
@@ -201,7 +203,7 @@
 		<span class="enregistrementgauche"><label for="id_cat_2">{$STR_SECOND_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_2" name="id_cat_2">
-				{$favorite_category_2}
+				{$id_cat_2}
 			</select>
 		</span>
 		{$id_cat_2_error}
@@ -210,7 +212,7 @@
 		<span class="enregistrementgauche"><label for="id_cat_3">{$STR_THIRD_CHOICE}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">
 			<select class="form-control" id="id_cat_3" name="id_cat_3">
-				{$favorite_category_3}
+				{$id_cat_3}
 			</select>
 		</span>
 		{$id_cat_3_error}
@@ -227,7 +229,7 @@
 	{foreach $specific_fields as $f}
 		{if $f.field_position!='company' && $f.field_position!='adresse'}
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory_fields)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory)}<span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 		<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
 	</div>
 		{/if}
@@ -242,6 +244,17 @@
 		</span>
 	</div>
 	{/if}
+{if !empty($STR_LOGO)}
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="logo">{$STR_LOGO}{$STR_BEFORE_TWO_POINTS}:</label></span>
+		<span class="enregistrementdroite">
+		{if isset($logo)}
+			{include file="uploaded_file.tpl" f=$logo STR_DELETE=$logo.STR_DELETE_THIS_FILE}
+		{else}
+			<input name="logo" type="file" value="" />
+		{/if}
+	</div>
+{/if}
 {if !empty($STR_NEWSLETTER_YES)}
 	<div class="enregistrement">
 		<span class="enregistrement"><input type="checkbox" name="newsletter" value="1"{if $newsletter_issel} checked="checked"{/if} /> {$STR_NEWSLETTER_YES}</span>
@@ -254,7 +267,7 @@
 {/if}
 </div>
 	<p class="center">
-		{$token}<input type="submit" value="{$STR_CHANGE|str_form_value}" class="btn btn-primary" />
+		{$token}<input type="submit" value="{$STR_CHANGE|str_form_value}" class="btn btn-primary btn-lg" />
 		<input type="hidden" name="id_utilisateur" value="{$id_utilisateur|str_form_value}" />
 	</p>
 	<p>{$cnil_txt|textEncode}</p>

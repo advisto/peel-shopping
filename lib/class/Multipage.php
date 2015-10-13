@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: Multipage.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 44077 2015-02-17 10:20:38Z sdelaporte $
+ * @version $Id: Multipage.php 46935 2015-09-18 08:49:48Z gboussin $
  * @access public
  */
 class Multipage {
@@ -95,7 +95,12 @@ class Multipage {
 		$this->sqlRequest = $sqlRequest;
 		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
 		if ($this->DefaultResultsPerPage != '*') {
-			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / 5) - round($this->DefaultResultsPerPage / 5) % $round_elements_per_page);
+			if($this->DefaultResultsPerPage<20) {
+				$divisor = 2;
+			} else {
+				$divisor = 5;
+			}
+			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
 			$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
 			$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
 		}
@@ -119,7 +124,11 @@ class Multipage {
 		$this->setResultsNumberPerPage();
 		// Mode de compatibilité avec ancien Multipage utilisant start= à la place de page=
 		if (!empty($_GET['start'])) {
-			$this->page = round($_GET['start'] / $this->ResultPerPage);
+			if(!empty($this->ResultPerPage)) {
+				$this->page = round($_GET['start'] / $this->ResultPerPage);
+			} else {
+				$this->page = 1;
+			}
 			if (empty($_POST) && !defined('IN_PEEL_ADMIN') && String::strpos(get_current_url(true), 'start=' . $_GET['start']) !== false) {
 				// L'URL contient bien en GET start=... (sans qu'il ne soit dans une URL réécrite)
 				// On fait une redirection 301 pour éviter que cette URL reste indexée
@@ -436,6 +445,16 @@ class Multipage {
 	 */
 	function getOrderBy()
 	{
+		if (!empty($_GET[$this->sort_get_variable]) && $this->allow_get_sort) {
+			$this_sort = String::substr(String::strtoupper(word_real_escape_string($_GET[$this->sort_get_variable])), 0, 4);
+		} elseif (!empty($this->SortDefault)) {
+			$this_sort = String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
+		} else {
+			$this_sort = 'ASC';
+		}
+		if(!in_array(String::strtolower($this_sort), array('asc', 'desc'))) {
+			$this_sort = 'ASC';
+		}
 		if (!empty($this->forced_before_first_order_by_string)) {
 			$order_by[] = $this->forced_before_first_order_by_string;
 		}
@@ -451,24 +470,24 @@ class Multipage {
 					if(!empty($this->order_sql_prefix) && String::strpos($this_column, '.') === false) {
 						$this_order_by = word_real_escape_string($this->order_sql_prefix) . '.' . $this_order_by;
 					}
-					if (!empty($_GET[$this->sort_get_variable]) && $this->allow_get_sort) {
-						$this_sort = String::substr(String::strtoupper(word_real_escape_string($_GET[$this->sort_get_variable])), 0, 4);
-					} elseif (!empty($this->SortDefault)) {
-						$this_sort = String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
-					} else {
-						$this_sort = 'ASC';
-					}
-					if(in_array(String::strtolower($this_sort), array('asc', 'desc'))) {
-						$this_order_by .= ' ' . $this_sort;
-					}
 					$order_by[] = $this_order_by;
 				}
 			}
 		} elseif (!empty($this->forced_order_by_string)) {
 			$order_by[] = $this->forced_order_by_string;
-		}
+		} elseif (!empty($this->OrderDefault)) {
+			$order_by[] = $this->OrderDefault;
+		} 
 		if (!empty($this->forced_second_order_by_string)) {
 			$order_by[] = $this->forced_second_order_by_string;
+		}
+		if(!empty($order_by)) {
+			foreach($order_by as $this_key => $this_value) {
+				if(!empty($this_sort) && String::strpos($this_value, ' ') === false) {
+					// On rajoute l'ordre si pas spécifié
+					$order_by[$this_key] .= ' ' . $this_sort;
+				}
+			}
 		}
 		if (!empty($order_by)) {
 			return 'ORDER BY ' . implode(', ', $order_by);

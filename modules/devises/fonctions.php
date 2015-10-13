@@ -3,16 +3,41 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 47154 2015-10-05 07:55:09Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Initialisation de la devise si demandée par l'utilisateur
+ *
+ * @param array $params
+ * @return
+ */
+function devises_hook_configuration_end($params) {
+	if (!empty($_GET['devise'])) {
+		set_current_devise($_GET['devise']);
+		// On redirige 302 après avoir défini la devise (les moteurs ont déjà plus tôt eu droit à redirection 301)
+		redirect_and_die(get_current_url(true, false, array('devise')));
+	}
+}
+
+/**
+ * Effectue les actions journalières si le module cron est actif
+ *
+ * @param array $params
+ * @return
+ */
+function devises_hook_general_actions_24h($params) {
+	// Mise à jour des devises
+	return update_currencies_rates(vb($GLOBALS['site_parameters']['code']));
 }
 
 /**

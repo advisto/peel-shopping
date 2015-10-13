@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_marque.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_marque.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -65,21 +65,9 @@
 {% endfor %}
 		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</td></tr>
 		{% if (image) %}
-		<tr>
-			<td colspan="2" class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:<br />
-				<img src="{{ image.src|escape('html') }}" alt="" /><br />
-				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ image.nom }}&nbsp;
-				<a href="{{ image.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_ADMIN_DELETE_IMAGE }}</a>
-				<input type="hidden" name="image" value="{{ image.nom|str_form_value }}" />
-			</td>
-		</tr>
+			{% include "uploaded_file.tpl" with {'f':image,'STR_DELETE':STR_DELETE_THIS_FILE } %}
 		{% else %}
-		<tr>
-			<td colspan="2" class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-		</tr>
-		<tr>
-			<td colspan="2"><input style="width: 100%" name="image" type="file" value="" /></td>
-		</tr>
+			<input style="width: 100%" name="image" type="file" value="" />
 		{% endif %}
 		{% if is_marque_promotion_module_active %}
 		<tr>
@@ -92,7 +80,7 @@
  		<tr>
 			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
 			</td>

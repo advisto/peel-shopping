@@ -3,22 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: newsletter.php 47186 2015-10-05 14:54:56Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv('admin_content');
 
-if (check_if_module_active('webmail')) {
-	include($GLOBALS['dirroot'] . "/modules/webmail/administrer/fonctions.php");
-}
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_NEWSLETTERS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
@@ -220,7 +217,7 @@ function insere_newsletter($frm)
 	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$req .= "'" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "','" . real_escape_string($frm['message_' . $this_lang]) . "',";
 	}
-	$req .= " '" . date('Y-m-d H:i:s', time()) . "', 'html', 'envoi nok', '" . nohtml_real_escape_string($frm['template_technical_code']) . "', '" . intval($frm['site_id']) . "')";
+	$req .= " '" . date('Y-m-d H:i:s', time()) . "', 'html', 'envoi nok', '" . nohtml_real_escape_string($frm['template_technical_code']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "')";
 
 	$qid = query($req);
 }
@@ -239,7 +236,7 @@ function maj_newsletter($id, $frm)
 	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 		$req .= "sujet_" . $this_lang . " = '" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "', message_" . $this_lang . " = '" . real_escape_string($frm['message_' . $this_lang]) . "',";
 	}
-	$req .= " format = 'html', date = '" . date('Y-m-d H:i:s', time()) . "', template_technical_code = '" . nohtml_real_escape_string($frm['template_technical_code']) . "', site_id = '" . intval($frm['site_id']) . "' 
+	$req .= " format = 'html', date = '" . date('Y-m-d H:i:s', time()) . "', template_technical_code = '" . nohtml_real_escape_string($frm['template_technical_code']) . "', site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "' 
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
 	$qid = query($req);
 }
@@ -307,11 +304,11 @@ function send_newsletter($id, $debut, $limit, $test = false)
 					WHERE id='" . intval($news_infos['id']) . "' AND " . get_filter_site_cond('newsletter', null, true));
 				$newsletter_name_info = $id . ' (' . $this_lang . ') "' . $sujet[$this_lang] . '"';
 				if (!$test) {
-					$message = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_SUBSCRIBERS'];
+					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_SUBSCRIBERS'];
 				} else {
-					$message = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_ADMINISTRATORS'];
+					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_ADMINISTRATORS'];
 				}
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($message, $newsletter_name_info)))->fetch();
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($output, $newsletter_name_info)))->fetch();
 			} else {
 				$sql_u .= "
 					LIMIT " . intval($debut) . "," . intval($limit);
@@ -367,7 +364,6 @@ function affiche_liste_newsletter()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$this_langs_array = array();
 			$titre = $ligne['sujet_' . $_SESSION['session_langue']];
@@ -398,7 +394,7 @@ function affiche_liste_newsletter()
 				'date_envoi' => $ligne['date_envoi'],
 				'mail_href' => get_current_url(false) . '?mode=send&id=' . $ligne['id'] . '&format=' . $ligne['format'] . '&token=' . get_form_token_input($_SERVER['PHP_SELF'], true, false),
 				'test_href' => get_current_url(false) . '?mode=send&id=' . $ligne['id'] . '&format=' . $ligne['format'] . '&test=test&token=' . get_form_token_input($_SERVER['PHP_SELF'], true, false), 
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

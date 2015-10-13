@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_mot_passe.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: change_mot_passe.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
@@ -28,8 +28,8 @@ if (!empty($_POST)) {
 	}
 	$form_error_object->valide_form($frm,
 		array('ancien_mot_passe' => $GLOBALS['STR_ERR_OLDPASS'],
-			'nouveau_mot_passe' => $GLOBALS['STR_ERR_NEWPASS'],
-			'nouveau_mot_passe2' => $GLOBALS['STR_ERR_NEWPASS_CONFIRM']));
+			'nouveau_mot_passe' => sprintf($GLOBALS['STR_ERR_NEWPASS'], vb($GLOBALS['site_parameters']['password_length_required'], 8)),
+			'nouveau_mot_passe2' => $GLOBALS['STR_ERR_NEWPASS_CONFIRM']), array('nouveau_mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('nouveau_mot_passe' => 'check_password_format'));
 	if (!$form_error_object->has_error('ancien_mot_passe') && !verifier_authentification(null, $frm["ancien_mot_passe"], $_SESSION['session_utilisateur']['id_utilisateur'])) {
 		$form_error_object->add('ancien_mot_passe', $GLOBALS['STR_ERR_OLDPASS_VALID']);
 	}

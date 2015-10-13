@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: legal.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: legal.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -19,6 +19,7 @@ necessite_priv("admin_content");
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_LEGAL_TITLE'];
 
 $id = intval(vn($_REQUEST['id']));
+$frm = $_POST;
 
 if (!isset($form_error_object)) {
 	$form_error_object = new FormError();
@@ -56,7 +57,6 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "maj" :
 		if (!empty($_POST)) {
-			$frm = $_POST;
 			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 				$empty_field_messages_array['titre_' . $lng] = sprintf($GLOBALS['STR_ADMIN_LEGAL_ERR_EMPTY_TITLE'], String::strtoupper($lng));
 			}
@@ -158,7 +158,8 @@ function affiche_formulaire_legal(&$frm, &$form_error_object)
  */
 function maj_legal($id, $frm)
 {
-	$sql = "UPDATE peel_legal SET date_maj = '" . date('Y-m-d H:i:s', time()) . "', site_id = '" . intval($frm['site_id']). "'";
+	$sql = "UPDATE peel_legal
+		SET date_maj='" . date('Y-m-d H:i:s', time()) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])). "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", titre_" . $lng . "='" . real_escape_string($frm['titre_' . $lng]) . "'";
 		$sql .= ", texte_" . $lng . "='" . real_escape_string($frm['texte_' . $lng]) . "'";
@@ -199,21 +200,21 @@ function affiche_formulaire_ajout_legal(&$frm, $form_error_object)
 
 
 /**
- * Supprime le contacts spécifié par $id.
+ * Supprime le contact spécifié par $id.
  *
  * @param integer $id
  * @return
  */
 function supprime_legal($id)
 {
-	/* Efface le contacts */
+	/* Efface le contact */
 	$qid = query("DELETE FROM peel_legal 
 		WHERE id=" . intval($id) . " AND ". get_filter_site_cond('legal', null, true));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK']))->fetch();
 }
 
 /**
- * Ajoute le contacts dans la table contacts
+ * Ajoute les informations dans la table legal
  *
  * @param array $frm Array with all fields data
  * @return
@@ -221,7 +222,7 @@ function supprime_legal($id)
 function insere_legal(&$frm)
 {
 	$sql = 'INSERT INTO peel_legal SET 
-		site_id = "' . intval($frm['site_id']) . '"
+		site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . '"
 		, date_maj = "' . date('Y-m-d H:i:s', time()) . '" ';
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= '
@@ -250,13 +251,12 @@ function affiche_liste_legal()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i),
+			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?$ligne['titre_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 		}
 		$tpl->assign('results', $tpl_results);

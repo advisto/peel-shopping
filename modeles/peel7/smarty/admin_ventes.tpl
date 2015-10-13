@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_ventes.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_ventes.tpl 47256 2015-10-08 19:53:07Z gboussin $
 *}{if isset($results)}
 <br /><div class="alert alert-info">{$STR_ADMIN_VENTES_FORM_EXPLAIN}</div><br />
 <p class="title_label center">{$period_text}</p>
@@ -71,7 +71,7 @@
 </div>
 {if $is_module_export_ventes_active}
 	<div style="padding-bottom:15px">
-		<a href="{$export_href|escape:'html'}" class="title_label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_VENTES_EXPORT_EXCEL}</a><br/>
+		<a href="{$export_href|escape:'html'}" class="title_label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_VENTES_EXPORT_EXCEL}</a><br />
 		<a href="{$export_href_one_line_per_order|escape:'html'}" class="title_label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER}</a>
 	</div>
 {/if}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: meta.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: meta.php 46935 2015-09-18 08:49:48Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -141,6 +141,7 @@ function affiche_formulaire_meta(&$frm)
 	$tpl->assign('technical_code', vb($frm['technical_code']));
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_OR', $GLOBALS['STR_OR']);
@@ -184,7 +185,7 @@ function maj_meta($id, $frm)
 	}
 	$sql .= ' peel_meta SET
 			technical_code = "' . nohtml_real_escape_string($frm['technical_code']) . '"
-			, site_id = "' . intval($frm['site_id']) . '"
+			, site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . '"
 			';
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= '
@@ -215,7 +216,6 @@ function affiche_liste_meta()
 		WHERE " . get_filter_site_cond('meta', null, true));
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			// On génère le lien vers les métas ici :
 			// - si le titre est vide, on se sert de la description, sinon des mots clés
@@ -240,7 +240,7 @@ function affiche_liste_meta()
 			$tpl_results[] = array('href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'technical_code' => $ligne['technical_code'],
 				'anchor' => $anchor,
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id']),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id']
 				);
 		}

@@ -3,30 +3,45 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prefetch.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: prefetch.php 46935 2015-09-18 08:49:48Z gboussin $
 define('PEEL_PREFETCH', true);
 include("configuration.inc.php");
 
+$short_url = $_SERVER['REQUEST_URI'];
+
 if(empty($GLOBALS['site_parameters']['enable_prefetch'])) {
-	redirect_and_die($GLOBALS['wwwroot'] . '/');
+	// Le prefetch est désactivé. Pourtant on arrive ici car le .htaccess a la règle qui fait la correspondance entre tous les .htm et ce fichier prefetch.php
+	if (empty($_GET) && strpos($short_url, '..') === false && file_exists($GLOBALS['dirroot'] . $short_url)) {
+		// On cherche la page .htm demandée au cas où elle existe
+		require_once($GLOBALS['dirroot'] . $short_url);
+		die();
+	}
+	// Sinon on redirige vers la page d'accueil
+	redirect_and_die(get_url('/'));
 }
-$url = $_SERVER['REQUEST_URI'];
-if (String::strpos($url, '?') !== false) {
-	$url = String::substr($url, 0, String::strpos($url, '?'));
+
+// Faire 301 de anciennes pages vers nouvelles pages
+// A FAIRE
+
+	
+// On va chercher à quoi peut correspondre la page .htm demandée
+if (String::strpos($short_url, '?') !== false) {
+	$short_url = String::substr($short_url, 0, String::strpos($short_url, '?'));
 }
-if (String::strpos($url, '/') === 0) {
-	$url = String::substr($url, 1);
+if (String::strpos($short_url, '/') === 0) {
+	$short_url = String::substr($short_url, 1);
 }
+// Etape 1 : Recherche dans les rubriques de contenu
 $sql = "SELECT r.*
 	FROM peel_rubriques r
-	WHERE " . get_filter_site_cond('rubriques', 'r') . " AND (r.technical_code='".real_escape_string($url)."' OR r.technical_code='/".real_escape_string($url)."')
+	WHERE " . get_filter_site_cond('rubriques', 'r') . " AND (r.technical_code='".real_escape_string($short_url)."' OR r.technical_code='/".real_escape_string($short_url)."')
 	LIMIT 1";
 $query = query($sql);
 if ($result = fetch_assoc($query)) {
@@ -35,9 +50,10 @@ if ($result = fetch_assoc($query)) {
 	die();
 }
 
+// Etape 2 : Recherche dans les articles de contenu
 $sql = "SELECT a.*
 	FROM peel_articles a
-	WHERE " . get_filter_site_cond('articles', 'a') . " AND (a.technical_code='".real_escape_string($url)."' OR a.technical_code='/".real_escape_string($url)."')
+	WHERE " . get_filter_site_cond('articles', 'a') . " AND (a.technical_code='".real_escape_string($short_url)."' OR a.technical_code='/".real_escape_string($short_url)."')
 	LIMIT 1";
 $query = query($sql);
 if ($result = fetch_assoc($query)) {
@@ -45,7 +61,22 @@ if ($result = fetch_assoc($query)) {
 	include($GLOBALS['dirroot'] . '/lire/article_details.php');
 	die();
 }
-/* Annonces Advisto.com */
+
+if(function_exists('convertHrefUri')) {
+	// Décodage d'URL
+	$href = convertHrefUri($_SERVER['REQUEST_URI']);
+	if(String::strpos($href['script_filename'], '.php') && file_exists($GLOBALS['dirroot'] . '/' . $href['script_filename'])) {
+		$script_filename = $href['script_filename'];
+		unset($href['script_filename']);
+		$_GET = $href;
+		unset($href);
+		require_once($GLOBALS['dirroot'] . '/' . $script_filename);
+		die();
+	}
+}
+
+/*
+// Annonces Advisto.com
 $href = convertHrefUri($_SERVER['REQUEST_URI'], null, $_SESSION['session_langue']);
 
 if (!empty($href) && !empty($href[0])) {
@@ -65,11 +96,11 @@ if (!empty($href) && !empty($href[0])) {
 		if ($file_name == 'form_save.php') {
 			require_once($GLOBALS['dirroot'] . '/modules/advistocom/form_save.php');
 		} elseif (file_exists('files/' . $file_name)) {
-			$starter_loaded = true;
 			require_once($GLOBALS['dirroot'] . 'files/' . $file_name);
 			die();
 		}
 	}
-	// Faire 301 de anciennes pages vers nouvelles pages
-	// A FAIRE
 }
+*/
+
+echo 'nothing found';

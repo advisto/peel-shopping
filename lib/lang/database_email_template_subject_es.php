@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_subject_es.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: database_email_template_subject_es.php 46947 2015-09-18 10:38:20Z gboussin $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -73,6 +73,7 @@ $peel_email_template["subject"] = array(
   "send_mail_for_account_creation_stop" => "Su cuenta de revendedor",
   "send_mail_for_account_creation_reve" => "El cambio de estado de su cuenta de revendedor",
   "send_mail_for_account_creation_stand" => "Su cuenta de afiliado",
-  "send_mail_for_account_creation_affi" => "Cambio en el estado de su cuenta de afiliado"
+  "send_mail_for_account_creation_affi" => "Cambio en el estado de su cuenta de afiliado",
+  "validating_registration_by_admin" => "Confirmación de la creación de cuenta"
 );
 

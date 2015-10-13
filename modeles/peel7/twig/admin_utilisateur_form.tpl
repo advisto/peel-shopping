@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -25,6 +25,11 @@
 	{% endif %}
 		<tr>
 			<td style="font-weight:bold;" colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="{{ administrer_url }}/commander.php?mode=ajout&id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER }} #{{ id_utilisateur }}</a></span></td>
+		</tr>
+{% endif %}
+{% if hook_actions %}
+		<tr>
+			<td style="font-weight:bold;" colspan="2">{{ hook_actions }}</td>
 		</tr>
 {% endif %}
 {% if gift_check_link %}
@@ -107,11 +112,11 @@
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="email" class="form-control" name="email" style="width:100%" value="{{ email|str_form_value }}" /></td>
+			<td><input type="email" class="form-control" name="email" style="width:100%" value="{{ email|str_form_value }}" />{{ email_infos }}</td>
 		</tr>
-{% if (STR_PSEUDO) %}
+{% if pseudo_is_not_used is empty %}
 		<tr>
-			<td class="title_label">{{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label">{{ STR_ADMIN_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{{ pseudo|str_form_value }}" /></td>
 		</tr>
 {% endif %}
@@ -319,7 +324,7 @@
 		{% for f in specific_fields %}
 			{% if (f.field_title) %}
 				<tr>
-					<td>{{ f.field_title }}{% if f.mandatory_fields %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
+					<td>{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
 					<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
 				</tr>
 			{% else %}
@@ -342,28 +347,28 @@
 			</td>
 		</tr>
 		{% endif %}
-{% if is_annonce_module_active %}
+{% if is_annonce_module_active and ((id_categories) or (id_cat_1)) %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
 			<td colspan="2">{{ STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES }}</td>
 		</tr>
-	{% if favorite_category %}
+	{% if id_categories %}
 		<tr>
 			<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" id="favorite_category" name="favorite_category">
-					{{ favorite_category }}
+				<select class="form-control" id="id_categories" name="id_categories">
+					{{ id_categories }}
 				</select>
 			</td>
 		</tr>
-	{% else %}
+	{% elseif id_cat_1 %}
 		<tr>
 			<td>{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<select class="form-control" id="id_cat_1" name="id_cat_1">
-					{{ favorite_category_1 }}
+					{{ id_cat_1 }}
 				</select>
 			</td>
 		</tr>
@@ -371,7 +376,7 @@
 			<td>{{ STR_SECOND_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<select class="form-control" id="id_cat_2" name="id_cat_2">
-					{{ favorite_category_2 }}
+					{{ id_cat_2 }}
 				</select>
 			</td>
 		</tr>
@@ -379,7 +384,7 @@
 			<td>{{ STR_THIRD_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<select class="form-control" id="id_cat_3" name="id_cat_3">
-					{{ favorite_category_3 }}
+					{{ id_cat_3 }}
 				</select>
 			</td>
 		</tr>

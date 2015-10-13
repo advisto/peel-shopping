@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: rpc.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -58,7 +58,7 @@ if (String::strlen($search)>0) {
 				}
 			}
 			foreach($queries_results_array as $result) {
-				$product_object = new Product($result->id, $result, true, null, true, !is_micro_entreprise_module_active());
+				$product_object = new Product($result->id, $result, true, null, true, !check_if_module_active('micro_entreprise'));
 				// Prix hors ecotaxe
 				$purchase_prix_ht = $product_object->get_final_price(0, false, $is_reseller) * $currency_rate;
 				$purchase_prix = $product_object->get_final_price(0, $apply_vat, $is_reseller) * $currency_rate;
@@ -100,6 +100,8 @@ if (String::strlen($search)>0) {
 					'reference' => $result->reference,
 					'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) && !empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />',
 					'nom' => $result->nom,
+					'image' => $display_picture,
+					'image_thumbs' => $product_picture,
 					'prix' => fprix(String::str_form_value($result->prix)),
 					'promotion' => null,
 					'size_options_html' => $size_options_html,
@@ -114,27 +116,20 @@ if (String::strlen($search)>0) {
 				unset($product_object);
 			}
 		}
-	} elseif($mode=="offers") {
-		$queries_results_array = get_quick_search_results($search, $maxRows,false,null, "offers");
+	} elseif($mode=="offers" && !empty($GLOBALS['site_parameters']['user_offers_table_enable'])) {
+		$queries_results_array = get_quick_search_results($search, $maxRows, false, null, "offers");
 		foreach($queries_results_array as $result) {
 			$results_array[] = array('id' => $result->id_offre,
 				'nom' => $result->num_offre,
 				'user_id' => $id_utilisateur
 				);
 		}
-	} elseif($mode == "offer_add_user") {
+	} elseif($mode == "offer_add_user" && !empty($GLOBALS['site_parameters']['user_offers_table_enable'])) {
 		$queries_results_array = get_quick_search_results($search, $maxRows, false, null, "offer_add_user");
-		foreach($queries_results_array as $result) {
-			$results_array[] = array(
-				'id_utilisateur' => $result->id_utilisateur,
-				'prenom' => $result->prenom,
-				'nom_famille' => $result->nom_famille,
-				'societe' => $result->societe,
-				'laboratoire' => $result->laboratoire,
-				'email' => $result->email,
-				'ville' => $result->ville,
-				'msg' => $GLOBALS['STR_ADMIN_MSG_UPDATE_OK']
-				);
+		foreach($queries_results_array as $result_object) {
+			$result = (array)$result_object;
+			$result['msg'] = $GLOBALS['STR_ADMIN_MSG_UPDATE_OK'];
+			$results_array[] = $result;
 		}
 	}
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: marques.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -183,7 +183,7 @@ function supprime_marque($id)
  */
 function insere_sous_marque(&$frm)
 {
-	/* Remplis les contenu vides */
+	// Remplit les contenus vides
 	$frm = fill_other_language_content($frm);
 	
 	$sql = "INSERT INTO peel_marques (
@@ -204,7 +204,7 @@ function insere_sous_marque(&$frm)
 	$sql .= ", promotion_devises, promotion_percent
 	) VALUES (
 		'" . nohtml_real_escape_string($frm['image']) . "'
-		, '" . intval(vn($frm['site_id'])) . "'
+		, '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'
 		, '" . intval(vn($frm['etat'])) . "'
 		, '" . intval($frm['position']) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
@@ -240,7 +240,7 @@ function maj_marque(&$frm)
 		$on_promo = 0;
 	}
 	
-	/* Remplis les contenu vides */
+	// Remplit les contenus vides
 	$frm = fill_other_language_content($frm);
 	
 	$sql_promo = "UPDATE peel_produits 
@@ -255,7 +255,7 @@ function maj_marque(&$frm)
 	// On met à jour tous les droits par pays des produits liés à cette marque
 	if(!empty($_REQUEST['update_product_countries_submit'])) {
 		$sql_site_country = "UPDATE peel_produits 
-			SET site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "', site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 			WHERE id_marque='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
 		query($sql_site_country);
 	}
@@ -276,13 +276,13 @@ function maj_marque(&$frm)
 			, position = '" . intval($frm['position']) . "'
 			, promotion_devises = '" . floatval(vn($frm['promotion_devises'])) . "'
 			, promotion_percent = '" . floatval(vn($frm['promotion_percent'])) . "'
-			, site_id = '" . intval($frm['site_id']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		WHERE id = '" . intval($_POST['id']) . "' AND " . get_filter_site_cond('marques', null, true);
 	$qid = query($sql);
 }
 
 /**
- * Affiche un formulaire de marques vide
+ * Affiche un formulaire de marque vide
  *
  * @param integer $id
  * @param array $frm Array with all fields data
@@ -303,7 +303,7 @@ function affiche_formulaire_liste_marque($id, &$frm)
 	$frm['position'] = "";
 	$frm["titre_soumet"] = $GLOBALS['STR_ADMIN_MARQUES_ADD_BRAND'];
 
-	/* Affiche la liste des marques, en présélectionnant la marque choisie. */
+	// Affiche la liste des marques, en présélectionnant la marque choisie.
 	affiche_liste_marque($frm);
 }
 
@@ -329,7 +329,6 @@ function affiche_liste_marque(&$frm)
 
 	if (!empty($results_array)) {
 		$tpl_results = array();
-		$all_sites_name_array = get_all_sites_name_array();
 		$i = 0;
 		foreach ($results_array as $this_brand) {
 			$tmpLigne = array('tr_rollover' => tr_rollover($i, true),
@@ -339,18 +338,12 @@ function affiche_liste_marque(&$frm)
 				'id' => $this_brand['id'],
 				'img_src' => (!empty($this_brand['image']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($this_brand['image'], 80, 50, 'fit') : null),
 				'position' => $this_brand['position'],
-				'site_name' => ($this_brand['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$this_brand['site_id']]),
+				'site_name' => get_site_name($this_brand['site_id']),
 				'etat_onclick' => 'change_status("marques", "' . $this_brand['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($this_brand['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 				);
 			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-				$site_country_array = array();
-				if(String::strlen($this_brand['site_country'])>0) {
-					foreach(explode(',', $this_brand['site_country']) as $this_id) {
-						$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
-					}
-				}
-				$tmpLigne['site_country'] = implode(', ', $site_country_array);
+				$tmpLigne['site_country'] = get_country_name($this_brand['site_country']);
 			}
 			$tpl_results[] = $tmpLigne;
 			$i++;
@@ -409,10 +402,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	if (!empty($frm["image"])) {
-		$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image"],
-				'nom' => $frm["image"],
-				'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image',
-				));
+		$tpl->assign('image', get_uploaded_file_infos('image', $frm['image'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'));
 	}
 	$tpl->assign('is_marque_promotion_module_active', check_if_module_active('marques_promotion'));
 	if (check_if_module_active('marques_promotion')) {
@@ -422,6 +412,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 	}
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 	}
@@ -446,6 +437,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	$tpl->assign('STR_ADMIN_MARQUES_DISCOUNT_ON_BRAND', $GLOBALS['STR_ADMIN_MARQUES_DISCOUNT_ON_BRAND']);
 	echo $tpl->fetch();
@@ -461,7 +453,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
  */
 function supprime_fichier_marque($id, $file)
 {
-	/* Charge les infos du produit. */
+	// Charge les infos du produit.
 	switch ($file) {
 		case "image":
 			$sql = "SELECT image 

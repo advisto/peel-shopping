@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 47016 2015-09-23 15:02:15Z sdelaporte $
 if (!defined('PAYPAL_SANDBOX')) {
 	// Mettre à true pour faire des tests avec des comptes Sandbox
 	define('PAYPAL_SANDBOX', !empty($GLOBALS['site_parameters']['paypal_sandbox']));
@@ -27,7 +27,20 @@ if (!defined('PAYPAL_SANDBOX')) {
  * @param integer $payment_times
  * @param string $sTexteLibre
  * @param integer $user_id
- * @param string $user_country_bill
+ * @param string $prenom_ship
+ * @param string $nom_ship
+ * @param string $adresse_ship
+ * @param string $zip_ship
+ * @param string $ville_ship
+ * @param string $pays_ship
+ * @param string $telephone_ship
+ * @param string $prenom_bill
+ * @param string $nom_bill
+ * @param string $adresse_bill
+ * @param string $zip_bill
+ * @param string $ville_bill
+ * @param string $pays_bill
+ * @param string $telephone_bill
  * @return
  */
 function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $payment_times = 1, $sTexteLibre = '', $user_id, $prenom_ship, $nom_ship, $adresse_ship, $zip_ship, $ville_ship, $pays_ship, $telephone_ship, $prenom_bill = null, $nom_bill = null, $adresse_bill = null, $zip_bill = null, $ville_bill = null, $pays_bill = null, $telephone_bill = null)
@@ -41,10 +54,10 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 		}
 	} else {
 		$business = vb($GLOBALS['site_parameters']['email_paypal']);
-		if (!empty($GLOBLAS['site_parameters']['enable_paypal_integral_evolution']) && empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
+		if (!empty($GLOBALS['site_parameters']['enable_paypal_integral_evolution']) && empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
 			// Paypal integral evolution : 
 			$url = 'https://securepayments.paypal.com/cgi-bin/acquiringweb';
-		} elseif(!empty($GLOBLAS['site_parameters']['enable_paypal_integral_evolution']) && !empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
+		} elseif(!empty($GLOBALS['site_parameters']['enable_paypal_integral_evolution']) && !empty($GLOBALS['site_parameters']['enable_paypal_iframe'])) {
 			$url = 'https://securepayments.paypal.com/webapps/HostedSoleSolutionApp/webflow/sparta/hostedSoleSolutionProcess';
 		} else {
 			$url = 'https://www.paypal.com/cgi-bin/webscr';
@@ -81,7 +94,7 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	$tpl->assign('pays_bill', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
 	$tpl->assign('return', $GLOBALS['wwwroot'] . '/modules/paypal/ok.php?id=' . $order_id);
 	$tpl->assign('cancel_return', $GLOBALS['wwwroot'] . '/modules/paypal/nok.php?id=' . $order_id);
-	$tpl->assign('notify_url', $GLOBALS['wwwroot'] . '/modules/paypal/ipn.php');
+	$tpl->assign('notify_url', get_url('/modules/paypal/ipn.php'));
 	$tpl->assign('currency_code', $currency_code);
 	$tpl->assign('lc', $lang);
 	$tpl->assign('email', $user_email);

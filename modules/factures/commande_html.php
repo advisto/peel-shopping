@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an		|
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: commande_html.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../../configuration.inc.php");
 if(!empty($GLOBALS['site_parameters']['require_login_for_html_bill'])) {
 	necessite_identification();
 }
 if (!check_if_module_active('factures', '/commande_html.php') || is_user_bot()) {
 	// This module is not activated or this user is a bot => we redirect to the homepage
-	redirect_and_die($GLOBALS['wwwroot'] . "/");
+	redirect_and_die(get_url('/'));
 }
 
 /* Charge les détails d'une commande et les affiche */
@@ -133,7 +133,7 @@ if ($commande = fetch_object($qid_commande)) {
 						<td class="bill_cell_title">' . $GLOBALS['STR_SOLD_PRICE'] . ' ' . $GLOBALS['STR_TTC'] . '</td>
 						<td class="bill_cell_title">' . $GLOBALS['STR_QUANTITY'] . '</td>
 						<td class="bill_cell_title">' . $GLOBALS['STR_TOTAL_TTC'] . '</td>';
-	if (!is_micro_entreprise_module_active()) {
+	if (!check_if_module_active('micro_entreprise')) {
 		$output .= '
 						<td class="bill_cell_title">' .$GLOBALS['STR_VAT'] . '</td>';
 	}
@@ -161,7 +161,7 @@ if ($commande = fetch_object($qid_commande)) {
 						<td style="width:70px" class="bill_cell right">' . $prix . '</td>
 						<td style="width:70px" class="bill_cell center">' . $quantite . '</td>
 						<td style="width:70px" class="bill_cell right">' . $total_prix . '</td>';
-		if (!is_micro_entreprise_module_active()) {
+		if (!check_if_module_active('micro_entreprise')) {
 			$output .= '
 						<td style="width:70px" class="bill_cell right">' . $tva . ' %</td>';
 		}
@@ -185,7 +185,7 @@ if ($commande = fetch_object($qid_commande)) {
 						<td class="right">' . $order_infos['net_infos_array']['avoir'] . '</td>
 					</tr>';
 
-	if (!is_micro_entreprise_module_active()) {
+	if (!check_if_module_active('micro_entreprise')) {
 		$output .= '
 					<tr>
 						<td class="right" style="width:80%">' . $GLOBALS['STR_VAT'] . '' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</td>
@@ -193,7 +193,7 @@ if ($commande = fetch_object($qid_commande)) {
 					</tr>';
 	}
 	if (floatval($order_infos['net_infos_array']['total_tva'])==0) {
-		if (is_micro_entreprise_module_active()) {
+		if (check_if_module_active('micro_entreprise')) {
 			// Pour les entreprises bénéficiant du régime de franchise de base de TVA, il faut obligatoirement porter sur chaque facture la mention suivante : « TVA non applicable, article 293 B du CGI ».
 			$output .= '
 						<tr>
@@ -201,7 +201,7 @@ if ($commande = fetch_object($qid_commande)) {
 						</tr>';
 		} elseif(is_user_tva_intracom_for_no_vat($commande->id_utilisateur)) {
 			// Pour les livraisons de biens intracommunautaires, les factures doivent obligatoirement comporter la mention suivante : « Exonération de TVA, article 262 ter 1 du CGI ».
-			// Lorsqu’il s’agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
+			// Lorsqu'il s'agit de prestations de services intracommunautaires dont la taxe est autoliquidée par le preneur, il faudra faire figurer, à notre sens, les mentions « TVA due par le preneur, art. CGI 283-2, et art. 194 de la directive TVA 2006/112/CE »
 			// => Texte à définir en conséquence en fonction de votre site dans $GLOBALS['STR_INVOICE_BOTTOM_TEXT2']
 			$output .= '
 						<tr>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: String.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ $GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 44077 2015-02-17 10:20:38Z sdelaporte $
+ * @version $Id: String.php 46935 2015-09-18 08:49:48Z gboussin $
  * @access public
  */
 class String {
@@ -33,7 +33,7 @@ class String {
 	 * @param string $string
 	 * @return
 	 */
-	static function strlen($string)
+	public static function strlen($string)
 	{
 		if (function_exists('mb_strlen') && GENERAL_ENCODING != 'iso-8859-1') {
 			return mb_strlen($string);
@@ -51,7 +51,7 @@ class String {
 	 * @param integer $offset The optional offset parameter allows you to specify which character in haystack to start searching. The position returned is still relative to the beginning of haystack.
 	 * @return
 	 */
-	static function strpos($haystack, $needle, $offset = 0)
+	public static function strpos($haystack, $needle, $offset = 0)
 	{
 		if($needle!=='' && $needle!== null) {
 			if (function_exists('mb_strpos')) {
@@ -73,7 +73,7 @@ class String {
 	 * @param integer $offset May be specified to begin searching an arbitrary number of characters into the string. Negative values will stop searching at an arbitrary point prior to the end of the string.
 	 * @return
 	 */
-	static function strrpos($haystack, $needle, $offset = 0)
+	public static function strrpos($haystack, $needle, $offset = 0)
 	{
 		if ($offset > 0) {
 			$offset = min($offset, String::strlen($haystack));
@@ -109,7 +109,7 @@ class String {
 	 * @param integer $length
 	 * @return
 	 */
-	static function substr($string, $start, $length = null)
+	public static function substr($string, $start, $length = null)
 	{
 		if (function_exists('mb_substr')) {
 			if ($length !== null) {
@@ -132,7 +132,7 @@ class String {
 	 * @param string $string The input string.
 	 * @return
 	 */
-	static function strtolower($string)
+	public static function strtolower($string)
 	{
 		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
 			if (function_exists('mb_strtolower')) {
@@ -151,7 +151,7 @@ class String {
 	 * @param string $string The input string.
 	 * @return
 	 */
-	static function strtoupper($string)
+	public static function strtoupper($string)
 	{
 		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
 			if (function_exists('mb_strtoupper')) {
@@ -170,7 +170,7 @@ class String {
 	 * @param string $string The input string.
 	 * @return
 	 */
-	static function ucfirst($string)
+	public static function ucfirst($string)
 	{
 		if(empty($GLOBALS['site_parameters']['string_case_change_forbidden']) || empty($GLOBALS['site_parameters']['string_case_change_forbidden'][$_SESSION['session_langue']])) {
 			if (function_exists('mb_ucfirst')) {
@@ -191,7 +191,7 @@ class String {
 	 * @param integer $searched
 	 * @return
 	 */
-	static function substr_count($string, $searched)
+	public static function substr_count($string, $searched)
 	{
 		if (function_exists('mb_substr_count')) {
 			return mb_substr_count($string, $searched);
@@ -208,7 +208,7 @@ class String {
 	 * @param string $separator
 	 * @return
 	 */
-	static function cut_with_separator($string, $max_part_length = 40, $separator = ' ')
+	public static function cut_with_separator($string, $max_part_length = 40, $separator = ' ')
 	{
 		$left_string = '';
 		$right_string = $string;
@@ -230,14 +230,14 @@ class String {
 	 * @param mixed $ideal_length_with_clean_cut_if_possible
 	 * @return
 	 */
-	static function str_shorten($string, $length_limit, $middle_separator = '', $ending_if_no_middle_separator = '...', $ideal_length_with_clean_cut_if_possible = null)
+	public static function str_shorten($string, $length_limit, $middle_separator = '', $ending_if_no_middle_separator = '...', $ideal_length_with_clean_cut_if_possible = null)
 	{
 		$length = String::strlen($string);
 		if (!empty($ideal_length_with_clean_cut_if_possible) && $length > $ideal_length_with_clean_cut_if_possible) {
 			// Gestion d'une coupure propre si possible entre $ideal_length_with_clean_cut_if_possible et $length_limit
 			$middle_separator = null;
 			foreach(array('.', '!', '?', ';', ':', ',', ' ', '=', '+', '-', '{', '}', '[', ']', '(', ')', '<', '>', '_', '#', '*') as $this_separator) {
-				// On fait un test sur les séparateur, du plus important au moins important
+				// On fait un test sur les séparateurs, du plus important au moins important
 				$possible_cut = String::strpos($string, $this_separator, $ideal_length_with_clean_cut_if_possible);
 				if ($possible_cut !== false && $possible_cut < $length_limit - String::strlen($ending_if_no_middle_separator)) {
 					// On prend cette valeur comme étant la limite de coupure à faire
@@ -302,7 +302,7 @@ class String {
 	 * @param boolean $force_shorten_if_special_content
 	 * @return
 	 */
-	static function str_shorten_words($string, $length_limit = 100, $separator = " ", $force_shorten_if_special_content = false, $add_separator_instead_of_cutting = true)
+	public static function str_shorten_words($string, $length_limit = 100, $separator = " ", $force_shorten_if_special_content = false, $add_separator_instead_of_cutting = true)
 	{
 		// On coupe autour de tous les mots
 		$sentences_array = explode("\n", $string);
@@ -338,7 +338,7 @@ class String {
 	 * @param boolean $strip_umlaut
 	 * @return
 	 */
-	static function convert_accents($string, $convert_umlaut = false, $strip_umlaut = true)
+	public static function convert_accents($string, $convert_umlaut = false, $strip_umlaut = true)
 	{
 		$string = str_replace(array('à', 'á', 'â', 'ã', 'å'), 'a', $string);
 		$string = str_replace(array('À', 'Á', 'Â', 'Ã', 'Å'), 'A', $string);
@@ -372,7 +372,7 @@ class String {
 	 * @param string $original_encoding
 	 * @return
 	 */
-	static function convert_encoding($string, $new_encoding, $original_encoding = null)
+	public static function convert_encoding($string, $new_encoding, $original_encoding = null)
 	{
 		$new_encoding = strtolower($new_encoding);
 		$original_encoding = strtolower($original_encoding);
@@ -408,7 +408,7 @@ class String {
 	 * @param boolean $encode_only_isolated_amperstands
 	 * @return
 	 */
-	static function htmlentities ($string, $flags = ENT_COMPAT, $charset = GENERAL_ENCODING, $suppr_endline = false, $encode_only_isolated_amperstands = false, $decode_html_entities_first = false)
+	public static function htmlentities ($string, $flags = ENT_COMPAT, $charset = GENERAL_ENCODING, $suppr_endline = false, $encode_only_isolated_amperstands = false, $decode_html_entities_first = false)
 	{
 		if ($suppr_endline) {
 			$string = str_replace(array("\r", "\n"), ' ', $string);
@@ -421,7 +421,7 @@ class String {
 		if ($encode_only_isolated_amperstands) {
 			// On en remplace que les & qui sont tout seuls. On ne touche pas au reste
 			// ?! => assertion négative (et comme c'est une assertion, ça ne rentre pas de le résultat)
-			$string = preg_replace('/&(?!#?[xX]?([0-9a-zA-Z]{1,9});)/', '&amp;', $string);
+			$string = str_replace('&amp;amp;', '&amp;', preg_replace('/&(?!#?[xX]?([0-9a-zA-Z]{1,9});)/', '&amp;', $string));
 		} else {
 			// On encode les entités, mais si il y en avait déjà, dans ce cas on se retrouverait avec une entité du type &amp;entité;
 			// => On reconstruit donc ensuite les entités qui auraient été cassées grave au preg_replace
@@ -452,7 +452,7 @@ class String {
 	 * @param boolean $encode_only_isolated_amperstands
 	 * @return
 	 */
-	static function str_htmlentities($string, $suppr_endline = false, $encode_only_isolated_amperstands = false)
+	public static function str_htmlentities($string, $suppr_endline = false, $encode_only_isolated_amperstands = false)
 	{
 		return String::htmlentities($string, ENT_COMPAT, GENERAL_ENCODING, $suppr_endline, $encode_only_isolated_amperstands);
 	}
@@ -465,7 +465,7 @@ class String {
 	 * @param boolean $encode_only_isolated_amperstands
 	 * @return
 	 */
-	static function textEncode($string, $suppr_endline = false, $encode_only_isolated_amperstands = false)
+	public static function textEncode($string, $suppr_endline = false, $encode_only_isolated_amperstands = false)
 	{
 		return String::htmlentities($string, ENT_COMPAT, GENERAL_ENCODING, $suppr_endline, $encode_only_isolated_amperstands);
 	}
@@ -477,7 +477,7 @@ class String {
 	 * @param mixed $flags
 	 * @return
 	 */
-	static function str_form_value($value, $flags = ENT_COMPAT)
+	public static function str_form_value($value, $flags = ENT_COMPAT)
 	{
 		if (function_exists('html_entity_decode') && (version_compare(PHP_VERSION, '5.0.0', '>=') || GENERAL_ENCODING == 'iso-8859-1')) {
 			// Le 4è argument de htmlspecialchars appelé $double_encode n'est pas disponible avant PHP 5.2.3
@@ -497,7 +497,7 @@ class String {
 	 * @param mixed $style
 	 * @return
 	 */
-	static function htmlspecialchars_decode($string, $style = ENT_COMPAT)
+	public static function htmlspecialchars_decode($string, $style = ENT_COMPAT)
 	{
 		$translation = array_flip(get_html_translation_table(HTML_SPECIALCHARS, $style));
 		if ($style === ENT_QUOTES) {
@@ -514,7 +514,7 @@ class String {
 	 * @param mixed $charset
 	 * @return
 	 */
-	static function html_entity_decode($string, $quote_style = ENT_COMPAT, $charset = GENERAL_ENCODING)
+	public static function html_entity_decode($string, $quote_style = ENT_COMPAT, $charset = GENERAL_ENCODING)
 	{
 		if (version_compare(PHP_VERSION, '5.0.0', '>=')) {
 			return html_entity_decode($string, $quote_style, $charset);
@@ -530,7 +530,7 @@ class String {
 	 * @param string $string
 	 * @return
 	 */
-	static function html_entity_decode_if_needed($string)
+	public static function html_entity_decode_if_needed($string)
 	{
 		if (!empty($GLOBALS['site_parameters']['compatibility_mode_with_htmlentities_encoding_content']) && String::strpos($string, '<') === false) {
 			return String::html_entity_decode($string);
@@ -545,9 +545,9 @@ class String {
 	 * @param string $string
 	 * @return
 	 */
-	static function strip_tags($string, $allowed_tags = null)
+	public static function strip_tags($string, $allowed_tags = null)
 	{
-		return strip_tags(str_replace(array('    ', '   ', '  '), ' ', str_replace(array('<br />', '<br>', '</p>', '</td>', '</tr>', '</div>', '</h3>', '</h4>'), ' ', str_replace(array('<h1', '</h1>','<h2', '</h2>'), array(' - <h1', '</h1> - ', ' - <h2', '</h2> - '), $string))), $allowed_tags);
+		return str_replace(array(' -  -  - ', ' -  - '), ' - ', str_replace(array("\n\n\n\n\n", "\n\n\n\n", "\n\n\n", '     ','    ', '   ', '  '), array("\n\n", "\n\n", "\n\n", ' ', ' ', ' ', ' '), strip_tags(str_replace(array('<br />', '<br>', '</p>', '</td>', '</tr>', '</div>', '</h3>', '</h4>'), array("\n", "\n", "\n", ' ', ' ', ' ', ' ', ' '), str_replace(array('<h1', '</h1>','<h2', '</h2>', '<li', "\t", "\r\n", "\r"), array(' - <h1', '</h1> - ', ' - <h2', '</h2> - ', "\n- <li", ' ', "\n", "\n"), $string)), $allowed_tags)));
 	}
 
 	/**
@@ -556,7 +556,7 @@ class String {
 	 * @param mixed $string
 	 * @return
 	 */
-	static function nl2br_if_needed($string)
+	public static function nl2br_if_needed($string)
 	{
 		$has_no_br = String::strpos($string, '&lt;br') === false && String::strpos($string, '<br') === false;
 		// Attention aux balises param
@@ -577,7 +577,7 @@ class String {
 	 * @param mixed $string
 	 * @return
 	 */
-	static function detect_utf8_characters($string)
+	public static function detect_utf8_characters($string)
 	{
 		// On n'utilise pas mb_ detect_ encoding à cause de ses multiples bugs
 		return preg_match('%(?:
@@ -599,7 +599,7 @@ class String {
 	 * @param mixed $string
 	 * @return
 	 */
-	static function utf8_encode($string)
+	public static function utf8_encode($string)
 	{
 		$cp1252_map = array("\xc2\x80" => "\xe2\x82\xac",/* EURO SIGN */
 			"\xc2\x82" => "\xe2\x80\x9a",/* SINGLE LOW-9 QUOTATION MARK */
@@ -648,7 +648,7 @@ class String {
 	 * @param integer $max_word_and_url_length
 	 * @return
 	 */
-	static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000, $max_word_and_url_length = 100)
+	public static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000, $max_word_and_url_length = 100)
 	{
 		require_once($GLOBALS['dirroot'] . "/lib/fonctions/htmlawed.php");
 		if (empty($text)) {
@@ -790,7 +790,7 @@ class String {
 	 * @param boolean $try_filename_in_iso_8859_if_file_not_found
 	 * @return
 	 */
-	static function fopen_utf8($filename, $mode, $force_filename_in_iso_8859 = false, $try_filename_in_iso_8859_if_file_not_found = true)
+	public static function fopen_utf8($filename, $mode, $force_filename_in_iso_8859 = false, $try_filename_in_iso_8859_if_file_not_found = true)
 	{
 		if($force_filename_in_iso_8859 && String::detect_utf8_characters($filename)){
 			// On ne veut pas que le nom soit en UTF8
@@ -833,7 +833,7 @@ class String {
 	 * @param boolean $try_filename_in_iso_8859_if_file_not_found
 	 * @return
 	 */
-	static function file_get_contents_utf8($filename, $force_filename_in_iso_8859 = false, $try_filename_in_iso_8859_if_file_not_found = true)
+	public static function file_get_contents_utf8($filename, $force_filename_in_iso_8859 = false, $try_filename_in_iso_8859_if_file_not_found = true)
 	{
 		if($force_filename_in_iso_8859 && String::detect_utf8_characters($filename)){
 			// On ne veut pas que le nom soit en UTF8
@@ -863,7 +863,7 @@ class String {
 	 * @param mixed $handle
 	 * @return
 	 */
-	static function feof($handle) {
+	public static function feof($handle) {
 		static $timeout;
 		if($handle === false) {
 			return true;
@@ -890,7 +890,7 @@ class String {
 	 * @param boolean $avoid_slash
 	 * @return
 	 */
-	static function rawurlencode($string, $avoid_slash = true)
+	public static function rawurlencode($string, $avoid_slash = true)
 	{
 		if ($avoid_slash) {
 			return rawurlencode(str_replace('/', '-', $string));
@@ -906,7 +906,7 @@ class String {
 	 * @param boolean $avoid_slash
 	 * @return
 	 */
-	static function rawurldecode($string, $avoid_slash = false)
+	public static function rawurldecode($string, $avoid_slash = false)
 	{
 		if ($avoid_slash) {
 			return str_replace('/', '-', rawurldecode($string));

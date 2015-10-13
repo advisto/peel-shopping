@@ -3,18 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: rpc_status.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
-define('LOAD_NO_OPTIONAL_MODULE', true);
-define('SKIP_SET_LANG', true);
 include("../configuration.inc.php");
 
 if (!empty($_GET['encoding'])) {
@@ -32,35 +30,36 @@ if (!est_identifie() || empty($_POST)) {
 		WHERE id='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('commandes', null, true));
 	$output .=  $GLOBALS['administrer_url'] . '/images/' . $GLOBALS['site_parameters']['statut_livraison_picto'][$_POST['new_status']];
 } else {
+	$mode = vb($_POST['mode']);
 	output_general_http_header($page_encoding);
 	// On fait les tests de droits une bonne fois pour toutes
-	if(vb($_POST['mode']) == 'langues') {
+	if($mode == 'langues') {
 		$new_status = ($_POST['current_status']+2)%3-1;
 	} else {
 		$new_status = 1-$_POST['current_status'];
 	}
 	$new_status_sql_value = $new_status;
-	if(vb($_POST['mode']) == 'countries' && a_priv("admin_manage")) {
+	if($mode == 'countries' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_pays
 			SET etat='%s'
 			WHERE id='%s' AND " .  get_filter_site_cond('pays', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'types' && a_priv("admin_manage")) {
+	}elseif($mode == 'types' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_types
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('types', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'tailles' && a_priv("admin_products")) {
+	}elseif($mode == 'tailles' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_tailles
 			SET etat='%s'
 			WHERE id='%s' AND " .  get_filter_site_cond('tailles', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'couleurs' && a_priv("admin_products")) {
+	}elseif($mode == 'couleurs' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_couleurs
 			SET etat='%s'
 			WHERE id='%s' AND " .  get_filter_site_cond('couleurs', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'paiement' && a_priv("admin_manage")) {
+	}elseif($mode == 'paiement' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_paiement
 			SET etat='%s'
 			WHERE id='%s' AND " .  get_filter_site_cond('paiement', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'contact' && a_priv("admin_manage")) {
+	}elseif($mode == 'contact' && a_priv("admin_manage")) {
 		if(empty($new_status_sql_value)) {
 			$new_status_sql_value = "FALSE";
 		}else{
@@ -69,58 +68,54 @@ if (!est_identifie() || empty($_POST)) {
 		$sql = "UPDATE peel_admins_contacts_planified
 			SET actif='%s'
 			WHERE id='%s'";
-	}elseif(vb($_POST['mode']) == 'devises' && a_priv("admin_manage")) {
+	}elseif($mode == 'devises' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_devises
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('devises', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'banner' && a_priv("admin_content")) {
+	}elseif($mode == 'banner' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_banniere
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('banniere', null, true);
-		// Suppression des caches de bannières
-		$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
-		$this_cache_object->delete_cache_file(true);
-		unset($this_cache_object);
-	}elseif(vb($_POST['mode']) == 'avis' && a_priv("admin_webmastering")) {
+	}elseif($mode == 'avis' && a_priv("admin_webmastering")) {
 		$sql = "UPDATE peel_avis
 			SET etat='%s'
 			WHERE id='%s'";
-	}elseif(vb($_POST['mode']) == 'attributs' && a_priv("admin_products")) {
+	}elseif($mode == 'attributs' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_nom_attributs
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('nom_attributs', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'articles' && a_priv("admin_content")) {
+	}elseif($mode == 'articles' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_articles
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('articles', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'rubriques' && a_priv("admin_content")) {
+	}elseif($mode == 'rubriques' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_rubriques
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('rubriques', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'produits' && a_priv("admin_products")) {
+	}elseif($mode == 'produits' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_produits
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('produits', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'utilisateurs' && a_priv("admin_users")) {
+	}elseif($mode == 'utilisateurs' && a_priv("admin_users")) {
 		/*
 		// Pour la page de liste d'utilisateurs, on n'utilise pas le jquery pour gérer des points plus complexes (désactivation d'annonces ou autres) et mettre des messages spécifiques
 		$sql = "UPDATE peel_utilisateurs
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('utilisateurs', null, true) . "";
 		*/
-	}elseif(vb($_POST['mode']) == 'marques' && a_priv("admin_products")) {
+	}elseif($mode == 'marques' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_marques
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('marques', null, true);
-	}elseif(vb($_POST['mode']) == 'langues' && a_priv("admin_manage")) {
+	}elseif($mode == 'langues' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_langues
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('langues', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'html' && a_priv("admin_content")) {
+	}elseif($mode == 'html' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_html
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('html', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'email-templates' && a_priv("admin_content")) {
+	}elseif($mode == 'email-templates' && a_priv("admin_content")) {
 		if(empty($new_status_sql_value)) {
 			$new_status_sql_value = "FALSE";
 		}else{
@@ -129,33 +124,39 @@ if (!est_identifie() || empty($_POST)) {
 		$sql = "UPDATE peel_email_template
 			SET active='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('email_template', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'codes_promos' && a_priv("admin_sales,admin_users")) {
+	}elseif($mode == 'codes_promos' && a_priv("admin_sales,admin_users")) {
 		$sql = "UPDATE peel_codes_promos
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('codes_promos', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'categories' && a_priv("admin_products")) {
+	}elseif($mode == 'categories' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_categories
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('categories', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'lexique' && a_priv("admin_products")) {
+	}elseif($mode == 'lexique' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_lexique
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('lexique', null, true) . "";
-	}elseif(vb($_POST['mode']) == 'configuration' && a_priv("admin_manage")) {
+	}elseif($mode == 'configuration' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_configuration
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('configuration', null, true) . "";
-	} elseif(vb($_POST['mode']) == 'abus' && a_priv("admin_moderation")) {
+	} elseif($mode == 'abus' && a_priv("admin_moderation")) {
 		$new_status_sql_value = nohtml_real_escape_string($_POST['value']);
 		$sql = "UPDATE peel_abus_comment
 			SET status='%s', id_admin='".intval($_SESSION['session_utilisateur']['id_utilisateur'])."', status_change_date='".date('Y-m-d H:i:s')."'
 			WHERE id='%s'";
-	} else {
-		die('nok2');
+	} elseif(function_exists('rpc_status_'.$mode)) {
+		$function_name = 'rpc_status_'.$mode;
+		$new_status = $function_name($_POST);
 	}
-	// On met à jour les positions en fonction de la liste reçue en POST
-	query(sprintf($sql, $new_status_sql_value, intval($_POST['id'])));
-	$output .= $new_status;
+	if(empty($function_name)) {
+		// On met à jour les positions en fonction de la liste reçue en POST
+		query(sprintf($sql, $new_status_sql_value, intval($_POST['id'])));
+	}
+	call_module_hook('rpc_status', array('new_status' => $new_status, 'current_status' => $_POST['current_status'], 'id' => intval($_POST['id']), 'mode' => $mode));
+	if(isset($new_status)) {
+		$output .= $new_status;
+	}
 }
 echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_commande_details.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -64,6 +64,9 @@
 			</table>
 		</td>
 	</tr>
+	{% if is_tnt_module_active %}
+		{{ etiquette_tnt }}
+	{% endif %}
 	{% if is_fianet_sac_module_active %}
 		<tr>
 			<td><b>{{ STR_ADMIN_COMMANDER_FIANET_FUNCTIONS }}</b>{{ STR_BEFORE_TWO_POINTS }}: {{ fianet_analyse_commandes }}</td>
@@ -120,9 +123,6 @@
 		</tr>
 {% else %}
 </table>
-{% if is_tnt_module_active %}
-	{{ etiquette_tnt }}
-{% endif %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table>
 {% endif %}
@@ -142,7 +142,7 @@
 		<tr>
 			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
 			</td>
@@ -370,7 +370,7 @@
 					<td style="width:20px"></td>
 					<td class="title_label center" style="width:60px">{{ STR_ADMIN_ID }}</td>
 					<td class="title_label center" style="width:65px">{{ STR_REFERENCE }}</td>
-					<td class="title_label center" style="min-width:100px">{{ STR_ADMIN_COMMANDER_PRODUCT_NAME }}</td>
+					<td class="title_label center" style="min-width:80px">{{ STR_ADMIN_COMMANDER_PRODUCT_NAME }}</td>
 					<td class="title_label center" style="width:70px">{{ STR_SIZE }}</td>
 					<td class="title_label center" style="width:70px">{{ STR_COLOR }}</td>
 					<td class="title_label center" style="width:40px">{{ STR_QUANTITY_SHORT }}</td>
@@ -380,10 +380,11 @@
 					<td class="title_label center" style="width:70px">{{ STR_UNIT_PRICE }} {{ ttc_ht }}</td>
 					<td class="title_label center" style="width:70px">{{ STR_ADMIN_VAT_PERCENTAGE }}</td>
 					<td class="title_label center" style="width:120px">{{ STR_ADMIN_CUSTOM_ATTRIBUTES }}</td>
+					<td class="title_label center" style="width:20px">{{ STR_IMAGE }}</td>
 				</tr>
 			</thead>
 			{# Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! #}
-			<tbody id="dynamic_order_lines">{% for o in order_lines %}{{ o }}{% endfor %}</tbody>
+			<tbody class="sortable ui-sortable" id="dynamic_order_lines">{% for o in order_lines %}{{ o }}{% endfor %}</tbody>
 		</table>
 	</div>
 	<div class="center">
@@ -419,7 +420,7 @@
 {% if is_order_modification_allowed %}
 	<div class="entete">{{ STR_ADMIN_COMMANDER_ADD_PRODUCTS_TO_ORDER }}</div>
 	<div class="add_line_order">
-		<p style="margin-top:0px;"><input value="{{ STR_ADMIN_ADD_EMPTY_LINE|str_form_value }}" name="add_product" class="btn btn-primary" type="button" onclick="add_order_line(0, '', '', 0, 1, '', '', '{{ default_vat_select_options|filtre_javascript(true,true,true) }}', 0, 0, 0, '{{ STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript(true,true,true) }}', 'order'); return false;" /> {{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" onclick="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" /></p>
+		<p style="margin-top:0px;"><input value="{{ STR_ADMIN_ADD_EMPTY_LINE|str_form_value }}" name="add_product" class="btn btn-primary" type="button" onclick="add_products_list_line(0, '', '', '', '', 0, 1, '', '', '{{ default_vat_select_options|filtre_javascript(true,true,true)}}', 0, 0, 0, '{{ STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript(true,true,true) }}', 'order'); return false;" /> {{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" onclick="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" /></p>
 		<div class="suggestions" id="suggestions"></div>
 	</div>
 {% endif %}

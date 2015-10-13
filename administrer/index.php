@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: index.php 47158 2015-10-05 08:56:35Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -33,7 +33,9 @@ $output = '';
 
 if (isset($_POST['admin_multisite'])){
 	// Détermine le site à administrer. Cette valeur en session est utilisée dans la fonction get_filter_site_cond. $_POST['admin_multisite'] est éventuellement égal à 0.
-	$_SESSION['session_admin_multisite'] = intval($_POST['admin_multisite']);
+	if($_SESSION['session_utilisateur']['site_id'] == 0 || $_POST['admin_multisite'] == $_SESSION['session_utilisateur']['site_id']) {
+		$_SESSION['session_admin_multisite'] = intval($_POST['admin_multisite']);
+	}
 }
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_produits p
@@ -67,10 +69,9 @@ $paid_orders_delivered_count_object = fetch_object($q);
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_index.tpl');
 
 $tpl->assign('site_id_select_options', get_site_id_select_options(vb($_SESSION['session_admin_multisite'])));
+$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	
-if (check_if_module_active('phone_cti') && file_exists($GLOBALS['dirroot'] . '/modules/multisite/include.php')) {
-	require_once($dirroot . '/modules/multisite/include.php');
-	require_once($dirroot . '/modules/multisite/fonctions.php');
+if (check_if_module_active('phone_cti') && check_if_module_active('multisite')) {
 	$block_content = array();
 	$block_content['title'] = 'Liste des Appels';
 	$block_content['logo'] = '';
@@ -79,11 +80,26 @@ if (check_if_module_active('phone_cti') && file_exists($GLOBALS['dirroot'] . '/m
 	$block_content['description2'] = '';
 	$tpl->assign('KeyyoCalls', backoffice_home_block($block_content, 'red', true));
 }
+$delivery = '';
+if(a_priv('admin_sales', true)) {
+	if(!empty($GLOBALS['site_parameters']['mode_transport'])) {
+		$delivery .= backoffice_home_block('delivery', 'purple', true);	
+	} else {
+		$home_modules = call_module_hook('get_admin_home_block', array(), 'array');
+		if(!empty($home_modules)) {
+			$delivery .= current($home_modules);
+		}
+	}
+}
+if(vb($GLOBALS['site_parameters']['peel_database_version']) != PEEL_VERSION) {
+	$tpl->assign('version_update_link', $GLOBALS['administrer_url'] . '/update.php');
+	$tpl->assign('STR_ADMIN_UPDATE_VERSION_INVITE', $GLOBALS['STR_ADMIN_UPDATE_VERSION_INVITE']);
+}
 $tpl->assign('all_sites_name_array', get_all_sites_name_array(true));
 $tpl->assign('orders', (a_priv('admin_sales', true) ? backoffice_home_block('orders', 'green', true) : ''));
 $tpl->assign('sales', (a_priv('admin_sales', true) ? backoffice_home_block('sales', 'blue', true) : ''));
 $tpl->assign('products', (a_priv('admin_products', true) ? backoffice_home_block('products', 'orange', true) : ''));
-$tpl->assign('delivery', (a_priv('admin_sales', true) ? backoffice_home_block('delivery', 'purple', true) : ''));
+$tpl->assign('delivery', $delivery);
 $tpl->assign('users', (a_priv('admin_users', true) ? backoffice_home_block('users', 'red', true) : ''));
 $tpl->assign('link', $GLOBALS['administrer_url'] . '/sites.php');
 $tpl->assign('peel', backoffice_home_block('peel', 'black', true));
@@ -178,8 +194,7 @@ function get_home_block_content($content_code)
 			$i = 0;
 
 			while ($r = fetch_object($qid)) {
-				if (check_if_module_active('fianet_sac')) {
-					require_once($GLOBALS['fonctionsfianet_sac']);
+				if (check_if_module_active('fianet')) {
 					// Même si la fonction get_sac_status permet de passer un tableau d'id de commande en paramètre, l'appel de la fonction ce fait ici pour des raisons
 					// de simplicité pour le moment. Une amélioration possible est d'appeler la fonction avant le while.
 					$get_sac_status = get_sac_status($r->id, false);

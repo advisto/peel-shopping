@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46977 2015-09-21 13:27:07Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -59,8 +59,12 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 				continue;
 			} else {
 				// Faire attention que dans $prod on a bien les noms de colonnes correspondant à ce qui est nécessaire dans la classe product
-				$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+				$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+				if (empty($GLOBALS['site_parameters']['module_best_sellers_return_result_as_link'])) {
 				$this_product_in_container_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
+				} else {
+					$this_product_in_container_html = '<a href="' . $product_object->get_product_url() . '">' . $product_object->name . '</a>';
+				}
 				if (!empty($this_product_in_container_html)) {
 					$tpl_products[] = array('html' => $this_product_in_container_html,
 						'i' => $i+1);
@@ -68,6 +72,7 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 				}
 			}
 		}
+		$tpl->assign('module_best_sellers_return_result_as_link', !empty($GLOBALS['site_parameters']['module_best_sellers_return_result_as_link']));
 		$tpl->assign('nb_col_sm', $nb_col_sm);
 		$tpl->assign('nb_col_xs', 1);
 		$tpl->assign('nb_col_md', $nb_col_md);

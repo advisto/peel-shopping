@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,7 +36,19 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 	if (empty($source_filename)) {
 		return false;
 	}
-	$GLOBALS['error_text_to_display'] = '';
+	if(get_file_type($source_filename) == 'pdf') {
+		// Gestion des pdf
+		$source_filename = 'logoPDF_small.png';
+		$source_folder = $GLOBALS['dirroot'] .'/images/';
+	} elseif(get_file_type($source_filename) == 'zip') {
+		// Gestion des zip
+		$source_filename = 'zip.png';
+		$source_folder = $GLOBALS['dirroot'] .'/images/';
+	} elseif(get_file_type($source_filename) != 'image') {
+		// Gestion des autres documents
+		$source_filename = 'document.png';
+		$source_folder = $GLOBALS['dirroot'] .'/images/';
+	}
 	if (empty($thumb_folder)) {
 		if(strpos($source_filename, '//') !== false || strpos($source_filename, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
 			$thumb_folder = $GLOBALS['uploaddir'] . '/thumbs/';
@@ -72,7 +84,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		// L'image est en local et pourtant il n'est pas possible d'avoir sa date de mise à jour
 		// Donc c'est a priori qu'elle n'existe pas, et on l'a vérifié tout de même
 		if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
-			$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE'] .' '. $source_path))->fetch();
+			$GLOBALS['notification_output_array'][] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE'] .' '. $source_path))->fetch();
 		}
 		return false;
 	}
@@ -88,7 +100,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		$inWidth = vb($width);
 		$inHeight = vb($height);
 		// On génère le nom de l'image cache
-		$folder_hash = String::substr(md5($source_path . '-' . $width . 'x' . $height . '-' . $method), 0, 4);
+		$folder_hash = String::substr(md5($source_path . '-' . $width . 'x' . $height . '-' . $method), 0, vn($GLOBALS['site_parameters']['thumbs_name_suffix_length'], 6));
 		$thumb_filename = $nom . '-' . $folder_hash . '.' . $extension;
 		if(!empty($use_subfolders)) {
 			$folder1 = String::substr($folder_hash, 0, 2);
@@ -121,7 +133,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 			if(empty($imgInfo)){
 				// L'image ne semble pas valide
 				if (!empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
-					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $source_path))->fetch();
+					$GLOBALS['notification_output_array'][] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $source_path))->fetch();
 				}
 				$skip_creation = true;
 			}
@@ -179,8 +191,8 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 					$srcImg = imagecreatefromgif($source_path);
 					// On récupère la couleur transparente de l'image source si elle existe
 					$src_transparent_index = imagecolortransparent($srcImg);
-					if($src_transparent_index!=(-1)) {
-						$transparent_color = imagecolorsforindex($srcImg,$src_transparent_index);
+					if($src_transparent_index!=(-1) && $src_transparent_index<imagecolorstotal($srcImg)) {
+						$transparent_color = imagecolorsforindex($srcImg, $src_transparent_index);
 					}
 					if(!empty($transparent_color))
 					{
@@ -193,7 +205,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 					break;
 				default:
 					if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
-						$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $source_path))->fetch();
+						$GLOBALS['notification_output_array'][] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED'] . ' ' . $source_path))->fetch();
 					}
 					return false;
 			}
@@ -229,7 +241,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 			}
 			if (empty($res)) {
 				if (!empty($GLOBALS['display_errors'])  && a_priv('admin*', false)) {
-					$GLOBALS['error_text_to_display'] .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
+					$GLOBALS['notification_output_array'][] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE']))->fetch();
 				}
 				if(empty($thumb_path_filemtime)){
 					return false;

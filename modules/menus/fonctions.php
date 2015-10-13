@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -48,7 +48,7 @@ function affiche_menu_deroulant_1($div_id, $items_html_array)
 	changecontent(\'' . $div_id . '\');
 ';
 		if (empty($GLOBALS['scroller_1_already_initialized'])) {
-			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/scroller.js';
+			$GLOBALS['js_files_pageonly'][] = get_url('/modules/menus/scroller.js');
 			$GLOBALS['scroller_1_already_initialized'] = true;
 		}
 		$output .= '
@@ -79,7 +79,7 @@ function affiche_menu_deroulant_2($div_id, $items_html_array)
 			$pausecontent[] = $div_id . '_content[' . ($i++) . ']=\'' . str_replace(array('   ', '  ', "\t"), ' ', filtre_javascript($this_item_html, true, true, false)) . '\';' . "\r\n";
 		}
 		if (empty($GLOBALS['scroller_2_already_initialized'])) {
-			$GLOBALS['js_files_pageonly'][] = $GLOBALS['wwwroot'] . '/modules/menus/pausescroller.js';
+			$GLOBALS['js_files_pageonly'][] = get_url('/modules/menus/pausescroller.js');
 			$GLOBALS['scroller_2_already_initialized'] = true;
 		}
 		$GLOBALS['js_content_array'][] = '
@@ -114,7 +114,7 @@ function get_on_rollover_products_html()
 	$query = query($sql);
 	$i = 0;
 	while ($prod = fetch_assoc($query)) {
-		$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+		$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 		$product_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 		unset($product_object);
 		if (!empty($product_html)) {

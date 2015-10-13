@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tailles.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: tailles.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -232,7 +232,7 @@ function insere_taille(&$frm)
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix']) . "'
 		, '" . nohtml_real_escape_string($frm['signe'] . $frm['prix_revendeur']) . "'
 		,'" . nohtml_real_escape_string($frm['signe']) . "'
-		,'" . intval($frm['site_id']) . "'";
+		,'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -257,7 +257,7 @@ function maj_taille($id, &$frm)
 	$sql = "UPDATE peel_tailles
 		SET	poids = '" . nohtml_real_escape_string($frm['poids']) . "'
 			, position = '" . intval($frm['position']) . "'
-			, site_id = '" . intval($frm['site_id']) . "'";
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -285,7 +285,6 @@ function affiche_liste_taille()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -294,7 +293,7 @@ function affiche_liste_taille()
 				'prix' => ($ligne['prix'] != 0 ? fprix($ligne['prix'], true, $GLOBALS['site_parameters']['code'], false) : "n.a"),
 				'prix_revendeur' => ($ligne['prix_revendeur'] != 0 ? fprix($ligne['prix_revendeur'], true, $GLOBALS['site_parameters']['code'], false) : "n.a"),
 				'position' => $ligne['position'],
-				'site_name' => ($ligne['site_id'] == 0 ? $GLOBALS['STR_ADMIN_ALL_SITES'] : $all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

@@ -1,14 +1,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: README.txt 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: README.txt 47330 2015-10-12 15:21:04Z gboussin $
 
 English: 
 
@@ -42,7 +42,7 @@ Dézippez le sur votre ordinateur.
 Connectez-vous à votre hébergement web et accédez à votre base de données MySQL.
 Votre base de données MySql est protégée par un ***nom d'utilisateur*** et un ***mot de passe***, procurez-les vous (dans les infos de votre compte d'hébergement web) 
 pour vous connecter à votre base de données MySQL. NB : vous aurez besoin de ces renseignements plus tard lors de l'installation.
-Créez une nouvelle base de donnée en lui donnant le ***nom de base*** que vous souhaitez, dans mon exemple elle s'appelle nomdemabase.
+Créez une nouvelle base de données en lui donnant le ***nom de base*** que vous souhaitez, dans mon exemple elle s'appelle nomdemabase.
 Il se peut que vous ne pourrez pas créer une nouvelle base de données et/ou qu'un nom de base de données y soit existante et/ou imposé,
 ce n'est pas grave, l'essentiel est de connaître ce nom car vous en aurez besoin plus tard lors de l'installation.
 

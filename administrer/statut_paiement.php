@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_paiement.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: statut_paiement.php 46935 2015-09-18 08:49:48Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -197,7 +197,7 @@ function insere_statut(&$frm)
 		$sql .= ", nom_" . $lng;
 	}
 	$sql .= "
-		) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . intval($frm['site_id']) . "'";
+		) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -216,7 +216,7 @@ function insere_statut(&$frm)
 function maj_statut($id, &$frm)
 {
 	$sql = "UPDATE peel_statut_paiement
-		SET	position='" . intval($frm['position']) . "', technical_code='" . nohtml_real_escape_string($frm['technical_code']) . "', site_id='" . intval($frm['site_id']) . "'";
+		SET	position='" . intval($frm['position']) . "', technical_code='" . nohtml_real_escape_string($frm['technical_code']) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -240,14 +240,13 @@ function affiche_liste_statut()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'technical_code' => $ligne['technical_code'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'nom' => $ligne['nom_' . $_SESSION['session_langue']],
 				'position' => $ligne['position'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

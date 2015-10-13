@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_articles.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: liste_articles.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<form id="search_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div style="margin-top:15px; margin-bottom:15px">
@@ -19,7 +19,7 @@
 				<label for="search_cat_search">{$STR_ADMIN_RUBRIQUE}{$STR_BEFORE_TWO_POINTS}:</label>
 				<select class="form-control" size="1" id="search_cat_search" name="cat_search" >
 					<option value="null">{$STR_ADMIN_RUBRIQUES_ALL}</option>
-					<option value="0" {if $cat_search=='0'} selected="selected"{/if}{$STR_ADMIN_RUBRIQUES_NONE_RELATED}</option>
+					<option value="0" {if $cat_search=='0'} selected="selected"{/if}>{$STR_ADMIN_RUBRIQUES_NONE_RELATED}</option>
 					{$rubrique_options}
 				</select>
 			</div>

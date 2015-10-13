@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 7.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_clients_par_produit.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_liste_clients_par_produit.tpl 46357 2015-07-14 20:54:45Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_PRODUITS_ACHETES_LIST_TITLE} {$nom}</div>
 <div class="table-responsive">
 	<table class="table admin_liste_clients_par_produit">
@@ -34,5 +34,13 @@
 			<td class="center">{$c.prix}</td>
 		</tr>
 	{/foreach}
+	<tr>
+	{if $is_module_export_ventes_active}
+		<td colspan="5" class="label" align="right" style="padding-bottom:15px"><a href="{$export_href|escape:'html'}" class="label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a></td>
+		<td colspan="2" class="label">&nbsp;</td>
+	{else}
+		<td colspan="7" class="label">&nbsp;</td>
+	{/if}
+	</tr>
 	</table>
 </div>	

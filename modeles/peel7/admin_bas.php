@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_bas.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_bas.php 46935 2015-09-18 08:49:48Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -29,9 +29,9 @@ $tpl->assign('STR_ADMIN_DISCONNECT', $GLOBALS['STR_ADMIN_DISCONNECT']);
 $tpl->assign('STR_ADMIN_SUPPORT', $GLOBALS['STR_ADMIN_SUPPORT']);
 $tpl->assign('STR_ADMIN_CONTACT_PEEL', $GLOBALS['STR_ADMIN_CONTACT_PEEL']);
 $tpl->assign('STR_ADMIN_CONTACT_PEEL_ADDRESS', $GLOBALS['STR_ADMIN_CONTACT_PEEL_ADDRESS']);
-$tpl->assign('sortie_href', $GLOBALS['wwwroot'] . '/sortie.php');
+$tpl->assign('sortie_href', get_url('sortie'));
 $debug_infos = '';
-if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
+if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 	$tpl->assign('peel_debug', $GLOBALS['peel_debug']);
 }
 $tpl->assign('js_output', get_javascript_output(false, false));

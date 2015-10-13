@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: format.php 47245 2015-10-08 16:47:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -134,7 +134,11 @@ function getPregConditionCompatAccents($string, $delimiter = '/')
  */
 function url2Link($string)
 {
-	return preg_replace('/(http|mailto|news|ftp|https)\:\/\/(([-éa-z0-9\/\.\?_=#@:~&%])*)/i', "<a href=\"$1://$2\" target=\"_blank\">$1://$2</a>", str_replace('&amp;', '&', $string));
+	if(String::strpos($string, '<a ') === false && String::strpos($string, '<img ') === false) {
+		return preg_replace('/(http|mailto|news|ftp|https)\:\/\/(([-éa-z0-9\/\.\?_=#@:;,!~&%])*)/i', "<a href=\"$1://$2\" target=\"_blank\">$1://$2</a>", $string);
+	} else {
+		return $string;
+	}
 }
 
 /**
@@ -191,10 +195,13 @@ function linkFormat($text)
  */
 function get_float_from_user_input($string, $from_currency_rate = 1)
 {
+	if(is_array($string)) {
+		return $string;
+	}
 	foreach(array('.', ',') as $separator) {
 		$array_temp = explode($separator, $string);
 		if (count($array_temp) > 2) {
-			// Plus de deux occurence du séparateur => ne peut être un séparateur de décimales
+			// Plus de deux occurences du séparateur => ne peut être un séparateur de décimales
 			$string = str_replace($separator, '', $string);
 		}
 		unset($array_temp);
@@ -342,7 +349,7 @@ function get_country_iso_2_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays') . '
+		WHERE (id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '") AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -369,7 +376,7 @@ function get_country_iso_3_letter_code($country_id_or_name, $guess_if_not_found 
 {
 	$sql = 'SELECT iso3
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '"  AND ' . get_filter_site_cond('pays') . '
+		WHERE (id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '") AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -395,7 +402,7 @@ function get_country_iso_num_code($country_id_or_name)
 {
 	$sql = 'SELECT iso_num
 		FROM peel_pays
-		WHERE id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '" AND ' . get_filter_site_cond('pays') . '
+		WHERE (id="' . nohtml_real_escape_string($country_id_or_name) . '" OR pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($country_id_or_name) . '") AND ' . get_filter_site_cond('pays') . '
 		LIMIT 1';
 	$query = query($sql);
 	if ($obj = fetch_object($query)) {
@@ -538,27 +545,30 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
 
 	if ($display_mode == 'month') {
 		if ($months >= 1) {
-			$result[] = floor($months) . ' ' . $GLOBALS['STR_MONTHS'];
+			$result[] = floor($months) . ' ' . str_replace('(s)', ($months>1?'s':''), $GLOBALS['STR_MONTHS']);
 		} elseif ($weeks >= 1) {
-			$result[] = floor($weeks) . ' ' . $GLOBALS['strWeeks'];
+			$result[] = floor($weeks) . ' ' . str_replace('(s)', ($weeks>1?'s':''), $GLOBALS['strWeeks']);
 		} elseif ($days >= 1) {
-			$result[] = floor($days) . ' ' . $GLOBALS['strDays'];
+			$result[] = floor($days) . ' ' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
 		}
 	} else {
 		if ($days >= 1) {
-			$result[] = floor($days) . ' ' . $GLOBALS['strDays'];
+			$result[] = floor($days) . '' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strShortDays']);
 		}
 		if ($hours >= 1) {
-			$result[] = floor($hours) . ' ' . $GLOBALS['strShortHours'];
+			$result[] = floor($hours) . '' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
 		}
 		if ($minutes >= 1) {
-			$result[] = floor($minutes) . ' ' . $GLOBALS['strShortMinutes'];
+			$result[] = floor($minutes) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
 		}
 		if ($seconds >= 1 && ($show_seconds || $total_seconds<60)) {
-			$result[] = floor($seconds) . ' ' . $GLOBALS['strShortSecs'];
+			$result[] = floor($seconds) . '' . str_replace('(s)', ($seconds>1?'s':''), $GLOBALS['strShortSecs']);
 		}
 	}
-
+	if(is_numeric($display_mode)) {
+		$temp = array_chunk($result, $display_mode);
+		$result = $temp[0];
+	}
 	return implode(' ', $result);
 }
 
@@ -578,15 +588,29 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
  *    - TIMESTAMP : Timestamp actuelle
  * On ne traite pas ici les tags qui nécessitent de connaître le numéro de facture (on les remplacera juste avant utilisation du texte)
  *
- * @param string $text
+ * @param mixed $text
  * @param array $custom_template_tags
  * @param boolean $replace_only_custom_tags
  * @param string $format : null => does not touch the format of the tag, "text" or "html"
  * @param string $lang
+ * @param boolean $avoid_load_urls A mettre à true pour éviter appels récursifs infinis
  * @return
  */
-function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null, $lang = null)
+function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null, $lang = null, $avoid_load_urls = false)
 {
+	if(is_array($text)) {
+		$temp = array();
+		foreach(array_keys($text) as $this_key) {
+			if(strpos($this_key, '[') !== false) {
+				$this_new_key = template_tags_replace($this_key, $custom_template_tags, $replace_only_custom_tags, $format, $lang, $avoid_load_urls);
+			} else {
+				$this_new_key = $this_key;
+			}
+			// On construit un nouveau tableau au fur et à mesurepour garder l'ordre initial, même si des clés ont leur texte modifié
+			$temp[$this_new_key] = template_tags_replace($text[$this_key], $custom_template_tags, $replace_only_custom_tags, $format, $lang, $avoid_load_urls);
+		}
+		return $temp;
+	}
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
@@ -596,7 +620,9 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		$template_tags['SITE'] = $GLOBALS['site'];
 		$template_tags['SITE_NAME'] = $GLOBALS['site'];
 		$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
-		$template_tags['CATALOG_URL'] = get_product_category_url();
+		if(!$avoid_load_urls) {
+			$template_tags['CATALOG_URL'] = get_product_category_url();
+		}
 		$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
 		$template_tags['CURRENT_URL'] = get_current_url(false);
 		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
@@ -605,68 +631,91 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		$template_tags['DATE_SHORT'] = get_formatted_date(time(), 'short', false);
 		$template_tags['TIMESTAMP'] = time();
 		// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
-		$tag_begin = -1;
-		while (String::strpos($text, '[CODE_PROMO_SOURCE=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[CODE_PROMO_SOURCE=', $tag_begin + 1)) !== false) {
-			// Traitement pour chaque tag
-			// Il y a au moins un bon quote à remplacer
-			// on se positionne sur la dernière imbrication
-			$tag_begin = String::strpos($text, '[CODE_PROMO_SOURCE=', $tag_begin + 1);
-			$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
-			$tag_name_array = explode('=', $this_tag);
-			// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
-			$sql = 'SELECT id, nom
-				FROM peel_codes_promos cp
-				WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($tag_name_array[1]).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
-				ORDER BY id ASC
-				LIMIT 1';
-			$query = query($sql);
-			if ($obj = fetch_object($query)) {
-				$template_tags[$this_tag] = $obj->nom;
-				$sql = 'UPDATE peel_codes_promos
-					SET nb_valide=nb_valide-1
-					WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos');
-				$query = query($sql);
+		foreach(array('CODE_PROMO_SOURCE' => false, 'FUNCTION' => true, 'HTML' => true, 'GLOBALS' => true, 'BEST_SELLER_CARROUSEL' => true, 'CONTENT_CARROUSEL' => true) as $this_function_tag => $arg_mandatory) {
+			$tag_begin = -1;
+			while (String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1)) !== false) {
+				// Traitement pour chaque tag
+				// Il y a au moins un bon quote à remplacer
+				// on se positionne sur la dernière imbrication
+				$tag_begin = String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1);
+				$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
+				$tag_name_array = explode('=', $this_tag, 2);
+				$this_arg = vb($tag_name_array[1]);
+				if(!$arg_mandatory || !empty($this_arg)) {
+					if($this_function_tag == 'CODE_PROMO_SOURCE') {
+						// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
+						$sql = 'SELECT id, nom
+							FROM peel_codes_promos cp
+							WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($this_arg).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
+							ORDER BY id ASC
+							LIMIT 1';
+						$query = query($sql);
+						if ($obj = fetch_object($query)) {
+							$template_tags[$this_tag] = $obj->nom;
+							$sql = 'UPDATE peel_codes_promos
+								SET nb_valide=nb_valide-1
+								WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos');
+							$query = query($sql);
+						}
+					} elseif($this_function_tag == 'FUNCTION') {
+						// SECURITE : Liste des fonctions autorisées ci-dessous, sinon la fonction appelée doit commencer par le préfixe 'get_tag_function_'
+						$allowed_functions = array('');
+						$this_arg_array=explode(',', $this_arg, 2);
+						$this_arg = $this_arg_array[0];
+						$this_params_array = get_array_from_string(vb($this_arg_array[1]));
+						if(in_array($this_arg, $allowed_functions)) {
+							$function_name = $this_arg;
+						} else {
+							$function_name = 'get_tag_function_' . $this_arg;
+						}
+						if(function_exists($function_name)) {
+							$template_tags[$this_tag] = $function_name($this_params_array);
+						} else {
+							$template_tags[$this_tag] = '[' . $function_name . ' not found]'; 
+						}
+					} elseif($this_function_tag == 'GLOBALS') {
+						// SECURITE : Liste des variables globales autorisées ci-dessous, sinon la variable appelée doit commencer par le préfixe 'tag_'
+						$allowed_functions = array('');
+						if(in_array($this_arg, $allowed_functions)) {
+							$function_name = $this_arg;
+						} else {
+							$function_name = 'tag_' . $this_arg;
+						}
+						$template_tags[$this_tag] = vb($GLOBALS[$function_name]);
+					} elseif($this_function_tag == 'RSS') {
+						// Pour chaque tag RSS, on remplace par le contenu du flux
+						$template_tags[$this_tag] = get_rss_feed_content($this_arg);
+					} elseif($this_function_tag == 'HTML') {
+						// Pour chaque tag HTML, on remplace par le contenu de la zone HTML correspondante
+						$template_tags[$this_tag] = affiche_contenu_html($this_arg, true);
+					} 
+				}
 			}
-		}
-		if(String::strpos($text, '[AD_CATEGORIES_OPTIONS]') !== false && check_if_module_active('annonces')) {
-			$template_tags['AD_CATEGORIES_OPTIONS'] = get_categories_output(null, 'categories_annonces', vb($_POST['cat']), 'option', '&nbsp;&nbsp;', null);
-		}
-		if(String::strpos($text, '[USER_CLIENTS]') !== false && check_if_module_active('clients')) {
-			include($GLOBALS['fonctionsclients']);
-			$template_tags['USER_CLIENTS'] = affiche_descriptions_clients();
-			// On supprime les ajouts automatiques par l'éditeur de texte
-			$text = str_replace('<p>[USER_CLIENTS]</p>', '[USER_CLIENTS]', $text);
 		}
 		if(String::strpos($text, '[CONTACT_FORM]') !== false) {
 			// Affichage du formulaire de contact, avec gestion des erreurs 
 			$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
-			$text = str_replace('<p>[CONTACT_FORM]</p>', '[CONTACT_FORM]', $text);
-		}
-		if(String::strpos($text, '[AFFICHE_CARROUSEL_REFERENCE]') !== false && check_if_module_active('carrousel')) {
-			$template_tags['AFFICHE_CARROUSEL_REFERENCE'] = affiche_carrousel('references', true);
+		} elseif(String::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
+			$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
+		} elseif(String::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
+			$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
+		} elseif(String::strpos($text, '[CLIENT_REFERENCES]') !== false) {
+			$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 		}
 		if(String::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
-			$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div></div></div>';
-			// On supprime les ajouts automatiques par l'éditeur de texte
-			$text = str_replace('<p>[CLOSE_MAIN_CONTAINER]</p>', '[CLOSE_MAIN_CONTAINER]', $text);
+			$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div>';
+			if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
+				$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div></div>';
+			} elseif(defined('IN_HOME')) {
+				$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div>';
+			}
 		}
 		if(String::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
-			$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12"><div class="rub_wrapper special_content"><div class="rub_content">';
-			// On supprime les ajouts automatiques par l'éditeur de texte
-			$text = str_replace('<p>[REOPEN_MAIN_CONTAINER]</p>', '[REOPEN_MAIN_CONTAINER]', $text);
-		}
-		$tag_begin = -1;
-		while (String::strpos($text, '[RSS=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[RSS=', $tag_begin + 1)) !== false) {
-			// Traitement pour chaque tag RSS
-			// Il y a au moins un bon quote à remplacer
-			// on se positionne sur la dernière imbrication
-			$tag_replace = '';
-			$tag_begin = String::strpos($text, '[RSS=', $tag_begin + 1);
-			$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
-			$tag_name_array = explode('=', $this_tag, 2);
-			// On remplace par le contenu du flux
-			if(!empty($tag_name_array[1])){
-				$template_tags[$this_tag] = get_rss_feed_content($tag_name_array[1]);
+			$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12">';
+			if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
+				$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="rub_wrapper special_content"><div class="rub_content">';
+			} elseif(defined('IN_HOME')) {
+				$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="page_home_content">';
 			}
 		}
 		if (empty($custom_template_tags['NEWSLETTER']) && String::strpos($text, '[NEWSLETTER]') !== false) {
@@ -679,6 +728,8 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $frm['lang']]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
 			}
 		}
+		// Appel aux fonctions propres à chaque module pour récupérer des listes de tags à remplacer
+		$template_tags = array_merge($template_tags, call_module_hook('template_tags', array('text' => $text), 'array'));
 	}
 	if (!empty($custom_template_tags) && is_array($custom_template_tags)) {
 		foreach(array('GENDER,CIVILITE', 'NOM_FAMILLE,LASTNAME,LAST_NAME,NOM,NAME', 'FIRST_NAME,FIRSTNAME,PRENOM', 'PSEUDO,LOGIN') as $this_tags_list) {
@@ -697,6 +748,8 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		$template_tags = array_merge($template_tags, $custom_template_tags);
 	}
 	foreach($template_tags as $this_tag => $this_tag_value) {
+		// On supprime les ajouts automatiques par l'éditeur de texte
+		$text = str_replace('<p>['.$this_tag.']</p>', '['.$this_tag.']', $text);
 		// Remplacement de tous les tags en majuscules ou minuscules avant de traiter les dates et heures
 		// Si un tag est un mix avec majuscules et minuscules, le remplacement est fait quelques lignes plus loin
 		if($format == 'text') {
@@ -704,12 +757,18 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		} elseif($format == 'html') {
 			$this_tag_value = String::nl2br_if_needed($this_tag_value);
 		}
+		// ATTENTION : A FAIRE AVANT la gestion des tags de dates à cause de différences entre minuscules et majuscules dans ces tags
 		$text = str_replace(array('[' . String::strtoupper($this_tag) . ']', '[' . String::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
 	}
 	if(!$replace_only_custom_tags) {
+		// On rajoute des tags de date qui sont en minuscules ou majuscules
 		foreach(array('d', 'D', 'j', 'l', 'N', 's', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y', 'a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'U') as $this_date_item) {
 			// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
 			$template_tags[$this_date_item] = date($this_date_item);
+		}
+		for($i=0 ; $i<=10 ; $i++) {
+			// Gestion de tags YEAR-N
+			$template_tags[str_replace('YEAR-0', 'YEAR', 'YEAR-'.$i)] = date('Y')-$i;
 		}
 	}
 	// On gère tous les tags qui restent à remplacer sans modification de la casse
@@ -763,17 +822,23 @@ function output_csv_http_export_header($filename, $type = 'excel', $page_encodin
  * @param string $filename
  * @param string $page_encoding
  * @param string $content_type
+ * @param integer $cache_duration_in_seconds
  * @return
  */
-function output_xml_http_export_header($filename, $page_encoding, $content_type = 'application/svg+xml')
+function output_xml_http_export_header($filename, $page_encoding, $content_type = 'application/svg+xml', $cache_duration_in_seconds = null)
 {
 	if (a_priv('demo')) {
 		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch());
 		die();
 	}
 	header('Content-Type: '.$content_type.'; charset=' . $page_encoding);
-	header("Expires: 0");
-	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	if(!empty($cache_duration_in_seconds)) {
+		header('Pragma: public');
+		header('Cache-Control: public, max-age=' . $cache_duration_in_seconds . ', must-revalidate');
+	} else {
+		header("Expires: 0");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	}
 	header("Content-disposition: filename=" . $filename);
 }
 
@@ -902,15 +967,20 @@ function smileysFormat ($string)
  * Convertit un tableau en chaine de caractère simple à gérer par un utilisateur
  *
  * @param mixed $array
+ * @param mixed $disable_ad_quote pour ne pas ajouter de guillemets autour de la valeur à retourner.
  * @return
  */
-function get_string_from_array($array)
+function get_string_from_array($array, $disable_ad_quote=false)
 {
 	if(is_array($array)) {
 		// NB : Pas besoin de remplacer " par \" dans les valeurs des chaines, le décodage tient compte des " en association avec les virgules uniquement
 		if($array===array_values($array)) {
 			// On ne précise pas les clés du tableau
-			$string = '"' . implode('", "', $array) . '"';
+			if ($disable_ad_quote) {
+				$string = '' . implode(', ', $array) . '';
+			} else {
+				$string = '"' . implode('", "', $array) . '"';
+			}
 		}else {
 			foreach($array as $this_key => $this_value) {
 				if($this_value === true){
@@ -919,6 +989,8 @@ function get_string_from_array($array)
 					$array[$this_key] = 'false';
 				} elseif($this_value === null){
 					$array[$this_key] = 'null';
+				} else {
+					$array[$this_key] = '"' . $this_value . '"';
 				}
 			}
 			$string = trim(str_replace(array('Array ', '    ', '  ', '  '), array('Array', ' ', ' ', ' '), str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', print_r($array, true)))));
@@ -1083,4 +1155,29 @@ function userAgeFormat ($date)
 function get_formatted_phone_number($phone_number)
 {
 	return str_replace(array(' ','/','.','-',')','(','_'), "", $phone_number);
+}
+
+/**
+ * Vérifie le format d'un mot de passe si une contrainte est configurée
+ * 
+ * Exemple de regexp qui peut être mise dans $GLOBALS['site_parameters']['password_regexp'] :
+ * #.*^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#
+ * Explications :
+ *	#.*^                   # Start of group
+ *	 (?=.*[0-9])           #   must contains one digit from 0-9
+ *	 (?=.*[a-z])           #   must contains one lowercase characters
+ *	 (?=.*[A-Z])           #   must contains one uppercase characters
+ *	 (?=.*\W)              #   must contains one special symbols (ou un caractère accentué)
+ *	 .*$#
+ * 
+ * @param string $string
+ * @return
+ */
+function check_password_format($string) {
+	if(!empty($GLOBALS['site_parameters']['password_regexp'])) {
+		$result = preg_match($GLOBALS['site_parameters']['password_regexp'], $string);
+		return !empty($result);
+	} else {
+		return true;
+	}
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: produit_details_html.tpl 47320 2015-10-12 13:55:00Z sdelaporte $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -49,27 +49,25 @@
 			</div>
 			{if isset($product_images)}
 				<ul id="files">
-					{foreach $product_images as $img}
-						{if $img.is_pdf}
-							<li>
-								<a href="{$img.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$wwwroot}/images/logoPDF_small.png" width="50" alt="{$product_name|str_form_value}" /></a>
-							</li>
-						{else}
-							<li id="{$img.id}">
-								<a {$img.a_attr} title="{$product_name}"><img src="{$img.src|escape:'html'}" alt="{$product_name}" width="50" /></a>
-							</li>
-						{/if}
-					{/foreach}
+				{foreach $product_images as $img}
+					{if $img.is_image}
+					<li id="{$img.id}">
+						<a {$img.a_attr} title="{$product_name}"><img src="{$img.src|escape:'html'}" alt="{$product_name|str_form_value}" width="50" /></a>
+					</li>
+					{else}
+					<li>
+						<a href="{$img.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$img.src|escape:'html'}" alt="{$product_name|str_form_value}" width="50" /></a>
+					</li>
+					{/if}
+				{/foreach}
 				</ul>
 			{/if}
 			<br />
 			{if !empty($display_share_tools_on_product_pages)}
-			<table id="product_link_to_modules_container">
-				<tr>
-					<td>
-						<!-- dire à un ami, avis des internautes -->
-						{if isset($tell_friends)}
+			<div id="product_link_to_modules_container">
 						<table class="product_link_to_modules">
+						{if isset($tell_friends)}
+						<!-- dire à un ami, avis des internautes -->
 							<tr class="picto-tell_friends">
 								<td class="img-tell_friends">
 									<a href="{$tell_friends.href|escape:'html'}" class="partage"><img src="{$tell_friends.src|escape:'html'}" alt="{$tell_friends.txt}" /></a>
@@ -78,10 +76,8 @@
 									<a href="{$tell_friends.href|escape:'html'}" class="title_label partage">{$tell_friends.txt}</a>
 								</td>
 							</tr>
-						</table>
 						{/if}
 						{if isset($avis)}
-						<table class="product_link_to_modules">
 							<tr class="picto-avis">
 								<td class="img-avis">
 									<a href="{$avis.href|escape:'html'}"><img src="{$avis.src|escape:'html'}" alt="{$avis.txt}" /></a>
@@ -90,10 +86,8 @@
 									<a href="{$avis.href|escape:'html'}" class="title_label partage">{$avis.txt}</a>
 								</td>
 							</tr>
-						</table>
 						{/if}
 						{if isset($tous_avis)}
-						<table class="product_link_to_modules">
 							<tr class="picto-tous_avis">
 								<td class="img-tous_avis">
 									<a href="{$tous_avis.href|escape:'html'}"><img src="{$tous_avis.src|escape:'html'}" alt="{$tous_avis.txt}" /></a>
@@ -110,10 +104,15 @@
 									</td>
 								</tr>
 							{/if}
-						</table>
+							{if !empty($add_easy_list)}
+								<tr class="picto-tous_avis">
+									<td colspan="2" class="txtdetail-tous_avis">
+										<a href="{$add_easy_list.href|escape:'html'}" class="title_label">{$add_easy_list.txt|escape:'html'}</a>
+									</td>
+								</tr>
+							{/if}
 						{/if}
 						{if isset($pensebete)}
-						<table class="product_link_to_modules">
 							<tr class="picto-pensebete">
 								<td class="img-pensebete">
 									<a href="{$pensebete.href|escape:'html'}" class="title_label"><img src="{$pensebete.src|escape:'html'}" alt="{$pensebete.txt|str_form_value}" /></a>
@@ -122,9 +121,7 @@
 									<a href="{$pensebete.href|escape:'html'}" class="title_label partage">{$pensebete.txt}</a>
 								</td>
 							</tr>
-						</table>
 						{/if}
-						<table class="product_link_to_modules">
 							<tr class="picto-print">
 								<td class="img-print">
 									<a href="javascript:window.print()"><img src="{$print.src|escape:'html'}" alt="{$print.txt}" title="{$print.txt}" /></a>
@@ -134,30 +131,18 @@
 								</td>
 							</tr>
 						</table>
-					</td>
-				</tr>
 				{if isset($addthis_buttons)}
-				<tr>
-					<td>{$addthis_buttons}</td>
-				</tr>
+				{$addthis_buttons}
 				{/if}
 				{if isset($display_facebook_like)}
-				<tr>
-					<td>
-						<table class="product_link_to_modules">
-							<tr>
-								<td>
-									{$display_facebook_like}
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
+				{$display_facebook_like}
 				{/if}
-			</table>
+			</div>
 			{/if}
+			{if !empty($qrcode_image_src)}<div class="qrcode"><img src="{$qrcode_image_src|escape:'html'}" alt="" /></div>{/if}
+			{if !empty($barcode_image_src)}<div class="qrcode"><img src="{$barcode_image_src|escape:'html'}" alt="" /></div>{/if}
 		</div>
-		<h1 property="name" class="titre_produit" property="name">{$product_name}</h1>
+		<h1 property="name" class="titre_produit">{$product_name}</h1>
 		{if isset($subscribe_trip_form)}
 			{$subscribe_trip_form}
 		{/if}
@@ -169,21 +154,13 @@
 		{elseif isset($critere_stock)}
 			{$critere_stock}
 		{elseif !empty($on_estimate)}
-			<div class="on_estimate">
-				<table >
-					<tr>
-						<td class="center">
-							<span style="font-size: 20px;">{$on_estimate.label}</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="middle">
+			<div class="on_estimate well pull-right">
+				<div class="center">
+					<span style="font-size: 20px;">{$on_estimate.label}</span><br />
 							<form class="entryform form-inline" role="form" method="post" action="{$on_estimate.action}">
-							<input class="btn btn-primary" type="submit" value="{$on_estimate.contact_us|str_form_value}">
+						<input class="btn btn-primary btn-lg" type="submit" value="{$on_estimate.contact_us|str_form_value}">
 							</form>
-						</td>
-					</tr>
-				</table>
+			</div>
 			</div>
 		{/if}
 		{if isset($reference)}
@@ -214,7 +191,6 @@
 		{if isset($explanation_table)}
 			{$explanation_table}
 		{/if}
-		{if !empty($qrcode_image_src)}<div class="qrcode"><img src="{$qrcode_image_src|escape:'html'}" alt="" /></div>{/if}
 	</div>
 {if isset($tabs)}
 	<br />
@@ -226,7 +202,7 @@
 		</ul>
 		<div class="tab-content">
 	{foreach $tabs as $tab}
-			<div class="tab-pane{if $tab.is_current} active{/if}" id="title_{$tab.index}">{$tab.content}</div>
+			<div class="tab-pane{if $tab.is_current} active{/if}" id="title_{$tab.index}">{$tab.content|html_entity_decode_if_needed}</div>
 	{/foreach}
 		</div>
 	</div>

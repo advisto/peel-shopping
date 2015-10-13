@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: societe.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: societe.php 46935 2015-09-18 08:49:48Z gboussin $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -32,12 +32,10 @@ if (!isset($_REQUEST['mode']) && !empty($_SESSION['session_admin_multisite'])) {
 		}
 	}
 }
-
-include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
-
+$output = '';
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :
-		afficher_formulaire_ajout_societe();
+		$output .= afficher_formulaire_ajout_societe();
 		break;
 
 	case "insere" :
@@ -45,19 +43,19 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			maj_societe($frm);
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CONFIGURATION_MSG_CREATED'], vb($frm['nom_' . $_SESSION["session_langue"]]))))->fetch();
-			liste_societe($frm);
+			$output .= maj_societe($frm);
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CONFIGURATION_MSG_CREATED'], vb($frm['nom_' . $_SESSION["session_langue"]]))))->fetch();
+			$output .= liste_societe($frm);
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .= $form_error_object->text('token');
 			}
-			afficher_formulaire_ajout_societe($frm);
+			$output .= afficher_formulaire_ajout_societe($frm);
 		}
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_societe(intval($_GET['id']), $frm);
+		$output .= affiche_formulaire_modif_societe(intval($_GET['id']), $frm);
 		break;
 
 	case "maj" :
@@ -65,21 +63,23 @@ switch (vb($_REQUEST['mode'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
 		if (!$form_error_object->count()) {
-			maj_societe($frm);
-			affiche_formulaire_modif_societe(1, $frm);
+			$output .= maj_societe($frm);
+			$output .= affiche_formulaire_modif_societe(1, $frm);
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .= $form_error_object->text('token');
 			}
-			affiche_formulaire_modif_societe(intval($frm['id']), $frm);
+			$output .= affiche_formulaire_modif_societe(intval($frm['id']), $frm);
 		}
 		break;
 
 	default :
-		liste_societe($frm);
+		$output .= liste_societe($frm);
 		break;
 }
 
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
+echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
@@ -126,7 +126,7 @@ function afficher_formulaire_ajout_societe()
 	$frm['nouveau_mode'] = "insere";
 	$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_SOCIETE_UPDATE'];
 
-	affiche_formulaire_societe($frm);
+	return affiche_formulaire_societe($frm);
 }
 
 /**
@@ -153,7 +153,7 @@ function affiche_formulaire_modif_societe($id, &$frm)
 	if (!empty($frm)) {
 		$frm['nouveau_mode'] = "maj";
 		$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-		affiche_formulaire_societe($frm);
+		return affiche_formulaire_societe($frm);
 	} else {
 		redirect_and_die(get_current_url(false).'?mode=ajout');
 	}
@@ -202,6 +202,7 @@ function affiche_formulaire_societe(&$frm)
 	$tpl->assign('fax2', vb($frm['fax2']));
 	$tpl->assign('titre_soumet', vb($frm['titre_soumet']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS', $GLOBALS['STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS']);
@@ -231,7 +232,7 @@ function affiche_formulaire_societe(&$frm)
 	$tpl->assign('STR_SWIFT', $GLOBALS['STR_SWIFT']);
 	$tpl->assign('STR_ACCOUNT_MASTER', $GLOBALS['STR_ACCOUNT_MASTER']);
 	$tpl->assign('STR_BANK_ACCOUNT_DOMICILIATION', $GLOBALS['STR_BANK_ACCOUNT_DOMICILIATION']);
-	echo $tpl->fetch();
+	return  $tpl->fetch();
 }
 
 /**
@@ -242,9 +243,10 @@ function affiche_formulaire_societe(&$frm)
  */
 function maj_societe($frm)
 { 
+	// get_filter_site_cond('configuration') => Ne pas utiliser le paramètre $use_admin_rights, il savoir si des informations sur la société relative au site $frm['site_id'] existe. Les droits de l'administrateur qui fait la demande ne sont pas à prendre en compte.
 	$sql_select = "SELECT *
 		FROM peel_societe
-		WHERE " . get_filter_site_cond('societe', null, true) . " AND site_id = " . intval($frm['site_id']) . "
+		WHERE " . get_filter_site_cond('societe', null, false, $frm['site_id'], true) . "
 		LIMIT 1";
 	$query = query($sql_select);
 	if ($r = fetch_object($query)) {
@@ -280,16 +282,17 @@ function maj_societe($frm)
 			, domiciliation = '" . nohtml_real_escape_string(String::strtoupper($frm['domiciliation'])) . "'
 			, cnil = '" . nohtml_real_escape_string($frm['cnil']) . "'
 			, iban = '" . nohtml_real_escape_string($frm['iban']) . "'
-			, swift= '" . nohtml_real_escape_string($frm['swift']) . "'
-			, site_id= '" . nohtml_real_escape_string($frm['site_id']) . "'";
+			, swift = '" . nohtml_real_escape_string($frm['swift']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	if($update) {
 		$sql = "UPDATE peel_societe " . $sql . "
 			WHERE id = '" . intval($frm['id']) . "' AND " . get_filter_site_cond('societe', null, true);
 	} else {
+		// A FAIRE : Revérifier les droits sur site_id par l'administration avant de faire l'insertion
 		$sql = "INSERT INTO peel_societe " . $sql . "";
 	}
 	query($sql);
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SOCIETE_MSG_UPDATED_OK']))->fetch();
+	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SOCIETE_MSG_UPDATED_OK']))->fetch();
 }
 
 /**
@@ -330,5 +333,5 @@ function liste_societe($frm)
 	$tpl->assign('STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND', $GLOBALS['STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND']);
 	$tpl->assign('STR_ADMIN_ADD', $GLOBALS['STR_ADMIN_ADD']);
 	
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }

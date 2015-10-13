@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_eo.php 46947 2015-09-18 10:38:20Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -294,7 +294,6 @@ $GLOBALS["STR_ADMIN_DEACTIVATE"] = "Malaktivigi";
 $GLOBALS["STR_ADMIN_DEACTIVATED"] = "Malaktiva";
 $GLOBALS['STR_ADMIN_DELETE_ALL_RESULTS'] = "";
 $GLOBALS["STR_ADMIN_DELETE_IMAGE"] = "forigi ĉi bildon";
-$GLOBALS["STR_ADMIN_DELETE_THIS_FILE"] = "forigi ĉi dosieron";
 $GLOBALS["STR_ADMIN_DELETE_WARNING"] = "Konfirmu forigon";
 $GLOBALS["STR_ADMIN_DELIVERY_EMAIL_SENT"] = "Retmesaĝo pri konfirmo de livero ĵus sendiĝis al %s";
 $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "PROVVERSIO: Sendo de retmesaĝoj malaktivas";
@@ -553,7 +552,6 @@ $GLOBALS["STR_ADMIN_MENU_MANAGE_PROFIL"] = "";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT"] = "Pag-manieroj";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT_AND_TAXES"] = "";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_CLEAN_FOLDERS"] = "Dosiera purigado";
-$GLOBALS["STR_ADMIN_MENU_MANAGE_BUTTERFLIVE"] = "Agordoj pri Sekvilo kaj Babililo";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_HEADER"] = "";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_ZONES"] = "";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_COUNTRIES"] = "Lando";
@@ -912,6 +910,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_ORDER_DETAIL"] = "Detaloj de la mendo";
 $GLOBALS["STR_ADMIN_PRODUITS_OTHER_OPTION"] = "Alia opcio";
 $GLOBALS["STR_ADMIN_PRODUITS_POSITION_EXPLAIN"] = "La pozicio indikas pri la ordigo de varaj listoj kaj pri la modulo \"Antaŭa / Sekva\".";
 $GLOBALS["STR_ADMIN_PRODUITS_PRICE_IN"] = "Venda prezo je";
+$GLOBALS["STR_ADMIN_PRODUITS_PRICE_PROMOTION"] = "";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCT_COLORS"] = "Koloroj de la varo";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCT_SIZES"] = "Grandoj de la varo";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCTS_COUNT"] = "Entuta nombro da varoj";
@@ -927,6 +926,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_TAB"] = "Langeto en lingvo";
 $GLOBALS["STR_ADMIN_PRODUITS_TEXT_RELATED_IN"] = "TEKSTO RILATA AL LA VARO EN LINGVO";
 $GLOBALS["STR_ADMIN_PRODUITS_TITLE"] = "Administri varojn";
 $GLOBALS["STR_ADMIN_PRODUITS_TO_ORDER"] = "Mendota";
+$GLOBALS["STR_ADMIN_PRODUITS_UNIT_PER_PALLET"] = "";
 $GLOBALS["STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT"] = "Modifo de enhavo ĉe langetoj de vara paĝo";
 $GLOBALS["STR_ADMIN_PRODUITS_UPDATE"] = "Modifi la varon";
 $GLOBALS["STR_ADMIN_PRODUITS_VIDEO_TAG"] = "Ĉi indiku vian HTML-kodon pri enmeto de filmo el YouTube- / Dailymotion- / Facebook-retejo aperonta ĉe la vara paĝo";
@@ -1018,7 +1018,6 @@ $GLOBALS["STR_ADMIN_SITES_CLOUD_ZOOM"] = "\"Cloud Zoom\"-bild-zomilo (necesas jQ
 $GLOBALS["STR_ADMIN_SITES_COMPARATOR_EXPLAIN"] = "Eksporto al prezo-kompariloj";
 $GLOBALS["STR_ADMIN_SITES_CONFIGURED_PROMOTIONS"] = "Elektado de la butono aperigas ĉe la paĝo nur produktojn \"fulm-vendaj\" kaj rabatitaj laŭ marko aŭ kategorio";
 $GLOBALS["STR_ADMIN_SITES_CONFIGURED_TOP_SALES"] = "Varoj celitaj kiel plej bone vendotaj";
-$GLOBALS["STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE"] = "Kontaktu PEEL se vi deziras akiri ĉi funkciaĵon";
 $GLOBALS["STR_ADMIN_SITES_CSS_FILES_EXPLAIN"] = "La dosier-nomoj de stil-folioj estu disigitaj per komoj, ĉi tie ne uzu html_bill.css";
 $GLOBALS["STR_ADMIN_SITES_CSS_FILES"] = "Nomo de la stil-folio troviĝanta en la elektita dosierujo";
 $GLOBALS["STR_ADMIN_SITES_CURRENCIES_LINK"] = "Administri viajn kambiojn";
@@ -1097,9 +1096,11 @@ $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "La modulo pri entrepreneto 
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Entrepreneto";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Por ke estos petita minimuman mendan monsumon, lasu la ĉi suban kampon je 0.";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED"] = "Minimuma menda monsumo";
+$GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_REVE_AMOUNT_ALLOWED"] = "";
 $GLOBALS["STR_ADMIN_SITES_MODULE"] = "MODULO";
-$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Eblas rilatigi modulojn kun dezirata loko en la paĝo (malsupre, supre, maldekstre, dekstre) per difino de afiŝa ordo kaj pozicio.<br />Por kuŝigi la modulon dekstre aŭ maldekstre: la sideblock- kaj sideblocktitle-agordoj formatigas la modulon en bloko, ĉi lasta simple aldonas titolon.<br />Ĉe reklama spaco, po unu reklambendo aperas kaj hazarde ŝanĝiĝas se pluraj bendoj estas difinitaj.<br />La speciala modulo \"Hazarda reklamo\" afiŝas unu post la alia hazardajn reklamojn el ĉiuj fontoj.<br />La kataloga modulo afiŝas la kategori-arbon de varoj: vi nepre jam havŭ kategoriojn por ke ĝi funkcios.<br />";
-$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Administro de la lokoj de moduloj en la kolumnoj de la retejo";
+$GLOBALS["STR_ADMIN_SITES_MODULE_INSTALL"] = "";
+$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Eblas rilatigi modulojn kun dezirata loko en la paĝo (malsupre, supre,meza supro, meza malalta) per difino de afiŝa ordo kaj pozicio.<br />La sideblock- kaj sideblocktitle-agordoj formatigas la modulon en bloko, ĉi lasta simple aldonas titolon.<br />Ĉe reklama spaco, po unu reklambendo aperas kaj hazarde ŝanĝiĝas se pluraj bendoj estas difinitaj.<br />La speciala modulo \"Hazarda reklamo\" afiŝas unu post la alia hazardajn reklamojn el ĉiuj fontoj.<br />La kataloga modulo afiŝas la kategori-arbon de varoj: vi nepre jam havŭ kategoriojn por ke ĝi funkcios.<br />";
+$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Administro de la lokoj de moduloj de la retejo";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_EMAIL"] = "Komerca retmesaĝadreso ĉe moneybookers.com-servo (indiko aktivigas la Moneybookers-modulon)";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_MODULE"] = "Pago per Moneybookers-servo";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "";
@@ -1272,6 +1273,7 @@ $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_IN_ADMIN"] = "";
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER"] = "";
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE"] = "";
+$GLOBALS["STR_ADMIN_SITES_VATLAYER_MODULE"] = "";
 $GLOBALS["STR_ADMIN_SITES_ZOOM_SELECTION"] = "";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS"] = "";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_EXPLAIN"] = "";
@@ -1630,6 +1632,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HEIGHT"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HIT"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_IMAGE_OR_FLASH"] = "Rastera- aŭ Flash-bildoj";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_KEYWORDS"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_LIST_TITLE"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_DELETED_OK"] = "La reklam-bendo <b>%s</b> estis forigita.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"] = "Bone enkalkuliĝis la ŝanĝoj pri reklama bendo %s.";
@@ -1664,48 +1667,6 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"] = "";
 $GLOBALS["STR_MODULE_BOUNCES_BAD_EMAILS_TITLE"] = "";
 $GLOBALS["STR_MODULE_BOUNCES_ACTIONS_SELECTION"] = "";
 $GLOBALS["STR_MODULE_BOUNCES_SEARCH_EMAIL_PROBLEM"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACCOUNT_CREATE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACCOUNT_CREATION"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_OK"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_TITLE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_WEBSITE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_BACK_TO_CONFIGURATION"] = "Ree al la agorda paĝo";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE_EXPLAIN"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE_TITLE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_DOWNLOAD_EXPLAIN"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ACCOUNT_CONNECTION"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ACCOUNT_CREATION_RETRY_LATER"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ALREADY_EXISTING_ACCOUNT"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ALREADY_VALIDATED"] = "Via Butterflive-konto jam validiĝis.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_CONFIGURATION"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_INVALID_LINK"] = "Maleblas trakti vian peton, la ligilo ŝajnas nevalida. Dankon pri <a href=\"contact@butterflive.com\">kontakto de Butterflive-retejo</a> se daŭras la eraro.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_PASSWORD"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_PASSWORD_INVALID"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_RETRY_LATER"] = "Okazis eraro, bonvolu denove klaki la validigan ligilon pli poste.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_SERVER_CONNEXION"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_I_ALREADY_HAVE_AN_ACCOUNT"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ID"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_LINK_PEEL_TO_BUTTERFLIVE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_ACCOUNT_VALIDATED_OK"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_CONFIGURATION_OK"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_INSCRIPTION_OK"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_RETRY_VALIDATION"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_NEW_ACCOUNT_OPEN_EXPLAIN"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_NO_KEY_FOUND_FOR_THIS_EMAIL"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_OPEN_ACCOUNT_TITLE"] = "Tuj-tempa trafika analizo kaj Babililo";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_PARAMETERS_VERIFY"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_SAVE_BUTTON"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_TITLE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_OTHER_ACCOUNT"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_THIS_ACCOUNT"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_TITLE"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USER_ANOTHER_EMAIL"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN_ACTIVATE"] = "Por aktivigi la sekvadon de vizitantoj kaj la babililon, vi enskribiĝu ĉe Butterflive, kaj poste alŝutu la sekvo-konzolo. Aliĝo estas tute senpaga. Poste, eblas page aboni ĉe Butterflive por disponigi al vi plurajn specialajn funkciojn: <ul><li>Helpo de pluraj profesiuloj samtempe,</li><li>Administrado de pluraj retejoj,</li><li>Adaptigo de pritakso laŭ la aĉet-korbo de la vizitanto.</li></ul>";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN"] = "";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME"] = "Asocie kun <a href=\"http://www.butterflive.fr?o=afpee01\">Butterflive</a>, PEEL ebligas <strong>sekvi viajn klientojn sammomente</strong> en via bit-komerca vendejo. Pritaksa modulo mezuras la vizitojn laŭ agado cele al trafe rimarkigi zorgindajn klientojn. <strong>Babilila modulo</strong> ebligas ekkontakti vizitantojn tekste aŭ per <strong>video-babilado</strong>.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_YOU_HAVE_ALREADY_ACCOUNT"] = "";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_TITLE"] = "";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_MSG_IMAGE_CREATED_OK"] = "";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_MSG_IMAGE_DELETED_OK"] = "";

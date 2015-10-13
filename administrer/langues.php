@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: langues.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: langues.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -169,6 +169,7 @@ function affiche_formulaire_langue(&$frm)
 	$tpl->assign('url_rewriting', $frm["url_rewriting"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('STR_ADMINISTRATION', $GLOBALS['STR_ADMINISTRATION']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
@@ -218,7 +219,7 @@ function maj_langue($id, $frm)
 	if (empty($frm['lang']) || String::strlen($frm['lang']) != 2) {
 		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_FORMAT_EXPLAIN']))->fetch();
 	}
-	/* Met à jour la table langue */
+	// Met à jour la table de langues
 
 	$sql = "UPDATE peel_langues
 		SET lang = '" . nohtml_real_escape_string(String::strtolower($frm['lang'])) . "'";
@@ -231,7 +232,7 @@ function maj_langue($id, $frm)
 		, etat = '" . intval(vb($frm['etat'])) . "'
 		, url_rewriting = '" . nohtml_real_escape_string($frm['url_rewriting']) . "'
 		, position = '" . intval($frm['position']) . "'
-		, site_id = '" . intval($frm['site_id']) . "'
+		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('langues', null, true) . "";
 	query($sql);
 }
@@ -258,7 +259,6 @@ function affiche_liste_langue()
 		WHERE " . get_filter_site_cond('langues', null, true) . "
 		ORDER BY position ASC");
 	if (!(num_rows($result) == 0)) {
-		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
@@ -281,7 +281,7 @@ function affiche_liste_langue()
 				'flag_src' => $this_flag,
 				'url_rewriting' => $ligne['url_rewriting'],
 				'position' => $ligne['position'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id']),
 				'etat_onclick' => 'change_status("langues", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : ($ligne['etat']<0 ? 'puce-orange.gif' : 'puce-verte.gif')),
 				);

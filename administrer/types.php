@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: types.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -160,16 +160,16 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('position', $frm['position']);
 	$tpl->assign('etat', vb($frm['etat']));
 	$tpl->assign('without_delivery_address', $frm['without_delivery_address']);
-	$tpl->assign('is_socolissimo_module_active', is_socolissimo_module_active());
-		if (is_socolissimo_module_active()) {
+	$tpl->assign('is_socolissimo_module_active', check_if_module_active('socolissimo'));
+	if (check_if_module_active('socolissimo')) {
 		$tpl->assign('is_socolissimo', $frm['is_socolissimo']);
 	}
-	$tpl->assign('is_icirelais_module_active', is_icirelais_module_active());
-	if (is_icirelais_module_active()) {
+	$tpl->assign('is_icirelais_module_active', check_if_module_active('icirelais'));
+	if (check_if_module_active('icirelais')) {
 		$tpl->assign('is_icirelais', $frm['is_icirelais']);
 	}
 	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
-	$tpl->assign('is_tnt_module_active', is_tnt_module_active());
+	$tpl->assign('is_tnt_module_active', check_if_module_active('tnt'));
 	$tpl->assign('tnt_threshold', vb($frm['tnt_threshold']));
 	$tpl->assign('is_tnt', vb($frm['is_tnt']));
 	$tpl->assign('fianet_type_transporteur', vb($frm['fianet_type_transporteur']));
@@ -229,36 +229,36 @@ function insere_type($frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
-	if (is_socolissimo_module_active()) {
+	if (check_if_module_active('socolissimo')) {
 		$sql .= ", is_socolissimo";
 	}
-	if (is_icirelais_module_active()) {
+	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur";
 	}
-	if(is_tnt_module_active()){
+	if(check_if_module_active('tnt')){
 		$sql .= ", is_tnt";
 		$sql .= ", tnt_threshold";
 	}
 	$sql .= "
-	) VALUES ('" . intval($frm['position']) . "', '" . intval($frm['site_id']) . "'
+	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
 		, '" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	if (is_socolissimo_module_active()) {
+	if (check_if_module_active('socolissimo')) {
 		$sql .= ", '" . intval($frm['is_socolissimo']) . "'";
 	}
-	if (is_icirelais_module_active()) {
+	if (check_if_module_active('icirelais')) {
 		$sql .= ", '" . intval($frm['is_icirelais']) . "'";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . intval($frm['fianet_type_transporteur']) . "'";
 	}
-	if(is_tnt_module_active()){
+	if(check_if_module_active('tnt')){
 		$sql .= ", '" . intval($frm['is_tnt']) . "'";
 		$sql .= ", '" . intval($frm['tnt_threshold']) . "'";
 	}
@@ -277,22 +277,22 @@ function insere_type($frm)
 function maj_type($id, $frm)
 {
 	$sql = "UPDATE peel_types SET position = '" . nohtml_real_escape_string($frm['position']) . "'
-		, site_id = '" . nohtml_real_escape_string($frm['site_id']) . "'
+		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, without_delivery_address='" . intval($frm['without_delivery_address']) . "'
 		, etat='" . intval(vn($frm['etat'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	if (is_socolissimo_module_active()) {
+	if (check_if_module_active('socolissimo')) {
 		$sql .= ", is_socolissimo = '" . intval($frm['is_socolissimo']) . "'";
 	}
-	if (is_icirelais_module_active()) {
+	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais = '" . intval(vn($frm['is_icirelais'])) . "'";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur = '" . intval($frm['fianet_type_transporteur']) . "'";
 	}
-	if(is_tnt_module_active()){
+	if(check_if_module_active('tnt')){
 		$sql .= ", is_tnt = '".intval($frm['is_tnt'])."'";
 		$sql .= ", tnt_threshold = '".intval($frm['tnt_threshold'])."'";
 	}
@@ -320,7 +320,6 @@ function affiche_liste_type()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -329,7 +328,7 @@ function affiche_liste_type()
 				'etat_onclick' => 'change_status("types", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'position' => $ligne['position'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

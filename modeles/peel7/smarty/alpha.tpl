@@ -3,22 +3,22 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: alpha.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: alpha.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<h1 property="name" class="page_title">{$title}</h1>
 <div class="page_content">
-	<table class="full_width" cellpadding="3">
-		{foreach $map as $letter}
-			<tr><td colspan="2">{$letter.value}</td></tr>
-			{foreach $letter.items as $item}
-				<tr><td><a href="{$item.href|escape:'html'}">{$item.name|html_entity_decode_if_needed} ({$item.count})</a></td></tr>
-			{/foreach}
+{foreach $map as $letter}
+	{if !empty( $letter.items)}
+		<div class="well" style="margin-bottom:7px; margin-top:15px; padding:10px">{$letter.value}</div>
+		{foreach $letter.items as $item}
+		<div><a href="{$item.href|escape:'html'}">{$item.name|html_entity_decode_if_needed}{if !empty($item.count)} ({$item.count}){/if}</a></div>
 		{/foreach}
-	</table>
+	{/if}
+{/foreach}
 </div>

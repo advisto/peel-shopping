@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: verifdroits.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: verifdroits.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_INSTALLATION', 4);
 include("../configuration.inc.php");
 
@@ -32,7 +32,7 @@ if (!select_db($_SESSION['session_install_choixbase'], $GLOBALS['database_object
 }
 $error = 0;
 $directories_checkup_messages = '';
-$liste = array($GLOBALS['dirroot'] . "/lib/setup", $GLOBALS['dirroot'] . "/upload", $GLOBALS['dirroot'] . "/upload/thumbs", $GLOBALS['dirroot'] . "/download", $GLOBALS['dirroot'] . "/comparateur", $GLOBALS['dirroot'] . "/cache", $GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile");
+$liste = array($GLOBALS['dirroot'] . "/lib/setup", $GLOBALS['dirroot'] . "/upload", $GLOBALS['dirroot'] . "/upload/thumbs", $GLOBALS['dirroot'] . "/download", $GLOBALS['dirroot'] . "/comparateur", $GLOBALS['dirroot'] . "/cache", $GLOBALS['dirroot'] . "/lib/templateEngines/smarty/compile", $GLOBALS['dirroot'] . "/modules/captcha/security_codes");
 for($i = 0; $i < count($liste); $i++) {
 	if (!is_writable($liste[$i])) {
 		$directories_checkup_messages .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_INSTALL_DIRECTORY_NOK'], $liste[$i])))->fetch();

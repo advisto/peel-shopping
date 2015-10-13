@@ -3,17 +3,28 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les éléments de menu affichables
+ *
+ * @param array $params
+ * @return
+ */
+function profil_hook_admin_menu_items($params) {
+	$result['menu_items']['manage_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/profil/administrer/profil.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PROFIL"];
+	return $result;
 }
 
 /**
@@ -78,25 +89,10 @@ function affiche_formulaire_profil(&$frm)
 	
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$this_image_html = '';
-		if(!empty($frm['document_' . $lng])) {
-			$imgExtension = array(".png", ".jpg", ".jpeg", ".gif");
-			$extension=strrchr($frm['document_' . $lng],'.');
-			if($extension == '.pdf') {
-				$this_image_html = '<a href="' . $GLOBALS['repertoire_upload'] . '/' . $frm['document_' . $lng] . '" onclick="return(window.open(this.href)?false:true);"><img src="' . $GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png" alt="pdf" width="100" height="100" /></a>';
-			} elseif($extension == '.zip') {
-				$this_image_html = '<a href="' . $GLOBALS['repertoire_upload'] . '/' . $frm['document_' . $lng] . '" onclick="return(window.open(this.href)?false:true);"><img src="' . $GLOBALS['wwwroot_in_admin'] . '/images/zip.png" alt="zip" width="100" height="100" /></a>';
-			} elseif(in_array($extension, $imgExtension)) {
-				$this_image_html = '<img src="' . $GLOBALS['repertoire_upload'] . '/' . $frm['document_' . $lng] . '" />';
-			}
-		}
 		$tpl_langs[] = array('lng' => $lng,
 			'name' => $frm['name_' . $lng],
 			'description_document' => vb($frm['description_document_' . $lng]),
-			'document' => vb($frm['document_' . $lng]),
-			'document_href' => $GLOBALS['repertoire_upload'] . '/' . vb($frm['document_' . $lng]),
-			'document_delete_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=document_' . $lng,
-			'this_image_html' => $this_image_html
+			'document' => get_uploaded_file_infos('document_' . $lng, vb($frm['document_' . $lng]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=document_' . $lng)
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
@@ -117,7 +113,7 @@ function affiche_formulaire_profil(&$frm)
 	$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_MODULE_PROFIL_ADMIN_ABBREVIATE', $GLOBALS['STR_MODULE_PROFIL_ADMIN_ABBREVIATE']);
-	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	echo $tpl->fetch();
 }
 
@@ -142,7 +138,7 @@ function insere_profil(&$frm)
 	$sql .= "
 	) VALUES (
 		'" . nohtml_real_escape_string($frm['priv']) . "'
-		, '" . nohtml_real_escape_string($frm['site_id']) . "'
+		, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
@@ -167,7 +163,7 @@ function maj_profil($id, &$frm)
 {
 	$sql = "UPDATE peel_profil SET
 		priv = '" . nohtml_real_escape_string($frm['priv']) . "'
-		, site_id = '" . intval($frm['site_id']) . "'
+		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
@@ -179,22 +175,6 @@ function maj_profil($id, &$frm)
 	$sql .= "
 		WHERE id = '" . intval($id) . "'";
 	query($sql);
-}
-
-/**
- * Retourne les informations d'un type de profil
- *
- * @param string $technical_code (column named 'priv' into table)
- * @return
- */
-function get_profil($technical_code)
-{
-	/* Charge les informations du produit */
-	$qid = query("SELECT *, name_".$_SESSION['session_langue']." AS name
-		FROM peel_profil
-		WHERE priv = '" . nohtml_real_escape_string($technical_code) . "' AND " . get_filter_site_cond('profil') . "");
-	$profil = fetch_assoc($qid);
-	return $profil;
 }
 
 /**
@@ -218,14 +198,13 @@ function affiche_liste_profil($start)
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'name' => $ligne['name'],
 				'priv' => $ligne['priv'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 			);
 			$i++;
 		}

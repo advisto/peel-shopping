@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: installation_choixbase.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: installation_choixbase.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}
 <form class="entryform form-inline" role="form" action="verifdroits.php" method="post">
 	<p>{{ STR_ADMIN_INSTALL_DATABASE_ADVISE_SPECIFIC|escape('html') }}</p>
@@ -18,7 +18,7 @@
 	<p>{{ STR_ADMIN_INSTALL_DATABASE_SELECT|escape('html') }}</p>
 	{% if available_databases %}
 		{% for this_database in available_databases %}
-	<p><label class="radio"><input type="radio" name="choixbase" id="{{ this_database|str_form_value }}" value="{{ this_database|str_form_value }}" {% if $this_database == $selected_database %} checked="checked"{% endif %} /> {{ this_database }}</label></p>
+	<p><label class="radio"><input type="radio" name="choixbase" id="{{ this_database|str_form_value }}" value="{{ this_database|str_form_value }}" {% if this_database == selected_database %} checked="checked"{% endif %} /> {{ this_database }}</label></p>
 		{% endfor %}
 	{% else %}
 		<input type="text" class="form-control" name="choixbase" /> {{ error_message }}

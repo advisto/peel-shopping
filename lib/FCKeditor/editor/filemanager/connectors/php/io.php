@@ -117,7 +117,7 @@ function CreateServerFolder( $folderPath, $lastFolder = null )
 
 		$php_errormsg = '' ;
 		// Enable error tracking to catch the error.
-		ini_set( 'track_errors', '1' ) ;
+		@ini_set( 'track_errors', '1' ) ;
 
 		if ( isset( $Config['ChmodOnFolderCreate'] ) && !$Config['ChmodOnFolderCreate'] )
 		{

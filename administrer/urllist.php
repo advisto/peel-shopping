@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: urllist.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: urllist.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -77,12 +77,14 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_encoding)
 {
 	$sitemap = '';
+	$current_lang = $_SESSION['session_langue'];
 	foreach($this_wwwroot_lang_array as $this_lang) {
 		// Modification de l'environnement de langue
+		$_SESSION['session_langue'] = $this_lang;
 		set_lang_configuration_and_texts($this_lang, vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$this_lang]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 		
 		$sitemap .= $GLOBALS['wwwroot'] . "\r\n";
-		$sitemap .= $GLOBALS['wwwroot'] . "/membre.php\r\n";
+		$sitemap .= get_url('membre') . "\r\n";
 		$sitemap .= get_product_category_url() . "\r\n";
 		// génération des liens pour les categories 
 		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
@@ -118,6 +120,9 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 			$sitemap .= get_product_url($result['produit_id'], $result['produit'], $result['categorie_id'], $result['categorie']) . "\r\n";
 		}
 	}
+	// rétablissement de la langue du back office pour l'affichage du message de confirmation
+	$_SESSION['session_langue'] = $current_lang;
+	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
 	
 	// Création du fichier. Ce fichier sera lu par le fichier php /get_sitemap.xml. Une règle de réécriture dans le htaccess rend cet appel transparent pour le client.
 	$txt_filename = $GLOBALS['dirroot'] . "/urllist_" . substr(md5($this_wwwroot), 0, 4) . ".txt";
@@ -125,9 +130,6 @@ function create_yahoo_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_enc
 	$create_txt = String::fopen_utf8($txt_filename, "wb");
 	fwrite($create_txt, String::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
 	fclose($create_txt);
-	// rétablissement de la langue du back office pour l'affichage du message de confirmation
-	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
-
 }
 
 /**

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: ipn.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../../configuration.inc.php");
 
 
@@ -36,27 +36,35 @@ if ($checknumber == vb($_POST['md5sig'])) {
 				switch ($status) {
 					case '-2' :
 						// failed
-						$update_status = 6;
+						$update_status = 'cancelled';
 						break;
 
 					case '2' :
 						// processed
-						$update_status = 3;
+						$update_status = 'completed';
 						break;
 
 					case '0' :
 						// pending
-						$update_status = 1;
+						$update_status = 'pending';
 						break;
 
 					case '-1' :
 						// cancelled
-						$update_status = 6;
+						$update_status = 'cancelled';
 						break;
 
 					default :
-						$update_status = 1;
+						$update_status = 'pending';
 						break;
+				}
+				if(in_array($update_status, array('being_checked', 'completed'))) {
+					$data = $_POST;
+					$data['MONTANT_CREDIT'] = $amount;
+					accounting_insert_transaction($transaction_id, 'moneybookers', $_POST);
+				}
+				if(in_array($update_status, array('completed'))) {
+					email_commande($transaction_id);
 				}
 				update_order_payment_status($transaction_id, $update_status, true, null, null,false, 'moneybookers');
 			} else {

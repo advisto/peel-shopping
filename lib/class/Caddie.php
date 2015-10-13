@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: Caddie.php 46999 2015-09-22 15:01:17Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 44077 2015-02-17 10:20:38Z sdelaporte $
+ * @version $Id: Caddie.php 46999 2015-09-22 15:01:17Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -164,7 +164,12 @@ class Caddie {
 	/* ID de la commande liée au caddie */
 	var $commande_id;
 	var $commande_hash;
+	
+	// Module conditionnement
 	var $conditionnement;
+	var $pallet_count;
+	var $global_percent_pallet_filled;
+
 
 	/**
 	 * Caddie::Caddie()
@@ -175,16 +180,19 @@ class Caddie {
 	{
 		$this->percent_remise_user = $percent_remise_user;
 		/* constructeur d'object */
-		$this->init();
+		$this->init(true, false);
 	}
 
 	/**
 	 * Initialise le caddie
 	 *
+	 * @param mixed $load_from_caddie_cookie_if_available Charge les informations de caddie à partir du cookie si disponible
+	 * @param mixed $erase_caddie_cookie Efface les informations de caddie à partir du cookie si disponible
 	 * @return
 	 */
-	function init()
+	function init($load_from_caddie_cookie_if_available = false, $erase_caddie_cookie = true)
 	{
+		unset($_SESSION['session_commande']);
 		foreach($this->articles as $numero_ligne => $product_id) {
 			$this->delete_line($numero_ligne);
 		}
@@ -256,19 +264,28 @@ class Caddie {
 		$this->commande_id = 0;
 		$this->commande_hash = '';
 
+		$this->pallet_count = 0;
+		$this->global_percent_pallet_filled = 0;
+
 		$this->delivery_orderid = String::substr(sha1(mt_rand(1, 10000000)), 0, 16);
-		if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie']) && !empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
-			// Le panier vient d'être initialisé. Si un cookie qui contient des produits n'est pas vide, il faut remplir le panier avec les informations du cookie si le paramétrage de la boutique le permet.
-			$product_in_caddie_cookie = @unserialize($_COOKIE[$GLOBALS['caddie_cookie_name']]);
-			foreach ($product_in_caddie_cookie as $this_product_info) {
-				// Il ne faut pas mettre les données stocké dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuse.
-				$product_object = new Product($this_product_info['product_id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
-				$product_object->set_configuration($this_product_info['couleurId'], $this_product_info['tailleId'], $this_product_info['id_attribut'], is_reseller_module_active() && is_reseller());
-				$this->add_product($product_object, $this_product_info['quantite'], $email_check, $listcadeaux_owner);
-				unset($product_object);
+		if($load_from_caddie_cookie_if_available) {
+			if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie']) && !empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Le panier vient d'être initialisé. Si un cookie qui contient des produits n'est pas vide, il faut remplir le panier avec les informations du cookie si le paramétrage de la boutique le permet.
+				$product_in_caddie_cookie = @unserialize($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+				foreach ($product_in_caddie_cookie as $this_product_info) {
+					// Il ne faut pas mettre les données stockées dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuses.
+					$product_object = new Product($this_product_info['product_id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+					$product_object->set_configuration($this_product_info['couleurId'], $this_product_info['tailleId'], $this_product_info['id_attribut'], check_if_module_active('reseller') && is_reseller());
+					$this->add_product($product_object, $this_product_info['quantite'], $email_check, $listcadeaux_owner);
+					unset($product_object);
+				}
+			}
+		} elseif($erase_caddie_cookie) {
+			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
 			}
 		}
-		
 		// Au cas où certaines variables ne seraient pas bien nettoyées, on recalcule l'ensemble pour assurer une parfaite cohérence
 		$this->update();
 	}
@@ -316,14 +333,14 @@ class Caddie {
 				}
 			}
 		}
-		if (is_giftlist_module_active() && $listcadeaux_owner !== null && $this->giftlist_owners[$numero_ligne] != $listcadeaux_owner) {
+		if (check_if_module_active('listecadeau') && $listcadeaux_owner !== null && $this->giftlist_owners[$numero_ligne] != $listcadeaux_owner) {
 			// on teste pour qui est destiné le cadeau, et on ne fusionne pas deux lignes pour deux destinataires différents
 			unset($numero_ligne);
 		}
 		if (isset($numero_ligne)) {
 			// Le produit est déjà dans le panier avec la bonne configuration de couleur et de taille
 			$quantite_start = $this->quantite[$numero_ligne];
-			if (is_giftlist_module_active() && $listcadeaux_owner !== null) {
+			if (check_if_module_active('listecadeau') && $listcadeaux_owner !== null) {
 				// destinataire déjà répertorié
 				// on regarde ses besoins en quantité
 				$quantity_wished = min($this->quantite[$numero_ligne] + $added_quantity_wished, getNessQuantityFromGiftList($this->articles[$numero_ligne], $product_object->configuration_color_id, $product_object->configuration_size_id, $this->giftlist_owners[$numero_ligne]));
@@ -366,6 +383,8 @@ class Caddie {
 				}
 			}
 		}
+		// On recalcule tout, notamment pour les frais de port
+		// Par ailleurs à la fin de l'update, on va éventuellement rediriger vers la page de caddie si une quantité demandée n'a pas été donnée car pas en stock
 		$this->update();
 	}
 
@@ -374,15 +393,16 @@ class Caddie {
 	 *
 	 * @param mixed $numero_ligne
 	 * @param mixed $product_id
-	 * @param mixed $quantity_wished
+	 * @param mixed $quantity_wished contient la quantité global souhaitée pour la ligne. Si le module de stock est actif, c'est reservation_stock_temp qui fixera la quantité de la ligne.
 	 * @param mixed $couleur_id
 	 * @param mixed $taille_id
 	 * @param mixed $email_check
 	 * @param mixed $liste_attribut
 	 * @param mixed $listcadeaux_owner
+	 * @param mixed $do_update_line
 	 * @return
 	 */
-	function change_line_data($numero_ligne, $product_id, $quantity_wished, $couleur_id, $taille_id, $email_check, $liste_attribut, $listcadeaux_owner = null)
+	function change_line_data($numero_ligne, $product_id, $quantity_wished, $couleur_id, $taille_id, $email_check, $liste_attribut, $listcadeaux_owner = null, $do_update_line = true)
 	{
 		if (!is_numeric($numero_ligne)) {
 			return false;
@@ -392,31 +412,35 @@ class Caddie {
 		}
 		$this->articles[$numero_ligne] = $product_id;
 		// Si on gère les stocks pour ce produit, la valeur $quantite est temporaire avant validation du stock disponible
-		// $added_quantity peut être négative, nulle ou positive suivant évolution depuis dernière mise à jour du caddie
+		// $added_quantity_wished peut être négative, nulle ou positive suivant évolution depuis dernière mise à jour du caddie
 		$added_quantity_wished = $quantity_wished - vn($this->quantite[$numero_ligne]);
 		$this->couleurId[$numero_ligne] = $couleur_id;
 		$this->tailleId[$numero_ligne] = $taille_id;
 		$this->email_check[$numero_ligne] = $email_check;
 		$this->id_attribut[$numero_ligne] = $liste_attribut;
 		$this->giftlist_owners[$numero_ligne] = $listcadeaux_owner;
-		// On appelle update_line pour mettre à jour les autres colonnes, telles que $this->etat_stock[$numero_ligne] qui sert pour les stocks ci-dessous
-		$this->update_line($numero_ligne, $this->get_available_point_for_current_line($numero_ligne));
+		if (!empty($do_update_line)) {
+			// On appelle update_line pour mettre à jour les autres colonnes, telles que $this->etat_stock[$numero_ligne] qui sert pour les stocks ci-dessous
+			$this->update_line($numero_ligne, $this->get_available_point_for_current_line($numero_ligne));
+		}
 		// Que la valeur de commande_id soit définie ou pas, on continue à faire vivre l'évaluation des variables de stock temporaire
-		if(check_if_module_active('stock_advanced') && $this->etat_stock[$numero_ligne] == 1) {
+		if(check_if_module_active('stock_advanced') && vb($this->etat_stock[$numero_ligne]) == 1) {
 			// Le module de gestion des stocks est activé et le produit a on_stock=1 ($this->etat_stock[$numero_ligne] est la valeur de on_stock du produit)
 			// On réserve des stocks temporaires pour les nouvelles informations de la ligne
 			// Si nécessaire on rectifie la quantité dans le panier en fonction de ce qui a pu être réservé après vérification des stocks temporaires et réels
-			if (is_conditionnement_module_active() && !empty($this->conditionnement[$numero_ligne])) {
-				$this->quantite[$numero_ligne] += reservation_stock_temp_conditionnement($this, $numero_ligne, $product_id, $couleur_id, $taille_id, $added_quantity_wished);
+			
+			if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
+				$this->quantite[$numero_ligne] += Conditionnement::reservation_stock_temp($this, $numero_ligne, $product_id, $couleur_id, $taille_id, $added_quantity_wished);
 			} else {
 				$this->quantite[$numero_ligne] += reservation_stock_temp($product_id, $couleur_id, $taille_id, $added_quantity_wished);
 			}
 		} else {
 			$this->quantite[$numero_ligne] += $added_quantity_wished;
 		}
-		if($this->quantite[$numero_ligne]<$quantity_wished && (defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
-			// Redirection en cas de problème de stock au dernier moment lors de la commande => on redirige vers la page de caddie
-			redirect_and_die($GLOBALS['wwwroot'] . "/achat/caddie_affichage.php");
+		if($this->quantite[$numero_ligne]<$quantity_wished) {
+			// Si on ne peut pas allouer la quantité souhaitée, alors nous redirigerons l'utilisateur vers le caddie pour que l'utilisateur se rende compte de l'état du caddie
+			// Mais on ne pourra le faire qu'uniquement après avoir tout traité, et seulement si ça semble adapté
+			$GLOBALS['quantity_wished_not_fulfilled'] = true;
 		}
 		// Si on veut avoir les totaux de cette ligne et du caddie, il faut appeler par la suite $this->update(); 
 		// On ne le fait pas après chaque ligne pour éviter surcharge inutile
@@ -434,7 +458,7 @@ class Caddie {
 		foreach ($this->articles as $numero_ligne => $product_id) {
 			if($numero_ligne !== $this_line) {
 				$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, $this->apply_vat);
-				$product_object->set_configuration($this->couleurId[$numero_ligne], $this->tailleId[$numero_ligne], $this->id_attribut[$numero_ligne], is_reseller_module_active() && is_reseller());
+				$product_object->set_configuration($this->couleurId[$numero_ligne], $this->tailleId[$numero_ligne], $this->id_attribut[$numero_ligne], check_if_module_active('reseller') && is_reseller());
 				if(!empty($product_object->on_gift) && $product_object->on_gift_points > 0 && empty($this->prix_cat[$numero_ligne])) {
 					// Produit cadeau qui est mis dans caddie gratuitement avec les points disponibles
 					$max_available_gift_points -= $product_object->on_gift_points * $this->quantite[$numero_ligne];
@@ -452,14 +476,31 @@ class Caddie {
 	 * @return
 	 */
 	function update_line($numero_ligne, $max_available_gift_points)
-	{
+	{	
 		$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, $this->apply_vat);
-		$product_object->set_configuration($this->couleurId[$numero_ligne], $this->tailleId[$numero_ligne], $this->id_attribut[$numero_ligne], is_reseller_module_active() && is_reseller());
-
+		$product_object->set_configuration($this->couleurId[$numero_ligne], $this->tailleId[$numero_ligne], $this->id_attribut[$numero_ligne], check_if_module_active('reseller') && is_reseller());
+		if(check_if_module_active('stock_advanced') && $product_object->etat_stock == 1) {
+			// Le module de gestion des stocks est activé et le produit a on_stock=1 ($product_object->etat_stock est la valeur de on_stock du produit)
+			// On réserve des stocks temporaires pour les nouvelles informations de la ligne
+			// Si nécessaire on rectifie la quantité dans le panier en fonction de ce qui a pu être réservé après vérification des stocks temporaires et réels.
+			if (empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
+				// Dans le cas d'un timemax faible, si un produit avec un exemplaire en stock est commandé par un premier utilisateur, le produit sera à nouveau disponible si l'uilisateur fait une pause longue sur les pages de process de commande après le panier. Le produit pourra alors être à nouveau ajouté au panier par un autre utilisateur. On se retrouvera avec 2 panier avec ce produit qui est pourtant disponible en un seul exemplaire.
+				// => pour cette raison il faut vérifier à chaque mise à jour du panier si le produit est disponible dans le stock temporaire, et mettre la quantité à jour en fonction. Un utilisateur risque de voir son produit disparaitre de son panier sans comprendre pourquoi. Il faudra dans ce cas augmenter le timemax.
+				$quantity_wished = min($this->quantite[$numero_ligne], get_stock($product_object->id, $product_object->configuration_color_id, $product_object->configuration_size_id, 0));
+				if ($quantity_wished != $this->quantite[$numero_ligne]) {
+					// Si la quantité est différente, il faut mettre à jour le stock temporaire puis la quantité dans le panier via la fonction change_line_data 
+					// $this->email_check[$numero_ligne] : le but est de contrôler la quantité, donc l'email check est repris des infos déjà dans le panier.
+					$this->change_line_data($numero_ligne, $product_object->id, $quantity_wished, $product_object->configuration_color_id, $product_object->configuration_size_id, $this->email_check[$numero_ligne], $product_object->configuration_attributs_list, null, false);
+					// On ne peut pas garder la quantité souhaitée car pas en stock réellement, alors nous redirigerons l'utilisateur vers le caddie pour que l'utilisateur se rende compte de l'état du caddie
+					// Mais on ne pourra le faire qu'uniquement après avoir tout traité, et seulement si ça semble adapté
+					$GLOBALS['quantity_wished_not_fulfilled'] = true;
+				}
+			}
+		}
 		if(!empty($product_object->on_gift) && $product_object->on_gift_points > 0) {
 			// Produit cadeau qui est susceptible d'être mis dans caddie gratuitement avec les points disponibles
 			$gift_max_quantity = floor($max_available_gift_points / $product_object->on_gift_points);
-			if($gift_max_quantity>=1 || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) == 0) {
+			if($gift_max_quantity>=1 || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) == 0) {
 				// on limite la quantité au max possible payable avec les points dans 2 cas :
 				// - quantité prenable avec les points non nulle => ce mode de paiement a priorité
 				// - OU prix nul => produit pas commandable par ailleurs
@@ -470,13 +511,12 @@ class Caddie {
 				$product_object->on_gift_points = 0;
 			}
 		}
-		
 		/* Traitement de l'ecotaxe */
 		$this->delai_stock[$numero_ligne] = $product_object->delai_stock;
 		// Attention : etat_stock de Caddie est on_stock du produit
 		$this->etat_stock[$numero_ligne] = $product_object->on_stock;
 		$this->ecotaxe_ht[$numero_ligne] = $product_object->ecotaxe_ht;
-		if (is_gifts_module_active()) {
+		if (check_if_module_active('gifts')) {
 			// Total points de la ligne
 			$this->points[$numero_ligne] = $product_object->points * $this->quantite[$numero_ligne];
 		}
@@ -505,8 +545,8 @@ class Caddie {
 		// Total poids de la ligne
 		$this->poids[$numero_ligne] = ($product_object->poids + $product_object->configuration_overweight) * $this->quantite[$numero_ligne];
 		// Calcul du prix original avant réductions et options
-		$this->prix_cat_ht[$numero_ligne] = $product_object->get_original_price(false, is_reseller_module_active() && is_reseller(), false, false, true, false);
-		$this->prix_cat[$numero_ligne] = $product_object->get_original_price($apply_vat, is_reseller_module_active() && is_reseller(), false, false, true, false);
+		$this->prix_cat_ht[$numero_ligne] = $product_object->get_original_price(false, check_if_module_active('reseller') && is_reseller(), false, false, true, false);
+		$this->prix_cat[$numero_ligne] = $product_object->get_original_price($apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, true, false);
 		if (display_prices_with_taxes_active()) {
 			// On doit arrondir les valeurs tarifaires officielles qui sont en TTC
 			$this->prix_cat[$numero_ligne] = round($this->prix_cat[$numero_ligne], 2);
@@ -524,21 +564,25 @@ class Caddie {
 		if (!empty($this->quantite[$numero_ligne])) {
 			// La variable prix_avant_code_promo sert pour connaître le montant acheté pour savoir si on peut appliquer ou non un code promo
 			// Pour tenir compte des prix par lots, on récupère le prix pour l'ensemble des produits et on divise par la quantité
-			if (is_conditionnement_module_active() && !empty($this->conditionnement[$numero_ligne])) {
+			if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
 				$real_stock_used = $this->conditionnement[$numero_ligne] * $this->quantite[$numero_ligne];
 			} else {
 				$real_stock_used = intval($this->quantite[$numero_ligne]);
 			}
-			$this->prix_ht_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, false, is_reseller_module_active() && is_reseller(), false, false, $real_stock_used, true, true, false, $this->count_products($product_object->categorie_id)) / $real_stock_used;
-			$this->prix_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, $apply_vat, is_reseller_module_active() && is_reseller(), false, false, $real_stock_used, true, true, false,$this->count_products($product_object->categorie_id)) / $real_stock_used;
+			$this->prix_ht_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, false, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_used, true, true, false, $this->count_products($product_object->categorie_id)) / $real_stock_used;
+			$this->prix_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, $apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_used, true, true, false,$this->count_products($product_object->categorie_id)) / $real_stock_used;
 		}
-		$this->percent_remise_produit[$numero_ligne] = $product_object->get_all_promotions_percentage(is_reseller_module_active() && is_reseller(), $this->percent_remise_user, false);
+		$this->percent_remise_produit[$numero_ligne] = $product_object->get_all_promotions_percentage(check_if_module_active('reseller') && is_reseller(), $this->percent_remise_user, false);
 		if(!empty($product_object->on_gift) && $product_object->on_gift_points * $this->quantite[$numero_ligne] <= $max_available_gift_points) {
 			foreach(array('ecotaxe', 'ecotaxe_ht', 'prix_cat', 'prix_cat_ht', 'option', 'option_ht', 'prix_ht_avant_code_promo', 'prix_avant_code_promo', 'percent_remise_produit') as $this_property) {
 				$this_temp = &$this->$this_property;
 				$this_temp[$numero_ligne] = 0;
 			}
 			$max_available_gift_points -= $product_object->on_gift_points * $this->quantite[$numero_ligne];
+		}
+		if (check_if_module_active('conditionnement') && !empty($product_object->unit_per_pallet)) {
+			// Calcul du pourcentage de remplissage de palette pour la ligne de produit. Le champ unit_per_pallet est actif uniqument si le module conditionnement est installé.
+			$this->global_percent_pallet_filled += ($real_stock_used*100)/$product_object->unit_per_pallet;
 		}
 		unset($product_object);
 		return $max_available_gift_points;
@@ -586,7 +630,7 @@ class Caddie {
 			$this->id_attribut[$numero_ligne],
 			$this->attribut[$numero_ligne],
 			$this->total_prix_attribut[$numero_ligne]);
-		// suppression des attributs d'image existants
+		// Suppression des attributs d'image existants
 		if (!empty($attributs_list)) {
 			foreach(explode("§", $attributs_list) as $attribut_infos_list) {
 				$attribut_infos = explode("|", $attribut_infos_list);
@@ -782,7 +826,7 @@ class Caddie {
 		$query = query($sql);
 		if ($Zone = fetch_assoc($query)) {
 			if ($zoneId != $this->zoneId) {
-				// On initilialise le type de port à blank car on a changé de zone ou de pays
+				// On initialise le type de port à blank car on a changé de zone ou de pays
 				$this->type = "";
 				$this->typeId = "";
 			}
@@ -832,9 +876,15 @@ class Caddie {
 		if ($percent_remise_user !== null) {
 			$this->percent_remise_user = $percent_remise_user;
 		}
-		$this->apply_vat = ($this->zoneTva && !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+		$this->apply_vat = ($this->zoneTva && !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+		$max_available_gift_points = intval(vn($_SESSION['session_utilisateur']['points']));
+		// ETAPE 0 :
+		// On met d'abord à jour toutes les lignes et notamment les quantités si la gestion de stock est activée et qu'un stock vient de disparaitre depuis le dernier update du caddie
+		foreach ($this->articles as $numero_ligne => $product_id) {
+			$max_available_gift_points = $this->update_line($numero_ligne, $max_available_gift_points);
+		}
 		// INITIALISATION : On enlève tous les produits non valides
-		// c'est à dire ceux dont l'identifiant n'est pas numérique ou dont la quantité est < 1
+		// c'est-à-dire ceux dont l'identifiant n'est pas numérique ou dont la quantité est < 1
 		foreach ($this->quantite as $numero_ligne => $qte) {
 			if ($qte < 1) {
 				// Attention ici normalement on nettoie si la quantité commandée est < à 1
@@ -873,51 +923,80 @@ class Caddie {
 		}
 
 		$this->avoir_user = max(vn($_SESSION['session_utilisateur']['avoir']), 0);
+		$this->global_percent_pallet_filled = 0;
 		// ETAPE 1 : On calcule les totaux avant réduction
-		$max_available_gift_points = intval(vn($_SESSION['session_utilisateur']['points']));
 		foreach ($this->articles as $numero_ligne => $product_id) {
-			$max_available_gift_points = $this->update_line($numero_ligne, $max_available_gift_points);
 			$this->total_ecotaxe_ttc += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
 			$this->total_ecotaxe_ht += $this->ecotaxe_ht[$numero_ligne] * $this->quantite[$numero_ligne];
-			if (is_conditionnement_module_active() && !empty($this->conditionnement[$numero_ligne])) {
+			if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
 				$real_stock_used = $this->conditionnement[$numero_ligne] * $this->quantite[$numero_ligne];
 			} else {
 				$real_stock_used = intval($this->quantite[$numero_ligne]);
 			}
 			$this->total_produit_avant_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $real_stock_used;
 		}
-		// ETAPE 2 : maintenant qu'on connait le montant total avant réduction pour le catégorie et chaque catégorie de produits,
-		// on vérifie si le code promotionnel est toujours actif aprés un changement de montant total du caddie.
+		// ETAPE 2 : maintenant qu'on connait le montant total avant réduction pour les produits et chaque catégorie de produits,
+		// on vérifie si le code promotionnel est toujours actif après un changement de montant total du caddie.
 		$this->update_code_promo();
 
+		if (empty($this->code_infos) && !empty($GLOBALS['site_parameters']['cart_offer_products_for_each_lot_count'])) {
+			// L'exonération de produits en fonction du nombre ajouté au panier est active. Il faut mettre à 0 le montant des produits les moins chères si les conditions sont réunis pour le faire :
+			// Sur N produits achetés, le moins cher des N est offert. Cette opération est cumulable : pour 2*N produits / 2 offerts, etc.
+			// On commence par calculer le nombre de produits à offrir, puis on regarde les moins chers du caddie en tenant compte des quantités dans le panier.
+			$free_cost_cart_nb_product = floor($this->count_products()/$GLOBALS['site_parameters']['cart_offer_products_for_each_lot_count']);
+			if(!empty($free_cost_cart_nb_product)) {
+				// Récupération des prix de tous les produits dans le caddie
+				foreach($this->articles as $numero_ligne => $product_id) {
+					$this_quantity = $this->quantite[$numero_ligne];
+					while($this_quantity--) {
+						$prices_offered_array[] = $this->prix_avant_code_promo[$numero_ligne];
+					}
+				}
+				// Récupération des $free_cost_cart_nb_product produits les moins chers. La fonction sort réinitialise les clés.
+				sort($prices_offered_array);
+				foreach($prices_offered_array as $this_item => $this_price) {
+					if($this_item>=$free_cost_cart_nb_product) {
+						// Le tableau est trié dans l'ordre, on conserve les $free_cost_cart_nb_product dans le tableau
+						unset($prices_offered_array[$this_item]);
+					}
+				}
+			}
+		}
 		// Recalcul des produits en appliquant correctement les ventilations des codes promos
 		foreach ($this->articles as $numero_ligne => $product_id) {
+			$promotion_ventile_ttc = 0;
 			// Gestion du code promo
 			if (!empty($this->total_produit_related_to_code_promo) && !empty($this->code_infos)) {
 				$found_cat = null;
 				$product_object = new Product($this->articles[$numero_ligne]);
 				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo']);
 				unset($product_object);
-			} else {
-				$apply_code_on_this_product = false;
-			}
-			if ($apply_code_on_this_product) {
-				// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles qui concernent au moins un produit du panier
-				$code_promo_ventile_ttc = $this->total_reduction_code_promo * ($this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne]) / $this->total_produit_related_to_code_promo;
+				if ($apply_code_on_this_product) {
+					// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles qui concernent au moins un produit du panier
+					$promotion_ventile_ttc = $this->total_reduction_code_promo * ($this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne]) / $this->total_produit_related_to_code_promo;
+				}
+			} elseif (!empty($prices_offered_array)) {
+				// On calcule le nombre de produits offerts au prix unitaire correspondant à la ligne en cours, et on les prend en compte tant que le décompte prévu n'est pas atteint
+				// Attention : il peut y avoir plusieurs produits dans le panier avec le même prix, d'où le raisonnement par prix et non pas par produit
+				$this_quantity_offered = 0;
+				while(!empty($prices_offered_array) && in_array($this->prix_avant_code_promo[$numero_ligne], $prices_offered_array)) {
+					$this_quantity_offered++;
+					unset($prices_offered_array[array_search($this->prix_avant_code_promo[$numero_ligne], $prices_offered_array)]);
+				}
+				$promotion_ventile_ttc = $this->prix_avant_code_promo[$numero_ligne] * $this_quantity_offered;
 			} else {
 				// Panier au montant nul ou code promo à une catégorie non applicable au panier
-				$code_promo_ventile_ttc = 0;
 			}
 			// Le produit et l'ecotaxe ont potentiellement deux taux de TVA différents => quand on passe de HT à TTC il faut traiter l'ecotaxe à part
 			// Par ailleurs il faut arrondir les prix en TTC ou HT pour qu'ensuite l'application de quantités ne donne pas de problèmes d'arrondi
 			if (display_prices_with_taxes_active()) {
 				// On arrondit le prix TTC
-				$this->prix[$numero_ligne] = round($this->prix_avant_code_promo[$numero_ligne] - $code_promo_ventile_ttc / $this->quantite[$numero_ligne], 2);
+				$this->prix[$numero_ligne] = round($this->prix_avant_code_promo[$numero_ligne] - $promotion_ventile_ttc / $this->quantite[$numero_ligne], 2);
 				// On recalcule le prix HT à partir du prix TTC arrondi
 				$this->prix_ht[$numero_ligne] = ($this->prix[$numero_ligne] - $this->ecotaxe_ttc[$numero_ligne]) / (1 + $this->tva_percent[$numero_ligne] / 100) + $this->ecotaxe_ht[$numero_ligne];
 			} else {
 				// On arrondit le prix HT
-				$this->prix_ht[$numero_ligne] = round($this->prix_ht_avant_code_promo[$numero_ligne] - $code_promo_ventile_ttc / $this->quantite[$numero_ligne] / (1 + $this->tva_percent[$numero_ligne] / 100), 2);
+				$this->prix_ht[$numero_ligne] = round($this->prix_ht_avant_code_promo[$numero_ligne] - $promotion_ventile_ttc / $this->quantite[$numero_ligne] / (1 + $this->tva_percent[$numero_ligne] / 100), 2);
 				// On recalcule le prix TTC à partir du prix HT arrondi
 				$this->prix[$numero_ligne] = (($this->prix_ht[$numero_ligne] - $this->ecotaxe_ht[$numero_ligne]) * (1 + $this->tva_percent[$numero_ligne] / 100)) + $this->ecotaxe_ttc[$numero_ligne];
 			}
@@ -927,7 +1006,7 @@ class Caddie {
 		$this->_recalc_line_totals();
 		
 		// Calcul du pourcentage applicable en fonction du total des produits dans le panier
-		if (is_lot_module_active() && !empty($GLOBALS['site_parameters']['global_promotion_percent_by_threshold'])) {
+		if (check_if_module_active('lot') && !empty($GLOBALS['site_parameters']['global_promotion_percent_by_threshold'])) {
 			// Tri des valeurs par ordre croissant, pour permettre la sélection du bon taux en fonction du montant total des produits
 			asort($GLOBALS['site_parameters']['global_promotion_percent_by_threshold']);
 			foreach ($GLOBALS['site_parameters']['global_promotion_percent_by_threshold'] as $promotion_percent => $threshold) {
@@ -960,7 +1039,12 @@ class Caddie {
 		}
 		
 		// ETAPE 3 : On gère des éventuels frais supplémentaires si la commande est trop petite
-		if (count($this->articles) && $this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= vn($GLOBALS['site_parameters']['minimal_amount_to_order'])) {
+		if(a_priv('reve') && isset($GLOBALS['site_parameters']['minimal_amount_to_order_reve'])) {
+			$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
+		} else {
+			$treshold_to_use = vn($GLOBALS['site_parameters']['minimal_amount_to_order']);
+		}
+		if (count($this->articles) && $this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= $treshold_to_use) {
 			$this->small_order_overcost_amount_ht = $GLOBALS['site_parameters']['small_order_overcost_amount'] / (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));
 			if ($this->apply_vat) {
 				$this->small_order_overcost_amount = $this->small_order_overcost_amount_ht * (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));
@@ -1009,8 +1093,18 @@ class Caddie {
 		} else {
 			$this->cout_transport_ht = $delivery_cost_infos['cost_ht'];
 		}
-
-		if ($this->apply_vat) {
+		$free_delivery_vat = false;
+		if (!empty($GLOBALS['site_parameters']['delivery_vat_free_if_product_with_no_vat'])) {
+			// Mode d'exonération de la TVA des frais de port si un produit n'a pas de TVA.
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				if (empty($this->tva[$numero_ligne])) {
+					// un produit n'a pas de TVA. On exonère la TVA pour le transport
+					$free_delivery_vat = true;
+				}
+			}
+		}
+		
+		if ($this->apply_vat && empty($free_delivery_vat)) {
 			$this->cout_transport = $this->cout_transport_ht * (1 + $delivery_cost_infos['tva'] / 100);
 		} else {
 			$this->cout_transport = $this->cout_transport_ht;
@@ -1028,7 +1122,12 @@ class Caddie {
 		$this->tva_total_ecotaxe = $this->total_ecotaxe_ttc - $this->total_ecotaxe_ht;
 		$this->total = $this->total_produit - $this->avoir + $this->cout_transport + $this->tarif_paiement + $this->small_order_overcost_amount;
 		$this->total_ht = $this->total_produit_ht + $this->cout_transport_ht + $this->tarif_paiement_ht + $this->small_order_overcost_amount_ht;
-
+		
+		if (!empty($this->global_percent_pallet_filled)) {
+			// Calcul du nombre total de palette à partir du pourcentage de remplissage. 100% = 1 palette.
+			$this->pallet_count = ceil($this->global_percent_pallet_filled/100);
+		}
+		
 		if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie'])) {
 			// ETAPE 7 : Le contenu du panier est stocké dans un cookie, pour que l'utilisateurs puisse retrouver son panier après que la session soit expiré. Le panier est chargé avec les informations du cookie dans la fonction init
 			if (isset($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
@@ -1049,6 +1148,10 @@ class Caddie {
 		}
 		// FIN
 		$update_in_process = false;
+		// Redirection en cas de problème de stock au dernier moment lors de la commande => on redirige vers la page de caddie
+		if(!empty($GLOBALS['quantity_wished_not_fulfilled']) && (defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3'))) {
+			redirect_and_die(get_url('caddie_affichage'));
+		}
 		return true;
 	}
 	
@@ -1071,7 +1174,7 @@ class Caddie {
 		// Recalcul des totaux en appliquant correctement les ventilations des codes promos
 		foreach ($this->articles as $numero_ligne => $product_id) {
 			// Si le module conditionnement est présent, il faut prendre en compte le conditionnement dans le calcul du prix de la ligne.
-			if (is_conditionnement_module_active() && !empty($this->conditionnement[$numero_ligne])) {
+			if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
 				$this->total_prix[$numero_ligne] = $this->prix[$numero_ligne] * $this->quantite[$numero_ligne] * $this->conditionnement[$numero_ligne];
 				$this->total_prix_ht[$numero_ligne] = $this->prix_ht[$numero_ligne] * $this->quantite[$numero_ligne] * $this->conditionnement[$numero_ligne];
 			} else {
@@ -1086,7 +1189,7 @@ class Caddie {
 			}
 			// Aucune remise ne s'applique sur l'ecotaxe
 			// => on calcule la remise sur $prix_ht_no_ecotaxe qui est le prix hors ecotaxe
-			if (is_conditionnement_module_active() && !empty($this->conditionnement[$numero_ligne])) {
+			if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
 				$real_stock_used = $this->conditionnement[$numero_ligne] * $this->quantite[$numero_ligne];
 			} else {
 				$real_stock_used = intval($this->quantite[$numero_ligne]);
@@ -1103,7 +1206,7 @@ class Caddie {
 			$this->total_option_ht += $this->option_ht[$numero_ligne] * $real_stock_used;
 			$this->tva_total_produit += $this->tva[$numero_ligne];
 			$this->total_poids += $this->poids[$numero_ligne];
-			if (is_gifts_module_active()) {
+			if (check_if_module_active('gifts')) {
 				$this->total_points += $this->points[$numero_ligne];
 			}
 		}
@@ -1121,7 +1224,7 @@ class Caddie {
 		// On s'assure des montants avant leur insertion en BDD
 		$this->update();
 		/* Le reversement affilié est calculé sur le total HT des produits */
-		if (is_affiliate_module_active() && !empty($_SESSION['session_affilie']) && is_affiliation_active($_SESSION['session_affilie'])) {
+		if (check_if_module_active('affiliation') && !empty($_SESSION['session_affilie']) && is_affiliation_active($_SESSION['session_affilie'])) {
 			$order_infos['affilie'] = 1;
 			$order_infos['statut_affilie'] = 0;
 			$order_infos['montant_affilie'] = $this->total_produit * $GLOBALS['site_parameters']['commission_affilie'] / 100;
@@ -1184,14 +1287,14 @@ class Caddie {
 			// Attention ici normalement on nettoie si la quantité commandée est < à 1
 			$articles[$numero_ligne]['product_id'] = $product_id;
 			$articles[$numero_ligne]['quantite'] = $this->quantite[$numero_ligne];
-			if (is_giftlist_module_active()) {
+			if (check_if_module_active('listecadeau')) {
 				$articles[$numero_ligne]['giftlist_owners'] = $this->giftlist_owners[$numero_ligne];
 			}
 			$articles[$numero_ligne]['poids'] = $this->poids[$numero_ligne];
 			$articles[$numero_ligne]['points'] = $this->points[$numero_ligne];
 			$articles[$numero_ligne]['couleurId'] = $this->couleurId[$numero_ligne];
 			$articles[$numero_ligne]['tailleId'] = $this->tailleId[$numero_ligne];
-			if (is_conditionnement_module_active()) {
+			if (check_if_module_active('conditionnement')) {
 				$articles[$numero_ligne]['conditionnement'] = $this->conditionnement[$numero_ligne];
 			}
 			$articles[$numero_ligne]['prix'] = $this->prix[$numero_ligne];
@@ -1264,7 +1367,7 @@ class Caddie {
 			WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 
 		// si il y a des commandes de cadeau on envoie un email
-		if (!empty($this->giftlist_owners[0]) && is_giftlist_module_active()) {
+		if (!empty($this->giftlist_owners[0]) && check_if_module_active('listecadeau')) {
 			email_ordered_cadeaux($this->commande_id, $order_infos, $this->giftlist_owners[0]);
 		}
 		return $this->commande_id;

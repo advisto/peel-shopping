@@ -3,16 +3,80 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46961 2015-09-21 06:36:49Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les éléments de menu affichables
+ *
+ * @param array $params
+ * @return
+ */
+function webmail_hook_admin_menu_items($params) {
+	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
+	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
+	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
+	return $result;
+}
+
+/**
+ * Fonction affichant la liste d'emails sur le compte utilisateur
+ *
+ * @param array $params
+ * @return
+ */
+function webmail_hook_list_user_mail($params) {
+	$output = '';
+	// Requête d'emails à partir du site
+	$sql_formulaire = 'SELECT *
+		FROM peel_webmail
+		WHERE id_user="' . intval(vn($params['id_utilisateur'])) . '" AND ' . get_filter_site_cond('webmail', null, true) . '
+		ORDER BY date DESC, heure DESC';
+	$Links_formulaire = new Multipage($sql_formulaire, 'affiche_liste_mail_annonce', '*');
+	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_MESSAGE'], $GLOBALS['STR_DATE'], $GLOBALS['STR_ADMIN_INFO']);
+	$Links_formulaire->HeaderTitlesArray = $HeaderTitlesArray;
+	$result_formulaire = $Links_formulaire->Query();
+
+	$output .= '
+			<table class="full_width">
+				<tr>
+					<td class="entete" colspan="2">'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_LIST_IN_SITE_CONTACT_FORM'].'</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table id="tablesForm" style="width:100%;">
+						' . $Links_formulaire->getHeaderRow();
+	$i = 0;
+	if (empty($result_formulaire)) {
+		$output .= '<tr><td colspan="4" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
+	} else {
+		foreach($result_formulaire as $formulaire) {
+			$output .= tr_rollover($i, true) . '
+								<td class="center">' . vb($formulaire['titre']) . '</td>
+								<td class="center">' . vb($formulaire['message']) . '</td>
+								<td class="center">' . vb($formulaire['date']) . ' ' . vb($formulaire['heure']) . '</td>
+								<td class="center">' . vb($formulaire['ip']) . '</td>
+							</tr>';
+		}
+	}
+	$output .= '
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">' . $Links_formulaire->GetMultipage() . '</td>
+				</tr>
+			</table>';
+	return $output;
 }
 
 /**
@@ -47,9 +111,9 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 		$row_mail = fetch_assoc($q);
 		// on update ensuite pour marquer le email comme répondu
 		if ($row_mail['read'] == 'NO') {
-			query('UPDATE `peel_webmail`
-				SET `read` = "READ"
-				WHERE `id`="' . intval($frm['id_webmail']) . "' AND " . get_filter_site_cond('webmail', null, true) . "");
+			query("UPDATE `peel_webmail`
+				SET `read` = 'READ'
+				WHERE `id`='" . intval($frm['id_webmail']) . "' AND " . get_filter_site_cond('webmail', null, true) . "");
 		}
 
 		$user_id = $row_mail['id_user'];
@@ -59,9 +123,9 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 
 		if (!empty($user_id)) {
 			// on récupère les infos persos dans la BDD si l'utilisateur était loggué
-			$q = query('SELECT *
+			$q = query("SELECT *
 				FROM peel_utilisateurs
-				WHERE id_utilisateur=' . intval($user_id) . ' AND ' . get_filter_site_cond('utilisateurs') . '') ;
+				WHERE id_utilisateur='" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "") ;
 			$row_account = fetch_assoc($q);
 			$user_gender = $row_account['civilite'];
 			$user_login = $row_account['pseudo'];
@@ -129,17 +193,18 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	$tpl->assign('email_templates_href', $GLOBALS['administrer_url'] . '/email-templates.php');
 	$tpl->assign('email_templates_admin_href', $GLOBALS['administrer_url'] . '/administrer/email-templates.php');
 	$tpl_options = array();
-	$result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name
+	$sql = 'SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name, tc.site_id
 		FROM peel_email_template_cat tc
 		INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't') . '
-		WHERE ' . get_filter_site_cond('email_template_cat', 'tc', true) . '
+		WHERE ' . get_filter_site_cond('email_template_cat', 'tc') . '
 		GROUP BY tc.id
-		ORDER BY name');
+		ORDER BY name';
+	$result = query($sql);
 	while ($row_categories = fetch_assoc($result)) {
 		$tpl_options[] = array(
 			'value' => intval(vn($row_categories['id'])),
 			'issel' => !empty($frm['id_cat']) && $frm['id_cat'] == $row_categories['id'],
-			'name' => vb($row_categories['name'])
+			'name' => get_site_info($row_categories) . vb($row_categories['name'])
 		);
 	}
 	$tpl->assign('options', $tpl_options);
@@ -148,7 +213,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	// Sélection de la signature par défaut (support_clientèle)
 	$q = query('SELECT id 
 		FROM peel_email_template
-		WHERE ' . get_filter_site_cond('email_template', null, true) . ' AND lang="' . nohtml_real_escape_string(!empty($frm['lang_mail'])? $frm['lang_mail']:$_SESSION['session_langue']) . '" AND technical_code = "signature_support"');
+		WHERE ' . get_filter_site_cond('email_template', null) . ' AND lang="' . nohtml_real_escape_string(!empty($frm['lang_mail'])? $frm['lang_mail']:$_SESSION['session_langue']) . '" AND technical_code = "signature_support"');
 	if($default_signature = fetch_assoc($q)) {
 		$default_signature_id = $default_signature['id'];	
 	} else {
@@ -518,7 +583,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 	$sql = "SELECT w.*, u.pseudo AS login
 		FROM peel_webmail w
 		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u') . "
-		WHERE " . get_filter_site_cond('webmail', 'w', true) . " " . (!empty($sql_cond)?'' . implode(' AND ', $sql_cond):'') . "
+		WHERE " . get_filter_site_cond('webmail', 'w', true) . "  " . (!empty($sql_cond)?' AND ' . implode(' AND ', $sql_cond):'') . "
 		ORDER BY w.Date DESC, w.Heure DESC";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
 	$HeaderTitlesArray = array(' ', $GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], $GLOBALS['STR_MESSAGE'], 'IP', $GLOBALS["STR_ADMIN_WEBSITE"]);
@@ -636,7 +701,6 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 	} else {
 		$read_title_array = array('NO' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER'], 'READ' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_READ'], 'SEND' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ANSWERED']);
 		
-		$all_sites_name_array = get_all_sites_name_array();
 		foreach($result as $message) {
 			$output .= tr_rollover($i, true) . '
 				<td class="center" style="width:5px;">
@@ -649,13 +713,13 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 					'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
 				</td>
 				<td class="center" style="width:35%">
-					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(trim($message['message'])) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1">Voir message(s) envoyé(s) par nous à ' . vb($message['email']) . '</a></p>':'') . '
+					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1">Voir message(s) envoyé(s) par nous à ' . vb($message['email']) . '</a></p>':'') . '
 				</td>
 				<td class="center" style="width:15%">
 				' . vb($message['ip']) . '
 				</td>
 				<td class="center" style="width:15%">
-				' . ($message['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$message['site_id']]) . '
+				' . get_site_name($message['site_id']) . '
 				</td>
 			</tr>';
 			$i++;
@@ -707,154 +771,3 @@ function update_state_mail($frm)
 		}
 	}
 }
-
-/**
- * Fonction affichant la liste d'emails sur le compte utilisateur
- *
- * @param array $frm Array with all fields data
- * @return
- */
-function list_user_mail($id_utilisateur, $return_mode = false)
-{
-	$output = '';
-	if (!empty($id_utilisateur)) {
-		// Requête d'emails à partir du site
-		$sql_formulaire = 'SELECT *
-			FROM peel_webmail
-			WHERE id_user="' . intval(vn($id_utilisateur)) . '" AND ' . get_filter_site_cond('webmail', null, true) . '
-			ORDER BY date DESC, heure DESC';
-		$Links_formulaire = new Multipage($sql_formulaire, 'affiche_liste_mail_annonce', '*');
-		$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_MESSAGE'], $GLOBALS['STR_DATE'], $GLOBALS['STR_ADMIN_INFO']);
-		$Links_formulaire->HeaderTitlesArray = $HeaderTitlesArray;
-		$result_formulaire = $Links_formulaire->Query();
-
-		if (check_if_module_active('vitrine')) {
-			$sql_vitrine = 'SELECT uc.*
-				FROM peel_user_contacts uc
-				WHERE uc.user_id="' . intval(vn($id_utilisateur)) . '" AND uc.annonce_id = 0
-				ORDER BY uc.date DESC';
-			$Links_vitrine = new Multipage($sql_vitrine, 'affiche_liste_mail_vitrine', '*');
-			$HeaderTitlesArray = array('Date', 'Message');
-			$Links_vitrine->HeaderTitlesArray = $HeaderTitlesArray;
-			$result_vitrine = $Links_vitrine->Query();
-
-			$output .= '
-				<table class="full_width">
-					<tr>
-						<td class="entete" colspan="2">'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_LIST_IN_VITRINE'].'</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<table id="tablesForm" style="width:100%;">
-							' . $Links_vitrine->getHeaderRow();
-			$i = 0;
-			if (empty($result_vitrine)) {
-				$output .= '<tr><td colspan="4" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
-			} else {
-				foreach($result_vitrine as $vitrine) {
-					$output .= tr_rollover($i, true) . '
-									<td class="center">' . date('y-m-d H:i:s', $vitrine['date']) . '</td>
-									<td class="center">' . vb($vitrine['corps_email']) . '</td>
-								</tr>';
-				}
-			}
-			$output .= '
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">' . $Links_vitrine->GetMultipage() . '</td>
-					</tr>
-				</table>';
-		}
-		if (check_if_module_active('annonces')) {
-			$sql_annonce = 'SELECT *
-				FROM peel_user_contacts uc
-				LEFT JOIN peel_lot_vente a ON a.ref = uc.annonce_id AND a.id_personne="' . intval(vn($id_utilisateur)) . '"
-				LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = uc.id_expediteur AND ' . get_filter_site_cond('utilisateurs', 'u') . '
-				WHERE uc.user_id = "' . intval(vn($id_utilisateur)) . '"
-				ORDER BY date DESC';
-			$Links_annonce = new Multipage($sql_annonce, 'affiche_liste_mail_annonce');
-			$HeaderTitlesArray = array($GLOBALS["STR_DATE"], $GLOBALS["STR_MODULE_ANNONCES_AD"], $GLOBALS["STR_MESSAGE"]);
-			$Links_annonce->HeaderTitlesArray = $HeaderTitlesArray;
-			$Links_annonce->allow_get_sort = false;
-			$result_annonce_query = $Links_annonce->Query();
-			$output .= '
-				<table class="full_width">
-					<tr>
-						<td class="entete" colspan="2">'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_LIST_IN_AD_FORMS'].'</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<table id="tablesForm" style="width:100%;">
-							' . $Links_annonce->getHeaderRow();
-			$i = 0;
-			if (empty($result_annonce_query)) {
-				$output .= '<tr><td colspan="4" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
-			} else {
-				foreach($result_annonce_query as $annonce) {
-					$output .= tr_rollover($i, true) . '
-									<td style="width:200px;text-align:center;">
-										' . date('Y-m-d H:i:s', $annonce['date']) . '
-									</td>
-									<td style="width:100px;text-align:center;">
-										<a href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/annonces/administrer/annonces.php?mode=modif&ref=' . intval(vn($annonce['annonce_id'])) . '" onclick="return(window.open(this.href)?false:true);">' . intval(vn($annonce['annonce_id'])) . '</a>
-									</td>
-									<td style="width:700px;text-align:center;">
-										'.$GLOBALS["STR_ADMIN_SEND_BY"].' : ' . ($annonce['id_expediteur'] != 0 ?$annonce['pseudo'] . ' - (<a onclick="return(window.open(this.href)?false:true);" href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($annonce['id_expediteur'])) . '">' . sprintf($GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_USER"], intval(vn($annonce['id_expediteur']))) . '</a>)':$annonce['mail_expediteur']) . '<br />' . vb($annonce['corps_email']) . '
-									</td>
-								</tr>';
-					$i++;
-				}
-			}
-			$output .= '
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							' . $Links_annonce->GetMultipage() . '
-						</td>
-					</tr>
-				</table>';
-		}
-		$output .= '
-				<table class="full_width">
-					<tr>
-						<td class="entete" colspan="2">'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_LIST_IN_SITE_CONTACT_FORM'].'</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<table id="tablesForm" style="width:100%;">
-							' . $Links_formulaire->getHeaderRow();
-		$i = 0;
-		if (empty($result_formulaire)) {
-			$output .= '<tr><td colspan="4" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
-		} else {
-			foreach($result_formulaire as $formulaire) {
-				$output .= tr_rollover($i, true) . '
-									<td class="center">' . vb($formulaire['titre']) . '</td>
-									<td class="center">' . vb($formulaire['message']) . '</td>
-									<td class="center">' . vb($formulaire['date']) . ' ' . vb($formulaire['heure']) . '</td>
-									<td class="center">' . vb($formulaire['ip']) . '</td>
-								</tr>';
-			}
-		}
-		$output .= '
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">' . $Links_formulaire->GetMultipage() . '</td>
-					</tr>
-				</table>';
-	}
-	if ($return_mode) {
-		return $output;
-	} elseif (!empty($output)) {
-		echo $output;
-	} else {
-		return false;
-	}
-}
-

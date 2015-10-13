@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: positions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: positions.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -75,7 +75,7 @@ function affiche_formulaire_modif_position($catid)
 	$tpl_results = array();
 	$i = 0;
 	while ($prod = fetch_assoc($resProd)) {
-		$product_object = new Product($prod['id'], $prod, true, null, true, !is_micro_entreprise_module_active());
+		$product_object = new Product($prod['id'], $prod, true, null, true, !check_if_module_active('micro_entreprise'));
 		$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 			'value' => intval($product_object->id),
 			'modif_href' => 'produits.php?mode=modif&id=' . $product_object->id,

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: Product.php 47025 2015-09-24 19:23:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 44077 2015-02-17 10:20:38Z sdelaporte $
+ * @version $Id: Product.php 47025 2015-09-24 19:23:45Z sdelaporte $
  * @access public
  */
 class Product {
@@ -51,6 +51,7 @@ class Product {
 	// prix_revendeur is the price for resellers : it is stored with taxes included, even if we will usually display it without taxes
 	var $prix_revendeur = null;
 	var $promotion = null;
+	var $prix_promo = null;
 	var $tva = null;
 	var $points = null;
 	var $default_image = null;
@@ -64,6 +65,26 @@ class Product {
 	var $image8 = null;
 	var $image9 = null;
 	var $image10 = null;
+	var $image11 = null;
+	var $image12 = null;
+	var $image13 = null;
+	var $image14 = null;
+	var $image15 = null;
+	var $image16 = null;
+	var $image17 = null;
+	var $image18 = null;
+	var $image19 = null;
+	var $image20 = null;
+	var $image21 = null;
+	var $image22 = null;
+	var $image23 = null;
+	var $image24 = null;
+	var $image25 = null;
+	var $image26 = null;
+	var $image27 = null;
+	var $image28 = null;
+	var $image29 = null;
+	var $image30 = null;
 	var $zip = null;
 	var $youtube_code = null;
 	var $on_stock = null;
@@ -106,12 +127,12 @@ class Product {
 	var $id_utilisateur = null;
 	var $vat_applicable = null;
 	var $extra_link = null;
+	var $unit_per_pallet = null;
 	var $conditionnement = null;
 	var $categorie_sentence_displayed_on_product = null;
 	var $date_maj = null;
 	var $attributes_with_single_options_array = null;
 	var $paiement = null;
-
 	/**
 	 * Product::Product()
 	 *
@@ -160,16 +181,6 @@ class Product {
 				}
 			}
 		}
-		if (is_module_gift_checks_active()) {
-			// Il faut déterminer si le produit est un chèque cadeaux. Les chèques cadeaux n'ont pas de catégorie associée, donc il faut modifier la requête SQL de cette classe en conséquence pour ne pas faire de jointure INNER sur les catégories (même effet que la variable global allow_products_without_category)
-			$query = query("SELECT on_check
-				FROM peel_produits
-				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('produits'));
-			if ($result = fetch_assoc($query)) {
-				$this->on_check = $result['on_check'];
-			}
-		}
-
 		if (!$user_only_product_infos) {
 			if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
 				$sql = "SELECT
@@ -189,6 +200,7 @@ class Product {
 						, p.prix_revendeur
 						, p.tva
 						, p.etat
+						, p.prix_promo
 						, p.promotion
 						, p.points
 						, p.default_image
@@ -232,14 +244,19 @@ class Product {
 						, p.position
 						, p.extra_link
 						, p.paiement
-						, c.id AS categorie_id
-						, c.nom_" . $lang . " AS categorie";
-				if (is_conditionnement_module_active()) {
+						, IF(c.id IS NOT NULL, c.id, 0) AS categorie_id
+						, IF(c.nom_" . $lang . " IS NOT NULL, c.nom_" . $lang . ", 0) AS categorie";
+				if (check_if_module_active('conditionnement')) {
+					$sql .= ", p.unit_per_pallet";
 					$sql .= ", p.conditionnement";
 				}
 				if (!empty($GLOBALS['site_parameters']['enable_categorie_sentence_displayed_on_product'])) {
 					$sql .= ", c.sentence_displayed_on_product_" . $lang . " AS categorie_sentence_displayed_on_product";
 				}
+				if (!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
+					$sql .= ','.implode(',', array_keys($GLOBALS['site_parameters']['products_table_additionnal_fields'])).'';
+				}
+				// Les chèques cadeaux n'ont pas de catégorie associée, donc il faut modifier la requête SQL de cette classe en conséquence pour ne pas faire de jointure INNER sur les catégories (même effet que la variable global allow_products_without_category)
 				$sql .= " FROM peel_produits p
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_produits_categories pc ON pc.produit_id=p.id
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
@@ -264,6 +281,10 @@ class Product {
 				$this->id = 0;
 			}
 		}
+		// Initialisation de variables non présentes dans peel_produits
+		// L'écotaxe est gérée par l'appel au hook "product_init_post" si le module est présent
+		$this->ecotaxe_ht = 0;
+		$this->ecotaxe_ttc = 0;
 		if (!empty($GLOBALS['site_parameters']['specific_categorie_used_for_product_array'])) {
 			// Cette variable de configuration permet de spécifier une catégorie différente de l'association en back office. Cela permet par exemple de choisir la catégorie avec laquelle l'url du produit sera générée, dans le cas où plusieurs catégories sont associées au produit.
 			// Il est possible de créer une règle qui s'applique à tous les produits en définissant le paramètre comme ceci : '*'=>'id_de_categorie'
@@ -282,55 +303,39 @@ class Product {
 		}
 		$this->name = String::html_entity_decode_if_needed($this->name);
 		$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
-		$this->description = String::html_entity_decode_if_needed($this->description);
-		
+		$extra_description = '';
 		if(function_exists('get_product_description')) {
-			$this->description .= get_product_description($this);
+			$extra_description .= get_product_description($this);
 		}
-		correct_output($this->descriptif, false, 'html', $lang);
-		correct_output($this->description, false, 'html', $lang);
-		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
-		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, true, false, true);
+		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, false, true);
 		foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
 			foreach($this_options_array as $this_attribut_id => $this_options_infos) {
 				if($this_attribut_id && empty($this_options_infos['texte_libre']) && empty($this_options_infos['upload'])) {
 					// Ceci n'est pas un attribut texte ou upload
 					if (empty($GLOBALS['site_parameters']['disable_display_attributes_with_single_options_on_product_description'])) {
-						$this->description .= $this_options_infos['nom'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $this_options_infos['descriptif'] . '<br />';
+						$extra_description .= $this_options_infos['nom'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $this_options_infos['descriptif'] . '<br />';
 					}
 					$this->attributes_with_single_options_array[$this_options_infos['technical_code']] = array('nom'=>$this_options_infos['nom'],'descriptif'=>$this_options_infos['descriptif']);
 				}
 			}
 		}
+		if (empty($GLOBALS['site_parameters']['display_extra_product_description_mode']) || $GLOBALS['site_parameters']['display_extra_product_description_mode']=='after') {
+			$this->description = String::html_entity_decode_if_needed($this->description) . $extra_description;
+		} elseif ($GLOBALS['site_parameters']['display_extra_product_description_mode']=='before') {
+			$this->description = $extra_description . String::html_entity_decode_if_needed($this->description);
+		}
+		correct_output($this->descriptif, true, 'html', $lang);
+		correct_output($this->description, true, 'html', $lang);
+		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
+		if(empty($this->descriptif) && !empty($GLOBALS['site_parameters']['product_short_description_generate_if_empty'])) {
+			$this->descriptif = String::str_shorten(String::strip_tags($this->description), 500);
+		}
 		$this->categorie = String::html_entity_decode_if_needed(vb($this->categorie));
 		$this->poids = floatval($this->poids);
 		$this->volume = floatval($this->volume);
-		if (is_module_ecotaxe_active()) {
-			if (!empty($product_infos) && isset($product_infos['ecotaxe_ht']) && isset($product_infos['ecotaxe_ttc'])) {
-				$this->ecotaxe_ht = $product_infos['ecotaxe_ht'];
-				$this->ecotaxe_ttc = $product_infos['ecotaxe_ttc'];
-			} else {
-				if (!empty($this->id_ecotaxe)) {
-					$eco = get_ecotax_object($this->id_ecotaxe);
-				}
-				if (!empty($eco)) {
-					$this->ecotaxe_ht = $eco->prix_ht;
-					$this->ecotaxe_ttc = $eco->prix_ttc;
-				} else {
-					$this->ecotaxe_ht = 0;
-					$this->ecotaxe_ttc = 0;
-				}
-			}
-		} else {
-			$this->ecotaxe_ht = 0;
-			$this->ecotaxe_ttc = 0;
-		}
-		$this->prix_ht = $this->prix / (1 + $this->tva / 100);
-		if (check_if_module_active('attributs')) {
-			// On ajoute au prix les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
-			$price_calculation = affiche_attributs_form_part($this, 'price_calculation', null, null, null, null, null, is_reseller_module_active() && is_reseller(), false, false, true);
-		}
-		$this->prix_ht += vn($GLOBALS['last_calculation_additional_price_ht']);
+ 		$this->prix_ht = $this->prix / (1 + $this->tva / 100);
+		// On exécute des fonctions de modules qui permettent de compléter le prix, de calculer certaines propriétés de l'objet, ...
+		call_module_hook('product_init_post', array('this' => $this, 'user_only_product_infos' => $user_only_product_infos, 'product_infos' => $product_infos));
 		$this->vat_applicable = $vat_applicable;
 		if (empty($vat_applicable)) {
 			$this->ecotaxe_ttc = $this->ecotaxe_ht;
@@ -366,17 +371,7 @@ class Product {
 			$this->configuration_size_price_ht = vn($size_array['row_original_price']);
 			$this->configuration_overweight = vn($size_array['poids']);
 		}
-		if (check_if_module_active('attributs') && $this->configuration_attributs_list !== $attributs_list) {
-			// Initialisation
-			$this->configuration_attributs_list = $attributs_list;
-			$this->configuration_total_original_price_attributs_ht = 0;
-			$this->configuration_attributs_description = "";
-			// Traitement des attributs
-			if (!empty($attributs_list)) {
-				$this->configuration_attributs_description = affiche_attributs_form_part($this, 'selected_text', null, null, null, null, null, $reseller_mode);
-				$this->configuration_total_original_price_attributs_ht = vn($GLOBALS['last_calculation_additional_price_ht']);
-			}
-		}
+		call_module_hook('product_set_configuration', array('this' => $this, 'attributs_list' => $attributs_list, 'reseller_mode' => $reseller_mode));
 	}
 
 	/**
@@ -389,7 +384,7 @@ class Product {
 	function get_product_url($add_get_suffixe = false, $html_encode = false)
 	{
 		if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
-			if (empty($this->categorie_id) || empty($this->categorie)) {
+			if ($this->categorie_id === null || $this->categorie === null) {
 				$query = query("SELECT p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this->lang)." AS name, pc.categorie_id, r.nom_" . $this->lang . " AS categorie
 					FROM peel_produits p
 					" . (!empty($GLOBALS['site_parameters']['allow_products_without_category']) || $this->on_check == 1 ? 'LEFT' : 'INNER') . " JOIN peel_produits_categories pc ON p.id = pc.produit_id
@@ -403,6 +398,10 @@ class Product {
 						$this->name = $prod['name'];
 					}
 				}
+			}
+			if(!empty($GLOBALS['site_parameters']['product_check_specific_link_column'])) {
+				$column = $GLOBALS['site_parameters']['product_check_specific_link_column'];
+				$GLOBALS['product_current_specific_link'] = $this->$column;
 			}
 			if (!empty($this->categorie_id)) {
 				return get_product_url($this->id, $this->name, $this->categorie_id, $this->categorie, $add_get_suffixe, $html_encode);
@@ -508,6 +507,12 @@ class Product {
 			foreach($possible_sizes[$this->id . '-' . $this->lang] as $result) {
 				if ($return_mode == 'name') {
 					$sizes_array[$result['taille_id']] = $result['nom_' . $this->lang];
+				} elseif ($return_mode == 'export') {
+					$sizes_array[$result['taille_id']] = $result['nom_' . $this->lang];
+					if($result['prix']!=0 || $result['prix_revendeur']!=0) {
+						// Ajout d'informations sur le prix si adapté
+						$sizes_array[$result['taille_id']] .= '§'.$taille['prix'].'§'.$taille['prix_revendeur'];
+					}
 				} else {
 					if ($reseller_mode && a_priv('reve') && $result["prix_revendeur"] != 0) {
 						$original_price = $result["prix_revendeur"] / (1 + $this->tva / 100);
@@ -633,15 +638,7 @@ class Product {
 	 */
 	function get_product_options()
 	{
-		$options_array = array();
-		$query = query('SELECT pa.descriptif_' . $this->lang . '
-			FROM peel_attributs pa
-			INNER JOIN peel_produits_attributs ppa ON ppa.attribut_id = pa.id
-			WHERE ppa.produit_id = ' . intval($this->id) .' AND ' . get_filter_site_cond('attributs', 'pa'));
-		while ($result = fetch_assoc($query)) {
-			$options_array[] = $result['descriptif_' . $this->lang];
-		}
-		return $options_array;
+		return call_module_hook('product_get_options', array('id_or_technical_code' => $this->id, 'lang' => $this->lang, 'return_mode' => 'value'), 'array');
 	}
 
 	/**
@@ -677,14 +674,15 @@ class Product {
 		if(empty($product_images) || !in_array($cache_id, array_keys($product_images))){
 			if(empty($GLOBALS['site_parameters']['use_ads_as_products'])) {
 				if (!empty($force_id_couleur)) {
-					$sql_condition = ' AND couleur_id="' . intval($force_id_couleur) . '"';
+					$this_color = $force_id_couleur;
 				} elseif (!empty($this->configuration_color_id)) {
-					$sql_condition = ' AND couleur_id="' . intval($this->configuration_color_id) . '"';
+					$this_color = $this->configuration_color_id;
 				} else {
 					// Si il n'y a pas de couleur choisie, on sélectionne la couleur par défaut choisie par l'admin
-					$sql_condition = ' AND couleur_id="' . intval($this->default_color_id) . '"';
+					$this_color = $this->default_color_id;
 				}
-				if(empty($GLOBALS['site_parameters']['disable_product_colors'])) {
+				if(!empty($this_color) && empty($GLOBALS['site_parameters']['disable_product_colors'])) {
+					$sql_condition = ' AND couleur_id="' . intval($this_color) . '"';
 					$sql = 'SELECT *
 						FROM peel_produits_couleurs
 						WHERE produit_id="' . intval($this->id) . '" ' . $sql_condition . '
@@ -723,6 +721,18 @@ class Product {
 					$this_image_item = 'image' . $i;
 					if (!empty($this->$this_image_item) && $i != $this->default_image && (!$only_return_first_picture || empty($product_images[$cache_id])) && ($display_pdf || pathinfo($this->$this_image_item, PATHINFO_EXTENSION) != 'pdf')) {
 						$product_images[$cache_id][] = $this->$this_image_item;
+					}
+				}
+				if (!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
+					foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
+						if (strpos($this_key, 'image') === 0) {
+							// Prise en compte des images complémentaires
+							$i++;
+							$this_image_item = $this_key;
+							if (!empty($this->$this_image_item) && $i != $this->default_image && (!$only_return_first_picture || empty($product_images[$cache_id])) && ($display_pdf || pathinfo($this->$this_image_item, PATHINFO_EXTENSION) != 'pdf')) {
+								$product_images[$cache_id][] = $this->$this_image_item;
+							}
+						}
 					}
 				}
 			} else {
@@ -812,34 +822,17 @@ class Product {
 		// Choix entre prix revendeur et prix public
 		if ($reseller_mode) {
 			// The reseller price is never affected by flash prices
-			$price_ht = $this->get_original_price(false, true, false, false, false, false, 1, false);
+			$price_ht = $this->get_original_price(false, true, false, false, false, false, $quantity, false) / $quantity;
 		} elseif ($this->is_price_flash($reseller_mode)) {
 			$price_ht = $this->prix_flash / (1 + $this->tva / 100);
 		} else {
-			$price_ht = $this->get_original_price(false, false, false, false, false, false, 1, false);
+			$price_ht = $this->get_original_price(false, false, false, false, false, false, $quantity, false) / $quantity;
 		}
-		if (is_lot_module_active()) {
-			/* Si le module de gestion des prix / quantité est actif */
-			if (!isset($GLOBALS['cache']) || !isset($GLOBALS['cache']['lot_price_by_id']) || !isset($GLOBALS['cache']['lot_price_by_id'][$this->id])) {
-				$GLOBALS['cache']['lot_price_by_id'][$this->id] = array();
-				// Ces informations ne changent pas en cours d'exécution du script
-				// => on met en cache global (pas static car l'objet sera peut-être recréé entre temps)
-				$query = query("SELECT quantite, prix, prix_revendeur
-					FROM peel_quantites q
-					WHERE produit_id = '" . intval($this->id) . "' AND " . (is_reseller_module_active() && is_reseller()?'q.prix_revendeur>0':'q.prix>0') . " AND " . get_filter_site_cond('quantites', 'q') . " 
-					ORDER BY quantite ASC");
-				while ($Qte = fetch_assoc($query)) {
-					$GLOBALS['cache']['lot_price_by_id'][$this->id][] = $Qte;
-				}
-			}
-			foreach($GLOBALS['cache']['lot_price_by_id'][$this->id] as $Qte) {
-				/* il existe des remises / quantité dans la base */
-				if ($quantity >= $Qte['quantite']) {
-					$price_ht = min ($price_ht, ($reseller_mode && $Qte['prix_revendeur'] != 0? $Qte['prix_revendeur'] / (1 + $this->tva / 100) : $Qte['prix'] / (1 + $this->tva / 100)));
-				} else {
-					break;
-				}
-			}
+		// Récupération du prix modifié par d'éventuels modules (par exemple module "lot" pour donner le prix réduit pour une quantité donnée)
+		$call_module_hook = call_module_hook('product_get_final_price', array('quantity' => $quantity, 'reseller_mode' => $reseller_mode, 'price_ht' => $price_ht, 'this' => $this), 'min');
+		if ($call_module_hook !== null) {
+			// un prix a été défini par le hook. Si la valeur est null, c'est qu'aucun hook est appelé par la fonction 	call_module_hook
+			$price_ht = min($price_ht, $call_module_hook);
 		}
 		if ($get_price_for_this_configuration) {
 			$price_ht += $this->configuration_size_price_ht;
@@ -858,7 +851,7 @@ class Product {
 						$promotion_devises = max($promotion_devises, $cat['promotion_devises']);
 					}
 				}
-				if (check_if_module_active('marques_promotion')) {
+				if (!empty($this->id_marque) && check_if_module_active('marques_promotion')) {
 					$marque = get_marque_promotion($this->id_marque);
 					if (!empty($marque) && $marque['promotion_devises'] > 0) {
 						// Réduction par marque en valeur et non pas en pourcentage
@@ -870,6 +863,7 @@ class Product {
 				if(!empty($get_promotion_by_user_offer_object) && $get_promotion_by_user_offer_object->prix>0) {
 					$price_ht = min($price_ht, $get_promotion_by_user_offer_object->prix / (1 + $this->tva / 100));
 				}
+				// Application des réductions automatique en fonction de mots clés dans la description ou la référence du produit 
 				$promotion_by_product_filter_object = $this->get_promotion_by_product_filter();
 				if(!empty($promotion_by_product_filter_object)) {
 					$promotion_devises = max($promotion_devises, $promotion_by_product_filter_object->remise_valeur);
@@ -898,7 +892,7 @@ class Product {
 	 */
 	function is_price_flash($reseller_mode = false)
 	{
-		return (!$reseller_mode && check_if_module_active('flash') && $this->prix_flash > 0 && $this->flash_start < date('Y-m-d H:i:s', time()) && $this->flash_end > date('Y-m-d H:i:s', time()) && is_flash_active_on_site());
+		return (!$reseller_mode && $this->prix_flash > 0 && $this->flash_start < date('Y-m-d H:i:s', time()) && $this->flash_end > date('Y-m-d H:i:s', time()) && is_flash_active_on_site());
 	}
 
 	/**
@@ -922,6 +916,9 @@ class Product {
 			if ($r_get_product_cat = fetch_assoc($q_get_product_cat)) {
 				$found_cat = true;
 			} else {
+				$found_cat = false;
+			}
+			if(!$found_cat) {
 				$apply_code_on_this_product = false;
 			}
 		}
@@ -941,7 +938,8 @@ class Product {
 	}
 
 	/**
-	 * Product::get_promotions_by_product_filter()
+	 * Récupère une éventuelle réduction définie dans la table code promo, avec nom vide (pour application automatique) et une définition de filtre produit,
+	 * qui s'applique automatiquement en fonction du texte dans la référence et la description
 	 *
 	 * @param boolean $reseller_mode
 	 * @return
@@ -1027,11 +1025,32 @@ class Product {
 				$cat = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
 			}
 			if (!empty($GLOBALS['site_parameters']['global_remise_percent'])) {
-				$global_promotion = vn($GLOBALS['site_parameters']['global_remise_percent']);
+				if(is_array($GLOBALS['site_parameters']['global_remise_percent'])) {
+                    // Si c'est un tableau, on souhaite définir un seuil d'application du montant. On trie le tableau du plus petit seuil au seuil le plus important pour faire une boucle.
+                    ksort($GLOBALS['site_parameters']['global_remise_percent']);
+					$total = 0;
+					foreach($_SESSION['session_caddie']->articles as $numero_ligne => $id) {
+						$product_object = new Product($id);
+						// impossible d'utiliser directement $_SESSION['session_caddie']->total, puisqu'en la variable est en cours de calcul quand on la test
+						if (empty($GLOBALS['site_parameters']['product_promotion_plurality_disable']) || (!empty($GLOBALS['site_parameters']['product_promotion_plurality_disable']) && $product_object->promotion==0)) {
+							// On utilise que les produits sur lesquelles aucune réduction ne s'applique pour calculer le seuil.
+							$total += $_SESSION['session_caddie']->prix_cat[$numero_ligne] * $_SESSION['session_caddie']->quantite[$numero_ligne];
+						}
+						unset($product_object);
+					}
+                    foreach($GLOBALS['site_parameters']['global_remise_percent'] as $this_treshold => $this_percent) {
+                        if (vn($total) >= $this_treshold) {
+						   // On a dépassé le seuil, donc la valeur la plus proche est celle précédemment trouvée.
+						   $global_promotion = vn($this_percent);
+						}
+                    }
+                } else {
+					$global_promotion = vn($GLOBALS['site_parameters']['global_remise_percent']);
+                }
 			} else {
 				$global_promotion = 0;
 			}
-			if (check_if_module_active('marques_promotion')) {
+			if (!empty($this->id_marque) && check_if_module_active('marques_promotion')) {
 				$marque = get_marque_promotion($this->id_marque);
 			}
 			if (empty($marque)) {
@@ -1043,18 +1062,25 @@ class Product {
 			} else {
 				$promotion_by_user_offer = 0;
 			}
+			// Application des réductions automatique en fonction de mots clés dans la description ou la référence du produit 
 			$promotion_by_product_filter_object = $this->get_promotion_by_product_filter();
 			if(!empty($promotion_by_product_filter_object)) {
 				$promotion_by_product_filter = $promotion_by_product_filter_object->remise_percent;
 			} else {
 				$promotion_by_product_filter = 0;
 			}
+			// Calcul du pourcentage de réduction à partir du champ prix_promo. Ne s'applique pas si le prix est défini par les réductions par lot
+			if ($this->prix_promo > 0 && $this->prix > 0 && empty($GLOBALS['cache']['lot_price_by_id'][$this->id])) {
+				$prix_promo_percent = round(($this->prix - $this->prix_promo) * 100 / $this->prix, 2);
+			} else {
+				$prix_promo_percent = 0;
+			}
 			if (!empty($GLOBALS['site_parameters']['product_add_all_percent_discount'])) {
 				// Si on veut cumuler les réductions par produit, par marque et par catégorie
 				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - $this->promotion / 100) * (1 - $cat['promotion_percent'] / 100) * (1 - $marque['promotion_percent'] / 100) * (1 - $global_promotion / 100) * (1 - $promotion_by_product_filter / 100) * (1 - $promotion_by_user_offer / 100);
 			} else {
 				// La réduction produit est le max de ce qui est indiqué dans le produit, la marque , la catégorie et la promotion générale
-				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min(max($this->promotion, $cat['promotion_percent'], $marque['promotion_percent'], $global_promotion, $promotion_by_product_filter, $promotion_by_user_offer), 100) / 100);
+				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min(max($this->promotion, $cat['promotion_percent'], $marque['promotion_percent'], $global_promotion, $promotion_by_product_filter, $promotion_by_user_offer, $prix_promo_percent), 100) / 100);
 			}
 		} else {
 			// Si on est revendeur, seule la promotion utilisateur est utilisée
@@ -1097,9 +1123,9 @@ class Product {
 	 * @param boolean $display_old_price_inline
 	 * @return
 	 */
-	function affiche_prix($with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $add_rdfa_properties = false, $display_with_vat_symbol = true, $display_minimal_price = false)
+	function affiche_prix($with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $add_rdfa_properties = false, $force_display_with_vat_symbol = null, $display_minimal_price = null)
 	{
-		$output = affiche_prix($this, $with_taxes, $reseller_mode, $return_mode, $display_with_measurement, $item_id, $display_ecotax, $display_old_price, $table_css_class, $display_old_price_inline, $display_with_vat_symbol, $add_rdfa_properties, $display_minimal_price);
+		$output = affiche_prix($this, $with_taxes, $reseller_mode, $return_mode, $display_with_measurement, $item_id, $display_ecotax, $display_old_price, $table_css_class, $display_old_price_inline, $force_display_with_vat_symbol, $add_rdfa_properties, $display_minimal_price);
 
 		if ($return_mode) {
 			return $output;
@@ -1139,7 +1165,7 @@ class Product {
 				$value_with_taxes = $value_without_taxes;
 			}
 			if ($format) {
-				$value_with_taxes = fprix($value_with_taxes, true, null, true, null, false, true, ',', $add_rdfa_properties);
+				$value_with_taxes = fprix($value_with_taxes, true, null, true, null, false, true, null, $add_rdfa_properties);
 				if ($add_tax_type_text) {
 					$value_with_taxes .= ' ' . $GLOBALS['STR_TTC'];
 				}
@@ -1147,7 +1173,7 @@ class Product {
 			return $value_with_taxes;
 		} else {
 			if ($format) {
-				$value_without_taxes = fprix($value_without_taxes, true, null, true, null, false, true, ',', $add_rdfa_properties);
+				$value_without_taxes = fprix($value_without_taxes, true, null, true, null, false, true, null, $add_rdfa_properties);
 				if ($add_tax_type_text) {
 					$value_without_taxes .= ' ' . $GLOBALS['STR_HT'];
 				}
@@ -1180,7 +1206,7 @@ class Product {
 	function get_product_stock_state($product_stock_infos = null)
 	{
 		if (empty($product_stock_infos)) {
-			$product_stock_infos = get_product_stock_infos($this->id);
+			$product_stock_infos = get_product_stock_infos($this->id, $this->configuration_size_id, $this->configuration_color_id);
 		}
 		$stock_remain_all = 0;
 		foreach($product_stock_infos as $stock_infos) {
@@ -1233,6 +1259,19 @@ class Product {
 	}
 
 	/**
+	 * Récupère une image avec le code barre au format EAN13
+	 *
+	 * @return
+	 */
+	function barcode_image_src()
+	{
+		if(!empty($this->ean_code)) {
+			return $GLOBALS['wwwroot'].'/qrcode.php?barcode='.urlencode($this->ean_code);
+		} else {
+			return false;
+		}
+	}
+	/**
 	 * Retourne le prix d'appel du produit, toutes réductions inclue
 	 *
 	 * @return
@@ -1245,8 +1284,8 @@ class Product {
 			WHERE produit_id = '" . intval($this->id) . "' AND "  . get_filter_site_cond('quantites');
 		$query = query($sql);
 		$Qte = fetch_assoc($query);
-		$price_Qte_ht = (is_reseller_module_active() && is_reseller() && $Qte['prix_revendeur'] != 0? $Qte['prix_revendeur'] / (1 + $this->tva / 100) : $Qte['prix'] / (1 + $this->tva / 100));
-		$price_ht = $this->get_final_price(get_current_user_promotion_percentage(), false, is_reseller_module_active() && is_reseller());
+		$price_Qte_ht = (check_if_module_active('reseller') && is_reseller() && $Qte['prix_revendeur'] != 0? $Qte['prix_revendeur'] / (1 + $this->tva / 100) : $Qte['prix'] / (1 + $this->tva / 100));
+		$price_ht = $this->get_final_price(get_current_user_promotion_percentage(), false, check_if_module_active('reseller') && is_reseller());
 		$minimal_price_array = array();
 		if ($price_Qte_ht > 0) {
 			$minimal_price_array[] = $price_Qte_ht;

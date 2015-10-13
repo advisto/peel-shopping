@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: search.php 47245 2015-10-08 16:47:28Z gboussin $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -26,7 +26,22 @@ if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 		die();
 	}
 }
-include("configuration.inc.php");
+if (defined('PEEL_PREFETCH')) {
+	call_module_hook('configuration_end', array());
+} else {
+	include("configuration.inc.php");
+}
+
+if (!empty($_GET['type']) && $_GET['type'] == 'unset_quick_add_product_from_search_page') {
+	unset($_SESSION['session_search_product_list']);
+}
+if (!empty($_GET['type']) && $_GET['type'] == 'quick_add_product_from_search_page' && !empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
+	necessite_identification();
+	$quick_add_product_from_search_page = true;
+	if (!empty($_GET['prodid']) && !empty($_GET['quantite'])) {
+		$_SESSION['session_search_product_list'][$_GET['prodid']] = $_GET['quantite'];
+	}
+}
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	// On va présenter des résultats par défaut => on met comme URL de référence search.php pour le multipage, sinon cela créerait des liens vers des pages inexistantes
 	$_SERVER['REQUEST_URI'] = $GLOBALS['apparent_folder'] . 'search.php';
@@ -54,6 +69,7 @@ foreach(array('/produits/', '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'
 define('IN_SEARCH', true);
 
 if (check_if_module_active('annonces')) {
+	get_lang_ads_post_manage($_GET);
 	if (check_if_module_active('maps')) {
 		include_once($GLOBALS['fonctionsmap']);
 	}
@@ -119,7 +135,7 @@ $search_attribute_tab = array('marque' => array('table' => 'marques', 'join' => 
 	'taille' => array('table' => 'tailles', 'join' => 'produits_tailles', 'join_id' => 'taille_id', 'label' => $GLOBALS['STR_TALL_LB'])
 	);
 if (empty($GLOBALS['site_parameters']['disable_search_form_on_search_page'])) {
-	$output_form = get_search_form($_GET, $search, $match, $real_search);
+	$output_form = get_search_form($_GET, $search, $match, $real_search, "full", !empty($quick_add_product_from_search_page));
 } else {
 	$output_form = '';
 }
@@ -141,7 +157,7 @@ $tpl_r->assign('STR_SEARCH_NO_RESULT_ARTICLE', $GLOBALS['STR_SEARCH_NO_RESULT_AR
 $tpl_r->assign('STR_SEARCH_RESULT_BRAND', $GLOBALS['STR_SEARCH_RESULT_BRAND']);
 $tpl_r->assign('STR_SEARCH_NO_RESULT_BRAND', $GLOBALS['STR_SEARCH_NO_RESULT_BRAND']);
 $tpl_r->assign('is_annonce_module_active', check_if_module_active('annonces'));
-$tpl_r->assign('search_in_product_and_ads',  !empty($GLOBALS['site_parameters']['search_in_product_and_ads']));
+$tpl_r->assign('search_in_product_and_ads', !empty($GLOBALS['site_parameters']['search_in_product_and_ads']));
 $tpl_r->assign('page', vn($_GET['page']));
 $tpl_r->assign('search', $real_search);
 if (check_if_module_active('sauvegarde_recherche')) {
@@ -251,25 +267,28 @@ if(!empty($launch_product_search)) {
 	}
 }
 if (check_if_module_active('annonces')) {
-	// On fait la recherche dans le module d'annonce si il est présent
+	// On fait la recherche dans le module d'annonces si il est présent
 	$additional_sql_cond_array = array();
 	$additional_sql_inner = '';
-	$categorie_annonce = '';
+	$categorie_annonce = null;
 	$tpl_r->assign('STR_MODULE_ANNONCES_SEARCH_RESULT_ADS', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_RESULT_ADS']);
 	$tpl_r->assign('STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS']);
-	if (!empty($_GET['cat_select'])) {
+	if (!empty($_GET['cat_select']) && !is_array($_GET['cat_select'])) {
 		$categorie_annonce = intval($_GET['cat_select']);
 	}
-	$res_affiche_annonces = affiche_annonces($categorie_annonce, get_ad_search_sql($_GET, false), null, 'search', $GLOBALS['site_parameters']['ads_per_page'], 'line', true, null, 4, false, true, false, false, 0, '', '', false);
+	// Si la catégorie est unique, elle est traitée séparément de get_ad_search_sql
+	$sql_cond = get_ad_search_sql($_GET, empty($categorie_annonce));
+	if (!empty($GLOBALS['site_parameters']['ads_search_page_display_mode']) && $GLOBALS['site_parameters']['ads_search_page_display_mode'] == 'column') {
+		$boostrap_column_sizes_array = array('sm' => 4, 'md' => 4, 'lg' => 4);
+	} else {
+		$boostrap_column_sizes_array = array('sm' => 12, 'md' => 12, 'lg' => 12);
+	}
+	$res_affiche_annonces = affiche_annonces($categorie_annonce, $sql_cond, null, 'search', $GLOBALS['site_parameters']['ads_per_page'], vb($GLOBALS['site_parameters']['ads_search_page_display_mode'], 'line'), true, null, 4, false, true, false, $boostrap_column_sizes_array, 0, '', '', false);
 	if(!empty($GLOBALS['ads_found']) && String::strlen($real_search)>=4) {
 		$found_words_array[] = $real_search;
 	}
-	if(check_if_module_active('user_alerts')) {
-		// Sauvegarde de la recherche
-		$res_affiche_annonces .= display_save_search_button($_GET);
-	}
 	if (vn($_GET['page'])<=1) {
-		// On transmet le GET, en étant compatible avec les tableaux en GET (=> ne pas reconstruire chaine à partir de GET)
+		// On transmet le GET, en étant compatible avec les tableaux en GET (=> por ne pas avoir besoin de reconstruire la chaine à partir de GET)
 		$xml_call_args = String::substr(get_current_url(true),String::strlen(get_current_url(false))+1);
 		if(!empty($_GET['search']) && strpos($xml_call_args, 'search=')===false) {
 			// Gestion des pages avec URL rewriting
@@ -286,11 +305,11 @@ if (check_if_module_active('annonces')) {
 }
 
 if (vn($_GET['page'])<=1 && count($terms) > 0) {
-	// on ne recherche dans les articles & marques que si l'on a renseigné le champs texte
+	// On ne recherche dans les articles & marques que si l'on a renseigné le champs texte
 	// Affichage sur la première page uniquement (pas de multipage)
 	$tpl_r->assign('are_terms', true);
 	$tpl_arts_found = array();
-	// recherche dans les rubriques : on teste d'abord si il existe des rubriques affichables
+	// Recherche dans les rubriques : on teste d'abord si il existe des rubriques affichables
 	$sql = "SELECT id
 		FROM peel_rubriques r
 		WHERE r.etat = '1' AND r.nom_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('rubriques', 'r') . "
@@ -300,7 +319,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		$launch_content_category_search = true;
 	}
 	if(!empty($launch_content_category_search)) {
-		// recherche dans les rubriques
+		// Recherche dans les rubriques
 		unset($fields);
 		$fields[] = 'r.nom_' . $_SESSION['session_langue'];
 		$fields[] = 'r.description_' . $_SESSION['session_langue'];
@@ -326,7 +345,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 			$i++;
 		}
 	}
-	// recherche dans les articles : on teste d'abord si il existe des articles affichables
+	// Recherche dans les articles : on teste d'abord si il existe des articles affichables
 	$sql = "SELECT id
 		FROM peel_articles a
 		WHERE  " . get_filter_site_cond('articles', 'a') . " AND a.etat = '1' AND (a.chapo_" . $_SESSION['session_langue'] . " != '' || a.texte_" . $_SESSION['session_langue'] . " != '')
@@ -372,7 +391,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		}
 		$tpl_r->assign('arts_found', $tpl_arts_found);
 	}
-	// recherche dans les marques : on teste d'abord si il existe des marques affichables
+	// Recherche dans les marques : on teste d'abord si il existe des marques affichables
 	$sql = "SELECT id
 		FROM peel_marques m
 		WHERE m.etat = '1' AND m.nom_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('marques', 'm')  . "
@@ -382,7 +401,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		$launch_article_search = true;
 	}
 	if(!empty($launch_brand_search)) {
-		// recherche dans les marques
+		// Recherche dans les marques
 		$tpl_brands_found = array();
 		$i = 1;
 		unset($fields);
@@ -392,7 +411,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		$result = query($sql);
 		while ($marque = fetch_assoc($result)) {
 			$nom = $marque['nom_' . $_SESSION['session_langue']];
-			$urlbrand = $GLOBALS['wwwroot'] . '/achat/marque.php?id=' . $marque['id'];
+			$urlbrand = get_url('/achat/marque.php', array('id' => $marque['id']));
 			// on supprime le HTML du contenu
 			$description = String::strip_tags(String::html_entity_decode_if_needed($marque['description_' . $_SESSION['session_langue']]));
 			// on coupe le texte si trop long
@@ -412,7 +431,7 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 		$tpl_r->assign('brands_found', $tpl_brands_found);
 	}
 	// On sait quel mot recherché correspond à un mot existant sur une première page de recherche, on l'ajoute dans peel_tag_cloud
-	if (vn($_GET['page'])<=1 && !empty($found_words_array) && is_module_tagcloud_active()) {
+	if (vn($_GET['page'])<=1 && !empty($found_words_array) && check_if_module_active('tagcloud')) {
 		$keywords_array = get_keywords_from_text($found_words_array, 5, 20, false, true, null);
 		foreach ($keywords_array as $this_keyword) {
 			// On ne stocke que les expressions globales, et les mots suffisamment longs pour éviter tous les mots d'articulation
@@ -423,8 +442,15 @@ if (vn($_GET['page'])<=1 && count($terms) > 0) {
 $result = $tpl_r->fetch();
 $tpl = $GLOBALS['tplEngine']->createTemplate('search.tpl');
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
-	$tpl->assign('content', affiche_contenu_html('error404', true));
+	$content = affiche_contenu_html('error404', true);
+	if(!$GLOBALS['affiche_contenu_html_last_found']) {
+		// Pas de contenu défini dans la langue de la page, on force un message pour indiquer l'erreur
+		$content = '<h1>Error 404</h1><br />';
+	}
+	$tpl->assign('content', $content);
+	
 }
+$tpl->assign('quick_add_product_from_search_page', !empty($quick_add_product_from_search_page));
 $tpl->assign('form', $output_form);
 $tpl->assign('search', $real_search);
 $tpl->assign('result', vb($result));
@@ -440,7 +466,7 @@ include($GLOBALS['repertoire_modele'] . '/bas.php');
 /* FONCTIONS */
 
 /**
- * build_sql_articles()
+ * build_sql_content_category()
  *
  * @param mixed $terms
  * @param mixed $fields
@@ -451,7 +477,7 @@ function build_sql_content_category($terms, $fields, $match_method)
 {
 	$requete = 'SELECT r.id';
 	foreach ($fields as $value) {
-		$requete .= ', ' . $value . ' ';
+		$requete .= ', ' . real_escape_string($value) . ' ';
 	}
 	$requete .= '
 		FROM peel_rubriques r
@@ -473,7 +499,7 @@ function build_sql_articles($terms, $fields, $match_method)
 {
 	$requete = 'SELECT a.id, r.id AS rubrique_id, r.nom_' . $_SESSION['session_langue'] . ' AS rubrique ';
 	foreach ($fields as $value) {
-		$requete .= ', ' . $value . ' ';
+		$requete .= ', ' . real_escape_string($value) . ' ';
 	}
 	$requete .= '
 		FROM peel_articles a
@@ -498,8 +524,8 @@ function build_sql_marques($terms, $fields, $match_method)
 {
 	$requete = 'SELECT m.id ';
 	foreach ($fields as $value) {
-		$requete .= ', ' . $value . ' ';
-	} //verifier avec ce que j'ai supprimé
+		$requete .= ', ' . real_escape_string($value) . ' ';
+	}
 	$requete .= '
 		FROM peel_marques m
 		WHERE m.etat = "1" AND ' . get_filter_site_cond('marques', 'm') . ' AND ' . build_terms_clause($terms, $fields, $match_method) . '

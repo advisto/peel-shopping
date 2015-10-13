@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: sites.php 47327 2015-10-12 14:36:00Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -33,7 +33,34 @@ if (!empty($_GET['mode']) && in_array($_GET['mode'], array('insere', 'ajout', 'd
 	// Le lien de création de site ne s'affiche pas aux administrateurs multisite.
 	$_GET['mode'] = 'default';
 }
+
 switch (vb($_GET['mode'])) {
+	case "siteid_to_SET" :
+		// pour le mode multisite où l'on peut spécifier une liste de site différent pour un élément. Il faut passer pour cela site_id à SET de 32 possibilités
+		// pour lancer la requête il faut appeler cette page avec mode=siteid_to_SET.
+		// Fonction expérimentale , à n'utiliser vous maitriser le sujet.
+		query("ALTER TABLE `peel_admins_actions` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_articles` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_categories` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_codes_promos` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_commandes` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_commandes_cadeaux` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_configuration` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_devises` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_html` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_langues` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_marques` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_meta` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_produits` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_rubriques` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_societe` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_tarifs` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_utilisateurs` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_utilisateur_connexions` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_vignettes_carrousels` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_zones` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';");
+		break;
+
 	case "ajout" :
 		// Affiche le formulaire d'ajout de site
 		$output .= affiche_formulaire_ajout_site($frm);
@@ -61,6 +88,30 @@ switch (vb($_GET['mode'])) {
 			
 			if (!$form_error_object->count()) {
 				// => Pas d'erreur lors du contrôle du formulaire, on peut faire les modifications en BDD
+
+				if(!empty($frm['install'])) {
+					// Gestion de l'installation ou la désinstallation d'un module
+					foreach($frm['install'] as $this_module => $install_or_uninstall) {
+						if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
+							// Module complet avec classe permettant de gérer proprement l'installation
+							$class_name = String::ucfirst($this_module);
+							if($install_or_uninstall != $class_name::check_install()) {
+								if(!isset($GLOBALS[$class_name])) {
+									$GLOBALS[$class_name] = new $class_name();
+								}
+								if($install_or_uninstall) {
+									$installed = $GLOBALS[$class_name]->install();
+								} else {
+									$uninstalled = $GLOBALS[$class_name]->uninstall();
+								}
+								$output .= $GLOBALS[$class_name]->get_messages();
+							}
+						} else {
+							// Module light, sans classe.
+							// Ici on ne fait rien, l'installation est gérée dans la fonction affiche_formulaire_site
+						}
+					}
+				}
 				$frm['site_id'] = $_GET['id'];
 				$output .= create_or_update_site($frm, true, $_GET['mode']);
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITES_MSG_UPDATED_OK']))->fetch();
@@ -86,9 +137,10 @@ switch (vb($_GET['mode'])) {
 	case "duplicate" :
 		// Duplication d'un site existant.
 		if (check_if_module_active('duplicate') && isset($_GET['id'])) {
-			include($fonctionsduplicate);
 			// Il faut que l'administrateur possède les droits d'administration pour tous les sites pour faire la duplication, sinon il ne pourra pas accéder aux informations du site en cours de création
-			$_SESSION['session_admin_multisite'] = 0;
+			if($_SESSION['session_utilisateur']['site_id'] == 0) {
+				$_SESSION['session_admin_multisite'] = 0;
+			}
 			// Exécute la duplication
 			duplicate_site(intval($_GET['id']));
 			// Redirection vers la page de liste de site, afin d'éviter une nouvelle duplication en faisant F5
@@ -100,7 +152,7 @@ switch (vb($_GET['mode'])) {
 		break;
 
 	case "insere" :
-		// Fait l'intertion d'un nouveau site (vient après mode=ajout)
+		// Fait l'insertion d'un nouveau site (vient après mode=ajout)
 		if (!verify_token($_SERVER['PHP_SELF'] . vb($_GET['mode']))) {
 			// Contrôle du token
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
@@ -122,8 +174,10 @@ switch (vb($_GET['mode'])) {
 			$frm['default_picture'] = upload('default_picture', false, 'image_or_ico', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['default_picture']));
 
 			// => Pas d'erreur lors du contrôle du formulaire, on peut faire les modifications en BDD
-						// Il faut que l'administrateur possède les droits d'administration pour tous les sites pour faire la duplication, sinon il ne pourra pas accéder aux informations du site en cours de création
-			$_SESSION['session_admin_multisite'] = 0;
+			// Il faut que l'administrateur possède les droits d'administration pour tous les sites pour faire la duplication, sinon il ne pourra pas accéder aux informations du site en cours de création
+			if($_SESSION['session_utilisateur']['site_id'] == 0) {
+				$_SESSION['session_admin_multisite'] = 0;
+			}
 			$output .= create_or_update_site($frm, false, $_GET['mode'], $GLOBALS['lang_codes']);
 			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_INSERTED_OK'], $frm['nom_' . $_SESSION['session_langue']])))->fetch();
 			$output .= affiche_liste_site();
@@ -254,6 +308,7 @@ function affiche_formulaire_ajout_site(&$frm)
 		$frm['small_order_overcost_amount'] = "";
 		$frm['small_order_overcost_tva_percent'] = "";
 		$frm['minimal_amount_to_order'] = "";
+		$frm['minimal_amount_to_order_reve'] = "";
 		$frm['mode_transport'] = 1;
 		$frm['format_numero_facture'] = "[id]";
 		$frm['module_socolissimo'] = 1;
@@ -299,9 +354,11 @@ function affiche_formulaire_ajout_site(&$frm)
 		// attribut pour l'image par défaut
 		$frm['default_picture'] = "";
 		// On prend les valeurs par défaut : site_id = 0 en base de données 
+		// get_filter_site_cond('configuration') => Ne pas utiliser le paramètre $use_admin_rights, les configurations à récupérer sont uniquement celles communes à tous les sites (id=0). Les droits de l'administrateur qui fait la demande ne sont pas à prendre en compte.
 		$sql = 'SELECT *
 			FROM peel_configuration
-			WHERE ' . get_filter_site_cond('configuration', null, true) . ' AND site_id = 0';
+			WHERE ' . get_filter_site_cond('configuration', null, false, 0, true) . '
+			ORDER BY site_id ASC';
 		$q = query($sql);
 		while($result = fetch_assoc($q)) {
 			if(!in_array($result['technical_code'], array('wwwroot'))) {
@@ -328,10 +385,13 @@ function affiche_formulaire_modif_site($id, $frm)
 	if (empty($frm)) {
 		// On charge le tableau de configuration commune aux sites, puis spécifique au site en cours de modification
 		// Si les tableaux d'entrées ont des clés en commun, alors, la valeur finale pour cette clé écrasera la précédente. 
+		// get_filter_site_cond('configuration') => Ne pas utiliser le paramètre $use_admin_rights, les configurations à récupérer sont celles de $id + celles publiques avec id=0, même si l'administrateur ne pourra pas modifier celles-ci.
+		// Les droits de l'administrateur qui fait la demande ne sont pas à prendre en compte ici, mais plus tard à l'insert/update
 		$frm = array();
 		$sql = 'SELECT *
 			FROM peel_configuration
-			WHERE ' . get_filter_site_cond('configuration', null, true) . ' AND site_id = '.intval($id);
+			WHERE ' . get_filter_site_cond('configuration', null, false, $id, false) . '
+			ORDER BY site_id ASC';
 		$q = query($sql);
 		while($result = fetch_assoc($q)) {
 			$frm[$result['technical_code']] = $result['string'];
@@ -339,7 +399,7 @@ function affiche_formulaire_modif_site($id, $frm)
 	}
 	if (!empty($frm)) {
 		// Les modules ne sont pas concerné par le multi-site
-		$frm_modules = get_modules_array(false, null, null, true, $id);
+		$frm_modules = get_modules_array(false, null, null, true, $id, false);
 		$frm['id'] = $id;
 		$frm["nouveau_mode"] = "modif";
 		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
@@ -362,6 +422,7 @@ function affiche_formulaire_modif_site($id, $frm)
  */
 function affiche_formulaire_site(&$frm, $frm_modules)
 {
+	$output = '';
 	// Correction gestion variables de configuration booléennes
 	foreach(array('site_suspended', 'systempay_test_mode') as $this_field) {
 		if(isset($frm[$this_field])) {
@@ -374,6 +435,191 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_site.tpl');
 
+	// Liste des modules installés
+	
+	$premium_modules_array = array('affiliation', 'birthday', 'cart_preservation', 'category_promotion', 'comparateur', 'download', 'duplicate', 
+			'facture_advanced', 'faq', 'gift_check', 'gifts', 'good_clients', 'groups', 'lexique', 'lot', 'marges', 'marques_promotion', 'micro_entreprise',
+			'parrainage', 'picking', 'reseller', 'statistiques', 'stock_advanced', 'url_rewriting', 'welcome_ad');
+	$modules_light_default_names = array('expeditor' => $GLOBALS['STR_ADMIN_SITES_EXPEDITOR_MODULE'], 'facebook' => $GLOBALS['STR_ADMIN_SITES_FACEBOOK_MODULE'],
+			'icirelais' => $GLOBALS['STR_ADMIN_SITES_ICI_RELAIS_MODULE'], 'sips' => $GLOBALS['STR_ADMIN_SITES_SIPS_MODULE'],
+			'spplus' => $GLOBALS['STR_ADMIN_SITES_SPPLUS_MODULE'], 'paybox' => $GLOBALS['STR_ADMIN_SITES_PAYBOX_MODULE'],
+			'systempay' => $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY'], 'partenaires' => $GLOBALS['STR_ADMIN_SITES_PARTNERS_MODULE'],
+			'ecotaxe' => $GLOBALS['STR_ADMIN_SITES_ECOTAX_MODULE'], 'devises' => $GLOBALS['STR_ADMIN_SITES_CURRENCIES_MODULE'],
+			'paypal' => $GLOBALS['STR_ADMIN_SITES_PAYPAL_MODULE'], 'moneybookers' => $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_MODULE'],
+			'kekoli' => $GLOBALS['STR_ADMIN_SITES_KEKOLI_MODULE'], 'tag_cloud' => $GLOBALS['STR_ADMIN_SITES_TAG_CLOUD_MODULE'],
+			'flash' => $GLOBALS['STR_ADMIN_SITES_FLASH_SALES_MODULE'], 'rss' => $GLOBALS['STR_ADMIN_SITES_RSS_MODULE'],
+			'avis' => $GLOBALS['STR_ADMIN_SITES_OPINIONS_MODULE'], 'stock_advanced' => $GLOBALS['STR_ADMIN_SITES_STOCKS_MODULE'],
+			'cart_preservation' => $GLOBALS['STR_ADMIN_SITES_CART_SAVE_MODULE'], 'affiliation' => $GLOBALS['STR_ADMIN_SITES_AFFILIATION_MODULE'],
+			'lots' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_LOTS_MODULE'], 'parrainage' => $GLOBALS['STR_ADMIN_SITES_SPONSOR_MODULE'],
+			'url_rewriting' => $GLOBALS['STR_ADMIN_SITES_URL_REWRITING_MODULE'], 'micro_entreprise' => $GLOBALS['STR_ADMIN_SITES_MICROBUSINESS_MODULE'],
+			'birthday' => $GLOBALS['STR_ADMIN_SITES_BIRTHDAY_MODULE'], 'faq' => $GLOBALS['STR_ADMIN_SITES_FAQ_MODULE'],
+			'category_promotion' => $GLOBALS['STR_ADMIN_SITES_CATEGORIES_PROMOTION'], 'marques_promotion' => $GLOBALS['STR_ADMIN_SITES_TRADEMARK_PROMOTION'],
+			'conditionnement' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE'], 'friends_connect' => $GLOBALS['STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE'],
+			'vacances' => $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE'], 'forum' => $GLOBALS['STR_ADMIN_SITES_FORUM_MODULE'],
+			'gifts_list' => $GLOBALS['STR_ADMIN_SITES_GIFTS_LIST'], 'so_colissimo' => $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_MODULE'],
+			'vatlayer' => $GLOBALS['STR_ADMIN_SITES_VATLAYER_MODULE'],
+			);
+	
+	$modules_dir = $GLOBALS['dirroot'] . "/modules";
+	if ($handle = opendir($modules_dir)) {
+		while ($file = readdir($handle)) {
+			if ($file != "." && $file != ".." && is_dir($modules_dir . '/' . $file)) {
+				$modules_on_disk[$file] = $modules_dir . '/' . $file;
+			}
+		}
+	}
+	$tpl_modules_infos = array();
+	$i=0;
+	foreach($modules_on_disk as $this_module => $folder_path) {
+		unset($file_path);
+		unset($installed);
+		unset($to_install);
+		if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
+			$installed = true;
+			foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
+				$file_path = $GLOBALS['dirroot'] . $this_file;
+				if(String::strpos($file_path, '.php') !== false && !in_array($this_file, $GLOBALS['modules_loaded_functions']) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
+					// Fichier pas déjà chargé car module non activé => là on charge le fichier pour savoir si une classe est dedans
+					include($file_path);
+				}
+			}
+		} else {
+			// Module pas installé et inconnu 
+			foreach(array('fonctions.php', 'functions.php', String::ucfirst($this_module) . '.php') as $this_filename) {
+				if(!in_array(String::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php')) && file_exists($folder_path . '/' . $this_filename)) {
+					// Fichier de classe ou de fonctions du module
+					$file_path = $folder_path . '/' . $this_filename;
+					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+						@include($file_path);
+					}
+					if($this_filename != String::ucfirst($this_module) . '.php' || (class_exists(String::ucfirst($this_module) && method_exists(String::ucfirst($this_module), 'check_install')))) {
+						// Soit il s'agit d'un fichier de fonctions, soit d'un fichier de classe
+						// Mais par exemple modules/calc/calc.php qui n'est pas un fichier de classe ne doit pas être installé
+						$to_install = $file_path;
+					}
+					break;
+				}
+			}
+		}
+		if(empty($file_path)) {
+			// Si rien de trouvé dans les fichiers standards, on cherche un fichier PHP quelconque pour connaître la version en regardant dans le code plus loin
+			$file_path = $folder_path . '/';
+			$temp = explode(',', $file_path);
+			$file_path = $temp[0];
+			foreach(array($file_path, $file_path . 'administrer', $file_path . 'admin') as $this_folder) {
+				if(String::strpos($this_folder, '.php') === false && file_exists($this_folder)) {
+					if ($handle = opendir($this_folder)) {
+						while ($file = readdir($handle)) {
+							if ($file != "." && $file != ".." && String::strpos($file, '.php') !== false) {
+								$file_path = $this_folder . '/' . $file;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
+			// Une classe est détectée, c'est un module complet avec une méthode d'installation
+			$class_name = String::ucfirst($this_module);
+			if(!isset($GLOBALS[$class_name])) {
+				$GLOBALS[$class_name] = new $class_name();
+			}
+			$type = 'full';
+			$installed = $class_name::check_install();
+			$version = $GLOBALS[$class_name]->version;
+			$name = $GLOBALS[$class_name]->name;
+		} else {
+			// Module léger sans classe - sa présence sur le disque suffit à considérer qu'il est installé
+			$type = 'light';
+			$name = vb($modules_light_default_names[$this_module], String::ucfirst($this_module));
+			if(empty($installed)) {
+				if(!empty($to_install)) {
+					foreach(array('peel_' . $this_module . '.sql', '' . $this_module . '.sql') as $this_filename) {
+						if (file_exists($modules_dir . '/' . $this_module . '/' . $this_filename)) {
+							// Exécution du SQL d'installation d'un module qui n'a pas de méthode d'installation
+							$error_msg = execute_sql($GLOBALS['dirroot'] . '/modules/' . $this_module . '/' . $this_filename, null, true);
+							$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'SQL OK '. $GLOBALS['STR_BEFORE_TWO_POINTS'].': ' . $GLOBALS['dirroot'] . '/modules/' . $this_module . '/' . $this_filename))->fetch();
+							if(!empty($error_msg)) {
+								$output .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
+							}
+						}
+					}
+				}
+				// Intallation Express automatique, exécutée une seule fois :
+				if(!empty($to_install) && !in_array(str_replace($GLOBALS['dirroot'], '', $to_install), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $to_install), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+					// on ajoute la configuration du fichier de fonctions à modules_front_office_functions_files_array pour que le module puisse être chargé (et pas forcément activé)
+					$GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $to_install);
+					set_configuration_variable(array('technical_code' => 'modules_front_office_functions_files_array', 'string' => $GLOBALS['site_parameters']['modules_front_office_functions_files_array'], 'type' => 'array', 'origin' => 'sites.php', 'site_id' => 0), true);
+				}
+				// On cherche si il y a un fichier de fonctions d'administration à installer
+				foreach(array('administrer/fonctions.php', 'admin/fonctions.php', 'administrer/functions.php', 'admin/functions.php') as $this_filename) {
+					if(file_exists($folder_path . '/' . $this_filename)) {
+						// Fichier d'administration, de classe ou de fonctions du module
+						$file_path = $folder_path . '/' . $this_filename;
+						if(String::strpos($file_path, '.php') !== false && !in_array(vb($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]), $GLOBALS['modules_loaded_functions']) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
+							include($file_path);
+							if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['modules_admin_functions_array'])) {
+								$GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $file_path);
+								set_configuration_variable(array('technical_code' => 'modules_admin_functions_array', 'string' => $GLOBALS['site_parameters']['modules_admin_functions_array'], 'type' => 'array', 'origin' => 'sites.php', 'site_id' => 0), true);
+							}
+						}
+						break;
+					}
+				}
+			}
+			// Détection de la version
+			$version = '';
+			// On cherche dans le fichier de référence le numéro de version dans une ligne de commentaire d'entête du type
+			// PEEL Modules X.X.X
+			if($fp = String::fopen_utf8($file_path, "r")) {
+				while ($line = fgets($fp, 1024)) { 
+					if(String::substr($line, 0, 2) == '//' && preg_match("/PEEL (Shopping|Modules) ([0-9.]*)/i", $line, $matches)) { 
+						$version = $matches[2];
+						break;
+					}
+				} 
+				fclose($fp); 
+			}
+		}
+		if(!empty($GLOBALS['modules_installed'][$this_module]) || (empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) && empty($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]) && check_if_module_active($this_module))) {
+			$enabled = true;
+		} else {
+			$enabled = false;
+		}
+		$tpl_modules_infos[$name.$i] = array('tr_rollover' => tr_rollover($i, true),
+			'type' => $type,
+			'installed' => !empty($installed),
+			'enabled' => $enabled,
+			'name' => $name,
+			'technical_code' => $this_module,
+			'version' => $version,
+			'package' => (in_array($this_module, $premium_modules_array)?'Premium':''),
+			'configuration_variable' =>  vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$this_module], 'module_' . $this_module)
+			);
+		$i++;
+	}
+	ksort($tpl_modules_infos);
+	$other_modules_array = array_unique(array_merge(array_keys($GLOBALS['site_parameters']['modules_front_office_functions_files_array']), $GLOBALS['site_parameters']['modules_no_library_load_array']));
+	sort($other_modules_array);
+	foreach($other_modules_array as $this_module) {
+		if(empty($modules_on_disk[$this_module])) {
+			$tpl_modules_infos[] = array('tr_rollover' => tr_rollover($i, true),
+				'type' => 'none',
+				'installed' => false,
+				'enabled' => false,
+				'name' => vb($modules_light_default_names[$this_module], String::ucfirst($this_module)),
+				'technical_code' => $this_module,
+				'version' => null,
+				'contact' => true,
+				'package' => (in_array($this_module, $premium_modules_array)?' (inclus dans le module Premium)':'')
+				);
+			$i++;
+		}
+	}	
+	
+	$tpl->assign('modules_infos', $tpl_modules_infos);
+	
 	// Récupération des informations sur la configuration des zones pour l'affichage dans le formulaire "Pour information, votre configuration actuelle des zones franco de port est :" 
 	$tpl_zones = array();
 	$qid = query("SELECT *
@@ -505,11 +751,11 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$emplacement_array['center_middle'] = $GLOBALS['STR_ADMIN_SITES_CENTER_MIDDLE'];
 	$emplacement_array['center_middle_home'] = $GLOBALS['STR_ADMIN_SITES_CENTER_MIDDLE_HOME'];
 	$emplacement_array['bottom_middle'] = $GLOBALS['STR_ADMIN_SITES_CENTER_BOTTOM'];
-	if (is_module_banner_active() && check_if_module_active('vitrine')) {
+	if (check_if_module_active('banner') && check_if_module_active('vitrine')) {
 		$emplacement_array['top_vitrine'] = $GLOBALS['STR_ADMIN_SITES_USER_SHOPS_TOP'];
 		$emplacement_array['bottom_vitrine'] = $GLOBALS['STR_ADMIN_SITES_USER_SHOPS_BOTTOM'];
 	}
-	if (is_annonce_module_active()) {
+	if (check_if_module_active('annonces')) {
 		$emplacement_array['top_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_TOP'];
 		$emplacement_array['sponso_cat'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_SPONSOR'];
 		$emplacement_array['ad_detail_bottom'] = $GLOBALS['STR_ADMIN_SITES_POSITION_AD_BOTTOM'];
@@ -519,8 +765,8 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 		$emplacement_array['left_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_LEFT'];
 		$emplacement_array['right_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_ADS_RIGHT'];
 	}
-	if (is_iphone_ads_module_active()) {
-		$emplacement_array['iphone_ads_splashscreen'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_HOMEs'];
+	if (check_if_module_active('iphone-ads')) {
+		$emplacement_array['iphone_ads_splashscreen'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_HOME'];
 		$emplacement_array['iphone_ads_bottom_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ADS_BOTTOM'];
 		$emplacement_array['iphone_ads_top_annonce'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_ADS_TOP'];
 		$emplacement_array['iphone_ads_ad_detail_top'] = $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_TOP'];
@@ -575,12 +821,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('is_fonctionsprecedentsuivant', file_exists($GLOBALS['fonctionsprecedentsuivant']));
 	$tpl->assign('is_fonctionsgooglefriendconnect', file_exists($GLOBALS['fonctionsgooglefriendconnect']));
 	$tpl->assign('is_fonctionssignintwitter', file_exists($GLOBALS['fonctionssignintwitter']));
-	$tpl->assign('is_fonctionscartpreservation', file_exists($GLOBALS['fonctionscartpreservation']));
+	$tpl->assign('is_fonctionscartpreservation', file_exists($GLOBALS['fonctionscart_preservation']));
 	$tpl->assign('is_fonctionsreseller', file_exists($GLOBALS['fonctionsreseller']));
 	$tpl->assign('is_fonctionsaffiliate', file_exists($GLOBALS['fonctionsaffiliate']));
 	$tpl->assign('is_fonctionslot', file_exists($GLOBALS['fonctionslot']));
 	$tpl->assign('is_fonctionsparrain', file_exists($GLOBALS['fonctionsparrain']));
-	$tpl->assign('is_fonctionsgiftcheck', file_exists($GLOBALS['fonctionsgiftcheck']));
+	$tpl->assign('is_fonctionsgift_check', file_exists($GLOBALS['fonctionsgift_check']));
 	$tpl->assign('is_fonctionsfaq', file_exists($GLOBALS['fonctionsfaq']));
 	$tpl->assign('is_rewritefile', file_exists($GLOBALS['rewritefile']));
 	$tpl->assign('is_fonctionsmicro', file_exists($GLOBALS['fonctionsmicro']));
@@ -656,6 +902,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('small_order_overcost_amount', vb($frm['small_order_overcost_amount']));
 	$tpl->assign('small_order_overcost_tva_percent', vb($frm['small_order_overcost_tva_percent']));
 	$tpl->assign('minimal_amount_to_order', vb($frm['minimal_amount_to_order']));
+	$tpl->assign('minimal_amount_to_order_reve', vb($frm['minimal_amount_to_order_reve']));
 	$tpl->assign('seuil_total', vb($frm['seuil_total']));
 	$tpl->assign('seuil_total_reve', vb($frm['seuil_total_reve']));
 	$tpl->assign('nb_product', vb($frm['nb_product']));
@@ -704,12 +951,17 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('module_socolissimo', vn($frm['module_socolissimo']));
 	$tpl->assign('module_icirelais', vn($frm['module_icirelais']));
 	$tpl->assign('module_tnt', vn($frm['module_tnt']));
+	$tpl->assign('module_vacances_type', vn($frm['module_vacances_type']));
+	
 	$tpl->assign('keep_old_orders_intact', vn($frm['keep_old_orders_intact']));
 	$tpl->assign('fonctionsconditionnement', file_exists($GLOBALS['fonctionsconditionnement']));
 	$tpl->assign('module_conditionnement', vn($frm['module_conditionnement']));
 	$tpl->assign('payment_status_decrement_stock', vn($frm['payment_status_decrement_stock']));
 	$tpl->assign('keep_old_orders_intact_date', (empty($frm['keep_old_orders_intact_date']) && intval(vn($frm['keep_old_orders_intact']))>1?get_formatted_date(vb($frm['keep_old_orders_intact'])) : vb($frm['keep_old_orders_intact_date'])));
 	$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
+	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
+	$tpl->assign('STR_ADMIN_MODULES', 'Modules');
+	$tpl->assign('STR_ADMIN_SITES_MODULE_INSTALL', $GLOBALS['STR_ADMIN_SITES_MODULE_INSTALL']);
 	$tpl->assign('STR_ADMIN_SITES_PREMIUM_MODULE', $GLOBALS['STR_ADMIN_SITES_PREMIUM_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_CAPTCHA_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_CAPTCHA_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
@@ -740,7 +992,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_LOGO_URL', $GLOBALS['STR_ADMIN_SITES_LOGO_URL']);
 	$tpl->assign('STR_ADMIN_SITES_LOGO_HEADER_DISPLAY', $GLOBALS['STR_ADMIN_SITES_LOGO_HEADER_DISPLAY']);
 	$tpl->assign('STR_ADMIN_SITES_FAVICON', $GLOBALS['STR_ADMIN_SITES_FAVICON']);
-	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_ADMIN_SITES_ZOOM_SELECTION', $GLOBALS['STR_ADMIN_SITES_ZOOM_SELECTION']);
 	$tpl->assign('STR_ADMIN_SITES_JQZOOM', $GLOBALS['STR_ADMIN_SITES_JQZOOM']);
 	$tpl->assign('STR_ADMIN_SITES_CLOUD_ZOOM', $GLOBALS['STR_ADMIN_SITES_CLOUD_ZOOM']);
@@ -788,7 +1040,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_PRODUCTS_PER_PAGE_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_PRODUCTS_PER_PAGE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_ADD_TO_CART_ANIMATION', $GLOBALS['STR_ADMIN_SITES_ADD_TO_CART_ANIMATION']);
 	$tpl->assign('STR_ADMIN_SITES_DEFAULT_PRODUCT_PAGE', $GLOBALS['STR_ADMIN_SITES_DEFAULT_PRODUCT_PAGE']);
-	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_ADMIN_SITES_TOP_SALES_CONFIGURATION', $GLOBALS['STR_ADMIN_SITES_TOP_SALES_CONFIGURATION']);
 	$tpl->assign('STR_ADMIN_SITES_AUTO_TOP_SALES', $GLOBALS['STR_ADMIN_SITES_AUTO_TOP_SALES']);
 	$tpl->assign('STR_ADMIN_SITES_CONFIGURED_TOP_SALES', $GLOBALS['STR_ADMIN_SITES_CONFIGURED_TOP_SALES']);
@@ -813,6 +1065,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_SMALL_ORDERS_AMOUNT', $GLOBALS['STR_ADMIN_SITES_SMALL_ORDERS_AMOUNT']);
 	$tpl->assign('STR_ADMIN_SITES_SMALL_ORDERS_VAT', $GLOBALS['STR_ADMIN_SITES_SMALL_ORDERS_VAT']);
 	$tpl->assign('STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED', $GLOBALS['STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED']);
+	$tpl->assign('STR_ADMIN_SITES_MINIMUM_ORDER_REVE_AMOUNT_ALLOWED', $GLOBALS['STR_ADMIN_SITES_MINIMUM_ORDER_REVE_AMOUNT_ALLOWED']);
 	$tpl->assign('STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_ORDERS_UPDATING_LIMITATION', $GLOBALS['STR_ADMIN_SITES_ORDERS_UPDATING_LIMITATION']);
 	$tpl->assign('STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBID', $GLOBALS['STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBID']);
@@ -838,15 +1091,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_VAT_DISPLAY_MODE_IN_ADMIN', $GLOBALS['STR_ADMIN_SITES_VAT_DISPLAY_MODE_IN_ADMIN']);
 	$tpl->assign('STR_ADMIN_SITES_DISPLAY_ERRORS_FOR_IP_EXPLAIN',  $GLOBALS['STR_ADMIN_SITES_DISPLAY_ERRORS_FOR_IP_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_MODULE', $GLOBALS['STR_ADMIN_SITES_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_ECOTAX_MODULE', $GLOBALS['STR_ADMIN_SITES_ECOTAX_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER', $GLOBALS['STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER']);
-	$tpl->assign('STR_ADMIN_SITES_CURRENCIES_MODULE', $GLOBALS['STR_ADMIN_SITES_CURRENCIES_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY', $GLOBALS['STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY']);
 	$tpl->assign('STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_CURRENCY_SELECT_DISPLAY_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_DEFAULT_CURRENCY', $GLOBALS['STR_ADMIN_SITES_DEFAULT_CURRENCY']);
 	$tpl->assign('STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING', $GLOBALS['STR_ADMIN_SITES_DEFAULT_CURRENCY_WARNING']);
 	$tpl->assign('STR_ADMIN_SITES_CURRENCIES_LINK', $GLOBALS['STR_ADMIN_SITES_CURRENCIES_LINK']);
-	$tpl->assign('STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE', $GLOBALS['STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR']);
 	$tpl->assign('STR_ADMIN_SITES_DEFAULT', $GLOBALS['STR_ADMIN_SITES_DEFAULT']);
 	$tpl->assign('STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN']);
@@ -904,30 +1154,21 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_TOP', $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_TOP']);
 	$tpl->assign('STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_BOTTOM', $GLOBALS['STR_ADMIN_SITES_POSITION_IPHONE_AD_CREATION_BOTTOM']);
 	$tpl->assign('STR_ADMIN_SITES_ON_HOMEPAGE_ONLY', $GLOBALS['STR_ADMIN_SITES_ON_HOMEPAGE_ONLY']);
-	$tpl->assign('STR_ADMIN_SITES_PAYPAL_MODULE', $GLOBALS['STR_ADMIN_SITES_PAYPAL_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_PAYPAL_EMAIL', $GLOBALS['STR_ADMIN_SITES_PAYPAL_EMAIL']);
-	$tpl->assign('STR_ADMIN_SITES_MONEYBOOKERS_MODULE', $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_MONEYBOOKERS_EMAIL', $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_EMAIL']);
 	$tpl->assign('STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD', $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD']);
 	$tpl->assign('STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_KEKOLI_MODULE', $GLOBALS['STR_ADMIN_SITES_KEKOLI_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_DELIVERY_CARRIER_DELAY', $GLOBALS['STR_ADMIN_SITES_DELIVERY_CARRIER_DELAY']);
 	$tpl->assign('STR_ADMIN_SITES_ANALYTICS_TAG', $GLOBALS['STR_ADMIN_SITES_ANALYTICS_TAG']);
 	$tpl->assign('STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_TAG_CLOUD_MODULE', $GLOBALS['STR_ADMIN_SITES_TAG_CLOUD_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE', $GLOBALS['STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_FLASH_SALES_MODULE', $GLOBALS['STR_ADMIN_SITES_FLASH_SALES_MODULE']);
 	$tpl->assign('STR_ADMIN_CONTACT_PEEL_FOR_MODULE', $GLOBALS['STR_ADMIN_CONTACT_PEEL_FOR_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_ADVERTISING', $GLOBALS['STR_ADMIN_SITES_ADVERTISING']);
-	$tpl->assign('STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE', $GLOBALS['STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_HEADER', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_HEADER']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_DISPLAY', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_DISPLAY']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_DISPLAY_REPLACE', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_DISPLAY_REPLACE']);
 	$tpl->assign('STR_ADMIN_SITES_ROLLOVER_DISPLAY_SCROLLING', $GLOBALS['STR_ADMIN_SITES_ROLLOVER_DISPLAY_SCROLLING']);
-	$tpl->assign('STR_ADMIN_SITES_RSS_MODULE', $GLOBALS['STR_ADMIN_SITES_RSS_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_OPINIONS_MODULE', $GLOBALS['STR_ADMIN_SITES_OPINIONS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_CAPTCHA_ACTIVATION', $GLOBALS['STR_ADMIN_SITES_CAPTCHA_ACTIVATION']);
 	$tpl->assign('STR_ADMIN_SITES_CAPTCHA_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_CAPTCHA_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION']);
@@ -936,7 +1177,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_DIRECT_PARENT', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_DIRECT_PARENT']);
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS']);
-	$tpl->assign('STR_ADMIN_SITES_STOCKS_MODULE', $GLOBALS['STR_ADMIN_SITES_STOCKS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT', $GLOBALS['STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT']);
 	$tpl->assign('STR_ADMIN_SITES_ALLOW_ORDERS_WITHOUT_STOCKS', $GLOBALS['STR_ADMIN_SITES_ALLOW_ORDERS_WITHOUT_STOCKS']);
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS', $GLOBALS['STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS']);
@@ -945,40 +1185,23 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_LIMIT_ALERT', $GLOBALS['STR_ADMIN_SITES_STOCKS_LIMIT_ALERT']);
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS', $GLOBALS['STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS']);
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_STOCKS_DECREMENT_BY_PAYMENT_STATUS_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_CART_SAVE_MODULE', $GLOBALS['STR_ADMIN_SITES_CART_SAVE_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_RESELLER_MANAGE', $GLOBALS['STR_ADMIN_SITES_RESELLER_MANAGE']);
 	$tpl->assign('STR_ADMIN_SITES_RESELLER_MANAGE_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_RESELLER_MANAGE_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_AFFILIATION_MODULE', $GLOBALS['STR_ADMIN_SITES_AFFILIATION_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_AFFILIATION_COMMISSION', $GLOBALS['STR_ADMIN_SITES_AFFILIATION_COMMISSION']);
 	$tpl->assign('STR_ADMIN_SITES_AFFILIATION_LOGO', $GLOBALS['STR_ADMIN_SITES_AFFILIATION_LOGO']);
-	$tpl->assign('STR_ADMIN_SITES_PRODUCT_LOTS_MODULE', $GLOBALS['STR_ADMIN_SITES_PRODUCT_LOTS_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_SPONSOR_MODULE', $GLOBALS['STR_ADMIN_SITES_SPONSOR_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_SPONSOR_COMMISSION', $GLOBALS['STR_ADMIN_SITES_SPONSOR_COMMISSION']);
-	$tpl->assign('STR_ADMIN_SITES_GIFT_CHECKS_MODULE', $GLOBALS['STR_ADMIN_SITES_GIFT_CHECKS_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_FAQ_MODULE', $GLOBALS['STR_ADMIN_SITES_FAQ_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_URL_REWRITING_MODULE', $GLOBALS['STR_ADMIN_SITES_URL_REWRITING_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_MICROBUSINESS_MODULE', $GLOBALS['STR_ADMIN_SITES_MICROBUSINESS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_BIRTHDAY_MODULE', $GLOBALS['STR_ADMIN_SITES_BIRTHDAY_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT', $GLOBALS['STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT']);
-	$tpl->assign('STR_ADMIN_SITES_CATEGORIES_PROMOTION', $GLOBALS['STR_ADMIN_SITES_CATEGORIES_PROMOTION']);
-	$tpl->assign('STR_ADMIN_SITES_TRADEMARK_PROMOTION', $GLOBALS['STR_ADMIN_SITES_TRADEMARK_PROMOTION']);
 	$tpl->assign('STR_ADMIN_SITES_COMPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_COMPARATOR_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE', $GLOBALS['STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE', $GLOBALS['STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_SITE_ID', $GLOBALS['STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_SITE_ID']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_SIGN_IN', $GLOBALS['STR_ADMIN_SITES_TWITTER_SIGN_IN']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_CONSUMER_KEY', $GLOBALS['STR_ADMIN_SITES_TWITTER_CONSUMER_KEY']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET', $GLOBALS['STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK', $GLOBALS['STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK']);
-	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE_ADMIN', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE_ADMIN']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE_SUPPLIER', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE_SUPPLIER']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_ADMIN_MESSAGE', $GLOBALS['STR_ADMIN_SITES_VACANCY_ADMIN_MESSAGE']);
-	$tpl->assign('STR_ADMIN_SITES_FORUM_MODULE', $GLOBALS['STR_ADMIN_SITES_FORUM_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_GIFTS_LIST', $GLOBALS['STR_ADMIN_SITES_GIFTS_LIST']);
-	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_MODULE', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FOID', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FOID']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_SHA1_KEY', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_SHA1_KEY']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_URL_KO', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_URL_KO']);
@@ -991,43 +1214,35 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_PREPARATIONTIME_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_FIRSTORDER_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_POINT_RELAIS_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_EXPEDITOR_MODULE', $GLOBALS['STR_ADMIN_SITES_EXPEDITOR_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_ICI_RELAIS_MODULE', $GLOBALS['STR_ADMIN_SITES_ICI_RELAIS_MODULE']);
-	$tpl->assign('STR_ADMIN_SITES_TNT_MODULE', $GLOBALS['STR_ADMIN_SITES_TNT_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_USERNAME', $GLOBALS['STR_ADMIN_SITES_TNT_USERNAME']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_PASSWORD', $GLOBALS['STR_ADMIN_SITES_TNT_PASSWORD']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER', $GLOBALS['STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_EXPEDITION_DELAY', $GLOBALS['STR_ADMIN_SITES_TNT_EXPEDITION_DELAY']);
-	$tpl->assign('STR_ADMIN_SITES_SIPS_MODULE', $GLOBALS['STR_ADMIN_SITES_SIPS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_CERTIFICATE', $GLOBALS['STR_ADMIN_SITES_SIPS_CERTIFICATE']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SIPS_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_SPPLUS_MODULE', $GLOBALS['STR_ADMIN_SITES_SPPLUS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_SPPLUS_EXTERNAL_URL', $GLOBALS['STR_ADMIN_SITES_SPPLUS_EXTERNAL_URL']);
-	$tpl->assign('STR_ADMIN_SITES_PAYBOX_MODULE', $GLOBALS['STR_ADMIN_SITES_PAYBOX_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_PAYBOX_CGI', $GLOBALS['STR_ADMIN_SITES_PAYBOX_CGI']);
 	$tpl->assign('STR_ADMIN_SITES_PAYBOX_SITE', $GLOBALS['STR_ADMIN_SITES_PAYBOX_SITE']);
 	$tpl->assign('STR_ADMIN_SITES_PAYBOX_RANG', $GLOBALS['STR_ADMIN_SITES_PAYBOX_RANG']);
 	$tpl->assign('STR_ADMIN_SITES_PAYBOX_ID', $GLOBALS['STR_ADMIN_SITES_PAYBOX_ID']);
 	$tpl->assign('STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_CERTIFICATE', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_CERTIFICATE']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_TEST', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_TEST']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_ID', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_ID']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_OCCURENCES', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_OCCURENCES']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_DAYS_BETWEEN_OCCURENCES', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_DAYS_BETWEEN_OCCURENCES']);
 	$tpl->assign('STR_ADMIN_SITES_SYSTEMPAY_TEST_MODE', $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY_TEST_MODE']);
-	$tpl->assign('STR_ADMIN_SITES_PARTNERS_MODULE', $GLOBALS['STR_ADMIN_SITES_PARTNERS_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_PARTNERS_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_PARTNERS_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_SITES_PARTNERS_INDIVIDUAL', $GLOBALS['STR_ADMIN_SITES_PARTNERS_INDIVIDUAL']);
 	$tpl->assign('STR_ADMIN_SITES_PARTNERS_GLOBAL', $GLOBALS['STR_ADMIN_SITES_PARTNERS_GLOBAL']);
-	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_MODULE', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_MODULE']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_ADMIN', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_ADMIN']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_PAGE_LINK', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_PAGE_LINK']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_CONNECT', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_CONNECT']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_APPID', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_APPID']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_SECRET', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_SECRET']);
 	$tpl->assign('STR_ADMIN_SITES_FACEBOOK_BASEURL', $GLOBALS['STR_ADMIN_SITES_FACEBOOK_BASEURL']);
-	return $tpl->fetch();
+	$output .= $tpl->fetch();
+	return $output;
 }
 
 /**
@@ -1041,31 +1256,31 @@ function supprime_site($id)
 	// Récupération du nom des sites, pour afficher le message de confirmation de suppression (avant l'exécution de la requête)
 	$all_sites_name_array = get_all_sites_name_array();
 	$delete_table_array = array('admins_actions' ,'commandes' ,'codes_promos' ,'articles' ,'categories' ,'configuration' ,'html' ,'produits' ,'rubriques' ,'tarifs' ,'utilisateurs' ,'utilisateur_connexions' ,'zones' ,'societe' ,'langues' ,'devises' ,'marques' ,'meta' ,'cgv' ,'contacts' ,'legal' ,'access_map' ,'tailles' ,'couleurs' ,'banniere' ,'nom_attributs' ,'attributs' ,'ecotaxes' ,'email_template' ,'email_template_cat' ,'import_field' ,'modules' ,'newsletter' ,'paiement' ,'pays' ,'profil' ,'statut_livraison' ,'statut_paiement' ,'tva' ,'types' ,'webmail' ,'commandes_articles'); 
-	if (is_module_faq_active()) {
+	if (check_if_module_active('faq')) {
 		$delete_table_array[] = 'faq';
 	}
-	if (is_groups_module_active()) {
+	if (check_if_module_active('groups')) {
 		$delete_table_array[] = 'groupes';
 	}
 	if (check_if_module_active('lexique')) {
 		$delete_table_array[] = 'lexique';
 	}
-	if (is_lot_module_active()) {
+	if (check_if_module_active('lot')) {
 		$delete_table_array[] = 'quantites';
 	}
-	if (is_parrainage_module_active()) {
+	if (check_if_module_active('parrainage')) {
 		$delete_table_array[] = 'parrain';
 	}
 	if (check_if_module_active('stock_advanced')) {
 		$delete_table_array[] = 'alertes';
 	}
-	if (is_affiliate_module_active()) {
+	if (check_if_module_active('affiliation')) {
 		$delete_table_array[] = 'affiliation';
 	}
 	if (check_if_module_active('stock_advanced')) {
 		$delete_table_array[] = 'etatstock';
 	}
-	if (is_carrousel_module_active()) {
+	if (check_if_module_active('carrousel')) {
 		$delete_table_array[] = 'carrousels';
 		$delete_table_array[] = 'vignettes_carrousels';
 	}
@@ -1073,7 +1288,7 @@ function supprime_site($id)
 	foreach ($delete_table_array as $this_table_short_name) {
 		$qid = query("DELETE 
 			FROM peel_".word_real_escape_string($this_table_short_name)."
-			WHERE " . get_filter_site_cond($this_table_short_name, null, true) . " AND site_id=".intval($id));
+			WHERE " . get_filter_site_cond($this_table_short_name, null, true) . " AND site_id='".nohtml_real_escape_string(get_site_id_sql_set_value($id))."'");
 		if ($this_table_short_name == 'configuration' && affected_rows()) {
 			$site_erased = true;
 		}
@@ -1145,7 +1360,7 @@ function affiche_liste_site()
 			$output .= '
 		</td>
 		<td class="title_label center">' . $site_id . '</td>
-		<td class="center" style="padding-left:10px">' . ($site_id==0?$GLOBALS['STR_ADMIN_ALL_SITES']:vb($nom)) . '</td>
+		<td class="center" style="padding-left:10px">' . get_site_name($site_id) . '</td>
 		<td class="center" style="padding-left:10px">' . vb($sites_wwwroot_array[$site_id]) . '</td>
 	</tr>';
 			// L'incrément est utile pour la fonction tr_rollover

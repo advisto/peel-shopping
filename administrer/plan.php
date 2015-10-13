@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: plan.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: plan.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -90,7 +90,7 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
  */
 
 /**
- * Affiche le formulaire de modification pour le contacts sélectionné
+ * Affiche le formulaire de modification pour le contact sélectionné
  * Charge les informations du contacts
  *
  * @param array $frm Array with all fields data
@@ -162,7 +162,7 @@ function affiche_formulaire_contact(&$frm, &$form_error_object)
 function maj_contacts($id, $frm)
 {
 	$sql = 'UPDATE peel_access_map SET 
-		site_id = "' . intval($frm['site_id']) . '"
+		site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . '"
 		, map_tag = "' . real_escape_string($frm['map_tag']) . '"
 		, date_maj = "' . date('Y-m-d H:i:s', time()) . '" ';
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -206,29 +206,29 @@ function affiche_formulaire_ajout_contacts(&$frm, $form_error_object)
 
 
 /**
- * Supprime le contacts spécifié par $id.
+ * Supprime le contact spécifié par $id.
  *
  * @param integer $id
  * @return
  */
 function supprime_contacts($id)
 {
-	/* Efface le contacts */
+	/* Efface le contact */
 	$qid = query("DELETE FROM peel_access_map 
 		WHERE id=" . intval($id) . " AND " . get_filter_site_cond('access_map', null, true));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_CONTACTS_MSG_DELETED_OK']))->fetch();
 }
 
 /**
- * Ajoute le contacts dans la table contacts
- *
+ * Ajoute les informations dans la table access_map
+ * 
  * @param array $frm Array with all fields data
  * @return
  */
 function insere_contacts(&$frm)
 {
-	$sql = 'INSERT INTO  peel_access_map SET 
-		site_id = "' . intval($frm['site_id']) . '"
+	$sql = 'INSERT INTO peel_access_map SET 
+		site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . '"
 		, map_tag = "' . real_escape_string($frm['map_tag']) . '"
 		, date_maj = "' . date('Y-m-d H:i:s', time()) . '" ';
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -258,13 +258,12 @@ function affiche_liste_contacts()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i),
+			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?$ligne['titre_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 		}
 		$tpl->assign('results', $tpl_results);

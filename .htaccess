@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 44077 2015-02-17 10:20:38Z sdelaporte $
+# $Id: .htaccess 47169 2015-10-05 12:04:48Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -164,19 +164,22 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(images/|upload|icones|modeles/images)/ - [L]
 
 	# Recuperer toutes les pages se terminant par .htm - à n'activer que si vous activez $GLOBALS['site_parameters']['enable_prefetch'] et n'avez pas de page statique en .htm sur votre site
+	RewriteCond %{REQUEST_URI} !^/lib/(.*)$
+	RewriteCond %{REQUEST_URI} !^lib/(.*)$
 	RewriteRule (\.htm)$ prefetch.php [QSA,L]
 
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$
 	# Suivant les hébergements, il faut ou non laisser un / devant $2 dans la ligne suivante (bug apache sur certaines versions ?)
 	# => A changer si vous modifiez RewriteBase ci-dessus, ou si vous avez un problème d'URL rewriting sur les répertoires virtuels de langue
+	RewriteRule ^([a-z]{2})/([a-z]{2})/(.*)$ /$1/$3 [QSA,L,R=301] 
 	RewriteRule ^([a-z]{2})/(.*)$ /$2?langue=$1 [QSA,L]
 	# RewriteRule ^([a-z]{2})/(.*)$ $2?langue=$1 [QSA,L]
 
 	# Navigation sur RSS
 	RewriteRule ^rss\.php$ modules/rss/rss.php [QSA,L]
 	RewriteRule ^rss\.xml$  modules/rss/rss.php [QSA,L]
-	RewriteRule ^rss-([0-9]+)\.xml$  modules/rss/rss.php?cat=$1 [QSA,L]
+	RewriteRule ^(.*)rss-([0-9]+)\.xml$  modules/rss/rss.php?cat=$2 [QSA,L]
 
 	# sitemap pour google et yahoo
 	RewriteRule ^sitemap\.xml$  get_sitemap.php?file=sitemap [QSA,L]
@@ -187,6 +190,7 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/(.*)\.(.*)$ achat/$2.$3 [QSA,L]
 	RewriteRule ^(lire|read|leer|lesen|lees)/(.*)-([0-9]+)/(.*)-([0-9]+)\.html$ lire/article_details.php?id=$5&rubid=$3 [QSA,L]
 	RewriteRule ^(lire|read|leer|lesen|lees)/(.*)-([0-9]+)\.html$ lire/index.php?rubid=$3 [QSA,L]
+	RewriteRule ^(lire|read|leer|lesen|lees)/$ lire/index.php [QSA,L]
 	RewriteRule ^(.*)-([0-9]+)/(.*)-([0-9]+)\.html$ achat/produit_details.php?id=$4&catid=$2 [QSA,L]
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/lettre-(.)\.html$ lexique/index.php?lettre=$2 [QSA,L]
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]

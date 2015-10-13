@@ -3,22 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: import_produits.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_products,admin_webmastering");
 
-if (check_if_module_active('stock_advanced')) {
-	include($fonctionsstock_advanced_admin);
-}
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock', 'Categorie', 'categorie_id');
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_TITLE'];
 
@@ -26,10 +23,7 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $action = vb($_POST['action']);
 // On récupère les noms des champs de la table de produits
-$product_fields_infos = get_table_fields('peel_produits');
-foreach($product_fields_infos as $this_field_infos) {
-	$product_field_names[] = $this_field_infos['Field'];
-}
+$product_field_names = get_table_field_names('peel_produits');
 sort($product_field_names);
 
 // Seléction des attributs, actif ou pas.
@@ -61,7 +55,7 @@ switch ($action) {
 				if (!affected_rows()) {
 					// Comme etat valait 0 avant, c'est que la ligne n'existait pas, on va donc la créer
 					query("INSERT INTO peel_import_field
-						SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "', site_id = " . intval($GLOBALS['site_id']));
+						SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id']))."'");
 				}
 			}
 		}
@@ -186,7 +180,7 @@ switch ($action) {
 							// On n'a trouvé aucun champ sur la ligne en cours, on passe à la ligne suivante
 							continue;
 						}
-						create_or_update_product($field_values, $columns_skipped, $product_field_names);
+						create_or_update_product($field_values, $columns_skipped, $product_field_names, $specific_fields_array, true);
 					}
 				}
 				fclose($fp);

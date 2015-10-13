@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: email-templates.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -18,19 +18,19 @@ necessite_priv("admin_content");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE'];
 
-$reportError = array();
+$form_error_object = new FormError();
 $report = '';
 $output = '';
 
 // Modification d'un template
 if (!empty($_GET['id'])) {
 	if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'])) {
-		if ($_POST['form_id_cat'] == "0") formErrorPush ($reportError, 'form_id_cat');
-		if (empty($_POST['form_name'])) formErrorPush ($reportError, 'form_name');
-		if (empty($_POST['form_subject'])) formErrorPush ($reportError, 'form_subject');
-		if (!verify_token('email-templates.php?id=' . $_GET['id'])) formErrorPush ($reportError, 'token', $GLOBALS['STR_INVALID_TOKEN']);
+		if ($_POST['form_id_cat'] == "0") $form_error_object->add('form_id_cat');
+		if (empty($_POST['form_name'])) $form_error_object->add('form_name');
+		if (empty($_POST['form_subject'])) $form_error_object->add('form_subject');
+		if (!verify_token('email-templates.php?id=' . $_GET['id'])) $form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		if (empty($_POST['form_text'])) {
-			formErrorPush ($reportError, 'form_text');
+			$form_error_object->add('form_text');
 		} elseif (String::strip_tags($_POST['form_text']) != $_POST['form_text']) {
 			// On corrige le HTML si nécessaire
 			if (String::strpos($_POST['form_text'], '<br>') === false && String::strpos($_POST['form_text'], '<br />') === false && String::strpos($_POST['form_text'], '</p>') === false && String::strpos($_POST['form_text'], '<table') === false) {
@@ -44,9 +44,9 @@ if (!empty($_GET['id'])) {
 			}
 		}
 
-		if (count($reportError)) {
-			if (!empty($reportError['token'])) {
-				$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $reportError['token']))->fetch();
+		if ($form_error_object->count()) {
+			if ($form_error_object->has_error['token']) {
+				$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_error_object->text['token']))->fetch();
 			} else {
 				$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERR_FILL_IN_ALL']))->fetch();
 			}
@@ -72,15 +72,18 @@ if (!empty($_GET['id'])) {
 		LIMIT 1');
 	$template_infos = fetch_assoc($query_update);
 	// On va chercher les catégories
-	$result_categories = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name
-		FROM peel_email_template_cat');
+	$sql = 'SELECT id, name_' . $_SESSION['session_langue'] . ' AS name, site_id
+		FROM peel_email_template_cat
+		WHERE ' . get_filter_site_cond('email_template_cat', null) . '
+		ORDER BY name ASC';
+	$result_categories = query($sql);
 	$tpl_categories_list = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_categories_list.tpl');
 	$tpl_categories_list->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl_options = array();
 	while ($row_categories = fetch_assoc($result_categories)) {
 		$tpl_options[] = array('value' => intval($row_categories['id']),
 			'issel' => vb($_POST['form_id_cat']) == $row_categories['id'] || $row_categories['id'] == $template_infos['id_cat'],
-			'name' => $row_categories['name']
+			'name' => get_site_info($row_categories) . $row_categories['name']
 			);
 	}
 	$tpl_categories_list->assign('options', $tpl_options);
@@ -135,15 +138,15 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 		$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERR_FILL_IN_ALL']))->fetch();
 	}
 	if (!verify_token('email-templates.php-ajout')) {
-		formErrorPush ($reportError, 'token', $GLOBALS['STR_INVALID_TOKEN']);
+		$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 	}
 	if (empty($_POST['form_subject'])) {
-		formErrorPush ($reportError, 'form_subject');
+		$form_error_object->add('form_subject');
 	}
 	if (empty($_POST['form_text'])) {
-		formErrorPush ($reportError, 'form_text');
+		$form_error_object->add('form_text');
 	}
-	if (!count($reportError)) {
+	if (!$form_error_object->count()) {
 		query('INSERT INTO peel_email_template (site_id, technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
 			"' . trim(nohtml_real_escape_string($_POST['site_id'])) . '",
 			"' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
@@ -159,16 +162,17 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 // Insertion d'un template
 if (empty($_GET['id'])) {
 	// On va chercher les catégories
-	$result_categories = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name
+	$result_categories = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name, site_id
 		FROM peel_email_template_cat
-		WHERE ' . get_filter_site_cond('email_template_cat', null, true));
+		WHERE ' . get_filter_site_cond('email_template_cat', null) . '
+		ORDER BY name ASC');
 	$tpl_categories_list = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_categories_list.tpl');
 	$tpl_categories_list->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl_options = array();
 	while ($row_categories = fetch_assoc($result_categories)) {
 		$tpl_options[] = array('value' => intval($row_categories['id']),
 			'issel' => vb($_POST['form_id_cat']) == $row_categories['id'],
-			'name' => $row_categories['name']
+			'name' => get_site_info($row_categories) . $row_categories['name']
 			);
 	}
 	$tpl_categories_list->assign('options', $tpl_options);
@@ -217,16 +221,16 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_search.tpl')
 $form_error_object = new FormError();
 $tpl_options = array();
 // Récupération des catégories de template email
-$result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name
+$result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name, tc.site_id
 	FROM peel_email_template_cat tc
 	INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't', true) . '
-	WHERE ' . get_filter_site_cond('email_template_cat', 'tc', true) . '
+	WHERE ' . get_filter_site_cond('email_template_cat', 'tc') . '
 	GROUP BY tc.id
 	ORDER BY name');
 while ($row_categories = fetch_assoc($result)) {
 	$tpl_options[] = array('value' => intval($row_categories['id']),
 		'issel' => vb($_GET['form_lang_template']) == $row_categories['id'],
-		'name' => $row_categories['name']
+		'name' => get_site_info($row_categories) . $row_categories['name']
 		);
 }
 $tpl->assign('options', $tpl_options);
@@ -289,16 +293,18 @@ if (!empty($results_array)) {
 	$tpl_results = array();
 	$i = 0;
 	$bold = 0;
-	$all_sites_name_array = get_all_sites_name_array();
 	foreach ($results_array as $this_template) {
 		// On récupère la catégorie du template (s'il en a une)
 		$category_name = '';
 		if ($this_template['id_cat'] != 0) {
-			$result_category = query('SELECT name_' . $_SESSION['session_langue'] . ' AS name
+			$result_category = query('SELECT name_' . $_SESSION['session_langue'] . ' AS name, site_id
 			FROM peel_email_template_cat
-			WHERE id=' . intval($this_template['id_cat']) . ' AND ' . get_filter_site_cond('email_template_cat', null, true));
-			$row_category = fetch_assoc($result_category);
-			$category_name = $row_category['name'];
+			WHERE id=' . intval($this_template['id_cat']) . ' AND ' . get_filter_site_cond('email_template_cat', null));
+			if($row_category = fetch_assoc($result_category)) {
+				$category_name = get_site_info($row_category) . $row_category['name'];
+			}else {
+				$category_name = '';
+			}
 		}
 		$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 			'id' => $this_template["id"],
@@ -311,7 +317,7 @@ if (!empty($results_array)) {
 			'etat_onclick' => 'change_status("email-templates", "' . $this_template['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 			'etat_src' => $GLOBALS['administrer_url'] . '/images/' . ($this_template["active"] != "TRUE" ? 'puce-blanche.gif' : 'puce-verte.gif'),
 			'edit_href' => 'email-templates.php?id=' . $this_template['id'],
-			'site_name' => ($this_template['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$this_template['site_id']]),
+			'site_name' => get_site_name($this_template['site_id'])
 			);
 		$i++;
 	}

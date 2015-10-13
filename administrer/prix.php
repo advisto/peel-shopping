@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: prix.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -27,7 +27,7 @@ switch (vb($_REQUEST['mode'])) {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_INVALID_TOKEN']))->fetch();
 		} elseif (!empty($_POST['id'])) {
 			foreach($_POST['id'] as $i => $prodid) {
-				// $product_object = new Product($prodid, null, false, null, true, !is_micro_entreprise_module_active());
+				// $product_object = new Product($prodid, null, false, null, true, !check_if_module_active('micro_entreprise'));
 				$prix = get_float_from_user_input($_POST['prix'][$i]);
 				// $prix_ht = get_float_from_user_input($_POST['prix'][$i]) / (1 + $product_object->tva / 100);
 				$prix_revendeur = get_float_from_user_input($_POST['prix_revendeur'][$i]);

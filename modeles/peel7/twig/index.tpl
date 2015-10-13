@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: index.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}{% if (error) %}
 <div class="alert alert-danger">
 	{{ error }}
@@ -26,7 +26,26 @@
 {% if categorie_annonce is defined %}
 	{{ categorie_annonce }}
 {% endif %}
+{% if  affiche_compte or user_register_form %}
+	<div class="row">
+		<div class="col-md-8">
+			{{ contenu_html }}
+		</div>
+		<div class="col-md-4">
+		{% if affiche_compte %}
+			{{ affiche_compte }}
+		{% endif %}
+		{% if user_register_form %}
+			{{ user_register_form }}
+		{% endif %}
+		</div>
+	</div>
+{% else %}
 	{{ contenu_html }}
+{% endif %}
+{% if fresh_ad_presentation %}
+	{{ fresh_ad_presentation }}
+{% endif %}
 	{{ categorie_accueil }}
 	{{ notre_selection }}
 	{{ nouveaute }}

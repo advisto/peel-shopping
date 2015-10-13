@@ -3,51 +3,52 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: bas.tpl 47149 2015-10-04 13:54:29Z sdelaporte $
 #}
-							<div class="row bottom_middle">
-								<div class="col-md-12">
-									{{ MODULES_BOTTOM_MIDDLE }}
-								</div>
 							</div>
+							<div class="bottom_middle row">
+								{{ MODULES_BOTTOM_MIDDLE }}
+							</div>
+							<div class="middle_column_footer">&nbsp;</div>
 						</div>
-						<div class="middle_column_footer">&nbsp;</div>
+						{% if MODULES_RIGHT %}
+						<!-- Début right_column -->
+						<div class="side_column right_column col-sm-3 col-lg-2">
+							{{ MODULES_RIGHT }}
+						</div>
+						<!-- Fin right_column -->
+						{% endif %}
 					</div>
 				</div>
 				<!-- Fin middle_column -->
-				{% if page_columns_count == 3 %}
-				<!-- Début right_column -->
-				<div class="right_column container">
+				{% if MODULES_BELOW_MIDDLE %}
+				<!-- Début below_middle -->
+				<div class="below_middle container">
 					<div class="row">
-						{{ MODULES_RIGHT }}
+						{{ MODULES_BELOW_MIDDLE }}
 					</div>
 				</div>
-				<!-- Fin right_column -->
+				<!-- Fin below_middle -->
 				{% endif %}
 			</div>
-			<!-- Fin main_content -->
+			<!-- Fin main_content -->	
 			<div class="push"></div>
 		</div>
 		<!-- Fin Total -->
+		{% if scroll_to_top %}<div class="scroll_to_top"><a href="#"><span class="glyphicon glyphicon-circle-arrow-up"></span></a></div>{% endif %}
 		<!-- Début Footer -->
 		<div id="footer" class="clearfix">
-			{% if (CONTENT_HOME_BOTTOM) or (CONTENT_FOOTER) or (footer_column) %}
+			{% if CONTENT_FOOTER or footer_column %}
 			<div class="container">
 				<div class="affiche_contenu_html_footer">
-					{% if (CONTENT_HOME_BOTTOM) %}
-					{{ CONTENT_HOME_BOTTOM }}
-					{% endif %}
 					{{ CONTENT_FOOTER }}
-				{% if (footer_column) %}
-					<div class="footer_column">{{ footer_column }}</div>
-				{% endif %}
 				</div>
 			</div>
 			{% endif %}
@@ -55,22 +56,25 @@
 				<div class="container">
 					<div class="row">
 						{{ MODULES_FOOTER }}
-						<div class="col-sm-{{ block_columns_width_sm }} col-md-{{ block_columns_width_md }} footer_col">
-							{{ FOOTER }}
-						</div>
+					{% if footer_column %}
+						<div class="footer_column">{{ footer_column }}</div>
+					{% endif %}
+						{{ FOOTER }}
 						<div class="clearfix visible-sm"></div>
-						{% if (rss) %}
+						{% if rss is defined %}
 							{{ rss }}
 						{% endif %}
-						<div class="clearfix"></div>
+					</div>
+					<div class="clearfix"></div>
 						{% if (flags_links_array) or (flags) %}<div id="flags_xs" class="pull-right visible-xs">{% if (flags_links_array) %}{{ flags_links_array|join('&nbsp;') }}{% endif %}{{ flags }}</div>{% endif %}
 						{% if (module_devise) %}<div id="currencies_xs" class="pull-right visible-xs">{{ module_devise }}</div>{% endif %}
-						<div class="clearfix"></div>
+					<div class="clearfix"></div>
 						{% if (footer_link) %}
 						<div class="footer_link">{{ footer_link }}</div>
+						<div class="clearfix"></div>
 						{% endif %}
-					</div>
 				</div>
+			</div>
 			{% if (footer_bottom) %}
 				<div class="footer_bottom">{{ footer_bottom }}</div>
 			{% endif %}
@@ -82,13 +86,11 @@
 		{% if end_javascript is defined %}
 			{{ end_javascript }}
 		{% endif %}
-		{% if (butterflive_tracker) %}
-			{{ butterflive_tracker }}
-		{% endif %}
 		{% if (peel_debug) %}
 			{% set i=0 %}
+			<div class="clearfix"></div>
 			{% for key,value in peel_debug %}
-				<span {% if value.duration<0.010 %}style="color:grey"{% else %}{% if value.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ (value.duration*1000)|number_format(2) }} ms - Start{{ STR_BEFORE_TWO_POINTS }}{{ value.start*1000|number_format(2) }} ms  - {% if (value.sql) %}{{ value.sql }}{% endif %} {% if (value.template) %}{{ value.template }}{% endif %}</span><br />
+			<span {% if value.duration<0.010 %}style="color:grey"{% else %}{% if value.duration>0.100 %}style="color:red"{% endif %}{% endif %}>{{ key }}{{ STR_BEFORE_TWO_POINTS }}: {{ (value.duration*1000)|number_format(2) }} ms - Start{{ STR_BEFORE_TWO_POINTS }}{{ value.start*1000|number_format(2) }} ms  - {% if (value.sql) %}{{ value.sql }}{% endif %}{% if (value.template) %}{{ value.template }}{% endif %}{% if (value.text) %}{{ value.text }}{% endif %}</span><br />
 			{% endfor %}
 		{% endif %}
 	</body>

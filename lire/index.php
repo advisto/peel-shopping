@@ -3,23 +3,25 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 44077 2015-02-17 10:20:38Z sdelaporte $
-// Appel possible via prefetch.php
-if(!defined('PEEL_PREFETCH') || substr($_SERVER["SCRIPT_NAME"], -strlen("/prefetch.php")) != "/prefetch.php") {
+// $Id: index.php 47245 2015-10-08 16:47:28Z gboussin $
+if (defined('PEEL_PREFETCH')) {
+	call_module_hook('configuration_end', array());
+} else {
 	include("../configuration.inc.php");
 }
+
 define('IN_RUBRIQUE', true);
 
 if (empty($_GET['rubid']) && !empty($GLOBALS['site_parameters']['disallow_main_content_category'])) {
 	// Si pas autorisé de voir /lire/ , retour à la page d'accueil
-	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
+	redirect_and_die(get_url('/'), true);
 }
 
 $output = '';
@@ -34,15 +36,18 @@ $rub_query = query($sql);
 if ($rub = fetch_assoc($rub_query)) {
 	if(!empty($rub['technical_code']) && String::strpos($rub['technical_code'], 'R=') === 0) {
 		// redirection suivie que la rubrique soit active ou non
-		redirect_and_die($GLOBALS['wwwroot'] . '/' . String::substr($rub['technical_code'], 2), true);
+		$url_rub = String::substr($rub['technical_code'], 2);
+		if(strpos($url_rub, '://') === false) {
+			if(String::substr($url_rub, 0, 1) != '/') {
+				$url_rub = '/' . $url_rub;
+			}
+			$url_rub = $GLOBALS['wwwroot'] . $url_rub;
+		}
+		redirect_and_die($url_rub, true);
 	}
 	if($rub['etat']==0 && !a_priv('admin_content', false)) {
-		redirect_and_die($GLOBALS['wwwroot'], true);
+		redirect_and_die(get_url('/'), true);
 	}
-	if ($rub['technical_code'] == 'clients' && check_if_module_active('clients')) {
-		include($GLOBALS['fonctionsclients']);
-	}
-	
 	// Permet de définir l'id de la div principal du site.
 	if ($rub['technical_code'] == 'tradefair' || $rub['technical_code'] == 'tradefaire_home') {
 		$GLOBALS['main_div_id'] = 'tradefair';
@@ -50,7 +55,7 @@ if ($rub = fetch_assoc($rub_query)) {
 		$GLOBALS['main_div_id'] = 'tradefloor';
 	}
 }
-if (is_module_url_rewriting_active()) {
+if (check_if_module_active('url_rewriting')) {
 	if (!empty($rub) && get_content_category_url($rubid, $rub['nom']) != get_current_url(false)) {
 		// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 		$theoretical_current_url = (!empty($_GET['page'])?get_content_category_url($rubid, $rub['nom'], true, true) . 'page=' . $_GET['page']:get_content_category_url($rubid, $rub['nom']));

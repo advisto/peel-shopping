@@ -3,18 +3,81 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les éléments de menu affichables
+ *
+ * @param array $params
+ * @return
+ */
+function attributs_hook_admin_menu_items($params) {
+	$result['menu_items']['products_attributes'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/nom_attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES"];
+	$result['menu_items']['products_attributes'][$GLOBALS['wwwroot_in_admin'] . '/modules/attributs/administrer/attributs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_OPTIONS"];
+	return $result;
+}
+
+/**
+ * Génération d'informations pour l'exportde produits
+ *
+ * @param array $params
+ * @return
+ */
+function attributs_hook_export_products_get_configuration_array(&$params) {
+	$result = array();
+	$sql_n = "SELECT *
+		FROM peel_nom_attributs
+		WHERE " . get_filter_site_cond('nom_attributs') . "
+		ORDER BY id";
+	$nom_attrib = query($sql_n);
+	while ($this_attribut = fetch_assoc($nom_attrib)) {
+		// On prépare des informations qui seront utilisées pour chaque ligne par la suite
+		$GLOBALS['attribut_infos_array'][$this_attribut['id']] = $this_attribut;
+		$result['product_field_names'][] = $this_attribut['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['id'];
+	}
+	return $result;
+}
+
+/**
+ * Génération d'informations pour l'export de produits
+ *
+ * @param array $params
+ * @return
+ */
+function attributs_hook_export_products_get_line_infos_array(&$params) {
+	$result = array();
+	// Récupération des valeurs pour les attributs
+	$query_produits_attributs = query("SELECT ppa.nom_attribut_id, pa.id, pa.descriptif_" . $_SESSION['session_langue'] . " AS descriptif
+		FROM peel_produits_attributs ppa
+		LEFT JOIN peel_attributs pa ON pa.id=ppa.attribut_id AND pa.id_nom_attribut=ppa.nom_attribut_id AND " . get_filter_site_cond('attributs', 'pa')."
+		WHERE produit_id='" . intval($params['id']) . "'");
+	while ($this_attribut = fetch_assoc($query_produits_attributs)) {
+		if (!empty($attribut_infos_array[$this_attribut['nom_attribut_id']])) {
+			if ($attribut_infos_array[$this_attribut['nom_attribut_id']]['upload'] == 1) {
+				// L'attribut concerné est un champ d'upload => on exporte cette info, sans notion d'id d'attribut car il n'y en a pas
+				$this_value = '0#__upload';
+			} elseif ($attribut_infos_array[$this_attribut['nom_attribut_id']]['texte_libre'] == 1) {
+				// L'attribut concerné est un champ de texte libre => on exporte cette info, sans notion d'id d'attribut car il n'y en a pas
+				$this_value = '0#__texte_libre';
+			} else {
+				$this_value = $this_attribut['id'] . '#' . $this_attribut['descriptif'];
+			}
+			$result[$GLOBALS['attribut_infos_array'][$this_attribut['nom_attribut_id']]['nom_' . $_SESSION['session_langue']] . '#' . $this_attribut['nom_attribut_id']][] = $this_value;
+		}
+	}
+	return $result;
 }
 
 /**
@@ -169,7 +232,7 @@ function insere_nom_attribut($frm)
 	}
 	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description
 	) VALUES ('" . intval($frm['etat']) . "'
-			, '" . intval($frm['site_id']) . "'
+			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, '" . intval($frm['mandatory']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
@@ -201,7 +264,7 @@ function maj_nom_attribut($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . nohtml_real_escape_string($lng) . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", site_id = '" . intval($frm['site_id']) . "'
+	$sql .= ", site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			 , mandatory = '" . intval($frm['mandatory']) . "'
 			 , texte_libre ='" . intval($frm['texte_libre']) . "'
 			 , upload ='" . intval(vn($frm['upload'])) . "'
@@ -248,7 +311,6 @@ function affiche_liste_nom_attribut($start)
 	$tpl_results = array();
 	if ($nr != 0) {
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
@@ -259,7 +321,7 @@ function affiche_liste_nom_attribut($start)
 				'upload' => $ligne['upload'],
 				'etat_onclick' => 'change_status("attributs", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}
@@ -362,7 +424,7 @@ function insere_attribut($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng;
 	}
-	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "', '" . intval($frm['site_id']) . "'";
+	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['descriptif_' . $lng]) . "'";
 	}
@@ -387,7 +449,7 @@ function maj_attribut($id, $frm)
 		 ,  prix = '" . nohtml_real_escape_string($prix) . "'
 		 ,  prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
 		 ,  mandatory = '" . intval($frm['mandatory']) . "'
-		 ,  site_id = '" . intval($frm['site_id']) . "'
+		 ,  site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		 ,  position = '" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng . " = '" . nohtml_real_escape_string($_POST['descriptif_' . $lng]) . "'";
@@ -446,7 +508,6 @@ function affiche_liste_attribut($frm)
 		$tpl_results = array();
 		if ($nr != 0) {
 			$i = 0;
-			$all_sites_name_array = get_all_sites_name_array();
 			while ($DescAtt = fetch_assoc($res)) {
 				$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 					'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
@@ -455,7 +516,7 @@ function affiche_liste_attribut($frm)
 					'descriptif' => $DescAtt['descriptif_' . $_SESSION['session_langue']],
 					'prix' => fprix($DescAtt['prix'], true, $GLOBALS['site_parameters']['code'], false),
 					'img_src' => (!empty($DescAtt['image']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($DescAtt['image'], 100, 100, "fit") : ''),
-					'site_name' => ($DescAtt['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$DescAtt['site_id']])
+					'site_name' => get_site_name($DescAtt['site_id'])
 					);
 				$i++;
 			}
@@ -508,11 +569,7 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl->assign('langs', $tpl_langs);
 
 		if (!empty($frm["image"])) {
-			$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image"],
-					'nom' => $frm["image"],
-					'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&attid=' . vb($_GET['attid']),
-					'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
-					));
+			$tpl->assign('image', get_uploaded_file_infos('image', $frm['image'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&attid=' . vb($_GET['attid'])));
 		}	
 		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 		$tpl->assign('prix', fprix(vn($frm['prix']), false, $GLOBALS['site_parameters']['code'], false));
@@ -613,7 +670,7 @@ function affiche_choix_nom_attribut()
  */
 function affiche_liste_attributs_by_id($id)
 {
-	$product_object = new Product($id, null, false, null, true, !is_micro_entreprise_module_active());
+	$product_object = new Product($id, null, false, null, true, !check_if_module_active('micro_entreprise'));
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_liste_by_id.tpl');
 	$tpl->assign('wwwroot_in_admin', $GLOBALS['wwwroot_in_admin']);

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: display_article.php 47101 2015-10-02 09:47:03Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -37,15 +37,11 @@ if (!function_exists('get_article_details_html')) {
 			$tpl->assign('STR_OFFLINE_ART', $GLOBALS['STR_OFFLINE_ART']);
 
 			if (!empty($article['image1'])) {
-				if (pathinfo($article['image1'], PATHINFO_EXTENSION) == 'pdf') {
-					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
-				} else {
-					$this_thumb = thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-				}
+				$this_thumb = thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 				$tpl->assign('main_image', array(
 					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($article['image1']),
 					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-					'is_pdf' => !(pathinfo($article['image1'], PATHINFO_EXTENSION) != 'pdf')
+					'is_pdf' => (pathinfo($article['image1'], PATHINFO_EXTENSION) == 'pdf')
 				));
 			}
 			if(empty($GLOBALS['site_parameters']['chapo_in_article_page_disabled'])) {
@@ -53,9 +49,9 @@ if (!function_exists('get_article_details_html')) {
 			}
 			$tpl->assign('texte', $article['texte']);
 			
-			if (function_exists('get_peelfr_share_feature')) {
-				$tpl->assign('share_feature', get_peelfr_share_feature());
-			} elseif (check_if_module_active('direaunami') && empty($GLOBALS['site_parameters']['hide_share_article_link'])) {
+			if (function_exists('get_share_feature')) {
+				$tpl->assign('share_feature', get_share_feature());
+			} elseif (empty($GLOBALS['site_parameters']['hide_share_article_link']) && check_if_module_active('direaunami')) {
 				$tpl->assign('tell_friends', array(
 						'src' => $GLOBALS['site_parameters']['general_send_email_image'],
 						'txt' => $GLOBALS['STR_TELL_FRIEND'],
@@ -118,7 +114,7 @@ if (!function_exists('get_rubriques_sons_html')) {
 
 if (!function_exists('get_articles_html')) {
 	/**
-	 * get_articles_html()
+	 * Récupère la liste des articles correspondant à une rubrique de contenu donnée
 	 *
 	 * @param integer $rubid
 	 * @param boolean $get_sub_rubrique
@@ -153,6 +149,7 @@ if (!function_exists('get_articles_html')) {
 		$tpl->assign('STR_MORE_DETAILS', $GLOBALS['STR_MORE_DETAILS']);
 		$tpl->assign('haut_de_page_txt', $GLOBALS['STR_HAUT_DE_PAGE']);
 		$tpl->assign('haut_de_page_href', '#haut_de_page');
+		$tpl->assign('category_content_show_explicit_buttons_if_articles_more_to_read', vb($GLOBALS['site_parameters']['category_content_show_explicit_buttons_if_articles_more_to_read'], true));
 		
 		if (!empty($results_array)) {
 			$data = array();
@@ -163,10 +160,10 @@ if (!function_exists('get_articles_html')) {
 				if(!empty($art['chapo'])){
 					$chapo = String::nl2br_if_needed(trim(String::html_entity_decode_if_needed($art['chapo'])));
 				}else{
-					$chapo = String::str_shorten(trim(strip_tags(String::html_entity_decode_if_needed($art['texte']))),500,'','...',450);
+					$chapo = String::nl2br_if_needed(String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed($art['texte']))),500,'','...',450));
 				}
 				$chapo = str_replace(array('<h1', '<h2', '<h3', '<h4', '</h1', '</h2', '</h3', '</h4'), array('<p', '<p', '<p', '<p', '</p', '</p', '</p', '</p'), $chapo);
-				if($chapo == String::strip_tags($chapo)) {
+				if($chapo == strip_tags($chapo)) {
 					$chapo = '<p>' . $chapo . '</p>';
 				}
 				$data[] = array(
@@ -215,19 +212,15 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('offline_rub_txt', $GLOBALS['STR_OFFLINE_RUB']);
 			}
 			if (!empty($rowrub['image'])) {
-				if (pathinfo($rowrub['image'], PATHINFO_EXTENSION) == 'pdf') {
-					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
-				} else {
-					$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-				}
+				$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 				$tpl->assign('main_image', array(
 					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($rowrub['image']),
 					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-					'is_pdf' => !(pathinfo($rowrub['image'], PATHINFO_EXTENSION) != 'pdf')
+					'is_pdf' => (get_file_type($rowrub['image']) == 'pdf')
 				));
 			}
 			$tpl->assign('technical_code', $rowrub['technical_code']);
-			$tpl->assign('description', $rowrub['description']);
+			$tpl->assign('description', String::nl2br_if_needed($rowrub['description']));
 			if($rowrub['technical_code'] == 'clients' && check_if_module_active('clients')) {
 				$tpl->assign('descriptions_clients', affiche_descriptions_clients());
 			}

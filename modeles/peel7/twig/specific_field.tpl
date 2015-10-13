@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: specific_field.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}{% if f.field_type == "radio" %}
 	{% for o in f.options %}
 		<input type="radio" value="{{ o.value|str_form_value }}"{% if o.issel %} checked="checked"{% endif %} id="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}">{{ o.name }}</label><br />
@@ -20,39 +20,35 @@
 	<input type="checkbox" value="{{ o.value|str_form_value }}"{% if o.issel %} checked="checked"{% endif %} id="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}">{{ o.name }}</label><br />
 	{% endfor %}
 {% elseif f.field_type == "select" %}
-<select class="form-control" id="{{ f.field_name }}" name="{{ f.field_name }}">
+<select id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control">
 	<option value="">{{ f.STR_CHOOSE }}...</option>
-	{% for o in f.options %}
+{% for o in f.options %}
 	<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
-	{% endfor %}
+{% endfor %}
 </select>
 {% elseif f.field_type == "password" %}
-	{% for o in f.options %}
-		<input type="password" id="{{ f.field_name }}" name="{{ f.field_name }}" class="form-control" value="" /><br />
-	{% endfor %}
+<input type="password" id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" value="{{ f.field_value|str_form_value }}" class="form-control" />
 {% elseif f.field_type == "datepicker" %}
-	{% for o in f.options %}
-		<input type="text" value="{{ o.value|str_form_value }}" id="{{ f.field_name }}#{{ o.value|str_form_value }}" name="{{ f.field_name }}" class="form-control datepicker" /><br />
-	{% endfor %}
+<input type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name|str_form_value }}#{{ f.field_value|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control datepicker" />
 {% elseif f.field_type == "upload" %}
-	{% for o in f.options %}
-		<input class="uploader" name="{{ f.field_name }}" type="file" value="" id="{{ f.field_name }}" /><br />
-	{% endfor %}
+	{% if f.upload_infos %}
+		{% if  site_parameters.used_uploader=="fineuploader" %}
+{% if f.upload_file_display_title is not empty }<div class="upload_file_field_title">{{ f.field_title }}</div>{% endif %}<div id="{{ f.field_name|str_form_value }}" class="uploader"></div>
+		{% else %}
+<input name="{{ f.field_name|str_form_value }}" type="file" value="" id="{{ f.field_name|str_form_value }}" />
+		{% endif %}
+	{% else %}
+{% include "uploaded_file.tpl" with {'f':f.upload_infos,'STR_DELETE':f.upload_infos.STR_DELETE_THIS_FILE } %}
+	{% endif %}
 {% elseif f.field_type == "hidden" %}
-	{% for o in f.options %}
-		<input name="{{ f.field_name }}" type="hidden" value="{{ o.value|str_form_value }}" id="{{ f.field_name }}" /><br />
-	{% endfor %}
+<input name="{{ f.field_name|str_form_value }}" type="hidden" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name }}" />
 {% elseif f.field_type == "textarea" %}
-	{% for o in f.options %}
-		<textarea class="form-control" name="{{ f.field_name }}" id="{{ f.field_name }}">{{ o.value }}</textarea>
-	{% endfor %}
-{% elseif f.field_type == "separator" %}
-	{* Ici on permet de mettre un séparateur à la place d'un champ. C'est pratique pour faire différent bloc dans un formulaire, avec un titre par bloc *}
-	{% for o in f.options %}
-		<{{ o.name }}>{{ o.value }}</{{ o.name }}>
-	{% endfor %}
-{% elseif f.field_type == "text" or f.field_type is empty %}
-	{% for o in f.options %}
-		<input type="text" value="{{ o.value|str_form_value }}" id="{{ f.field_name }}#{{ o.value|str_form_value }}" name="{{ f.field_name }}" class="form-control" /><br />
-	{% endfor %}
+<textarea name="{{ f.field_name|str_form_value }}" id="{{ f.field_name }}"class="form-control">{{ f.field_value }}</textarea>
+{% elseif f.field_type == "html" %}
+{{ f.text_editor_html }}
+{% elseif f.field_type == "separator" or f.field_type == "tag" %}
+{* Ici on permet de mettre du HTML. C'est pratique pour faire différents blocs dans un formulaire, avec un titre par bloc *}
+{{ f.field_value }}
+{% elseif f.field_type == "text" or f.field_type %}
+<input type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control" />
 {% endif %}

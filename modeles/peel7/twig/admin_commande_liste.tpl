@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_commande_liste.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ links_nbRecord }}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div style="margin-top: 15px; margin-bottom: 15px">
@@ -93,6 +93,9 @@
 				{% else %}
 					<td class="center">{{ res.delivery_status_name }}</td>
 				{% endif %}
+				{% if (res.type) %}
+					<td class="center"><center><table><tr><td>{{ res.type }}</td></tr></table></center></td>
+				{% endif %}
 			{% if is_fianet_sac_module_active %}
 				<td class="center"><center><table><tr><td>{{ this_sac_status }}</td></tr></table></center></td>
 			{% endif %}
@@ -118,6 +121,15 @@
 			<input type="submit" value="{{ STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION|str_form_value }}" class="btn btn-primary" />
 		</div>
 	</div>
+	
+	{% if is_module_genere_pdf_active %}
+	<div style="margin-bottom: 10px; margin-top: 10px;">
+		<div class="row center">
+			<input type="submit" name="export_pdf" value="{{ STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value }}" class="btn btn-primary" />
+		</div>
+	</div>
+	{% endif %}
+	
 	<div class="center">{{ links_multipage }}</div>
 {% else %}
 	<p>{{ STR_ADMIN_COMMANDER_NO_ORDER_FOUND }}</p>

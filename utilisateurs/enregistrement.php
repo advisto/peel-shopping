@@ -3,28 +3,29 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: enregistrement.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../configuration.inc.php");
 include("../lib/fonctions/display_user_forms.php");
 
 define('IN_REGISTER', true);
+$GLOBALS['allow_fineuploader_on_page'] = true;
 if (est_identifie()) {
 	if (!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
 		// Création d'une commande de devis en base de données pour un utilisateur loggué n'ayant pas le droit de voir les prix
-		$output = create_devis_order($frm);
+		$output = Devis::create_devis_order($frm);
 		include($GLOBALS['repertoire_modele'] . "/haut.php");
 		echo $output;
 		include($GLOBALS['repertoire_modele'] . "/bas.php");
 		die();
 	} else {
-		redirect_and_die($GLOBALS['wwwroot'] . "/utilisateurs/change_params.php");
+		redirect_and_die(get_url("/utilisateurs/change_params.php"));
 	}
 }
 
@@ -43,7 +44,7 @@ if(isset($GLOBALS['site_parameters']['user_mandatory_fields'])) {
 	$mandatory_fields = $GLOBALS['site_parameters']['user_mandatory_fields'];
 }
 // Dans un second temps on ajoute à cette variable les champs obligatoires qui doivent être vérifiés dans tous les cas, ou si des modules ou variables de configurations sont présents.
-$mandatory_fields['mot_passe'] = 'STR_ERR_PASSWORD';
+$mandatory_fields['mot_passe'] = sprintf($GLOBALS['STR_ERR_PASSWORD'], vn($GLOBALS['site_parameters']['password_length_required'], 8));
 $mandatory_fields['email'] = 'STR_ERR_EMAIL';
 if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 	$mandatory_fields['societe'] = 'STR_ERR_SOCIETY';
@@ -52,30 +53,34 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
 }
 if(check_if_module_active('annonces')) {
-	if(!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories'])) {
+	if(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
 		$mandatory_fields['id_categories'] = 'STR_ERR_FIRST_CHOICE';
-	} else {
+	} elseif (vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'select') {
 		$mandatory_fields['id_cat_1'] = 'STR_ERR_FIRST_CHOICE';
 	}
 	$mandatory_fields['cgv_confirm'] = 'STR_ERR_CGV';
 	$mandatory_fields['mot_passe_confirm'] = 'STR_ERR_PASS_CONFIRM';
 }
-if(is_captcha_module_active()) {
+if(check_if_module_active('captcha')) {
 	$mandatory_fields['code'] = 'STR_EMPTY_FIELD';
 }
+if(empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && empty($GLOBALS['site_parameters']['pseudo_is_optionnal'])) {
+	$mandatory_fields['pseudo'] = 'STR_EMPTY_FIELD';
+}
+		
 foreach($mandatory_fields as $key => $value) {
 	// Transformation des valeurs du tableau avec les variables de langue du même nom
 	if (!empty($GLOBALS[$value])) {
 		$mandatory_fields[$key] = $GLOBALS[$value];
 	}
 }
-if (is_socolissimo_module_active()) {
+if (check_if_module_active('socolissimo')) {
 	// Securité SO Colissimo pour bien s'assurer que le process de commande sera cohérent
 	unset($_SESSION['session_commande']);
 }
 if (!empty($frm)) {
 	// D'abord on génère une erreur pour tous les champs obligatoires qui sont vides
-	$form_error_object->valide_form($frm, $mandatory_fields);
+	$form_error_object->valide_form($frm, $mandatory_fields, array('mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('mot_passe' => 'check_password_format'));
 	
 	// On traite ensuite les champs avec des règles plus compliquées
 	if (!empty($frm['siret']) && vb($frm['pays']) == 1 && !preg_match("#([0-9]){9,14}#", str_replace(array(' ', '.'), '', $frm['siret']))) {
@@ -85,7 +90,7 @@ if (!empty($frm)) {
 	if (!empty($frm['mot_passe_confirm']) && vb($frm['mot_passe_confirm']) != vb($frm['mot_passe'])) {
 		$form_error_object->add('mot_passe_confirm', $GLOBALS['STR_ERR_PASS_CONFIRM']);
 	}
-	if(empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && !empty($frm['pseudo'])) {
+	if(!empty($mandatory_fields['pseudo']) && !empty($frm['pseudo'])) {
 		$add_pseudo_error = (String::strpos($frm['pseudo'], '@') !== false);
 		if (function_exists('searchKeywordFiltersInLogin')) {
 			$add_pseudo_error = ($add_pseudo_error || searchKeywordFiltersInLogin($frm['pseudo'])) ;
@@ -116,7 +121,7 @@ if (!empty($frm)) {
 			}
 		}
 	}
-	if (!empty($frm['code']) && is_captcha_module_active()) {
+	if (!empty($frm['code']) && check_if_module_active('captcha')) {
 		if (!check_captcha($frm['code'], $frm['code_id'])) {
 			$form_error_object->add('code', $GLOBALS['STR_CODE_INVALID']);
 			// Code mal déchiffré par l'utilisateur, on en donne un autre
@@ -133,10 +138,13 @@ if (!empty($frm)) {
 		// On envoie une demande de confirmation d'email
 		$form_error_object->add('email_confirm', $GLOBALS['STR_ERR_MISMATCH_EMAIL']);
 	}
-	
+	if (!empty($GLOBALS['site_parameters']['user_tva_intracom_validation_on_registration_page']) && check_if_module_active('vatlayer') && !empty($frm['intracom_for_billing']) && !vatlayer_check_vat($frm['intracom_for_billing'])) {
+		$form_error_object->add('intracom_for_billing', $GLOBALS['STR_MODULE_VATLAYER_ERR_INTRACOM']);
+	}
 	if (!$form_error_object->count()) {
+		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
 		// Le formulaire envoyé est apparemment OK, on le traite
-		if (is_captcha_module_active()) {
+		if (check_if_module_active('captcha')) {
 			// Code OK on peut effacer le code
 			delete_captcha($frm['code_id']);
 		}
@@ -148,24 +156,24 @@ if (!empty($frm)) {
 		$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
 
 		if(!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
-			$output = create_devis_order($frm);
+			$output = Devis::create_devis_order($frm);
 		} else {
 			$output = get_user_register_success($frm);
 		}
-		if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']])) {
+		if (!empty($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][$utilisateur['priv']])) {
 			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
-			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']]);
+			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][$utilisateur['priv']]);
 		} elseif ($_SESSION['session_caddie']->count_products() > 0) {
 			if (empty($_SESSION['session_caddie']->zoneId) || empty($_SESSION['session_caddie']->typeId)) {
 				include($GLOBALS['repertoire_modele'] . "/haut.php");
 				echo $output;
 				include($GLOBALS['repertoire_modele'] . "/bas.php");
 			} else {
-				if (is_socolissimo_module_active()) {
+				if (check_if_module_active('socolissimo')) {
 					// Pour SO Colissimo, si on s'inscrit "en cours de commande", on force le passage vers le caddie de nouveau, sinon le passage par l'interface de SO Colissimo serait zappée ---> Commande incomplète en BDD.
-					redirect_and_die($GLOBALS['wwwroot'] . "/achat/caddie_affichage.php");
+					redirect_and_die(get_url('caddie_affichage'));
 				} else {
-					redirect_and_die($GLOBALS['wwwroot'] . "/achat/achat_maintenant.php");
+					redirect_and_die(get_url('achat_maintenant'));
 				}
 			}
 		} else {
@@ -176,17 +184,11 @@ if (!empty($frm)) {
 		die();
 	}
 }
-// Si on a tenté sans succès de se connecter via un site extérieur et que la connexion a réussi mais qu'aucun compte sur le site n'a été trouvé,
+
+// Si on a tenté sans succès de se connecter via un site extérieur et que la connexion a réussi
 // alors on préremplit les champs d'inscription avec les données du site extérieur
-if (is_facebook_connect_module_active() && !empty($_SESSION['session_utilisateur']['fb_user_info'])) {
-	init_register_form_with_facebook_infos($frm);
-}
-if (is_sign_in_twitter_module_active() && !empty($_SESSION['session_utilisateur']['tw_user_info'])) {
-	init_register_form_with_twinfos($frm);
-}
-if (check_if_module_active('openid') && !empty($_SESSION['session_utilisateur']['openid_user_info'])) {
-	init_register_form_with_openid_infos($frm);
-}
+$hook_result = call_module_hook('account_create', $frm, 'array');
+
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 
 if ($form_error_object->count()) {
@@ -199,7 +201,7 @@ if ($form_error_object->has_error('token')) {
 	echo $form_error_object->text('token');
 }
 
-echo get_user_register_form($frm, $form_error_object, !empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis'));
+echo get_user_register_form($frm, $form_error_object, !empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis'), false, null, $mandatory_fields);
 
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 

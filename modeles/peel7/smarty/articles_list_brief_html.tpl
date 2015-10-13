@@ -3,35 +3,35 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles_list_brief_html.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: articles_list_brief_html.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}{if $is_not_empty}
 	<h1 property="name" class="page_title">{$name|html_entity_decode_if_needed}</h1>
 {/if}
 <div class="rub_content {if $is_not_empty}{$technical_code}{/if}">
 	{if $is_not_empty}
 		{if isset($offline_rub_txt)}
-			<p style="color: red;">{$offline_rub_txt}</p>
+	<p style="color: red;">{$offline_rub_txt}</p>
 		{/if}
 		{if isset($main_image)}
 			{if $main_image.is_pdf}
-				<a style="margin: 5px;" href="{$main_image.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$wwwroot}/images/logoPDF_small.png" alt="{$name}" /></a>
+	<a style="margin: 5px;" href="{$main_image.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);"><img src="{$wwwroot}/images/logoPDF_small.png" alt="{$name}" /></a>
 			{else}
-				<p><img style="margin: 5px;" src="{$main_image.src|escape:'html'}" alt="{$name|escape:'html'}" /></p>
+	<p><img style="margin: 5px;" src="{$main_image.src|escape:'html'}" alt="{$name|escape:'html'}" /></p>
 			{/if}
 		{/if}
-		{$description|html_entity_decode_if_needed|trim|nl2br_if_needed}
+	{$description|html_entity_decode_if_needed|trim|nl2br_if_needed}
 		{if isset($descriptions_clients)}
-		{$descriptions_clients}
+	{$descriptions_clients}
 		{/if}
 		{if isset($reference_multipage)}
-		{$reference_multipage}
+	{$reference_multipage}
 		{/if}
 	{/if}
 	{if isset($add_cart_by_reference)}

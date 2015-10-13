@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -49,7 +49,7 @@
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}: </td>
 			<td>
-				<select class="form-control" name="site_id">
+				<select class="form-control" name="site_id" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
 			</td>
@@ -72,7 +72,7 @@
 		{% for field in products_table_additionnal_fields_array %}
  		<tr>
 			<td class="title_label top">{{ field.title }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" value="{{ field.value|str_form_value }}" id="{{ field.name|str_form_value }}" name="{{ field.name|str_form_value }}" /></td>
+			<td><input type="{{ field.type|str_form_value }}"  class="form-control" value="{{ field.value|str_form_value }}" id="{{ field.name|str_form_value }}" name="{{ field.name|str_form_value }}" /></td>
 		</tr>
 		{% endfor %} 
 	{% endif %}
@@ -110,7 +110,7 @@
 	{% endif %}
 	{% if display_recommanded_product_on_cart_page %}
 		<tr>
-			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_ON_CART_PAGEe}}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="title_label top">{{ STR_ADMIN_PRODUITS_IS_ON_CART_PAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="recommanded_product_on_cart_page" value="1"{% if is_recommanded_product_on_cart_page %} checked="checked"{% endif %} /></td>
 		</tr>
 	{% endif %}
@@ -147,6 +147,10 @@
 			<td class="title_label">{{ STR_ADMIN_PRODUITS_PRICE_IN }} <b>{{ site_symbole }} {{ ttc_ht }}</b>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left"><input type="text" class="form-control" name="prix" value="{{ prix|str_form_value }}" /></td>
 		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_PRODUITS_PRICE_PROMOTION }} <b>{{ site_symbole }} {{ ttc_ht }}</b>{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="left"><input type="text" class="form-control" name="prix_promo" value="{{ prix_promo|str_form_value }}" /></td>
+		</tr>
 	{% if is_reseller_module_active %}
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_PRODUITS_RESELLER_PRICE_IN }} <b>{{ site_symbole }} {{ reseller_price_taxes_txt }}</b>{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -157,6 +161,10 @@
 		<tr>
 			<td class="title_label">{{ STR_CONDITIONNEMENT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left"><input type="text" class="form-control" name="conditionnement" value="{{ conditionnement|str_form_value }}" /></td>
+		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_PRODUITS_UNIT_PER_PALLET }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td class="left"><input type="text" class="form-control" name="unit_per_pallet" value="{{ unit_per_pallet|str_form_value }}" /></td>
 		</tr>
 	{% endif %}
 		<tr>
@@ -312,7 +320,7 @@
 	{% if is_attributes_module_active %}
 		<tr>
 			<td colspan="2">
-				<div class="alert alert-info">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO }}{{ STR_BEFORE_TWO_POINTS }}: {% if mode == "maj" %}<a href="{{ produits_attributs_href|escape('html') }}">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK }}</a>{% else %}{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER }} <a href="{{ nom_attributs_href|escape('html') }}">{{ nom_attributs_href }}</a>{% endif %}</div></td>
+				<div class="alert alert-info">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO }}{{ STR_BEFORE_TWO_POINTS }}: {% if mode == "maj" %}<a href="{{ produits_attributs_href|escape('html') }}" class="alert-link" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK }}</a>{% else %}{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER }} <a href="{{ nom_attributs_href|escape('html') }}">{{ nom_attributs_href }}</a>{% endif %}</div></td>
 		</tr>
 	{% endif %}
 		<tr>
@@ -424,7 +432,7 @@
 		{% if (files.i) %}
 		<tr>
 			<td class="title_label">{% if files.i.type == 'img' %}{{ STR_IMAGE }} {% else %}{{ STR_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{% include "uploaded_file.tpl" with {'f':f,'STR_DELETE':STR_ADMIN_DELETE_THIS_FILE} %}</td>
+			<td>{% include "uploaded_file.tpl" with {'f':files.i,'STR_DELETE':STR_DELETE_THIS_FILE } %}</td>
 		</tr>
 		{% else %}
 		<tr>
@@ -447,29 +455,16 @@
 			</td>
 		</tr>
 		{% if (c.images) %}
-		{% for i in c.images|keys %}
-		{% if (f) %}
+			{% for i in c.images|keys %}
 		<tr>
 			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				{{ STR_ADMIN_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}: {{ files.i.nom }} &nbsp;
-				<a href="{{ files.i.sup_href|escape('html') }}">
-				<img src="{{ drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_ADMIN_DELETE_IMAGE }}</a>
-				<input type="hidden" name="imagecouleur{{ c.id }}_{{ i }}" value="{{ files.i.nom|str_form_value }}" />
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2" class="center">{% if files.i.is_pdf %}<img src="{{ pdf_logo_src|escape('html') }}" alt="pdf" width="100" height="100" />{% else %}<img src="{{ files.i.src|escape('html') }}" alt="" />{% endif %}</td>
-		</tr>
-		{% else %}
-		<tr>
-			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
+				{% if c.images.i %}
+				{% include "uploaded_file.tpl" with {'f':c.images.i,'STR_DELETE':STR_DELETE_THIS_FILE } %}
+				{% else %}
 				<input class="form-control" name="imagecouleur{{ c.id }}_{{ i }}" type="file" value="" />
-			</td>
-		</tr>
-		{% endif %}
-		{% endfor %}
+				{% endif %}
+			{% endfor %}
 		{% else %}
 		<tr>
 			<td class="title_label" id="td_{{ c.id }}" colspan="2"><a href="" onclick="addImagesFields('{{ c.id|filtre_javascript }}','{{ upload_images_per_color|filtre_javascript }}');return false">{{ STR_ADMIN_PRODUITS_ADD_INPUT_FOR_THIS_COLOR }}</a></td>

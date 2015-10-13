@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 
 /**
  * getMoneyBookersForm()
@@ -41,9 +41,9 @@ function getMoneyBookersForm($pay_to_email, $order_id, $lang, $user_id, $user_em
 	$tpl->assign('pay_to_email', $pay_to_email);
 	$tpl->assign('order_id', $order_id);
 	$tpl->assign('try', $_SESSION['session_moneybookers_try']);
-	$tpl->assign('return_url', $GLOBALS['wwwroot'] . '/modules/moneybookers/ok.php');
-	$tpl->assign('cancel_url', $GLOBALS['wwwroot'] . '/modules/moneybookers/nok.php');
-	$tpl->assign('status_url', $GLOBALS['wwwroot'] . '/modules/moneybookers/ipn.php');
+	$tpl->assign('return_url', get_url('/modules/moneybookers/ok.php'));
+	$tpl->assign('cancel_url', get_url('/modules/moneybookers/nok.php'));
+	$tpl->assign('status_url', get_url('/modules/moneybookers/ipn.php'));
 	$tpl->assign('lang', $lang);
 	$tpl->assign('user_id', $user_id);
 	$tpl->assign('user_email', $user_email);

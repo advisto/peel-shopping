@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: display_product.php 47320 2015-10-12 13:55:00Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -50,12 +50,8 @@ if (!function_exists('get_produit_details_html')) {
 			$display_first_image_on_mini_pictures_list = true;
 			$imgInfo = null;
 			if (!empty($product_images[0])) {
-				if (pathinfo($product_images[0], PATHINFO_EXTENSION) == 'pdf') {
-					$this_thumb = thumbs('logoPDF_small.png', $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', $GLOBALS['dirroot'] .'/images/');
-				} else {
-					$this_thumb = thumbs($product_images[0], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
-				}
-				$imgInfo = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . $this_thumb);
+				$this_thumb = thumbs($product_images[0], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
+				$imgInfo = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($this_thumb));
 			}
 			if(!empty($imgInfo)) {
 				if (!empty($GLOBALS['site_parameters']['lightbox_gallery_enable'])) {
@@ -100,7 +96,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$tpl->assign('main_image', array(
 						'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($product_images[0]),
 						'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-						'is_pdf' => !(pathinfo($product_images[0], PATHINFO_EXTENSION) != 'pdf')
+						'is_pdf' => (get_file_type($product_images[0]) == 'pdf')
 					));
 			}
 			$tpl->assign('a_zoom_attributes', vb($a_zoom_attributes));
@@ -115,10 +111,10 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					'txt' => false, 
 					'value' => $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS']
 					));
-			} elseif ($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) != 0) {
+			} elseif ($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) != 0) {
 				$tpl->assign('title_price', array(
 					'txt' => false, 
-					'value' => str_replace(' ', ' ', $product_object->affiche_prix(display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, false, 'title_price', false, true, 'price_in_product_title', true, true))
+					'value' => str_replace(' ', ' ', $product_object->affiche_prix(display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, false, 'title_price', false, true, 'price_in_product_title', true, true))
 					));
 			} else {
 				$tpl->assign('title_price', array(
@@ -130,7 +126,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$tpl->assign('subscribe_trip_form', get_subscribe_trip_form($product_object->id, vn($_SESSION['session_utilisateur']['id_utilisateur'])));
 				$tpl->assign('display_registred_user', display_registred_user($product_object->id));
 			}
-			if (is_module_vacances_active()) {
+			if (check_if_module_active('vacances')) {
 				if (get_vacances_type() == 1) {
 					$tpl->assign('global_error', array(
 						'txt' => vb($GLOBALS['site_parameters']['module_vacances_client_msg_' . $_SESSION['session_langue']]), 
@@ -150,7 +146,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					}
 				}
 			}
-			$tpl->assign('link_contact', $GLOBALS["wwwroot"] . '/utilisateurs/contact.php');
+			$tpl->assign('link_contact', get_url('/utilisateurs/contact.php'));
 			$tpl->assign('contact', $GLOBALS["STR_CONTACT"]);
 			$tpl->assign('product_detail_image', $GLOBALS['site_parameters']['general_product_image']);
 			$tpl->assign('product_name', $product_object->name);
@@ -165,16 +161,16 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			} else {
 				$current_catid = $product_object->categorie_id;
 			}
-			$prev = (is_module_precedent_suivant_active() ? show_preview_next($product_object->id, $product_object->position, 'prev', $current_catid) : '');
-			$next = (is_module_precedent_suivant_active() ? show_preview_next($product_object->id, $product_object->position, 'next', $current_catid) : '');
+			$prev = (check_if_module_active('precedent_suivant') ? show_preview_next($product_object->id, $product_object->position, 'prev', $current_catid) : '');
+			$next = (check_if_module_active('precedent_suivant') ? show_preview_next($product_object->id, $product_object->position, 'next', $current_catid) : '');
 			$tpl->assign('prev', $prev);
 			$tpl->assign('next', $next);
 			
-			if ($product_object->is_price_flash(is_reseller_module_active() && is_reseller())) {
+			if ($product_object->is_price_flash(check_if_module_active('reseller') && is_reseller())) {
 				$tpl->assign('flash_txt', $GLOBALS['STR_TEXT_FLASH1'] . ' ' . get_formatted_duration(strtotime($product_object->flash_end) - time(), false, 'day') . ' ' . $GLOBALS['STR_TEXT_FLASH2']);
 			}
 			
-			if (a_priv('admin_products', false)) {
+			if (empty($GLOBALS['site_parameters']['admin_product_edit_links_in_front_office_disable']) && a_priv('admin_products', false)) {
 				$tpl->assign('admin', array(
 					'href' => $GLOBALS['administrer_url'] . '/produits.php?mode=modif&id=' . $product_object->id,
 					'modify_txt' => $GLOBALS['STR_MODIFY_PRODUCT'],
@@ -227,17 +223,18 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 						// On n'affiche pas l'image principale pour Jq zoom, puisque l'image principal est intervertit avec l'image secondaire.
 					} else {
 						$vignette_id = 'vignette' . $key;
-						if (pathinfo($name, PATHINFO_EXTENSION) == 'pdf') {
-							$tmp_imgs[] = array(
-								'is_pdf' => true,
-								'href' => $GLOBALS['repertoire_upload'] . '/' . $name,
-							);
-						} else {
+						if (get_file_type($name) == 'image') {
 							$small_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($name, $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 							$tmp_imgs[] = array(
-								'is_pdf' => false,
+								'is_image' => true,
 								'id' => $vignette_id,
 								'a_attr' => str_replace(array('[SMALL_IMAGE]', '[ZOOM_IMAGE]', '[VIGNETTE_CLASS]'), array($small_image, $GLOBALS['repertoire_upload'] . '/' . $name, $vignette_id), $a_other_pictures_attributes),
+								'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($name, $secondary_images_width, $secondary_images_height, 'fit'),
+							);
+						} else {
+							$tmp_imgs[] = array(
+								'is_image' => false,
+								'href' => $GLOBALS['repertoire_upload'] . '/' . $name,
 								'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($name, $secondary_images_width, $secondary_images_height, 'fit'),
 							);
 						}
@@ -252,10 +249,10 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					'txt' => $GLOBALS['STR_TELL_FRIEND']
 				));
 			}
-			if (check_if_module_active('facebook')) {
+			if (check_if_module_active('facebook') && empty($GLOBALS['site_parameters']['facebook_like_disable'])) {
 				$tpl->assign('display_facebook_like', display_facebook_like(get_current_url(true)));
 			}
-			if (is_module_avis_active()) {
+			if (check_if_module_active('avis')) {
 				$q_average_rating = query("SELECT AVG(note) AS average_rating
 					FROM peel_avis
 					WHERE id_produit = '" . intval($product_object->id) . "' AND etat = '1'");
@@ -287,12 +284,18 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					'STR_POSTED_OPINIONS' => $GLOBALS['STR_POSTED_OPINIONS'],
 					'STR_MODULE_AVIS_NOTE' => $GLOBALS['STR_MODULE_AVIS_NOTE'],
 					'nb_avis' => array_sum($notation_array),
-					'star_src' => $GLOBALS['wwwroot'] . '/images/star1.gif',
+					'star_src' => get_url('/images/star1.gif'),
 					'average_rating' => $average_rating,
 					'display_opinion_resume_in_product_page' => !empty($GLOBALS['site_parameters']['display_opinion_resume_in_product_page'])
 				));
 			}
-			if (is_module_pensebete_active()) {
+			if (!empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
+				$tpl->assign('add_easy_list', array(
+					'href' => $GLOBALS['wwwroot']. '/search.php?type=quick_add_product_from_search_page&prodid=' . $product_object->id . '&quantite=1',
+					'txt' => $GLOBALS['STR_PRODUCT_ADD_TO_EASY_LIST']
+				));
+			}
+			if (check_if_module_active('pensebete')) {
 				$tpl->assign('pensebete', array(
 					'href' => $GLOBALS['wwwroot'] . '/modules/pensebete/ajouter.php?mode=ajout&prodid=' . $product_object->id,
 					'src' => $GLOBALS['site_parameters']['general_add_notepad_image'],
@@ -342,18 +345,20 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			if(!empty($GLOBALS['site_parameters']['show_qrcode_on_product_pages'])) {
 				$tpl->assign('qrcode_image_src', $product_object->qrcode_image_src());
 			}
+			if(!empty($GLOBALS['site_parameters']['show_barcode_on_product_pages'])) {
+				$tpl->assign('barcode_image_src', $product_object->barcode_image_src());
+			}
 			$tpl->assign('extra_link', $product_object->extra_link);
 
-			if (is_lot_module_active()) {
-				include ($GLOBALS['fonctionslot']);
+			if (check_if_module_active('lot')) {
 				$tpl->assign('explanation_table', get_lot_explanation_table($product_object->id, $product_object->categorie_id));
 			}
 
-			if (!empty($product_object->on_check) && is_module_gift_checks_active()) {
+			if (!empty($product_object->on_check) && check_if_module_active('gift_check')) {
 				$tpl->assign('check', affiche_check($product_object->id, 'cheque', null, true));
 			} else {
 				if (empty($product_object->on_estimate)) {
-					if($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), false, false, 1, true, true, false)!=0 || vb($GLOBALS['site_parameters']['show_add_to_cart_on_free_products'])) {
+					if($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), false, false, 1, true, true, false)!=0 || vb($GLOBALS['site_parameters']['show_add_to_cart_on_free_products'])) {
 						$tpl->assign('critere_stock', affiche_critere_stock($product_object, 'details', null, true));
 					} else {
 						$tpl->assign('critere_stock', '');
@@ -388,8 +393,7 @@ WHERE id="' . $product_object->id . '" AND ' . get_filter_site_cond('produits') 
 				$tabs = array();
 				// pour connaitre le nombre total d'onglets, on initialise un compteur
 				$j = 0;
-				if (!empty($GLOBALS['site_parameters']['display_opinion_on_product_tab']) && is_module_avis_active()) {
-					include($GLOBALS['fonctionsavis']);
+				if (!empty($GLOBALS['site_parameters']['display_opinion_on_product_tab']) && check_if_module_active('avis')) {
 					$render_avis_public_list = render_avis_public_list($product_object->id, 'produit', null, true);
 					if (!empty($render_avis_public_list)) {
 						$tabs[] = array(
@@ -405,7 +409,7 @@ WHERE id="' . $product_object->id . '" AND ' . get_filter_site_cond('produits') 
 					for ($i = 1; $i <= 6; $i++) {
 						$title = trim($tab['tab' . $i . '_title']);
 						if (!empty($title)) {
-							$tab_html = trim($tab['tab' . $i . '_html']);
+							$tab_html = template_tags_replace(trim($tab['tab' . $i . '_html']));
 							$tabs[] = array(
 								'tab_id' => 'tab_' .  $i,
 								'index' => $i,
@@ -466,22 +470,20 @@ if (!function_exists('get_products_list_brief_html')) {
 			ORDER BY position";
 		$rescat = query($sqlcat);
 		if ($cat_infos = fetch_assoc($rescat)) {
-			$page_title = String::html_entity_decode_if_needed($cat_infos['nom_' . $_SESSION['session_langue']]);
-			$GLOBALS['meta_title'] = $page_title;
-			foreach(explode(' ', $cat_infos['meta_titre']) as $this_word) {
-				if ((String::strlen($this_word)>=3 && String::strpos(String::strtolower(' '.$page_title.' '), String::strtolower(' '.$this_word.' ')) === false) && String::strlen($page_title . ' ' . $this_word) < 80) {
-					if (empty($GLOBALS['site_parameters']['get_straight_category_page_title'])) {
-						// On retouche la méta titre de la page
-						if(String::strpos($page_title, ' - ') === false) {
-							$page_title .= ' - ';
+			$page_h1 = String::html_entity_decode_if_needed($cat_infos['nom_' . $_SESSION['session_langue']]);
+			if (empty($GLOBALS['site_parameters']['get_straight_category_page_title'])) {
+				// Pour un meilleur référencement, on améliore la balise h1 présente sur la page
+				foreach(explode(' ', $cat_infos['meta_titre']) as $this_word) {
+					if ((String::strlen($this_word)>=3 && String::strpos(String::strtolower(' '.$page_h1.' '), String::strtolower(' '.$this_word.' ')) === false) && String::strlen($page_h1 . ' ' . $this_word) < 80) {
+						if(String::strpos($page_h1, ' - ') === false) {
+							$page_h1 .= ' -';
 						}
-						$page_title .= ' ' . $this_word;
+						$page_h1 .= ' ' . $this_word;
 					}
-					$GLOBALS['meta_title'] .= ' ' . $this_word;
 				}
 			}
 			$cat = array(
-				'name' => $page_title,
+				'name' => $page_h1,
 			);
 			if (a_priv('admin_products', false)) {
 				$cat['admin'] = array(
@@ -497,7 +499,7 @@ if (!function_exists('get_products_list_brief_html')) {
 				if(!empty($this_thumb)) {
 					$cat['image'] = array(
 						'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-						'name' => $cat_infos['nom_' . $_SESSION['session_langue']]
+						'name' => String::html_entity_decode_if_needed($cat_infos['nom_' . $_SESSION['session_langue']])
 					);
 				}
 			}
@@ -529,6 +531,14 @@ if (!function_exists('get_products_list_brief_html')) {
 				$tpl->assign('subcategories', $subcategories_table);
 			}
 		}
+
+		if (!empty($GLOBALS['site_parameters']['display_main_categories_on_subcategory_pages'])) {
+			$tpl->assign('main_categories', get_categories_output(null, 'categories', null, 'html', '&nbsp;&nbsp;', null, null, false, 25, null, 0, $catid));
+		}
+		if(empty($subcategories_table) && empty($cat['description'])) {
+			// Ne pas afficher le titre "Liste des produits" ensuite car rien au-dessus => On affiche directement les produits
+			$GLOBALS['STR_LIST_PRODUCT'] = '';
+		}
 		$additional_sql_cond = '';
 		$tpl->assign('associated_products', affiche_produits($catid, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond));
 		return $tpl->fetch();
@@ -549,11 +559,12 @@ if (!function_exists('affiche_prix')) {
 	 * @param mixed $display_old_price
 	 * @param string $table_css_class
 	 * @param boolean $display_old_price_inline
-	 * @param boolean $display_with_vat_symbol
+	 * @param boolean $force_display_with_vat_symbol
 	 * @param boolean $add_rdfa_properties
+	 * @param boolean $display_minimal_price
 	 * @return
 	 */
-	function affiche_prix(&$product_object, $with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $display_with_vat_symbol = true, $add_rdfa_properties = false, $display_minimal_price = false)
+	function affiche_prix(&$product_object, $with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $force_display_with_vat_symbol = true, $add_rdfa_properties = false, $display_minimal_price = null)
 	{
 		static $tpl;
 		$output = '';
@@ -561,13 +572,21 @@ if (!function_exists('affiche_prix')) {
 			if(empty($tpl)) {
 				$tpl = $GLOBALS['tplEngine']->createTemplate('prix.tpl');
 			}
+			if($display_minimal_price === null) {
+				$display_minimal_price = vb($GLOBALS['site_parameters']['product_display_minimal_price'], false);
+			}
 			$tpl->assign('table_css_class', $table_css_class);
 			$tpl->assign('about', '#product'.$product_object->id);
 			$tpl->assign('item_id', $item_id);
 			$tpl->assign('display_old_price_inline', $display_old_price_inline);
+			if((!display_prices_with_taxes_active() || !empty($GLOBALS['site_parameters']['price_force_tax_display_on_product_and_category_pages']))) {
+				$display_with_vat_symbol = true;
+			} else {
+				$display_with_vat_symbol = false;
+			}
+
 			if (!empty($display_minimal_price)) {
-				$tpl->assign('STR_FROM', $GLOBALS['STR_FROM']);
-				$tpl->assign('final_price', $product_object->get_minimal_price());
+				$tpl->assign('final_price', $GLOBALS['STR_FROM'] . ' ' . $product_object->get_minimal_price());
 			} else {
 				$tpl->assign('final_price', $product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode, true, $display_with_vat_symbol, 1, true, true, $add_rdfa_properties));
 			}
@@ -576,7 +595,7 @@ if (!function_exists('affiche_prix')) {
 			} else {
 				$tpl->assign('original_price', null);
 			}
-			if ($display_ecotax && !empty($product_object->ecotaxe_ht) && is_module_ecotaxe_active()) {
+			if ($display_ecotax && !empty($product_object->ecotaxe_ht) && check_if_module_active('ecotaxe')) {
 				$tpl->assign('ecotax', array(
 					'label' => $GLOBALS['STR_WITH_ECOTAX'] . $GLOBALS['STR_BEFORE_TWO_POINTS'],
 					'prix' => fprix($product_object->get_ecotax($with_taxes), true)
@@ -587,12 +606,12 @@ if (!function_exists('affiche_prix')) {
 			if ($display_with_measurement && !empty($product_object->poids) && $product_object->display_price_by_weight == '1') {
 				$tpl->assign('measurement', array(
 					'label' => $GLOBALS['STR_PRICE_WEIGHT'],
-					'prix' => fprix($product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode) * 1000 / intval($product_object->poids), true)
+					'prix' => fprix($product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode, false, false, 1000 / floatval($product_object->poids)), true)
 				));
 			} elseif ($display_with_measurement && !empty($product_object->volume) && $product_object->display_price_by_weight == '2') {
 				$tpl->assign('measurement', array(
 					'label' => $GLOBALS['STR_PRICE_LITRE'],
-					'prix' => fprix($product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode) * 1000 / intval($product_object->volume), true)
+					'prix' => fprix($product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode, false, false, 1000 / floatval($product_object->volume)), true)
 				));
 			}else {
 				$tpl->assign('measurement', null);
@@ -727,6 +746,7 @@ if (!function_exists('affiche_produits')) {
 
 		$prods = array();
 		$j = 0;
+		$total = 0;
 		foreach ($results_array as $prod) {
 			if ((!a_priv("admin_product") && !a_priv("reve")) && $prod['on_reseller'] == 1) {
 				continue;
@@ -735,7 +755,7 @@ if (!function_exists('affiche_produits')) {
 			$tmpProd = $prod;
 			$tmpProd['display_border'] = (($j % $params['nb_colonnes'] != $params['nb_colonnes'] - 1) && ($j != count($results_array) - 1));
 			
-			$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active(), !empty($params['show_draft']));
+			$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'), !empty($params['show_draft']));
 			// on affiche une cellule
 			$tmpProd['i'] = $j + 1;
 			
@@ -745,12 +765,14 @@ if (!function_exists('affiche_produits')) {
 			}
 			if ($type == 'save_cart') { // Si on est dans le module save_cart on ajoute les actions du module
 				$tmpProd['save_cart'] = array(
-					'src' => $GLOBALS['wwwroot'] . '/' . $GLOBALS['site_parameters']['backoffice_directory_name'] . '/images/b_drop.png',
+					'src' => get_url('/' . $GLOBALS['site_parameters']['backoffice_directory_name'] . '/images/b_drop.png'),
 					'href' => get_current_url(false) . '?mode=delete&id=' . $prod['save_cart_id'],
 					'confirm_msg' => $GLOBALS['STR_DELETE_CART_PRESERVATION'],
 					'title' => $GLOBALS['STR_DELETE_CART_TITLE'],
 					'label' => $GLOBALS['STR_DELETE']
 				);
+				// Calcul du total TTC de produit.
+				$total += $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), false, false, $prod['saved_quantity']);
 			}
 			$tmpProd['href'] = $product_object->get_product_url();
 			$tmpProd['name'] = $product_object->name;
@@ -765,7 +787,7 @@ if (!function_exists('affiche_produits')) {
 				$display_picture = $product_object->get_product_main_picture(true);
 			}
 			if (!empty($display_picture)) {
-				if (pathinfo($display_picture, PATHINFO_EXTENSION) == 'pdf') {
+				if (get_file_type($display_picture) == 'pdf') {
 					$tmpProd['image'] = array(
 						'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs('logoPDF_small.png', $params['small_width'], $params['small_height'], 'fit', $GLOBALS['dirroot'] .'/images/'),
 						'width' => $GLOBALS['site_parameters']['small_width'],
@@ -774,6 +796,7 @@ if (!function_exists('affiche_produits')) {
 						'zoom' => array(
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $display_picture,
 							'is_lightbox' => false,
+							'is_pdf' => true,
 							'label' => $GLOBALS['STR_ZOOM']
 						)
 					);
@@ -785,7 +808,7 @@ if (!function_exists('affiche_produits')) {
 						'alt' => $product_object->name,
 						'zoom' => array(
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $display_picture,
-							'is_lightbox' => true,
+							'is_lightbox' => empty($GLOBALS['site_parameters']['lightbox_disable']),
 							'label' => $GLOBALS['STR_ZOOM']
 						)
 					);
@@ -800,7 +823,7 @@ if (!function_exists('affiche_produits')) {
 			} else {
 				$tmpProd['image'] = null;
 			}
-			if ($product_object->is_price_flash(is_reseller_module_active() && is_reseller())) {
+			if ($product_object->is_price_flash(check_if_module_active('reseller') && is_reseller())) {
 				$tmpProd['flash'] = $GLOBALS['STR_TEXT_FLASH1'] . ' ' . get_formatted_duration(strtotime($product_object->flash_end) - time(), false, 'day') . ' ' . $GLOBALS['STR_TEXT_FLASH2'];
 			}
 			if (check_if_module_active('participants') && est_identifie() && $_SESSION['session_utilisateur']['id_utilisateur'] != $product_object->id_utilisateur) {
@@ -811,9 +834,9 @@ if (!function_exists('affiche_produits')) {
 				$tmpProd['on_estimate'] = display_on_estimate_information(true);
 			} elseif($product_object->on_gift) {
 				$tmpProd['on_estimate'] = $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS'];
-			} elseif($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) != 0) {
+			} elseif($product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) != 0) {
 				if ((vn($GLOBALS['site_parameters']['category_order_on_catalog']) != 1) && ($type != 'save_cart') && empty($GLOBALS['site_parameters']['disable_add_to_cart_section_for_products'])) {
-					$tmpProd['on_estimate'] = $product_object->affiche_prix(display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, false, null, false, true, 'full_width', ($params['mode'] != 'line'), false, !display_prices_with_taxes_active());
+					$tmpProd['on_estimate'] = $product_object->affiche_prix(display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, false, null, false, true, 'full_width', ($params['mode'] != 'line'), false, null);
 				}
 			} else {
 				$tmpProd['on_estimate'] = '<span class="title_price_free">'.$GLOBALS['STR_FREE'].'</span>';
@@ -822,7 +845,7 @@ if (!function_exists('affiche_produits')) {
 				$tmpProd['stock_state'] = $product_object->get_product_stock_state();
 			}
 			if (vn($GLOBALS['site_parameters']['category_order_on_catalog']) == '1' || $type == 'save_cart') {
-				if (!empty($product_object->on_check) && is_module_gift_checks_active()) {
+				if (!empty($product_object->on_check) && check_if_module_active('gift_check')) {
 					$tmpProd['check_critere_stock'] = affiche_check($product_object->id, 'cheque', null, true);
 				} else {
 					if ($type == 'save_cart') {
@@ -834,7 +857,7 @@ if (!function_exists('affiche_produits')) {
 					}
 				}
 			}
-			if (a_priv('admin_products', false)) {
+			if (empty($GLOBALS['site_parameters']['admin_product_edit_links_in_front_office_disable']) && a_priv('admin_products', false)) {
 				$tmpProd['admin'] = array(
 					'href' => $GLOBALS['administrer_url'] . '/produits.php?mode=modif&id=' . $product_object->id,
 					'label' => $GLOBALS['STR_MODIFY_PRODUCT']
@@ -864,6 +887,12 @@ if (!function_exists('affiche_produits')) {
 		$tpl->assign('nb_col_sm', min($params['nb_colonnes'],3));
 		$tpl->assign('nb_col_md', $params['nb_colonnes']);
 		$tpl->assign('vars', $template_additional_variables);
+
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_TOTAL', $GLOBALS['STR_TOTAL'] .' '. (display_prices_with_taxes_active() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
+		if (!empty($total)) {
+			$tpl->assign('total', fprix($total, true));
+		} 
 
 		// Si il n'y a pas de produit associé, on ne retourne rien
 		if ($type == 'associated_product' && $j == 0) {
@@ -930,9 +959,9 @@ if (!function_exists('affiche_critere_stock')) {
 			$selected_color_id = 0;
 		}
 	
-		$product_object->set_configuration($selected_color_id, $saved_size_id, $saved_attributs_list, is_reseller_module_active() && is_reseller(), false);
+		$product_object->set_configuration($selected_color_id, $saved_size_id, $saved_attributs_list, check_if_module_active('reseller') && is_reseller(), false);
 		if (check_if_module_active('stock_advanced') && $product_object->on_stock == 1) {
-			$product_stock_infos = get_product_stock_infos($product_object->id);
+			$product_stock_infos = get_product_stock_infos($product_object->id, $product_object->configuration_size_id, $product_object->configuration_color_id);
 			// on regarde la quantité du produit en stock
 			$stock_remain_all = 0;
 			if (!empty($product_stock_infos)) {
@@ -969,10 +998,10 @@ if (!function_exists('affiche_critere_stock')) {
 			
 		if (empty($product_object->on_rupture)) {
 			$colors_array = $product_object->get_possible_colors();
-			$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
-			$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
+			$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
+			$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 			
-			if(empty($GLOBALS['site_parameters']['show_add_to_cart_on_free_products']) && ($product_object->on_estimate || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) == 0 && empty($colors_array) && empty($sizes_infos_array) && empty($attributs_infos_array) && !empty($GLOBALS['site_parameters']['disable_add_to_cart_section_if_null_base_price_and_no_option']) || (!empty($GLOBALS['site_parameters']['disable_add_to_cart_section_for_products'])))) {
+			if(empty($GLOBALS['site_parameters']['show_add_to_cart_on_free_products']) && ($product_object->on_estimate || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) == 0 && empty($colors_array) && empty($sizes_infos_array) && empty($attributs_infos_array) && !empty($GLOBALS['site_parameters']['disable_add_to_cart_section_if_null_base_price_and_no_option']) || (!empty($GLOBALS['site_parameters']['disable_add_to_cart_section_for_products'])))) {
 				// Si le produit est "sur devis", cette fonction affiche_critere_stock ne doit pas être utilisé, de la même façon que si le produit n'a pas de prix
 				return false;
 			}
@@ -1060,9 +1089,10 @@ if (!function_exists('affiche_critere_stock')) {
 							// Comme on fait une sélection par défaut de la taille, on doit mettre à jour le prix automatiquement au chargement
 							$update_product_price_needed = true;
 						}
-						if (!empty($this_size_infos['row_final_price']) && $this_size_infos['row_final_price'] > 0) {
+						
+						if (!empty($this_size_infos['row_final_price']) && $this_size_infos['row_final_price'] > 0 && (empty($GLOBALS['site_parameters']['disable_display_size_overcost']))) {
 							$option_content .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': +' . fprix($this_size_infos['final_price_formatted'], true);
-						} elseif (!empty($this_size_infos['row_final_price']) && $this_size_infos['row_final_price'] < 0) {
+						} elseif (!empty($this_size_infos['row_final_price']) && $this_size_infos['row_final_price'] < 0 && (empty($GLOBALS['site_parameters']['disable_display_size_overcost']))) {
 							$option_content .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . fprix($this_size_infos['final_price_formatted'], true);
 						}
 						if (check_if_module_active('stock_advanced') && $product_object->on_stock == 1) {
@@ -1186,7 +1216,7 @@ if (!function_exists('affiche_critere_stock')) {
 			$tpl->assign('product_affiche_prix', $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS']);
 		} else {
 			$display_old_price_inline = (vn($GLOBALS['site_parameters']['category_order_on_catalog']) == '1') ? false : true;
-			$tpl->assign('product_affiche_prix', $product_object->affiche_prix(display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, true, 'prix_' . $product_object->id . $save_suffix_id, true, true, 'full_width', $display_old_price_inline, true, !display_prices_with_taxes_active()));
+			$tpl->assign('product_affiche_prix', $product_object->affiche_prix(display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, 'prix_' . $product_object->id . $save_suffix_id, true, true, 'full_width', $display_old_price_inline, true, null));
 		}
 		
 		if (!empty($product_object->on_rupture) && !$is_in_catalog) {
@@ -1199,10 +1229,11 @@ if (!function_exists('affiche_critere_stock')) {
 		}
 		if (empty($product_object->on_rupture)) {
 			// On peut commander
-			if (is_giftlist_module_active() && isset($listcadeaux_owner)) {
+			if (check_if_module_active('listecadeau') && isset($listcadeaux_owner)) {
 				$q_owner = getNessQuantityFromGiftList($product_object->id, $selected_color_id, $saved_size_id, $listcadeaux_owner);
 			} else {
-				$q_owner = 1;
+				// quantité par défaut administrable, sauf pour les produits les produit "liste d'achat" pour lesquelles la quantité sauvegardée doit être affichée.
+				$q_owner = vn($GLOBALS['site_parameters']['product_default_quantity'], 1);
 			}
 			if (empty($product_object->on_estimate)) {
 				$tpl->assign('on_estimate', false);
@@ -1214,10 +1245,11 @@ if (!function_exists('affiche_critere_stock')) {
 					if (!empty($saved_quantity)) {
 						$tpl->assign('qte_value', intval($saved_quantity));
 					} else {
-						$tpl->assign('qte_value', 1);
+						// quantité par défaut administrable, sauf pour les produits du panier sauvegardé pour lesquelles la quantité sauvegardée doit être affichée.
+						$tpl->assign('qte_value', vn($GLOBALS['site_parameters']['product_default_quantity'], 1));
 					}
 				}
-				if (is_giftlist_module_active()) {
+				if (check_if_module_active('listecadeau')) {
 					$tpl->assign('giftlist', array(
 						'listcadeaux_owner' => vn($listcadeaux_owner),
 						'id' => $product_object->id,
@@ -1413,10 +1445,13 @@ if (!function_exists('get_product_in_container_html')) {
 	 * @param boolean $only_show_products_with_picture
 	 * @return
 	 */
-	function get_product_in_container_html(&$product_object, $only_show_products_with_picture = true, $display_minimal_price = false)
+	function get_product_in_container_html(&$product_object, $only_show_products_with_picture = true, $display_minimal_price = null)
 	{
 		static $tpl;
 		$output = '';
+		if($display_minimal_price === null) {
+			$display_minimal_price = vb($GLOBALS['site_parameters']['product_display_minimal_price'], false);
+		}
 		if (!empty($product_object->id) && !empty($product_object->etat)) {
 			$urlprod = $product_object->get_product_url();
 			$display_picture = $product_object->get_product_main_picture();
@@ -1429,6 +1464,8 @@ if (!function_exists('get_product_in_container_html')) {
 				if (!empty($product_object->id_utilisateur)) {
 					$user_info = get_user_information($product_object->id_utilisateur);
 					$tpl->assign('user', array('pseudo'=>$user_info['pseudo']));
+				} else {
+					$tpl->assign('user', null);
 				}
 				$tpl->assign('href', $urlprod);
 				$tpl->assign('name', $product_object->name);
@@ -1447,7 +1484,7 @@ if (!function_exists('get_product_in_container_html')) {
 				} elseif ($product_object->on_gift) {
 					$tpl->assign('on_estimate', $product_object->on_gift_points . ' ' . $GLOBALS['STR_GIFT_POINTS']);
 				} else {
-					$tpl->assign('on_estimate', $product_object->affiche_prix(display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller(), true, false, null, false, false, 'full_width', true, false, !display_prices_with_taxes_active(), $display_minimal_price));
+					$tpl->assign('on_estimate', $product_object->affiche_prix(display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, false, null, false, false, 'full_width', true, false, null, $display_minimal_price));
 				}
 
 				$output .= $tpl->fetch();
@@ -1495,19 +1532,19 @@ if (!function_exists('display_javascript_for_price_update')) {
 		$output = '';
 		$get_infos_js = '';
 		$get_javascript_price = array();
-		$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
+		$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 		if(!empty($product_object2)) {
-			foreach($product_object2->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) as $this_key => $this_value) {
+			foreach($product_object2->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) as $this_key => $this_value) {
 				$attributs_infos_array[$this_key] = $this_value;
 			}
 		}
-		$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller());
+		$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 		if(!empty($product_object2)) {
-			foreach($product_object2->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), is_reseller_module_active() && is_reseller()) as $this_key => $this_value) {
+			foreach($product_object2->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) as $this_key => $this_value) {
 				$sizes_infos_array[$this_key] = $this_value;
 			}
 		}
-		if ((!empty($sizes_infos_array) && count($sizes_infos_array)>1) || (check_if_module_active('attributs') && !empty($attributs_infos_array))) {
+		if (!empty($sizes_infos_array) || (check_if_module_active('attributs') && !empty($attributs_infos_array))) {
 			$output .= '
 <script><!--//--><![CDATA[//><!--
 ';
@@ -1515,7 +1552,7 @@ if (!function_exists('display_javascript_for_price_update')) {
 				$get_infos_js .= '
 	' . build_attr_var_js('attribut_list', $attributs_infos_array, $form_id);
 			}
-			if (!empty($sizes_infos_array) && count($sizes_infos_array)>1) {
+			if (!empty($sizes_infos_array)) {
 				// On gère prix de taille uniquement, pas d'attributs
 				if ($taille_display_mode == 0) {
 					// Affichage sous forme de select de la taille
@@ -1577,16 +1614,16 @@ if (!function_exists('get_recommanded_product_on_cart_page')) {
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
 			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
-			WHERE p.recommanded_product_on_cart_page = '1' AND p.nom_" . $_SESSION['session_langue'] . " != '' AND c.nom_" . $_SESSION['session_langue'] . " != '' AND p.etat='1'  ".(empty($GLOBALS['site_parameters']['allow_command_product_ongift'])?" AND p.on_gift != '1'":'')." AND " . get_filter_site_cond('produits', 'p') . "
+			WHERE p.recommanded_product_on_cart_page = '1' AND p.id NOT IN ('" . implode("','", nohtml_real_escape_string($_SESSION['session_caddie']->articles)) . "') AND p.nom_" . $_SESSION['session_langue'] . " != '' AND c.nom_" . $_SESSION['session_langue'] . " != '' AND p.etat='1'  ".(empty($GLOBALS['site_parameters']['allow_command_product_ongift'])?" AND p.on_gift != '1'":'')." AND " . get_filter_site_cond('produits', 'p') . "
 			GROUP BY p.id
-			ORDER BY p.date_insere DESC
-			LIMIT 20";
+			ORDER BY RAND() ASC
+			LIMIT 4";
 		$query = query($sql);
 		$i = 0;
 		$product_html = '';
 		$output = '';
 		while ($prod = fetch_assoc($query)) {
-			$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+			$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 			$product_html .= get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 			unset($product_object);
 		}

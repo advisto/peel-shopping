@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: rubriques.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -138,14 +138,9 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 		WHERE r.parent_id = "' . intval($parent_id) . '" AND ' . get_filter_site_cond('rubriques', 'r', true) . '
 		ORDER BY r.position' . (!empty($GLOBALS['site_parameters']['content_category_primary_order_by'])? ", r." . $GLOBALS['site_parameters']['content_category_primary_order_by']  : '') . '';
 	$qid = query($sql);
-	$all_sites_name_array = get_all_sites_name_array();
 	while ($rub = fetch_assoc($qid)) {
 		if (!empty($rub['image'])) {
-			if (pathinfo($rub['image'], PATHINFO_EXTENSION) == 'pdf') {
-				$this_thumb = thumbs('logoPDF_small.png', 80, 50, 'fit', $GLOBALS['dirroot'] .'/images/');
-			} else {
-				$this_thumb = thumbs($rub['image'], 80, 50, 'fit');
-			}
+			$this_thumb = thumbs($rub['image'], 80, 50, 'fit');
 			$tpl->assign('image', $rub['image']);
 			$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
 		} else {
@@ -162,7 +157,7 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		$tpl->assign('indent', $indent);
 		$tpl->assign('modif_href', get_current_url(false) . '?mode=modif&id=' . $rub['id']);
-		$tpl->assign('site_name', ($rub['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$rub['site_id']]));
+		$tpl->assign('site_name', get_site_name($rub['site_id']));
 		$tpl->assign('depth', $depth);
 		$tpl->assign('position', $rub['position']);
 		$tpl->assign('up_href', get_current_url(false) . '?mode=modif_etat&id=' . $rub['id'] . '&position=' . ($rub['position'] - 1));
@@ -195,7 +190,7 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
  */
 function affiche_formulaire_ajout_rubrique($id, &$frm)
 {
-	/* Valeurs par défaut */
+	// Valeurs par défaut
 	if(empty($frm)) {
 		$frm = array();
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -217,7 +212,7 @@ function affiche_formulaire_ajout_rubrique($id, &$frm)
 	$frm['site_id'] = "";
 	$frm["titre_soumet"] = $GLOBALS['STR_ADMIN_RUBRIQUES_CREATE'];
 	
-	/* Affiche la liste des rubriques, en présélectionnant la rubrique choisie. */
+	// Affiche la liste des rubriques, en présélectionnant la rubrique choisie.
 	affiche_formulaire_rubrique($frm);
 }
 
@@ -232,7 +227,7 @@ function affiche_formulaire_modif_rubrique($id, &$frm)
 {
 	if(empty($frm)){
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
-		/* Charge les infos de la rubrique. */
+		// Charge les infos de la rubrique.
 		$qid = query("SELECT *
 			FROM peel_rubriques
 			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
@@ -245,7 +240,7 @@ function affiche_formulaire_modif_rubrique($id, &$frm)
 	$frm["nouveau_mode"] = "maj";
 	$frm["titre_soumet"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
 
-	/* Affiche la liste des rubriques, en présélectionnant la rubrique choisie. */
+	// Affiche la liste des rubriques, en présélectionnant la rubrique choisie.
 	affiche_formulaire_rubrique($frm);
 }
 
@@ -263,14 +258,14 @@ function supprime_rubrique($id)
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "";
 	$query = query($sql);
 	$current_rub = fetch_assoc($query);
-	/* Trouve le parent de cette rubrique */
+	// Trouve le parent de cette rubrique
 	$qid = query("SELECT rub.nom_" . $_SESSION['session_langue'] . ", rub.parent_id, parent.nom_" . $_SESSION['session_langue'] . " AS parent
 		FROM peel_rubriques rub
 		INNER JOIN peel_rubriques parent ON parent.id = rub.parent_id
 		WHERE rub.id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', 'rub', true) . "");
 
 	if ($rub = fetch_assoc($qid)) {
-		/* Réaffecte tous les produits de cette rubrique à la rubrique parente */
+		// Réaffecte tous les produits de cette rubrique à la rubrique parente
 		$qid = query("UPDATE peel_articles_rubriques
 			SET rubrique_id = " . intval($rub['parent_id']) . "
 			WHERE rubrique_id = '" . intval($id) . "'");
@@ -279,11 +274,11 @@ function supprime_rubrique($id)
 			SET parent_id = " . intval($rub['parent_id']) . "
 			WHERE parent_id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
 	} else {
-		/* Réaffecte tous les produits de cette rubrique à la rubrique parente */
+		// Réaffecte tous les produits de cette rubrique à la rubrique parente
 		$qid = query("UPDATE peel_articles_rubriques
 			SET rubrique_id = '0'
 			WHERE rubrique_id = '" . intval($id) . "'");
-		/* Réaffecte toutes les sous-rubriques de cette rubrique à la rubrique parente */
+		// Réaffecte toutes les sous-rubriques de cette rubrique à la rubrique parente
 		$qid = query("UPDATE peel_rubriques
 			SET parent_id = '0'
 			WHERE parent_id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
@@ -301,7 +296,7 @@ function supprime_rubrique($id)
  */
 function insere_sous_rubrique($frm)
 {
-	/* Remplis les contenu vides */
+	// Remplit les contenus vides
 	$frm = fill_other_language_content($frm);
 	
 	$sql = 'INSERT INTO peel_rubriques (
@@ -324,7 +319,7 @@ function insere_sous_rubrique($frm)
 	) VALUES (
 		" . intval($frm['parent_id']) . "
 		, '" . nohtml_real_escape_string($frm['image']) . "'
-		,'" . intval($frm['site_id']) . "'
+		,'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		,'" . intval($frm['etat']) . "'
 		,'" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 		,'" . intval($frm['position']) . "'
@@ -356,7 +351,7 @@ function maj_rubrique($id, $frm)
 		$parent_id = $frm['parent_id'];
 	}
 	
-	/* Remplis les contenu vides */
+	// Remplit les contenus vides
 	$frm = fill_other_language_content($frm);
 	
 	$sql = "UPDATE peel_rubriques
@@ -372,7 +367,7 @@ function maj_rubrique($id, $frm)
 
 	$sql .= ", image = '" . nohtml_real_escape_string($frm['image']) . "'
 		, etat = '" . intval($frm['etat']) . "'
-		, site_id = '" . intval($frm['site_id']) . "'
+		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, position = '" . intval($frm['position']) . "'
 		, articles_review = '" . nohtml_real_escape_string($frm['articles_review']) . "'
@@ -438,11 +433,12 @@ function affiche_formulaire_rubrique(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('getmode', vb($_GET['mode']));
 	$tpl->assign('nom', $frm['nom_' . $_SESSION['session_langue']]);
 	$tpl->assign('category_href', get_content_category_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], false, false, null, vb($frm['site_id'])));
 	$tpl->assign('empty_parent_id', empty($frm['parent_id']));
-	$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['id']), 'option', '&nbsp;&nbsp;', null, null, true));
+	$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['parent_id']), 'option', '&nbsp;&nbsp;', null, null, true, 80));
 	$tpl->assign('etat', vb($frm['etat']));
 	$tpl->assign('position', vb($frm['position']));
 	if(empty($frm['id'])){
@@ -462,25 +458,8 @@ function affiche_formulaire_rubrique(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
-	$tpl->assign('pdf_logo_src',$GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 	if (!empty($frm["image"])) {
-		if (String::strtolower(String::substr($frm['image'], strrpos($frm['image'], ".") + 1)) == 'pdf') {
-			$type = 'pdf';
-		} else {
-			$type = 'img';
-		}
-		if(strpos($frm['image'], '//') !== false) {
-			$this_url = $frm['image'];
-		} elseif(strpos($frm['image'], '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
-			$this_url = $GLOBALS['wwwroot'] . $frm['image'];
-		} else {
-			$this_url = $GLOBALS['repertoire_upload'] . '/' . $frm['image'];
-		}
-		$tpl->assign('image', array('src' => $this_url,
-				'name' => $frm["image"],
-				'type' => $type,
-				'sup_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'
-		));
+		$tpl->assign('image', get_uploaded_file_infos('image', $frm['image'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'));
 	}
 	if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
 		$tpl_diapo = array();
@@ -490,40 +469,18 @@ function affiche_formulaire_rubrique(&$frm)
 				FROM `peel_diaporama`
 				WHERE `id_rubrique`=" . intval($frm['id']));
 			while ($diaporama = fetch_assoc($sql)) {
-				if (!empty($diaporama["image"])) {
-					if (String::strtolower(String::substr($diaporama['image'], strrpos($diaporama['image'], ".") + 1)) == 'pdf') {
-						$type = 'pdf';
-					} else {
-						$type = 'img';
-					}
-					if(strpos($diaporama['image'], '/' . $GLOBALS['site_parameters']['cache_folder']) === 0) {
-						$this_url = $GLOBALS['wwwroot'] . $diaporama['image'];
-					} else {
-						$this_url = $GLOBALS['repertoire_upload'] . '/' . $diaporama['image'];
-					}
-					$tpl_diapo[$i] = array('name' => basename($diaporama['image']),
-						'form_value' => $diaporama['image'],
-						'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
-						'drop_href' => get_current_url(false) . '?mode=supprdiapo&id='.$frm['id'].'&diapoid=' . vb($diaporama['id']) . '&file=' . $diaporama['image'],
-						'url' => $this_url,
-						'type' => $type,
-						'pdf_logo_src' => $GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png'
-						);
-				} else {
-					$tpl_diapo[$i] = array();
-				}
+				$tpl_diapo[$i] = get_uploaded_file_infos('image_diapo' . $i, $diaporama['image'], get_current_url(false) . '?mode=supprdiapo&id='.$frm['id'].'&diapoid=' . vb($diaporama['id']) . '&file=' . $diaporama['image']);
 				$i++;
 			}
 		}
 		$tpl->assign('diapo', $tpl_diapo);
 	}
 
-
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
-	$tpl->assign('STR_ADMIN_DELETE_THIS_FILE', $GLOBALS['STR_ADMIN_DELETE_THIS_FILE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_RUBRIQUES_UPDATE', $GLOBALS['STR_ADMIN_RUBRIQUES_UPDATE']);
 	$tpl->assign('STR_ADMIN_SEE_RESULT_IN_REAL', $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL']);
@@ -577,9 +534,8 @@ function supprime_fichier_rubrique($id, $file)
 	delete_uploaded_file_and_thumbs($file['image']);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_RUBRIQUES_MSG_DELETED_OK'], $file['image'])))->fetch();
 }
+
 /**
- * supprime_fichier_diaporama()
- *
  * Supprime l'image de la rubrique spécificiée par $id
  *
  * @param mixed $id
@@ -596,9 +552,10 @@ function supprime_fichier_diaporama($id, $file)
 
 
 /*
-* ajoute des images du diaporama
-*@param mixed $id
-*/
+ * Ajoute des images du diaporama
+ * 
+ * @param mixed $id
+ */
 function upload_rubrique_diaporama($id_rubrique, $frm)
 {
 	for($i = 1;$i < 6;$i++) {

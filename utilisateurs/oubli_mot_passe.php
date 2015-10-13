@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: oubli_mot_passe.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
@@ -72,23 +72,25 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 		initialise_mot_passe($_POST["email"]);
 		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_PASSWORD_EMAIL']))->fetch();
 	}
-} elseif ((!empty($_POST['password_once']) && !empty($_POST['password_twice'])) && !empty($_GET['email'])) {
-	$password_once = trim($_POST['password_once']);
-	$password_twice = trim($_POST['password_twice']);
-	$email = trim($_GET['email']);
-	if ($password_twice == $password_once) {
-		query("UPDATE peel_utilisateurs
-			SET mot_passe='" . get_user_password_hash($password_once) . "'
-			WHERE email='" . nohtml_real_escape_string($email) . "' AND " . get_filter_site_cond('utilisateurs') . "");
-		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_RECOVER_PASSWORD_OK']))->fetch();
+} elseif (!empty($_GET['email'])) {
+	if ((!empty($_POST['password_once']) && !empty($_POST['password_twice']) && String::strlen($_POST['password_once'])>=vb($GLOBALS['site_parameters']['password_length_required'], 8)) && !empty($_GET['email'])) {
+		$password_once = trim($_POST['password_once']);
+		$password_twice = trim($_POST['password_twice']);
+		$email = trim($_GET['email']);
+		if ($password_twice == $password_once) {
+			query("UPDATE peel_utilisateurs
+				SET mot_passe='" . real_escape_string(get_user_password_hash($password_once)) . "'
+				WHERE email='" . nohtml_real_escape_string($email) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+			$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_RECOVER_PASSWORD_OK']))->fetch();
+		} else {
+			$mode = 'renew_password';
+			$form_error_object->add('mismatch_password', $GLOBALS['STR_ERR_MISMATCH_PASSWORD']);
+		}
+		// Vérification de la présence des deux mots de passe dans le formulaire de renouvellement de mot de passe.
 	} else {
 		$mode = 'renew_password';
-		$form_error_object->add('mismatch_password', $GLOBALS['STR_ERR_MISMATCH_PASSWORD']);
+		$form_error_object->add('empty_field', sprintf($GLOBALS['STR_ERR_NEWPASS'], vb($GLOBALS['site_parameters']['password_length_required'], 8)));
 	}
-	// Vérification de la présence des deux mots de passe dans le formulaire de renouvellement de mot de passe.
-} elseif ((empty($_POST['password_once']) || empty($_POST['password_twice'])) && !empty($_GET['email'])) {
-	$mode = 'renew_password';
-	$form_error_object->add('empty_field', $GLOBALS['STR_ERR_NEWPASS']);
 }
 
 if (empty($noticemsg)) {

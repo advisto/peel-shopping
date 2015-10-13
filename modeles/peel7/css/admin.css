@@ -1,3 +1,7 @@
+/* Compatibilite editeurs HTML */
+.cke_dialog *, .cke_dialog *:before, .cke_dialog *:after {
+  -webkit-box-sizing: initial; -moz-box-sizing: initial; box-sizing: initial;
+}
 /* General */
 h1 {
 	font-size: 24px;
@@ -54,6 +58,7 @@ label {
 	text-transform: uppercase;
 	padding: 5px;
 	clear: both;
+	width: 100%;
 }
 .entete a {
 	color: #FFFFFF;

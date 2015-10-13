@@ -3643,7 +3643,7 @@ class TCPDF {
 	public function SetAutoPageBreak($auto, $margin=0) {
 		$this->AutoPageBreak = $auto ? true : false;
 		$this->bMargin = $margin;
-		$this->PageBreakTrigger = $this->h - $margin;
+		$this->PageBreakTrigger = $this->h - ($margin*2);
 	}
 
 	/**

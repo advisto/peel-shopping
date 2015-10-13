@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: search.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}{% if (content) %}
 {{ content }}
-{% elseif (result) %}
+{% elseif (result) and (quick_add_product_from_search_page) is empty %}
 {{ result }}
 {% endif %}
 {{ form }}
-{% if page<=1 %}
+{% if page<=1 and (quick_add_product_from_search_page) is empty %}
 <br />{{ STR_SEARCH_HELP }}
 {% endif %}

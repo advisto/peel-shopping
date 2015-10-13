@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: exaprint.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
-#}{% if isset($results) %}
+// $Id: exaprint.tpl 47242 2015-10-08 15:28:40Z gboussin $
+#}{% if results not empty %}
 <br />{{ STR_ADMIN_VENTES_FORM_EXPLAIN }}<br />
 <p class="title_label center">{{ period_text }}</p>
 <table class="main_table">
@@ -52,7 +52,7 @@
 	{% for v in vats %}
 	<tr>
 		<td colspan="7" class="title_label">&nbsp;</td>
-		<td class="title_label">{{ STR_ADMIN_TOTAL_VAT }} {% if $v.rate == 'transport' %}{{ v.rate }}{% else %}{{ v.rate }}%{% endif %}</td>
+		<td class="title_label">{{ STR_ADMIN_TOTAL_VAT }} {% if v.rate == 'transport' %}{{ v.rate }}{% else %}{{ v.rate }}%{% endif %}</td>
 		<td class="center title_label">{{ v.prix }}</td>
 	</tr>
 	{% endfor %}
@@ -73,8 +73,8 @@
 		<td class="center title_label" >{{ totalTva_prix }}</td>
 	</tr>
 </table>
-<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_DELIVERY }}{{ STR_BEFORE_TWO_POINTS }}: {% if isset($statut_livraison_name) %}{{ statut_livraison_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
-<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_CARRIER }}{{ STR_BEFORE_TWO_POINTS }}: {% if isset($statut_transporteur_name) %}{{ statut_transporteur_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
+<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_DELIVERY }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_livraison_name not empty %}{{ statut_livraison_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
+<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_CARRIER }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_transporteur_name not empty %}{{ statut_transporteur_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
 {% else %}
 <p class="title_label center">{{ period_text }}</p>
 <div class="center"><b>{{ STR_ADMIN_VENTES_NO_ORDER_FOUND }}</b></div>

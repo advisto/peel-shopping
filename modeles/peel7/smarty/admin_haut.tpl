@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_haut.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}<!DOCTYPE html>
 <html lang="{$lang}" dir="ltr">
 <head>
@@ -62,7 +62,7 @@
 							</ul>
 							<ul class="nav nav-pills pull-right">
 								<li style="margin-top: 8px; margin-bottom: 3px">{*' &nbsp;'|implode:$flags_links_array*}{$flags}</li>
-								<li><a href="{$sortie_href|escape:'html'}" title="{$STR_ADMIN_DISCONNECT|str_form_value}"><span class="glyphicon glyphicon-off"></span></a></li>
+								<li style="margin-top: 3px"><a href="{$sortie_href|escape:'html'}" title="{$STR_ADMIN_DISCONNECT|str_form_value}"><span class="glyphicon glyphicon-off"></span></a></li>
 							</ul>
 						</nav>
 					</div>
@@ -82,7 +82,7 @@
 			<div class="main_content row">
 				<div class="col-md-12">
 					{$output_create_or_update_order}
-					{$error_text_to_display}
+					{$notification_output}
 {if $is_demo_error}
 					<p class="alert alert-danger fade in">{$STR_ADMIN_DEMO_WARNING} <button class="close remember-close" aria-hidden="true" data-dismiss="alert" type="button" id="demo_warning_close">×</button></p>
 {/if}

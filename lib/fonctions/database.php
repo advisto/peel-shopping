@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: database.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -122,8 +122,8 @@ function select_db($database_name, &$database_object, $continue_if_error = false
 		}
 		$sujet_du_mail = "Database selection problem";
 		$contenu_du_mail = "The page " . $_SERVER['REQUEST_URI'] . " had an error while trying to connect to MySQL database - " . $contenu_display;
-		if (!empty($support)) {
-			send_email($support, $sujet_du_mail, $contenu_du_mail, null, null, null, '', null);
+		if (!empty($GLOBALS['support'])) {
+			send_email($GLOBALS['support'], $sujet_du_mail, $contenu_du_mail, null, null, null, '', null);
 		}
 		if (!empty($display_warning_if_database_object_problem)) {
 			echo $contenu_display;
@@ -157,6 +157,9 @@ function select_db($database_name, &$database_object, $continue_if_error = false
  */
 function query($query, $die_if_error = false, $database_object = null, $silent_if_error = false, $security_sql_filter = true)
 {
+	if(empty($query)) {
+		return false;
+	}
 	if (defined('IN_PEEL_ADMIN') && a_priv('demo') && ((strpos(strtolower($query), 'insert ') !== false && strpos(strtolower($query), 'into ') !== false) || strpos(strtolower($query), 'update ') !== false || strpos(strtolower($query), 'delete ') !== false || strpos(strtolower($query), 'alter ') !== false)) {
 		// L'utilisateur ayant le profil "demo" ne peut pas faire de modification des données
 		return false;
@@ -168,7 +171,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 	if(empty($database_object)) {
 		$database_object = &$GLOBALS['database_object'];
 	}
-	if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
+	if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 		$start_time = microtime_float();
 	}
 	$i = 0;
@@ -185,6 +188,12 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 				}
 				// On force une reconnexion
 				db_connect($database_object);
+			} elseif($error_number == 1364 && String::strpos($query, 'sql_mode') === false) {
+				// Si problème "Field doesn't have a default values" on passe en mode compatibilité définitivement pour les prochaines pages vues
+				set_configuration_variable(array('technical_code' => 'mysql_sql_mode_force', 'string' => 'MYSQL40', 'site_id' => 0, 'origin' => 'auto'), true);
+				// Pour le reste de la génération de page, on passe en mode compatibilité
+				query("SET @@session.sql_mode='MYSQL40");
+				break;
 			} else {
 				// Si l'erreur n'est pas reconnue, on s'arrête là
 				break;
@@ -203,7 +212,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 				if ($silent_if_error) {
 					$query_values = @mysql_query($query, $database_object);
 				} else {
-					$query_values = @mysql_query($query, $database_object);
+					$query_values = mysql_query($query, $database_object);
 				}
 			}
 		}
@@ -222,7 +231,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 			break;
 		}
 	}
-	if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
+	if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 		$end_time = microtime_float();
 		$GLOBALS['peel_debug'][] = array('sql' => $query, 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
 	}
@@ -491,6 +500,27 @@ function get_table_field_names($table_name, $link_identifier = null, $silent_if_
 	} else {
 		foreach($fields as $this_field) {
 			$results[] = $this_field['Field'];
+		}
+		return $results;
+	}
+}
+
+/**
+ * get_table_field_types()
+ *
+ * @param mixed $table_name
+ * @param mixed $link_identifier
+ * @param boolean $silent_if_error
+ * @return
+ */
+function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false)
+{
+	$fields = get_table_fields($table_name, $link_identifier, $silent_if_error);
+	if (empty($fields)) {
+		return null;
+	} else {
+		foreach($fields as $this_field) {
+			$results[$this_field['Field']] = $this_field['Type'];
 		}
 		return $results;
 	}

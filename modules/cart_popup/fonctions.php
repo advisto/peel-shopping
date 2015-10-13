@@ -3,16 +3,47 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
+}
+call_module_hook('cart_product_added', array('quantity' => vn($added_quantity), 'user_id' => vn($_SESSION['session_utilisateur']['id_utilisateur'])));
+
+/**
+ * Effectue les actions journalières si le module cron est actif
+ *
+ * @param array $params
+ * @return
+ */
+function cart_popup_hook_cart_product_added($params) {
+	if (!empty($params['quantite'])) {
+		if (!empty($_POST['save_cart_id'])) {
+			// le produit a été ajouté depuis la page de sauvegarde du panier. Il faut mettre à jour la quantité ou supprimer le produit
+			$query = query("SELECT quantite
+				FROM peel_save_cart 
+				WHERE id=".intval($_POST['save_cart_id']));
+			if($result = fetch_assoc($query)) {
+				if ($params['quantite']<$result['quantite']) {
+					// La quantité ajoutée au panier est strictement inférieur à la quantité sauvegardée. Il reste donc au moins une unité pour ce produit donc on met à jour l'enregistrement .
+					query("UPDATE peel_save_cart 
+						SET quantite=quantite-".intval($params['quantite']) . "
+						WHERE id=".intval($_POST['save_cart_id']) . " AND id_utilisateur=" . intval($params['user_id']));
+				} else {
+					// La quantité ajoutée au panier est égal ou supérieur (quantité modifiée manuellement), on supprime l'enregistrement.
+					query("DELETE FROM peel_save_cart 
+						WHERE id=" . intval($_POST['save_cart_id']) . " AND id_utilisateur=" . intval($params['user_id']));
+				}
+			}
+		}
+		$_SESSION['session_show_caddie_popup'] = true;
+	}
 }
 
 if (!function_exists('get_cart_popup_script')) {
@@ -84,7 +115,7 @@ if (!function_exists('get_cart_popup_div')) {
 			// Configuration possible du lien du bouton "Votre panier"
 			$tpl->assign('main_href', $GLOBALS['site_parameters']['bootbox_dialog_buttons_main_link'][$product_object->technical_code]);
 		} else {
-			$tpl->assign('main_href', $GLOBALS['wwwroot'] . '/achat/caddie_affichage.php');
+			$tpl->assign('main_href', get_url('caddie_affichage'));
 		}
 		
 		// On verifie si le technical code du produit correspond à un affichage spécial contenu dans "bootbox_dialog_buttons_success_link"

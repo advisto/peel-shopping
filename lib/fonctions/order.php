@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 46023 2015-06-03 14:59:46Z sdelaporte $
+// $Id: order.php 47245 2015-10-08 16:47:28Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -100,6 +100,67 @@ function get_bill_number($bill_number_format, $id, $generate_bill_number_if_empt
 		}
 	}
 	return $bill_number_format;
+}
+
+/**
+ * Crée une transaction d'encaissement
+ *
+ * @param integer $order_id
+ * @param string $technical_code
+ * @param array $data
+ * @return
+ */
+function accounting_insert_transaction($order_id, $technical_code, $data) {
+	// Si la REF de la transaction est vide, on vérifie qu'on a le même libellé
+	// et quoiqu'il arrive on teste la date pour être sûr qu'on ne modifie pas de vieilles transactions
+	$allowed_fields = get_table_field_names('peel_transactions');
+	if(empty($data['datetime'])) {
+		$data['datetime'] = date('Y-m-d H:i:s', time());
+	} else {
+		$data['datetime'] = get_mysql_date_from_user_input($data['datetime']);
+	}
+	$data['orders_id'] = $order_id;
+	// date (ddmmyyyy) + plateforme (dto, dinn, dfun, dexpe, dsale, dinve) => corrigé uniquement sur 3 lettres
+	//  + heure (hhmmss) + 3 lettres aléatoires de l'alphabet + un nombre aléatoire compris entre 00000 et 99999. => Corrigé en 8 lettres différentes
+	//  Exemple final : 30072014dex210738ihz16794
+	$data['reference'] = date('dmY') . vb($GLOBALS['site_parameters']['transaction_reference_site_part'], MDP(3)) . date('His') . MDP(8);
+	foreach($data as $item => $value) {
+		if(in_array($item, $allowed_fields)) {
+			$sql_set[$item] = word_real_escape_string($item) . "='" . str_replace(array("\n", "\r"), ' ', real_escape_string($value)) . "'";
+		}
+	}
+	// Sécurité : ne pas imposer l'id
+	unset($sql_set['id']);
+	$query = query("SELECT t.id
+		FROM peel_transactions t
+		WHERE REF='" . real_escape_string(vb($data['REF'])) . "'" . (true || (empty($data['REF']) || $data['REF'] == '_______' || strpos(vb($data['LIBELLE_OPERATION']), ' AP') !== false)?" AND LIBELLE_OPERATION='" . real_escape_string(vb($data['LIBELLE_OPERATION'])) . "' AND MONTANT_DEBIT='".real_escape_string(vb($data['MONTANT_DEBIT']))."' AND MONTANT_CREDIT='".real_escape_string(vb($data['MONTANT_CREDIT']))."'":"") . " AND (TO_DAYS(datetime) BETWEEN TO_DAYS('" . real_escape_string($data['datetime']) . "')-2 AND TO_DAYS('" . real_escape_string($data['datetime']) . "')+2)
+	");
+	if ($result_query = fetch_assoc($query)) {
+		query("UPDATE peel_transactions
+			SET " . implode(',', $sql_set) . "
+			WHERE id='" . real_escape_string($result_query['id']) . "' AND bank='" . real_escape_string($result_query['bank']) . "'");
+	} else {
+		query("INSERT INTO peel_transactions
+			SET " . implode(',', $sql_set) . "");
+		$inserted_id = insert_id();
+		// Traitement des alertes par email
+		if (!empty($sql_set['reimbursement']) && vb($data['MONTANT_DEBIT']) > 0) {
+			$template_technical_code = 'reimbursement_debit';
+		} elseif (!empty($sql_set['cash']) && vb($data['MONTANT_CREDIT']) > 0) {
+			$template_technical_code = 'cash_credit';
+		} elseif (!empty($sql_set['wire']) && vb($data['MONTANT_CREDIT']) > 0) {
+			$template_technical_code = 'wire_credit';
+		} elseif (!empty($sql_set['wire']) && vb($data['MONTANT_DEBIT']) > 0) {
+			$template_technical_code = 'wire_debit';
+		}
+		if (!empty($template_technical_code)) {
+			// Envoi des emails d'information
+			send_email($GLOBALS['support'], null, null, $template_technical_code, $data);
+		}
+	}
+	unset($sql_set);
+	call_module_hook('accounting_insert_transaction', array('order_id' => $order_id, 'technical_code' => $technical_code, 'data' => $data));
+	return true;
 }
 
 /**
@@ -208,7 +269,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			query($sql);
 		}
 		if ($statut_paiement_new !== null && in_array($statut_paiement_new, array('being_checked', 'completed')) && !in_array($commande['statut_paiement'], array('being_checked','completed'))) {
-			if (is_module_gift_checks_active()) {
+			if (check_if_module_active('gift_check')) {
 				$output .= cree_cheque_cadeau($order_id);
 			}
 			if (!empty($GLOBALS['fonctionsfianet_sac']) && file_exists($GLOBALS['fonctionsfianet_sac'])) {
@@ -220,23 +281,35 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			$sql_set_array[] = "a_timestamp='" . date('Y-m-d H:i:s', time()) . "'";
 			if (check_if_module_active('annonces')) {
 				// On gère les crédits d'annonces GOLD
-				$sql = "SELECT pp.technical_code, pca.attributs_list, pca.reference
+				$sql = "SELECT pp.technical_code, pca.attributs_list, pca.reference, pca.quantite
 					FROM peel_produits pp
 					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND " . get_filter_site_cond('commandes_articles', 'pca') . " 
 					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND " . get_filter_site_cond('commandes', 'pc') . "
 					WHERE pc.id = " . intval($order_id) . " AND " . get_filter_site_cond('produits', 'pp') . "";
 				$query_t = query($sql);
 				while ($product_ordered_infos = fetch_assoc($query_t)) {
-					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_') {
-						// Format : annonce_g_12m_1c
-						$insert_credit = 'INSERT INTO peel_gold_ads_to_users (user_id,order_id,gold_type)
-							VALUES (' . intval($commande['id_utilisateur']) . ',' . intval($commande['id']) . ',"' . nohtml_real_escape_string($product_ordered_infos['technical_code']) . '")';
-						query($insert_credit);
-					} elseif (substr($product_ordered_infos['technical_code'], 0, strlen('ad_')) == 'ad_') {
+					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_' || substr($product_ordered_infos['technical_code'], 0, strlen('gold_credit_')) == 'gold_credit_') {
+						if(substr($product_ordered_infos['technical_code'], 0, strlen('gold_credit_separated_')) == 'gold_credit_separated_') {
+							// Quand il y a _separated_ dans le nom, on considère que chaque crédit doit être mis sur une ligne séparée. Comme ça on pourra l'utiliser quand on veut
+							// (on aurait pu aussi ne mettre qu'une ligne mais diminuer le Xc en (X-1)x à chaque usage, mais c'est plus simple de mettre des lignes séparées
+							$temp = end(explode('_', $product_ordered_infos['technical_code']));
+							$lines_by_credit = String::substr($temp,0, String::strlen($temp)-1);
+							if($lines_by_credit == '*') {
+								// On n'insère qu'une ligne car illimité - dans ce cas, on ne la supprimera pas
+								$lines_by_credit = 1;
+							}
+						} else {
+							$lines_by_credit = 1;
+						}
+						for($i=1;$i<=$product_ordered_infos['quantite']*$lines_by_credit;$i++) {
+							// Format : annonce_g_12m_1c ou credit_gold_sales_6m_3c
+							add_credit_gold_user($commande['id_utilisateur'], $product_ordered_infos['technical_code'], $commande['id']);
+						}
+					} elseif (substr($product_ordered_infos['technical_code'], 0, strlen('ad_')) == 'ad_' && $product_ordered_infos['quantite']>=1) {
 						// On ajoute les attributs commandés à l'annonce
 						$update_attributs = 'UPDATE peel_lot_vente
 							SET attributs_list=CONCAT(attributs_list,IF(attributs_list="", "", "§"), "'.nohtml_real_escape_string($product_ordered_infos['attributs_list']).'")
-							WHERE ref ="' . intval($product_ordered_infos['reference']) . '"';
+							WHERE ref ="' . intval($product_ordered_infos['reference']) . '" ' . get_filter_site_cond('lot_vente');
 						query($update_attributs);
 					}
 				}
@@ -382,10 +455,9 @@ function put_session_commande(&$frm)
 	}
 
 	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
-		// Paramètre lié à la fonction get_specific_field_infos.
 		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
 			if (isset($frm[$this_field])) {
-				// On a ajouter dans la table utilisateur un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
+				// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
 				$_SESSION['session_commande'][$this_field] = $frm[$this_field];
 			}
 		}
@@ -423,7 +495,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		, "option" => "prix_option"
 		, "option_ht" => "prix_option_ht");
 	
-	// Si touts les produits ont été supprimés de la commande, on initialise le tableau
+	// Si tous les produits ont été supprimés de la commande, on initialise le tableau
 	if (empty($articles_array)) {
 		$articles_array = array();
 	}
@@ -440,41 +512,12 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		if (isset($order_infos[$key])) {
 			// Nécessite une conversion du nom de l'index.
 			$order_infos[$value] = $order_infos[$key];
-			// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage;
+			// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage
 			unset($order_infos[$key]);
 		}
 	}
-
-	$adresses_fields_array = array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
-	if(!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
-		$specific_fields_titles = $GLOBALS['site_parameters']['order_specific_field_titles'];
-		$specific_field_types = $GLOBALS['site_parameters']['order_specific_field_types'];
-	}
-	if (!empty($specific_fields_titles)) {
-		// Paramètre lié à la fonction get_specific_field_infos.
-		// récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
-		$this_table_fields_names = get_table_field_names('peel_commandes');
-		foreach($specific_fields_titles as $this_field => $this_title) {
-			if ((String::substr($this_field,-5) == '_ship' ||  String::substr($this_field,-5) == '_bill') && !in_array(String::substr($this_field, 0, -5), $adresses_fields_array)) {
-				$adresses_fields_array[] = String::substr($this_field,0,-5);
-			}
-			if (!in_array($this_field, $this_table_fields_names)) {
-				// Champ pas présent en BDD, on ne l'ajoute pas à la requête SQL.
-				continue;
-			}
-			if ($specific_field_types[$this_field] == 'datepicker') {
-				$order_infos[$this_field] = get_mysql_date_from_user_input($order_infos[$this_field]);
-			}
-			if (isset($order_infos[$this_field])) {
-				if (is_array($order_infos[$this_field])) {
-					// Si $order_infos[$this_field] est un tableau, il faut le convertir en chaine de caractères pour le stockage en BDD
-					$order_infos[$this_field] = implode(',', $order_infos[$this_field]);
-				}
-				$order_specific_field[] = word_real_escape_string($this_field) . " = '" . nohtml_real_escape_string($order_infos[$this_field]) ."'";
-			}
-		}
-	}
-	foreach($adresses_fields_array as $this_item) {
+	handle_specific_fields($order_infos, 'order');
+	foreach(vb($order_infos['adresses_fields_array'], array()) as $this_item) {
 		// En complément de name_compatibility_array
 		if ($this_item == 'zip') {
 			$this_field = 'code_postal';
@@ -492,7 +535,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	}
 	// On complète les données si nécessaire
 	if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($order_infos['typeId']) || is_delivery_address_necessary_for_delivery_type($order_infos['typeId']))) {
-		foreach($adresses_fields_array as $this_item) {
+		foreach(vb($order_infos['adresses_fields_array'], array()) as $this_item) {
 			if (empty($order_infos[$this_item . '2']) && isset($order_infos[$this_item . '1'])) {
 				$order_infos[$this_item . '2'] = $order_infos[$this_item . '1'];
 			}
@@ -509,8 +552,8 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		$order_infos_ex = null;
 	}
 	if (empty($order_infos['devise'])) {
-		// Par exemple si !is_devises_module_active() : on prend la devise de la boutique
-		$order_infos['devise'] = $GLOBALS['site_parameters']['devise'];
+		// Par exemple si !check_if_module_active('devises') : on prend la devise de la boutique
+		$order_infos['devise'] = $GLOBALS['site_parameters']['code'];
 	}
 	if (empty($order_infos['lang'])) {
 		$order_infos['lang'] = $_SESSION['session_langue'];
@@ -683,8 +726,8 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	}
 	$set_sql .= ", delivery_infos = '" . real_escape_string(vb($order_infos['delivery_infos'])) . "'
 		, delivery_locationid = '" . nohtml_real_escape_string(vb($order_infos['delivery_locationid'])) . "'
-		, site_id = '" . intval(vn($order_infos['site_id'])) . "'";
-	if (is_tnt_module_active()) {
+		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vn($order_infos['site_id']))) . "'";
+	if (check_if_module_active('tnt')) {
 		if(!empty($_SESSION['session_commande']['xETTCode'])) {
 			$set_sql .= ", xETTCode = '" . word_real_escape_string(vb($_SESSION['session_commande']['xETTCode'])) . "'";		
 		}
@@ -692,8 +735,8 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		, expedition_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'
 		, shipping_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'";
 	}
-	if (!empty($order_specific_field)) {
-		$set_sql .= ',' . implode(',', $order_specific_field);
+	if (!empty($order_infos['specific_field_sql_set'])) {
+		$set_sql .= ',' . implode(',', $order_infos['specific_field_sql_set']);
 	}
 	if (!empty($order_infos['commandeid'])) {
 		// On met à jour la commande
@@ -752,7 +795,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 				}
 			}
 		}
-		if(is_gifts_module_active()) {
+		if(check_if_module_active('gifts')) {
 			// On retire les points attribués préalablement, pour redonner les nouveaux points ensuite
 			update_points($order_infos['total_points'], vn($order_infos['points_etat']), $order_id, null);
 		}
@@ -775,9 +818,9 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		// On l'utilise pour des informations diverses, mais surtout pas pour les prix par exemple, qui doivent être ceux imposés par $article_infos
 		// L'objet produit n'a pas besoin d'être initialisé avec toute les informations de $article_infos car on ne l'utilise que pour les parties sur lesquelles on n'a pas d'information dans $article_infos
 		$product_infos = null;
-		$product_object = new Product($article_infos['product_id'], $product_infos, false, null, true, !is_micro_entreprise_module_active());
+		$product_object = new Product($article_infos['product_id'], $product_infos, false, null, true, !check_if_module_active('micro_entreprise'));
 		// On n'a pas à indiquer si l'utilisateur est un revendeur ou non car on ne va pas utiliser les prix des configurations ci-après, on utilisera $article_infos
-		$product_object->set_configuration($article_infos['couleurId'], $article_infos['tailleId'], vb($article_infos['id_attribut']), false, true);
+		$product_object->set_configuration(vn($article_infos['couleurId']), vn($article_infos['tailleId']), vb($article_infos['id_attribut']), false, true);
 		// Dans le cas d'une création de commande, l'id attribut est renseigné dans la session caddie => On peut configurer les attributs de ce produit avec la classe Product.
 		// En revanche, dans le cas d'une modification d'une commande existante, l'id de l'attribut n'est pas disponible, car elle n'est pas sauvegardée lors du passage de la commande.
 		// Le nom de l'attribut est stocké dans la table peel_commandes_articles pour que cette information n'évolue pas dans le temps.
@@ -808,7 +851,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 			$article_infos['reference'] = $product_object->reference;
 		}
 		$sql = "INSERT INTO peel_commandes_articles SET
-			site_id = '" . intval($order_infos['site_id']) . "'
+			site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($order_infos['site_id'])) . "'
 			, commande_id = '" . intval($order_id) . "'
 			, produit_id = '" . intval($product_object->id) . "'
 			, categorie_id = '" . intval($product_object->categorie_id) . "'";
@@ -876,16 +919,16 @@ function create_or_update_order(&$order_infos, &$articles_array)
 			, etat_stock = '" . nohtml_real_escape_string(vb($article_infos['etat_stock'])) . "'
 			, delai_stock = '" . nohtml_real_escape_string(vb($article_infos['delai_stock'])) . "'";
 		}
-		if (is_giftlist_module_active() && !empty($article_infos['giftlist_owners'])) {
+		if (check_if_module_active('listecadeau') && !empty($article_infos['giftlist_owners'])) {
 			$sql .= "
 			, listcadeaux_owner = '" . nohtml_real_escape_string(vn($article_infos['giftlist_owners'])) . "'";
 		}
-		if (is_conditionnement_module_active()) {
+		if (check_if_module_active('conditionnement')) {
 			// Les produits sont conditionnés sous forme de lot => ici on sauvegarde la taille des lots de conditionnement
 			$sql .= "
 			, conditionnement = '" . nohtml_real_escape_string(vb($product_object->conditionnement)) . "'";
 		}
-		if (is_tnt_module_active()) {
+		if (check_if_module_active('tnt')) {
 			$sql .= "
 			, tnt_parcel_number = '" . nohtml_real_escape_string(vb($article_infos['tnt_parcel_number'])) . "'";
 		}
@@ -910,7 +953,7 @@ function create_or_update_order(&$order_infos, &$articles_array)
 	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
 	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
 	// output_create_or_update_order sera afficher dans le fichier admin_haut.
-	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], $order_infos['delivery_tracking'], true, vb($order_infos['payment_technical_code']));
+	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], vb($order_infos['delivery_tracking']), true, vb($order_infos['payment_technical_code']));
 	if(check_if_module_active('nexway')) {
 		include_once($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 		Nexway::create_order($order_infos, $articles_array);
@@ -961,9 +1004,9 @@ function email_commande($order_id)
 				send_email($GLOBALS['support_commande'], '', '', 'confirm_ordered_'.$this_ordered_product['technical_code'], $custom_template_tags, null, $GLOBALS['support_commande']);
 			}
 		}
-
-		send_email($order_object->email, '', '', 'email_commande', $custom_template_tags, null, $GLOBALS['support_commande']);
-		send_email($GLOBALS['support_commande'], '', '', 'email_commande', $custom_template_tags, null, $GLOBALS['support_commande']);
+		$template_technical_codes_array = array('email_commande_' . $order_object->paiement, 'email_commande');
+		send_email($order_object->email, '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
+		send_email($GLOBALS['support_commande'], '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
 		if(!defined('IN_PEEL_ADMIN') || (defined('IN_PEEL_ADMIN') && !empty($GLOBALS['site_parameters']['send_email_order_in_admin']))) {
 			// Envoi de l'email pour l'administrateur en plus de la copie de ce qui est envoyé au client. L'envoi de cet email si l'on est en back office est paramétrable.
 			send_mail_order_admin($order_id);
@@ -989,6 +1032,7 @@ function send_mail_order_admin($order_id)
 	$custom_template_tags['MONTANT'] = fprix($order_object->montant, true);
 	$custom_template_tags['O_TIMESTAMP'] = get_formatted_date($order_object->o_timestamp);
 	$custom_template_tags['PAIEMENT'] = get_payment_name($order_object->paiement);
+	$custom_template_tags['COMMENT'] = $order_object->commentaires;
 
 	send_email($GLOBALS['support_commande'], '', '', 'send_mail_order_admin', $custom_template_tags, null, $GLOBALS['support_commande']);
 }
@@ -1003,7 +1047,7 @@ function get_payment_name($id_or_code)
 {
 	$sql_paiement = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom
 		FROM peel_paiement p
-		WHERE p.id="' . intval($id_or_code) . '" OR p.technical_code="' . nohtml_real_escape_string($id_or_code) . '"  AND ' .  get_filter_site_cond('paiement', 'p') . '';
+		WHERE (p.id="' . intval($id_or_code) . '" OR p.technical_code="' . nohtml_real_escape_string($id_or_code) . '") AND ' .  get_filter_site_cond('paiement', 'p') . '';
 	$res_paiement = query($sql_paiement);
 	if ($tab_paiement = fetch_assoc($res_paiement)) {
 		return $tab_paiement['nom'];
@@ -1049,8 +1093,10 @@ function get_delivery_status_name($id)
 	$res_livraison = query($sql_livraison);
 	if ($tab_livraison = fetch_assoc($res_livraison)) {
 		return String::html_entity_decode_if_needed($tab_livraison['nom']);
-	} else {
+	} elseif (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 		return $id;
+	} else {
+		return '-';
 	}
 }
 
@@ -1095,17 +1141,18 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 	}
 	
 	if (!empty($zone_id)) {
-		$query = query('SELECT z.on_franco, z.on_franco_amount, z.on_franco_nb_products
+		$query = query('SELECT z.on_franco, z.on_franco_amount, z.on_franco_reseller_amount, z.on_franco_nb_products
 			FROM peel_zones z
 			WHERE id = "' . intval($zone_id) . '" AND ' . get_filter_site_cond('zones', 'z') . '
 			LIMIT 1');
 		$result_zones = fetch_assoc($query);
 		if (!empty($result_zones['on_franco'])) {
+			$amount_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $result_zones['on_franco_reseller_amount'] : $result_zones['on_franco_amount']);
 			// Zone franco de port
-			if ($result_zones['on_franco_amount'] <= round($total_price, 2)) {
+			if ($amount_used <= round($total_price, 2)) {
 				return null;
 			} else {
-				$add_for_free_delivery['amount'] = $result_zones['on_franco_amount'] - round($total_price, 2);
+				$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
 			}
 		}
 		if (!empty($result_zones['on_franco_nb_products'])) {
@@ -1121,7 +1168,7 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 	// Don con ne teste ici les exonérations générales que si il n'y a pas de configuration d'exonération par zone
 	if (empty($add_for_free_delivery['amount'])) {
 		// Cas où un seuil de commande minimal est défini pour l'utilisateur de manière globale au niveau de la configuration du site
-		$seuil_total_used = floatval((is_reseller_module_active() && is_reseller()) ? $GLOBALS['site_parameters']['seuil_total_reve'] : $GLOBALS['site_parameters']['seuil_total']);
+		$seuil_total_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $GLOBALS['site_parameters']['seuil_total_reve'] : $GLOBALS['site_parameters']['seuil_total']);
 		if (round($seuil_total_used, 2) > 0) {
 			if(round($total_price, 2) >= round($seuil_total_used, 2)) {
 				// Si le seuil défini pour le franco de port pour la zone n'est pas atteint par le montant de la commande, l'exénoration des frais de port ne s'applique pas
@@ -1152,9 +1199,13 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 function get_delivery_cost_infos($total_weight, $total_price, $type_id = null, $zone_id = null, $nb_product = 1)
 {
 	static $delivery_cost_infos_by_weight_and_price_array;
+	$delivery_cost_infos = array('cost_ht' => 0, 'tva' => 0);
+	if (empty($nb_product)) {
+		// si nb_product est vide, on ne cherche pas à calculer les frais de ports.
+		return $delivery_cost_infos;
+	}
 	$key_weight_and_price = $type_id . $zone_id . $total_weight . $total_price;
 	$add_for_free_delivery = get_needed_for_free_delivery($total_weight, $total_price, $type_id, $zone_id, $nb_product);
-	$delivery_cost_infos = array('cost_ht' => 0, 'tva' => 0);
 	if ($add_for_free_delivery !== null && !empty($GLOBALS['site_parameters']['mode_transport'])) {
 		if (!isset($delivery_cost_infos_by_weight_and_price_array[$key_weight_and_price])) {
 			// Frais de port calculés en fonction du poids total et du montant total
@@ -1175,7 +1226,7 @@ function get_delivery_cost_infos($total_weight, $total_price, $type_id = null, $
 			$req = query($tarifs_sql);
 			if ($this_tarif = fetch_assoc($req)) {
 				$delivery_cost_infos['cost_ht'] = $this_tarif['tarif'] / (1 + $this_tarif['tva'] / 100);
-				if (!is_micro_entreprise_module_active()) {
+				if (!check_if_module_active('micro_entreprise')) {
 					$delivery_cost_infos['tva'] = $this_tarif['tva'];
 				} else {
 					$delivery_cost_infos['tva'] = 0;
@@ -1203,7 +1254,7 @@ function get_payment_technical_code($id_or_code)
 {
 	$sql_paiement = 'SELECT technical_code
 		FROM peel_paiement
-		WHERE id="' . intval($id_or_code) . '" OR technical_code="' . nohtml_real_escape_string($id_or_code) . '" AND ' .  get_filter_site_cond('paiement') . '';
+		WHERE (id="' . intval($id_or_code) . '" OR technical_code="' . nohtml_real_escape_string($id_or_code) . '") AND ' .  get_filter_site_cond('paiement') . '';
 	$res_paiement = query($sql_paiement);
 	if ($tab_paiement = fetch_assoc($res_paiement)) {
 		return $tab_paiement['technical_code'];
@@ -1377,9 +1428,17 @@ function get_order_infos_array($order_object)
 	}
 	$order_infos['tva_infos_array'] = array("total_tva" => fprix($order_object->total_tva, true, $order_object->devise, true, $order_object->currency_rate, true));
 	$distinct_total_vat = get_vat_array($order_object->code_facture);
-	foreach($distinct_total_vat as $vat_percent => $value) {
+	foreach($distinct_total_vat as $vat_percent_name => $value) {
+		if (String::substr($vat_percent_name, 0, strlen('transport')) == 'transport') {
+			// La variable $vat_percent_name contient la valeur qui sera affichée en face du montant de la TVA sur la facture
+			// Dans le cas de la TVA sur le transport, le mot "tranport" est présent dans le nom. Pour connaitre le taux de TVA dans ce cas, il faut supprimer le mot "transport" du nom, et supprimer les espaces.
+			$vat_percent = trim(String::substr($vat_percent_name, strlen('transport')));
+		} else {
+			// Dans tous les autres cas, le nom de la TVA est le taux de la TVA, il n'y a pas d'information supplémentaire dans le nom.
+			$vat_percent = $vat_percent_name;
+		}
 		if ($vat_percent>0 && $value>0) {
-			$order_infos['tva_infos_array']["distinct_total_vat"][$vat_percent] = fprix($value, true, $order_object->devise, true, $order_object->currency_rate, true);
+			$order_infos['tva_infos_array']["distinct_total_vat"][$vat_percent_name] = fprix($value, true, $order_object->devise, true, $order_object->currency_rate, true);
 		}
 	}
 	if (!empty($order_object->code_promo)) {
@@ -1411,10 +1470,12 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 {
 	if(empty($order_by) && !empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'name') {
 		$order_by = 'oi.nom_produit ASC';
+	} elseif(!empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'reference') {
+		$order_by = 'oi.reference ASC';
 	} else {
 		$order_by = 'oi.id ASC';
 	}
-	
+
 	$product_infos_array = array();
 	$sql = "SELECT oi.*, p.technical_code, c.nom_".$_SESSION['session_langue']." AS category_name, m.nom_".$_SESSION['session_langue']." AS brand_name
 		FROM peel_commandes_articles oi
@@ -1449,7 +1510,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		// Ce pourcentage ne prend pas en considération des réductions par montant effectuées, donc ça n'est pas le total de réduction en pourcentage
 		// - $prod['remise'] est quant à lui la remise totale effectuée, donc c'est une information compréhensible par l'utilisateur.
 		$remise_text = ($prod['remise'] > 0 ? "\r\n" . $GLOBALS['STR_PROMOTION_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . get_discount_text((display_prices_with_taxes_active()?$prod['remise']:$prod['remise_ht']), $prod['percent_remise_produit'] , display_prices_with_taxes_active()) : "");
-		if (is_module_ecotaxe_active()) {
+		if (check_if_module_active('ecotaxe')) {
 			// On affiche le montant de l'écotaxe dans la colonne dénomination du produit et non pas prix pour des raisons de largeur de colonne
 			$ecotaxe_text = ($prod['ecotaxe_ttc'] > 0) ? "\r\n" . $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ttc'], true, $devise, true, $currency_rate) : "";
 		}
@@ -1466,19 +1527,20 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
  * @param integer $order_id
  * @param mixed $forced_type
  * @param mixed $send_admin_email
- * @param mixed $amount_to_pay
+ * @param mixed $amount_to_pay Ce paramètre est utilisé pour les paiements partiels.
  * @param boolean $allow_autosend
  * @return string
  */
 function get_payment_form($order_id, $forced_type = null, $send_admin_email = false, $amount_to_pay = 0, $allow_autosend = true)
 {
 	$output = '';
-
 	$result = query('SELECT *
 		FROM peel_commandes
 		WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes') . '');
 	$com = fetch_object($result);
-	// Ce paramètre est utilisé pour les paiements partiels.
+	if(empty($com)) {
+		return null;
+	}
 	if (empty($amount_to_pay)) {
 		$amount_to_pay = floatval($com->montant);
 	}
@@ -1709,6 +1771,11 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			break;
 
 		default :
+			if (function_exists('get_payment_form_'.$type)) {
+				$function_name = 'get_payment_form_'.$type;
+				$tpl->assign('form', $function_name(array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship, 'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type)));
+				$send_admin_template_email = 'admin_info_payment_credit_card';
+			}
 			break;
 	}
 	if ($send_admin_email && !empty($send_admin_template_email)) {
@@ -1716,7 +1783,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		$custom_template_tags['ORDER_ID'] = $order_id;
 		send_email($GLOBALS['support_commande'], '', '', $send_admin_template_email, $custom_template_tags, null, $GLOBALS['support_commande']);
 	}
-	if($allow_autosend && !empty($js_action) && is_autosend_module_active()) {
+	if($allow_autosend && !empty($js_action) && (vn($GLOBALS['site_parameters']['module_autosend']) == 1)) {
 		$GLOBALS['js_content_array'][] = '
 		setTimeout("' . filtre_javascript($js_action, true, false, true, true, false) . '", ' . vn($GLOBALS['site_parameters']['module_autosend_delay']) * 1000 . ');
 ';
@@ -1741,10 +1808,10 @@ function is_order_modification_allowed($order_datetime)
 	} elseif ($GLOBALS['site_parameters']['keep_old_orders_intact'] == '1') {
 		if (intval(date('m')) > 6) {
 			// Année <= N-1 bloquées
-			$reference_date = date('Y-06-30', time() - 24 * 3600 * 365);
+			$reference_date = date('Y-12-31', time() - 24 * 3600 * 365);
 		} else {
 			// Année <= N-2 bloquées
-			$reference_date = date('Y-06-30', time() - 24 * 3600 * 365 * 2);
+			$reference_date = date('Y-12-31', time() - 24 * 3600 * 365 * 2);
 		}
 	} else {
 		// keep_old_orders_intact est alors un timestamp

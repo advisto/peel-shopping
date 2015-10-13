@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_password_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: change_password_form.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ change_password }}</h1>
 {% if (noticemsg) %}
 	{{ noticemsg }}
@@ -33,6 +33,6 @@
 			<span class="enregistrementgauche"><label for="nouveau_mot_passe">{{ STR_NEW_PASSWORD_CONFIRM }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="password" class="form-control" name="nouveau_mot_passe2" id="nouveau_mot_passe2" size="32" value="{{ new_password_confirm|str_form_value }}" /> {{ new_password_confirm_error }}</span>
 		</div>
-		<p class="center">{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="btn btn-primary" />&nbsp;&nbsp;&nbsp;<input type="reset" value="{{ STR_EMPTY_FIELDS|str_form_value }}" class="btn btn-warning" /></p>
+		<p class="center" style="margin-top:10px">{{ token }}<input type="submit" value="{{ STR_CHANGE|str_form_value }}" class="btn btn-primary" />&nbsp;&nbsp;&nbsp;<input type="reset" value="{{ STR_EMPTY_FIELDS|str_form_value }}" class="btn btn-warning" /></p>
 	</form>
 {% endif %}

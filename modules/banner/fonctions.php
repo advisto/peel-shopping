@@ -3,20 +3,45 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46952 2015-09-18 14:24:10Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 // Définition du tableau de critère SQL (champ => Valeur)
 $GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page');
+
+/**
+ * Traitement de la fin de la génération d'une page
+ *
+ * @param array $params
+ * @return
+ */
+function banner_hook_close_page_generation($params) {
+	update_viewed_banners();
+}
+
+/**
+ * Gestion du changement de status d'un élément dans une table si pas prévu par défaut
+ *
+ * @param array $params
+ * @return
+ */
+function banner_hook_rpc_status(&$params) {
+	// Suppression des caches de bannières
+	if ($params['mode']=='banner') {
+		$this_cache_object = new Cache(null, array('group' => 'affiche_banner_data'));
+		$this_cache_object->delete_cache_file(true);
+		unset($this_cache_object);
+	}
+}
 
 /**
  * affiche_banner()
@@ -39,7 +64,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 {
 	static $is_module_banner_active;
 	if(!isset($is_module_banner_active)) {
-		$is_module_banner_active = is_module_banner_active();
+		$is_module_banner_active = check_if_module_active('banner');
 	}
 	$output = '';
 	$cmp = 0;
@@ -220,7 +245,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							if (empty($height)){
 								$height = '300';
 							}
-							$banner_html = getFlashBannerHTML($GLOBALS['repertoire_upload'] . '/' . $banner['image'], $width, $height, true);
+							$banner_html = getFlashBannerHTML(get_url_from_uploaded_filename($banner['image']), $width, $height, true);
 						} else {
 							// Si la taille de la bannière est définie, alors nous appliquons le style de la banniere
 							$style_banner = '';
@@ -230,7 +255,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							if (!empty($height)){
 								$style_banner .= ' height="' . $height . '" ';
 							}
-							$banner_html = '<img src="' . $GLOBALS['repertoire_upload'] . '/' . $banner['image'] . '" alt="' . vb($banner['lien']) . '" ' . $style_banner . ' />';
+							$banner_html = '<img src="' . get_url_from_uploaded_filename($banner['image']) . '" alt="' . vb($banner['lien']) . '" ' . $style_banner . ' />';
 							if (!empty($banner['lien'])) {
 								$banner_html = '<a href="' . $GLOBALS['wwwroot'] . '/modules/banner/bannerHit.php?id=' . $banner['id'] . '" ' . $banner['extra_javascript'] . ' ' . (!empty($banner['target']) && $banner['target'] != '_self' ? ($banner['target'] == '_blank' && String::strpos($banner['extra_javascript'], 'onclick=') === false?'onclick="return(window.open(this.href)?false:true);"':'target="' . $banner['target'] . '"'):'') . '>' . $banner_html . '</a>';
 							}

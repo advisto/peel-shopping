@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_bas.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_bas.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 *}				</div>
 			</div>
 		</div>
@@ -28,7 +28,7 @@
 	{$js_output}
 	{if isset($peel_debug)}
 		{foreach $peel_debug as $key => $item_arr}
-			<span {if $item_arr.duration<0.010}style="color:grey"{else}{if $item_arr.duration>0.100}style="color:red"{/if}{/if}>{$key}{$STR_BEFORE_TWO_POINTS}: {{math equation="x*y" x=$item_arr.duration y=1000}|string_format:'%04d'} ms - Start{$STR_BEFORE_TWO_POINTS}{{math equation="x*y" x=$item_arr.start y=1000}|string_format:'%04d'} ms - {if isset($item_arr.sql)}{$item_arr.sql}{/if} {if isset($item_arr.template)}{$item_arr.template}{/if}</span><br />
+			<span {if $item_arr.duration<0.010}style="color:grey"{else}{if $item_arr.duration>0.100}style="color:red"{/if}{/if}>{$key}{$STR_BEFORE_TWO_POINTS}: {{math equation="x*y" x=$item_arr.duration y=1000}|string_format:'%04d'} ms - Start{$STR_BEFORE_TWO_POINTS}{{math equation="x*y" x=$item_arr.start y=1000}|string_format:'%04d'} ms - {if isset($item_arr.sql)}{$item_arr.sql}{/if}{if isset($item_arr.template)}{$item_arr.template}{/if}{if isset($item_arr.text)}{$item_arr.text}{/if}</span><br />
 		{/foreach}
 	{/if}
 </body>

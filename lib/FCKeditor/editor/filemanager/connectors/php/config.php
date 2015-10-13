@@ -30,10 +30,9 @@ global $Config ;
 $Config['Enabled'] = true ;
 
 // On va chercher la configuration de PEEL
-define('IN_PEEL', true);
+define('LOAD_NO_OPTIONAL_MODULE', true);
 include('../../../../../../configuration.inc.php');
 
-session_start();
 // Vérification des droits : l'utilisateur doit être un administrateur PEEL
 if(!a_priv('admin*', false)){
 	die();

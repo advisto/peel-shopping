@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -52,7 +52,7 @@ function affiche_select_marque($return_mode = false) {
 		$tpl_options = array();
 		while ($brand = fetch_assoc($query)) {
 			$tpl_id = null;
-			if (is_module_url_rewriting_active()) {
+			if (check_if_module_active('url_rewriting')) {
 				$tpl_id = rewriting_urlencode($brand['marque']);
 			}
 			$tpl_options[] = array(
@@ -78,7 +78,6 @@ function affiche_select_marque($return_mode = false) {
  * @param array $attribute
  * @return
  */
-
 function display_select_attribute($categorie, $attribute) {
 	$output = '';
 	// si la requete necessite une autre table pour le controle de l'utilisation de l'attribut
@@ -110,14 +109,14 @@ function display_select_attribute($categorie, $attribute) {
 
 /*
  * Affichage des attributs crées via l'administration du site
- * A FAIRE : Cette fonction est à fusionner avec display_form_part du modules attributs
+ * A FAIRE : L'affichage des champs est à séparer et à fusionner avec affiche_attributs_form_part
  *
  * @param array $selected_attributes
  * @param string $technical_code identifiant unique d'un attribut
  * @param boolean $show_all
  * @return
  */
-function display_custom_attribute($selected_attributes=null, $technical_code = null, $show_all = false) {
+function display_custom_attribute($selected_attributes = null, $technical_code = null, $show_all = false) {
 	$output = '';
 	if(!empty($technical_code)) {
 		if (is_array($technical_code)) {
@@ -148,6 +147,7 @@ function display_custom_attribute($selected_attributes=null, $technical_code = n
 	}
 	if(!empty($tpl_attrs)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_custom_attribute.tpl');
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('select_attrib_txt', $GLOBALS['STR_MODULE_SEARCH_SELECT_ATTRIB']);
 		$tpl->assign('attributes', $tpl_attrs);
 		$output .= $tpl->fetch();

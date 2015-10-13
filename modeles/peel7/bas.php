@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: bas.php 47234 2015-10-08 11:03:43Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -19,12 +19,11 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('bas.tpl');
 $tpl->assign('MODULES_BOTTOM_MIDDLE', get_modules('bottom_middle', true, null, vn($_GET['catid'])));
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
 if ($GLOBALS['page_columns_count'] == 3) {
-	$modules_right = '';
-	if(check_if_module_active('annonces')) {
-		$modules_right .= get_modules('right_annonce', true, null, vn($_GET['catid'])); 
-	}
-	$modules_right .= get_modules('below_middle', true, null, vn($_GET['catid']));
-	$tpl->assign('MODULES_RIGHT', $modules_right);
+	$modules_below_middle = get_modules('below_middle', true, null, vn($_GET['catid']));
+	$tpl->assign('MODULES_BELOW_MIDDLE', $modules_below_middle);
+}
+if (!empty($GLOBALS['modules_right'])) {
+	$tpl->assign('MODULES_RIGHT', $GLOBALS['modules_right']);
 }
 $tpl->assign('IN_HOME', defined('IN_HOME'));
 if (defined('IN_HOME')) {
@@ -38,7 +37,7 @@ $tpl->assign('footer_columns_width_sm', vb($GLOBALS['site_parameters']['footer_c
 $tpl->assign('footer_columns_width_md', vb($GLOBALS['site_parameters']['footer_columns_width_md'], 3));
 
 $tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], false, 26));
-if (is_devises_module_active()) {
+if (check_if_module_active('devises')) {
 	$tpl->assign('module_devise', affiche_module_devise(true));
 }
 
@@ -53,9 +52,6 @@ if (!empty($_SESSION["session_display_popup"]["no_uploaded_image"])) {
 }
 
 $tpl->assign('tag_analytics', get_tag_analytics());
-if (is_butterflive_module_active()) {
-	$tpl->assign('butterflive_tracker', get_butterflive_tracker());
-}
 
 $end_javascript = '';
 if (!empty($GLOBALS['site_parameters']['google_premium_account_id']) && !empty($GLOBALS['integrate_javascript_google_ads']) && empty($GLOBALS['disable_google_ads']) && strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false && check_if_module_active('annonces')) {
@@ -72,10 +68,10 @@ if (!empty($GLOBALS['site_parameters']['twenga_ads_account_url']) && !empty($GLO
 }
 $tpl->assign('end_javascript', $end_javascript);
 
-if (defined('PEEL_DEBUG') && PEEL_DEBUG == true) {
+if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 	$tpl->assign('peel_debug', $GLOBALS['peel_debug']);
 }
-$tpl->assign('DEBUG_TEMPLATES', DEBUG_TEMPLATES);
+$tpl->assign('DEBUG_TEMPLATES', defined('DEBUG_TEMPLATES') && DEBUG_TEMPLATES);
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 // Si js_files pas mis dans haut.php (chargement asynchrone ou demandés entre temps dans la génération PHP)
 // Au cas où on veuille mettre les javascript en pied de <body> au lieu de head, pour plus de vitesse (mais moins conforme aux usages)
@@ -94,6 +90,7 @@ $tpl->assign('footer_bottom', $footer_bottom);
 if(function_exists('get_footer_column')) {
 	$tpl->assign('footer_column', get_footer_column());
 }
+$tpl->assign('scroll_to_top', vb($GLOBALS['site_parameters']['scroll_to_top'], false));
 
 echo $tpl->fetch();
 

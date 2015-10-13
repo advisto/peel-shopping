@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paiement.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: paiement.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -245,7 +245,7 @@ function insere_paiement(&$frm)
 		, '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, '" . nohtml_real_escape_string($frm['tva']) . "'
 		, '" . intval($frm['etat']) . "'
-		, '" . intval($frm['site_id']) . "'";
+		, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	if (check_if_module_active('payback')) {
 		$sql .= ", '" . intval($frm['retour_possible']) . "'";
 	}
@@ -279,7 +279,7 @@ function maj_paiement($id, $frm)
 		$sql .= ", retour_possible = '" . nohtml_real_escape_string($frm['retour_possible']) . "'";
 	}
 	$sql .= ", etat = '" . nohtml_real_escape_string($frm['etat']) . "'
-			, site_id = '" . intval($frm['site_id']) . "'";
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -314,7 +314,6 @@ function affiche_liste_paiement()
 	if (!(num_rows($result) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		$all_sites_name_array = get_all_sites_name_array();
 		while ($ligne = fetch_assoc($result)) {
 			if ($ligne['technical_code'] == 'paypal' && empty($GLOBALS['site_parameters']['email_paypal'])) {
 				$explain = '<br /><span class="red">' . String::strtoupper($GLOBALS["STR_ADMIN_DEACTIVATED"]) . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': <a href="'.$GLOBALS['administrer_url'].'/sites.php" style="color:#999999">' . $GLOBALS["STR_ADMIN_SITES_PAYPAL_EMAIL"].'</a></span>';
@@ -333,7 +332,7 @@ function affiche_liste_paiement()
 				'prix' => ($ligne['tarif'] != "0.00000" ? fprix($ligne['tarif'], true, $GLOBALS['site_parameters']['code'], false) . "" : "-"),
 				'etat_onclick' => 'change_status("paiement", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']:$all_sites_name_array[$ligne['site_id']])
+				'site_name' => get_site_name($ligne['site_id'])
 				);
 			$i++;
 		}

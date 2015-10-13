@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: compte.php 46935 2015-09-18 08:49:48Z gboussin $
 
 include("configuration.inc.php");
 
@@ -18,9 +18,6 @@ define('IN_COMPTE', true);
 $GLOBALS['page_name'] = 'compte';
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_COMPTE'];
 
-if (check_if_module_active('profil')) {
-	include($GLOBALS['fonctionsprofile']);
-}
 // Desactive le compte de l'utilisateur depuis le front-office
 if (est_identifie() && !empty($_GET['unsubscribe_account']) && !empty($GLOBALS['site_parameters']['disable_account_by_user_in_front_office'])) {
 	$sql = "UPDATE peel_utilisateurs SET `etat`=0 WHERE id_utilisateur=" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . " AND " . get_filter_site_cond('utilisateurs');
@@ -31,15 +28,18 @@ if (est_identifie() && !empty($_GET['unsubscribe_account']) && !empty($GLOBALS['
 }
 if (!est_identifie()) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true);
-	redirect_and_die($GLOBALS['wwwroot'] . '/membre.php');
+	redirect_and_die(get_url('membre'));
 }
 
 $GLOBALS['page_related_to_user_id'] = $_SESSION['session_utilisateur']['id_utilisateur'];
+$output = '';
+
+if (vb($_GET['error']) == 'admin_rights') {
+	$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_NO_RIGHTS_TO_ACCESS_ADMIN']))->fetch();
+}
+$output .= print_compte(true);
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
-if (vb($_GET['error']) == 'admin_rights') {
-	echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_NO_RIGHTS_TO_ACCESS_ADMIN']))->fetch();
-}
-echo print_compte(true);
+echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 

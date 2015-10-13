@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_fr.php 47186 2015-10-05 14:54:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -176,7 +176,7 @@ $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"] = "Créer ou modifier une
 $GLOBALS["STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED"] = "Taux de change appliqué à la commande (par rapport à %s)";
 $GLOBALS["STR_ADMIN_COMMANDER_DOWNLOADS_LIST_TITLE"] = "Liste des téléchargements en cours";
 $GLOBALS["STR_ADMIN_COMMANDER_FIANET_FUNCTIONS"] = "FONCTIONNALITÉ SERVICE D'ANALYSE DES COMMANDES FIANET";
-$GLOBALS["STR_ADMIN_COMMANDER_FIANET_UPDATE"] = "Mettre à jour les status d'états de validation fianet (cette opération peux prendre plusieurs secondes)";
+$GLOBALS["STR_ADMIN_COMMANDER_FIANET_UPDATE"] = "Mettre à jour les statuts d'états de validation Fianet (cette opération peut prendre plusieurs secondes)";
 $GLOBALS["STR_ADMIN_COMMANDER_GIFT_POINTS"] = "Attribution des points cadeaux";
 $GLOBALS["STR_ADMIN_COMMANDER_GIVE_CREDIT"] = "Attribuer l'avoir";
 $GLOBALS["STR_ADMIN_COMMANDER_INCLUDING_CREDIT_NOTE"] = "dont Avoir";
@@ -294,7 +294,6 @@ $GLOBALS["STR_ADMIN_DEACTIVATE"] = "Désactiver";
 $GLOBALS["STR_ADMIN_DEACTIVATED"] = "Désactivé";
 $GLOBALS['STR_ADMIN_DELETE_ALL_RESULTS'] = "Supprimer les %s résultats";
 $GLOBALS["STR_ADMIN_DELETE_IMAGE"] = "supprimer cette image";
-$GLOBALS["STR_ADMIN_DELETE_THIS_FILE"] = "supprimer ce fichier";
 $GLOBALS["STR_ADMIN_DELETE_WARNING"] = "Etes-vous sûr de vouloir supprimer ?";
 $GLOBALS["STR_ADMIN_DELIVERY_EMAIL_SENT"] = "Un email de confirmation d'expédition vient d'être envoyé à %s";
 $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "DEMONSTRATION : L'envoi d'emails est désactivé";
@@ -553,7 +552,6 @@ $GLOBALS["STR_ADMIN_MENU_MANAGE_PROFIL"] = "Profils d'utilisateurs";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT"] = "Moyens de paiement";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT_AND_TAXES"] = "Paiement / taxes";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_CLEAN_FOLDERS"] = "Nettoyage de dossiers";
-$GLOBALS["STR_ADMIN_MENU_MANAGE_BUTTERFLIVE"] = "Paramètres Tracking et Chat";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_HEADER"] = "TRANSPORT";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_ZONES"] = "Zones d'expédition";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_COUNTRIES"] = "Pays";
@@ -912,6 +910,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_ORDER_DETAIL"] = "Détail de la commande";
 $GLOBALS["STR_ADMIN_PRODUITS_OTHER_OPTION"] = "Autre option";
 $GLOBALS["STR_ADMIN_PRODUITS_POSITION_EXPLAIN"] = "La position sert à définir l'ordre dans les listes de produits, et pour le module \"Précédent / Suivant\".";
 $GLOBALS["STR_ADMIN_PRODUITS_PRICE_IN"] = "Prix de vente en";
+$GLOBALS["STR_ADMIN_PRODUITS_PRICE_PROMOTION"] = "Nouveaux prix promotionnés";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCT_COLORS"] = "Couleurs du produit";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCT_SIZES"] = "Tailles du produit";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCTS_COUNT"] = "Nombre total de produits";
@@ -927,6 +926,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_TAB"] = "Onglet en langue";
 $GLOBALS["STR_ADMIN_PRODUITS_TEXT_RELATED_IN"] = "RÉDACTIONNEL LIÉ AU PRODUIT EN LANGUE";
 $GLOBALS["STR_ADMIN_PRODUITS_TITLE"] = "Gérer les produits";
 $GLOBALS["STR_ADMIN_PRODUITS_TO_ORDER"] = "A commander";
+$GLOBALS["STR_ADMIN_PRODUITS_UNIT_PER_PALLET"] = "Nombre de produits par palette";
 $GLOBALS["STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT"] = "Modification du contenu des onglets pour le produit";
 $GLOBALS["STR_ADMIN_PRODUITS_UPDATE"] = "Modifier le produit";
 $GLOBALS["STR_ADMIN_PRODUITS_VIDEO_TAG"] = "Renseignez ici votre code HTML d'intégration Youtube / Dailymotion / Facebook pour faire figurer la vidéo sur la fiche produit";
@@ -1018,7 +1018,6 @@ $GLOBALS["STR_ADMIN_SITES_CLOUD_ZOOM"] = "Cloud Zoom (nécessite jQuery)";
 $GLOBALS["STR_ADMIN_SITES_COMPARATOR_EXPLAIN"] = "Export vers les comparateurs de prix";
 $GLOBALS["STR_ADMIN_SITES_CONFIGURED_PROMOTIONS"] = "Si cette option est coché, seuls les produits \"Ventes flash\", ainsi que les produits promotionnés par leur marque ou leurs catégories seront affichés sur la page";
 $GLOBALS["STR_ADMIN_SITES_CONFIGURED_TOP_SALES"] = "Produits configurés pour être le top des ventes";
-$GLOBALS["STR_ADMIN_SITES_CONTACT_PEEL_TO_GET_MODULE"] = "Contactez PEEL si vous souhaitez obtenir cette fonctionnalité";
 $GLOBALS["STR_ADMIN_SITES_CSS_FILES_EXPLAIN"] = "Les noms de fichiers des feuilles de style sont à séparer par des virgules ; ne pas indiquer html_bill.css ici";
 $GLOBALS["STR_ADMIN_SITES_CSS_FILES"] = "Nom de la feuille de style se trouvant dans le répertoire sélectionné";
 $GLOBALS["STR_ADMIN_SITES_CURRENCIES_LINK"] = "Gérer vos devises";
@@ -1097,9 +1096,11 @@ $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "Le module micro-entreprise 
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro-entreprise";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Pour ne pas demander un montant minimum de commande, laissez le champ ci-dessus à 0.";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED"] = "Montant minimum de commande";
+$GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_REVE_AMOUNT_ALLOWED"] = "Montant minimum de commande revendeur";
 $GLOBALS["STR_ADMIN_SITES_MODULE"] = "MODULE";
-$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Vous pouvez associer des modules à l'emplacement souhaité (bas, haut, gauche ou droite) en définissant l'ordre d'affichage avec la position.<br />Pour les positions gauche et droite : le mode sideblock met en forme le module dans un bloc, et sideblocktitle idem avec un titre.<br />Sur un espace publicitaire donné, une seule bannière est affichée en même temps, une rotation aléatoire est effectuée si plusieurs bannières sont configurées sur cet espace.<br />Le module spécial \"Publicité au hasard\" affiche en rotation aléatoire des bannières publicitaires provenant de tous les espaces publicitaires quels qu'ils soient.<br />Le module de catalogue affiche l'arborescence des catégories de produits : vous devez donc avoir des catégories pour qu'il s'affiche.<br />";
-$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Gestion des emplacements des modules dans les colonnes du site";
+$GLOBALS["STR_ADMIN_SITES_MODULE_INSTALL"] = "Module présent - Procédez à l'installation du module";
+$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS_EXPLAIN"] = "Vous pouvez associer des modules à l'emplacement souhaité (bas, haut, milieu-bas ou milieu-haut) en définissant l'ordre d'affichage avec la position.<br />Le mode sideblock met en forme le module dans un bloc, et sideblocktitle idem avec un titre.<br />Sur un espace publicitaire donné, une seule bannière est affichée en même temps, une rotation aléatoire est effectuée si plusieurs bannières sont configurées sur cet espace.<br />Le module spécial \"Publicité au hasard\" affiche en rotation aléatoire des bannières publicitaires provenant de tous les espaces publicitaires quels qu'ils soient.<br />Le module de catalogue affiche l'arborescence des catégories de produits : vous devez donc avoir des catégories pour qu'il s'affiche.<br />";
+$GLOBALS["STR_ADMIN_SITES_MODULES_POSITIONS"] = "Gestion des emplacements des modules sur le site";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_EMAIL"] = "Email du compte marchand sur moneybookers.com (active le module Moneybookers si renseigné)";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_MODULE"] = "Paiement Moneybookers";
 $GLOBALS["STR_ADMIN_SITES_MONEYBOOKERS_SECRET_WORD_EXPLAIN"] = "Ce mot de passe est défini dans le compte Moneybookers. Il permet sécuriser les échanges entre votre site et Moneybookers.";
@@ -1133,7 +1134,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Rappel des valeurs de
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(restera immédiat dans tous les cas pour Kwixo = ancien FIANET ReceiveAndPay)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Définir l'attente en secondes avant validation automatique du formulaire de paiement";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Activation de la validation automatique du formulaire de paiement (restera inactive avec SPPLUS et ATOS)";
-$GLOBALS["STR_ADMIN_SITES_PAYPAL_EMAIL"] = "Email paypal (active le module Paypal si renseigné)";
+$GLOBALS["STR_ADMIN_SITES_PAYPAL_EMAIL"] = "Email du compte Paypal (obligatoire sinon module inactif)";
 $GLOBALS["STR_ADMIN_SITES_PAYPAL_MODULE"] = "Paiement Paypal";
 $GLOBALS["STR_ADMIN_SITES_POSITION_AD_BOTTOM"] = "Bas des pages annonces";
 $GLOBALS["STR_ADMIN_SITES_POSITION_AD_TOP"] = "Haut des pages annonces";
@@ -1157,7 +1158,7 @@ $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_BOTTOM"] = "iPhone - Bas fav
 $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_FAVORITES_TOP"] = "iPhone - Haut page favoris";
 $GLOBALS["STR_ADMIN_SITES_POSITION_IPHONE_HOME"] = "iPhone - Splashscreen application";
 $GLOBALS["STR_ADMIN_SITES_PREMIUM_MODULE"] = "MODULE PREMIUM";
-$GLOBALS["STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT"] = "Module présent et activé par défaut";
+$GLOBALS["STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT"] = "Module présent et sans installation nécessaire";
 $GLOBALS["STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION"] = "Gestion des boutons précédent et suivant sur les fiches produit";
 $GLOBALS["STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS"] = "Circulation dans la catégorie directe et dans les catégories parentes.";
@@ -1272,6 +1273,7 @@ $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_EXPLAIN"] = "NB : Ceci a un impact su
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_IN_ADMIN"] = "Affichage des prix dans l'administration de préférence en";
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER"] = "Affichage des prix en TTC/HT";
 $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE"] = "Affichage des prix sauf pour revendeurs, et hors administration";
+$GLOBALS["STR_ADMIN_SITES_VATLAYER_MODULE"] = "Connexion avec l'API vatlayer pour contrôler le numéro de TVA Intracommunautaire";
 $GLOBALS["STR_ADMIN_SITES_ZOOM_SELECTION"] = "Sélection du zoom utilisé sur l'image principal dans les fiches produits";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS"] = "Paramètres de la société";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_EXPLAIN"] = "Les informations présentes dans cette page servent notamment pour la facturation :";
@@ -1358,6 +1360,10 @@ $GLOBALS["STR_ADMIN_TVA_UPDATE"] = "Modifier cette TVA";
 $GLOBALS["STR_ADMIN_UNCHECK_ALL"] = "Tout décocher";
 $GLOBALS["STR_ADMIN_UPDATE"] = "Mettre à jour";
 $GLOBALS["STR_ADMIN_UPDATED_DATE"] = "Création / Mise à jour";
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_DETECTED"] = 'Version détectée';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_INVITE"] = 'Vous devez mettre à jour la structure de votre base de données';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_OK"] = 'MAJ de la base de données exécutée : ancienne version = %s - nouvelle version = %s';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_WARNING"] = 'Vous devez sauvegarder votre base de données par vos propres moyens avant toute mise à jour automatique - Cet outil est risqué et sous votre propre responsabilité';
 $GLOBALS["STR_ADMIN_URL_REWRITING"] = "URL Rewriting";
 $GLOBALS["STR_ADMIN_URLLIST_CREATE_TITLE"] = "Création du sitemap";
 $GLOBALS["STR_ADMIN_URLLIST_GENERATE_SITEMAP"] = "Générer le sitemap pour Yahoo !";
@@ -1545,7 +1551,7 @@ $GLOBALS["STR_ADMIN_ZONES_DOES_VAT_APPLY_IN_ZONE"] = "La TVA s'applique t'elle d
 $GLOBALS["STR_ADMIN_ZONES_FORM_TITLE"] = "Ajouter ou modifier une zone";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT_EXPLAIN"] = "Ce montant ne sert que si l'activation est cochée ci-dessus.";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT"] = "Montant à partir duquel l'exonération totale des frais de port s'applique";
-$GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN"] = "Ce nombre ne sert que si l'activation est cochée ci-dessus. Renseigner 0 (zéro) pour ne pas prendre en compte le nombre de produit.";
+$GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN"] = "Ce nombre ne sert que si l'activation est cochée ci-dessus. Renseigner 0 (zéro) pour ne pas prendre en compte le nombre de produits.";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS"] = "Nombre de produits achetés à partir duquel l'exonération des frais de port s'applique";
 $GLOBALS["STR_ADMIN_ZONES_FREE_DELIVERY"] = "Franco de port";
 $GLOBALS["STR_ADMIN_ZONES_MSG_CREATED_OK"] = "La zone de livraison <b>%s</b> a été créée.";
@@ -1630,6 +1636,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT"] = "Evénement JavaScript su
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HEIGHT"] = "Hauteur (dimension en px)";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HIT"] = "Hit";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_IMAGE_OR_FLASH"] = "Image ou Flash";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_KEYWORDS"] = "Mots-clés";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_LIST_TITLE"] = "LISTE DES BANNIERES";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_DELETED_OK"] = "La bannière <b>%s</b> a été effacée.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"] = "Les changements apportés à bannière publicitaire %s ont bien été pris en compte.";
@@ -1664,48 +1671,6 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"] = "La bannière publicitaire <b>%s</b
 $GLOBALS["STR_MODULE_BOUNCES_BAD_EMAILS_TITLE"] = "Liste des emails à problèmes";
 $GLOBALS["STR_MODULE_BOUNCES_ACTIONS_SELECTION"] = "Sélection des actions";
 $GLOBALS["STR_MODULE_BOUNCES_SEARCH_EMAIL_PROBLEM"] = "Rechercher un problème d'email";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACCOUNT_CREATE"] = "Créer le compte";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACCOUNT_CREATION"] = "Création de compte";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE"] = "Activer Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_OK"] = "Votre site web est maintenant autorisé dans votre profil Butterflive. Si vous avez déjà installé la console Butterflive sur votre PC, vous devrez la redémarrer pour prendre en compte ces modifications.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_TITLE"] = "Paramétrer Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ACTIVATE_WEBSITE"] = "Activer le site";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_BACK_TO_CONFIGURATION"] = "Retour à l'écran de configuration";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE"] = "Configuration de votre compte Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE_EXPLAIN"] = "Afin d'autoriser votre site dans Butterflive, veuillez entrer votre mot de passe Butterflive.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_CONFIGURE_TITLE"] = "Configuration Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_DOWNLOAD_EXPLAIN"] = "Pour suivre en direct vos utilisateurs et pouvoir dialoguer avec eux, vous devez installer la console de suivi (aussi appelé <em>Butterflive Widget</em>) sur votre ordinateur.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ACCOUNT_CONNECTION"] = "An error occured while accessing your Butterflive account. Please try again later.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ACCOUNT_CREATION_RETRY_LATER"] = "Une erreur est survenue, veuillez réessayer de créer un compte plus tard.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ALREADY_EXISTING_ACCOUNT"] = "Erreur: Vous semblez déjà disposer d'un <a href='http://www.butterflive.fr/login'>compte Butterflive</a> pour l'adresse e-mail '%s'.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_ALREADY_VALIDATED"] = "Votre compte Butterflive a déjà été validé.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_CONFIGURATION"] = "Une erreur est survenue lors de la configuration de Butterflive. Veuillez réessayer plus tard.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_INVALID_LINK"] = "Impossible de traiter votre demande, le lien semble invalide. Merci de <a href=\"contact@butterflive.com\">contacter Butterflive</a> si l'erreur persiste.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_PASSWORD"] = "Les deux mots de passe ne correspondent pas.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_PASSWORD_INVALID"] = "Mot de passe non valide. Vous devez rentrer le mot de passe de votre compte Butterflive.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_RETRY_LATER"] = "Une erreur est survenue, merci de recliquer sur le lien de validation plus tard.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ERR_SERVER_CONNEXION"] = "Une erreur est survenue lors de la communication avec les serveurs Butterflive. Veuillez réessayer plus tard.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_I_ALREADY_HAVE_AN_ACCOUNT"] = "J'ai déjà un compte";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_ID"] = "Votre identifiant Butterflive :";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_LINK_PEEL_TO_BUTTERFLIVE"] = "Cliquez ici pour relier PEEL à votre compte '%s'";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_ACCOUNT_VALIDATED_OK"] = "Votre compte a été validé, vous pouvez <a href=\"butterflive.php\">commencer à utiliser Butterflive</a>.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_CONFIGURATION_OK"] = "Votre site PEEL est maintenant associé à votre compte Butterflive \"%s\".";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_INSCRIPTION_OK"] = "L'inscription au service Butterflive a réussi, vous allez recevoir un mail vous invitant à valider votre inscription.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_MSG_RETRY_VALIDATION"] = "L'inscription au service prend plus de temps que prévu. Merci de recliquer dans quelques minutes sur le lien de validation pour valider votre compte.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_NEW_ACCOUNT_OPEN_EXPLAIN"] = "Vous ne disposez pas d'un compte Butterflive ? <a href=\"%s\">Cliquez ici pour en créer un gratuitement!</a>";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_NO_KEY_FOUND_FOR_THIS_EMAIL"] = "Aucune clé Butterflive n'est associée à cette addresse e-mail.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_OPEN_ACCOUNT_TITLE"] = "Analyse trafic temps-réel & Chat";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_PARAMETERS_VERIFY"] = "Veuillez patienter, vérification de votre paramétrage en cours";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_SAVE_BUTTON"] = "Enregistrer les modifications";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_TITLE"] = "Paramétrer Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_OTHER_ACCOUNT"] = "Utiliser un autre compte";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_THIS_ACCOUNT"] = "Utiliser ce compte";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USE_TITLE"] = "Utiliser Butterflive";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_USER_ANOTHER_EMAIL"] = "Alternativement, veuillez utiliser une autre adresse email";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN_ACTIVATE"] = "Afin d'activer le suivi des visiteurs et le chat, vous devez vous inscrire à Butterflive, puis télécharger la console de suivi. L'inscription est totalement gratuite. Vous aurez par la suite la possibilité de souscrire un abonnement auprès de Butterflive pour disposer de fonctionnalités exclusives : <ul><li>Support de plusieurs conseillers simultanés,</li><li>Gestion de plusieurs sites web,</li><li>Score adapté au panier du visiteur.</li></ul>";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME_EXPLAIN"] = "Grâce à ce module, vous pouvez utiliser très simplement et rapidement Butterflive. Créez simplement un compte en remplissant le formulaire ci dessous et activez le grâce au lien envoyé à votre adresse e-mail. Vous n'avez pas à vous soucier d'installer vous-même le code de suivi ni quoi que ce soit d'autre, PEEL s'en charge !";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_WELCOME"] = "En association avec <a href=\"http://www.butterflive.fr?o=afpee01\">Butterflive</a>, PEEL vous offre la possibilité de <strong>suivre en direct vos visiteurs</strong> sur votre site.Un module de scoring note vos visiteurs selon leur activité sur le site pour détecter les clients potentiels. Un <strong>module de chat</strong> vous permet de rentrer en contact avec vos visiteurs en chat classique, ou en <strong>chat vidéo</strong>.";
-$GLOBALS["STR_MODULE_BUTTERFLIVE_YOU_HAVE_ALREADY_ACCOUNT"] = "Vous disposez déjà d'un <a href=\"http://www.butterflive.fr/\">compte Butterflive</a> ? Entrez vos identifiants pour utiliser votre compte Butterflive sur ce site";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_TITLE"] = "Gestion des carrousels";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_MSG_IMAGE_CREATED_OK"] = "Insertion de la vignette effectuée.";
 $GLOBALS["STR_MODULE_CARROUSEL_ADMIN_MSG_IMAGE_DELETED_OK"] = "Suppression de la vignette effectuée.";
@@ -1961,7 +1926,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_EXPLAIN_TEMPLATES"] = "Cette page permet d'en
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_FORM_TITLE"] = "Créer / Editer un modèle d'email";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_LIST_IN_AD_FORMS"] = "Liste des emails sur les formulaires de ses pages d'annonces";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_LIST_IN_SITE_CONTACT_FORM"] = "Emails envoyés par cet utilisateur depuis le formulaire de contact du site";
-$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_LIST_IN_VITRINE"] = "Liste d'emails à partir de sa vitrine";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_LIST_IN_VITRINE"] = "Liste d'emails à partir de son profil public";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_LIST_TITLE"] = "Liste des emails envoyés aux utilisateurs par le biais du site.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_NOT_READ"] = "Comme non lu(s)";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_READ"] = "Comme lu(s)";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_output.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_email-templates_output.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}{{ action_html }}
 <h2 style="margin-left:30px; color:#009900;"><a href="{{ href|escape('html') }}">{{ STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE }}{{ STR_BEFORE_TWO_POINTS }}: {{ STR_CLICK_HERE }}</a></h2>
 <br />
@@ -26,10 +26,10 @@
 							<td>{{ categories_list }}</td>
 						</tr>
 						<tr>
-							<td>{{ STR_ADMIN_WEBSITE}}{{ STR_BEFORE_TWO_POINTS }}: </td>
+							<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}: </td>
 							<td>
 								<select class="form-control" name="site_id" style="width:90%">
-									{{ site_id_select_options}}
+									{{ site_id_select_options }}
 								</select>
 							</td>
 						</tr>

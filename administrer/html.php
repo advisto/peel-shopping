@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: html.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: html.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -161,7 +161,7 @@ function affiche_formulaire_home(&$frm)
 	if(file_exists($GLOBALS['fonctionscarrousel'])){
 		$emplacement_array['entre_carrousel'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CARROUSEL_TOP'];
 	}
-	if(is_reseller_module_active()){
+	if(check_if_module_active('reseller')){
 		$emplacement_array['devenir_revendeur'] = $GLOBALS['STR_ADMIN_HTML_PLACE_BECOME_RESELLER'];
 	}
 	if(file_exists($GLOBALS['fonctionspartenaires'])){
@@ -191,6 +191,7 @@ function affiche_formulaire_home(&$frm)
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 	}
@@ -202,7 +203,7 @@ function affiche_formulaire_home(&$frm)
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
-	$tpl->assign('etat', $frm["etat"]);
+	$tpl->assign('etat', vb($frm["etat"]));
 	$tpl->assign('emplacement', vb($frm['emplacement']));
 	$tpl->assign('emplacement_array', $emplacement_array);
 	// Test sur la presence du fichier pour permettre le choix de l'emplacement independamment de la configuration du site
@@ -271,7 +272,7 @@ function insere_home($frm)
 		$sql .= ", site_country";
 	}
 	$sql .= ")
-		VALUES ('" . intval($frm['etat']) . "', '" . nohtml_real_escape_string($frm['titre']) . "', '" . real_escape_string($frm['contenu_html']) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . nohtml_real_escape_string($frm['emplacement']) . "', '" . nohtml_real_escape_string($frm['lang']) . "', '" . intval($frm['site_id']) . "'";
+		VALUES ('" . intval($frm['etat']) . "', '" . nohtml_real_escape_string($frm['titre']) . "', '" . real_escape_string($frm['contenu_html']) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . date('Y-m-d H:i:s', time()) . "', '" . nohtml_real_escape_string($frm['emplacement']) . "', '" . nohtml_real_escape_string($frm['lang']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", '" . word_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
 	}
@@ -291,7 +292,7 @@ function maj_home($id, $frm)
 	$sql = "UPDATE peel_html
 		SET etat = '" . intval($frm['etat']) . "'
 			, titre = '" . nohtml_real_escape_string($frm['titre']) . "'
-			, site_id = '" . intval($frm['site_id']) . "'
+			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			".(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])?", site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'":"")."
 			, contenu_html = '" . real_escape_string($frm['contenu_html']) . "'
 			".(!empty($frm['emplacement'])?", emplacement = '" . nohtml_real_escape_string($frm['emplacement']) . "'":"")."
@@ -318,12 +319,11 @@ function affiche_liste_home()
 		WHERE " . get_filter_site_cond('html', null, true) . "
 		ORDER BY a_timestamp DESC");
 	if (!(num_rows($result) == 0)) {
-		$all_sites_name_array = get_all_sites_name_array();
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
 			$tmpLigne = array('tr_rollover' => tr_rollover($i, true),
-				'site_name' => ($ligne['site_id'] == 0? $GLOBALS['STR_ADMIN_ALL_SITES']: $all_sites_name_array[$ligne['site_id']]),
+				'site_name' => get_site_name($ligne['site_id']),
 				'titre' => $ligne['titre'],
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
@@ -334,13 +334,7 @@ function affiche_liste_home()
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 				);
 			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-				$site_country_array = array();
-				if(String::strlen($ligne['site_country'])>0) {
-					foreach(explode(',', $ligne['site_country']) as $this_id) {
-						$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
-					}
-				}
-				$tmpLigne['site_country'] = implode(', ', $site_country_array);
+				$tmpLigne['site_country'] = get_country_name($ligne['site_country']);
 			}
 			$tpl_results[] = $tmpLigne;
 			$i++;

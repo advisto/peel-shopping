@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: produit_details.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -18,11 +18,13 @@ $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['product_details_pa
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_PRODUCT'];
 
 $output = '';
+$product_infos = array();
+$form_error_object = new FormError();
+
 if (empty($_GET['id'])) {
 	// Si aucun produit n'est spécifié, retour à la page d'accueil
-	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
+	redirect_and_die(get_url('/'), true);
 }
-$product_infos = array();
 
 if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'])) {
 	// Autorisation de plusieurs urls pour ce produit dans le cas où il est associé à plusieurs catégories. Cette configuration est désactivée par défaut
@@ -38,20 +40,19 @@ if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'
 	}
 }
 
-$product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+$product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 $url = $product_object->get_product_url();
 if (empty($product_object->id) || ((!a_priv("admin_product") && !a_priv("reve")) && $product_object->on_reseller == 1)) {
 	// Si aucun produit n'est trouvé, retour à la page d'accueil
-	redirect_and_die($GLOBALS['wwwroot'] . "/", true);
+	redirect_and_die(get_url('/'), true);
 }
-if (is_module_url_rewriting_active() && String::strpos($_SERVER['REQUEST_URI'], 'id=') !== false) {
-	if (empty($url)) {
-		$url = $GLOBALS['wwwroot'] . "/";
-	}
-	redirect_and_die($url, true);
-}
-if (is_module_url_rewriting_active()) {
-	if (!empty($url) && $url != get_current_url(false)) {
+if (check_if_module_active('url_rewriting')) {
+	if (String::strpos($_SERVER['REQUEST_URI'], 'id=') !== false) {
+		if (empty($url)) {
+			$url = get_url('/');
+		}
+		redirect_and_die($url, true);
+	} elseif (!empty($url) && $url != get_current_url(false)) {
 		// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 		$theoretical_current_url = $url;
 		redirect_and_die($theoretical_current_url, true);
@@ -59,35 +60,13 @@ if (is_module_url_rewriting_active()) {
 		// si l'url n'a pas été calculé par la class Product
 		// Si un produit n'a pas de catégorie associé (ce qui n'est pas un cas normal) la class Product ne peut pas trouver le produit. Il faut pouvoir consulter un produit même si il n'est pas associé à une catégorie, ce qui peut être utile dans des cas spécifiques.
 		// Si l'url n'a pas été calculée par la class Product pour une raison quelconque
-		redirect_and_die($GLOBALS['wwwroot'] . "/");
+		redirect_and_die(get_url('/'));
 	}
 } else {
 	$_GET['catid'] = $product_object->categorie_id;
 }
 
-if (is_last_views_module_active()) {
-	add_product_to_last_views_cookie(intval($_GET['id'])); // on actualiste la liste des produits visités
-}
-// Insertion de la demande d'infos de stock
-$form_error_object = new FormError();
-if (check_if_module_active('stock_advanced') && (isset($_POST["validate"]))) { // si on valide le formulaire d'info stock
-	$form_error_object->valide_form($_POST,
-		array('email' => $GLOBALS['STR_ERR_EMAIL']));
-	if (!$form_error_object->has_error('email')) {
-		$_POST['email'] = trim($_POST['email']);
-		if (!EmailOK($_POST['email'])) {
-			// si il y a un email on teste l'email
-			$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
-		}
-	}
-	if (!$form_error_object->count()) {
-		if (insere_alerte($_POST)) {
-			$form_error_object->add('confirm_ok', $GLOBALS['STR_REQUEST_OK']);
-		} else {
-			$form_error_object->add('confirm_ko', $GLOBALS['STR_ERR_EMAIL_BAD']);
-		}
-	}
-}
+$output .= call_module_hook('product_details_show', array('id' => intval($_GET['id'])), 'output');
 
 // Gestion des erreurs de téléchargement des fichiers (cas d'attribut d'upload)
 if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {

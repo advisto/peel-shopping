@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: webmailAdmin_form.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: webmailAdmin_form.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" id="form_send_email" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<table class="main_table">
@@ -211,11 +211,11 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="center">
+			<td colspan="2" class="center" style="padding-top:10px">
 				{% if (count_email_all_hash) and (request_email_all_hash) %}
-				<br /><br /><center><input type="submit" name="submit_send_email_all" class="btn btn-primary" value="{{ STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS|str_form_value }}" /></center>
+				<p><input type="submit" name="submit_send_email_all" class="btn btn-primary" value="{{ STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS|str_form_value }}" /></p>
 				{% else %}
-				<br /><br /><center><input type="submit" name="submit" class="btn btn-primary" value="{{ STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL|str_form_value }}" /></center>
+				<p><input type="submit" name="submit" class="btn btn-primary" value="{{ STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL|str_form_value }}" /></p>
 				{% endif %}
 			</td>
 		</tr>

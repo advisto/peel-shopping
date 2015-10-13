@@ -3,16 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Renvoie les éléments de menu affichables
+ *
+ * @param array $params
+ * @return
+ */
+function avis_hook_admin_menu_items($params) {
+	$result['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/avis/administrer/avis.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"];
+	return $result;
 }
 
 /**
@@ -59,21 +70,6 @@ function supprime_avis($id)
 }
 
 /**
- * Met à jour la avis $id avec les nouvelles valeurs contenues dans $frm
- *
- * @param array $frm Array with all fields data
- * @return
- */
-function maj_avis($frm)
-{
-	$qid = query("UPDATE peel_avis SET
-			avis = '" . nohtml_real_escape_string($frm['avis']) . "'
-			,note = '" . nohtml_real_escape_string($frm['note']) . "'
-			,etat = '" . nohtml_real_escape_string($frm['etat']) . "'
-		WHERE id = '" . intval($_POST['id']) . "'");
-}
-
-/**
  * affiche_liste_avis()
  *
  * @return
@@ -93,7 +89,7 @@ function affiche_liste_avis()
 	$tpl->assign('add_annonce_href', get_current_url(false) . '?mode=ajout&type=annonce');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$tpl->assign('star_src', $GLOBALS['wwwroot'] . '/images/star1.gif');
+	$tpl->assign('star_src', get_url('/images/star1.gif'));
 
 	$tpl_results = array();
 	if (!empty($results_array)) {
@@ -143,7 +139,7 @@ function affiche_liste_avis()
 function affiche_formulaire_avis(&$frm, &$form_error_object, $type)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_formulaire.tpl');
-	$tpl->assign('star_src', $GLOBALS['wwwroot'] . '/images/star1.gif');
+	$tpl->assign('star_src', get_url('/images/star1.gif'));
 	$tpl->assign('action', get_current_url(false));
 	$tpl->assign('type', $type);
 	$tpl->assign('modif_href', $GLOBALS['administrer_url'] . '/utilisateurs.php?id_utilisateur=' . $frm['id_utilisateur'] . '&mode=modif');
@@ -177,7 +173,7 @@ function affiche_formulaire_avis(&$frm, &$form_error_object, $type)
 function formulaire_ajout_avis(&$frm, &$form_error_object, $type)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_formulaire_ajout.tpl');
-	$tpl->assign('star_src', $GLOBALS['wwwroot'] . '/images/star1.gif');
+	$tpl->assign('star_src', get_url('/images/star1.gif'));
 	$tpl->assign('type', $type);
 	$tpl->assign('action', get_current_url(true));
 	$tpl->assign('prenom', vb($_SESSION['session_utilisateur']['prenom']));
@@ -190,7 +186,7 @@ function formulaire_ajout_avis(&$frm, &$form_error_object, $type)
 	$tpl->assign('id_utilisateur', intval($_SESSION['session_utilisateur']['id_utilisateur']));
 	$tpl->assign('langue', $_SESSION['session_langue']);
 	$tpl->assign('note_max', $GLOBALS['site_parameters']['rating_max_value']);
-	if ($type == 'produit') {
+	if ($type == 'produit') { 
 		$tpl->assign('is_product_select_list', product_select_list() != "");
 		if(product_select_list() != "") {
 			$tpl->assign('product_error', $form_error_object->text('produit'));
@@ -235,7 +231,7 @@ function product_select_list($default = null)
 	$output = "";
 	$sql = "SELECT id,nom_" . $_SESSION['session_langue'] . " AS nom 
 		FROM peel_produits
-		WHERE " . get_filter_site_cond('produits') . "
+		WHERE " . get_filter_site_cond('produits', null, true) . "
 		LIMIT 1000";
 	$qid = query($sql);
 	if (num_rows($qid) > 0) {
@@ -250,7 +246,7 @@ function product_select_list($default = null)
 		}
 		$tpl->assign('options', $tpl_options);
 		$tpl->assign('select_product_txt', $GLOBALS['STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT']);
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 	}
 	return $output;
 }
@@ -263,6 +259,7 @@ function annonce_select_list($default = null)
 	$output = "";
 	$sql = "SELECT ref, titre_".$_SESSION['session_langue']." AS titre
 		FROM peel_lot_vente
+		WHERE " . get_filter_site_cond('lot_vente', null, true) . "
 		LIMIT 1000";
 	$qid = query($sql);
 	if (num_rows($qid) > 0) {
@@ -277,7 +274,7 @@ function annonce_select_list($default = null)
 		}
 		$tpl->assign('options', $tpl_options);
 		$tpl->assign('select_product_txt', $GLOBALS['STR_MODULE_AVIS_ADMIN_SELECT_AD']);
-		$output = $tpl->fetch();
+		$output .= $tpl->fetch();
 	}
 
 	return $output;

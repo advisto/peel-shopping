@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: template_mail.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: template_mail.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../../../configuration.inc.php");
 
 $output = '';
 if ((!empty($_POST['id']) || !empty($_POST['technical_code'])) && !empty($_POST['mode'])) {
 	$sql = 'SELECT subject, text, lang
 		FROM peel_email_template
-		WHERE ' . get_filter_site_cond('email_template', null, true) . ' AND id="' . intval(vb($_POST['id'])) . '"';
+		WHERE ' . get_filter_site_cond('email_template', null) . ' AND id="' . intval(vb($_POST['id'])) . '"';
 	$result = query($sql);
 	if($row_template = fetch_assoc($result)) {
 		if ($_POST['mode'] == "message") {

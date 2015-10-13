@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: fine_uploader.php 46935 2015-09-18 08:49:48Z gboussin $
 
 include("configuration.inc.php");
 
@@ -76,21 +76,9 @@ if($load) {
 			$result['uploadName'] = basename($image_resize_result);
 		}
 	}
-	if ($extension == 'pdf') {
-		$type = 'pdf';
-	} else {
-		$type = 'img';
-	}
 	// On renvoie le HTML qu'on veut afficher à la place du bouton upload
 	$tpl = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
-	$file_infos = array('name' => $result['uploadName'],
-			'form_name' => $uploader->inputName,
-			'form_value' => $save_path.'/'.$result['uploadName'],
-			'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
-			'drop_href' => 'javascript:reinit_upload_field("'.$uploader->inputName.'");',
-			'url' => str_replace($GLOBALS['dirroot'], $GLOBALS['wwwroot'], $save_full_path).'/'.$result['uploadName'],
-			'type' => $type
-		);
+	$file_infos = get_uploaded_file_infos($uploader->inputName, $save_path.'/'.$result['uploadName'], 'javascript:reinit_upload_field("'.$uploader->inputName.'");');
 	$tpl->assign('f', $file_infos);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);

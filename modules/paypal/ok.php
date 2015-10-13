@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ok.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: ok.php 46935 2015-09-18 08:49:48Z gboussin $
 
 include("../../configuration.inc.php");
 
@@ -34,13 +34,9 @@ if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 // Cette page est purement informative pour le client, et n'a qu'un titre indicatif.
 // Ce n'est pas ici que se trouve la validation du paiement, mais dans le script IPN qui est appelé directement par Paypal et dans lequel le traitement est sécurisé
 
-if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
-	// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
-	unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
-}
 // Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 $_SESSION['session_caddie']->init();
-unset($_SESSION['session_commande']);
+
 // Décommenter la ligne suivante si on veut que l'utilisateur soit déconnecté automatiquement si son paiement a échoué
 // session_destroy();
 if (!empty($session_utilisateur_id) || (!empty($_SESSION['session_last_bill_viewed']) && $_SESSION['session_last_bill_viewed'] == $transaction_id)) {

@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: info.inc.src.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: info.inc.src.php 46935 2015-09-18 08:49:48Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
 }
 // Ce fichier a été généré lors de l'installation de PEEL.
-// En cas de migration de serveur ou configuration sépcifique, vous pouvez modifier dans ce fichier manuellement vos variables de configuration
+// En cas de migration de serveur ou configuration spécifique, vous pouvez modifier dans ce fichier manuellement vos variables de configuration
 $GLOBALS['serveur_mysql'] = "votre_serveur_mysql";
 $GLOBALS['utilisateur_mysql'] = "votre_utilisateur_mysql";
 $GLOBALS['mot_de_passe_mysql'] = "votre_motdepasse_mysql";

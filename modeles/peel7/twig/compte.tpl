@@ -3,168 +3,86 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: compte.tpl 47264 2015-10-09 13:31:33Z gboussin $
 #}<h1 property="name" class="page_title">{{ compte }}</h1>
-<div class="page_content">
-<p>{{ msg_support }}</p>
-	{% if est_identifie %}
-		<p>{{ compte }} {{ number }} {{ code_client }}</p>
-		<h3>{{ my_order }}</h3>
-		- <a href="{{ order_history_href|escape('html') }}">{{ order_history }}</a><br />
-		{% if (cart_preservation) %}
-		- <a href="{{ cart_preservation.href|escape('html') }}">{{ cart_preservation.txt }}</a><br />
-		{% endif %}
+<div class="page_content account_icons">
+{% if est_identifie %}
+	{% if user_infos_resume_array %}
+		{* Si cette variable est active, on affiche qu'elle sur la page de compte. *}
+		{{ user_infos_resume_array }}
+	{% else  %}
+		{% if admin %}
+		<a class="btn btn-warning pull-right" style="margin-right:10px; margin-left:10px" href="{{ admin.href|escape('html') }}">{{ admin.txt }}</a>
+		{% endif  %}	
+		<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{{ logout.href|escape('html') }}"><span class="glyphicon glyphicon-log-out"></span> {{ logout.txt }}</a>
+		<p>{{ msg_support }}</p>
+		<p>{{ compte }} {{ number }} <b>{{ code_client }}</b></p>
 		
-		{% if (return_history) %}
-		<h3>{{ return_history.header }}</h3>
-		- <a href="{{ return_history.href|escape('html') }}">{{ return_history.txt }}</a><br />
-		{% endif %}
-		
-		{% if (download_links) %}
-		<h3>{{ STR_DOWNLOAD_CENTER }}</h3>
-			{% for item in download_links %}
-		- <a href="{{ item.href|escape('html') }}">{{ item.name }}</a><br />
+		{% if code_promo_utilise %}
+		<h2 class="well">{{ code_promo_utilise.header }}</h2>
+		<div class="row">
+			<div class="col-xs-12">
+			{% for item in code_promo_utilise.data %}
+				- {{ item.code_promo }} {{ item.discount_text }}<br />
 			{% endfor %}
+			</div>
+		</div>
+			{% endif %}
+			{% if code_promo_valide %}
+		<h2 class="well">{{ code_promo_valide.header }}</h2>
+		<div class="row">
+			<div class="col-xs-12">
+			{% for item in code_promo_valide.data %}
+				- {{ item.nom_code }} {{ item.discount_text }} {{ item.code_promo_valid_from }} {{ item.date_from }} {{ item.flash_to }} {{ item.date_to }}<br />
+			{% endfor %}
+			</div>
+		</div>
+			{% endif %}
+			{% if remise_percent %}
+		<div class="row">
+			<div class="col-xs-12">
+				- {{ remise_percent.label }}: {{ remise_percent.value }} %<br />
+			</div>
+			{% if avoir %}
+			<div class="col-xs-12">
+				- {{ avoir.label }}: {{ avoir.value }}<br />
+			</div>
+			{% endif %}
+		</div>
 		{% endif %}
-		
-		{% if (ads) %}
-		<h3>{{ ads.header }}</h3>
-		- <a href="{{ ads.list_href|escape('html') }}">{{ ads.STR_MODULE_ANNONCES_MY_AD_LIST }}</a><br />
-		- <a href="{{ ads.create_href|escape('html') }}">{{ ads.STR_MODULE_ANNONCES_AD_CREATE }}</a><br />
-		- <a href="{{ ads.buy_href|escape('html') }}">{{ ads.STR_MODULE_ANNONCES_BUY_GOLD_ADS }}</a><br />
-		{% endif %}
-		
-		{% if page_agenda is defined %}
-		<h3>{{ STR_MODULE_AGENDA_TITRE }}</h3>
-		- <a href="{{ page_agenda.href|escape('html') }}">{{ page_agenda.txt }}</a><br />
-		{% endif %}
-
-		{% if page_creation_produit is defined %}
-		<h3>{{ STR_CATALOGUE }}</h3>
-		- <a href="{{ page_creation_produit.href|escape('html') }}">{{ page_creation_produit.txt }}</a><br />
-		{% endif %}
-		
-		{% if (shop) %}
-		<h3>{{ shop.header }}</h3>
-		- <a href="{{ shop.href|escape('html') }}">{{ shop.txt }}</a><br />
-		{% endif %}
-
-		<h3>{{ change_params.header }}</h3>
-		- <a href="{{ change_password.href|escape('html') }}">{{ change_password.txt }}</a><br />
-		- <a href="{{ change_params.href|escape('html') }}">{{ change_params.txt }}</a><br />
-		{% if (MON_COMPTE_BLOG) %}
-			{{ MON_COMPTE_BLOG }}
-		{% endif %}
-		
-		{% if (giftlist) %}
-		<h3>{{ giftlist.header }}</h3>
-		- <a href="{{ giftlist.href|escape('html') }}">{{ giftlist.txt }}</a><br />
-		{% endif %}
-		
-		{% if (pensebete) %}
-		<h3>{{ pensebete.header }}</h3>
-		- <a href="{{ pensebete.href|escape('html') }}">{{ pensebete.txt }}</a><br />
-		{% endif %}
-		
-		{% if (parrainage) %}
-		<h3>{{ parrainage.header }}</h3>
-		- <a href="{{ parrainage.href|escape('html') }}">{{ parrainage.txt }}</a><br />
-		{% endif %}
-		
-		{% if (produit_cadeaux) %}
-		<h3>{{ produit_cadeaux.header }}</h3>
-		- <a href="{{ produit_cadeaux.href|escape('html') }}">{{ produit_cadeaux.txt }}</a><br />
-		- {{ produit_cadeaux.points_label }}: {{ produit_cadeaux.points }}<br />
-		{% endif %}
-		
-		{% if (code_promo_utilise) %}
-		<h3>{{ code_promo_utilise.header }}</h3>
-		{% for item in code_promo_utilise.data %}
-			- {{ item.code_promo }} {{ item.discount_text }}<br />
-		{% endfor %}
-		{% endif %}
-		
-		{% if (code_promo_valide) %}
-		<h3>{{ code_promo_valide.header }}</h3>
-		{% for item in code_promo_valide.data %}
-			- {{ item.nom_code }} {{ item.discount_text }} {{ item.code_promo_valid_from }} {{ item.date_from }} {{ item.flash_to }} {{ item.date_to }}<br />
-		{% endfor %}
-		{% endif %}
-		
-		{% if (remise_percent) %}
-		<br />- {{ remise_percent.label }}: {{ remise_percent.value }} %<br />
-		{% endif %}
-		
-		{% if (avoir) %}
-		<br />- {{ avoir.label }}: {{ avoir.value }}<br />
-		{% endif %}
-		
-		{% if (gift) %}
-		<br />
-		<h3>{{ gift.header }}: {{ gift.gifts_points }}</h3>
-		- <a href="{{ gift.href|escape('html') }}">{{ gift.txt }}</a><br />
-		{% endif %}
-		
-		{% if (affiliate) %}
-		<h3>{{ affiliate.account }}</h3>
-		{{ affiliate.account_msg }}<br />
-		<br />
-		{{ affiliate.account_url }} <b>{{ affiliate.account_href }}</b><br />
-		<br />
-		- <a href="{{ affiliate.account_prod_href|escape('html') }}">{{ affiliate.STR_AFFILIATE_ACCOUNT_PROD }}</a><br />
-		- <a href="{{ affiliate.account_ban_href|escape('html') }}">{{ affiliate.STR_AFFILIATE_ACCOUNT_BAN }}</a><br />
-		- <a href="{{ affiliate.account_sell_href|escape('html') }}">{{ affiliate.STR_AFFILIATE_ACCOUNT_SELL }}</a><br />
-		{% endif %}
-		
-		{% if sauvegarde_recherche is defined %}
-			<h3>{{ STR_MODULE_SAUVEGARDE_SEARCH_LIST }}</h3>
-			- <a href="{{ sauvegarde_recherche.href|escape('html') }}">{{ sauvegarde_recherche.txt }}</a><br />
-		{% endif %}
-
-		{% if (profile) %}
-		<h3>{{ profile.header }}</h3>
-		{{ profile.content }}
-		{% $profile.href %}
-		- <a href="{{ profile.href|escape('html') }}">{{ profile.txt }}</a><br />
-		{/if}
-
-		{% endif %}
- 		
-		{% if disable_account is defined %}
-		<br />
-		- <a data-confirm="{{ confirm_disable_account }}" href="{{ disable_account_href|escape('html') }}">{{ disable_account_text }}</a><br /><br />
-		{% endif %}
-
-		{% if (user_alerts) %}
-		- <a href="{{ user_alerts.href|escape('html') }}">{{ user_alerts.txt }}</a><br />
-		{% endif %}
-		
-		{% if (admin) %}
-		<h3>{{ admin.txt }}</h3>
-		- <a href="{{ admin.href|escape('html') }}">{{ admin.txt }}</a><br /><br />
-		{% endif %}
-		
-		<br />
-		- <a href="{{ logout.href|escape('html') }}">{{ logout.txt }}</a><br />
-
-		{% if (ABONNEMENT_MODULE) %}{{ ABONNEMENT_MODULE }}{% endif %}
-		
-		{% if (annonce) %}
-		<p class="center"><b>{{ annonce.label }}: {{ annonce.credit }}</b></p>
-		{% endif %}
-		
-	{% else %}
-		- <a href="{{ login_href|escape('html') }}">{{ login }}</a><br />
-		- <a href="{{ register_href|escape('html') }}">{{ register }}</a><br />
+			{% if modules_data %}
+				{% for group,modules_data_array in modules_data %}
+					{% if modules_data_group[group] and modules_data_group[group].header %}
+		<h2 class="well">{{ modules_data_group[group].header }}</h2>
+					{% endif %}
+		<div class="row">
+				{% for module in modules_data_array %}
+			<div class="col-sm-4 col-md-3 col-lg-3"><a class="btn btn-default" href="{{ module.href|escape('html') }}">{{ module.txt }}</a></div>
+					{% endfor %}
+					{% if modules_data_group[group] and modules_data_group[group].comments %}
+			<div class="clearfix"></div>
+			<div class="col-xs-12"><p>{{ modules_data_group[group].comments }}</p></div>
+					{% endif %}
+		</div>
+				{% endfor %}
+			{% endif %}
+			{% if disable_account %}
+		<a class="btn btn-danger" style="margin-bottom:10px" data-confirm="{{ confirm_disable_account }}" href="{{ disable_account_href|escape('html') }}">{{ disable_account_text }}</a></div></div>
+			{% endif %}
+			{% if ABONNEMENT_MODULE %}{{ ABONNEMENT_MODULE }}{% endif %}
 	{% endif %}
-	{% if (downloadable_file_link_array) %}
+{% else %}
+	<div><a class="btn btn-primary" style="margin-bottom:10px" href="{{ login_href|escape('html') }}">{{ login }}</a></div>
+	<div><a class="btn btn-primary" style="margin-bottom:10px" href="{{ register_href|escape('html') }}">{{ register }}</a></div>
+{% endif %}
+{% if downloadable_file_link_array  %}
 		<table class="full_width">
 		{% for item in downloadable_file_link_array %}
 			<tr>
@@ -174,5 +92,5 @@
 			</tr>
 		{% endfor %}
 		</table>
-	{% endif %}
+{% endif %}
 </div>

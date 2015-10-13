@@ -1,14 +1,15 @@
 <?php
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2008 Advisto SAS contact@advisto.fr                    |
+// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is for internal use only by Advisto SAS.                   |
-// | Only members of the company who have an explicit authorisation may   |
-// | read or use this file, which is strictly confidential.               |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | opensource GPL license: you are allowed to customize the code		  |
+// | for your own needs, but must keep your changes under GPL			  |
+// | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
-// | Author: Advisto SAS, RCS 479 205 452, France, http://www.advisto.fr/ |
+// | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: check-integrity.php 44067 2015-02-17 08:41:44Z sdelaporte $
+// $Id: check-integrity.php 46935 2015-09-18 08:49:48Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,10 +22,11 @@ $output = '';
 
 $dir_array = vb($GLOBALS['site_parameters']['check_integrity_directories_by_type_array'], array('products' => 'upload/'));
 $fields_to_check_array['products'] = array('photo1', 'photo2', 'photo3', 'photo4', 'photo5', 'photo6', 'photo7', 'photo8', 'photo9', 'photo10');
-if(check_if_module_active('annonces')) {
-	$dir_array['ads'] = 'upload:';
-	$fields_to_check_array['ads'] = array('photo1', 'photo2', 'photo3', 'photo4', 'photo5', 'photo6', 'photo7', 'photo8', 'photo9', 'photo10');
-}
+
+$hook_result = call_module_hook('check_integrity_get_configuration_array', array(), 'array');
+$fields_to_check_array = array_merge_recursive($fields_to_check_array, $hook_result['fields_to_check_array']);
+$dir_array = array_merge_recursive($dir_array, $hook_result['dir_array']);
+
 $photos_to_keep_array = vb($GLOBALS['site_parameters']['photos_to_keep_array'], array());
 
 if (!empty($_GET['delete'])) {
@@ -113,7 +115,7 @@ foreach($dir_array as $type => $dir) {
 		$j++;
 		foreach($fields_to_check_array as $this_item) {
 			if(!empty($res[$this_item])) {
-				$file_in_db[$res[$this_item] = true;
+				$file_in_db[$res[$this_item]] = true;
 			}
 		}
 	}
@@ -208,7 +210,7 @@ foreach($dir_array as $type => $dir) {
 							$temp_array = explode('.', $file);
 							$value_for_query = $temp_array[0];
 						}
-                         query(nohtml_real_escape_string( str_replace('[ID]', $value_for_query, $sql) ));
+                        query(nohtml_real_escape_string(str_replace('[ID]', $value_for_query, $sql)));
                         $output .= str_replace('[ID]', $value_for_query, $sql) . '<br />';
                     }
                 }

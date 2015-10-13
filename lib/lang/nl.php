@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 44079 2015-02-17 11:04:30Z sdelaporte $
+// $Id: nl.php 47320 2015-10-12 13:55:00Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -63,6 +63,7 @@ $GLOBALS["STR_BANK_ACCOUNT_NUMBER"] = "Bankrekeningnummer";
 $GLOBALS["STR_BANK_ACCOUNT_RIB_KEY"] = "RIB sleutel";
 $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "RIB sleutel";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Bankrekening";
+$GLOBALS["STR_BARCODE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Word partner";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "Om uw bestelling online aan te passen, klik hier";
@@ -155,7 +156,9 @@ $GLOBALS["STR_DECONNECT"] = "Uitloggen";
 $GLOBALS["STR_DELETE_CART_PRESERVATION"] = "Weet u zeker dat u deze safeguard wilt verwijderen?";
 $GLOBALS["STR_DELETE_CART_TITLE"] = "Verwijder safeguard";
 $GLOBALS["STR_DELETE_PROD_CART"] = "Weet u zeker dat u dit product uit uw winkelwagentje wilt verwijderen?";
+$GLOBALS["STR_DELETE_THIS_FILE"] = "";
 $GLOBALS["STR_DELETE"] = "Verwijderen";
+$GLOBALS["STR_DELETE_CONFIRM"] = "";
 $GLOBALS["STR_DELIVERY_STOCK"] = "Verwachte vertraging levering";
 $GLOBALS["STR_DELIVERY"] = "Levering";
 $GLOBALS["STR_DEMO_RIGHTS_LIMITED"] = "DEMONSTRATIE: U heeft geen toestemming om deze actie uit te voeren";
@@ -182,6 +185,7 @@ $GLOBALS["STR_DOWNLOAD_CENTER"] = "Download centrum";
 $GLOBALS["STR_DOWNLOAD_DOCUMENT"] = "Download document";
 $GLOBALS["STR_DOWNLOAD"] = "Download";
 $GLOBALS["STR_EAN_CODE"] = "EAN Code 8/13 of UPC code";
+$GLOBALS["STR_EASY_LIST"] = "easy list";
 $GLOBALS["STR_ECOTAXE_INCLUDE"] = "Prijs inclusief ecotax";
 $GLOBALS["STR_ECOTAXE"] = "Ecotax";
 $GLOBALS["STR_EDITED"] = "bewerkt op";
@@ -393,7 +397,7 @@ $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "Gebruikers meningen 
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Uw advies verzenden";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "U wilt een reactie bestand op het product";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Uw commentaar over het product";
-$GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "Uw mening is geregistreerd.<br/> Na validatie wordt deze gepubliceerd op  %s";
+$GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_WAITING_FOR_VALIDATION"] = "Uw mening is geregistreerd.<br /> Na validatie wordt deze gepubliceerd op %s";
 $GLOBALS["STR_MODULE_BANNER_MSG_ERR_DATE"] = "U moet de datum invullen.\n";
 $GLOBALS["STR_MODULE_CART_POPUP_PRODUCT_ADDED"] = "Het product is toegevoegd";
 $GLOBALS["STR_MODULE_DEVIS_CONSEIL"] = "Om kontakt op te nemen met {$GLOBALS['site']}, gelieve volgend formulaar in te vullen";
@@ -406,6 +410,7 @@ $GLOBALS["STR_MODULE_EXPEDITOR_SHIPPING_WARNING_SENT_TO"] = "De verzendopdracht 
 $GLOBALS["STR_MODULE_FACEBOOK_JOIN_ON_FACEBOOK"] = "Volg ons op";
 $GLOBALS["STR_MODULE_FACTURES_CATALOGUE_PRICE"] = "Prijs catalogus";
 $GLOBALS["STR_MODULE_FACTURES_PAY_COST"] = "Supplement gebonden aan uw betalingswijze";
+ $GLOBALS["STR_MODULE_FACTURES_ADVANCED_EXPORT_LIST_PDF"] = "Exporteren deze lijst in pdf";
 $GLOBALS["STR_MODULE_FACTURES_WARNING_PARTIAL_PAYMENT"] = "ATTENTIE: Deelbetaling gevraagd voor";
 $GLOBALS["STR_MODULE_FORUM_EDIT"] = "Bewerken";
 $GLOBALS["STR_MODULE_LAST_VIEWS_NO_LAST_VIEWS"] = "Nog geen producten bekeken.";
@@ -459,7 +464,6 @@ $GLOBALS["STR_MODULE_PREMIUM_PRODUCT_UNIT"] = "Eenheid";
 $GLOBALS["STR_MODULE_PREMIUM_SAVE_CART_SUCCESS"] = "Het winkelwagentje is met succes opgeslagen.";
 $GLOBALS["STR_MODULE_PREMIUM_SAVED_CART_DELETED"] = "Safeguard is verwijderd.";
 $GLOBALS["STR_MODULE_PREMIUM_THANKS_CHECK_DOWNLOAD"] = "Dank u voor het controleren van de geldigheid van uw download link.";
-$GLOBALS["STR_MODULE_PREMIUM_TOP_PAGE"] = "Begin van de pagina";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ACHAT"] = "koop";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD"] = "supplier-research";
 $GLOBALS["STR_MODULE_PREMIUM_URL_ANNOTATION_SYSTEM"] = "annotatie-systeem";
@@ -493,15 +497,6 @@ $GLOBALS["STR_MODULE_TEMPLATE_EMAIL_TO_DELETE_YOUR_ACCOUNT"] = "Om u uit te schr
 $GLOBALS["STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE"] = "Onmogelijk om te afbeelding op te slaan in de cache map. Controleer de toegangsrechten op de server.";
 $GLOBALS["STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE"] = "Onmogelijk om de afbeelding te openen";
 $GLOBALS["STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED"] = "Afbeeldingstype niet ondersteund";
-$GLOBALS["STR_MODULE_USER_ALERTS_SAVE_NEW_SEARCH"] = "Maak een nieuwe signalering.";
-$GLOBALS["STR_MODULE_USER_ALERTS_SAVE_SEARCH"] = "Maak een signalering.";
-$GLOBALS["STR_MODULE_USER_ALERTS_CANT_SAVE_MORE_SEARCH"] = "U kunt geen nieuwe signalering maken";
-$GLOBALS["STR_MODULE_USER_ALERTS_NO_SEARCH_LIST"] = "Geen signaleringen opgeslagen";
-$GLOBALS["STR_MODULE_USER_ALERTS_SEARCH_LIST"] = "Lijst van uw opgeslagen signaleringen";
-$GLOBALS["STR_MODULE_USER_ALERTS_SEARCH_NAME"] = "Naam van uw signalering";
-$GLOBALS["STR_MODULE_USER_ALERTS_MY_ALERTS"] = "Mijn signaleringen";
-$GLOBALS["STR_MODULE_USER_ALERTS_SAVE_ALERT"] = "Sla deze signalering op";
-$GLOBALS["STR_MODULE_USER_ALERTS_SEE_ALERT_RESULTS"] = "Bekijk de resultaten voor deze signalering:";
 $GLOBALS["STR_MONTH"] = "Maand";
 $GLOBALS["STR_MONTHS"] = "Maanden";
 $GLOBALS["STR_MORE_DETAILS"] = "Meer details";
@@ -650,6 +645,7 @@ $GLOBALS["STR_PRINT_PAGE"] = "Print deze pagina";
 $GLOBALS["STR_PRINT_PROFORMA"] = "Bestelbon drukken";
 $GLOBALS["STR_PRINT_YOUR_BILL"] = "Print uw factuur";
 $GLOBALS["STR_PRINT"] = "Printen";
+$GLOBALS["STR_PRODUCT_ADD_TO_EASY_LIST"] = "";
 $GLOBALS["STR_PRODUCT_BUY"] = "Gekochte producten";
 $GLOBALS["STR_PRODUCT_NAME"] = "Productnaam";
 $GLOBALS["STR_PRODUCT"] = "Produkt";
@@ -719,6 +715,8 @@ $GLOBALS["STR_SEE_YOU_SOON"] = "Tot binnenkort bij";
 $GLOBALS["STR_SEND_CHECK"] = "Gelieve uw betaling over te maken aan";
 $GLOBALS["STR_SEND_TRANSFER"] = "Gelieve uw betaling per overschrijving uit te voeren\n";
 $GLOBALS["STR_SEND"] = "Verzenden";
+$GLOBALS["STR_SCAN_CODE_AND_ADD_LIST"] = "Barcode scannen om product aan deze lijst toe te voegen";
+$GLOBALS["STR_SCAN_HELP"] = "";
 $GLOBALS["STR_SHIP_ADDRESS"] = "Leveringsadres";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Gelieve uw transportwijze te kiezen";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Kies uw regio voor verzending";
@@ -740,6 +738,7 @@ $GLOBALS["STR_SOLD_PRICE"] = "Verkoopprijs";
 $GLOBALS["STR_SPECIAL"] = "Promoties";
 $GLOBALS["STR_SQL_ERROR"] = "SQL fout";
 $GLOBALS["STR_STATUS"] = "Staat";
+$GLOBALS["STR_START_PRICE"] = "";
 $GLOBALS["STR_STEP1"] = "STAP 1. UW PERSOONLIJKE GEGEVENS";
 $GLOBALS["STR_STEP2"] = "STAP 2. OVERZICHT VAN UW BESTELLING";
 $GLOBALS["STR_STEP3"] = "STAP 3. ORDERBEVESTIGING";
@@ -777,12 +776,14 @@ $GLOBALS["STR_TO"] = "naar";
 $GLOBALS["STR_TOP"] = "Beste verkopen";
 $GLOBALS["STR_TOTAL_AMOUNT"] = "totaal bedrag van uw winkelwagentje";
 $GLOBALS["STR_TOTAL_HT"] = "Totaal exkl. BTW";
+$GLOBALS["STR_TOTAL_PALETTE"] = "";
 $GLOBALS["STR_TOTAL_PRICE"] = "Totaal";
 $GLOBALS["STR_TOTAL_TTC"] = "Totaal inkl. BTW";
 $GLOBALS["STR_TOTAL"] = "TOTAAL";
 $GLOBALS["STR_TOUS_LES_AVIS"] = "Alle advijzen op dit produkt ";
 $GLOBALS["STR_TOWN"] = "Gemeente";
 $GLOBALS["STR_TRACKING_LINK"] = "Tracking code";
+$GLOBALS["STR_TRANSACTION"] = "";
 $GLOBALS["STR_TRANSFER"] = "Overschrijving";
 $GLOBALS["STR_TRANSFORM"] = "Transformeren";
 $GLOBALS["STR_TTC"] = "inkl. BTW";
@@ -819,15 +820,17 @@ $GLOBALS["STR_VIA"] = "Via";
 $GLOBALS["STR_VOIR_LISTE_CADEAU"] = "Bekijk mijn geschenklijst";
 $GLOBALS["STR_VOIR_PENSE_BETE"] = "Bekijk mijn verlanglijstje";
 $GLOBALS["STR_VOTE"] = "Stem";
-$GLOBALS["STR_WARNING_SIZE_PICTURE_ADS"] = "Let op: Als u afbeeldingen invoegt in de beschrijving, volg dan het formaat op van het. <br/> Uw afbeeldingen moeten een maximale breedte hebben van 600 pixels.";
+$GLOBALS["STR_WARNING_SIZE_PICTURE_ADS"] = "Let op: Als u afbeeldingen invoegt in de beschrijving, volg dan het formaat op van het.<br />Uw afbeeldingen moeten een maximale breedte hebben van 600 pixels.";
 $GLOBALS["STR_WARNING"] = "Let op";
 $GLOBALS["STR_WEBSITE"] = "Website";
 $GLOBALS["STR_WEEK"] = "Week(en)";
 $GLOBALS["STR_WEIGHT"] = "Gewicht van uw bestelling.";
+$GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "";
 $GLOBALS["STR_WHOLESALER"] = "Groothandelaar";
 $GLOBALS["STR_WITH_ECOTAX"] = "Ecotax";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "met promotiecode";
 $GLOBALS["STR_WITH"] = "Met";
+$GLOBALS["STR_WORLD"] = "";
 $GLOBALS["STR_WORD_RESELLER"] = "Wederverkopers";
 $GLOBALS["STR_WORD_SELLERS"] = "Verkopers";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "Vul uw e-mailadres hier in";

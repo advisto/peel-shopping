@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: brand_description_html.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: brand_description_html.tpl 47249 2015-10-08 17:24:40Z gboussin $
 #}{% if is_error %}
 <h1 property="name" class="brand_description_html">{{ error_header }}</h1>
 <p class="alert alert-danger">{{ error_content }}</p>
@@ -33,8 +33,10 @@
 				{% if (item.href) %}<a href="{{ item.href|escape('html') }}">{% endif %}{{ item.nb_produits_txt }}{% if (item.href) %}</a>{% endif %}
 			</td>
 		</tr>
+		{% if item.description %}
 		<tr><td colspan="3" style="padding:5px;">{{ item.description|html_entity_decode_if_needed }}</td></tr>
-	</table>
+		{% endif %}
+</table>
 	{% else %}
 	<div class="center {% if data|length==1 %}col-md-12{% else %} col-md-3 col-sm-4{% endif %} ">
 		<h{% if data|length==1 %}1{% else %}2{% endif %} class="brand_description_html">{% if (item.href) %}<a href="{{ item.href|escape('html') }}">{% endif %}{{ item.nom|html_entity_decode_if_needed }}{% if (item.href) %}</a>{% endif %}</h{% if data|length==1 %}1{% else %}2{% endif %}>

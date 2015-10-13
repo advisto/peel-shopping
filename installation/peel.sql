@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 7.2.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 44077 2015-02-17 10:20:38Z sdelaporte $
+# $Id: peel.sql 47169 2015-10-05 12:04:48Z gboussin $
 #
 
 --
@@ -85,6 +85,31 @@ CREATE TABLE IF NOT EXISTS `peel_admins_contacts_planified` (
   `actif` enum('TRUE','FALSE') NOT NULL DEFAULT 'TRUE',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `peel_adresses`
+--
+
+CREATE TABLE IF NOT EXISTS `peel_adresses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_utilisateur` int(11) NOT NULL DEFAULT '0',
+  `civilite` varchar(20) NOT NULL DEFAULT '',
+  `prenom` varchar(64) NOT NULL DEFAULT '',
+  `nom_famille` varchar(64) NOT NULL DEFAULT '',
+  `societe` varchar(255) NOT NULL DEFAULT '',
+  `telephone` varchar(32) NOT NULL DEFAULT '',
+  `portable` varchar(32) NOT NULL DEFAULT '',
+  `adresse` varchar(255) NOT NULL DEFAULT '',
+  `code_postal` varchar(100) NOT NULL DEFAULT '',
+  `ville` varchar(255) NOT NULL DEFAULT '',
+  `pays` int(11) NOT NULL DEFAULT '0',
+  `nom` varchar(255) NOT NULL DEFAULT '',
+  `address_type` varchar(255) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -291,7 +316,7 @@ CREATE TABLE IF NOT EXISTS `peel_codes_promos` (
   `nb_used_per_client` int( 11 ) NOT NULL DEFAULT '1',
   `site_id` int(11) NOT NULL DEFAULT '0',
   `product_filter` varchar(255) NOT NULL DEFAULT '',
-  `cat_not_apply_code_promo` TEXT NOT NULL DEFAULT '',
+  `cat_not_apply_code_promo` TEXT NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `id_utilisateur` (`id_utilisateur`),
   KEY `nom` (`nom`),
@@ -1294,7 +1319,7 @@ CREATE TABLE IF NOT EXISTS `peel_tailles` (
   `prix_revendeur` float(15,5) NOT NULL DEFAULT '0.00000',
   `position` int(11) NOT NULL DEFAULT '0',
   `signe` char(1) NOT NULL DEFAULT '',
-  `poids` float(15,5) NOT NULL DEFAULT '0.00000',
+  `poids` float(10,2) NOT NULL DEFAULT '0.00000',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
@@ -1404,6 +1429,8 @@ CREATE TABLE IF NOT EXISTS `peel_utilisateurs` (
   `code_postal` varchar(100) NOT NULL DEFAULT '',
   `ville` varchar(255) NOT NULL DEFAULT '',
   `pays` int(11) NOT NULL DEFAULT '1',
+  `address_bill_default` varchar(32) NOT NULL DEFAULT '',
+  `address_ship_default` varchar(32) NOT NULL DEFAULT '',
   `cnil` tinyint(1) NOT NULL DEFAULT '1',
   `newsletter` tinyint(1) NOT NULL DEFAULT '1',
   `commercial` tinyint(1) NOT NULL DEFAULT '1',
@@ -1552,6 +1579,7 @@ CREATE TABLE IF NOT EXISTS `peel_zones` (
   `position` int(11) NOT NULL DEFAULT '0',
   `on_franco` tinyint(1) NOT NULL DEFAULT '0',
   `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000',
+  `on_franco_reseller_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_nb_products` int(5) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),

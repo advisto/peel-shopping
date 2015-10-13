@@ -3,19 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 47196 2015-10-06 09:09:05Z sdelaporte $
 #}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div class="row">
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
-					<label for="search_email">{{ STR_ADMIN_ID }} / {{ STR_EMAIL }}{% if (STR_PSEUDO) %} / {{ STR_PSEUDO }}{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>
+					<label for="search_email">{{ STR_ADMIN_ID }} / {{ STR_EMAIL }}{% if pseudo_is_not_used is empty %} / {{ STR_PSEUDO }}{% endif %} {{ STR_BEFORE_TWO_POINTS }}:</label>
 					<input type="text" class="form-control" id="search_email" name="email" value="{{ email|str_form_value }}" />
 				</div>
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
@@ -284,22 +284,22 @@
 			{% if is_annonce_module_active %}
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
 					{{ STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES }}{{ STR_BEFORE_TWO_POINTS }}:<br />
-					{% if (favorite_category) %}
-						{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:<br />{{ favorite_category }}
-					{% else %}
+				{% if (id_categories) %}
+						{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:<br />{{ id_categories }}
+				{% elseif id_cat_1 %}
 					<label for="search_id_cat_1">{{ STR_FIRST_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					<select class="form-control" id="search_id_cat_1" name="id_cat_1">
-						{{ favorite_category_1 }}
+						{{ id_cat_1 }}
 					</select>
 					<label for="search_id_cat_2">{{ STR_SECOND_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					<select class="form-control" id="search_id_cat_2" name="id_cat_2">
-						{{ favorite_category_2 }}
+						{{ id_cat_2 }}
 					</select>
 					<label for="search_id_cat_3">{{ STR_THIRD_CHOICE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					<select class="form-control" id="search_id_cat_3" name="id_cat_3">
-						{{ favorite_category_3 }}
+						{{ id_cat_3 }}
 					</select>
-					{% endif %}
+				{% endif %}
 				</div>
 				<div class="clearfix visible-md visible-lg"></div>
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
@@ -432,7 +432,8 @@
 	<div class="center">
 		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{{ STR_ADMIN_CHECK_ALL|str_form_value }}" />
 		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{{ STR_ADMIN_UNCHECK_ALL|str_form_value }}" />
-			&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-primary" type="submit" value="{{ STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value }}" /></td>
+			&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-primary" type="submit" value="{{ STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value }}" />
+			<a class="btn btn-primary" href="{{ export_client_href|str_form_value }}">{{ STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT }}</a></td>
 	</div>
 	<div class="center">{{ link_multipage }}</div>
 	<div class="alert alert-info">{{ STR_ADMIN_UTILISATEURS_LIST_EXPLAIN }}</div>

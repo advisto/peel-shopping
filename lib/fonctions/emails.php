@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: emails.php 46935 2015-09-18 08:49:48Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,19 +21,21 @@ if (!defined('IN_PEEL')) {
  * @param string $to It can be a single email address or a list of addresses separated by coma or semicolon
  * @param string $mail_subject Sujet de l'email sous forme de texte (pas de HTML admis)
  * @param string $mail_content Contenu de l'email sous forme de texte ou de HTML
- * @param mixed $template_technical_code Si présent, alors le modèle d'email correspondant est chargé et fournit le sujet et le corps de l'emails (si vides dans les paramètres ci-avant)
+ * @param mixed $template_technical_code Si présent, alors le modèle d'email correspondant est chargé et fournit le sujet et le corps de l'emails (si vides dans les paramètres ci-avant). Si $template_technical_code est un tableau, on teste les code techniques dans l'ordre et on utilise le premier trouvé
  * @param array $template_tags Tableau de tags du type [TAG] : array("TAGNAME"=>tagvalue)
  * @param string $format Format de l'envoi : "html" ou "text"
- * @param string $from Email apparaissant comme envoyeur. Sender email. If null, $GLOBALS['support'] is used instead
+ * @param mixed $sender Tableau d'informations de l'envoyeur, ou email apparaissant comme envoyeur. Sender email. If null, $GLOBALS['support'] is used instead
  * @param boolean $html_add_structure Ajoute les headers HTML au contenu envoyé
  * @param boolean $html_correct_conformity Corrige la validité du HTML
  * @param boolean $html_convert_url_to_links Convertit les URL du texte en balises A
  * @param string $reply_to Email de destinataires en copie
  * @param array $attached_files_infos_array contient le nom des fichiers à joindre, le chemin et le type-mime de chacun d'entre eux.
- * @param array $lang 
+ * @param string $lang 
+ * @param array $additional_infos_array contient des informations additionnelles pour d'éventuels hooks 
+ * @param array $attachment_not_sent_by_email pour que la pièce jointe ne soit pas envoyé par email, mais pourra toujours être utilisée par une fonction hookable
  * @return
  */
-function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $from = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null)
+function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false)
 {
 	// Suivant les hébergements, on peut remplacer \r\n par \n
 	$eol = "\r\n";
@@ -49,32 +51,44 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_DEMO_EMAILS_DEACTIVATED']))->fetch();
 		return false;
 	}
+	if(is_array($sender)) {
+		$from = $sender['email'];
+	} else {
+		$from = $sender;
+	}
 	if (empty($from) && !empty($GLOBALS['support'])) {
 		$from = $GLOBALS['support'];
 	}
+	$used_template_technical_code = null;
 	if (!empty($template_technical_code)) {
-		$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $lang);
-		if (!empty($template_infos)) {
-			// Si l'on envoi un email avec un sujet, un message et un template d'email, le template n'est pas prioritaire.
-			// Ce fonctionnement est utile au module webmail lors de l'envoi d'email depuis le site.
-			if (empty($mail_subject)) {
-				$mail_subject = $template_infos['subject'];
-			}
-			if (empty($mail_content)) {
-				$mail_content = $template_infos['text'];
-			}
-			
-			if (!empty($mail_content)) {
-				if (!empty($template_infos["default_signature_code"])) {
-					// Récupération du technical code de la signature associé au template
-					$signature = $template_infos["default_signature_code"];
-				} else {
-					$signature = 'signature';
+		if(!is_array($template_technical_code)) {
+			$template_technical_code = array($template_technical_code);
+		}
+		foreach($template_technical_code as $this_template_technical_code) {
+			$template_infos = getTextAndTitleFromEmailTemplateLang($this_template_technical_code, $lang);
+			if (!empty($template_infos)) {
+				// Si l'on envoie un email avec un sujet, un message et un template d'email, le template n'est pas prioritaire.
+				// Ce fonctionnement est utile au module webmail lors de l'envoi d'email depuis le site.
+				if (empty($mail_subject)) {
+					$mail_subject = $template_infos['subject'];
 				}
-				$signature_infos = getTextAndTitleFromEmailTemplateLang($signature, $lang);
-				if (!empty($signature_infos)) {
-					$mail_content .= $signature_infos['text'];
+				if (empty($mail_content)) {
+					$mail_content = $template_infos['text'];
 				}
+				if (!empty($mail_content)) {
+					if (!empty($template_infos["default_signature_code"])) {
+						// Récupération du technical code de la signature associé au template
+						$signature = $template_infos["default_signature_code"];
+					} else {
+						$signature = 'signature';
+					}
+					$signature_infos = getTextAndTitleFromEmailTemplateLang($signature, $lang);
+					if (!empty($signature_infos)) {
+						$mail_content .= $signature_infos['text'];
+					}
+				}
+				$used_template_technical_code = $this_template_technical_code;
+				break;
 			}
 		}
 	}
@@ -91,8 +105,8 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		} else {
 			$nom_expediteur = '';
 		}
-		$from_array = explode(',', str_replace(';', ',', $from));
-		$from = trim($from_array[0]);
+		$temp = explode(',', str_replace(';', ',', $from));
+		$from = trim($temp[0]);
 		// création du header de l'email
 		if (!empty($nom_expediteur)) {
 			$mail_header .= 'From: "' . $nom_expediteur . '" <' . $from . '>' . $eol;
@@ -109,45 +123,51 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		}
 		$mail_header .= "Return-Path:" . $from . "" . $eol;
 	}
-	if ($format == "text") {
-		// On force le format en texte sans HTML
-		$mail_content = String::strip_tags($mail_content);
-	} else {
-		// On passe le contenu de l'email en HTML si ce n'est pas déjà le cas
-		if (String::strip_tags($mail_content) != $mail_content) {
+	if ($format != "text") {
+		// On traite le modèle d'email avant de remplacer les tags car le modèle est peut-être en texte brut contrairement aux tags
+		if (strip_tags($mail_content) != $mail_content) {
+			// On passe le contenu de l'email en HTML si ce n'est pas déjà le cas
 			// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne
 			$mail_content = String::nl2br_if_needed($mail_content);
-			if ($html_correct_conformity) {
-				// On corrige le HTML si nécessaire
-				$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, false);
-			}
 		} else {
 			// Email de texte qu'on va envoyer en HTML, et pour avoir une source d'email lisible on garde le \n à la fin
 			// NB : il faut faire le replace en 2 fois pour éviter que le \n après le <br /> soit à nouveau remplacé !
-			$mail_content = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), "\n", $mail_content));
+			$mail_content = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), array("\n", "\n"), $mail_content));
 		}
 	}
 	// Traitement des tags dans les templates. Même si $template_tags est vide il faut le faire pour gérer les tags génériques
+	// NB : Si on veut du HTML avec $format='html', le contenu de ces tags est converti par template_tags_replace en HTML
 	$mail_content = template_tags_replace($mail_content, $template_tags, false, $format, $lang);
 	$mail_subject = template_tags_replace(String::strip_tags($mail_subject), $template_tags, false, 'text', $lang);
 	if ($format == "text") {
+		// On force le format en texte sans HTML
+		$mail_content = trim(String::html_entity_decode(String::strip_tags($mail_content)));
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
 			$mail_header .= "Content-Type: text/plain; charset=" . GENERAL_ENCODING . "" . $eol;
 		}
+		$mail_body = $mail_content;
 	} else {
+		// Dans tous les cas, si les & ne sont pas encodés, on les encode. 
+		// Sinon, problème avec certaines messageries qui croient que dans une URL, &currency est une entité pour laquelle il manque le point virgule
+		// Si les & sont déjà encodés en &amp; la fonction suivante va les garder 
+		$mail_content = String::htmlentities($mail_content, null, GENERAL_ENCODING, false, true, false);
+		if ($html_correct_conformity) {
+			// On corrige le HTML si demandé
+			$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, false);
+		}
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
 			$mail_header .= "Content-Type: text/html; charset=" . GENERAL_ENCODING . "" . $eol;
 		}
 		// On transforme les liens [link=] ... [/link] en balises HTML <a>
 		$mail_content = linkFormat($mail_content);
-		if ($html_convert_url_to_links && String::strpos($mail_content, '<a ') === false && String::strpos($mail_content, '<img ') === false) {
+		if ($html_convert_url_to_links) {
 			// On rend cliquables les URL qui étaient bruts
 			$mail_content = url2Link($mail_content);
 		}
 		if (String::strpos(String::strtolower($mail_content), '<body') === false && String::strpos($mail_content, '<!DOCTYPE') === false) {
-			$mail_content = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+			$mail_body = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=' . GENERAL_ENCODING . '">
@@ -157,66 +177,97 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 ' . $mail_content . '
 </body>
 </html>';
+		} else {
+			$mail_body = $mail_content;
 		}
-		// Ajout de fichiers attachés
-		if (!empty($attached_files_infos_array)) {
-			$mime_boundary_main = md5(uniqid() . 'iéhf|ao5225izah%0g'.mt_rand(1,1000000));
-			$mime_boundary_html_or_plain = md5(mt_rand(1,1000000).'iéhf|ao5225izah%0g' . uniqid());
-			// multipart/alternative
-			$mail_header .= "Content-Type: multipart/mixed; boundary=\"" . $mime_boundary_main . "\"" . "" . $eol;
+	}
+	// Ajout de fichiers attachés
+	if (!empty($attached_files_infos_array) && !$attachment_not_sent_by_email) {
+		$main_document_attached = $attached_files_infos_array['path_file_attachment'][0] . $attached_files_infos_array['name'][0]; 
+		$mime_boundary_main = md5(uniqid() . 'iéhf|ao5225izah%0g'.mt_rand(1,1000000));
+		$mime_boundary_html_or_plain = md5(mt_rand(1,1000000).'iéhf|ao5225izah%0g' . uniqid());
+		// multipart/alternative
+		$mail_header .= "Content-Type: multipart/mixed; boundary=\"" . $mime_boundary_main . "\"" . "" . $eol;
 
-			$msg = "--" . $mime_boundary_main . "" . $eol;
-			$msg .= "Content-Type: multipart/alternative; boundary=\"" . $mime_boundary_html_or_plain . "\"" . $eol . $eol;
+		$msg = "--" . $mime_boundary_main . "" . $eol;
+		$msg .= "Content-Type: multipart/alternative; boundary=\"" . $mime_boundary_html_or_plain . "\"" . $eol . $eol;
 
-			$msg .= "--" . $mime_boundary_html_or_plain . "" . $eol;
-			$msg .= "Content-Type: text/plain; charset=" . GENERAL_ENCODING . "" . $eol;
-			$msg .= "Content-Transfer-Encoding: 8bit" . "" . $eol . $eol;
-			$msg .= trim(String::strip_tags($mail_content)) . $eol;
+		$msg .= "--" . $mime_boundary_html_or_plain . "" . $eol;
+		$msg .= "Content-Type: text/plain; charset=" . GENERAL_ENCODING . "" . $eol;
+		$msg .= "Content-Transfer-Encoding: 8bit" . "" . $eol . $eol;
+		$msg .= trim(String::strip_tags($mail_body)) . $eol;
+		if ($format == "html") {
+			// SI on envoie en HTML, on met en texte brut d'abord, et en HTML ensuite
 			$msg .= "--" . $mime_boundary_html_or_plain . "" . $eol;
 			$msg .= "Content-Type: text/html; charset=" . GENERAL_ENCODING . "" . $eol;
 			$msg .= "Content-Transfer-Encoding: 8bit" . $eol . $eol;
-			$msg .= $mail_content . $eol;
-			$msg .= "--".$mime_boundary_html_or_plain."--" . "" . $eol . $eol;
-			for($j = 0;$j < count($attached_files_infos_array['name']); $j++) {
-				$fichier = file_get_contents($attached_files_infos_array['path_file_attachment'][$j] . $attached_files_infos_array['name'][$j]);
-				$msg .= "--" . $mime_boundary_main . "" . $eol;
-				$msg .= "Content-Type: " . $attached_files_infos_array['type-mime'][$j] . "; name=\"" . $attached_files_infos_array['name'][$j] . "\"" . "" . $eol;
-				$msg .= "Content-Transfer-Encoding: base64" . "" . $eol;
-				$msg .= "Content-Disposition: attachment; filename=\"" . $attached_files_infos_array['name'][$j] . "\"" . "" . $eol . $eol;
-				$msg .= chunk_split(base64_encode($fichier)) . "" . $eol . $eol;
-			}
-			$msg .= "--" . $mime_boundary_main . "--" . "" . $eol . $eol;
-			$mail_content = $msg;
+			$msg .= $mail_body . $eol;
 		}
+		$msg .= "--".$mime_boundary_html_or_plain."--" . "" . $eol . $eol;
+		for($j = 0;$j < count($attached_files_infos_array['name']); $j++) {
+			if(!empty($attached_files_infos_array['content'][$j])) {
+				$fichier = $attached_files_infos_array['content'][$j];
+			} else {
+				$fichier = file_get_contents($attached_files_infos_array['path_file_attachment'][$j] . $attached_files_infos_array['name'][$j]);
+			}
+			$msg .= "--" . $mime_boundary_main . "" . $eol;
+			$msg .= "Content-Type: " . $attached_files_infos_array['type-mime'][$j] . "; name=\"" . $attached_files_infos_array['name'][$j] . "\"" . "" . $eol;
+			$msg .= "Content-Transfer-Encoding: base64" . "" . $eol;
+			$msg .= "Content-Disposition: attachment; filename=\"" . $attached_files_infos_array['name'][$j] . "\"" . "" . $eol . $eol;
+			$msg .= chunk_split(base64_encode($fichier)) . "" . $eol . $eol;
+		}
+		$msg .= "--" . $mime_boundary_main . "--" . "" . $eol . $eol;
+		$mail_body = $msg;
 	}
-	$to_array = explode(',', str_replace(';', ',', $to));
+	$recipient_array = explode(',', str_replace(';', ',', $to));
 	$result = false;
 	$i = 0;
-	foreach($to_array as $this_email) {
+	foreach($recipient_array as $this_email) {
 		$this_email = trim($this_email);
-		if (empty($this_email) || $i > 10) {
-			// Limitation à 10 destinataires en même temps par sécurité
-			continue;
-		}
-		if (strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false && !empty($GLOBALS['site_parameters']['send_email_active'])) {
-			if(EmailOK($this_email)){
-				if (String::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
-					$result = mail($this_email, '=?' . String::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_content, $mail_header);
-				} else {
-					$result = mail($this_email, $mail_subject, $mail_content, $mail_header);
-				}
-				if(!empty($GLOBALS['site_parameters']['trigger_user_notice_email_sent']) && empty($GLOBALS['display_errors'])) {
-					trigger_error('Email sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
-				}
-			}else{
-				trigger_error('Email invalide : ' . $this_email, E_USER_NOTICE);
+		if(empty($used_template_technical_code) || !in_array($used_template_technical_code, vb($GLOBALS['site_parameters']['send_email_technical_codes_no_email'], array()))) {
+			if (empty($this_email) || $i > 10) {
+				// Limitation à 10 destinataires en même temps par sécurité
+				continue;
 			}
+			if (((strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false) || !empty($GLOBALS['site_parameters']['localhost_send_email_active'])) && !empty($GLOBALS['site_parameters']['send_email_active'])) {
+				if(EmailOK($this_email)){
+					if (String::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
+						$result = mail($this_email, '=?' . String::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_body, $mail_header);
+					} else {
+						$result = mail($this_email, $mail_subject, $mail_body, $mail_header);
+					}
+					if(!empty($GLOBALS['site_parameters']['trigger_user_notice_email_sent']) && empty($GLOBALS['display_errors'])) {
+						trigger_error('Email sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
+					}
+				}else{
+					trigger_error('Email invalide : ' . $this_email, E_USER_NOTICE);
+				}
+			} else {
+				if(!IN_INSTALLATION) {
+					// On n'affiche le message de désactivation des envois qu'à l'extérieur de l'installation
+					echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();
+				}
+			}
+		}
+		if(is_array($sender)) {
+			$params = $sender;
 		} else {
-			if(!IN_INSTALLATION) {
-				// On n'affiche le message de désactivation des envois qu'à l'extérieur de l'installation
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();
+			$params = array();
+		}
+		$params = array_merge($params, array('recipient_array' => array($this_email), 'from' => $from, 'mail_subject' => $mail_subject, 'mail_content' => $mail_content, 'technical_code' => $used_template_technical_code, 'document' => vb($main_document_attached)), $additional_infos_array);
+		if(empty($params['id_expediteur']) && !empty($from)) {
+			if(!empty($params['id_utilisateur'])) {
+				$params['id_expediteur'] = $params['id_utilisateur'];
+			} else {
+				$query = query('SELECT id_utilisateur
+					FROM peel_utilisateurs
+					WHERE email="' . real_escape_string($from) . '"');
+				if($result = fetch_assoc($query)) {
+					$params['id_expediteur'] = $result['id_utilisateur'];
+				}
 			}
 		}
+		call_module_hook('send_email', $params);
 		$i++;
 	}
 	return $result;
@@ -282,7 +333,7 @@ function getTextAndTitleFromEmailTemplateLang($template_technical_code, $templat
 	// Dans le cas de la newsletter, le titre ne doit pas être celui du template, mais le titre renseigné dans la liste des newsletters.
 	$sql = 'SELECT *
 		FROM peel_email_template
-		WHERE active="TRUE"	AND ' . get_filter_site_cond('email_template', null, true);
+		WHERE active="TRUE"	AND ' . get_filter_site_cond('email_template', null);
 	if(!empty($template_technical_id)) {
 		$sql .= ' AND id="' . intval($template_technical_id) . '"';
 	} else {

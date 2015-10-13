@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributs_form_part.tpl 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: attributs_form_part.tpl 47242 2015-10-08 15:28:40Z gboussin $
 #}
 {# On renvoie le formulaire sous forme de table ou de HTML simple #}
 {% if display_mode=='table' %}
@@ -41,7 +41,7 @@
 			{% if a.max_label_length>=5 %}<br />{% endif %}<input type="{{ a.input_type }}" value="{{ o.value }}" id="{{ o.id }}" name="{{ o.name }}" {% if o.issel %} checked="checked"{% endif %} onclick="{{ o.onclick }}" /><label for="{{ o.id }}">{{ o.text }}</label>
 			{% endfor %}
 		{% elseif a.input_type=='link' %}
-			{% for o in $a.options %}
+			{% for o in a.options %}
 				<a href="{{ wwwroot }}/search.php?{{ o.name }}={{ o.value }}">{{ o.text }}</a>
 			{% endfor %}
 		{% elseif a.input_type %}

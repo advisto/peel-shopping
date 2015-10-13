@@ -3,35 +3,36 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: change_params.php 46935 2015-09-18 08:49:48Z gboussin $
 include("../configuration.inc.php");
 necessite_identification();
 
 define('IN_CHANGE_PARAMS', true);
 $GLOBALS['page_name'] = 'change_params';
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_CHANGE_PARAMS'];
+$GLOBALS['allow_fineuploader_on_page'] = true;
 include("../lib/fonctions/display_user_forms.php");
 
 $form_error_object = new FormError();
-// Dans un premier temps on stocke dans $mandatory_fields les champs obligatoires indiqués dans $GLOBALS['site_parameters']['user_mandatory_fields'].
+// Dans un premier temps on stocke dans $mandatory_fields les champs obligatoires indiqués dans $GLOBALS['site_parameters']['user_change_mandatory_fields'].
 $mandatory_fields = array();
-if(isset($GLOBALS['site_parameters']['user_mandatory_fields'])) {
-	foreach($GLOBALS['site_parameters']['user_mandatory_fields'] as $key => $value) {
+if(isset($GLOBALS['site_parameters']['user_change_mandatory_fields'])) {
+	foreach($GLOBALS['site_parameters']['user_change_mandatory_fields'] as $key => $value) {
 		if(check_if_module_active('annonces')) {
 			if($key == 'pseudo') {
-				// Si le module d'annonce est présent, le pseudo n'est éditable donc pas transmit dans le formulaire. Le test sur le champ pseudo est prévu dans user_mandatory_fields uniquement pour l'inscription dans ce cas.
+				// Si le module d'annonce est présent, le pseudo n'est éditable donc pas transmit dans le formulaire. Le test sur le champ pseudo est prévu dans user_change_mandatory_fields uniquement pour l'inscription dans ce cas.
 				continue;
 			}
 		}
-		if($key == 'code') {
-			// il n'y a pas de module captcha dans le formulaire de mise à jour d'utilisateur. Le test sur le champ code est prévu dans user_mandatory_fields uniquement pour l'inscription
+		if($key == 'code' || $key == 'mot_passe_confirm') {
+			// il n'y a pas de module captcha dans le formulaire de mise à jour d'utilisateur. Le test sur le champ code est prévu dans user_change_mandatory_fields uniquement pour l'inscription
 			continue;
 		}
 		$mandatory_fields[$key] = $value;
@@ -45,9 +46,9 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
 }
 if(check_if_module_active('annonces')) {
-	if(!empty($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories'])) {
+	if(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
 		$mandatory_fields['id_categories'] = 'STR_ERR_FIRST_CHOICE';
-	} else {
+	} elseif(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'select') {
 		$mandatory_fields['id_cat_1'] = 'STR_ERR_FIRST_CHOICE';
 	}
 }
@@ -58,6 +59,22 @@ foreach($mandatory_fields as $key => $value) {
 	}
 }
 $frm = $_POST;
+/* Supprime l'image associée à l'utilisateur. */
+switch (vb($_REQUEST['mode'])) {
+	case "supprfile" :
+		$id = intval(vn($_REQUEST['id']));
+		$sql = "SELECT logo
+			FROM peel_utilisateurs
+			WHERE id_utilisateur = '" . intval($id)."'";
+		$res = query($sql);
+		$file = fetch_assoc($res);
+		query("UPDATE peel_utilisateurs
+			SET logo = ''
+			WHERE id_utilisateur = '" . intval($id)."'");
+		delete_uploaded_file_and_thumbs($file['logo']);
+		$noticemsg_keep_form = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MSG_CHANGE_PARAMS'], $file['logo'])))->fetch();
+		break;
+}
 if (a_priv('demo')) {
 	$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch();
 } elseif (!empty($frm)) {
@@ -113,18 +130,22 @@ if (a_priv('demo')) {
 		// Si nous sommes en France, nous avons renseigné le numéro $GLOBALS['STR_SIREN'], cela nécessite un contrôle de la valeur rentrée par l'utilisateur
 		$form_error_object->add('siret', $GLOBALS['STR_ERR_SIREN']);
 	}
+	if (!empty($GLOBALS['site_parameters']['user_tva_intracom_validation_on_change_params_page']) && check_if_module_active('vatlayer') && !empty($frm['intracom_for_billing']) && !vatlayer_check_vat($frm['intracom_for_billing'])) {
+		$form_error_object->add('intracom_for_billing', $GLOBALS['STR_MODULE_VATLAYER_ERR_INTRACOM']);
+	}
 	if (!$form_error_object->count()) {
+		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+		$frm['priv'] = $_SESSION['session_utilisateur']['priv'];
 		maj_utilisateur($frm, true);
 		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MSG_CHANGE_PARAMS'], 'list_content' => $GLOBALS['STR_CHANGE_PARAMS_OK']))->fetch();
 	}
 } else {
 	$frm = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
 }
-
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 
 if (empty($noticemsg)) {
-	echo get_user_change_params_form($frm, $form_error_object);
+	echo vb($noticemsg_keep_form) . get_user_change_params_form($frm, $form_error_object);
 } else {
 	echo $noticemsg;
 }

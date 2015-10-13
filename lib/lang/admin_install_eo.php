@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 7.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_eo.php 44077 2015-02-17 10:20:38Z sdelaporte $
+// $Id: admin_install_eo.php 46935 2015-09-18 08:49:48Z gboussin $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -76,5 +76,5 @@ $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Elektu la instalotajn lingvojn:
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Necesas aktivigi la PHP5-programon en via retejo: redaktu la dosieron \".htaccess\" situanta en la rediko de la retejo, kaj malkomenti la liniojn rilataj al via gastigado, forigante la signojn '#' komence de linio, aŭ kontaktu la gastiganton. Eblas gastigi la retejon rekte ĉe PEEL - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Necesos aliigi mane la kodigon de la retejo - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Necesos aliigi mane la kodigon de la retejo - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
-$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Ĉio devus en orde funkcii, krom la modulo \"Butterflive\" kies funkciado ne eblos.";
+$GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Ĉio devus en orde funkcii, krom modulo kies funkciado ne eblos.";
 
