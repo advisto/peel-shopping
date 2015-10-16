@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47305 2015-10-12 10:14:59Z gboussin $
+// $Id: fonctions.php 47429 2015-10-16 16:43:09Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -2742,13 +2742,13 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 		// Eviter les problèmes sur MySQL 5 sous Windows
 		query("SET @@session.sql_mode='" . vb($GLOBALS['site_parameters']['mysql_sql_mode_force'], 'MYSQL40') . "'");
 	}
-	// On prend un dossier de template par défaut si pas défini ou inexistant
-	if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
-		if(empty($GLOBALS['site_parameters']['peel_database_version'])) {
-			// La version de la base de donnée est inférieur à 8. On est dans un contexte de migration, il faut forcer le dossier modele à PEEL7.
-			// Les dossiers modeles des versions plus ancienne utilisent des fonctions is_module_XXXX_active qui ne sont plus défini dans la version 8.
-			$GLOBALS['site_parameters']['template_directory'] = 'peel7';
-		} else {
+	if(empty($GLOBALS['site_parameters']['peel_database_version'])) {
+		// La version de la base de donnée est inférieur à 8. On est dans un contexte de migration, il faut forcer le dossier modele à PEEL7.
+		// Les dossiers modeles des versions plus anciennes utilisent des fonctions is_module_XXXX_active qui ne sont plus définies dans la version 8.
+		$GLOBALS['site_parameters']['template_directory'] = 'peel7';
+	} else {
+		// On prend un dossier de template par défaut si pas défini ou inexistant
+		if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
 			$modeles_dir = $GLOBALS['dirroot'] . "/modeles";
 			if ($handle = opendir($modeles_dir)) {
 				while (false !== ($file = readdir($handle))) {
@@ -5112,7 +5112,7 @@ function insere_code_promo($frm)
 		, '" . intval(vb($frm['nombre_prevue'])) . "'
 		, '" . intval(vb($frm['nb_used_per_client'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['product_filter'])) . "'
-		, '" . nohtml_real_escape_string(get_string_from_array(vb($frm['cat_not_apply_code_promo']))) . "'
+		, '" . nohtml_real_escape_string(get_string_from_array(vb($frm['cat_not_apply_code_promo']), true)) . "'
 		)";
 	query($sql);
 	return insert_id();
@@ -5285,7 +5285,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
  */
 function handle_specific_fields(&$frm, $form_usage = 'user') {
 	$table_correspondance = array('user' => 'utilisateurs', 'order' => 'commandes', 'ad' => 'lot_vente');
-	$adresses_potentiel_fields_array = array('prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
+	$addresses_potential_fields_array = array('societe', 'prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
 	if(empty($table_correspondance[$form_usage])) {
 		return null;
 	}
@@ -5297,9 +5297,11 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 	$this_table_field_names = get_table_field_names('peel_' . $table_correspondance[$form_usage]);
 	foreach($this_table_field_names as $this_field) {
 		// On identifie tous les champs d'adresse relatifs à cette table
-		if(in_array($this_field, $adresses_potentiel_fields_array)) {
+		if(in_array($this_field, $addresses_potential_fields_array)) {
+			// Contenu tel que celui de la table utilisateurs, ou autre table avec noms de champs sans suffixe
 			$frm['adresses_fields_array'][$this_field] = $this_field;
 		} elseif ((String::substr($this_field,-5) == '_ship' ||  String::substr($this_field,-5) == '_bill')) {
+			// contenu de la table de commandes
 			$frm['adresses_fields_array'][String::substr($this_field, 0, -5)] = String::substr($this_field, 0, -5);
 		}
 		if (empty($specific_fields_titles) || empty($specific_fields_titles[$this_field])) {

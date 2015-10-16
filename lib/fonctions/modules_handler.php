@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 47350 2015-10-12 20:16:45Z gboussin $
+// $Id: modules_handler.php 47429 2015-10-16 16:43:09Z gboussin $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -24,14 +24,17 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function load_modules($technical_code = null) {
-	$modules_to_check = array_keys(array_merge_recursive(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array()), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
+	if(empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'])) {
+		$GLOBALS['site_parameters']['modules_front_office_functions_files_array'] = array('thumbs' => '/modules/thumbs/fonctions.php');
+	}
+	$modules_to_check = array_keys(array_merge_recursive(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
 	foreach($modules_to_check as $this_module) {
 		if((empty($technical_code) || $technical_code == $this_module) && empty($GLOBALS['modules_installed'][$this_module])) {
 			// Pour la compatibilité avec d'anciennes versions, on stocke le chemin vers les fichiers de fonctions dans une variable globale
 			if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 				$GLOBALS[vb($GLOBALS['site_parameters']['modules_fonctions_variable_array'][$this_module], 'fonctions'. $this_module)] = $GLOBALS['dirroot'] . str_replace(',', ',' . $GLOBALS['dirroot'], $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]);
 			}
-			if ((in_array($this_module, $GLOBALS['site_parameters']['modules_no_optional_array']) || !defined('LOAD_NO_OPTIONAL_MODULE') || (defined('LOAD_MODULE_FORCED') && in_array($this_module, LOAD_MODULE_FORCED))) && check_if_module_active($this_module)) {
+			if ((in_array($this_module, vb($GLOBALS['site_parameters']['modules_no_optional_array'], array())) || !defined('LOAD_NO_OPTIONAL_MODULE') || (defined('LOAD_MODULE_FORCED') && in_array($this_module, LOAD_MODULE_FORCED))) && check_if_module_active($this_module)) {
 				// On a une protection pour éviter de charger deux fois le même fichier de fonctions en cas de doublon de configuration
 				// En revanche, rien n'empêche de charger plusieurs librairies de fonctions pour un même module
 				if((empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
@@ -89,7 +92,7 @@ function load_modules($technical_code = null) {
  */
 function check_if_module_active($module_name, $specific_file_name=null) {
 	$automatically_activate_if_no_configuration_available = array('thumbs');
-	if (empty($module_name) || !isset($GLOBALS['site_parameters']['modules_configuration_variable_array'])) {
+	if (empty($module_name) || (!isset($GLOBALS['site_parameters']['modules_configuration_variable_array']) && !in_array($module_name, $automatically_activate_if_no_configuration_available))) {
 		// Nom du module vide ou pas renseigné - Ou pas de configuration valide disponible, comme lors de l'installation
 		return false;
 	}

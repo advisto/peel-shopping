@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 47355 2015-10-12 21:46:21Z sdelaporte $
+// $Id: update.php 47430 2015-10-16 16:46:34Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -100,7 +100,7 @@ if(!empty($_GET['version'])) {
 			$current_version = '7.1.4';
 		} elseif(in_array('reve_certif', $profil_fields)) {
 			$current_version = '7.2.0';
-		} elseif(empty($adresses_fields)) {
+		} elseif(empty($adresses_fields) || empty($GLOBALS['site_parameters']['peel_database_version'])) {
 			$current_version = '7.2.1';
 		}
 	}
@@ -2310,7 +2310,7 @@ ksort($sql_update_array);
 $output .= '<p>' . 'PEEL PHP' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '. PEEL_VERSION . '</p>';
 if (!empty($current_version)) {
 	// On a determiné la version de la base de données, donc on peut procéder au différent traitement. Si current_version est vide, c'est qu'on est pas en mesure de définir la version de la bdd, donc on ne fait rien.
-	if(vb($GLOBALS['site_parameters']['peel_database_version']) == PEEL_VERSION) {
+	if($current_version == PEEL_VERSION) {
 		// OK
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK'))->fetch();
 	} elseif(!empty($_GET['do_update'])) {
