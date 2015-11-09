@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 46982 2015-09-21 15:34:38Z sdelaporte $
+// $Id: haut.php 47592 2015-10-30 16:40:22Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -70,7 +70,7 @@ if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) &
 		$this_logo = $GLOBALS['wwwroot'] . $this_logo;
 	}
 	if (!empty($GLOBALS['site_parameters']['main_site_id'])) {
-		// Il y a plusieurs site et un site principal est défini. L'url du logo dans le header doit pointer vers le site principal.
+		// Il y a plusieurs sites et un site principal est défini. L'url du logo dans le header doit pointer vers le site principal.
 		$logo_href = get_site_wwwroot($GLOBALS['site_parameters']['main_site_id']);
 	} else {
 		// Lien vers la home défini pour la configuration du site.

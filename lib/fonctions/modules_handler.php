@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 47429 2015-10-16 16:43:09Z gboussin $
+// $Id: modules_handler.php 47716 2015-11-06 16:26:21Z gboussin $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -25,6 +25,7 @@ if (!defined('IN_PEEL')) {
  */
 function load_modules($technical_code = null) {
 	if(empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'])) {
+		// Si la variable de configuration n'existe pas, il faut obligatoirement définir thumbs dans la configuration, sinon le site ne charge pas.
 		$GLOBALS['site_parameters']['modules_front_office_functions_files_array'] = array('thumbs' => '/modules/thumbs/fonctions.php');
 	}
 	$modules_to_check = array_keys(array_merge_recursive(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
@@ -87,17 +88,17 @@ function load_modules($technical_code = null) {
  * 
  * @param string $module_name Nom du module à tester. Le nom du module doit être le même que le dossier
  * @param string $specific_file_name Nom du fichier specifique à tester si nécessaire.
- *
+ * @param boolean $skip_activation_test
  * @return
  */
-function check_if_module_active($module_name, $specific_file_name=null) {
+function check_if_module_active($module_name, $specific_file_name = null, $skip_activation_test = false) {
 	$automatically_activate_if_no_configuration_available = array('thumbs');
 	if (empty($module_name) || (!isset($GLOBALS['site_parameters']['modules_configuration_variable_array']) && !in_array($module_name, $automatically_activate_if_no_configuration_available))) {
 		// Nom du module vide ou pas renseigné - Ou pas de configuration valide disponible, comme lors de l'installation
 		return false;
 	}
 	$module_configuration_variable = vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$module_name], 'module_' . $module_name);
-	$module_configured = ((in_array($module_name, $automatically_activate_if_no_configuration_available) && !isset($GLOBALS['site_parameters'][$module_configuration_variable])) || !empty($GLOBALS['site_parameters'][$module_configuration_variable]));
+	$module_configured = ($skip_activation_test || (in_array($module_name, $automatically_activate_if_no_configuration_available) && !isset($GLOBALS['site_parameters'][$module_configuration_variable])) || !empty($GLOBALS['site_parameters'][$module_configuration_variable]));
 	$module_enable_for_this_lang = (empty($GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']));
 	if ($module_configured && $module_enable_for_this_lang) {
 		// Si le paramètre est absent, ou qu'il est activé en back office. La validité de l'absence du paramètre est nécessaire pour des raisons de compatibilité pour certains modules. Donc la désactivation du module est à faire depuis le back office, en passant la valeur à 0 ou false (selon le type de la configuration)
@@ -162,7 +163,9 @@ function call_module_hook($hook, $params, $mode = 'boolean') {
 					$output = min($output, $result);
 				}
 			} elseif($mode == 'unique') {
-				$output = $result;
+				if($output === null || !empty($result)) {
+					$output = $result;
+				}
 			} elseif($mode == 'add') {
 				$output += $result;
 			} else {

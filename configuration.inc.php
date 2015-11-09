@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 47304 2015-10-12 10:09:41Z gboussin $
+// $Id: configuration.inc.php 47619 2015-11-02 11:20:20Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,14 +43,15 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '8.0.0');
+define('PEEL_VERSION', '8.0.1');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
 if (!defined('IN_INSTALLATION')) {
 	define('IN_INSTALLATION', false);
 }
-
+// Pour éviter l'emission des erreurs pour faciliter la migration, on désactive l'affichage des messages d'erreur. Plus bas dans le code on refait un calcul selon l'ip pour savoir si on affiche les erreurs ou non.
+define('DISPLAY_ERRORS_DURING_INIT', 0);
 $GLOBALS['dirroot'] = dirname(__FILE__);
 $GLOBALS['repertoire_achat'] = $GLOBALS['dirroot'] . "/achat";
 $GLOBALS['libdir'] = $GLOBALS['dirroot'] . "/lib";
@@ -201,7 +202,14 @@ if (!IN_INSTALLATION) {
 	// On ne définit que le dossier modeles/ car dans l'installation on ne va pas chercher la configuration en BDD
 	load_site_parameters();
 }
-
+if (empty($GLOBALS['site_parameters']['peel_database_version']) || (!empty($GLOBALS['site_parameters']['peel_database_version']) && $GLOBALS['site_parameters']['peel_database_version'] != PEEL_VERSION)) {
+	// Contexte de migration
+	$GLOBALS['database_wrong_version'] = true;
+	if(empty($GLOBALS['site_parameters']['peel_database_version'])) {
+		// Ancienne version, on désactive le test sur les champs site_id des tables
+		$GLOBALS['site_parameters']['multisite_disable'] = true;
+	}
+}
 // ***********************************
 // * FORCER DES VALEURS DE SITE_PARAMETERS *
 // Le fonctionnement normal est l'utilisation de variables de configurations stockés dans la table peel_configuration et éditable dans l'administration (section Variables de configuration)
@@ -211,9 +219,10 @@ if (!IN_INSTALLATION) {
 // $GLOBALS['site_parameters']['site_suspended'] = true;
 // * FIN SITE_PARAMETERS *
 // ***********************************
-if (!isset($GLOBALS['site_parameters']['display_errors_for_ips'])) {
+if (!isset($GLOBALS['site_parameters']['display_errors_for_ips']) && empty($GLOBALS['database_wrong_version'])) {
 	$GLOBALS['display_errors'] = 1;
-} elseif (!empty($GLOBALS['site_parameters']['display_errors_for_ips'])) {
+} elseif (empty($GLOBALS['database_wrong_version']) && !empty($GLOBALS['site_parameters']['display_errors_for_ips'])) {
+	// On ne veux pas afficher  les erreurs dans le contexte d'une migration
 	foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['site_parameters']['display_errors_for_ips'])) as $this_ip_part) {
 		if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
 			// IP utilisée détectée comme commençant par une IP listée dans display_errors_for_ips
@@ -327,7 +336,6 @@ if(defined('IN_PEEL_ADMIN') || IN_INSTALLATION) {
 }
 
 // Si nécessaire dans get_identified_lang, on redirige si langue pas définie
-// Dans ce cas on considère que la version de la base de données et la version du code sont les mêmes, donc on exécute un contrôle sur la configuration.
 $_SESSION['session_langue'] = get_identified_lang((defined('IN_PEEL_ADMIN')?$GLOBALS['admin_lang_codes']:$GLOBALS['lang_codes']));
 if(empty($_SESSION['session_langue'])) {
 	if(empty($GLOBALS['admin_lang_codes']) && defined('IN_PEEL_ADMIN')) {

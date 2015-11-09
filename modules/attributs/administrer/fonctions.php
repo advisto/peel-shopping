@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: fonctions.php 47710 2015-11-06 14:57:19Z gboussin $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -690,6 +690,16 @@ function affiche_liste_attributs_by_id($id)
 		foreach ($all_attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
 			$tpl_sub_res = array();
 			foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
+				if(check_if_module_active('reseller') && is_reseller()) {
+					$montant = $this_attribut_infos['prix_revendeur'];
+				} else {
+					$montant = $this_attribut_infos['prix'];
+				}
+				if (display_prices_with_taxes_in_admin()) {
+					$montant_displayed = $montant;
+				} else {
+					$montant_displayed = $montant / (1 + $product_object->tva / 100);
+				}
 				if (!empty($this_attribut_id) || $this_attribut_id === 0) {
 					if(trim(String::strip_tags($this_attribut_infos['descriptif']))=='') {
 						$this_attribut_infos['descriptif'] = '['.$this_attribut_id.'] ';
@@ -697,7 +707,7 @@ function affiche_liste_attributs_by_id($id)
 					$tpl_sub_res[] = array('value' => intval($this_attribut_id),
 						'issel' => !empty($product_attributs_array[$this_nom_attribut_id]) && !empty($product_attributs_array[$this_nom_attribut_id][$this_attribut_id]),
 						'desc' => String::strip_tags($this_attribut_infos['descriptif']),
-						'prix' => fprix($this_attribut_infos['prix'], true, $GLOBALS['site_parameters']['code'], false)
+						'prix' => fprix($montant_displayed, true, $GLOBALS['site_parameters']['code'], false)
 						);
 				}
 			}
@@ -726,7 +736,7 @@ function affiche_liste_attributs_by_id($id)
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_FREE_TEXT', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_FREE_TEXT"]);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_NO_OPTION', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_NO_OPTION"]);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_MANAGE_LINK', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_MANAGE_LINK"]);
-	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+	$tpl->assign('ttc_ht', (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 	echo $tpl->fetch();
 }
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: fonctions.php 47614 2015-10-30 21:31:00Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -30,7 +30,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	}
 
 	if (empty($_GET['limit'])) {
-		$limit = 10;
+		$limit = vb($GLOBALS['site_parameters']['rss_default_items_count'], 15);
 	} else {
 		$limit = min(intval($_GET['limit']), 500);
 	}
@@ -86,16 +86,30 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	$tpl_items = array();
 	if (!check_if_module_active('annonces')) {
 		// Récupération et affichage des données
-		$sql = "SELECT p.id, p.prix, p.tva, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.date_maj, p.description_" . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']) . " AS description, p.promotion, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
+		if ($GLOBALS['site_id'] == vn($GLOBALS['site_parameters']['main_site_id'])) {
+			// On affiche tous les produits sur le site principal si il existe un site principal
+			$category_cond = "";
+			$product_cond = "";
+		} else {
+			// Par défaut, on affiche uniquement les produits du site consulté
+			$category_cond = " AND " . get_filter_site_cond('categories', 'c') . "";
+			$product_cond = " AND " . get_filter_site_cond('produits', 'p') . "";
+		}
+		$sql = "SELECT p.*, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.description_" . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']) . " AS description, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
-			WHERE p.etat='1' AND " . get_filter_site_cond('produits', 'p') . " " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id" . $category_cond . "
+			WHERE p.etat='1'" . $product_cond . " " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
 			GROUP BY p.id
 			ORDER BY p.date_maj DESC, p.id DESC
 			LIMIT " . intval($limit);
 		$result = query($sql);
 		while ($prod = fetch_assoc($result)) {
+			if (!isset($last_site_id) || (isset($last_site_id) && $prod['site_id'] != $last_site_id)) {
+				// Premier passage ou changement de site_id (les résultats sont triés par site_id)
+				$GLOBALS['site_id'] = $prod['site_id'];
+				load_site_parameters(null, false, $GLOBALS['site_id']);
+			}
 			$product_object = new Product($prod['id'], $prod, false, null, true, !check_if_module_active('micro_entreprise'));
 			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($product_object->description, ENT_QUOTES)))));
 			$promotion_rss = $product_object->get_all_promotions_percentage(false, 0, true);
@@ -123,6 +137,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			}
 			$tpl_items[] = $this_item;
 			unset($product_object);
+			$last_site_id = $prod['site_id'];
 		}
 	} else {
 		// Définit les limites des annonces à afficher
@@ -134,14 +149,23 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 		if (!empty($seller_id)) {
 			$sql_cond .= " AND id_personne=" . intval($seller_id);
 		}
+		if ($GLOBALS['site_id'] != vn($GLOBALS['site_parameters']['main_site_id'])) { 
+			// On affiche toutes les annonces sur le site principal
+			$sql_cond .= " AND " . get_filter_site_cond('lot_vente') . "";
+		}
 		$sql = "SELECT *
 			FROM peel_lot_vente
-			WHERE " . $sql_cond . " AND " . get_filter_site_cond('lot_vente') . "
+			WHERE " . $sql_cond . "
 			ORDER BY date_insertion DESC
-			LIMIT 10";
+			LIMIT ". intval($limit);
 		$rs = query($sql);
 		// Génération des derniéres annonces
 		while ($row_rs = fetch_assoc($rs)) {
+			if (!isset($last_site_id) || (isset($last_site_id) && $row_rs['site_id'] != $last_site_id)) {
+				// Premier passage ou changement de site_id (les résultats sont triés par site_id)
+				$GLOBALS['site_id'] = $row_rs['site_id'];
+				load_site_parameters(null, false, $GLOBALS['site_id']);
+			}
 			$IDP = $row_rs['id_personne'];
 			if (empty($category_id) && !empty($row_rs['categorie_id'])) {
 				// On n'affiche la catégorie dans le titre que si on n'a pas demandé cette catégorie explicitement
@@ -165,6 +189,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			}
 			$tpl_items[] = $this_item;
 			unset($annonce_object);
+			$last_site_id = $row_rs['site_id'];
 		}
 	}
 	// Fin d'affichage

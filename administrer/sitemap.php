@@ -3,20 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: sitemap.php 47705 2015-11-06 12:08:31Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_webmastering");
 
-if (empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite']!=$GLOBALS['site_id']) {
+$all_sites_name_array = get_all_sites_name_array(false, false, true);
+if ((empty($_SESSION['session_admin_multisite']) && count($all_sites_name_array)>1) || (!empty($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite']!=$GLOBALS['site_id'])) {
 	// Possibilité de générer le sitemap uniquement pour le domaine en cours d'utilisation, et pas pour le site administré.
 	redirect_and_die($GLOBALS['administrer_url'] . '/');
 }

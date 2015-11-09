@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_rubrique.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: admin_formulaire_rubrique.tpl 47736 2015-11-07 20:55:34Z gboussin $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -113,11 +113,11 @@
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
-			{for $i=1 to 5}
-				<tr>
-					<td class="title_label">{$STR_FILE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
-					<td><input name="image{$i}" type="file" value="" /></td>
-				</tr>
+			{for $i=1+count($diapo) to 5}
+		<tr>
+			<td class="title_label">{$STR_FILE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input name="image{$i}" type="file" value="" /></td>
+		</tr>
 			{/for}
 		{/if}
 		<tr>

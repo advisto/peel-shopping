@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 47245 2015-10-08 16:47:28Z gboussin $
+// $Id: produits.php 47686 2015-11-05 10:09:28Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -122,7 +122,7 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "insere" :
 		if (!empty($frm)) {
-			if (empty($frm['on_check'])) {
+			if (empty($frm['on_check']) && empty($GLOBALS['site_parameters']['allow_products_without_category'])) {
 				// les chèques cadeaux ne sont pas associés à une catégorie. Ils s'affichent sur la page /modules/gift_check/cheques.php
 				$check_fields_array = array('categories' => $GLOBALS['STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY']);
 			}
@@ -168,7 +168,7 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "maj" :
 		if (!empty($frm)) {
-			if (empty($frm['on_check'])) {
+			if (empty($frm['on_check']) && empty($GLOBALS['site_parameters']['allow_products_without_category'])) {
 				// les chèques cadeaux ne sont pas associés à une catégorie. Ils s'affichent sur la page /modules/gift_check/cheques.php
 				$check_fields_array = array('categories' => $GLOBALS['STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY']);
 			}
@@ -502,6 +502,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('reseller_price_taxes_txt', (display_prices_with_taxes_in_admin() && empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes'])? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 		$tpl->assign('get_mode', vb($_GET['mode']));
 		$tpl->assign('create_product_process', $create_product_process);
+		$tpl->assign('allow_products_without_category', vb($GLOBALS['site_parameters']['allow_products_without_category']));
 		if (!$create_product_process) {
 			$tpl->assign('nom', vn($frm['nom_' . $_SESSION['session_langue']]));
 			if (!empty($frm['categories'])) {
@@ -1309,8 +1310,14 @@ function insere_produit($frm)
 	/* ajoute les références associées */
 	for ($i = 0; $i < count(vn($frm['references'])); $i++) {
 		if (!empty($frm['references'][$i])) {
-			$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
-				VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($product_id) . "')");
+			$query = query("SELECT reference_id
+				FROM peel_produits_references 
+				WHERE produit_id = " . intval($product_id) ." AND " . nohtml_real_escape_string($frm['references'][$i]));
+			if (!$result = fetch_assoc($query)) {
+				// Association de produit non présente.
+				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
+					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($product_id) . "')");
+			}
 		}
 	}
 
@@ -1523,10 +1530,18 @@ function maj_produit($id, $frm)
 		query("INSERT INTO peel_produits_categories (categorie_id, produit_id)
 			VALUES ('" . nohtml_real_escape_string($frm['categories'][$i]) . "', '" . intval($id) . "')");
 	}
-	for ($i = 0; $i < count($frm['references']); $i++) {
+	
+	for ($i = 0; $i < count(vn($frm['references'])); $i++) {
 		if (!empty($frm['references'][$i])) {
-			$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
-				VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
+			$query = query("SELECT reference_id
+				FROM peel_produits_references
+				WHERE produit_id = " . intval($id) ." AND reference_id = " . nohtml_real_escape_string($frm['references'][$i]));
+			$result = fetch_assoc($query);
+			if (empty($result)) {
+				// Association de produit non présente.
+				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
+					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
+			}
 		}
 	}
 	

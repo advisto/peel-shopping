@@ -2,14 +2,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 47334 2015-10-12 15:59:17Z gboussin $
+# $Id: create_new_site.sql 47738 2015-11-07 21:29:50Z gboussin $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -286,7 +286,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('load_site_specific_js_files', 'core', 'array', '', '', NOW(), 'Par défaut : vide - Permet de charger des fichiers de javascript non prévus dans le logiciel', '1', "[SITE_ID]"),
 ('load_site_specific_js_content_array', 'core', 'array', '', '', NOW(), 'Par défaut : vide - Permet de charger du javascript non prévus dans le logiciel', '1', "[SITE_ID]"),
 ('load_site_specific_js_ready_content_array', 'core', 'array', '', '', NOW(), 'Par défaut : vide - Permet de charger du javascript non prévus dans le logiciel après le chargement de la page', '1', "[SITE_ID]"),
-('show_special_on_content_category', 'boolean', 'true', '', '', NOW(), 'Permet d''afficher les articles sur la page d''accueil des rubriques.', '1', "[SITE_ID]"),
+('show_special_on_content_category', 'core', 'boolean', 'true', '', NOW(), 'Permet d''afficher les articles sur la page d''accueil des rubriques.', '1', "[SITE_ID]"),
 ('insert_article_categories_in_menu', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('only_show_articles_with_picture_in_containers', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('menu_custom_submenus', 'core', 'array', '', '', NOW(), 'Works with menu_custom_urls and menu_custom_titles - Example: "main_menu_technical_code1" => "submenu_technical_code1", "main_menu_technical_code2" => "submenu_technical_code2"', 1, "[SITE_ID]"),

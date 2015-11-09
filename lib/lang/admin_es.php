@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 47186 2015-10-05 14:54:56Z sdelaporte $
+// $Id: admin_es.php 47729 2015-11-06 22:00:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -269,6 +269,7 @@ $GLOBALS["STR_ADMIN_CONVERSION"] = "Tipo de Cambio";
 $GLOBALS["STR_ADMIN_COULEURS_ADD_COLOR_BUTTON"] = "Añadir color";
 $GLOBALS["STR_ADMIN_COULEURS_COLORS_TITLE"] = "Administración de color";
 $GLOBALS["STR_ADMIN_COULEURS_ERR_COLOR_NOT_FOUND"] = "El color no fue encontrado.";
+$GLOBALS["STR_ADMIN_COULEURS_FORM_TITLE"] = "Añadir o modificar un color";
 $GLOBALS["STR_ADMIN_COULEURS_LIST_EXPLAIN"] = "Puede ajustar los colores de esta página para sus productos. Estos colores están conectados con los productos de la forma de un elemento. El orden de visualización es manejable moviendo la línea correspondiente a un color en la posición deseada.";
 $GLOBALS["STR_ADMIN_COULEURS_MODIFY_COLOR"] = "Cambiar el color";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "El color <b>%s</b> se ha creado.";
@@ -1130,7 +1131,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_ID"] = "Paybox nombre de usuario";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_MODULE"] = "El pago Paybox";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_RANG"] = "rango Paybox";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_SITE"] = "site Paybox";
-$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Recordatorio de lors valores de pruebas de Paybox:</strong><br />SITE: 1999888<br />RANK: 99<br />USERNAME: 2";
+$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Recordatorio de lors valores de pruebas de Paybox:</strong><br />SITE: 1402611<br />RANK: 01<br />USERNAME:292047471";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(voluntad inmediata en todos los casos Kwixo ex FIANET ReceiveAndPay =)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Definición de los segundos de espera antes de la validación automática de la forma de pago";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Activar la validación automática de la forma de pago (y permanecerá inactiva con SPPLUS ATOS)";
@@ -1745,6 +1746,9 @@ $GLOBALS["STR_MODULE_FACTURES_ADMIN_ALL_BILLS_IN_ONE_FILE"] = "Todas las factura
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ONE_BILL_PER_FILE"] = "Un archivo de factura guardan en el servidor";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_SAVE_FOLDER"] = "Nombre de la carpeta de copia de factura";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_EXPORT_BILLS_BUTTON"] = "Generar facturas en PDF (la operación puede tardar varios segundos)";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_CATEGORIES_TITLE"] = "Administrar categorías de FAQ";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_ERR_NAME_MANDATORY"] = "Debe ingresar un nombre de categoría.";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_MSG_CATEGORY_DELETED_OK"] = "La categoría se ha eliminado.";
 $GLOBALS["STR_MODULE_FAQ_LIST_TITLE"] = "Lista de preguntas / respuestas";
 $GLOBALS["STR_MODULE_FAQ_CREATE"] = "Añadir una pregunta / respuesta";
 $GLOBALS["STR_MODULE_FAQ_QUESTION"] = "... Pregunta";

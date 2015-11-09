@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits_attributs.php 47090 2015-10-01 16:54:52Z gboussin $
+// $Id: produits_attributs.php 47710 2015-11-06 14:57:19Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -48,7 +48,7 @@ switch (vb($_REQUEST['mode'])) {
 			// Suppression de l'association entre le produit et les attributs.
 			$sql = query("DELETE FROM peel_produits_attributs WHERE produit_id = '" . intval($product_id) . "'");
 		}
-		affiche_liste_attributs_by_id(vb($_GET['id']));
+		affiche_liste_attributs_by_id($product_id);
 		break;
 
 	default :

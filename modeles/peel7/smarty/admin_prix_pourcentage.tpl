@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_prix_pourcentage.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: admin_prix_pourcentage.tpl 47604 2015-10-30 17:49:49Z gboussin $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<div class="entete">{$STR_ADMIN_PRIX_POURCENTAGE_TITLE}</div>
@@ -29,7 +29,7 @@
 	<div class="col-sm-5 center">
 		<p><b>{$STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT}</b>{$STR_BEFORE_TWO_POINTS}:</p>
 		<script><!--//--><![CDATA[//><!--
-			var new_order_line_html = '<tr class="top" id="sortable_[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="produits[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
+			var new_order_line_html = '<tr class="top" id="sortable_[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="produits[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
 		//--><!]]></script>
 		<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
 			<table class="table admin_commande_details">

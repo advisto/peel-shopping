@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 47256 2015-10-08 19:53:07Z gboussin $
+// $Id: display.php 47669 2015-11-04 10:57:45Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -99,7 +99,11 @@ if (!function_exists('affiche_meta')) {
 				FROM peel_articles 
 				WHERE id = "' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('articles') . '';
 		}
-		$sql_Meta = call_module_hook('meta_sql_get', array(), 'unique');
+		$sql_Meta_hook_result = call_module_hook('meta_sql_get', array(), 'unique');
+		if(!empty($sql_Meta_hook_result)) {
+			// Le hook a priorité sur le reste
+			$sql_Meta = $sql_Meta_hook_result; 
+		}
 		if (!empty($sql_Meta)) {
 			$query_Meta = query($sql_Meta);
 			$m = fetch_assoc($query_Meta);
@@ -1147,7 +1151,7 @@ if (!function_exists('print_compte')) {
 			if (function_exists('get_user_infos_resume_array') && !empty($_GET['display_user_infos_resume_array'])) {
 				$tpl->assign('user_infos_resume_array',  get_user_infos_resume_array());
 			}
-			$hook_result = call_module_hook('account_show', array(), 'array');
+			$hook_result = call_module_hook('account_show', $user_infos, 'array');
 			$modules_data = array_merge_recursive($modules_data, vb($hook_result['modules_data'], array()));
 			$modules_data_group = array_merge_recursive($modules_data_group, vb($hook_result['modules_data_group'], array()));
 			if(!empty($modules_data)) {
@@ -1478,6 +1482,7 @@ if (!function_exists('affiche_guide')) {
 		$tplLinks = array();
 		$tplLinks['cgv'] = array('href' => get_url('cgv'), 'label' => $GLOBALS['STR_CGV'], 'selected' => defined('IN_CGV'));
 		$tplLinks['contact'] = array('name' => 'contact', 'href' => get_url('/contacts.php'), 'label' => $GLOBALS['STR_CONTACT_INFO'], 'selected' => defined('IN_CONTACT_US'));
+		$tplLinks['contactus'] = array('name' => 'contact', 'href' => get_url('/utilisateurs/contact.php'), 'label' => $GLOBALS['STR_CONTACT_US'], 'selected' => defined('IN_CONTACT'));
 		
 		$hook_result = call_module_hook('affiche_guide', array('location' => $location), 'array');
 		$tplLinks = array_merge_recursive($tplLinks, $hook_result);
@@ -1577,20 +1582,12 @@ if (!function_exists('affiche_social_icons')) {
 			$tpl->assign('src', $GLOBALS['repertoire_images'] . '/rss.png');
 			$load = true;
 		}
-		if (!empty($GLOBALS['site_parameters']['facebook_page_link'])) {
-			$tpl->assign('fb_href', $GLOBALS['site_parameters']['facebook_page_link']);
-			$tpl->assign('fb_src', $GLOBALS['repertoire_images'] . '/facebook.png');
-			$load = true;
-		}
-		if (!empty($GLOBALS['site_parameters']['twitter_page_link'])) {
-			$tpl->assign('twitter_href', $GLOBALS['site_parameters']['twitter_page_link']);
-			$tpl->assign('twitter_src', $GLOBALS['repertoire_images'] . '/twitter.png');
-			$load = true;
-		}
-		if (!empty($GLOBALS['site_parameters']['googleplus_page_link'])) {
-			$tpl->assign('googleplus_href', $GLOBALS['site_parameters']['googleplus_page_link']);
-			$tpl->assign('googleplus_src', $GLOBALS['repertoire_images'] . '/googleplus.png');
-			$load = true;
+		foreach(array('facebook' => 'fb', 'twitter' => 'twitter', 'googleplus' => 'googleplus', 'viadeo' => 'viadeo', 'linkedin' => 'linkedin') as $this_social_network => $this_variable_name) {
+			if (!empty($GLOBALS['site_parameters'][$this_social_network.'_page_link'])) {
+				$tpl->assign($this_variable_name . '_href', $GLOBALS['site_parameters'][$this_social_network . '_page_link']);
+				$tpl->assign($this_variable_name . '_src', $GLOBALS['repertoire_images'] . '/' . $this_social_network . '.png');
+				$load = true;
+			}
 		}
 		if(!empty($load)) {
 			$tpl->assign('block_columns_width_sm', vb($GLOBALS['site_parameters']['footer_columns_width_sm'], 4));
@@ -3315,8 +3312,8 @@ if (!function_exists('get_address_list')) {
 						<div>'.$result['portable'].'</div>
 						<div>'.$result['email'].'</div>
 						<div style="margin-top:10px;">
-							<a class="btn btn-warning" data-confirm="'.$GLOBALS['STR_DELETE_CONFIRM'].'" style="width:auto;" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=suppr_address&id='.$result['id'].'" title="'.$GLOBALS['STR_DELETE'].'">'.$GLOBALS['STR_DELETE'].'</a>
-							<a class="btn btn-default" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=modif_address&id='.$result['id'].'" title="'.$GLOBALS['STR_MODIFY'].'">'.$GLOBALS['STR_MODIFY'].'</a>
+							<a class="btn btn-warning" data-confirm="' . String::str_form_value($GLOBALS["STR_DELETE_CONFIRM"]) . '" style="width:auto;" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=suppr_address&id='.$result['id'].'" title="'.String::str_form_value($GLOBALS['STR_DELETE']).'">'.$GLOBALS['STR_DELETE'].'</a>
+							<a class="btn btn-default" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=modif_address&id='.$result['id'].'" title="'.String::str_form_value($GLOBALS['STR_MODIFY']).'">'.$GLOBALS['STR_MODIFY'].'</a>
 						</div>
 					</div>
 				</div>

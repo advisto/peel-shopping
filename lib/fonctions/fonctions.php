@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47429 2015-10-16 16:43:09Z gboussin $
+// $Id: fonctions.php 47709 2015-11-06 14:51:18Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -339,7 +339,7 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 		// Donc même si on ne formatte pas, on veut afficher le prix corrigé de ce défaut (sinon, on n'aurait pas fait appel à la fonction fprix si on ne voulait pas un minimum de traitement)
 		if(abs($price_displayed-round($price_displayed, $prices_precision))<0.0001 == $price_displayed) {
 			$price_displayed = number_format($price_displayed, $prices_precision, '.', '');
-	}
+		}
 	}
 	return $price_displayed;
 }
@@ -2248,6 +2248,7 @@ function load_active_languages_list($site_id = null)
 					}
 				}
 			}
+			closedir($handle);
 		}
 		ksort($GLOBALS['admin_lang_codes']);
 	}
@@ -2330,7 +2331,7 @@ function handle_php_default_setup() {
 	}
 	@ini_set('scream.enabled', false); // Désactivation de scream qui altère le fonctionnement normal de error_reporting
 	@ini_set('default_socket_timeout', 4); // Eviter de bloquer sur la récupération d'une information venant d'un serveur extérieur
-	@ini_set('display_errors', 1); // Cette valeur est ensuite modifiée quand on accède à la base de données suivant la configuration du site
+	@ini_set('display_errors', DISPLAY_ERRORS_DURING_INIT); // Cette valeur est ensuite modifiée quand on accède à la base de données suivant la configuration du site
 	@ini_set("gd.jpeg_ignore_warning", 1); // Ignore les alertes créées par la fonction jpeg2wbmp() et la fonction imagecreatefromjpeg()
 
 	// Configuration de l'affichage des var_dump. -1 => Supression de la limite des résultats retournés : http://xdebug.org/docs/display
@@ -2574,15 +2575,19 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 				FROM peel_configuration c
 				LEFT JOIN peel_langues l ON l.etat = '1' AND l.url_rewriting LIKE '%.%' AND " . get_filter_site_cond('langues', 'l', false, $forced_site_id) . "
 				WHERE c.technical_code='wwwroot' AND ";
-				if ($forced_site_id === null) {
-					$sql .= "(c.string='".real_escape_string($GLOBALS['wwwroot'])."' OR REPLACE(c.string,'www.','')='".real_escape_string($GLOBALS['wwwroot'])."' OR (l.url_rewriting LIKE '%.%' AND (REPLACE(c.string,'www.',l.url_rewriting)='".real_escape_string($GLOBALS['wwwroot'])."' OR l.url_rewriting='".real_escape_string($GLOBALS['wwwroot'])."')))";
-				} else {
-					$sql .= get_filter_site_cond('configuration', 'c', false, $forced_site_id);
-				}
-				$sql .= "
+			if ($forced_site_id === null) {
+				$sql .= "(c.string='".real_escape_string($GLOBALS['wwwroot'])."' OR REPLACE(c.string,'www.','')='".real_escape_string($GLOBALS['wwwroot'])."' OR (l.url_rewriting LIKE '%.%' AND (REPLACE(c.string,'www.',l.url_rewriting)='".real_escape_string($GLOBALS['wwwroot'])."' OR l.url_rewriting='".real_escape_string($GLOBALS['wwwroot'])."')))";
+			} else {
+				$sql .= get_filter_site_cond('configuration', 'c', false, $forced_site_id);
+			}
+			$sql .= "
 				ORDER BY IF(c.technical_code='wwwroot',1,0) DESC, l.position ASC
 				LIMIT 1";
 			$query = query($sql);
+			if (empty($query)) {
+				// La requête SQL a echoué, on considère que l'on est dans un contexte de migration
+				$GLOBALS['database_wrong_version'] = true;
+			}
 			while ($result = fetch_assoc($query)) {
 				// forced_site_id ne doit pas être utilisé pour définir $GLOBALS['site_id']. C'est la configuration du site qui doit déterminer cette valeur.
 				$GLOBALS['site_id'] = $result['site_id'];
@@ -2759,6 +2764,7 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 						}
 					}
 				}
+				closedir($handle);
 			}
 		}
 	}
@@ -5166,7 +5172,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 	$specific_field_steps = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_steps']);
 		
 
-		if(!empty($specific_field_titles)) {
+	if(!empty($specific_field_titles)) {
 		foreach($specific_field_titles as $this_field => $this_title) {
 			// Les noms des différents champs dans l'étape sont séparés par des virgules
 			if (!empty($specific_field_steps) && is_numeric($step) && !empty($specific_field_steps[$step]) && !in_array($this_field, get_array_from_string($specific_field_steps[$step]))) {
@@ -5206,7 +5212,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 				// Pour les autres champs, $frm[$this_field] contient une valeur unique.
 				$frm_this_field_values_array = array(vb($frm[$this_field]));
 			}
-		if (empty($frm_this_field_values_array[0])) {
+			if (empty($frm_this_field_values_array[0])) {
 				// la valeur est vide, on regarde si une valeur par défaut est rempli.
 				if (defined('IN_PEEL_ADMIN')) {
 					// Valeur par défaut dans l'administration
@@ -5463,6 +5469,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 		if(!is_array($field_values['id_marque'])) {
 			$field_values['id_marque'] = array($field_values['id_marque']);
 		}
+		$this_brand_id_array = array();
 		foreach($field_values['id_marque'] as $this_key => $this_field_value) {
 			if(String::strlen($this_field_value)>0) {
 				// La marque n'est pas vide - il faut que l'import soit compatible avec des noms de marque pouvant être des nombres
@@ -5472,19 +5479,19 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 					WHERE id=' . intval($this_field_value) . " AND " . get_filter_site_cond('marques'));
 				if ($brand = fetch_assoc($q)) {
 					// Marque existante
-					$this_brand_id_array = $brand['id'];
+					$this_brand_id_array[] = $brand['id'];
 				} else {
 					$sql_select_brand = 'SELECT id 
 						FROM peel_marques
 						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_field_value).'" AND ' . get_filter_site_cond('marques');
 					$query_brand = query($sql_select_brand);
 					if($brand = fetch_assoc($query_brand)){
-						$this_brand_id_array = $brand['id'];
+						$this_brand_id_array[] = $brand['id'];
 					}elseif(!empty($this_field_value) && !is_numeric($this_field_value)) {
 						// Marque inexistante, on l'insère en base de données.
 						$q = query('INSERT INTO peel_marques
 							SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1", site_id="' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"');
-						$this_brand_id_array = insert_id();
+						$this_brand_id_array[] = insert_id();
 						if($admin_mode) {
 							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_BRAND_CREATED'], $GLOBALS['line_number'], $field_values['id_marque'])))->fetch();
 						}

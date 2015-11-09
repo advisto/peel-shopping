@@ -17,7 +17,7 @@ CE QU'IL VOUS FAUT
 --------------------
 
 - Les fichiers de code de PEEL SHOPPING
-- Un hébergement web Payant ou gratuit (avec PHP >=5.0 et MySQL >= 4.0, et apache ou IIS).
+- Un hébergement web Payant ou gratuit (avec PHP >=5.1.2 et MySQL >= 4.0, et apache ou IIS).
 - Un client FTP (exemple : Filezilla).
 
 

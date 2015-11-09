@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: rubriques.php 47736 2015-11-07 20:55:34Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -21,29 +21,30 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $form_error_object = new FormError();
 $frm = $_POST;
+$rubid = vn($_REQUEST['id']);
 
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :
-		affiche_formulaire_ajout_rubrique(vn($_REQUEST['id']), $frm);
+		affiche_formulaire_ajout_rubrique($rubid, $frm);
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_rubrique(vn($_REQUEST['id']), $frm);
+		affiche_formulaire_modif_rubrique($rubid, $frm);
 		break;
 
 	case "suppr" :
-		supprime_rubrique(vn($_REQUEST['id']));
-		affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+		supprime_rubrique($rubid);
+		affiche_formulaire_liste_rubrique($rubid);
 		break;
 
 	case "supprdiapo" :
 		supprime_fichier_diaporama(vn($_REQUEST['diapoid']), $_GET['file']);
-		affiche_formulaire_modif_rubrique(vn($_REQUEST['id']), $frm);
+		affiche_formulaire_modif_rubrique($rubid, $frm);
 		break;
 
 	case "supprfile" :
-		supprime_fichier_rubrique(vn($_REQUEST['id']), $_GET['file']);
-		affiche_formulaire_modif_rubrique(vn($_REQUEST['id']), $frm);
+		supprime_fichier_rubrique($rubid, $_GET['file']);
+		affiche_formulaire_modif_rubrique($rubid, $frm);
 		break;
 
 	case "insere" :
@@ -56,10 +57,10 @@ switch (vb($_REQUEST['mode'])) {
 			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 			insere_sous_rubrique($frm);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_CREATED_OK'], vb($_POST['nom_' . $_SESSION['session_langue']]))))->fetch();
-			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+			affiche_formulaire_liste_rubrique($rubid);
 		} else {
 			echo $form_error_object->text();
-			affiche_formulaire_ajout_rubrique(vn($_REQUEST['id']), $frm);
+			affiche_formulaire_ajout_rubrique($rubid, $frm);
 		}
 		break;
 
@@ -69,17 +70,19 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
-			maj_rubrique(vn($_REQUEST['id']), $frm);
+			maj_rubrique($rubid, $frm);
 
-			if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
-				if($GLOBALS['site_parameters']['used_uploader'] == 'html') {
-					upload_rubrique_diaporama(vn($_REQUEST['id']), $_POST); // ajout des images du diaporama
-				} else {
-					upload_rubrique_diaporama(vn($_REQUEST['id']), $_FILES); // ajout des images du diaporama
+			if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
+				// Ajoute des images du diaporama
+				for($i = 1;$i < 6;$i++) {
+					$img = upload('image' . $i, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image' . $i]));
+					if (!empty($img) && !empty($rubid)) {
+						query('INSERT INTO `peel_diaporama` SET id_rubrique="' . intval($rubid) . '", image="' . nohtml_real_escape_string($img) . '"');
+					}
 				}
 			}
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_UPDATED_OK'], vn($_REQUEST['id']))))->fetch();
-			affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_UPDATED_OK'], $rubid)))->fetch();
+			affiche_formulaire_liste_rubrique($rubid);
 		} else {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
@@ -103,11 +106,11 @@ switch (vb($_REQUEST['mode'])) {
 				SET position="' . intval($_GET['position']) . '"
 				WHERE id="' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('rubriques', null, true));
 		}
-		affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+		affiche_formulaire_liste_rubrique($rubid);
 		break;
 
 	default :
-		affiche_formulaire_liste_rubrique(vn($_REQUEST['id']));
+		affiche_formulaire_liste_rubrique($rubid);
 		break;
 }
 
@@ -124,6 +127,8 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
  * @param mixed $selectionne
  * @param integer $parent_id
  * @param string $indent
+ * @param integer $first_line
+ * @param integer $depth
  * @return
  */
 function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent = "", $first_line = 0, $depth = 1)
@@ -176,9 +181,10 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 		$sortie .= $tpl->fetch();
 		$first_line++;
 		if ($rub['id'] != $parent_id) {
-			affiche_arbo_rubrique($sortie, $selectionne, $rub['id'], $indent . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $first_line, $depth + 1);
+			$first_line = affiche_arbo_rubrique($sortie, $selectionne, $rub['id'], $indent . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $first_line, $depth + 1);
 		}
 	}
+	return $first_line;
 }
 
 /**
@@ -392,7 +398,7 @@ function affiche_formulaire_liste_rubrique($id)
 /**
  * affiche_liste_rubrique()
  *
- * @param mixed $parent_id
+ * @param integer $parent_id
  * @return
  */
 function affiche_liste_rubrique($parent_id)
@@ -423,6 +429,7 @@ function affiche_liste_rubrique($parent_id)
 /**
  * affiche_formulaire_rubrique()
  *
+ * @param array $frm
  * @return
  */
 function affiche_formulaire_rubrique(&$frm)
@@ -461,7 +468,7 @@ function affiche_formulaire_rubrique(&$frm)
 	if (!empty($frm["image"])) {
 		$tpl->assign('image', get_uploaded_file_infos('image', $frm['image'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'));
 	}
-	if ($GLOBALS['site_parameters']['display_content_category_diaporama']) {
+	if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
 		$tpl_diapo = array();
 		$i = 1;
 		if (!empty($frm['id'])) {
@@ -469,7 +476,7 @@ function affiche_formulaire_rubrique(&$frm)
 				FROM `peel_diaporama`
 				WHERE `id_rubrique`=" . intval($frm['id']));
 			while ($diaporama = fetch_assoc($sql)) {
-				$tpl_diapo[$i] = get_uploaded_file_infos('image_diapo' . $i, $diaporama['image'], get_current_url(false) . '?mode=supprdiapo&id='.$frm['id'].'&diapoid=' . vb($diaporama['id']) . '&file=' . $diaporama['image']);
+				$tpl_diapo[$i] = get_uploaded_file_infos('image' . $i, $diaporama['image'], get_current_url(false) . '?mode=supprdiapo&id='.$frm['id'].'&diapoid=' . vb($diaporama['id']) . '&file=' . $diaporama['image']);
 				$i++;
 			}
 		}
@@ -536,34 +543,17 @@ function supprime_fichier_rubrique($id, $file)
 }
 
 /**
- * Supprime l'image de la rubrique spécificiée par $id
+ * Supprime l'image du diaporama spécifiée par $id
  *
- * @param mixed $id
- * @param mixed $file
+ * @param integer $id
+ * @param string $file
  * @return
  */
 function supprime_fichier_diaporama($id, $file)
 {
-	/* Charge les infos du produit. */
+	/* Charge les infos du diaporama. */
 	query("DELETE FROM `peel_diaporama` WHERE id = '" . intval($id) . "'");
 	delete_uploaded_file_and_thumbs($file);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DIAPORAMA_MSG_DELETED_OK'], $file)))->fetch();
 }
 
-
-/*
- * Ajoute des images du diaporama
- * 
- * @param mixed $id
- */
-function upload_rubrique_diaporama($id_rubrique, $frm)
-{
-	for($i = 1;$i < 6;$i++) {
-		if (!empty($frm['image' . $i])) {
-			$img = upload('image' . $i, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image' . $i]));
-			if (!empty($img) && !empty($id_rubrique)) {
-				query('INSERT INTO `peel_diaporama` VALUES(NULL, "' . intval($id_rubrique) . '", "' . nohtml_real_escape_string($img) . '")');
-			}
-		}
-	}
-}

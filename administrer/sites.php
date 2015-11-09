@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 47327 2015-10-12 14:36:00Z gboussin $
+// $Id: sites.php 47719 2015-11-06 17:52:21Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -34,6 +34,7 @@ if (!empty($_GET['mode']) && in_array($_GET['mode'], array('insere', 'ajout', 'd
 	$_GET['mode'] = 'default';
 }
 
+// Gestion des différentes pages
 switch (vb($_GET['mode'])) {
 	case "siteid_to_SET" :
 		// pour le mode multisite où l'on peut spécifier une liste de site différent pour un élément. Il faut passer pour cela site_id à SET de 32 possibilités
@@ -90,6 +91,7 @@ switch (vb($_GET['mode'])) {
 				// => Pas d'erreur lors du contrôle du formulaire, on peut faire les modifications en BDD
 
 				if(!empty($frm['install'])) {
+					preload_modules();
 					// Gestion de l'installation ou la désinstallation d'un module
 					foreach($frm['install'] as $this_module => $install_or_uninstall) {
 						if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
@@ -435,90 +437,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_site.tpl');
 
-	// Liste des modules installés
-	
-	$premium_modules_array = array('affiliation', 'birthday', 'cart_preservation', 'category_promotion', 'comparateur', 'download', 'duplicate', 
-			'facture_advanced', 'faq', 'gift_check', 'gifts', 'good_clients', 'groups', 'lexique', 'lot', 'marges', 'marques_promotion', 'micro_entreprise',
-			'parrainage', 'picking', 'reseller', 'statistiques', 'stock_advanced', 'url_rewriting', 'welcome_ad');
-	$modules_light_default_names = array('expeditor' => $GLOBALS['STR_ADMIN_SITES_EXPEDITOR_MODULE'], 'facebook' => $GLOBALS['STR_ADMIN_SITES_FACEBOOK_MODULE'],
-			'icirelais' => $GLOBALS['STR_ADMIN_SITES_ICI_RELAIS_MODULE'], 'sips' => $GLOBALS['STR_ADMIN_SITES_SIPS_MODULE'],
-			'spplus' => $GLOBALS['STR_ADMIN_SITES_SPPLUS_MODULE'], 'paybox' => $GLOBALS['STR_ADMIN_SITES_PAYBOX_MODULE'],
-			'systempay' => $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY'], 'partenaires' => $GLOBALS['STR_ADMIN_SITES_PARTNERS_MODULE'],
-			'ecotaxe' => $GLOBALS['STR_ADMIN_SITES_ECOTAX_MODULE'], 'devises' => $GLOBALS['STR_ADMIN_SITES_CURRENCIES_MODULE'],
-			'paypal' => $GLOBALS['STR_ADMIN_SITES_PAYPAL_MODULE'], 'moneybookers' => $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_MODULE'],
-			'kekoli' => $GLOBALS['STR_ADMIN_SITES_KEKOLI_MODULE'], 'tag_cloud' => $GLOBALS['STR_ADMIN_SITES_TAG_CLOUD_MODULE'],
-			'flash' => $GLOBALS['STR_ADMIN_SITES_FLASH_SALES_MODULE'], 'rss' => $GLOBALS['STR_ADMIN_SITES_RSS_MODULE'],
-			'avis' => $GLOBALS['STR_ADMIN_SITES_OPINIONS_MODULE'], 'stock_advanced' => $GLOBALS['STR_ADMIN_SITES_STOCKS_MODULE'],
-			'cart_preservation' => $GLOBALS['STR_ADMIN_SITES_CART_SAVE_MODULE'], 'affiliation' => $GLOBALS['STR_ADMIN_SITES_AFFILIATION_MODULE'],
-			'lots' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_LOTS_MODULE'], 'parrainage' => $GLOBALS['STR_ADMIN_SITES_SPONSOR_MODULE'],
-			'url_rewriting' => $GLOBALS['STR_ADMIN_SITES_URL_REWRITING_MODULE'], 'micro_entreprise' => $GLOBALS['STR_ADMIN_SITES_MICROBUSINESS_MODULE'],
-			'birthday' => $GLOBALS['STR_ADMIN_SITES_BIRTHDAY_MODULE'], 'faq' => $GLOBALS['STR_ADMIN_SITES_FAQ_MODULE'],
-			'category_promotion' => $GLOBALS['STR_ADMIN_SITES_CATEGORIES_PROMOTION'], 'marques_promotion' => $GLOBALS['STR_ADMIN_SITES_TRADEMARK_PROMOTION'],
-			'conditionnement' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE'], 'friends_connect' => $GLOBALS['STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE'],
-			'vacances' => $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE'], 'forum' => $GLOBALS['STR_ADMIN_SITES_FORUM_MODULE'],
-			'gifts_list' => $GLOBALS['STR_ADMIN_SITES_GIFTS_LIST'], 'so_colissimo' => $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_MODULE'],
-			'vatlayer' => $GLOBALS['STR_ADMIN_SITES_VATLAYER_MODULE'],
-			);
-	
-	$modules_dir = $GLOBALS['dirroot'] . "/modules";
-	if ($handle = opendir($modules_dir)) {
-		while ($file = readdir($handle)) {
-			if ($file != "." && $file != ".." && is_dir($modules_dir . '/' . $file)) {
-				$modules_on_disk[$file] = $modules_dir . '/' . $file;
-			}
-		}
-	}
 	$tpl_modules_infos = array();
+	// Préparation de la liste des modules installés
+	preload_modules();
 	$i=0;
-	foreach($modules_on_disk as $this_module => $folder_path) {
-		unset($file_path);
-		unset($installed);
-		unset($to_install);
-		if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
-			$installed = true;
-			foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
-				$file_path = $GLOBALS['dirroot'] . $this_file;
-				if(String::strpos($file_path, '.php') !== false && !in_array($this_file, $GLOBALS['modules_loaded_functions']) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
-					// Fichier pas déjà chargé car module non activé => là on charge le fichier pour savoir si une classe est dedans
-					include($file_path);
-				}
-			}
-		} else {
-			// Module pas installé et inconnu 
-			foreach(array('fonctions.php', 'functions.php', String::ucfirst($this_module) . '.php') as $this_filename) {
-				if(!in_array(String::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php')) && file_exists($folder_path . '/' . $this_filename)) {
-					// Fichier de classe ou de fonctions du module
-					$file_path = $folder_path . '/' . $this_filename;
-					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
-						@include($file_path);
-					}
-					if($this_filename != String::ucfirst($this_module) . '.php' || (class_exists(String::ucfirst($this_module) && method_exists(String::ucfirst($this_module), 'check_install')))) {
-						// Soit il s'agit d'un fichier de fonctions, soit d'un fichier de classe
-						// Mais par exemple modules/calc/calc.php qui n'est pas un fichier de classe ne doit pas être installé
-						$to_install = $file_path;
-					}
-					break;
-				}
-			}
-		}
-		if(empty($file_path)) {
-			// Si rien de trouvé dans les fichiers standards, on cherche un fichier PHP quelconque pour connaître la version en regardant dans le code plus loin
-			$file_path = $folder_path . '/';
-			$temp = explode(',', $file_path);
-			$file_path = $temp[0];
-			foreach(array($file_path, $file_path . 'administrer', $file_path . 'admin') as $this_folder) {
-				if(String::strpos($this_folder, '.php') === false && file_exists($this_folder)) {
-					if ($handle = opendir($this_folder)) {
-						while ($file = readdir($handle)) {
-							if ($file != "." && $file != ".." && String::strpos($file, '.php') !== false) {
-								$file_path = $this_folder . '/' . $file;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
+	foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
+		$file_path = vb($GLOBALS['modules_on_disk_infos'][$this_module]['file_path'], null);
 		if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
 			// Une classe est détectée, c'est un module complet avec une méthode d'installation
 			$class_name = String::ucfirst($this_module);
@@ -526,19 +450,19 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 				$GLOBALS[$class_name] = new $class_name();
 			}
 			$type = 'full';
-			$installed = $class_name::check_install();
+			$GLOBALS['modules_on_disk_infos'][$this_module]['installed'] = $class_name::check_install();
 			$version = $GLOBALS[$class_name]->version;
 			$name = $GLOBALS[$class_name]->name;
 		} else {
 			// Module léger sans classe - sa présence sur le disque suffit à considérer qu'il est installé
 			$type = 'light';
-			$name = vb($modules_light_default_names[$this_module], String::ucfirst($this_module));
-			if(empty($installed)) {
-				if(!empty($to_install)) {
+			$name = vb($GLOBALS['modules_light_default_names'][$this_module], String::ucfirst($this_module));
+			if(empty($GLOBALS['modules_on_disk_infos'][$this_module]['installed'])) {
+				if(!empty($GLOBALS['modules_on_disk_infos'][$this_module]['to_install'])) {
 					foreach(array('peel_' . $this_module . '.sql', '' . $this_module . '.sql') as $this_filename) {
-						if (file_exists($modules_dir . '/' . $this_module . '/' . $this_filename)) {
+						if (file_exists($folder_path . '/' . $this_filename)) {
 							// Exécution du SQL d'installation d'un module qui n'a pas de méthode d'installation
-							$error_msg = execute_sql($GLOBALS['dirroot'] . '/modules/' . $this_module . '/' . $this_filename, null, true);
+							$error_msg = execute_sql($folder_path . '/' . $this_filename, null, true);
 							$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'SQL OK '. $GLOBALS['STR_BEFORE_TWO_POINTS'].': ' . $GLOBALS['dirroot'] . '/modules/' . $this_module . '/' . $this_filename))->fetch();
 							if(!empty($error_msg)) {
 								$output .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
@@ -547,9 +471,9 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 					}
 				}
 				// Intallation Express automatique, exécutée une seule fois :
-				if(!empty($to_install) && !in_array(str_replace($GLOBALS['dirroot'], '', $to_install), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $to_install), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+				if(!empty($GLOBALS['modules_on_disk_infos'][$this_module]['to_install']) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
 					// on ajoute la configuration du fichier de fonctions à modules_front_office_functions_files_array pour que le module puisse être chargé (et pas forcément activé)
-					$GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $to_install);
+					$GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']);
 					set_configuration_variable(array('technical_code' => 'modules_front_office_functions_files_array', 'string' => $GLOBALS['site_parameters']['modules_front_office_functions_files_array'], 'type' => 'array', 'origin' => 'sites.php', 'site_id' => 0), true);
 				}
 				// On cherche si il y a un fichier de fonctions d'administration à installer
@@ -557,7 +481,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 					if(file_exists($folder_path . '/' . $this_filename)) {
 						// Fichier d'administration, de classe ou de fonctions du module
 						$file_path = $folder_path . '/' . $this_filename;
-						if(String::strpos($file_path, '.php') !== false && !in_array(vb($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]), $GLOBALS['modules_loaded_functions']) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
+						if(String::strpos($file_path, '.php') !== false && !in_array(vb($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]), vb($GLOBALS['modules_loaded_functions'], array())) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
 							include($file_path);
 							if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['modules_admin_functions_array'])) {
 								$GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $file_path);
@@ -589,12 +513,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 		}
 		$tpl_modules_infos[$name.$i] = array('tr_rollover' => tr_rollover($i, true),
 			'type' => $type,
-			'installed' => !empty($installed),
+			'installed' => !empty($GLOBALS['modules_on_disk_infos'][$this_module]['installed']),
 			'enabled' => $enabled,
 			'name' => $name,
 			'technical_code' => $this_module,
 			'version' => $version,
-			'package' => (in_array($this_module, $premium_modules_array)?'Premium':''),
+			'package' => (in_array($this_module, $GLOBALS['premium_modules_array'])?'Premium':''),
 			'configuration_variable' =>  vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$this_module], 'module_' . $this_module)
 			);
 		$i++;
@@ -603,16 +527,16 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$other_modules_array = array_unique(array_merge(array_keys($GLOBALS['site_parameters']['modules_front_office_functions_files_array']), $GLOBALS['site_parameters']['modules_no_library_load_array']));
 	sort($other_modules_array);
 	foreach($other_modules_array as $this_module) {
-		if(empty($modules_on_disk[$this_module])) {
+		if(empty($GLOBALS['modules_on_disk'][$this_module])) {
 			$tpl_modules_infos[] = array('tr_rollover' => tr_rollover($i, true),
 				'type' => 'none',
 				'installed' => false,
 				'enabled' => false,
-				'name' => vb($modules_light_default_names[$this_module], String::ucfirst($this_module)),
+				'name' => vb($GLOBALS['modules_light_default_names'][$this_module], String::ucfirst($this_module)),
 				'technical_code' => $this_module,
 				'version' => null,
 				'contact' => true,
-				'package' => (in_array($this_module, $premium_modules_array)?' (inclus dans le module Premium)':'')
+				'package' => (in_array($this_module, $GLOBALS['premium_modules_array'])?' (inclus dans le module Premium)':'')
 				);
 			$i++;
 		}
@@ -673,6 +597,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			}
 		}
 		$tpl->assign('directory_options', $tpl_directory_options);
+		closedir($handle);
 	}
 
 	$tpl->assign('template_multipage', vb($frm['template_multipage']));
@@ -715,7 +640,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('is_best_seller_module_active', check_if_module_active('best_seller'));
 	$tpl->assign('promotions_href', $GLOBALS['wwwroot_in_admin'] . '/achat/promotions.php');
 	$tpl->assign('is_stock_advanced_module_active', check_if_module_active('stock_advanced'));
-	$tpl->assign('is_fonctionsvacances', file_exists($GLOBALS['fonctionsvacances']));
 
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 
@@ -724,7 +648,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('default_picture', vb($frm["default_picture"]));
 	$tpl->assign('default_picture_url',  $GLOBALS['repertoire_upload'] . '/' . vb($frm["default_picture"]));
 
-	$tpl->assign('is_fonctionsdevises', file_exists($GLOBALS['fonctionsdevises']));
 	$tpl->assign('devises_href', $GLOBALS['wwwroot_in_admin'] . '/modules/devises/administrer/devises.php');
 	$tpl_devices_options = array();
 	if (file_exists($GLOBALS['fonctionsdevises'])) {
@@ -812,42 +735,8 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('emplacement_array', $emplacement_array);
 	$tpl->assign('modules', $tpl_modules);
 
-	$tpl->assign('is_fonctionstagcloud', file_exists($GLOBALS['fonctionstagcloud']));
 	$tpl->assign('is_flash_sell_module_active', file_exists($GLOBALS['dirroot'] . "/modules/flash/flash.php"));
-	$tpl->assign('is_fonctionsbanner', file_exists($GLOBALS['fonctionsbanner']));
-	$tpl->assign('is_fonctionsmenus', file_exists($GLOBALS['fonctionsmenus']));
-	$tpl->assign('is_fonctionsrss', file_exists($GLOBALS['fonctionsrss']));
-	$tpl->assign('is_fonctionsavis', file_exists($GLOBALS['fonctionsavis']));
-	$tpl->assign('is_fonctionsprecedentsuivant', file_exists($GLOBALS['fonctionsprecedentsuivant']));
-	$tpl->assign('is_fonctionsgooglefriendconnect', file_exists($GLOBALS['fonctionsgooglefriendconnect']));
-	$tpl->assign('is_fonctionssignintwitter', file_exists($GLOBALS['fonctionssignintwitter']));
-	$tpl->assign('is_fonctionscartpreservation', file_exists($GLOBALS['fonctionscart_preservation']));
-	$tpl->assign('is_fonctionsreseller', file_exists($GLOBALS['fonctionsreseller']));
-	$tpl->assign('is_fonctionsaffiliate', file_exists($GLOBALS['fonctionsaffiliate']));
-	$tpl->assign('is_fonctionslot', file_exists($GLOBALS['fonctionslot']));
-	$tpl->assign('is_fonctionsparrain', file_exists($GLOBALS['fonctionsparrain']));
-	$tpl->assign('is_fonctionsgift_check', file_exists($GLOBALS['fonctionsgift_check']));
-	$tpl->assign('is_fonctionsfaq', file_exists($GLOBALS['fonctionsfaq']));
 	$tpl->assign('is_rewritefile', file_exists($GLOBALS['rewritefile']));
-	$tpl->assign('is_fonctionsmicro', file_exists($GLOBALS['fonctionsmicro']));
-	$tpl->assign('is_fonctionsbirthday', file_exists($GLOBALS['fonctionsbirthday']));
-	$tpl->assign('is_fonctionscatpromotions', file_exists($GLOBALS['fonctionscatpromotions']));
-	$tpl->assign('is_fonctionsmarquepromotions', file_exists($GLOBALS['fonctionsmarquepromotions']));
-	$tpl->assign('is_fonctionscomparateur', file_exists($GLOBALS['fonctionscomparateur']));
-	$tpl->assign('is_fonctionsstock_advanced', file_exists($GLOBALS['fonctionsstock_advanced']));
-	$tpl->assign('is_fonctionsforum', file_exists($GLOBALS['fonctionsforum']));
-	$tpl->assign('is_fonctionsgiftlist', file_exists($GLOBALS['fonctionsgiftlist']));
-	$tpl->assign('is_fonctionssocolissimo', file_exists($GLOBALS['fonctionssocolissimo']));
-	$tpl->assign('is_fonctionsexpeditor', file_exists($GLOBALS['fonctionsexpeditor']));
-	$tpl->assign('is_fonctionsicirelais', file_exists($GLOBALS['fonctionsicirelais']));
-	$tpl->assign('is_fonctionstnt', file_exists($GLOBALS['fonctionstnt']));
-	$tpl->assign('is_fonctionsatos', file_exists($GLOBALS['fonctionsatos']));
-	$tpl->assign('is_fonctionsspplus', file_exists($GLOBALS['fonctionsspplus']));
-	$tpl->assign('is_fonctionspaybox', file_exists($GLOBALS['fonctionspaybox']));
-	$tpl->assign('is_fonctionssystempay', file_exists($GLOBALS['fonctionssystempay']));
-	$tpl->assign('is_fonctionspartenaires', file_exists($GLOBALS['fonctionspartenaires']));
-	$tpl->assign('is_fonctionsfacebook', file_exists($GLOBALS['fonctionsfacebook']));
-	$tpl->assign('is_fonctionfacebookconnect', file_exists($GLOBALS['fonctionfacebookconnect']));
 
 	$tpl->assign('nb_on_top', vb($frm['nb_on_top']));
 	$tpl->assign('nb_last_views', vb($frm['nb_last_views']));

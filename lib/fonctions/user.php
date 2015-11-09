@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 47348 2015-10-12 19:43:26Z gboussin $
+// $Id: user.php 47592 2015-10-30 16:40:22Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -608,7 +608,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	}
 	if (!empty($frm['email'])) {
 		if (check_if_module_active('bounces')) {
-			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php");
+			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounce_driver.php");
 			resolve_bounce($frm['id_utilisateur'], $frm['email']);
 		}
 	}
@@ -786,7 +786,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 	
 	$requete = "SELECT *
 		FROM peel_utilisateurs
-		WHERE " . (empty($skip_state_test)? "etat=1":"") . "  AND " . get_filter_site_cond('utilisateurs') . " AND priv NOT IN ('".implode("','", $GLOBALS['disable_login_by_privilege'])."') AND ";
+		WHERE " . (empty($skip_state_test)? "etat=1 AND":"") . " " . get_filter_site_cond('utilisateurs') . " AND priv NOT IN ('".implode("','", $GLOBALS['disable_login_by_privilege'])."') AND ";
 	if (!empty($email_or_pseudo)) {
 		$requete .= "(email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
 	} else {

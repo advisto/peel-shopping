@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_de.php 46947 2015-09-18 10:38:20Z gboussin $
+// $Id: admin_de.php 47729 2015-11-06 22:00:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1130,7 +1130,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_ID"] = "paybox-Kennung";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_MODULE"] = "Payment Paybox";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_RANG"] = "paybox Rang";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_SITE"] = "paybox Website";
-$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong> Prüfwerte Paybox Erinnerung: </strong> <br /> ORT: 1999888 <br /> RANK: 99 <br /> NAME: 2";
+$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong> Prüfwerte Paybox Erinnerung: </strong> <br /> ORT: 1402611 <br /> RANK: 01 <br /> NAME: 292047471";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(Sofort bleiben in allen Fällen für Kwixo = alt FIANET ReceiveAndPay)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Stellen Sie die Wartezeit in Sekunden, bevor die automatische Validierung der Zahlungsform";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Aktivieren der automatischen Validierung der Zahlungsform (inaktiv bleiben mit SPPLUS und ATOS)";

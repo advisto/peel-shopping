@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 47186 2015-10-05 14:54:56Z sdelaporte $
+// $Id: admin_fr.php 47735 2015-11-07 19:56:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -79,7 +79,7 @@ $GLOBALS["STR_ADMIN_CATEGORIES_DISCOUNT_APPLY_TO_SONS"] = "Appliquer aux catégo
 $GLOBALS["STR_ADMIN_CATEGORIES_DISCOUNT_IN_CATEGORY"] = "Remise appliquée sur la catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL"] = "Afficher les produits de cette catégorie dans le carrousel";
 $GLOBALS["STR_ADMIN_CATEGORIES_DISPLAY_MODE"] = "Type d'affichage des produits de la catégorie";
-$GLOBALS["STR_ADMIN_CATEGORIES_ERR_NOT_FOUND"] = "Aucune catégorie trouvée ayant pour id n°%s";
+$GLOBALS["STR_ADMIN_CATEGORIES_ERR_NOT_FOUND"] = "Aucune catégorie trouvée ayant l'id n°%s";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON"] = "Ajouter cette catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_MODIFY"] = "Modifier la catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_LIST_TITLE"] = "Liste des catégories";
@@ -269,6 +269,7 @@ $GLOBALS["STR_ADMIN_CONVERSION"] = "Taux de change";
 $GLOBALS["STR_ADMIN_COULEURS_ADD_COLOR_BUTTON"] = "Ajouter une couleur";
 $GLOBALS["STR_ADMIN_COULEURS_COLORS_TITLE"] = "Gérer les couleurs";
 $GLOBALS["STR_ADMIN_COULEURS_ERR_COLOR_NOT_FOUND"] = "La couleur n'a pas été trouvée.";
+$GLOBALS["STR_ADMIN_COULEURS_FORM_TITLE"] = "Ajouter ou modifier une couleur";
 $GLOBALS["STR_ADMIN_COULEURS_LIST_EXPLAIN"] = "Vous pouvez définir sur cette page les couleurs de vos produits. Ces couleurs seront ensuite à lier aux produits depuis la fiche de détail d'un produit. L'ordre d'affichage est administrable en déplaçant la ligne correspondant à une couleur à la position souhaitée.";
 $GLOBALS["STR_ADMIN_COULEURS_MODIFY_COLOR"] = "Modifier cette couleur";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "La couleur <b>%s</b> a été créée.";
@@ -782,7 +783,7 @@ $GLOBALS["STR_ADMIN_PLACE"] = "Emplacement";
 $GLOBALS["STR_ADMIN_PLAN_ERR_TAG_VALID_NEEDED"] = "Vous devez insérer des tags valides.";
 $GLOBALS["STR_ADMIN_PLAN_MSG_UPDATED_OK"] = "La mise à jour de votre Google map a été effectuée.";
 $GLOBALS["STR_ADMIN_PLAN_TAG_CODE"] = "Votre code Google map";
-$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>Comment obtenir le code HTML nécessaire pour afficher la carte sur votre site</h2><ul><li>Rendez vous sur la page de <a href=\"http://maps.google.fr/\" title=\"Google Map\">Google Map</a></li><li>Tapez dans la barre de recherche la localisation que vous souhaitez afficher sur votre site internet</li><li>Cliquez sur le bouton <em>lien</em> en haut à gauche de la carte</li><li>Cliquez sur <em>personnaliser et prévisualiser la carte intégrée</em></li><li>Cochez la case <em>personnalisée</em> pour definir votre largeur et hauteur préférée</li><li>Copiez le code iframe que Google a généré</li><li>Et collez ce code dans la zone de texte ci-dessous.</li></ul>";
+$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>Comment obtenir le code HTML nécessaire pour afficher la carte sur votre site</h2><ul><li>Rendez vous sur la page de <a href=\"http://maps.google.fr/\" title=\"Google Map\">Google Map</a></li><li>Tapez dans la barre de recherche la localisation que vous souhaitez afficher sur votre site internet</li><li>Cliquez sur le bouton <em>Partagez</em> sur le panneau latéral gauche de la carte</li><li>Cliquez sur <em>intégrer la carte intégrée</em></li><li>Sélectionnez <em>personnalisée</em> sur la gauche pour definir votre largeur et hauteur préférée</li><li>Copiez le code iframe que Google a généré</li><li>Et collez ce code dans la zone de texte ci-dessous.</li></ul>";
 $GLOBALS["STR_ADMIN_PLAN_TITLE"] = "Gérer le plan d'accès de la société";
 $GLOBALS["STR_ADMIN_PLAN_UPDATE"] = "Modifier le plan d'accès de la société";
 $GLOBALS["STR_ADMIN_POSITION"] = "Position";
@@ -1130,7 +1131,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_ID"] = "Paybox identifiant";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_MODULE"] = "Paiement Paybox";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_RANG"] = "Paybox rang";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_SITE"] = "Paybox site";
-$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Rappel des valeurs de tests Paybox : </strong><br />SITE : 1999888<br />RANG : 99<br />IDENTIFIANT : 2";
+$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Rappel des valeurs de tests Paybox : </strong><br />SITE : 1402611<br />RANG : 01<br />IDENTIFIANT : 292047471";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(restera immédiat dans tous les cas pour Kwixo = ancien FIANET ReceiveAndPay)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Définir l'attente en secondes avant validation automatique du formulaire de paiement";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Activation de la validation automatique du formulaire de paiement (restera inactive avec SPPLUS et ATOS)";
@@ -1745,6 +1746,9 @@ $GLOBALS["STR_MODULE_FACTURES_ADMIN_ALL_BILLS_IN_ONE_FILE"] = "Toutes les factur
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ONE_BILL_PER_FILE"] = "Une facture par fichier sauvegardé sur le serveur";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_SAVE_FOLDER"] = "Nom du dossier de sauvegarde de facture";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_EXPORT_BILLS_BUTTON"] = "Générer les factures PDF (l'opération pourra durer plusieurs secondes)";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_CATEGORIES_TITLE"] = "Gérer les catégories de FAQ";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_ERR_NAME_MANDATORY"] = "Vous devez insérer un nom de catégorie.";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_MSG_CATEGORY_DELETED_OK"] = "La catégorie a été effacée.";
 $GLOBALS["STR_MODULE_FAQ_LIST_TITLE"] = "Liste des questions / réponses";
 $GLOBALS["STR_MODULE_FAQ_CREATE"] = "Ajouter une Question / Réponse";
 $GLOBALS["STR_MODULE_FAQ_QUESTION"] = "Question";
@@ -1802,7 +1806,8 @@ $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_ADD_SEARCH"] = "Ajouter une recherche";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_DELETED_OK"] = "Le mot a été effacé du lexique.";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_CREATE"] = "Ajouter un mot au lexique";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_DEFINITION"] = "Définition";
-$GLOBALS["STR_MODULE_LEXIQUE_ADMIN_ERR_NOTHING_FOUND"] = "Aucun mot enregistré dans la base pour le lexique.";
+$GLOBALS["STR_MODULE_LEXIQUE_ADMIN_ERR_NOTHING_FOUND"] = "Aucun mot enregistré dans le lexique.";
+$GLOBALS["STR_MODULE_LEXIQUE_ADMIN_FORM_TITLE"] = "Ajouter ou modifier un mot dans le lexique";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_CREATED_OK"] = "Le mot <b>%s</b> a été ajouté au lexique.";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_UPDATED_OK"] = "Les changements apportés au mot %s du lexique ont bien été pris en compte.";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_TITLE"] = "Gérer le lexique";

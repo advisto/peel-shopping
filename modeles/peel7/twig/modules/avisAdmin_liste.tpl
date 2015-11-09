@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avisAdmin_liste.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: avisAdmin_liste.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
 #}
 <div class="entete">{{ STR_MODULE_AVIS_ADMIN_LIST }}</div>
 <p><a href="{{ add_prod_href|escape('html') }}"><img src="{{ add_src|escape('html') }}" width="16" height="16" class="middle" alt="{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT|str_form_value }}" />{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT }}</a></p>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 47024 2015-09-24 13:35:43Z sdelaporte $
+// $Id: codes_promos.php 47592 2015-10-30 16:40:22Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -261,7 +261,7 @@ function maj_code_promo($id, $frm)
 			, nombre_prevue = '" . intval($frm['nombre_prevue']) . "'
 			, nb_used_per_client = '" . intval($frm['nb_used_per_client']) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
-			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true), true) . "'
+			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true)) . "'
 		WHERE id='" . intval($id) . "'";
 	query($sql);
 }

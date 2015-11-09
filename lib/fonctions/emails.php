@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: emails.php 47605 2015-10-30 18:16:58Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -59,6 +59,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	if (empty($from) && !empty($GLOBALS['support'])) {
 		$from = $GLOBALS['support'];
 	}
+	$recipient_array = explode(',', str_replace(';', ',', $to));
 	$used_template_technical_code = null;
 	if (!empty($template_technical_code)) {
 		if(!is_array($template_technical_code)) {
@@ -133,6 +134,21 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			// Email de texte qu'on va envoyer en HTML, et pour avoir une source d'email lisible on garde le \n à la fin
 			// NB : il faut faire le replace en 2 fois pour éviter que le \n après le <br /> soit à nouveau remplacé !
 			$mail_content = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), array("\n", "\n"), $mail_content));
+		}
+	}
+	// On complète ci-dessous les tags avec les informations relatives à la première adresse email auquel on veut envoyer l'email
+	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
+	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
+	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
+	$query = query('SELECT *
+		FROM peel_utilisateurs
+		WHERE email="' . real_escape_string(current($recipient_array)) . '"
+		LIMIT 1');
+	if($result = fetch_assoc($query)) {
+		foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
+			if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
+				$template_tags[$tag_key] = $result[$database_key];
+			}
 		}
 	}
 	// Traitement des tags dans les templates. Même si $template_tags est vide il faut le faire pour gérer les tags génériques
@@ -219,7 +235,6 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$msg .= "--" . $mime_boundary_main . "--" . "" . $eol . $eol;
 		$mail_body = $msg;
 	}
-	$recipient_array = explode(',', str_replace(';', ',', $to));
 	$result = false;
 	$i = 0;
 	foreach($recipient_array as $this_email) {

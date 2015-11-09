@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 47339 2015-10-12 17:30:16Z gboussin $
+// $Id: fonctions_admin.php 47732 2015-11-06 23:00:25Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -308,8 +308,6 @@ function get_admin_menu()
 						foreach ($GLOBALS['menu_items'][$this_url] as $this_url => $this_title) {
 							if (($current_url == $this_url && !$full_match) || $current_url_full == $this_url) {
 								$class = ' class="active"';
-							} elseif ($this_url == $GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php') {
-								$class = ' onclick="return(window.open(this.href)?false:true);"';
 							} else {
 								$class = '';
 							}
@@ -1649,26 +1647,11 @@ function save_commande_in_database($frm)
 	if (!isset($frm['delivery_tracking'])) {
 		$frm['delivery_tracking'] = null;
 	}
-	if (empty($frm['societe2']) && empty($frm['nom2']) && empty($frm['prenom2'])) {
-		// On ne remplit automatiquement la société et le nom que si vraiment l'ensemble de l'adresse de livraison n'était pas définie
-		// On remplit ces champs même pour un mode de livraison ne nécessitant pas d'adresse, c'est utile pour savoir à qui est destiné le colis.
-		$frm['societe2'] = vb($frm['societe1']);
-		$frm['nom2'] = vb($frm['nom1']);
-		$frm['prenom2'] = vb($frm['prenom1']);
-	}
+	// handle_specific_fields définit la variable $frm['adresses_fields_array']
 	handle_specific_fields($frm, 'order');
-	if (is_delivery_address_necessary_for_delivery_type($frm['type_transport'])) {
-		// Le type de transport nécessite une adresse de livraison.
-		// Il faut compléter les champs de l'adresse de livraison uniquement si le mode de livraison n'est pas "Retrait en boutique"
-		if(!empty($frm['adresses_fields_array'])) {
-			// $frm['adresses_fields_array'] est défini dans handle_specific_fields. Il n'est pas rempli dans le cas où il n'y a aucun champ spécifique concernant les adresses d'utilisateurs (se terminant par _ship ou _bill)
-			foreach ($frm['adresses_fields_array'] as $this_item) {
-				if (empty($frm[$this_item . '2'])) {
-					$frm[$this_item . '2'] = vb($frm[$this_item . '1']);
-				}
-			}
-		}
-	}
+
+	// Le code de preremplissage des informations de facturation est géré par la fonction create_or_update_order, et uniquement à cet endroit.
+
 	if (empty($frm['nb_produits'])) {
 		$frm['nb_produits'] = 5;
 	}
@@ -1725,7 +1708,7 @@ function save_commande_in_database($frm)
 			WHERE ' . get_filter_site_cond('commandes') . ' AND id = ' . intval(vn($frm['commandeid'])));
 		$result = fetch_assoc($query);
 		if((!empty($frm['autocomplete_order_adresses_with_account_info_if_order_email_change']) && $result['email'] != $frm['email']) || !empty($frm['autocomplete_order_adresses_with_account_info'])) {
-			// L'auteur de la commande a changé. On change les informations relative à l'utilisateur de cette commande.
+			// L'auteur de la commande a changé. On change les informations relatives à l'utilisateur de cette commande.
 			// Utile pour modifier une commande après une duplication de commande (module duplicate du module premium.)
 			$query = query('SELECT societe, prenom, nom_famille AS nom, adresse, code_postal, ville, pays, email, telephone AS contact
 				FROM peel_utilisateurs
@@ -2074,7 +2057,7 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 
 	$output =  tr_rollover($i, true, null, null, 'sortable_'.$i) .'
 					<td>
-						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
+						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.String::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {admin_delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . String::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
 						<input name="giftlist_owners_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['listcadeaux_owner'])) . '" />
 						<input name="nom_attribut_' . $i . '" type="hidden" value="' . String::str_form_value(vb($line_data['nom_attribut'])) . '" />';
 	if (check_if_module_active('tnt')) {
@@ -2741,6 +2724,8 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	if ($try_alter_table_even_if_modules_not_active || check_if_module_active('faq')) {
 		$query_alter_table[] = 'ALTER TABLE `peel_faq` ADD `question_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
 		$query_alter_table[] = 'ALTER TABLE `peel_faq` ADD `answer_' . word_real_escape_string($new_lang) . '` TEXT NOT NULL';
+		$query_alter_table[] = 'ALTER TABLE `peel_faq_categories` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_faq_categories` ADD `description_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
 	}
 	if ($try_alter_table_even_if_modules_not_active || check_if_module_active('annonces')) {
 		$query_alter_table[] = 'ALTER TABLE `peel_gold_ads` ADD `text_intro_' . word_real_escape_string($new_lang) . '` VARCHAR( 80 ) NOT NULL DEFAULT ""';
@@ -4090,13 +4075,17 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		if(!in_array($this_key, array('token', 'keep_old_orders_intact_date', 'site_id'))) {
 			foreach(array('module_', 'display_mode_', 'etat_', 'position_', 'home_') as $this_begin) {
 				if(String::substr($this_key, 0, String::strlen($this_begin)) == $this_begin && is_numeric(String::substr($this_key, String::strlen($this_begin)))) {
-					// On ne traite pas ici les données qui concernent les modules
+					// On ne traite pas ici les données qui concernent le contenu de peel_modules
 					$skip = true;
 				}
 			}
 			if(empty($skip)) {
 				// Insertion (ou mise à jour) dans la BDD
-				set_configuration_variable(array('technical_code' => $this_key, 'string' => $this_value, 'site_id' => $site_id, 'origin' => 'sites.php'), true, true);
+				$configuration_variable_array = array('technical_code' => $this_key, 'string' => $this_value, 'site_id' => $site_id, 'origin' => 'sites.php');
+				if(String::substr($this_key, 0, String::strlen('module_') == 'module_')) {
+					$configuration_variable_array['type'] = 'integer';
+				}
+				set_configuration_variable($configuration_variable_array, true, true);
 			}
 			unset($skip);
 		}
@@ -4310,7 +4299,6 @@ function affiche_liste_clients_par_produit($id, $array_output_mode=false)
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PRODUITS_ACHETES_ERR_ID_NOT_FOUND']))->fetch();
 	}
 }
-
 
 /**
  * Affiche la liste des utilisateurs en fonction des critères de recherche
@@ -5133,4 +5121,98 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$output .=$tpl->fetch();
 	}
 	return $output;
+}
+
+/**
+ * Charge le code des modules non installés et prépare des informations pour une installation potentielle
+ *
+ * @return
+ */
+function preload_modules()
+{
+	// Identification et chargement des modules détectés 
+	$GLOBALS['premium_modules_array'] = array('affiliation', 'birthday', 'cart_preservation', 'category_promotion', 'comparateur', 'download', 'duplicate', 
+			'facture_advanced', 'faq', 'gift_check', 'gifts', 'good_clients', 'groups', 'lexique', 'lot', 'marges', 'marques_promotion', 'micro_entreprise',
+			'parrainage', 'picking', 'reseller', 'statistiques', 'stock_advanced', 'url_rewriting', 'welcome_ad');
+	$GLOBALS['modules_light_default_names'] = array('expeditor' => $GLOBALS['STR_ADMIN_SITES_EXPEDITOR_MODULE'], 'facebook' => $GLOBALS['STR_ADMIN_SITES_FACEBOOK_MODULE'],
+			'icirelais' => $GLOBALS['STR_ADMIN_SITES_ICI_RELAIS_MODULE'], 'sips' => $GLOBALS['STR_ADMIN_SITES_SIPS_MODULE'],
+			'spplus' => $GLOBALS['STR_ADMIN_SITES_SPPLUS_MODULE'], 'paybox' => $GLOBALS['STR_ADMIN_SITES_PAYBOX_MODULE'],
+			'systempay' => $GLOBALS['STR_ADMIN_SITES_SYSTEMPAY'], 'partenaires' => $GLOBALS['STR_ADMIN_SITES_PARTNERS_MODULE'],
+			'ecotaxe' => $GLOBALS['STR_ADMIN_SITES_ECOTAX_MODULE'], 'devises' => $GLOBALS['STR_ADMIN_SITES_CURRENCIES_MODULE'],
+			'paypal' => $GLOBALS['STR_ADMIN_SITES_PAYPAL_MODULE'], 'moneybookers' => $GLOBALS['STR_ADMIN_SITES_MONEYBOOKERS_MODULE'],
+			'kekoli' => $GLOBALS['STR_ADMIN_SITES_KEKOLI_MODULE'], 'tag_cloud' => $GLOBALS['STR_ADMIN_SITES_TAG_CLOUD_MODULE'],
+			'flash' => $GLOBALS['STR_ADMIN_SITES_FLASH_SALES_MODULE'], 'rss' => $GLOBALS['STR_ADMIN_SITES_RSS_MODULE'],
+			'avis' => $GLOBALS['STR_ADMIN_SITES_OPINIONS_MODULE'], 'stock_advanced' => $GLOBALS['STR_ADMIN_SITES_STOCKS_MODULE'],
+			'cart_preservation' => $GLOBALS['STR_ADMIN_SITES_CART_SAVE_MODULE'], 'affiliation' => $GLOBALS['STR_ADMIN_SITES_AFFILIATION_MODULE'],
+			'lots' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_LOTS_MODULE'], 'parrainage' => $GLOBALS['STR_ADMIN_SITES_SPONSOR_MODULE'],
+			'url_rewriting' => $GLOBALS['STR_ADMIN_SITES_URL_REWRITING_MODULE'], 'micro_entreprise' => $GLOBALS['STR_ADMIN_SITES_MICROBUSINESS_MODULE'],
+			'birthday' => $GLOBALS['STR_ADMIN_SITES_BIRTHDAY_MODULE'], 'faq' => $GLOBALS['STR_ADMIN_SITES_FAQ_MODULE'],
+			'category_promotion' => $GLOBALS['STR_ADMIN_SITES_CATEGORIES_PROMOTION'], 'marques_promotion' => $GLOBALS['STR_ADMIN_SITES_TRADEMARK_PROMOTION'],
+			'conditionnement' => $GLOBALS['STR_ADMIN_SITES_PRODUCT_CONDITIONING_MODULE'], 'friends_connect' => $GLOBALS['STR_ADMIN_SITES_GOOGLE_FRIENDS_CONNECT_MODULE'],
+			'vacances' => $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE'], 'forum' => $GLOBALS['STR_ADMIN_SITES_FORUM_MODULE'],
+			'gifts_list' => $GLOBALS['STR_ADMIN_SITES_GIFTS_LIST'], 'so_colissimo' => $GLOBALS['STR_ADMIN_SITES_SO_COLISSIMO_MODULE'],
+			'vatlayer' => $GLOBALS['STR_ADMIN_SITES_VATLAYER_MODULE'],
+			);
+
+	$modules_dir = $GLOBALS['dirroot'] . "/modules";
+	if ($handle = opendir($modules_dir)) {
+		while ($file = readdir($handle)) {
+			if ($file != "." && $file != ".." && is_dir($modules_dir . '/' . $file)) {
+				$GLOBALS['modules_on_disk'][$file] = $modules_dir . '/' . $file;
+			}
+		}
+		closedir($handle);
+	}
+	foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
+		unset($file_path);
+		if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
+			$GLOBALS['modules_on_disk_infos'][$this_module]['installed'] = true;
+			foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
+				$file_path = $GLOBALS['dirroot'] . $this_file;
+				if(String::strpos($file_path, '.php') !== false && !in_array($this_module, array('url_rewriting')) && !in_array($this_file, vb($GLOBALS['modules_loaded_functions'], array())) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
+					// Fichier pas déjà chargé car module non activé => là on charge le fichier pour savoir si une classe est dedans
+					include($file_path);
+				}
+			}
+		} else {
+			// Module pas installé et inconnu 
+			foreach(array('fonctions.php', 'functions.php', String::ucfirst($this_module) . '.php', 'functions/emails.php') as $this_filename) {
+				if(!in_array(String::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php')) && file_exists($folder_path . '/' . $this_filename)) {
+					// Fichier de classe ou de fonctions du module
+					$file_path = $folder_path . '/' . $this_filename;
+					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+						@include($file_path);
+					}
+					if($this_filename != String::ucfirst($this_module) . '.php' || (class_exists(String::ucfirst($this_module) && method_exists(String::ucfirst($this_module), 'check_install')))) {
+						// Soit il s'agit d'un fichier de fonctions, soit d'un fichier de classe
+						// Mais par exemple modules/calc/calc.php qui n'est pas un fichier de classe ne doit pas être installé
+						$GLOBALS['modules_on_disk_infos'][$this_module]['to_install'] = $file_path;
+					}
+					break;
+				}
+			}
+		}
+		if(empty($file_path)) {
+			// Si rien de trouvé dans les fichiers standards, on cherche un fichier PHP quelconque pour connaître la version en regardant dans le code plus loin
+			$file_path = $folder_path . '/';
+			$temp = explode(',', $file_path);
+			$file_path = $temp[0];
+			foreach(array($file_path, $file_path . 'administrer', $file_path . 'admin') as $this_folder) {
+				if(String::strpos($this_folder, '.php') === false && file_exists($this_folder)) {
+					if ($handle = opendir($this_folder)) {
+						while ($file = readdir($handle)) {
+							if ($file != "." && $file != ".." && String::strpos($file, '.php') !== false) {
+								$file_path = $this_folder . '/' . $file;
+								break;
+							}
+						}
+						closedir($handle);
+					}
+				}
+			}
+		}
+		if(!empty($file_path)) {
+			$GLOBALS['modules_on_disk_infos'][$this_module]['file_path'] = $file_path;
+		}
+	}
 }

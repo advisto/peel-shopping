@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Module.php 47154 2015-10-05 07:55:09Z sdelaporte $
+// $Id: Module.php 47709 2015-11-06 14:51:18Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Module.php 47154 2015-10-05 07:55:09Z sdelaporte $
+ * @version $Id: Module.php 47709 2015-11-06 14:51:18Z gboussin $
  * @access public
  */
 abstract class Module {
@@ -99,7 +99,7 @@ abstract class Module {
         call_module_hook('module_install_pre', array('object' => $this));
 
         // Vérifie si module déjà installé
-        if ($this::check_install()) {
+        if (self::check_install()) {
             $this->_errors['installed'] = $this->name . ' déjà installé';
             return true;
         }
@@ -137,10 +137,7 @@ abstract class Module {
         // Hook de début de désinstallation
         call_module_hook('module_uninstall_pre', array('object' => $this));
 
-        // Vérifie si module déjà installé
-        if (!in_array($this->technical_code, $GLOBALS['modules_installed'])) {
-            return true;
-        }
+        // On ne vérifie pas si module déjà installé ou pas, $this->execute('uninstall') doit être appelé dans tous les cas pour compléter désinstallation si pas propre
 
         // Réaliser la désinstallation
         $this->execute('uninstall');

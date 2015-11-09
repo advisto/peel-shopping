@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_code_pour_client.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: admin_liste_code_pour_client.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL_TITLE}</div>
 <div>{$STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL_SUBTITLE}{$STR_BEFORE_TWO_POINTS}: <a title="{$STR_ADMIN_UTILISATEURS_UPDATE|str_form_value}" href="{$modif_util_href|escape:'html'}">{$civilite} {$prenom} {$nom_famille} - {$email}</a></div>
 {if !empty($options)}

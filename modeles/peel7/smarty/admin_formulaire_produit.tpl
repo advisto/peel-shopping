@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 47686 2015-11-05 10:09:28Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -277,7 +277,7 @@
 		<tr>
 			<td colspan="2">
 				<script><!--//--><![CDATA[//><!--
-					 var new_order_line_html = '<tr class="top" id="line[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="references[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
+					 var new_order_line_html = '<tr class="top" id="line[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="references[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
 				//--><!]]></script>
 				<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
 					<table class="table admin_commande_details">
@@ -289,7 +289,7 @@
 						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
 						<tbody id="dynamic_order_lines">{foreach $produits_options as $o}<tr class="top" id="line{$o.i}">
 									<td>
-										<img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm('{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}delete_products_list_line({$o.i}, true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" />
+										<img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm('{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line({$o.i}, true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" />
 										<input type="hidden" name="references[]" value="{$o.value|str_form_value}">
 									</td>
 									<td>{$o.reference} {$o.name}</td>
@@ -532,6 +532,6 @@
 			}
 		}
 		//--><!]]></script>
-		<p><input class="btn btn-primary" onclick="if(verif_form()==false) return false;" type="submit" value="{$normal_bouton|str_form_value}" /></p>
+		<p><input class="btn btn-primary" {if !$allow_products_without_category} onclick="if(verif_form()==false) return false;"{/if} type="submit" value="{$normal_bouton|str_form_value}" /></p>
 	</div>
 </form>

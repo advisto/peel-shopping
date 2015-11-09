@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clean_folders.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: clean_folders.php 47700 2015-11-06 09:50:10Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -146,6 +146,7 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 					sleep(1);
 				}
 			}
+			closedir($dir_pointer);
 		}
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf('%s not found', $folder)))->fetch();

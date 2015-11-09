@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 46947 2015-09-18 10:38:20Z gboussin $
+// $Id: admin_eo.php 47729 2015-11-06 22:00:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1130,7 +1130,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_ID"] = "Paybox-identigila numero";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_MODULE"] = "Pago per Paybox-servo";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_RANG"] = "Paybox-rango";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_SITE"] = "Paybox-retejo";
-$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Memorigo de la Paybox-testaj valoroj: </strong><br />RETEJO: 1999888<br />VICO: 99<br />IDENTIGILO: 2";
+$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Memorigo de la Paybox-testaj valoroj: </strong><br />RETEJO: 1402611<br />VICO: 01<br />IDENTIGILO: 292047471";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(daŭre estos tujtempa por Kwixo-pagservo = t.e. antaŭe FIANET-ReceiveAndPay-servo)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Difini je sekundoj la atento-tempon antaŭ aŭtomata validigo de la pagilo";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Aktivigo de la aŭtomata validigo de pag-formularo (restos malaktiva kun SSPLUS- aŭ ATOS-servo)";

@@ -1,14 +1,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: README.txt 47330 2015-10-12 15:21:04Z gboussin $
+// $Id: README.txt 47622 2015-11-02 13:12:46Z gboussin $
 
 English: 
 
@@ -27,7 +27,7 @@ CE QU'IL VOUS FAUT
 --------------------
 
 - Les fichiers de code de PEEL SHOPPING
-- Un hébergement web Payant ou gratuit (avec PHP >=5.0 et MySQL >= 4.0, et apache ou IIS).
+- Un hébergement web Payant ou gratuit (avec PHP >=5.1.2 et MySQL >= 4.0, et apache ou IIS).
 - Un client FTP (exemple : Filezilla).
 
 

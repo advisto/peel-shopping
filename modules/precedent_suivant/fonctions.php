@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: fonctions.php 47643 2015-11-02 19:53:57Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -30,9 +30,9 @@ function show_preview_next($product_id, $product_position, $prev_next, $category
 	if($GLOBALS['site_parameters']['in_category']==0) {
 		// Recherche des catégories fille de chaque catégorie trouvée précédemment + suppression des doublons + supression de la categorie 0
 		$descending_category_array = array_unique(get_category_tree_and_itself(0, 'sons'));
-		$sql_cond = 'ppc.categorie_id IN ("' . implode('","', $descending_category_array) . '")';
+		$sql_cond = 'pc.id IN ("' . implode('","', $descending_category_array) . '")';
 	} else {
-		$sql_cond = 'ppc.categorie_id="'. intval($category_id) . '"';
+		$sql_cond = 'pc.id="'. intval($category_id) . '"';
     }
 	// ATTENTION : dans params_affiche_produits on affiche par défaut avec pp.position ASC, pp.id DESC
 	// Donc les tris sur id et position sont inversés

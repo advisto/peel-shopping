@@ -3,20 +3,25 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rss.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: rss.php 47592 2015-10-30 16:40:22Z sdelaporte $
 include("../../configuration.inc.php");
 
 if (!check_if_module_active('rss')) {
 	// This module is not activated => we redirect to the homepage
 	redirect_and_die(get_url('/'));
 }
+if(!empty($_GET['critere'])) {
+	// Compatibilité avec anciennes URL
+	redirect_and_die(get_current_url(true, false, array('critere')), true);
+}
+
 if (!empty($_GET['cat'])) {
 	$category_id = intval($_GET['cat']);
 }elseif (!empty($_GET['CatIDS'])) {

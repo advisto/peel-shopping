@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_liste_by_id.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: attributsAdmin_liste_by_id.tpl 47710 2015-11-06 14:57:19Z gboussin $
 #}
 <form class="entryform form-inline" role="form" method="post" name="associe_produit_attribut" action="{{ action|escape('html') }}">
 	<table cellpadding="4" class="main_table">
@@ -36,7 +36,7 @@
 			{% if (res.sub_res) %}
 					<select class="form-control" name="attribut_id_{{ res.id }}[]" multiple="multiple" style="width:100%" size="{% if (res.sub_res|length)<5 %}{{ res.sub_res|length }}{% else %}5{% endif %}">
 				{% for sr in res.sub_res %}
-						<option value="{{ sr.value|str_form_value }}" {% if sr.issel %} selected="selected"{% endif %}>{{ sr.desc|html_entity_decode_if_needed }}{% if sr.prix>0 %} - {{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST }} : {{ sr.prix }} {{ STR_TTC }}{% endif %}</option>
+						<option value="{{ sr.value|str_form_value }}" {% if sr.issel %} selected="selected"{% endif %}>{{ sr.desc|html_entity_decode_if_needed }}{% if sr.prix>0 %} - {{ STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST }} : {{ sr.prix }} {{ ttc_ht }}{% endif %}</option>
 				{% endfor %}
 					</select>
 			{% elseif res.texte_libre or res.upload %}

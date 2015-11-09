@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 47145 2015-10-04 11:56:35Z sdelaporte $
+// $Id: admin_commande_details.tpl 47740 2015-11-09 09:17:42Z sdelaporte $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -53,7 +53,7 @@
 							<input type="hidden" name="bdc_mode" value="bdc" />
 							<input type="text" class="form-control" id="bdc_partial" name="bdc_partial" value="{$bdc_partial|str_form_value}" style="width:90px" /> {$bdc_devise}{$STR_BEFORE_TWO_POINTS}:
 							<a id="partial_amount_link" onclick="get_partial_amount_link('{$partial_amount_link_js}');" target="{$partial_amount_link_target}" class="btn btn-primary" href="{$partial_amount_link_href|escape:'html'}">{$STR_ADMIN_COMMANDER_OPEN_IN_BROWSER}</a>
-							<input type="submit" name="bdc_sendclient" class="btn btn-primary" value="{$STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value}" data-confirm="{$STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|str_form_value}" /></p>
+							<input type="submit" name="bdc_sendclient" class="btn btn-primary" value="{$STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value}" onclick="return confirm('{$STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|filtre_javascript:true:true:true}');" /></p>
 						</form>
 					{/if}
 					{if $is_duplicate_module_active}

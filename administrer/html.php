@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: html.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: html.php 47716 2015-11-06 16:26:21Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -148,7 +148,7 @@ function affiche_formulaire_home(&$frm)
 {
 	// liste des emplacements prévus
 	$emplacement_array['affiche_contenu_html_menu'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONTENU_HTML_MENU'];
-	$emplacement_array['heade'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HEADER'];
+	$emplacement_array['header'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HEADER'];
 	$emplacement_array['footer'] = $GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER'];
 	$emplacement_array['home'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HOME'];
 	$emplacement_array['home_bottom'] = $GLOBALS['STR_ADMIN_HTML_PLACE_HOME_BOTTOM'];
@@ -158,23 +158,23 @@ function affiche_formulaire_home(&$frm)
 	$emplacement_array['error404'] = $GLOBALS['STR_ADMIN_HTML_PLACE_ERROR404'];
 	$emplacement_array['scrolling'] = $GLOBALS['STR_ADMIN_HTML_PLACE_SCROLLING'];
 	$emplacement_array['contact_page'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONTACT_PAGE'];
-	if(file_exists($GLOBALS['fonctionscarrousel'])){
+	if(check_if_module_active('carrousel', null, true)){
 		$emplacement_array['entre_carrousel'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CARROUSEL_TOP'];
 	}
-	if(check_if_module_active('reseller')){
+	if(check_if_module_active('reseller', null, true)){
 		$emplacement_array['devenir_revendeur'] = $GLOBALS['STR_ADMIN_HTML_PLACE_BECOME_RESELLER'];
 	}
-	if(file_exists($GLOBALS['fonctionspartenaires'])){
+	if(check_if_module_active('partenaires', null, true)){
 		$emplacement_array['partner'] = $GLOBALS['STR_ADMIN_HTML_PLACE_PARTNER'];
 	}
-	if(file_exists($GLOBALS['fonctionsresellermap'])){
+	if(check_if_module_active('reseller_map', null, true)){
 		$emplacement_array['reseller_map'] = $GLOBALS['STR_ADMIN_HTML_PLACE_RESELLER_MAP'];
 	}
-	if(file_exists($GLOBALS['fonctionsannonces'])){
+	if(check_if_module_active('annonces', null, true)){
 		$emplacement_array['home_ad'] = $GLOBALS['STR_ADMIN_HTML_PLACE_ADS_TOP'];
 		$emplacement_array['top_create_ad'] = $GLOBALS['STR_ADMIN_HTML_PLACE_TOP_CREATE_AD'];
 	}
-	if(file_exists($GLOBALS['fonctionsparrain'])){
+	if(check_if_module_active('parrainage', null, true)){
 		$emplacement_array['intro_parrainage'] = $GLOBALS['STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE'];
 	}
 	if(!empty($GLOBALS['site_parameters']['short_order_process'])){

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 46935 2015-09-18 08:49:48Z gboussin $
+// $Id: String.php 47592 2015-10-30 16:40:22Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ $GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 46935 2015-09-18 08:49:48Z gboussin $
+ * @version $Id: String.php 47592 2015-10-30 16:40:22Z sdelaporte $
  * @access public
  */
 class String {
@@ -543,6 +543,7 @@ class String {
 	 * String::strip_tags()
 	 *
 	 * @param string $string
+	 * @param array $allowed_tags
 	 * @return
 	 */
 	public static function strip_tags($string, $allowed_tags = null)

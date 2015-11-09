@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 47158 2015-10-05 08:56:35Z gboussin $
+// $Id: admin_en.php 47735 2015-11-07 19:56:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -269,6 +269,7 @@ $GLOBALS["STR_ADMIN_CONVERSION"] = "Exchange rate";
 $GLOBALS["STR_ADMIN_COULEURS_ADD_COLOR_BUTTON"] = "Add Color";
 $GLOBALS["STR_ADMIN_COULEURS_COLORS_TITLE"] = "Manage Color";
 $GLOBALS["STR_ADMIN_COULEURS_ERR_COLOR_NOT_FOUND"] = "The color was not found.";
+$GLOBALS["STR_ADMIN_COULEURS_FORM_TITLE"] = "Add or modify a color";
 $GLOBALS["STR_ADMIN_COULEURS_LIST_EXPLAIN"] = "You can set the color of your products on this page. These colors will then be to bind to products from a product detail sheet. The display order is managed by moving the line corresponds to a color in the desired position.";
 $GLOBALS["STR_ADMIN_COULEURS_MODIFY_COLOR"] = "Change the color";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "The color <b>%s</b> has been created.";
@@ -782,7 +783,7 @@ $GLOBALS["STR_ADMIN_PLACE"] = "Location";
 $GLOBALS["STR_ADMIN_PLAN_ERR_TAG_VALID_NEEDED"] = "You must insert valid tags.";
 $GLOBALS["STR_ADMIN_PLAN_MSG_UPDATED_OK"] = "The update your Google map has been made.";
 $GLOBALS["STR_ADMIN_PLAN_TAG_CODE"] = "Your Google map code";
-$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>How to obtain the necessary HTML code to display the map on your site</h2><ul><li>Go to the page <a href=\"http://maps.google.com/\" title=\"Google Map\">Google Map</a></li><li>Type in the search bar at the location you want to display on your website</li><li>Click on the <em>link</em> at the top left of the map</li><li>Click on <em>customize and preview embedded map</em></li><li>Check the box <em>personalized</em> to set your preferred height and width</li><li>Copy the iframe code that Google generated</li> And paste this code into the box text below.</li></ul>";
+$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>How to obtain the necessary HTML code to display the map on your site</h2><ul><li>Go to the page <a href=\"http://maps.google.com/\" title=\"Google Map\">Google Map</a></li><li>Type in the search bar at the location you want to display on your website</li><li>Click on the <em>Share</em> link on the left side of the map</li><li>Click on <em>embedded map</em></li><li>Select <em>personalized</em> to set your preferred height and width</li><li>Copy the iframe code that Google generated</li><li>And paste this code into the box text below.</li></ul>";
 $GLOBALS["STR_ADMIN_PLAN_TITLE"] = "Manage map of society";
 $GLOBALS["STR_ADMIN_PLAN_UPDATE"] = "Change map of the company";
 $GLOBALS["STR_ADMIN_POSITION"] = "Position";
@@ -1130,7 +1131,7 @@ $GLOBALS["STR_ADMIN_SITES_PAYBOX_ID"] = "Paybox username";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_MODULE"] = "Payment Paybox";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_RANG"] = "Paybox rank";
 $GLOBALS["STR_ADMIN_SITES_PAYBOX_SITE"] = "Paybox site";
-$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Reminder of ​​Paybox test values:</strong><br />SITE:1999888<br />RANK: 99<br />USERNAME: 2";
+$GLOBALS["STR_ADMIN_SITES_PAYBOX_TEST_EXPLAIN"] = "<strong>Reminder of ​​Paybox test values:</strong><br />SITE:1402611<br />RANK: 01<br />USERNAME: 292047471";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN"] = "(immediate will in all cases Kwixo former FIANET ReceiveAndPay =)";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS"] = "Set the seconds to wait before automatic validation of the payment form";
 $GLOBALS["STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION"] = "Enable automatic validation of the payment form (and will remain inactive with SPPLUS ATOS)";
@@ -1745,6 +1746,9 @@ $GLOBALS["STR_MODULE_FACTURES_ADMIN_ALL_BILLS_IN_ONE_FILE"] = "All invoices in a
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ONE_BILL_PER_FILE"] = "An invoice file saved on the server";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_SAVE_FOLDER"] = "Name of the invoice save folder";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_EXPORT_BILLS_BUTTON"] = "Generate PDF invoices (the operation may take several seconds)";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_CATEGORIES_TITLE"] = "Manage the categories for references";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_ERR_NAME_MANDATORY"] = "You must enter a category name.";
+$GLOBALS["STR_MODULE_FAQ_ADMIN_MSG_CATEGORY_DELETED_OK"] = "The category has been deleted.";
 $GLOBALS["STR_MODULE_FAQ_LIST_TITLE"] = "List of questions / answers";
 $GLOBALS["STR_MODULE_FAQ_CREATE"] = "Add a Question / Answer";
 $GLOBALS["STR_MODULE_FAQ_QUESTION"] = "Question";
