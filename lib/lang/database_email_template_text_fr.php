@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_fr.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: database_email_template_text_fr.php 48447 2016-01-11 08:40:08Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -384,16 +384,16 @@ Nature de votre commande : [PRODUCT_NAME]
 Montant total de votre commande : [TOTAL_AMOUNT]
 Moyen de paiement que vous avez choisi : [PAYMENT_MEAN]
 
-Notre système de traitement automatisé des commandes n''a pas reçu confirmation de votre paiement.
+Notre système de traitement automatisé des commandes n'a pas reçu confirmation de votre paiement.
 Quel problème avez-vous rencontré ?
 
 Nous sommes à votre écoute pour valider cette commande éventuellement via un autre mode de paiement.
 
 Nous nous tenons à votre disposition pour toutes informations supplémentaires.
-Dans l''attente de votre réponse, nous vous souhaitons une bonne journée.
+Dans l'attente de votre réponse, nous vous souhaitons une bonne journée.
 
 A bientôt sur [WWWROOT]/
-L''équipe [SITE_NAME]
+L'équipe [SITE_NAME]
 
 NB : Ce message vous est envoyé automatiquement. Si vous êtes déjà rentré en contact avec nous à propos de ce paiement, veuillez ne pas tenir compte de cet email.",
   "cron_order_not_paid_alerts" => "Bonjour [PRENOM] [NOM],
@@ -404,11 +404,11 @@ Nature de votre commande : [PRODUCT_NAME]
 Montant total de votre commande : [TOTAL_AMOUNT]
 Moyen de paiement que vous avez choisi : [PAYMENT_MEAN]
 
-Or nous n''avons pas encore reçu votre paiement. Avez-vous besoin d''informations complémentaires afin de nous faire parvenir votre paiement ?
+Or nous n'avons pas encore reçu votre paiement. Avez-vous besoin d'informations complémentaires afin de nous faire parvenir votre paiement ?
 
 Nous nous tenons à votre disposition pour toute information supplémentaire.
 
-Dans l''attente de votre réponse, nous vous souhaitons une bonne journée.
+Dans l'attente de votre réponse, nous vous souhaitons une bonne journée.
 
 NB : Ce message vous est envoyé automatiquement. Si vous êtes déjà rentré en contact avec nous à propos de ce paiement, veuillez ne pas tenir compte de cet email.",
   "cron_update_contact_info" => "Bonjour [CIVILITE] [NOM],
@@ -434,13 +434,13 @@ Ville : [VILLE]
 Pays : [PAYS]
 Site web : [SITE_WEB]
 
-Si des informations ci-dessus s''avèrent inexactes, nous vous prions de les mettre à jour en vous connectant à votre compte utilisateur sur [WWWROOT]/utilisateurs/change_params.php
+Si des informations ci-dessus s'avèrent inexactes, nous vous prions de les mettre à jour en vous connectant à votre compte utilisateur sur [WWWROOT]/utilisateurs/change_params.php
 
-Si vous avez oubliez votre mot de passe, merci d''utiliser l''outil de récupération accessible à partir du lien suivant : [WWWROOT]/utilisateurs/oubli_mot_passe.php
+Si vous avez oubliez votre mot de passe, merci d'utiliser l'outil de récupération accessible à partir du lien suivant : [WWWROOT]/utilisateurs/oubli_mot_passe.php
 
-Nous vous rappelons que l''exactitude de ces informations est primordiale pour le bon fonctionnement du site et pour la bonne réussite commerciale de chacun. Toute information inexacte ou erronée peut entraîner l''annulation de votre compte utilisateur.
+Nous vous rappelons que l'exactitude de ces informations est primordiale pour le bon fonctionnement du site et pour la bonne réussite commerciale de chacun. Toute information inexacte ou erronée peut entraîner l'annulation de votre compte utilisateur.
 
-Pour toute information complémentaire, n''hésitez pas à nous contacter.",
+Pour toute information complémentaire, n'hésitez pas à nous contacter.",
 "inscription_newsletter" => "Bonjour,
 
 Merci pour votre inscription à la newsletter de [SITE_NAME]. Vous recevrez une newsletter hebdomadaire à l'adresse [EMAIL].

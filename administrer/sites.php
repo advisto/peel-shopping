@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 47719 2015-11-06 17:52:21Z gboussin $
+// $Id: sites.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -97,7 +97,8 @@ switch (vb($_GET['mode'])) {
 						if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
 							// Module complet avec classe permettant de gérer proprement l'installation
 							$class_name = String::ucfirst($this_module);
-							if($install_or_uninstall != $class_name::check_install()) {
+							// La syntaxe $class_name::check_install() n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
+							if($install_or_uninstall != call_user_func_array(array($class_name, 'check_install'), array())) {
 								if(!isset($GLOBALS[$class_name])) {
 									$GLOBALS[$class_name] = new $class_name();
 								}
@@ -450,7 +451,8 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 				$GLOBALS[$class_name] = new $class_name();
 			}
 			$type = 'full';
-			$GLOBALS['modules_on_disk_infos'][$this_module]['installed'] = $class_name::check_install();
+			// La syntaxe $class_name::check_install() n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
+			$GLOBALS['modules_on_disk_infos'][$this_module]['installed'] = call_user_func_array(array($class_name, 'check_install'), array());
 			$version = $GLOBALS[$class_name]->version;
 			$name = $GLOBALS[$class_name]->name;
 		} else {

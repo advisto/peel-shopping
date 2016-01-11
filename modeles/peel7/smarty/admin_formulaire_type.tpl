@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_type.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: admin_formulaire_type.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -59,6 +59,15 @@
 			<td>
 				<input type="radio" name="is_socolissimo" value="1" {if $is_socolissimo == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="is_socolissimo" value="0" {if $is_socolissimo == 0} checked="checked"{/if} /> {$STR_NO}
+			</td>
+		</tr>
+		{/if}
+		{if $is_kiala_module_active}
+		<tr>
+			<td>{$STR_ADMIN_TYPES_LINK_TO_KIALA}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="is_kiala" value="1" {if $is_kiala == 1} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="is_kiala" value="0" {if $is_kiala == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
 		{/if}

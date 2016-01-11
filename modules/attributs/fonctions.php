@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -92,7 +92,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		// On veut les attributs possibles correspondant à une liste vide
 		$sql_cond_array[] = '0';
 	}
-	if (!isset($possible_attributs[$product_id . '-' . $_SESSION['session_langue'] . '-' . $attributs_list])) {
+	if (!isset($possible_attributs[$product_id . '-' . $_SESSION['session_langue'] . '-' . $attributs_list]) || !empty($GLOBALS['product_possible_attribute_cache_disable'][$product_id])) {
 		$possible_attributs[$product_id . '-' . $_SESSION['session_langue'] . '-' . $attributs_list] = array();
 		// Les attributs possibles d'un produit (ex : parfum) sont énumérés dans la table peel_nom_attributs
 		// Pour chacun des attributs, il y a diverses options possibles qui sont stockées dans peel_attributs
@@ -150,22 +150,21 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 					// Si c'est texte_libre, c'est une notion de stockage par la suite du texte choisi, sous forme d'id 0
 					// Mais dans le tableau des options on fait apparaitre l'id de l'option fictive dans tous les cas 
 					// On remplit le contenu de l'attribut pour la liste des options
-					
 					foreach($fictive_options_array as $this_id => $this_fictive_options) {
-						if (empty($product_id) || (!empty($attributs_array[$this_nom_attribut_id][$this_id]['descriptif']) &&  $attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] == $this_fictive_options )) {
-							// Si empty($product_id) on veux tous les attributs possibles pour le produit, sinon on prend ce qui est associé au produit.
+						if (empty($GLOBALS['site_parameters']['attribut_fictive_options_accept_only_if_existing_option']) || empty($product_id) || (!empty($attributs_array[$this_nom_attribut_id][$this_id]['descriptif']) && $attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] == $this_fictive_options )) {
+							// Si empty($product_id) on veut tous les attributs possibles pour le produit, sinon on prend ce qui est associé au produit.
 							$attributs_array[$this_nom_attribut_id][$this_id] = $attributs_array[$this_nom_attribut_id][0];
 							$attributs_array[$this_nom_attribut_id][$this_id]['descriptif'] = $this_fictive_options;
 							// L'id de l'attribut dans ce cas est l'id qui est généré par la fonction de attribut_fictive_options_functions_by_technical_codes_array. 
 							$attributs_array[$this_nom_attribut_id][$this_id]['attribut_id'] = $this_id;
 						}
 					}
-					if ($this_attribut_values_array[0]['type_affichage_attribut'] == 1) {
+					if($this_attribut_values_array[0]['type_affichage_attribut'] == 1 && count($attributs_array[$this_nom_attribut_id])>1) {
 						unset($attributs_array[$this_nom_attribut_id][0]);
 					}
 					foreach ($attributs_array[$this_nom_attribut_id] as $this_attribut_id => $this_attribut_values) {
 						// Ici on supprime les attributs qui ont un ID à NULL, qu'il faut supprimer de la liste. Les ids NULL sont créées par la requête SQL de sélection d'attribut
-						if($this_attribut_values['attribut_id'] === NULL) {
+						if($this_attribut_values['attribut_id'] === NULL && count($attributs_array[$this_nom_attribut_id])>1) {
 							unset($attributs_array[$this_nom_attribut_id][$this_attribut_id]);
 						}
 					}
@@ -243,7 +242,9 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 	if (empty($technical_code_array) && $display_mode != 'selected_text' && !empty($GLOBALS['site_parameters']['affiche_attributs_form_part_function_by_product_technical_codes_array']) && !empty($GLOBALS['site_parameters']['affiche_attributs_form_part_function_by_product_technical_codes_array'][$product_object->technical_code]) && function_exists($GLOBALS['site_parameters']['affiche_attributs_form_part_function_by_product_technical_codes_array'][$product_object->technical_code])) {
 		// Cas spécifique des formulaires d'attributs générés par des fonctions spécifiques (développements spécifiques pour un site précis)
 		$this_function = $GLOBALS['site_parameters']['affiche_attributs_form_part_function_by_product_technical_codes_array'][$product_object->technical_code];
-		$output .= $this_function($product_object, $save_cart_id, $save_suffix_id, $form_id);
+		if(function_exists($this_function)) {
+			$output .= $this_function($product_object, $save_cart_id, $save_suffix_id, $form_id);
+		}
 		return $output;
 	}
 	// On récupère la liste des attributs qui n'offrent pas juste un choix (auquel cas, ils sont gérés par Product, et ils doivent apparaitre comme partie intégrante de la description d'un produit)
@@ -324,6 +325,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$type_affichage_attribut = 'upload';
 						$input_name = 'attribut' . $this_nom_attribut_id . '_upload';
 						$input_id = $form_id . '_custom_attribut' . $this_nom_attribut_id;
+						unset($_SESSION['apply_crop_after_upload'][$input_name]); // initialisation si plusieurs formulaires différents ont des noms de champs identiques
 						if (empty($_SESSION["session_display_popup"][$input_name]) && preg_match('`' . $GLOBALS['site_parameters']['uploaded_images_name_pattern'] . '`' , $preselected_value)) {
 							// Si pas déjà image téléchargée en cours et qu'on a passé une image dans attributs_list, on vérifie qu'elle semble avec nom cohérent, et on la prend
 							$_SESSION["session_display_popup"][$input_name] = $preselected_value;
@@ -334,6 +336,15 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						} else {
 							// On ne passe pas de nom d'image dans le formulaire par sécurité
 							$input_type = 'file';
+							// Charge le javascript fineuploader si c'est l'uploader actif sur le site
+							$GLOBALS['allow_fineuploader_on_page'] = true;
+							if($this_attribut_infos['technical_code'] == 'crop') {
+								// On garde en session l'information que ce champ doit avoir une fonctionnalité de découpage après upload
+								$_SESSION['apply_crop_after_upload'][$input_name] = true;
+								$GLOBALS['load_cropper'] = true;
+							} elseif($this_attribut_infos['technical_code'] == 'cropped') {
+								$input_type = 'cropped';
+							} 
 						}
 					}
 				} elseif (!empty($this_attribut_infos['texte_libre']) && empty($this_attribut_id)) {
@@ -458,18 +469,13 @@ function display_option_image($str_image, $set = false)
 			foreach ($option_tab as $str_img) {
 				if (($end_str = String::strpos($str_img, "}}")) !== false) {
 					$str_img = String::substr($str_img, 0, $end_str);
-					if (get_file_type($str_img) == 'pdf') {
-						$small_option_image = get_url('/images/logoPDF_small.png');
-						$is_pdf = true;
-					} else {
-						$small_option_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($str_img, 0, 25, 'fit');
-						$is_pdf = false;
-					}
+					$small_option_image = thumbs($str_img, 0, 25, 'fit', null, null, true, true);
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 							'set' => true,
 							'href' => $GLOBALS['repertoire_upload'] . '/' . $str_img,
 							'src' => $small_option_image,
-							'is_pdf' => $is_pdf
+							'file_type' => get_file_type($str_img),
+							'lightbox' => !defined('IN_PEEL_ADMIN')
 						))->fetch();
 					$str_image = str_replace('{{' . $str_img . '}}', $str_img_new, $str_image);
 				}
@@ -477,11 +483,13 @@ function display_option_image($str_image, $set = false)
 		}
 		$output .= $str_image;
 	} else {
-		$small_option_image = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($str_image, 0, 25, 'fit');
+		$small_option_image = thumbs($str_image, 0, 25, 'fit', null, null, true, true);
 		$output .= $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 				'set' => false,
 				'href' => $GLOBALS['repertoire_upload'] . '/' . $str_image,
-				'src' => $small_option_image
+				'file_type' => get_file_type($str_image),
+				'src' => $small_option_image,
+				'lightbox' => !defined('IN_PEEL_ADMIN')
 			))->fetch();
 	}
 	return $output;
@@ -607,8 +615,11 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 {
 	$reseller_mode = check_if_module_active('reseller') && is_reseller();
 	$combinaisons_array = array();
-	foreach(array_keys($_FILES) as $this_key) {
-		if(!isset($frm[$this_key]) && String::strpos($this_key, 'attribut') === 0) {
+	// Les fichiers sont dans $_FILES si upload standard, ou sont déjà sur le serveur et on envoie le chemin (soit dans /cache/ si upload via fineuploader, soit déjà dans le dossier d'upload standard si l'information correspond à une édition de données)
+	// Par ailleurs, il est possible aussi que l'image soit data:image/xxx;base64,XXXXXXXX si générée via javascript
+	// => tout cela est géré par la fonction upload
+	foreach(array_merge(array_keys($frm), array_keys($_FILES)) as $this_key) {
+		if(String::strpos($this_key, 'attribut') === 0 && String::strpos($this_key, '_upload') !== false) {
 			$frm[$this_key] = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_key]));
 			if(!empty($_FILES[$this_key]['name']) && $frm[$this_key] === false) {
 				// on signale que l'image n'a pas été chargée correctement
@@ -677,7 +688,10 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 			}
 		}
 		foreach($frm as $this_key => $this_value) {
-			if (String::strpos($this_key, 'attribut') === 0) {
+			 if (String::strpos($this_key, 'attribut_list') !== false) {
+				// On transmet déjà la liste des attributs correctement formatés dans le formulaire
+				$combinaisons_array[] = $this_value;
+			} elseif (String::strpos($this_key, 'attribut') === 0) {
 				// On a un attribut
 				$temp = explode('_', $this_key);
 				$this_nom_attribut_id = intval(String::substr($temp[0], String::strlen('attribut')));
@@ -738,6 +752,9 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}
 				}
+			} elseif($this_key == 'submit_all_value' && function_exists('handle_all_attributs_from_step_form')) {
+				// Traitement de l'enregistrement de l'utilisateur, sauvegarde en base de donnée de l'id utilisateur dans un champ attribut
+				$combinaisons_array = array_merge($combinaisons_array, handle_all_attributs_from_step_form($frm));
 			}
 		}
 	}

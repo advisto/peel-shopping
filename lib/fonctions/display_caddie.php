@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: display_caddie.php 48452 2016-01-11 09:46:23Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -876,9 +876,9 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					
 				);
 				if ($display_picture) {
-					$tmpProd['src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
+					$tmpProd['src'] = thumbs($display_picture, 75, 75, 'fit', null, null, true, true);
 				} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
-					$tmpProd['src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
+					$tmpProd['src'] = thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit', null, null, true, true);
 				}
 				if (!empty($listcadeaux_owner) && check_if_module_active('listecadeau')) {
 					$tmpProd['listcadeaux_owner_name'] = getUsername($listcadeaux_owner);
@@ -923,7 +923,15 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					if (!empty($_SESSION['session_caddie']->percent_remise_produit[$numero_ligne]))
 						$tmpProd['option_prix_remise'] = fprix($option, true);
 				}
-				if ($with_form_fields) {
+				if($product_object->technical_code == "ad" || $product_object->on_gift == "1") {
+					// Si un produit "ad" est dans le panier, alors il est associé à une annonce : il ne faut pas permettre à l'utilisateur de modifier la quantité pour ce produit, car il est applicable à une annonce précise seulement
+					// Pour les produits cadeaux, on ne souhaite pas pouvoir modifier la quantité dans le panier. Il manque des sécurités pour cette fonctionnalité, l'utilisateur pourrait en commander autant qu'il le souhaite.
+					// On force la valeur de with_form_fields pour ne pas afficher le formulaire de modification de quantité
+					$display_form_fields = false;
+				} else {
+					$display_form_fields = $with_form_fields;
+				}
+				if ($display_form_fields) {
 					$tmpProd['quantite'] = array(
 						'value' => $quantite,
 					);

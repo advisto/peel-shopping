@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 47669 2015-11-04 10:57:45Z gboussin $
+// $Id: display.php 48452 2016-01-11 09:46:23Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -195,9 +195,9 @@ if (!function_exists('affiche_meta')) {
 			// Titre tout en majuscule et pas juste un ou deux mots => on passe en minuscule car sinon mauvais pour moteurs de recherche
 			$this_title = String::strtolower($this_title);
 		}
-		if (!empty($GLOBALS['STR_TITLE_SUFFIX'])) {
+		if (!empty($GLOBALS['STR_TITLE_SUFFIX']) && empty($GLOBALS['site_parameters']['title_suffix_disable'])) {
 			foreach(explode(' ', $GLOBALS['STR_TITLE_SUFFIX']) as $this_word) {
-				if ((String::strlen($this_word)<=2 || String::strpos(String::strtolower($this_title), String::strtolower($this_word)) === false) && String::strlen($this_title . ' ' . $this_word) < 80) {
+				if ((String::strlen($this_word)<=2 || (String::strpos(String::strtolower($this_title), String::strtolower($this_word)) === false && empty($GLOBALS['site_parameters']['title_suffix_skip_keyword_in_double']))) && String::strlen($this_title . ' ' . $this_word) < 80) {
 					$this_title .= ' ' .$this_word;
 				}
 			}
@@ -581,7 +581,7 @@ if (!function_exists('get_brand_description_html')) {
 				$thumb_file = thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
 				if(!empty($thumb_file)) {
 					$tmpData['image'] = array('href' => ($show_links_to_details ? get_url('/achat/marque.php', array('id' => $brand_object->id)) : ''),
-							'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit')
+							'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $thumb_file
 						);
 				}
 			}
@@ -625,9 +625,11 @@ if (!function_exists('get_categories_output')) {
 	 * @param integer $text_max_length
 	 * @param integer $max_depth_allowed
 	 * @param integer $columns_if_related_display_mode
+	 * @param integer $parent_id
+	 * @param integer $exclude_id
 	 * @return
 	 */
-	function get_categories_output($location = null, $mode = 'categories', $selected_item = null, $display_mode = 'option', $add_indent = '&nbsp;&nbsp;', $input_name = null, $technical_code = null, $use_admin_rights = false, $text_max_length = 25, $max_depth_allowed = null, $columns_if_related_display_mode = null, $parent_id=null, $exclude_id=null)
+	function get_categories_output($location = null, $mode = 'categories', $selected_item = null, $display_mode = 'option', $add_indent = '&nbsp;&nbsp;', $input_name = null, $technical_code = null, $use_admin_rights = false, $text_max_length = 30, $max_depth_allowed = null, $columns_if_related_display_mode = null, $parent_id=null, $exclude_id=null)
 	{
 		$output = '';
 		if($mode == 'categories') {
@@ -1026,7 +1028,7 @@ if (!function_exists('print_actu')) {
 				} else {
 					$tplData[] = array('titre' => $art['titre_' . $_SESSION['session_langue']],
 						'date' => get_formatted_date(time()),
-						'image_src' => (!empty($art['image1']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($art['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit') : null),
+						'image_src' => (!empty($art['image1']) ? thumbs($art['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true) : null),
 						'chapo' => $art['chapo_' . $_SESSION['session_langue']]
 						);
 				}
@@ -1271,9 +1273,9 @@ if (!function_exists('affiche_mini_caddie')) {
 			$tmpProd['price'] = fprix($price_displayed, true);
 			$display_picture = $product_object->get_product_main_picture(false);
 			if ($display_picture) {
-				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
+				$product_picture = thumbs($display_picture, 75, 75, 'fit', null, null, true, true);
 			} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
-				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
+				$product_picture = thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit', null, null, true, true);
 			} else {
 				$product_picture = null;
 			}
@@ -1859,6 +1861,10 @@ if (!function_exists('getHTMLHead')) {
 		});
 ';
 		}
+		if(!empty($GLOBALS['load_cropper'])){
+			$GLOBALS['css_files'][] = get_url('/lib/css/cropper.min.css');
+			$GLOBALS['js_files'][] = get_url('/lib/js/cropper.min.js');
+		}
 		if(!empty($GLOBALS['site_parameters']['scroll_to_top'])) {
 			// Footer sur toutes les pages
 			$GLOBALS['js_ready_content_array'][] = '
@@ -1993,10 +1999,12 @@ if (!function_exists('get_menu')) {
 				$GLOBALS['main_menu_items']['account'] = array(get_url('membre') => $GLOBALS['STR_COMPTE']);
 			}
 			$GLOBALS['main_menu_items']['contact'] = array(get_contact_url(false, false) => $GLOBALS['STR_CONTACT']);
+			if(empty($GLOBALS['site_parameters']['disable_contact_submenu'])) {
 			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 				$GLOBALS['menu_items']['contact'][get_contact_url(false, false)] = $GLOBALS['STR_CONTACT'];
 			}
 			$GLOBALS['menu_items']['contact'][get_url('/plan_acces.php')] = $GLOBALS['STR_ACCESS_PLAN'];
+			}
 			if (a_priv('admin*', true)) {
 				$GLOBALS['main_menu_items']['admin'] = array($GLOBALS['administrer_url'] . '/' => $GLOBALS['STR_ADMIN']);
 			}
@@ -2016,7 +2024,7 @@ if (!function_exists('get_menu')) {
 			$GLOBALS['main_menu_items'] = array_merge_recursive($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
 			$GLOBALS['menu_items'] = array_merge_recursive($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
 			// $GLOBALS['main_menu_items']['news'] est ajouté dans le sous menu de "Autre" si il n'est pas présent dans les éléments principaux du menu
-			$GLOBALS['menu_items']['other'] = array_merge($GLOBALS['main_menu_items']['catalog'], $GLOBALS['menu_items']['news'], (!in_array('news', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['news']:array()), array('' => 'divider'), $GLOBALS['menu_items']['contact'], $GLOBALS['menu_items']['devis'],(!in_array('contact', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['contact']:array()));
+			$GLOBALS['menu_items']['other'] = array_merge($GLOBALS['main_menu_items']['catalog'], $GLOBALS['menu_items']['news'], (!in_array('news', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['news']:array()), array('' => 'divider'), vb($GLOBALS['menu_items']['contact'], array()), $GLOBALS['menu_items']['devis'],(!in_array('contact', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['contact']:array()));
 		}
 		if(isset($GLOBALS['site_parameters']['main_menu_items_if_available']) && is_array($GLOBALS['site_parameters']['main_menu_items_if_available'])) {
 			$temp = array();
@@ -2039,7 +2047,7 @@ if (!function_exists('get_menu')) {
 				$all_parents_with_ordered_direct_sons_array[$result['parent_id']][] = $result['id'];
 				$item_name_array[$result['id']] = $result['nom'];
 				if(empty($result['parent_id'])) {
-					$result['nom'] = String::strtoupper($result['nom']);
+					$result['nom'] = $result['nom'];
 				}
 				if(!empty($GLOBALS['site_parameters']['insert_product_categories_in_menu'])) {
 					// Il faut définir par la suite cat_XX dans le paramètre main_menu_items_if_available depuis le back office pour que la catégorie s'affiche.
@@ -2751,7 +2759,7 @@ if (!function_exists('newsletter_validation')) {
 	 *
 	 * @return
 	 */
-	function newsletter_validation($frm, $form_error_object)
+	function newsletter_validation(&$frm, &$form_error_object)
 	{
 		if (empty($frm)) {
 			return false;
@@ -2801,7 +2809,9 @@ if (!function_exists('affiche_contenu_html')) {
 	{
 		$output = '';
 		if (!isset($_SESSION['session_site_country']) && !empty($_SERVER['REMOTE_ADDR']) && check_if_module_active('geoip')) {
-			include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+			if(!class_exists('geoIP')) {
+				include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+			}
 			$geoIP = new geoIP();
 			$_SESSION['session_site_country'] = $geoIP->geoIPCountryIDByAddr($_SERVER['REMOTE_ADDR']);
 			$geoIP->geoIPClose();
@@ -2827,11 +2837,11 @@ if (!function_exists('affiche_contenu_html')) {
 				break;
 			}
 			// On préserve le HTML mais on corrige les & isolés
-			$output .= template_tags_replace(String::htmlentities(String::html_entity_decode_if_needed($obj->contenu_html), ENT_COMPAT, GENERAL_ENCODING, false, true), $custom_template_tags, false, 'html');
+			$output .= String::htmlentities(String::html_entity_decode_if_needed($obj->contenu_html), ENT_COMPAT, GENERAL_ENCODING, false, true);
 			$last_emplacement = $obj->emplacement;
 			$GLOBALS['affiche_contenu_html_last_found'] = true;
 		}
-		correct_output($output, false, 'html', $_SESSION['session_langue']);
+		correct_output(template_tags_replace($output, $custom_template_tags, false, 'html'), false, 'html', $_SESSION['session_langue']);
 		if ($return_mode) {
 			return $output;
 		} else {
@@ -2953,7 +2963,7 @@ if (!function_exists('get_diaporama')) {
 		while($img_diapo = fetch_assoc($q)) {
 			$tmpdiapo['j'] =  $j;
 			$tmpdiapo['image'] =  $GLOBALS['repertoire_upload'] .  '/' . $img_diapo["image"];
-			$tmpdiapo['thumbs'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($img_diapo["image"], 175, 275, "fit");
+			$tmpdiapo['thumbs'] = thumbs($img_diapo["image"], 175, 275, 'fit', null, null, true, true);
 			$tmpdiapo['is_row'] = ($j % $nb_colonnes == 0);
 			$j++;
 	
@@ -3043,9 +3053,9 @@ if (!function_exists('get_search_form')) {
 					$product_object = new Product($product_id);
 					$display_picture = $product_object->get_product_main_picture(false);
 					if ($display_picture) {
-						$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
+						$product_picture = thumbs($display_picture, 75, 75, 'fit', null, null, true, true);
 					} else {
-						$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
+						$product_picture = thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit', null, null, true, true);
 					}
 					$produits_options[] = array(
 						'ref' => $product_object->reference,
@@ -3116,7 +3126,7 @@ if (!function_exists('get_search_form')) {
 				if(empty($GLOBALS['select_categorie'])) {
 					// Si plusieurs formulaires de recherche sont présents sur la même page, on garde en mémoire $GLOBALS['select_categorie']
 					$GLOBALS['parent_categorie'] = vn($frm["categorie"]); // catégorie sélectionnée
-					$GLOBALS['select_categorie'] = get_categories_output(null, 'categories', vn($_GET["categorie"]), vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option'), '&nbsp;&nbsp;', null);
+					$GLOBALS['select_categorie'] = get_categories_output(null, 'categories', vn($_GET["categorie"]), vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option'), '&nbsp;&nbsp;', null, null, false, vb($GLOBALS['site_parameters']['search_form_category_text_length_max'], 40));
 				}
 				$tpl_f->assign('select_categorie', $GLOBALS['select_categorie']);
 				$tpl_f->assign('STR_CAT_LB', $GLOBALS['STR_CAT_LB']);
@@ -3128,7 +3138,9 @@ if (!function_exists('get_search_form')) {
 				}
 				$tpl_f->assign('select_attributes', $tpl_f_select_attributes);
 				// affichage des attributs variables
-				if (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form']) && $display == 'module_products') {
+				if (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form_'.$display])) {
+					$technical_code = $GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form_'.$display];
+				} elseif (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'])) {
 					$technical_code = $GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'];
 				}
 				$tpl_f->assign('custom_attribute', display_custom_attribute(vb($frm['custom_attribut']), vb($technical_code), true));

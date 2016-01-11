@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_connexion_user_liste.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: admin_connexion_user_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_CONNEXION_USER_TITLE}</div>
 {if $display_search_form}
 <form class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
@@ -23,14 +23,12 @@
 			<label for="search_user_ip">{$STR_ADMIN_REMOTE_ADDR}{$STR_BEFORE_TWO_POINTS}:</label><br />
 			<input type="text" class="form-control" id="search_user_ip" name="user_ip" value="{$user_ip|str_form_value}" />
 		</div>
-	{if !empty($STR_PSEUDO)}
 		<div class="col-sm-3 center">
-			<label for="search_client_info">{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</label><br />
+			<label for="search_client_info">{$STR_ADMIN_USER}{$STR_BEFORE_TWO_POINTS}:</label><br />
 			<input type="text" class="form-control" id="search_client_info" name="client_info" value="{$client_info|str_form_value}" />
 		</div>
-	{/if}
 		<div class="col-sm-3 center">
-			<label for="search_user_id">{$STR_ADMIN_USER}{$STR_BEFORE_TWO_POINTS}:</label><br />
+			<label for="search_user_id">{$STR_ADMIN_ID}{$STR_BEFORE_TWO_POINTS}:</label><br />
 			<input type="text" class="form-control" id="search_user_id" name="user_id" value="{$user_id|str_form_value}" />
 		</div>
 		<div class="clearfix"></div>

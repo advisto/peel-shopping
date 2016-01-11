@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits_attributs.php 47710 2015-11-06 14:57:19Z gboussin $
+// $Id: produits_attributs.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -22,7 +22,13 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 $product_id = vn($_GET['id']);
 
 switch (vb($_REQUEST['mode'])) {
-	case "associe" :
+	case "delete" :
+		// Suppression de l'association entre le produit et les attributs.
+		$sql = query("DELETE FROM peel_produits_attributs WHERE produit_id = '" . intval($product_id) . "'");
+		affiche_liste_attributs_by_id(vb($_GET['id']));
+		break;
+
+	default:
 		if (!empty($_POST)) {
 			$product_object = new Product($product_id, null, false, null, true, !check_if_module_active('micro_entreprise'));
 			if(!empty($product_object->id)) {
@@ -42,17 +48,11 @@ switch (vb($_REQUEST['mode'])) {
 						}
 					}
 				}
+				$GLOBALS['product_possible_attribute_cache_disable'][$product_id] = true;
 			}
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_MSG_UPDATE_OK']))->fetch();
-		} else {
-			// Suppression de l'association entre le produit et les attributs.
-			$sql = query("DELETE FROM peel_produits_attributs WHERE produit_id = '" . intval($product_id) . "'");
 		}
 		affiche_liste_attributs_by_id($product_id);
-		break;
-
-	default :
-		affiche_liste_attributs_by_id(vb($_GET['id']));
 		break;
 }
 

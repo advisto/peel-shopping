@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: produits.tpl 48460 2016-01-11 11:40:11Z sdelaporte $
 *}{if $is_associated_product}
 	<hr />
 	<div class="associated_product list-group">
@@ -68,7 +68,7 @@
 				{if isset($prod.image.zoom)}
 					{if $prod.image.zoom.is_lightbox}
 							<a href="{$prod.image.zoom.href|escape:'html'}" class="lightbox" onclick="return false;" title="{$prod.name|str_form_value}">{$prod.image.zoom.label}</a>
-					{elseif !empty($prod.image.zoom.is_pdf)}
+					{elseif $prod.image.zoom.file_type!='image'}
 							<a href="{$prod.image.zoom.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);" title="{$prod.name|str_form_value}">{$prod.image.zoom.label}</a>
 					{/if}
 				{/if}
@@ -113,7 +113,7 @@
 								{if isset($prod.image.zoom)}
 									{if $prod.image.zoom.is_lightbox}
 								<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" class="lightbox" onclick="return false;" title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
-									{elseif !empty($prod.image.zoom.is_pdf)}
+									{elseif !empty($prod.image.zoom.file_type) && {$prod.image.zoom.file_type}!='image'}
 								<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);" title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
 									{/if}
 								{/if}

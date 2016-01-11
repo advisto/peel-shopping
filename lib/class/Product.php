@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: Product.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 47592 2015-10-30 16:40:22Z sdelaporte $
+ * @version $Id: Product.php 48447 2016-01-11 08:40:08Z sdelaporte $
  * @access public
  */
 class Product {
@@ -133,6 +133,7 @@ class Product {
 	var $date_maj = null;
 	var $attributes_with_single_options_array = null;
 	var $paiement = null;
+
 	/**
 	 * Product::Product()
 	 *
@@ -142,9 +143,12 @@ class Product {
 	 * @param string $lang
 	 * @param boolean $show_all_etat_if_admin
 	 * @param boolean $vat_applicable
+	 * @param boolean $show_all
+	 * @param boolean $skip_additional_data
 	 */
-	function Product($id, $product_infos = null, $user_only_product_infos = false, $lang = null, $show_all_etat_if_admin = true, $vat_applicable = true, $show_all = false)
+	function Product($id, $product_infos = null, $user_only_product_infos = false, $lang = null, $show_all_etat_if_admin = true, $vat_applicable = true, $show_all = false, $skip_additional_data = false)
 	{
+		static $product_infos_sql;
 		if (empty($lang)) {
 			$lang = $_SESSION['session_langue'];
 		}
@@ -263,8 +267,11 @@ class Product {
 					WHERE p.id = '" . intval($this->id) . "' AND " . get_filter_site_cond('produits', 'p') . " " . (empty($show_all)?($show_all_etat_if_admin && a_priv("admin_products", false)?'AND p.etat IN ("1","0")':'AND p.etat = "1"') :'') . "
 					LIMIT 1";
 				// Le limit 1 est nécessaire car le produit peut être associé à plusieurs catégories => on ne récupère que la première catégorie trouvée
-				$query = query($sql);
-				$product_infos = fetch_assoc($query);
+				if(empty($product_infos_sql[md5($sql)])) {
+					$query = query($sql);
+					$product_infos_sql[md5($sql)] = fetch_assoc($query);
+				}
+				$product_infos = $product_infos_sql[md5($sql)];
 			} else {
 				$ad_object = new Annonce($this->id);
 				$product_infos = $ad_object->get_product_infos_object();
@@ -302,33 +309,35 @@ class Product {
 			}
 		}
 		$this->name = String::html_entity_decode_if_needed($this->name);
-		$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
-		$extra_description = '';
-		if(function_exists('get_product_description')) {
-			$extra_description .= get_product_description($this);
-		}
-		$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, false, true);
-		foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
-			foreach($this_options_array as $this_attribut_id => $this_options_infos) {
-				if($this_attribut_id && empty($this_options_infos['texte_libre']) && empty($this_options_infos['upload'])) {
-					// Ceci n'est pas un attribut texte ou upload
-					if (empty($GLOBALS['site_parameters']['disable_display_attributes_with_single_options_on_product_description'])) {
-						$extra_description .= $this_options_infos['nom'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $this_options_infos['descriptif'] . '<br />';
+		if(!$skip_additional_data) {
+			$this->descriptif = String::html_entity_decode_if_needed($this->descriptif);
+			$extra_description = '';
+			if(function_exists('get_product_description')) {
+				$extra_description .= get_product_description($this);
+			}
+			$possible_attributes_with_single_options = $this->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, false, true);
+			foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
+				foreach($this_options_array as $this_attribut_id => $this_options_infos) {
+					if($this_attribut_id && empty($this_options_infos['texte_libre']) && empty($this_options_infos['upload'])) {
+						// Ceci n'est pas un attribut texte ou upload
+						if (empty($GLOBALS['site_parameters']['disable_display_attributes_with_single_options_on_product_description'])) {
+							$extra_description .= $this_options_infos['nom'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $this_options_infos['descriptif'] . '<br />';
+						}
+						$this->attributes_with_single_options_array[$this_options_infos['technical_code']] = array('nom'=>$this_options_infos['nom'],'descriptif'=>$this_options_infos['descriptif']);
 					}
-					$this->attributes_with_single_options_array[$this_options_infos['technical_code']] = array('nom'=>$this_options_infos['nom'],'descriptif'=>$this_options_infos['descriptif']);
 				}
 			}
-		}
-		if (empty($GLOBALS['site_parameters']['display_extra_product_description_mode']) || $GLOBALS['site_parameters']['display_extra_product_description_mode']=='after') {
-			$this->description = String::html_entity_decode_if_needed($this->description) . $extra_description;
-		} elseif ($GLOBALS['site_parameters']['display_extra_product_description_mode']=='before') {
-			$this->description = $extra_description . String::html_entity_decode_if_needed($this->description);
-		}
-		correct_output($this->descriptif, true, 'html', $lang);
-		correct_output($this->description, true, 'html', $lang);
-		// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
-		if(empty($this->descriptif) && !empty($GLOBALS['site_parameters']['product_short_description_generate_if_empty'])) {
-			$this->descriptif = String::str_shorten(String::strip_tags($this->description), 500);
+			if (empty($GLOBALS['site_parameters']['display_extra_product_description_mode']) || $GLOBALS['site_parameters']['display_extra_product_description_mode']=='after') {
+				$this->description = String::html_entity_decode_if_needed($this->description) . $extra_description;
+			} elseif ($GLOBALS['site_parameters']['display_extra_product_description_mode']=='before') {
+				$this->description = $extra_description . String::html_entity_decode_if_needed($this->description);
+			}
+			correct_output($this->descriptif, true, 'html', $lang);
+			correct_output($this->description, true, 'html', $lang);
+			// On ajoute à la description les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
+			if(empty($this->descriptif) && !empty($GLOBALS['site_parameters']['product_short_description_generate_if_empty'])) {
+				$this->descriptif = String::str_shorten(String::strip_tags($this->description), 500);
+			}
 		}
 		$this->categorie = String::html_entity_decode_if_needed(vb($this->categorie));
 		$this->poids = floatval($this->poids);
@@ -1012,85 +1021,64 @@ class Product {
 	 */
 	function get_all_promotions_percentage($reseller_mode = false, $user_promotion_percentage = 0, $format = false, $quantity = 1, $quantity_all_products_in_category = null)
 	{
-		if($quantity_all_products_in_category === null) {
-			$quantity_all_products_in_category = $quantity;
+		static $all_promotions_percentage_array;
+		$cache_id = md5(serialize(array($this->id, $reseller_mode, $user_promotion_percentage, $format, $quantity, $quantity_all_products_in_category, $_SESSION['session_caddie']->articles)));
+		if(!isset($all_promotions_percentage_array[$cache_id])) {
+			if($quantity_all_products_in_category === null) {
+				$quantity_all_products_in_category = $quantity;
+			}
+			$user_promotion_percentage = min($user_promotion_percentage, 100);
+			if (!$reseller_mode) {
+				// Pour les revendeurs, on n'applique pas d'autre réduction que le pourcentage de réduction explicite pour cet utilisateur
+				if (check_if_module_active('category_promotion')) {
+					$cat = get_category_promotion_by_product($this->id, $quantity_all_products_in_category);
+				}
+				if (empty($cat)) {
+					$cat = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
+				}
+				$global_promotion = $_SESSION['session_caddie']->get_global_promotion();
+				if (!empty($this->id_marque) && check_if_module_active('marques_promotion')) {
+					$marque = get_marque_promotion($this->id_marque);
+				}
+				if (empty($marque)) {
+					$marque = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
+				}
+				$get_promotion_by_user_offer_object = $this->get_promotion_by_user_offer($quantity);
+				if(!empty($get_promotion_by_user_offer_object)) {
+					$promotion_by_user_offer = $get_promotion_by_user_offer_object->remise_percent;
+				} else {
+					$promotion_by_user_offer = 0;
+				}
+				// Application des réductions automatique en fonction de mots clés dans la description ou la référence du produit 
+				$promotion_by_product_filter_object = $this->get_promotion_by_product_filter();
+				if(!empty($promotion_by_product_filter_object)) {
+					$promotion_by_product_filter = $promotion_by_product_filter_object->remise_percent;
+				} else {
+					$promotion_by_product_filter = 0;
+				}
+				// Calcul du pourcentage de réduction à partir du champ prix_promo. Ne s'applique pas si le prix est défini par les réductions par lot
+				if ($this->prix_promo > 0 && $this->prix > 0 && empty($GLOBALS['cache']['lot_price_by_id'][$this->id])) {
+					$prix_promo_percent = round(($this->prix - $this->prix_promo) * 100 / $this->prix, 2);
+				} else {
+					$prix_promo_percent = 0;
+				}
+				if (!empty($GLOBALS['site_parameters']['product_add_all_percent_discount'])) {
+					// Si on veut cumuler les réductions par produit, par marque et par catégorie
+					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - $this->promotion / 100) * (1 - $cat['promotion_percent'] / 100) * (1 - $marque['promotion_percent'] / 100) * (1 - $global_promotion / 100) * (1 - $promotion_by_product_filter / 100) * (1 - $promotion_by_user_offer / 100);
+				} else {
+					// La réduction produit est le max de ce qui est indiqué dans le produit, la marque , la catégorie et la promotion générale
+					$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min(max($this->promotion, $cat['promotion_percent'], $marque['promotion_percent'], $global_promotion, $promotion_by_product_filter, $promotion_by_user_offer, $prix_promo_percent), 100) / 100);
+				}
+			} else {
+				// Si on est revendeur, seule la promotion utilisateur est utilisée
+				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100);
+			}
+			$all_promotions_percentage_array[$cache_id] = $rebate_coefficient * 100;
 		}
-		$user_promotion_percentage = min($user_promotion_percentage, 100);
-		if (!$reseller_mode) {
-			// Pour les revendeurs, on n'applique pas d'autre réduction que le pourcentage de réduction explicite pour cet utilisateur
-			if (check_if_module_active('category_promotion')) {
-				$cat = get_category_promotion_by_product($this->id, $quantity_all_products_in_category);
-			}
-			if (empty($cat)) {
-				$cat = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
-			}
-			if (!empty($GLOBALS['site_parameters']['global_remise_percent'])) {
-				if(is_array($GLOBALS['site_parameters']['global_remise_percent'])) {
-                    // Si c'est un tableau, on souhaite définir un seuil d'application du montant. On trie le tableau du plus petit seuil au seuil le plus important pour faire une boucle.
-                    ksort($GLOBALS['site_parameters']['global_remise_percent']);
-					$total = 0;
-					foreach($_SESSION['session_caddie']->articles as $numero_ligne => $id) {
-						$product_object = new Product($id);
-						// impossible d'utiliser directement $_SESSION['session_caddie']->total, puisqu'en la variable est en cours de calcul quand on la test
-						if (empty($GLOBALS['site_parameters']['product_promotion_plurality_disable']) || (!empty($GLOBALS['site_parameters']['product_promotion_plurality_disable']) && $product_object->promotion==0)) {
-							// On utilise que les produits sur lesquelles aucune réduction ne s'applique pour calculer le seuil.
-							$total += $_SESSION['session_caddie']->prix_cat[$numero_ligne] * $_SESSION['session_caddie']->quantite[$numero_ligne];
-						}
-						unset($product_object);
-					}
-                    foreach($GLOBALS['site_parameters']['global_remise_percent'] as $this_treshold => $this_percent) {
-                        if (vn($total) >= $this_treshold) {
-						   // On a dépassé le seuil, donc la valeur la plus proche est celle précédemment trouvée.
-						   $global_promotion = vn($this_percent);
-						}
-                    }
-                } else {
-					$global_promotion = vn($GLOBALS['site_parameters']['global_remise_percent']);
-                }
-			} else {
-				$global_promotion = 0;
-			}
-			if (!empty($this->id_marque) && check_if_module_active('marques_promotion')) {
-				$marque = get_marque_promotion($this->id_marque);
-			}
-			if (empty($marque)) {
-				$marque = array('nom' => '', 'promotion_devises' => 0, 'promotion_percent' => 0);
-			}
-			$get_promotion_by_user_offer_object = $this->get_promotion_by_user_offer($quantity);
-			if(!empty($get_promotion_by_user_offer_object)) {
-				$promotion_by_user_offer = $get_promotion_by_user_offer_object->remise_percent;
-			} else {
-				$promotion_by_user_offer = 0;
-			}
-			// Application des réductions automatique en fonction de mots clés dans la description ou la référence du produit 
-			$promotion_by_product_filter_object = $this->get_promotion_by_product_filter();
-			if(!empty($promotion_by_product_filter_object)) {
-				$promotion_by_product_filter = $promotion_by_product_filter_object->remise_percent;
-			} else {
-				$promotion_by_product_filter = 0;
-			}
-			// Calcul du pourcentage de réduction à partir du champ prix_promo. Ne s'applique pas si le prix est défini par les réductions par lot
-			if ($this->prix_promo > 0 && $this->prix > 0 && empty($GLOBALS['cache']['lot_price_by_id'][$this->id])) {
-				$prix_promo_percent = round(($this->prix - $this->prix_promo) * 100 / $this->prix, 2);
-			} else {
-				$prix_promo_percent = 0;
-			}
-			if (!empty($GLOBALS['site_parameters']['product_add_all_percent_discount'])) {
-				// Si on veut cumuler les réductions par produit, par marque et par catégorie
-				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - $this->promotion / 100) * (1 - $cat['promotion_percent'] / 100) * (1 - $marque['promotion_percent'] / 100) * (1 - $global_promotion / 100) * (1 - $promotion_by_product_filter / 100) * (1 - $promotion_by_user_offer / 100);
-			} else {
-				// La réduction produit est le max de ce qui est indiqué dans le produit, la marque , la catégorie et la promotion générale
-				$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100) * (1 - min(max($this->promotion, $cat['promotion_percent'], $marque['promotion_percent'], $global_promotion, $promotion_by_product_filter, $promotion_by_user_offer, $prix_promo_percent), 100) / 100);
-			}
-		} else {
-			// Si on est revendeur, seule la promotion utilisateur est utilisée
-			$rebate_coefficient = 1 - (1 - $user_promotion_percentage / 100);
-		}
-		$percentage = $rebate_coefficient * 100;
 		if ($format) {
-			return sprintf("%0.2f", $percentage) . '%';
+			return sprintf("%0.2f", $all_promotions_percentage_array[$cache_id]) . '%';
 		} else {
-			return $percentage;
+			return $all_promotions_percentage_array[$cache_id];
 		}
 	}
 
@@ -1293,7 +1281,11 @@ class Product {
 		if ($price_ht > 0) {
 			$minimal_price_array[] = $price_ht;
 		}
-		$minimal_price = min ($minimal_price_array);
+		if(!empty($minimal_price_array)) {
+			$minimal_price = min ($minimal_price_array);
+		} else {
+			$minimal_price = 0;
+		}
 		return $this->format_prices($minimal_price, display_prices_with_taxes_active(), false, true, true);
 	}
 }

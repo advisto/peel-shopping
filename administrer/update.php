@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 47738 2015-11-07 21:29:50Z gboussin $
+// $Id: update.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -211,8 +211,8 @@ ALTER TABLE `peel_produits` CHANGE `description_fr` `description_fr` MEDIUMTEXT 
 ALTER TABLE `peel_produits` CHANGE `description_en` `description_en` MEDIUMTEXT NOT NULL ;
 ALTER TABLE `peel_rubriques` CHANGE `description_fr` `description_fr` MEDIUMTEXT NOT NULL ;
 ALTER TABLE `peel_rubriques` CHANGE `description_en` `description_en` MEDIUMTEXT NOT NULL ;
-ALTER TABLE `peel_sites` ADD `tag_analytics` TEXT NOT NULL default '' ;
-ALTER TABLE `peel_sites` ADD `small_order_overcost_tva_percent` TEXT NOT NULL default '' ;
+ALTER TABLE `peel_sites` ADD `tag_analytics` TEXT NOT NULL;
+ALTER TABLE `peel_sites` ADD `small_order_overcost_tva_percent` TEXT NOT NULL;
 ALTER TABLE `peel_sites` ADD `site_suspended` ENUM('TRUE','FALSE') NOT NULL DEFAULT 'FALSE';
 ALTER TABLE `peel_sites` ADD `module_forum` tinyint(4) NOT NULL default '0';
 ALTER TABLE `peel_sites` ADD `module_giftlist` tinyint(4)  NOT NULL default '0';
@@ -1041,9 +1041,9 @@ comme les id des pays n'ont pas changé, vu qu'on rajoute continent_id, c'est qu
 
 CREATE TABLE `peel_access_map` (
 `id` INT NOT NULL AUTO_INCREMENT,
-`text_fr` TEXT NOT NULL DEFAULT '',
-`text_en` TEXT NOT NULL DEFAULT '',
-`map_tag` TEXT NOT NULL DEFAULT '',
+`text_fr` TEXT NOT NULL,
+`text_en` TEXT NOT NULL,
+`map_tag` TEXT NOT NULL,
 `date_insere` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 `date_maj` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 PRIMARY KEY (`id`)
@@ -1724,7 +1724,7 @@ ALTER TABLE `peel_categories_annonces`  ADD `site_id` int(11) unsigned NOT NULL 
 }
 $sql_update_array['7.1.4'] .= "
 -- Ajout de filtre des catégories à exclure de l'application d'un code promo
-ALTER TABLE `peel_codes_promos` ADD `cat_not_apply_code_promo` TEXT NOT NULL DEFAULT '';
+ALTER TABLE `peel_codes_promos` ADD `cat_not_apply_code_promo` TEXT NOT NULL;
 
 -- Ajout de filtre pour appliquer un code promo à un choix de produit seulement.
 ALTER TABLE `peel_codes_promos` ADD `product_filter` varchar(255) NOT NULL DEFAULT '';
@@ -2287,7 +2287,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('skip_home_affiche_compte', 'core', 'boolean', 'true', '', NOW(), '', 1, 1),
 ('skip_home_register_form', 'core', 'boolean', 'true', '', NOW(), '', 1, 1),
 ('scroll_to_top', 'core', 'boolean', 'true', '', NOW(), '', 1, 1),
-('modules_lang_folders_array', 'modules', 'array', '[forum] => \"/modules/forum/lang/\", [agenda] => \"/modules/agenda/lang/\", [participants] => \"/modules/participants/lang/\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/lang/\", [photos_gallery] => \"/modules/photos_gallery/lang/\", [sign_in_twitter] => \"/modules/sign_in_twitter/lang/\", [references] => \"/modules/references/lang/\", [icirelais] => \"/modules/icirelais/lang/\", [exaprint] => \"/modules/exaprint/lang/\", [groups_advanced] => \"/modules/groups_advanced/lang/\", [annonces] => \"/modules/annonces/lang/\", [abonnement] => \"/modules/abonnement/lang/\", [vitrine] => \"/modules/vitrine/lang/\", [affiliation] => \"/modules/affiliation/lang/\", [listecadeau] => \"/modules/listecadeau/lang/\", [blog] => \"/modules/blog/lang/\", [payback] => \"/modules/payback/lang/\", [tnt] => \"/modules/tnt/lang/\", [vatlayer] => \"/modules/vatlayer/lang/\", [telechargement] => \"/modules/telechargement/lang/\", [devis] => \"/modules/devis/lang/\", [exaprint] => \"/modules/exaprint/lang/\"', '', NOW(), '', 1, 0),
+('modules_lang_folders_array', 'modules', 'array', '[forum] => \"/modules/forum/lang/\", [agenda] => \"/modules/agenda/lang/\", [participants] => \"/modules/participants/lang/\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/lang/\", [photos_gallery] => \"/modules/photos_gallery/lang/\", [sign_in_twitter] => \"/modules/sign_in_twitter/lang/\", [references] => \"/modules/references/lang/\", [icirelais] => \"/modules/icirelais/lang/\", [exaprint] => \"/modules/exaprint/lang/\", [groups_advanced] => \"/modules/groups_advanced/lang/\", [annonces] => \"/modules/annonces/lang/\", [abonnement] => \"/modules/abonnement/lang/\", [vitrine] => \"/modules/vitrine/lang/\", [affiliation] => \"/modules/affiliation/lang/\", [listecadeau] => \"/modules/listecadeau/lang/\", [blog] => \"/modules/blog/lang/\", [payback] => \"/modules/payback/lang/\", [tnt] => \"/modules/tnt/lang/\", [vatlayer] => \"/modules/vatlayer/lang/\", [telechargement] => \"/modules/telechargement/lang/\", [devis] => \"/modules/devis/lang/\", [exaprint] => \"/modules/exaprint/lang/\", [kiala] => \"/modules/kiala/lang/\"', '', NOW(), '', 1, 0),
 ('modules_configuration_variable_array', 'modules', 'array', '[affiliation] => \"module_affilie\", [reseller] => \"module_retail\", [gift_check] => \"module_cadeau\", [tagcloud] => \"module_nuage\", [banner] => \"module_pub\", [devises] => \"module_devise\", [parrainage] => \"module_parrain\", [micro_entreprise] => \"module_entreprise\", [facebook_connect] => \"facebook_connect\", [googlefriendconnect] => \"googlefriendconnect\", [sign_in_twitter] => \"sign_in_twitter\"', '', NOW(), '', 1, 0),
 ('modules_fonctions_variable_array', 'modules', 'array', '[devises] => \"fonctionsdevises\", [sips] => \"fonctionsatos\", [profil] => \"fonctionsprofile\", [good_clients] => \"fonctionsgoodclients\", [facture_advanced] => \"fonctionsgenerepdf\", [statistiques] => \"fonctionsstats\", [welcome_ad] => \"fonctionswelcomead\", [reseller_map] => \"fonctionsresellermap\", [maps] => \"fonctionsmap\", [precedent_suivant] => \"fonctionsprecedentsuivant\", [url_rewriting] => \"rewritefile\", [banner] => \"fonctionsbanner\", [cart_popup] => \"fonctionscartpoup\", [advanced_search] => \"fonctionssearch\", [category_promotion] => \"fonctionscatpromotions\", [marques_promotion] => \"fonctionsmarquepromotions\", [groups_advanced] => \"fonctionsgroupsadvanced\", [parrainage] => \"fonctionsparrain\", [micro_entreprise] => \"fonctionsmicro\", [photos_gallery] => \"fonctionsphotosgallery\", [sign_in_twitter] => \"fonctionssignintwitter\", [phone_cti] => \"fonctionsphonecti\", [exaprint] => \"fonctionsadministrerexaprint\", [payment_by_product] => \"fonctionspaymentbyproduct\", [affiliation] => \"fonctionsaffiliate\", [listecadeau] => \"fonctionsgiftlist\", [gifts] => \"fonctionsgift\", [newsletter] => \"fonctionswanewsletter\", [facebook_connect] => \"fonctionfacebookconnect\", [ariane_panier] => \"fonctionsarianepanier\"', '', NOW(), '', 1, 0),
 ('modules_no_library_load_array', 'modules', 'array', '\"relance_avance\", \"sips\", \"cmcic\", \"bluepaid\", \"fianet\", \"fianet_sac\", \"ogone\", \"omnikassa\", \"paybox\", \"spplus\", \"systempay\", \"moneybookers\", \"paypal\", \"comparateur\", \"birthday\", \"good_clients\", \"facture_advanced\", \"statistiques\", \"expeditor\", \"chart\", \"kekoli\", \"reseller_map\", \"maps\", \"photodesk\"', '', NOW(), '', 1, 0),
@@ -2316,6 +2316,13 @@ CREATE TABLE IF NOT EXISTS `peel_faq_categories` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 ";
 }
+// Correction pour certains sites qui par le passé n'étaient pas en configuré standard 1,2,3 ou 2,3 pour certaines variables
+$sql_update_array['8.0.1'] = "
+UPDATE  peel_configuration SET `string` = 'completed'  WHERE technical_code = 'payment_status_create_bill' AND `string` = '3';
+UPDATE  peel_configuration SET `string` = 'completed'  WHERE technical_code = 'payment_status_decrement_stock' AND `string` = '3';
+ALTER TABLE `peel_utilisateurs` ADD `parameters` TEXT NOT NULL;
+";
+
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	
 }

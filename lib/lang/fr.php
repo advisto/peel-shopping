@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fr.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -43,6 +43,7 @@ $GLOBALS["STR_AFFILIATION"] = "Affiliation";
 $GLOBALS["STR_AJOUT_PENSE_BETE"] = "Ajouter au pense-bête";
 $GLOBALS["STR_ALL_BRAND"] = "Toutes les marques";
 $GLOBALS["STR_ALL"] = "Toutes";
+$GLOBALS["STR_ALL_RESULTS"] = "Tous les résultats";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "Détail de la note du vendeur";
 $GLOBALS["STR_AND"] = "et";
 $GLOBALS["STR_AMOUNT"] = "Montant";
@@ -166,7 +167,7 @@ $GLOBALS["STR_DELETE"] = "Supprimer";
 $GLOBALS["STR_DELETE_CONFIRM"] = "Etes-vous sûr de vouloir supprimer ?";
 $GLOBALS["STR_DELIVERY_STOCK"] = "Délai de livraison prévu";
 $GLOBALS["STR_DELIVERY"] = "Livraison";
-$GLOBALS["STR_DEMO_RIGHTS_LIMITED"] = "DEMONSTRATION : Vous n'avez pas les droits pour effectuer cette action";
+$GLOBALS["STR_RIGHTS_LIMITED"] = "%s : Vous n'avez pas les droits pour effectuer cette action";
 $GLOBALS["STR_DESC"] = "décroissant";
 $GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Description";
 $GLOBALS["STR_DESIGNATION"] = "Désignation";
@@ -828,7 +829,6 @@ $GLOBALS["STR_VIA"] = "Via";
 $GLOBALS["STR_VOIR_LISTE_CADEAU"] = "Consulter ma liste de cadeaux";
 $GLOBALS["STR_VOIR_PENSE_BETE"] = "Consulter ma liste d'achat";
 $GLOBALS["STR_VOTE"] = "Voter";
-$GLOBALS["STR_WARNING_SIZE_PICTURE_ADS"] = "Attention : Si vous insérez des images dans la description, veuillez respecter le format de celle-ci.<br />Vos images doivent être d'une largeur maximale de 600 pixels.";
 $GLOBALS["STR_WARNING"] = "Attention";
 $GLOBALS["STR_WEBSITE"] = "Site web";
 $GLOBALS["STR_WEEK"] = "Semaine(s)";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: produit_details.php 48447 2016-01-11 08:40:08Z sdelaporte $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -36,11 +36,13 @@ if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'
 	if (num_rows($query)>0) {
 		// le produit appartient à la catégorie demandée dans l'url => on spécifie l'id et le nom de la catégorie pour la classe Product
 		$product_infos['categorie_id'] = intval(vn($_GET['catid']));
-		$product_infos['categorie'] = get_category_name($product_infos['categorie_id']) ;
+		$product_infos['categorie'] = get_category_name($product_infos['categorie_id']);
 	}
 }
-
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+if (!empty($_GET['step']) && !empty($_POST) && function_exists('get_attribut_list_from_post_data')) {
+	$_SESSION['session_attributs_step'][$_GET['step']] = get_attribut_list_from_post_data($product_object, $_POST);
+}
 $url = $product_object->get_product_url();
 if (empty($product_object->id) || ((!a_priv("admin_product") && !a_priv("reve")) && $product_object->on_reseller == 1)) {
 	// Si aucun produit n'est trouvé, retour à la page d'accueil

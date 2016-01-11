@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 47729 2015-11-06 22:00:11Z sdelaporte $
+// $Id: admin_eo.php 48464 2016-01-11 13:42:43Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,6 +127,7 @@ $GLOBALS["STR_ADMIN_CODES_PROMOS_ALREADY_USED"] = "Ĉi kodo jam estis uzita entu
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_AMOUNT_REBATE"] = "Aldoni rabatan kodon je";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_PERCENTAGE_REBATE"] = "Aldoni rabatan kodon je %";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE"] = "Aldoni reklaman kodon";
+$GLOBALS["STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_EXISTS"] = "La rabat-kodo <b>%s</b> jam ekzistas.";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_SENT"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_DELETED"] = "La rabat-kodo %s estis forigita.";
@@ -514,6 +515,7 @@ $GLOBALS["STR_ADMIN_LIVRAISONS_SALES_HEADER"] = "RESUMO DE VENDOJ / LIVERAJ STAT
 $GLOBALS["STR_ADMIN_LIVRAISONS_TITLE"] = "Venda protokolo / Livera stato";
 $GLOBALS["STR_ADMIN_LOGIN"] = "";
 $GLOBALS["STR_ADMIN_MANDATORY"] = "Nepra kampo";
+$GLOBALS["STR_ADMIN_MARKETPLACE_ORDER_ID"] = "";
 $GLOBALS["STR_ADMIN_MARQUES_ADD_BRAND"] = "Aldoni markon";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_CREATED"] = "La marko <b>%s</b> estis kreita.";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_STATUS_UPDATED"] = "Bone ĝisdatiĝis la stato de la marko %s.";
@@ -1531,6 +1533,8 @@ $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "Aldonvalor-imposta kvoto";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Notu: la aprioraj prezoj aperas je la kambio uzita en la mendo.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "Neniu mendo dum ĉi periodo respondas la petitan staton.";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "RESUMO DE VENDOJ / PAGAJ STATOJ ";

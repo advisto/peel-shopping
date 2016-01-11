@@ -1,15 +1,15 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 47738 2015-11-07 21:29:50Z gboussin $
+# $Id: create_new_site.sql 48447 2016-01-11 08:40:08Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -753,6 +753,8 @@ INSERT INTO `peel_profil` (`priv`, `site_id`) VALUES
 ('admin_sales', "[SITE_ID]"),
 ('admin_products', "[SITE_ID]"),
 ('admin_webmastering', "[SITE_ID]"),
+('admin_users', "[SITE_ID]"),
+('admin_manage', "[SITE_ID]"),
 ('admin_moderation', "[SITE_ID]");
 
 

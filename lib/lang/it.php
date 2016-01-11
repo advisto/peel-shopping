@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: it.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -41,6 +41,7 @@ $GLOBALS["STR_AFFILIATION"] = "";
 $GLOBALS["STR_AJOUT_PENSE_BETE"] = "";
 $GLOBALS["STR_ALL_BRAND"] = "";
 $GLOBALS["STR_ALL"] = "";
+$GLOBALS["STR_ALL_RESULTS"] = "";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "";
 $GLOBALS["STR_AMOUNT"] = "";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "";
@@ -159,7 +160,7 @@ $GLOBALS["STR_DELETE"] = "Cancellare";
 $GLOBALS["STR_DELETE_CONFIRM"] = "";
 $GLOBALS["STR_DELIVERY_STOCK"] = "";
 $GLOBALS["STR_DELIVERY"] = "Spedizione";
-$GLOBALS["STR_DEMO_RIGHTS_LIMITED"] = "";
+$GLOBALS["STR_RIGHTS_LIMITED"] = "";
 $GLOBALS["STR_DESC"] = "decrescente";
 $GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Descrizione";
 $GLOBALS["STR_DESIGNATION"] = "";
@@ -801,7 +802,6 @@ $GLOBALS["STR_VIA"] = "";
 $GLOBALS["STR_VOIR_LISTE_CADEAU"] = "";
 $GLOBALS["STR_VOIR_PENSE_BETE"] = "";
 $GLOBALS["STR_VOTE"] = "";
-$GLOBALS["STR_WARNING_SIZE_PICTURE_ADS"] = "";
 $GLOBALS["STR_WARNING"] = "";
 $GLOBALS["STR_WEBSITE"] = "Sito Internet";
 $GLOBALS["STR_WEEK"] = "";

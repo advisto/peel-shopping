@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: format.php 48453 2016-01-11 09:52:17Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -614,171 +614,173 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
-	$template_tags = array();
-	if(!$replace_only_custom_tags) {
-		// On rajoute les tags génériques au site
-		$template_tags['SITE'] = $GLOBALS['site'];
-		$template_tags['SITE_NAME'] = $GLOBALS['site'];
-		$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
-		if(!$avoid_load_urls) {
-			$template_tags['CATALOG_URL'] = get_product_category_url();
-		}
-		$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
-		$template_tags['CURRENT_URL'] = get_current_url(false);
-		$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
-		$template_tags['DATETIME'] = get_formatted_date(time(), 'long', true);
-		$template_tags['DATE'] = get_formatted_date(time(), 'long', false);
-		$template_tags['DATE_SHORT'] = get_formatted_date(time(), 'short', false);
-		$template_tags['TIMESTAMP'] = time();
-		// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
-		foreach(array('CODE_PROMO_SOURCE' => false, 'FUNCTION' => true, 'HTML' => true, 'GLOBALS' => true, 'BEST_SELLER_CARROUSEL' => true, 'CONTENT_CARROUSEL' => true) as $this_function_tag => $arg_mandatory) {
-			$tag_begin = -1;
-			while (String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1)) !== false) {
-				// Traitement pour chaque tag
-				// Il y a au moins un bon quote à remplacer
-				// on se positionne sur la dernière imbrication
-				$tag_begin = String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1);
-				$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
-				$tag_name_array = explode('=', $this_tag, 2);
-				$this_arg = vb($tag_name_array[1]);
-				if(!$arg_mandatory || !empty($this_arg)) {
-					if($this_function_tag == 'CODE_PROMO_SOURCE') {
-						// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
-						$sql = 'SELECT id, nom
-							FROM peel_codes_promos cp
-							WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($this_arg).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
-							ORDER BY id ASC
-							LIMIT 1';
-						$query = query($sql);
-						if ($obj = fetch_object($query)) {
-							$template_tags[$this_tag] = $obj->nom;
-							$sql = 'UPDATE peel_codes_promos
-								SET nb_valide=nb_valide-1
-								WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos');
+	if(strpos($text, '[') !== false && strpos($text, ']') !== false) {
+		$template_tags = array();
+		if(!$replace_only_custom_tags) {
+			// On rajoute les tags génériques au site
+			$template_tags['SITE'] = $GLOBALS['site'];
+			$template_tags['SITE_NAME'] = $GLOBALS['site'];
+			$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
+			if(!$avoid_load_urls) {
+				$template_tags['CATALOG_URL'] = get_product_category_url();
+			}
+			$template_tags['PHP_SELF'] = $_SERVER['PHP_SELF'];
+			$template_tags['CURRENT_URL'] = get_current_url(false);
+			$template_tags['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+			$template_tags['DATETIME'] = get_formatted_date(time(), 'long', true);
+			$template_tags['DATE'] = get_formatted_date(time(), 'long', false);
+			$template_tags['DATE_SHORT'] = get_formatted_date(time(), 'short', false);
+			$template_tags['TIMESTAMP'] = time();
+			// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
+			foreach(array('CODE_PROMO_SOURCE' => false, 'FUNCTION' => true, 'HTML' => true, 'GLOBALS' => true, 'BEST_SELLER_CARROUSEL' => true, 'CONTENT_CARROUSEL' => true) as $this_function_tag => $arg_mandatory) {
+				$tag_begin = -1;
+				while (String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1)) !== false) {
+					// Traitement pour chaque tag
+					// Il y a au moins un bon quote à remplacer
+					// on se positionne sur la dernière imbrication
+					$tag_begin = String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1);
+					$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
+					$tag_name_array = explode('=', $this_tag, 2);
+					$this_arg = vb($tag_name_array[1]);
+					if(!$arg_mandatory || !empty($this_arg)) {
+						if($this_function_tag == 'CODE_PROMO_SOURCE') {
+							// On va chercher les codes 1 par 1 en faisant SELECT * WHERE nb_valide>0 ORDER BY id ASC et mettre nb_valide=nb_valide-1
+							$sql = 'SELECT id, nom
+								FROM peel_codes_promos cp
+								WHERE ' . get_filter_site_cond('codes_promos', 'cp') . ' AND nb_valide>0 AND (nombre_prevue=0 OR compteur_utilisation<nombre_prevue) AND source="'.real_escape_string($this_arg).'" AND cp.etat = "1" AND ("' . date('Y-m-d', time()) . '" BETWEEN cp.date_debut AND cp.date_fin)
+								ORDER BY id ASC
+								LIMIT 1';
 							$query = query($sql);
-						}
-					} elseif($this_function_tag == 'FUNCTION') {
-						// SECURITE : Liste des fonctions autorisées ci-dessous, sinon la fonction appelée doit commencer par le préfixe 'get_tag_function_'
-						$allowed_functions = array('');
-						$this_arg_array=explode(',', $this_arg, 2);
-						$this_arg = $this_arg_array[0];
-						$this_params_array = get_array_from_string(vb($this_arg_array[1]));
-						if(in_array($this_arg, $allowed_functions)) {
-							$function_name = $this_arg;
-						} else {
-							$function_name = 'get_tag_function_' . $this_arg;
-						}
-						if(function_exists($function_name)) {
-							$template_tags[$this_tag] = $function_name($this_params_array);
-						} else {
-							$template_tags[$this_tag] = '[' . $function_name . ' not found]'; 
-						}
-					} elseif($this_function_tag == 'GLOBALS') {
-						// SECURITE : Liste des variables globales autorisées ci-dessous, sinon la variable appelée doit commencer par le préfixe 'tag_'
-						$allowed_functions = array('');
-						if(in_array($this_arg, $allowed_functions)) {
-							$function_name = $this_arg;
-						} else {
-							$function_name = 'tag_' . $this_arg;
-						}
-						$template_tags[$this_tag] = vb($GLOBALS[$function_name]);
-					} elseif($this_function_tag == 'RSS') {
-						// Pour chaque tag RSS, on remplace par le contenu du flux
-						$template_tags[$this_tag] = get_rss_feed_content($this_arg);
-					} elseif($this_function_tag == 'HTML') {
-						// Pour chaque tag HTML, on remplace par le contenu de la zone HTML correspondante
-						$template_tags[$this_tag] = affiche_contenu_html($this_arg, true);
-					} 
+							if ($obj = fetch_object($query)) {
+								$template_tags[$this_tag] = $obj->nom;
+								$sql = 'UPDATE peel_codes_promos
+									SET nb_valide=nb_valide-1
+									WHERE id="'.intval($obj->id).'" AND ' . get_filter_site_cond('codes_promos');
+								$query = query($sql);
+							}
+						} elseif($this_function_tag == 'FUNCTION') {
+							// SECURITE : Liste des fonctions autorisées ci-dessous, sinon la fonction appelée doit commencer par le préfixe 'get_tag_function_'
+							$allowed_functions = array('');
+							$this_arg_array=explode(',', $this_arg, 2);
+							$this_arg = $this_arg_array[0];
+							$this_params_array = get_array_from_string(vb($this_arg_array[1]));
+							if(in_array($this_arg, $allowed_functions)) {
+								$function_name = $this_arg;
+							} else {
+								$function_name = 'get_tag_function_' . $this_arg;
+							}
+							if(function_exists($function_name)) {
+								$template_tags[$this_tag] = $function_name($this_params_array);
+							} else {
+								$template_tags[$this_tag] = '[' . $function_name . ' not found]'; 
+							}
+						} elseif($this_function_tag == 'GLOBALS') {
+							// SECURITE : Liste des variables globales autorisées ci-dessous, sinon la variable appelée doit commencer par le préfixe 'tag_'
+							$allowed_functions = array('');
+							if(in_array($this_arg, $allowed_functions)) {
+								$function_name = $this_arg;
+							} else {
+								$function_name = 'tag_' . $this_arg;
+							}
+							$template_tags[$this_tag] = vb($GLOBALS[$function_name]);
+						} elseif($this_function_tag == 'RSS') {
+							// Pour chaque tag RSS, on remplace par le contenu du flux
+							$template_tags[$this_tag] = get_rss_feed_content($this_arg);
+						} elseif($this_function_tag == 'HTML') {
+							// Pour chaque tag HTML, on remplace par le contenu de la zone HTML correspondante
+							$template_tags[$this_tag] = affiche_contenu_html($this_arg, true);
+						} 
+					}
 				}
 			}
-		}
-		if(String::strpos($text, '[CONTACT_FORM]') !== false) {
-			// Affichage du formulaire de contact, avec gestion des erreurs 
-			$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
-		} elseif(String::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
-			$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
-		} elseif(String::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
-			$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
-		} elseif(String::strpos($text, '[CLIENT_REFERENCES]') !== false) {
-			$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
-		}
-		if(String::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
-			$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div>';
-			if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
-				$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div></div>';
-			} elseif(defined('IN_HOME')) {
-				$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div>';
+			if(String::strpos($text, '[CONTACT_FORM]') !== false) {
+				// Affichage du formulaire de contact, avec gestion des erreurs 
+				$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
+			} elseif(String::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
+				$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
+			} elseif(String::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
+				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
+			} elseif(String::strpos($text, '[CLIENT_REFERENCES]') !== false) {
+				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 			}
-		}
-		if(String::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
-			$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12">';
-			if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
-				$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="rub_wrapper special_content"><div class="rub_content">';
-			} elseif(defined('IN_HOME')) {
-				$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="page_home_content">';
+			if(String::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
+				$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div>';
+				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
+					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div></div>';
+				} elseif(defined('IN_HOME')) {
+					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div>';
+				}
 			}
-		}
-		if (empty($custom_template_tags['NEWSLETTER']) && String::strpos($text, '[NEWSLETTER]') !== false) {
-			// On envoie un message qui contient un tag NEWSLETTER et dont on n'a pas spécifié explicitement le contenu => on récupère son contenu automatiqueemnt
-			// On prend la dernière newsletter rentrée en BDD - pas de possibilité de faire autrement, sinon il faut passer par le module de gestion de newsletter
-			$news_infos = get_last_newsletter(null, $lang);
-			if (!empty($news_infos)) {
-				// On remplace les tags à l'intérieur de la newsletter pour éviter problèmes et avoir besoin de passer le traitement en double sur l'intégralité du texte
-				// Par ailleurs on évite de se retrouver dans une boucle si le texte de la newsletter indiquait (de manière erronée !) un tag [NEWSLETTER]
-				$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $frm['lang']]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
+			if(String::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
+				$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12">';
+				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
+					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="rub_wrapper special_content"><div class="rub_content">';
+				} elseif(defined('IN_HOME')) {
+					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="page_home_content">';
+				}
 			}
+			if (empty($custom_template_tags['NEWSLETTER']) && String::strpos($text, '[NEWSLETTER]') !== false) {
+				// On envoie un message qui contient un tag NEWSLETTER et dont on n'a pas spécifié explicitement le contenu => on récupère son contenu automatiqueemnt
+				// On prend la dernière newsletter rentrée en BDD - pas de possibilité de faire autrement, sinon il faut passer par le module de gestion de newsletter
+				$news_infos = get_last_newsletter(null, $lang);
+				if (!empty($news_infos)) {
+					// On remplace les tags à l'intérieur de la newsletter pour éviter problèmes et avoir besoin de passer le traitement en double sur l'intégralité du texte
+					// Par ailleurs on évite de se retrouver dans une boucle si le texte de la newsletter indiquait (de manière erronée !) un tag [NEWSLETTER]
+					$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $frm['lang']]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
+				}
+			}
+			// Appel aux fonctions propres à chaque module pour récupérer des listes de tags à remplacer
+			$template_tags = array_merge($template_tags, call_module_hook('template_tags', array('text' => $text), 'array'));
 		}
-		// Appel aux fonctions propres à chaque module pour récupérer des listes de tags à remplacer
-		$template_tags = array_merge($template_tags, call_module_hook('template_tags', array('text' => $text), 'array'));
-	}
-	if (!empty($custom_template_tags) && is_array($custom_template_tags)) {
-		foreach(array('GENDER,CIVILITE', 'NOM_FAMILLE,LASTNAME,LAST_NAME,NOM,NAME', 'FIRST_NAME,FIRSTNAME,PRENOM', 'PSEUDO,LOGIN') as $this_tags_list) {
-			// Compatibilité avec autres tags
-			foreach(explode(',', $this_tags_list) as $this_tag) {
-				if (isset($custom_template_tags[$this_tag])) {
-					// Dès qu'on trouve une valeur, on remplit tous les autres (sauf si déjà défini, au cas où il y aurait ambiguité sur un nom
-					foreach(explode(',', $this_tags_list) as $replaced_tag) {
-						if ($replaced_tag != $this_tag && !isset($custom_template_tags[$replaced_tag])) {
-							$custom_template_tags[$replaced_tag] = $custom_template_tags[$this_tag];
+		if (!empty($custom_template_tags) && is_array($custom_template_tags)) {
+			foreach(array('GENDER,CIVILITE', 'NOM_FAMILLE,LASTNAME,LAST_NAME,NOM,NAME', 'FIRST_NAME,FIRSTNAME,PRENOM', 'PSEUDO,LOGIN') as $this_tags_list) {
+				// Compatibilité avec autres tags
+				foreach(explode(',', $this_tags_list) as $this_tag) {
+					if (isset($custom_template_tags[$this_tag])) {
+						// Dès qu'on trouve une valeur, on remplit tous les autres (sauf si déjà défini, au cas où il y aurait ambiguité sur un nom
+						foreach(explode(',', $this_tags_list) as $replaced_tag) {
+							if ($replaced_tag != $this_tag && !isset($custom_template_tags[$replaced_tag])) {
+								$custom_template_tags[$replaced_tag] = $custom_template_tags[$this_tag];
+							}
 						}
 					}
 				}
 			}
+			$template_tags = array_merge($template_tags, $custom_template_tags);
 		}
-		$template_tags = array_merge($template_tags, $custom_template_tags);
-	}
-	foreach($template_tags as $this_tag => $this_tag_value) {
-		// On supprime les ajouts automatiques par l'éditeur de texte
-		$text = str_replace('<p>['.$this_tag.']</p>', '['.$this_tag.']', $text);
-		// Remplacement de tous les tags en majuscules ou minuscules avant de traiter les dates et heures
-		// Si un tag est un mix avec majuscules et minuscules, le remplacement est fait quelques lignes plus loin
-		if($format == 'text') {
-			$this_tag_value = String::strip_tags($this_tag_value);
-		} elseif($format == 'html') {
-			$this_tag_value = String::nl2br_if_needed($this_tag_value);
+		foreach($template_tags as $this_tag => $this_tag_value) {
+			// On supprime les ajouts automatiques par l'éditeur de texte
+			$text = str_replace('<p>['.$this_tag.']</p>', '['.$this_tag.']', $text);
+			// Remplacement de tous les tags en majuscules ou minuscules avant de traiter les dates et heures
+			// Si un tag est un mix avec majuscules et minuscules, le remplacement est fait quelques lignes plus loin
+			if($format == 'text') {
+				$this_tag_value = String::strip_tags($this_tag_value);
+			} elseif($format == 'html') {
+				$this_tag_value = String::nl2br_if_needed($this_tag_value);
+			}
+			// ATTENTION : A FAIRE AVANT la gestion des tags de dates à cause de différences entre minuscules et majuscules dans ces tags
+			$text = str_replace(array('[' . String::strtoupper($this_tag) . ']', '[' . String::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
 		}
-		// ATTENTION : A FAIRE AVANT la gestion des tags de dates à cause de différences entre minuscules et majuscules dans ces tags
-		$text = str_replace(array('[' . String::strtoupper($this_tag) . ']', '[' . String::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
-	}
-	if(!$replace_only_custom_tags) {
-		// On rajoute des tags de date qui sont en minuscules ou majuscules
-		foreach(array('d', 'D', 'j', 'l', 'N', 's', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y', 'a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'U') as $this_date_item) {
-			// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
-			$template_tags[$this_date_item] = date($this_date_item);
+		if(!$replace_only_custom_tags) {
+			// On rajoute des tags de date qui sont en minuscules ou majuscules
+			foreach(array('d', 'D', 'j', 'l', 'N', 's', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y', 'a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'U') as $this_date_item) {
+				// Explications de chaque valeur sur : http://fr.php.net/manual/fr/function.date.php
+				$template_tags[$this_date_item] = date($this_date_item);
+			}
+			for($i=0 ; $i<=10 ; $i++) {
+				// Gestion de tags YEAR-N
+				$template_tags[str_replace('YEAR-0', 'YEAR', 'YEAR-'.$i)] = date('Y')-$i;
+			}
 		}
-		for($i=0 ; $i<=10 ; $i++) {
-			// Gestion de tags YEAR-N
-			$template_tags[str_replace('YEAR-0', 'YEAR', 'YEAR-'.$i)] = date('Y')-$i;
+		// On gère tous les tags qui restent à remplacer sans modification de la casse
+		foreach($template_tags as $this_tag => $this_tag_value) {
+			if($format == 'text') {
+				$this_tag_value = String::strip_tags($this_tag_value);
+			} elseif($format == 'html') {
+				$this_tag_value = String::nl2br_if_needed($this_tag_value);
+			}
+			$text = str_replace('[' . $this_tag . ']', $this_tag_value, $text);
 		}
-	}
-	// On gère tous les tags qui restent à remplacer sans modification de la casse
-	foreach($template_tags as $this_tag => $this_tag_value) {
-		if($format == 'text') {
-			$this_tag_value = String::strip_tags($this_tag_value);
-		} elseif($format == 'html') {
-			$this_tag_value = String::nl2br_if_needed($this_tag_value);
-		}
-		$text = str_replace('[' . $this_tag . ']', $this_tag_value, $text);
 	}
 	if(!empty($GLOBALS['site_parameters']['replace_words_after_tags_replace'])) {
 		// Remplacement de mots clés par des versions personnalisées pour le site
@@ -802,7 +804,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 function output_csv_http_export_header($filename, $type = 'excel', $page_encoding)
 {
 	if (a_priv('demo')) {
-		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch());
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
 		die();
 	}
 
@@ -828,7 +830,7 @@ function output_csv_http_export_header($filename, $type = 'excel', $page_encodin
 function output_xml_http_export_header($filename, $page_encoding, $content_type = 'application/svg+xml', $cache_duration_in_seconds = null)
 {
 	if (a_priv('demo')) {
-		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_DEMO_RIGHTS_LIMITED']))->fetch());
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
 		die();
 	}
 	header('Content-Type: '.$content_type.'; charset=' . $page_encoding);

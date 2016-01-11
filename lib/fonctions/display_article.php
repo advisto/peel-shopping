@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: display_article.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -37,11 +37,10 @@ if (!function_exists('get_article_details_html')) {
 			$tpl->assign('STR_OFFLINE_ART', $GLOBALS['STR_OFFLINE_ART']);
 
 			if (!empty($article['image1'])) {
-				$this_thumb = thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 				$tpl->assign('main_image', array(
 					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($article['image1']),
-					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-					'is_pdf' => (pathinfo($article['image1'], PATHINFO_EXTENSION) == 'pdf')
+					'src' => thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true),
+					'file_type' => get_file_type($article['image1'])
 				));
 			}
 			if(empty($GLOBALS['site_parameters']['chapo_in_article_page_disabled'])) {
@@ -96,10 +95,10 @@ if (!function_exists('get_rubriques_sons_html')) {
 					'name' => $rub['nom_' . $_SESSION['session_langue']]
 				);
 				if (!empty($rub['image'])) {
-					$tmp['image_src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($rub['image'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+					$tmp['image_src'] = thumbs($rub['image'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', null, null, true, true);
 				}
 				if (!empty($rub['image_lien'])) {
-					$tmp['lien_src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($rub['image_lien'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+					$tmp['lien_src'] = thumbs($rub['image_lien'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', null, null, true, true);
 				}
 				$data[] = $tmp;
 			}
@@ -212,11 +211,10 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('offline_rub_txt', $GLOBALS['STR_OFFLINE_RUB']);
 			}
 			if (!empty($rowrub['image'])) {
-				$this_thumb = thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit');
 				$tpl->assign('main_image', array(
 					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($rowrub['image']),
-					'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
-					'is_pdf' => (get_file_type($rowrub['image']) == 'pdf')
+					'src' => thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true),
+					'file_type' => get_file_type($rowrub['image'])
 				));
 			}
 			$tpl->assign('technical_code', $rowrub['technical_code']);

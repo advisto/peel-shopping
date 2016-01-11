@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -91,11 +91,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 	$output = '';
 	// Si $id_account existe, alors on envoie un email à un utilisateur connu.
 	if (!empty($frm['id_utilisateur'])) {
-		$q = 'SELECT *
-			FROM peel_utilisateurs
-			WHERE id_utilisateur ="' . intval(vn($frm['id_utilisateur'])) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
-		$result = query($q);
-		$row_account = fetch_assoc($result);
+		$row_account =  get_user_information(vn($frm['id_utilisateur']));
 		$user_id = $row_account['id_utilisateur'];
 		$user_email = $row_account['email'];
 		$user_gender = $row_account['civilite'];
@@ -109,7 +105,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 			FROM peel_webmail
 			WHERE id='" . intval(vn($frm['id_webmail'])) . "' AND " . get_filter_site_cond('webmail', null, true) . "");
 		$row_mail = fetch_assoc($q);
-		// on update ensuite pour marquer le email comme répondu
+		// On met à jour ensuite pour marquer l'email comme lu
 		if ($row_mail['read'] == 'NO') {
 			query("UPDATE `peel_webmail`
 				SET `read` = 'READ'
@@ -123,10 +119,7 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 
 		if (!empty($user_id)) {
 			// on récupère les infos persos dans la BDD si l'utilisateur était loggué
-			$q = query("SELECT *
-				FROM peel_utilisateurs
-				WHERE id_utilisateur='" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "") ;
-			$row_account = fetch_assoc($q);
+			$row_account = get_user_information($user_id);
 			$user_gender = $row_account['civilite'];
 			$user_login = $row_account['pseudo'];
 			$user_password = $row_account['mot_passe'];
@@ -317,11 +310,15 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 function send_mail_admin($frm)
 {
 	$output = '';
-	$raison = '';
 	$custom_template_tags = array();
 	if (!empty($frm)) {
 		if (empty($frm['destination_mail']) && empty($_SESSION['count_from_send_email_all'][$_GET['email_all_hash']])) {
 			return $tplEngine->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ERR_SENT_NO_EMAIL"]))->fetch();
+		}
+		if (!empty($frm['id_webmail'])) {
+			query("UPDATE `peel_webmail`
+				SET `read`='SEND'
+				WHERE `id`='" . intval($frm['id_webmail']) . "' AND `read`='READ' AND " . get_filter_site_cond('webmail', null, true) . "");
 		}
 		$mail_subject = vb($frm['subject']);
 		// Utilisation de \r\n. Ce sera transformé si nécessaire en <br /> par la fonction send_email
@@ -355,11 +352,11 @@ function send_mail_admin($frm)
 			unset($_SESSION['request_from_send_email_all'][$_GET['email_all_hash']]);
 			// on va envoyer plus tard par cron
 			$send_now = false;
-			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $raison, $_SESSION['count_from_send_email_all'][$_GET['email_all_hash']] . ' destinataires');
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, '', $_SESSION['count_from_send_email_all'][$_GET['email_all_hash']] . ' destinataires');
 		} else {
 			$destination_mail_array = explode(';', $frm['destination_mail']);
 			foreach($destination_mail_array as $this_destination_mail) {
-				// Récupération des données en fonction d'une adresse email pour les envois direct.
+				// Récupération des données en fonction d'une adresse email pour les envois directs.
 				$sql = 'SELECT *
 					FROM peel_utilisateurs
 					WHERE email="' . nohtml_real_escape_string($this_destination_mail) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
@@ -386,7 +383,7 @@ function send_mail_admin($frm)
 					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ERR_SENT'], $this_destination_mail)))->fetch();
 				}
 			}
-			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $raison, $frm['destination_mail']);
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'SEND_EMAIL', $this_data, $this_comment, $frm['destination_mail'], $frm['destination_mail']);
 		}
 	}
 	return $output;
@@ -584,7 +581,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 		FROM peel_webmail w
 		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u') . "
 		WHERE " . get_filter_site_cond('webmail', 'w', true) . "  " . (!empty($sql_cond)?' AND ' . implode(' AND ', $sql_cond):'') . "
-		ORDER BY w.Date DESC, w.Heure DESC";
+		ORDER BY w.date DESC, w.heure DESC";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
 	$HeaderTitlesArray = array(' ', $GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], $GLOBALS['STR_MESSAGE'], 'IP', $GLOBALS["STR_ADMIN_WEBSITE"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
@@ -607,19 +604,19 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 			<td>
 				<select name="date" class="form-control">';
 	// Affiche le select avec les differentes date d'email, ainsi qu'avec le signalement lu ou pas
-	$row_affdate = query("SELECT count(*) AS this_count, `Read`, `Date`
+	$row_affdate = query("SELECT count(*) AS this_count, `read`, `date`
 		FROM peel_webmail
 		WHERE " . get_filter_site_cond('webmail', null, true) . " 
-		GROUP BY `Date`, `Read`
-		ORDER BY `Date` DESC ");
+		GROUP BY `date`, `read`
+		ORDER BY `date` DESC ");
 	while ($row_row_affdate = fetch_assoc($row_affdate)) {
-		if (empty($messages_count[$row_row_affdate['Date']])) {
-			$messages_count[$row_row_affdate['Date']] = 0;
-			$messages_not_read[$row_row_affdate['Date']] = 0;
+		if (empty($messages_count[$row_row_affdate['date']])) {
+			$messages_count[$row_row_affdate['date']] = 0;
+			$messages_not_read[$row_row_affdate['date']] = 0;
 		}
-		$messages_count[$row_row_affdate['Date']] += $row_row_affdate['this_count'];
-		if ($row_row_affdate['Read'] == 'NO') {
-			$messages_not_read[$row_row_affdate['Date']] += $row_row_affdate['this_count'];
+		$messages_count[$row_row_affdate['date']] += $row_row_affdate['this_count'];
+		if ($row_row_affdate['read'] == 'NO') {
+			$messages_not_read[$row_row_affdate['date']] += $row_row_affdate['this_count'];
 		}
 	}
 
@@ -642,10 +639,10 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 					$style = '';
 				}
 				$output .= '
-							<option value="' . date('Y-m-d') . '" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == date('Y-m-d'), ' selected="selected"') . ' ' . $style . '>Aujourd\'hui</option>
-							<option value="any" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == 'any', ' selected="selected"') . '>Toutes dates</option>';
+							<option value="' . date('Y-m-d') . '" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == date('Y-m-d'), ' selected="selected"') . ' ' . $style . '>'.$GLOBALS['strToday'].'</option>
+							<option value="any" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == 'any', ' selected="selected"') . '>'.$GLOBALS["STR_ALL"].'</option>';
 
-				/*<option value="any_not_read"' . ((!empty($_GET['date'])) && ($_GET['date'] == 'any_not_read')?' selected="selected"':'') . '>Toutes dates</option>';*/
+				/* <option value="any_not_read"' . ((!empty($_GET['date'])) && ($_GET['date'] == 'any_not_read')?' selected="selected"':'') . '>'.$GLOBALS["STR_ALL"].'</option>'; */
 			}
 			$output .= '<option value="' . String::str_form_value(vb($this_date)) . '" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == $this_date , ' selected="selected"') . ' ' . $style . '>' . $jour . "/" . $mois . "/" . $annee . ' ' . $GLOBALS['day_of_week'][date('w', strtotime($this_date))];
 			if ($this_date == date('Y-m-d')) {

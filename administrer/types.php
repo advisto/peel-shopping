@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: types.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -62,7 +62,7 @@ switch (vb($_REQUEST['mode'])) {
 			$output .= affiche_liste_type();
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .= $form_error_object->text('token');
 			}
 			$output .= affiche_formulaire_modif_type($_GET['id'], $frm);
 		}
@@ -168,6 +168,11 @@ function affiche_formulaire_type(&$frm)
 	if (check_if_module_active('icirelais')) {
 		$tpl->assign('is_icirelais', $frm['is_icirelais']);
 	}
+	$tpl->assign('is_kiala_module_active', check_if_module_active('kiala'));
+	if(check_if_module_active('kiala')) {
+		$tpl->assign('is_kiala', $frm['is_kiala']);
+		$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KIALA', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KIALA']);
+	}
 	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
 	$tpl->assign('is_tnt_module_active', check_if_module_active('tnt'));
 	$tpl->assign('tnt_threshold', vb($frm['tnt_threshold']));
@@ -238,9 +243,12 @@ function insere_type($frm)
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur";
 	}
-	if(check_if_module_active('tnt')){
+	if (check_if_module_active('tnt')){
 		$sql .= ", is_tnt";
 		$sql .= ", tnt_threshold";
+	}
+	if (check_if_module_active('kiala')) {
+		$sql .= ", is_kiala";
 	}
 	$sql .= "
 	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
@@ -258,9 +266,12 @@ function insere_type($frm)
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . intval($frm['fianet_type_transporteur']) . "'";
 	}
-	if(check_if_module_active('tnt')){
+	if (check_if_module_active('tnt')){
 		$sql .= ", '" . intval($frm['is_tnt']) . "'";
 		$sql .= ", '" . intval($frm['tnt_threshold']) . "'";
+	}
+	if (check_if_module_active('kiala')) {
+		$sql .= ", '" . intval($frm['is_kiala']) . "'";
 	}
 	$sql .= ")";
 
@@ -291,6 +302,9 @@ function maj_type($id, $frm)
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur = '" . intval($frm['fianet_type_transporteur']) . "'";
+	}
+	if (check_if_module_active('kiala')) {
+		$sql .= ", is_kiala = '" . intval($frm['is_kiala']) . "'";
 	}
 	if(check_if_module_active('tnt')){
 		$sql .= ", is_tnt = '".intval($frm['is_tnt'])."'";

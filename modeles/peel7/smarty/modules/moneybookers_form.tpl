@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: moneybookers_form.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: moneybookers_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<form class="entryform form-inline" role="form" id="MoneyBookersForm" action="https://www.moneybookers.com/app/payment.pl" method="post">
 	<input type="hidden" name="pay_to_email" value="{$pay_to_email|str_form_value}" />
 	<input type="hidden" name="transaction_id" value="{$order_id|str_form_value}TRY{$try|str_form_value}" />

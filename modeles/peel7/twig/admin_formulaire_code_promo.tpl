@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_code_promo.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: admin_formulaire_code_promo.tpl 48464 2016-01-11 13:42:43Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -35,7 +35,10 @@
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_PROMO_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="nom" size="40" value="{{ nom|str_form_value }}" /></td>
+			<td><input type="text" class="form-control" name="nom" size="40" value="{{ nom|str_form_value }}" />{{ name_error }}</td>
+		</tr>
+		<tr>
+			<td class="title_label" colspan="2"><div class="alert alert-info">{{ STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO }}</div></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_BEGIN_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -73,8 +76,8 @@
  		<tr>
 			<td class="title_label">{{ STR_ADMIN_CATEGORIES_TO_EXCLUDE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-		  		<select class="form-control" name="cat_not_apply_code_promo[]" multiple>
-					<option value="NULL">{{ STR_ADMIN_ALL_CATEGORIES }}</option>
+		  		<select class="form-control" name="cat_not_apply_code_promo[]" multiple="multiple">
+					<option value="" {{ none_is_selected }}>{{ STR_NONE|upper }}</option>
 						{{ cat_not_apply_code_promo_options }}
 				</select>
 			</td>

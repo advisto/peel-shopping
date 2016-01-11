@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: Invoice.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 47592 2015-10-30 16:40:22Z sdelaporte $
+ * @version $Id: Invoice.php 48447 2016-01-11 08:40:08Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -1221,9 +1221,12 @@ class Invoice extends TCPDF {
 							$GLOBALS['STR_PDFTOTALTTC'] => $total_prix);
 					}
 				} else {
-					if (!empty($this_ordered_product["photo"]) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.thumbs($this_ordered_product["photo"],50, 35))) {
-						// Positionnement du logo à droite des informations sur la société
-						$this->Image($GLOBALS['uploaddir'].'/thumbs/'.thumbs($this_ordered_product["photo"], 50, 35), 15, $y-4);
+					if (!empty($this_ordered_product["photo"])) {
+						$this_thumb = thumbs($this_ordered_product["photo"], 50, 35);
+						if (!empty($this_thumb) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.$this_thumb)) {
+							// Positionnement du logo à droite des informations sur la société
+							$this->Image($GLOBALS['uploaddir'].'/thumbs/'.$this_thumb, 15, $y-4);
+						}
 					}
 					if (!empty($this_ordered_product["barcode_image_src"])) {
 						// Positionnement du logo à droite des informations sur la société

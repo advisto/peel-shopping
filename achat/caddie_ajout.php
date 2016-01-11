@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: caddie_ajout.php 48447 2016-01-11 08:40:08Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -138,7 +138,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					// Pas de problème => on ajoute le produit
 					$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $email_check, $listcadeaux_owner);
 					// Préparation par exemple de l'affichage d'une popup de confirmation de mise dans le panier dans le module cart_popup
-					call_module_hook('cart_product_added', array('quantite' => $added_quantity, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur']));
+					call_module_hook('cart_product_added', array('quantite' => $added_quantity, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'product_object' => $product_object));
 					unset($_SESSION['session_taille_id']);
 				} else {
 					$added_quantity = 0;

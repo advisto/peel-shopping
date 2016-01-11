@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 47605 2015-10-30 18:16:58Z gboussin $
+// $Id: emails.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -298,41 +298,6 @@ function EmailOK($email)
 {
 	// return(preg('^[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+' . '@' . '[-!#$%&\'*+\\/0-9=?A-Z^_`a-z{|}~]+\.' . '[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+$', $email));
 	return(preg_match('/^[[:alnum:]]*((\.|_|-)[[:alnum:]]+)*@[[:alnum:]]*((\.|-)[[:alnum:]]+)*(\.[[:alpha:]]{2,})/i', $email));
-}
-
-/**
- * Création d'un tableau contenant la correspondance entre nom des tags et valeur à utiliser
- *
- * @param mixed $user_id
- * @param integer $order_id
- * @return
- */
-function prepare_email_tags($user_id, $order_id)
-{
-	if (!empty($user_id)) {
-		$sql_additional_fields = '';
-		$q = 'SELECT *' . $sql_additional_fields . '
-			FROM peel_users
-			WHERE id_utilisateur="' . intval($user_id) . '"';
-		$result = query($q);
-		if ($row_account = fetch_assoc($result)) {
-			foreach($row_account as $key => $value) {
-				if ($key != 'mot_passe') {
-					$template_tags[String::strtoupper($key)] = $value;
-				}
-			}
-		}
-	}
-	if (!empty($order_id)) {
-		$q = 'SELECT o.code_facture
-			FROM peel_commandes o
-			WHERE o.id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes', 'o') . '';
-		$result_orders = query($q);
-		$row_orders = fetch_assoc($result_orders);
-		$template_tags['ORDER'] = '';
-		$template_tags['ORDER_LINK'] = '[link="' . $GLOBALS['wwwroot'] . '/factures/commande_pdf.php?code_facture=' . urlencode($row_orders['code_facture']) . '&amp;mode=facture"]Facture n°' . urlencode($_POST['form_order']) . '[/link]';
-	}
-	return $template_tags;
 }
 
 /**

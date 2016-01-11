@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 47735 2015-11-07 19:56:55Z gboussin $
+// $Id: admin_fr.php 48464 2016-01-11 13:42:43Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,6 +127,7 @@ $GLOBALS["STR_ADMIN_CODES_PROMOS_ALREADY_USED"] = "Ce code a déjà été utilis
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_AMOUNT_REBATE"] = "Ajouter un code promotionnel en";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_PERCENTAGE_REBATE"] = "Ajouter un code promotionnel en %";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE"] = "Ajouter un code promotionnel";
+$GLOBALS["STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO"] = "Si vous laissez ce champ vide, cela permettra de faire des réductions selon les autres paramètres ci dessous, sur tout le site, sans avoir besoin que l'utilisateur ne rentre de code promo.";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_EXISTS"] = "Le code promo <b>%s</b> existe déjà.";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_SENT"] = "L'utilisateur %s possède déjà le code promo %s";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_DELETED"] = "Le code promotionnel %s a été effacé.";
@@ -165,7 +166,7 @@ $GLOBALS["STR_ADMIN_COMMANDER_ALREADY_DOWNLOADED_DELETE_LINK_TEXT"] = "Cliquez i
 $GLOBALS["STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED"] = "et stocks recalculés.";
 $GLOBALS["STR_ADMIN_COMMANDER_ATTRIBUTED"] = "Attribués";
 $GLOBALS["STR_ADMIN_COMMANDER_BILL_ADDRESS_EXPLAIN"] = "Si une adresse email est renseignée pour cette commande, et que cette adresse ne correspond pas à un utilisateur existant, un utilisateur sera automatiquement créé.";
-$GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN"] = "Les valeurs de type [colonne] dans le numéro de facture seront remplies après la création de cette commande.";
+$GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN"] = "Les valeurs de type [colonne] dans le numéro de facture seront remplies après la création de la facture.";
 $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"] = "Numéro de la facture";
 $GLOBALS["STR_ADMIN_COMMANDER_CANCELED"] = "Annulés";
 $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_INFORMATION"] = "Informations client";
@@ -515,6 +516,7 @@ $GLOBALS["STR_ADMIN_LIVRAISONS_SALES_HEADER"] = "RESUME DES VENTES / STATUT DE L
 $GLOBALS["STR_ADMIN_LIVRAISONS_TITLE"] = "Rapport des ventes / Statut de livraison";
 $GLOBALS["STR_ADMIN_LOGIN"] = "Login";
 $GLOBALS["STR_ADMIN_MANDATORY"] = "Champ obligatoire";
+$GLOBALS["STR_ADMIN_MARKETPLACE_ORDER_ID"] = "Id de commande de la place de marché";
 $GLOBALS["STR_ADMIN_MARQUES_ADD_BRAND"] = "Ajouter une marque";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_CREATED"] = "La marque <b>%s</b> a été créée.";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_STATUS_UPDATED"] = "Le statut de la marque %s ont bien été mis à jour.";
@@ -1536,6 +1538,8 @@ $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "INFORMATIONS GENERALES";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "Taux de TVA";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Exporter le détail des commandes au format CSV avec une ligne par produit commandé";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exporter le détail des commandes au format CSV avec une ligne par commande";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Exporter le détail des quantités commandées par produit";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "Exporter les commandes sélectionnées";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "NB : Par défaut les prix sont affichés dans la devise dans laquelle la commande a été effectuée.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "Aucune commande durant cette période pour le statut demandé.";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "RESUME DES VENTES / STATUT DE PAIEMENT";

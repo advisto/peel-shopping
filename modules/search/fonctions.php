@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -80,7 +80,7 @@ function affiche_select_marque($return_mode = false) {
  */
 function display_select_attribute($categorie, $attribute) {
 	$output = '';
-	// si la requete necessite une autre table pour le controle de l'utilisation de l'attribut
+	// si la requête nécessite une autre table pour le contrôle de l'utilisation de l'attribut
 	if (!empty($attribute['join'])) {
 		$sql = 'SELECT DISTINCT a.`id`, a.`nom_' . $_SESSION['session_langue'] . '` AS `nom`
 			FROM `peel_' . word_real_escape_string($attribute['table']) . '` a
@@ -120,7 +120,7 @@ function display_custom_attribute($selected_attributes = null, $technical_code =
 	$output = '';
 	if(!empty($technical_code)) {
 		if (is_array($technical_code)) {
-			$sql_technical_code_condition = 'a.technical_code IN "(' . implode('","', real_escape_string($technical_code)) . ')"';
+			$sql_technical_code_condition = 'a.technical_code IN ("' . implode('","', real_escape_string($technical_code)) . '")';
 		} else {
 			$sql_technical_code_condition = 'a.technical_code ="' . real_escape_string($technical_code) . '"';
 		}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributs_form_part.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: attributs_form_part.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}
 {* On renvoie le formulaire sous forme de table ou de HTML simple *}
 {if $display_mode=='table'}
@@ -44,6 +44,9 @@
 			{foreach $a.options as $o}
 				<a href="{$wwwroot}/search.php?{$o.name}={$o.value}">{$o.text}</a>
 			{/foreach}
+		{elseif $a.input_type=='cropped'}
+			<img src="" alt="" style="max-height:100px" class="img_cropped" />
+			<input name="{$a.input_name}" type="hidden" value="" class="input_cropped" />
 		{elseif $a.input_type}
 			<input id="{$a.input_id}" type="{$a.input_type}" name="{$a.input_name}" value="{$a.input_value}" class="form-control{if $a.input_class} {$a.input_class}{/if}" />
 		{/if}

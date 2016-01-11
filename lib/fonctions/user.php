@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: user.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -129,9 +129,10 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
  * @param boolean $send_user_confirmation
  * @param boolean $warn_admin_if_template_active
  * @param boolean $skip_existing_account_tests
+ * @param boolean $create_password_on_behalf_of_user
  * @return integer New user id
  */
-function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false)
+function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false)
 {
 	$sql_condition_array = array();
 	// Si un compte a un privilège ci-dessous, et qu'un utilisateur veut créer un nouveau compte avec le même email, alors il est remplacé automatiquement par le nouveau compte
@@ -205,7 +206,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$password_hash = trim($frm['mot_passe']);
 	} elseif (!empty($frm['mot_passe'])) {
 		$password_hash = get_user_password_hash(trim($frm['mot_passe']));
-	} elseif(empty($frm['mot_passe']) && !empty($GLOBALS['site_parameters']['register_during_order_process'])) {
+	} elseif(empty($frm['mot_passe']) && (!empty($GLOBALS['site_parameters']['register_during_order_process']) || !empty($create_password_on_behalf_of_user))) {
 		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur
 		$frm['mot_passe'] = MDP();
 		$password_hash = get_user_password_hash($frm['mot_passe']);
@@ -921,7 +922,7 @@ function get_user_information($user_id = null, $get_full_infos = false)
 				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
 			$result_array[$cache_id] = fetch_assoc($qid);
 			if(!empty($result_array[$cache_id]) && $get_full_infos) {
-				$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat']), 'array');
+				$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat'], 'user_infos' => $result_array[$cache_id]), 'array');
 				$result_array[$cache_id] = array_merge_recursive($result_array[$cache_id], $hook_result);
 			}
 		}
@@ -938,7 +939,7 @@ function get_user_information($user_id = null, $get_full_infos = false)
  */
 function get_current_user_promotion_percentage()
 {
-	if(empty($_SESSION['session_utilisateur']['calculated_promotion_percentage'])) {
+	if(!isset($_SESSION['session_utilisateur']['calculated_promotion_percentage'])) {
 		$hook_result_percent = call_module_hook('user_promotion_percentage', vb($_SESSION['session_utilisateur'], array()), 'max');
 		$user_specific_discount = vn($_SESSION['session_utilisateur']['remise_percent']);
 		if(!empty($GLOBALS['site_parameters']['group_and_user_discount_cumulate_disable'])) {

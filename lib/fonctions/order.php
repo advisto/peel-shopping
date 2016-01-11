@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 47716 2015-11-06 16:26:21Z gboussin $
+// $Id: order.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -333,6 +333,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 					}
 				}
 			}
+			call_module_hook('order_status_completed', array('order_id' => $order_id));
 		}
 		if (!empty($payment_status_id_by_technical_code_array[$statut_paiement_new])) {
 			$sql_set_array[] = "id_statut_paiement='" . intval($payment_status_id_by_technical_code_array[$statut_paiement_new]) . "'";
@@ -406,7 +407,10 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				}
 			}
 		}
-		if ($statut_livraison_new == 'dispatched' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
+		if((!empty($commande['marketplace_orderid']) && ($id_statut_paiement_ex != $id_statut_paiement || $id_statut_livraison_ex != $id_statut_livraison) && check_if_module_active('sellermania')) && !empty($GLOBALS['site_parameters']['enable_sellermania_update_order'])) {
+			// Pas d'envoi d'email de livraison pour les commandes Sellermania. Ce sont les emails d'expédition sont envoyé par Sellermania.
+			sellermania_update_order($commande['marketplace_orderid'], $id_statut_paiement, $id_statut_livraison, $sellermania_status = null);
+		} elseif ($statut_livraison_new == 'dispatched' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
 			// Le statut de livraison passe à expédié pour la première fois
 			// => on envoie l'email d'expédition (avec ou sans les infos de delivery_tracking qui peut être vide)
 			send_avis_expedition($order_id, $delivery_tracking);
@@ -480,7 +484,7 @@ function put_session_commande(&$frm)
  * @param array $articles_array
  * @return
  */
-function create_or_update_order(&$order_infos, &$articles_array)
+function create_or_update_order($order_infos, $articles_array)
 {
 	$output = '';
 	// "nom du champ dans la BDD" => "nom du champ dans $order_infos"
@@ -592,6 +596,9 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		if(!empty($searched_id_utilisateur)) {
 			$order_infos['id_utilisateur'] = $searched_id_utilisateur;
 		}
+	}
+	if (isset($order_infos['marketplace_orderid'])) {
+		$set_sql .= ", marketplace_orderid = '" . real_escape_string(vb($order_infos['marketplace_orderid'])) . "'";
 	}
 	if (isset($order_infos['commande_interne'])) {
 		$set_sql .= ", commande_interne = '" . nohtml_real_escape_string($order_infos['commande_interne']) . "'";
@@ -752,6 +759,10 @@ function create_or_update_order(&$order_infos, &$articles_array)
 		, expedition_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'
 		, shipping_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'";
 	}
+	if (!empty($order_infos['shortkpid']) && check_if_module_active('kiala')) {
+		$set_sql .= ", shortkpid = '" . nohtml_real_escape_string(vb($order_infos['shortkpid'])) . "'";
+	}
+
 	if (!empty($order_infos['specific_field_sql_set'])) {
 		$set_sql .= ',' . implode(',', $order_infos['specific_field_sql_set']);
 	}

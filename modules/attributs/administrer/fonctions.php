@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47710 2015-11-06 14:57:19Z gboussin $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 /* Fonctions de nom_attributs.php */
 
 if (!defined('IN_PEEL')) {
@@ -171,6 +171,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
+	$tpl->assign('STR_TYPE', $GLOBALS['STR_TYPE']);
 	$tpl->assign('STR_ADMIN_MANDATORY', $GLOBALS['STR_ADMIN_MANDATORY']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
@@ -207,7 +208,7 @@ function supprime_nom_attribut($id)
 }
 
 /**
- * Ajoute l'attribut dans la table attribut
+ * Ajoute l'attribut dans la table des attributs
  *
  * @param array $frm Array with all fields data
  * @return
@@ -515,7 +516,7 @@ function affiche_liste_attribut($frm)
 					'edit_href' => get_current_url(false) . '?mode=modif&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
 					'descriptif' => $DescAtt['descriptif_' . $_SESSION['session_langue']],
 					'prix' => fprix($DescAtt['prix'], true, $GLOBALS['site_parameters']['code'], false),
-					'img_src' => (!empty($DescAtt['image']) ? $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($DescAtt['image'], 100, 100, "fit") : ''),
+					'img_src' => (!empty($DescAtt['image']) ? thumbs($DescAtt['image'], 100, 100, 'fit', null, null, true, true) : ''),
 					'site_name' => get_site_name($DescAtt['site_id'])
 					);
 				$i++;
@@ -595,6 +596,7 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl->assign('STR_ADMIN_MANDATORY', $GLOBALS['STR_ADMIN_MANDATORY']);
 		$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 		$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
+		$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 		echo $tpl->fetch();
 	}
 }
@@ -678,7 +680,7 @@ function affiche_liste_attributs_by_id($id)
 	$tpl->assign('product_name', $product_object->name);
 	$tpl->assign('product_revenir_href', $GLOBALS['administrer_url'] . '/produits.php?mode=modif&id=' . $id);
 	$tpl->assign('product_liste_revenir_href', $GLOBALS['administrer_url'] . '/produits.php');
-	$tpl->assign('action', get_current_url(false) . '?mode=associe&id=' . $id);
+	$tpl->assign('action', get_current_url(false) . '?id=' . $id);
 
 	$all_attributs_array = get_possible_attributs(null, 'rough', false, false);
 	$product_attributs_array = $product_object->get_possible_attributs('rough', false, 0, false, false, false, false, false, false);

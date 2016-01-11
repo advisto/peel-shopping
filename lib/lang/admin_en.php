@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 47735 2015-11-07 19:56:55Z gboussin $
+// $Id: admin_en.php 48464 2016-01-11 13:42:43Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,6 +127,7 @@ $GLOBALS["STR_ADMIN_CODES_PROMOS_ALREADY_USED"] = "This code has already been us
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_AMOUNT_REBATE"] = "Add a promotional code";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_PERCENTAGE_REBATE"] = "Add a promotional code in %";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE"] = "Add a Promotional Code";
+$GLOBALS["STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO"] = "If you leave this field blank, this will make reductions on all the website with category or product criteria of categories or products without requiring the user enters coupon code.";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_EXISTS"] = "The coupon code <b>%s</b> already exists.";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_SENT"] = "User %s already has %s promo code";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_DELETED"] = "The promotion code %s has been deleted.";
@@ -165,7 +166,7 @@ $GLOBALS["STR_ADMIN_COMMANDER_ALREADY_DOWNLOADED_DELETE_LINK_TEXT"] = "Click her
 $GLOBALS["STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED"] = "recalculated and stocks.";
 $GLOBALS["STR_ADMIN_COMMANDER_ATTRIBUTED"] = "Assigned";
 $GLOBALS["STR_ADMIN_COMMANDER_BILL_ADDRESS_EXPLAIN"] = "If an email address is entered for this order, and the address does not match an existing user, a user is automatically created.";
-$GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN"] = "Values ​​of type [column] in the invoice number will be filled after the creation of this order.";
+$GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN"] = "Values ​​of type [column] in the invoice number will be filled after the creation of this invoice.";
 $GLOBALS["STR_ADMIN_COMMANDER_BILL_NUMBER"] = "Invoice Number";
 $GLOBALS["STR_ADMIN_COMMANDER_CANCELED"] = "Canceled";
 $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_INFORMATION"] = "Customer Information";
@@ -298,7 +299,7 @@ $GLOBALS["STR_ADMIN_DELETE_IMAGE"] = "delete this file";
 $GLOBALS["STR_ADMIN_DELETE_WARNING"] = "Are you sure you want to delete?";
 $GLOBALS["STR_ADMIN_DELIVERY_EMAIL_SENT"] = "A shipping confirmation email has been sent to %s";
 $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "DEMONSTRATION: Sending emails is disabled";
-$GLOBALS["STR_ADMIN_DEMO_WARNING"] = "DEMONSTRATION: You are logged in as Administrator demonstration, you can see the data but not change";
+$GLOBALS["STR_ADMIN_DEMO_WARNING"] = "DEMONSTRATION: You are logged in as Administrator demonstration, you can see the data but not change it";
 $GLOBALS["STR_ADMIN_DESCRIPTION"] = "Description";
 $GLOBALS["STR_ADMIN_DETECTED"] = "Detected";
 $GLOBALS["STR_ADMIN_DIAPORAMA_MSG_DELETED_OK"] = "The image of the slideshow <b>%s</b> has been deleted from the server successfully.";
@@ -515,6 +516,7 @@ $GLOBALS["STR_ADMIN_LIVRAISONS_SALES_HEADER"] = "SUMMARY OF SALES / DELIVERY STA
 $GLOBALS["STR_ADMIN_LIVRAISONS_TITLE"] = "Sales report / Delivery status";
 $GLOBALS["STR_ADMIN_LOGIN"] = "Login";
 $GLOBALS["STR_ADMIN_MANDATORY"] = "Required field";
+$GLOBALS["STR_ADMIN_MARKETPLACE_ORDER_ID"] = "Marketplace order id";
 $GLOBALS["STR_ADMIN_MARQUES_ADD_BRAND"] = "Add a name";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_CREATED"] = "The brand <b>%s</b> has been created.";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_STATUS_UPDATED"] = "The status of the mark %s have been updated.";
@@ -1536,6 +1538,8 @@ $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "GENERAL INFORMATION";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "VAT rate";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Export order details in CSV format with one line per product ordered";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Export order details in CSV format with one line per order";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Export details of the quantities ordered by product";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "Export selected order";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Note: Default rates are displayed in the currency in which the order was made.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "No order found during this period for the requested status.";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "SUMMARY OF SALES / PAYMENT STATUS";

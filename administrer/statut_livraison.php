@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_livraison.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: statut_livraison.php 48447 2016-01-11 08:40:08Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -18,23 +18,23 @@ necessite_identification();
 necessite_priv("admin_manage,admin_sales");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_TITLE'];
-include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $frm = $_POST;
 $form_error_object = new FormError();
+$output = '';
 
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :
-		affiche_formulaire_ajout_statut($frm);
+		$output .= affiche_formulaire_ajout_statut($frm);
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_statut($_GET['id'], $frm);
+		$output .= affiche_formulaire_modif_statut($_GET['id'], $frm);
 		break;
 
 	case "suppr" :
-		supprime_statut($_GET['id']);
-		affiche_liste_statut();
+		$output .= supprime_statut($_GET['id']);
+		$output .= affiche_liste_statut();
 		break;
 
 	case "insere" :
@@ -43,12 +43,12 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			insere_statut($_POST);
-			affiche_liste_statut();
+			$output .= affiche_liste_statut();
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .=  $form_error_object->text('token');
 			}
-			affiche_formulaire_ajout_statut($frm);
+			$output .= affiche_formulaire_ajout_statut($frm);
 		}
 		break;
 
@@ -58,21 +58,23 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			maj_statut($_POST['id'], $_POST);
-			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_STATUT_LIVRAISON_MSG_UPDATED_OK'], $_POST['id'])))->fetch();
-			affiche_liste_statut();
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_STATUT_LIVRAISON_MSG_UPDATED_OK'], $_POST['id'])))->fetch();
+			$output .= affiche_liste_statut();
 		} else {
 			if ($form_error_object->has_error('token')) {
-				echo $form_error_object->text('token');
+				$output .=  $form_error_object->text('token');
 			}
-			affiche_formulaire_modif_statut($_GET['id'], $frm);
+			$output .= affiche_formulaire_modif_statut($_GET['id'], $frm);
 		}
 		break;
 
 	default :
-		affiche_liste_statut();
+		$output .= affiche_liste_statut();
 		break;
 }
 
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
+echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 
 /**
@@ -98,7 +100,7 @@ function affiche_formulaire_ajout_statut(&$frm)
 	$frm['id'] = "";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_STATUT_LIVRAISON_CREATE'];
 
-	affiche_formulaire_statut($frm);
+	return affiche_formulaire_statut($frm);
 }
 
 /**
@@ -121,7 +123,7 @@ function affiche_formulaire_modif_statut($id, &$frm)
 	if (!empty($frm)) {
 		$frm["nouveau_mode"] = "maj";
 		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
-		affiche_formulaire_statut($frm);
+		return affiche_formulaire_statut($frm);
 	} else {
 		redirect_and_die(get_current_url(false).'?mode=ajout');
 	}
@@ -159,7 +161,7 @@ function affiche_formulaire_statut(&$frm)
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }
 
 /**
@@ -172,7 +174,7 @@ function supprime_statut($id)
 {
 	/* Efface le statut */
 	query("DELETE FROM peel_statut_livraison WHERE id=" . intval($id) . " AND " . get_filter_site_cond('statut_livraison', null, true) . "");
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_STATUT_LIVRAISON_MSG_DELETED_OK'], get_delivery_status_name($id))))->fetch();
+	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_STATUT_LIVRAISON_MSG_DELETED_OK'], get_delivery_status_name($id))))->fetch();
 }
 
 /**
@@ -230,7 +232,7 @@ function affiche_liste_statut()
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($result)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'technical_code' => $ligne['technical_code'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'nom' => $ligne['nom_' . $_SESSION['session_langue']],
@@ -253,6 +255,6 @@ function affiche_liste_statut()
 	$tpl->assign('STR_ADMIN_STATUT_UPDATE', $GLOBALS['STR_ADMIN_STATUT_UPDATE']);
 	$tpl->assign('STR_ADMIN_STATUT_NO_STATUS_FOUND', $GLOBALS['STR_ADMIN_STATUT_NO_STATUS_FOUND']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
-	echo $tpl->fetch();
+	return $tpl->fetch();
 }
 

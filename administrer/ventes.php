@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: ventes.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -139,8 +139,10 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$tpl->assign('total_avoir', fprix($totalAvoir, true, $GLOBALS['site_parameters']['code'], false));
 			$tpl->assign('totalTransport_prix', fprix($totalTransport, true, $GLOBALS['site_parameters']['code'], false));
 			$tpl->assign('is_module_export_ventes_active', check_if_module_active('export', 'administrer/export_ventes.php'));
+			$tpl->assign('form_action', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2);
 			$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('export_href_one_line_per_order', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=one_line_per_order&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
+			$tpl->assign('export_href_one_line_per_product', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=one_line_per_product&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
 
 			if (!empty($_GET['statut'])) {
@@ -167,10 +169,12 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_ADMIN_TOTAL_VAT', $GLOBALS['STR_ADMIN_TOTAL_VAT']);
 		$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL', $GLOBALS['STR_ADMIN_VENTES_EXPORT_EXCEL']);
 		$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER', $GLOBALS['STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER']);
+		$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT', $GLOBALS['STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT']);
 		$tpl->assign('STR_ADMIN_ASKED_STATUS', $GLOBALS['STR_ADMIN_ASKED_STATUS']);
 		$tpl->assign('STR_ADMIN_ALL_ORDERS', $GLOBALS['STR_ADMIN_ALL_ORDERS']);
 		$tpl->assign('STR_ADMIN_VENTES_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_VENTES_NO_ORDER_FOUND']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER', $GLOBALS['STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER']);
 		$output .= $tpl->fetch();
 	} else {
 		$output .= $check_admin_date_data;

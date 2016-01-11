@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_pt.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: admin_pt.php 48464 2016-01-11 13:42:43Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -125,6 +125,7 @@ $GLOBALS["STR_ADMIN_CODES_PROMOS_ALREADY_USED"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_AMOUNT_REBATE"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE_PERCENTAGE_REBATE"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_CREATE"] = "";
+$GLOBALS["STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_EXISTS"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_ALREADY_SENT"] = "";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_ERR_DELETED"] = "";
@@ -504,6 +505,7 @@ $GLOBALS["STR_ADMIN_LIVRAISONS_SALES_HEADER"] = "";
 $GLOBALS["STR_ADMIN_LIVRAISONS_TITLE"] = "";
 $GLOBALS["STR_ADMIN_LOGIN"] = "";
 $GLOBALS["STR_ADMIN_MANDATORY"] = "";
+$GLOBALS["STR_ADMIN_MARKETPLACE_ORDER_ID"] = "";
 $GLOBALS["STR_ADMIN_MARQUES_ADD_BRAND"] = "";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_CREATED"] = "";
 $GLOBALS["STR_ADMIN_MARQUES_BRAND_STATUS_UPDATED"] = "";
@@ -1508,6 +1510,9 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "";
 $GLOBALS["STR_ADMIN_VENTES_RESULTS_TITLE"] = "";

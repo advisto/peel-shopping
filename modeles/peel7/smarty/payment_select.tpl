@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: payment_select.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: payment_select.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<table>
 	<tr>
 		<td>
@@ -23,7 +23,7 @@
 			{$STR_BEFORE_TWO_POINTS}: + {$tarif_percent} %
 	{/if}
 			<br />
-			<span id="payment_method" style="display: {if $isempty_moneybookers_payment_methods && !$issel} none{else} block{/if};">
+			<span id="payment_method" class="well" style="display: {if $isempty_moneybookers_payment_methods && !$issel} none{else} block{/if};">
 				<input {if $moneybookers_payment_methods == 'VSA'}checked="checked"{/if} type="radio" name="moneybookers_payment_methods" value="VSA" /> Visa<br />
 				<input {if $moneybookers_payment_methods == 'MSC'}checked="checked"{/if} type="radio" name="moneybookers_payment_methods" value="MSC" /> Mastercard<br />
 				<input {if $moneybookers_payment_methods == 'GCB'}checked="checked"{/if} type="radio" name="moneybookers_payment_methods" value="GCB" /> Carte Bleue<br />
@@ -31,7 +31,7 @@
 				<input {if $moneybookers_payment_methods == 'WLT'}checked="checked"{/if} type="radio" name="moneybookers_payment_methods" value="WLT" /> Moneybookers e-wallet<br />
 			</span>
 {else}
-			<input {if !$isempty_email_moneybookers}onclick="document.getElementById('payment_method').style.display='none';"{/if} type="radio" name="payment_technical_code" value="{$technical_code|str_form_value}"{if $issel} checked="checked"{/if} /> {$nom|html_entity_decode_if_needed}
+			<input {if $moneybookers_active}onclick="document.getElementById('payment_method').style.display='none';"{/if} type="radio" name="payment_technical_code" value="{$technical_code|str_form_value}"{if $issel} checked="checked"{/if} /> {$nom|html_entity_decode_if_needed}
 	{if !empty($fprix_tarif)}
 			{$STR_BEFORE_TWO_POINTS}: + {$fprix_tarif}
 	{/if}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47709 2015-11-06 14:51:18Z gboussin $
+// $Id: fonctions.php 48452 2016-01-11 09:46:23Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -464,9 +464,10 @@ function get_tag_analytics()
  * @param mixed $force_update_cache_information
  * @param integer $specific_site_id	Id du site concerné
  * @param boolean $exclude_public_items	Exclue les résultats concernant la configuration générique
+ * @param boolean $allow_in_home_items
  * @return array Liste des modules
  */
-function get_modules_array($only_active = false, $location = null, $technical_code = null, $force_update_cache_information = false, $specific_site_id = null, $exclude_public_items = false)
+function get_modules_array($only_active = false, $location = null, $technical_code = null, $force_update_cache_information = false, $specific_site_id = null, $exclude_public_items = false, $allow_in_home_items = true)
 {
 	static $modules_array;
 	$static_hash = '';
@@ -515,8 +516,8 @@ function get_modules_array($only_active = false, $location = null, $technical_co
 				$this_module['location'] = str_replace(array('left_annonce', 'right_annonce'), array('left', 'right'), $this_module['location']);
 			}
 			// On prend cet élément éventuellement modifié
-			// Si le module est défini pour être afficher uniquement sur la home, alors on vérifie si on est sur la page Home, sinon on ne l'affiche pas.
-			if (empty($this_module['in_home']) || (!empty($this_module['in_home']) && defined('IN_HOME'))) {
+			// Si le module est défini pour être afficher uniquement sur la home, alors on vérifie si on est sur la page Home, sinon on ne l'affiche pas. Dans l'administration on veut toujours afficher le module pour pouvoir l'administrer.
+			if (empty($this_module['in_home']) || (!empty($this_module['in_home']) && $allow_in_home_items)) {
 				$modules[$this_module['id']] = $this_module;
 			}
 		}
@@ -550,7 +551,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 	// Pour annonces, si module de crons activé, le cron toutes les heures regénère les fichiers de cache pour éviter que ce soit un utilisateur qui le déclenche
 	$output = '';
 	$output_array = array();
-	$modules_array = get_modules_array(true, $location, $technical_code);
+	$modules_array = get_modules_array(true, $location, $technical_code, true, null, true, defined('IN_HOME'));
 
 	$i = 0;
 	foreach ($modules_array as $this_module) {
@@ -1112,7 +1113,7 @@ function get_delivery_type_options($selected_delivery_type_id_or_name = null)
 	$output = '';
 	$sql_type = "SELECT id, nom_" . $_SESSION['session_langue'] . ", site_id
 		FROM peel_types
-		WHERE etat = 1 AND " . get_filter_site_cond('types') . " AND (nom_" . $_SESSION['session_langue'] . "!=''".(!empty($selected_delivery_type_id_or_name)?" OR id='" . real_escape_string($selected_delivery_type_id_or_name) . "'":"").")
+		WHERE etat = 1 AND " . get_filter_site_cond('types') . " AND (nom_" . $_SESSION['session_langue'] . "!=''".(!empty($selected_delivery_type_id_or_name) && is_numeric($selected_delivery_type_id_or_name) ?" OR id='" . real_escape_string($selected_delivery_type_id_or_name) . "'":"").")
 		ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC";
 	$res_type = query($sql_type);
 
@@ -1198,9 +1199,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 		' . $where . '
 		ORDER BY p.position';
 	$res_paiement = query($sql_paiement);
-	$results_count = num_rows($res_paiement);
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
-		$payment_complement_informations = '';
 		if((empty($tab_paiement['etat']) || empty($tab_paiement['nom_' . $_SESSION['session_langue']])) && (!$show_selected_even_if_not_available || $tab_paiement['technical_code'] != $selected_payment_technical_code)){
 			// On ne prend que les moyens de paiement actifs, ou ceux qui ont pour code technique $selected_payment_technical_code si $show_selected_even_if_not_available = true
 			// Dans les autres cas, on passe au suivant
@@ -1216,40 +1215,45 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			continue;
 		}
 		if (($tab_paiement['technical_code'] != 'paypal' || !empty($GLOBALS['site_parameters']['email_paypal'])) && ($tab_paiement['technical_code'] != 'moneybookers' || !empty($GLOBALS['site_parameters']['email_moneybookers']))) {
-			if (String::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
-				if ($tab_paiement['technical_code'] == 'kwixo_credit') {
-					// Popup popuprnp3x et popuprnp1xrnp défini dans ' . $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js
-					$payment_complement_informations .= '<a onclick="popuprnp3x();return false;" href="#" title="kwixo3x">';
-				} elseif($tab_paiement['technical_code'] == 'kwixo') {
-					$payment_complement_informations .= '<a onclick="popuprnp1xrnp();return false;" href="#" title="kwixo1x">';
-				}
-				if(file_exists($GLOBALS['dirroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png')) {
-					$payment_complement_informations .= '
-			<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.String::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
-';
-				}
-				$payment_complement_informations .= $GLOBALS['STR_MORE_DETAILS'] . '</a></td>';
-			}
-			$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
-			$tpl->assign('technical_code', $tab_paiement['technical_code']);
-			$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
-			$tpl->assign('issel', (vb($selected_payment_technical_code) == $tab_paiement['technical_code'] || $results_count == 1));
-			if ($tab_paiement['tarif'] != 0) {
-				$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
-			}
-			if ($tab_paiement['tarif_percent'] != 0) {
-				$tpl->assign('tarif_percent', $tab_paiement['tarif_percent']);
-			}
-			$tpl->assign('isempty_moneybookers_payment_methods', empty($_SESSION['session_commande']['moneybookers_payment_methods']));
-			$tpl->assign('moneybookers_payment_methods', vb($_SESSION['session_commande']['moneybookers_payment_methods']));
-			$tpl->assign('isempty_email_moneybookers', empty($GLOBALS['site_parameters']['email_moneybookers']));
-			if (!empty($payment_complement_informations)) {
-				$tpl->assign('payment_complement_informations', $payment_complement_informations);
-			}
-			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-			$tpl->assign('STR_TRANSFER', $GLOBALS['STR_TRANSFER']);
-			$output .= $tpl->fetch();
+			// Paypal et moneybookers ne sont actifs que si email du compte est configuré
+			$results_array[$tab_paiement['technical_code']] = $tab_paiement;
 		}
+	}
+	foreach($results_array as $tab_paiement) {
+		$payment_complement_informations = '';
+		if (String::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
+			if ($tab_paiement['technical_code'] == 'kwixo_credit') {
+				// Popup popuprnp3x et popuprnp1xrnp défini dans ' . $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js
+				$payment_complement_informations .= '<a onclick="popuprnp3x();return false;" href="#" title="kwixo3x">';
+			} elseif($tab_paiement['technical_code'] == 'kwixo') {
+				$payment_complement_informations .= '<a onclick="popuprnp1xrnp();return false;" href="#" title="kwixo1x">';
+			}
+			if(file_exists($GLOBALS['dirroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png')) {
+				$payment_complement_informations .= '
+		<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.String::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
+';
+			}
+			$payment_complement_informations .= $GLOBALS['STR_MORE_DETAILS'] . '</a></td>';
+		}
+		$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
+		$tpl->assign('technical_code', $tab_paiement['technical_code']);
+		$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
+		$tpl->assign('issel', (vb($selected_payment_technical_code) == $tab_paiement['technical_code'] || count($results_array) == 1));
+		if ($tab_paiement['tarif'] != 0) {
+			$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
+		}
+		if ($tab_paiement['tarif_percent'] != 0) {
+			$tpl->assign('tarif_percent', $tab_paiement['tarif_percent']);
+		}
+		$tpl->assign('isempty_moneybookers_payment_methods', empty($_SESSION['session_commande']['moneybookers_payment_methods']));
+		$tpl->assign('moneybookers_payment_methods', vb($_SESSION['session_commande']['moneybookers_payment_methods']));
+		$tpl->assign('moneybookers_active', !empty($results_array['moneybookers']));
+		if (!empty($payment_complement_informations)) {
+			$tpl->assign('payment_complement_informations', $payment_complement_informations);
+		}
+		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_TRANSFER', $GLOBALS['STR_TRANSFER']);
+		$output .= $tpl->fetch();
 	}
 	return $output;
 }
@@ -2868,19 +2872,19 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$sql_cond_array[] = "pc.categorie_id IN ('" . implode("','", real_escape_string($catid_array)) . "')";
 		$titre = $GLOBALS['STR_LIST_PRODUCT'];
 	} elseif ($type == 'flash') {
-		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d', time()) . "' BETWEEN p.flash_start AND p.flash_end";
+		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d H:i:s', time()) . "' BETWEEN p.flash_start AND p.flash_end";
 		$titre = $GLOBALS['STR_FLASH'];
 	} elseif ($type == 'flash_passed') {
-		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d', time()) . "' > flash_end";
+		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d H:i:s', time()) . "' > flash_end";
 		$titre = $GLOBALS['STR_FLASH_PASSED'];
 	} elseif ($type == 'user_flash_passed') {
-		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d', time()) . "' > flash_end AND id_utilisateur = " . intval($reference_id);
+		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d H:i:s', time()) . "' > flash_end AND id_utilisateur = " . intval($reference_id);
 		$titre = $GLOBALS['STR_FLASH_PASSED'];
 	} elseif ($type == 'coming_product_flash') {
-		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d', time()) . "' < flash_start";
+		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d H:i:s', time()) . "' < flash_start";
 		$titre = $GLOBALS['STR_COMING_PRODUCT_FLASH'];
 	} elseif ($type == 'user_coming_product_flash') {
-		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d', time()) . "' <= flash_start AND id_utilisateur = " . intval($reference_id);
+		$sql_cond_array[] = "p.on_flash='1' AND '" . date('Y-m-d H:i:s', time()) . "' <= flash_start AND id_utilisateur = " . intval($reference_id);
 		$titre = $GLOBALS['STR_COMING_PRODUCT_FLASH'];
 	} elseif ($type == 'check') {
 		$sql_cond_array[] = "p.on_check='1'";
@@ -3325,6 +3329,10 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 			// Le fichier a été chargé en cache : on va le déplacer et garder le nom
 			$file_infos['name'] = basename($_REQUEST[$field_name]);
 			$format_filename_base_disabled = true;
+		} elseif(strpos($_REQUEST[$field_name], ';base64,') !== false) {
+			// Le fichier est encodé en base64
+			$file_infos['name'] = substr(MDP(), 0, 12).'.png';
+			$file_infos['base64'] = true;
 		} else {
 			// Le fichier est à sa place, on renvoie simplement le nom déjà existant
 			return $_REQUEST[$field_name];
@@ -3346,13 +3354,23 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 			if(!empty($format_filename_base_disabled)) {
 				$the_new_file_name = $file_infos['name'];
 			} else {
-			// Si aucun nom forcé, on en crée un
+				// Si aucun nom forcé, on en crée un
 				$the_new_file_name = format_filename_base(vb($file_infos['name']), $rename_file). '.' . $extension;
-		}
+			}
 		} else {
-		$the_new_file_name = $new_file_name_without_extension . '.' . $extension;
+			$the_new_file_name = $new_file_name_without_extension . '.' . $extension;
 		}
-		if(!isset($file_infos['tmp_name'])) {
+		if (!empty($file_infos['base64'])) {
+			// Décodage d'une image envoyée en base64
+			$fp = fopen($path . $the_new_file_name, "wb"); 
+			$data = explode(',', $_REQUEST[$field_name]);
+			fwrite($fp, base64_decode($data[1])); 
+			fclose($fp); 
+			if(!empty($GLOBALS['site_parameters']['chmod_new_files'])) {
+				@chmod ($path . $the_new_file_name, $GLOBALS['site_parameters']['chmod_new_files']);
+			}
+			return $the_new_file_name; 
+		} elseif(!isset($file_infos['tmp_name'])) {
 			// Fichier temporaire stocké dans le cache, on va le déplacer dans le répertoire $path avec le bon nom
 			// Si il est déjà déplacé (car on revalide une seconde fois le formulaire), on s'arrange pour que ça marche aussi - dans ce cas on ne passe pas dans le test qui suit
 			if($GLOBALS['dirroot'] . $_REQUEST[$field_name] != $path . $the_new_file_name && file_exists($GLOBALS['dirroot'] . $_REQUEST[$field_name])) {
@@ -3594,7 +3612,7 @@ function get_file_type($filename)
 function get_document_image_html($filename, $width = 100, $height = 100)
 {
 	if(!empty($filename)) {
-		return '<a href="' . get_url_from_uploaded_filename($filename) . '" onclick="return(window.open(this.href)?false:true);"><img src="' . $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($filename, $width, $height, 'fit') . '" alt="" style="max-width: ' . $width . 'px; max-height: ' . $height . 'px" /></a>';
+		return '<a href="' . get_url_from_uploaded_filename($filename) . '" onclick="return(window.open(this.href)?false:true);"><img src="' . thumbs($filename, $width, $height, 'fit', null, null, true, true) . '" alt="" style="max-width: ' . $width . 'px; max-height: ' . $height . 'px" /></a>';
 	}
 }
 
@@ -3611,6 +3629,10 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 	}
 	$file_type = get_file_type($file);
 	$div_id = $field_name . '_' . substr(md5(rand()),0,6);
+	$class = '';
+	if(!empty($_SESSION['apply_crop_after_upload'][$field_name])) {
+		$class .= ' crop';
+	}
 	$result = array('name' => basename($file),
 		'div_id' => $div_id,
 		'form_name' => $field_name,
@@ -3619,16 +3641,39 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 		'drop_href' => str_replace(array('[DIV_ID]', "'".$field_name."'", '"'.$field_name.'"'),array($div_id, "'".$div_id."'", '"'.$div_id.'"'), $delete_url),
 		'url' => (!empty($file)?get_url_from_uploaded_filename($file):null),
 		'type' => $file_type,
+		'crop' => !empty($_SESSION['apply_crop_after_upload'][$field_name]),
+		'class' => $class,
 		'STR_DELETE_THIS_FILE' => $GLOBALS['STR_DELETE_THIS_FILE']
 		);
 	if($file_type != 'image') {
-		$result['file_logo_src'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($file, $logo_width, $logo_height, 'fit');
+		$result['file_logo_src'] = thumbs($file, $logo_width, $logo_height, 'fit', null, null, true, true);
+	} else {
+		if(!empty($_SESSION['apply_crop_after_upload'][$field_name])) {
+			$GLOBALS['js_ready_content_array'][] = '
+		$(function() {
+			$("#'.$div_id.' > img").cropper({
+				autoCropArea: 0.35,
+				built: function () {
+						croppedimage=$(this).cropper("getCroppedCanvas").toDataURL();
+						$(".img_cropped").attr("src", croppedimage);
+						$(".input_cropped").val(croppedimage);
+					},
+				cropend: function () {
+						croppedimage=$(this).cropper("getCroppedCanvas").toDataURL();
+						$(".img_cropped").attr("src", croppedimage);
+						$(".input_cropped").val(croppedimage);
+					}
+			});
+			
+		});
+';
+		}
 	}
 	return $result;
 }
 
 /**
- * Récupère le nom de domaine du site sans http:// et sans sous-domaine
+ * Récupère le nom de domaine du site sans http://
  *
  * @param boolean $return_only_domains
  * @param string $domain
@@ -3637,14 +3682,14 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
  */
 function get_site_domain($return_only_domains = false, $domain = null, $strip_subdomain = true)
 {
-	if(strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false) {
-		return $_SERVER["HTTP_HOST"];
-	} elseif (empty($domain)) {
-		$domain = $_SERVER["HTTP_HOST"];
-	} else {
+	if (!empty($domain)) {
 		$domain = str_replace(array('http://', 'https://', '://', '//'), '', $domain);
 		$temp = explode('/', $domain, 2);
 		$domain = $temp[0];
+	} elseif(strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false) {
+		return $_SERVER["HTTP_HOST"];
+	} else {
+		$domain = $_SERVER["HTTP_HOST"];
 	}
 	$temp = explode('.', $domain);
 	if(count($temp)>1 && (count($temp)!=4 || !is_numeric(str_replace('.','',$domain)))) {
@@ -3654,7 +3699,7 @@ function get_site_domain($return_only_domains = false, $domain = null, $strip_su
 			$temp[count($temp)-2] = $temp[count($temp)-2] . '.' . $temp[count($temp)-1];
 			unset($temp[count($temp)-1]);
 		}
-		if ($strip_subdomain) {
+		if ($strip_subdomain || !isset($temp[count($temp)-3])) {
 			return $temp[count($temp)-2].'.'.$temp[count($temp)-1];
 		} else {
 			return $temp[count($temp)-3].'.'.$temp[count($temp)-2].'.'.$temp[count($temp)-1];
@@ -4099,7 +4144,7 @@ bkLib.onDomLoaded(function() {
 });
 ';
 		$output .= '
-<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+<div style="width:' . $width_css . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:200px">
 		<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
 	</div>
@@ -4119,7 +4164,7 @@ bkLib.onDomLoaded(function() {
 		$oFCKeditor->Width = $width;
 		$oFCKeditor->Config = array('EditorAreaCSS' => implode(',', $css_files));
 		$output .= '
-<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+<div style="width:' . $width_css . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:550px">
 		'.$oFCKeditor->CreateHtml().'
 	</div>
@@ -4128,12 +4173,13 @@ bkLib.onDomLoaded(function() {
 	} elseif ($this_html_editor == '3') {
 		$default_text = String::nl2br_if_needed($default_text);
 		// Editeur CKeditor
+		// La hauteur demandée sera celle de la zone éditable - donc la hauteur total sera bien supérieure
 		include_once($GLOBALS['dirroot'] . "/lib/ckeditor/ckeditor.php");
 		$config = array('width' => $width, 'height' => $height, 'contentsCss' => $css_files);
 		$CKEditor = new CKEditor($GLOBALS['wwwroot'] . '/lib/ckeditor/');
 		$CKEditor->returnOutput = true;
 		$output .= '
-<div style="width:' . $width . '; max-width: 100%; height:' . $height . 'px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+<div style="width:' . (is_numeric($width)?($width+10).'px':$width_css) . '; max-width: 100%; min-height:' . ($height+143) . 'px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:270px">
 		'.$CKEditor->editor($instance_name, String::htmlspecialchars_decode($default_text, ENT_QUOTES), $config).'
 	</div>
@@ -4173,7 +4219,7 @@ bkLib.onDomLoaded(function() {
 ';
 		}
 		$output .= '
-<div style="width:' . $width . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+<div style="width:' . (is_numeric($width)?$width.'px':$width_css) . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:600px">
 		<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
 	</div>
@@ -5078,6 +5124,9 @@ function insere_code_promo($frm)
 	if (!isset($frm['nb_used_per_client'])) {
 		$frm['nb_used_per_client'] = 1;
 	}
+	if (empty($frm['site_id'])) {
+		$frm['site_id'] = $GLOBALS['site_id'];
+	}
 
 	$sql = "INSERT INTO peel_codes_promos (
 		nom
@@ -5450,7 +5499,7 @@ $(".uploader").each(function () {
  * @param boolean $admin_mode
  * @return
  */
-function create_or_update_product($field_values, $columns_skipped = array(), $product_field_names = array(), $specific_fields_array = array(), $admin_mode = false) {
+function create_or_update_product($field_values, $columns_skipped = array(), $product_field_names = array(), $specific_fields_array = array(), $admin_mode = false, $categories_created_activate = true) {
 	$output = '';
 	if(!isset($GLOBALS['nbprod_update'])) {
 		$GLOBALS['nbprod_update'] = 0;
@@ -5582,7 +5631,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			query('DELETE FROM peel_produits_couleurs 
 				WHERE produit_id="' . intval($product_id) . '"');
 			$this_list_color = explode(",", $this_field_value);
-			foreach($this_list_color as $this_id => $this_value){
+			foreach($this_list_color as $this_value){
 				if(String::strlen($this_value)>0) {
 					if(!is_numeric($this_value)) {
 						$sql_select_color = 'SELECT * 
@@ -5614,7 +5663,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			query('DELETE FROM peel_produits_tailles 
 				WHERE produit_id="' . intval($product_id) . '"');
 			$this_list_size = explode(",", $this_field_value);
-			foreach($this_list_size as $this_id => $this_value){
+			foreach($this_list_size as $this_value){
 				$this_list_size_and_price = explode("§", $this_value);
 				$size_name = $this_list_size_and_price[0];
 				if(String::strlen($size_name)>0) {
@@ -5737,9 +5786,19 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				if ($categorie = fetch_assoc($q)) {
 					$this_categorie_id = $categorie['id'];
 				} else {
+					if(!empty($field_values['section_catalogue'])) {
+						$q = query('INSERT INTO peel_categories
+							SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($field_values['section_catalogue']) . '", etat="'.(!empty($categories_created_activate)?1:0).'"');
+						$categorie_parent_id = insert_id();
+					}
+					$sql = 'INSERT INTO peel_categories
+						SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '", etat="'.(!empty($categories_created_activate)?1:0).'", site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"';
 					// Catégorie inexistante : on l'insère en base de données
-					$q = query('INSERT INTO peel_categories
-						SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '", etat="1", site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"');
+					if(!empty($categorie_parent_id)) {
+						$sql .= ', parent_id="' . intval($categorie_parent_id) . '"';
+						unset($categorie_parent_id);
+					}
+					$q = query($sql);
 					$this_categorie_id = insert_id();
 					if($admin_mode) {
 						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_CATEGORY_CREATED'], $this_category, $this_categorie_id)))->fetch();

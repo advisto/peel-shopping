@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: utilisateurs.php 48453 2016-01-11 09:52:17Z gboussin $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -49,13 +49,39 @@ if (!empty($_POST['print_all_bill'])) {
 switch (vb($_REQUEST['mode'])) {
 	case "modif_etat" :
 		if (isset($_GET['etat']) && !empty($_GET['id'])) {
-			if(!a_priv('admin*', false, false, $_GET['id']) || a_priv('admin', false, true)) {
-				// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué n'a pas le droit de le modifier
-				// NB : il faut être administrateur général pour avoir le droit de modifier les autres administrateurs
-				if ($_GET['etat'] == 1) {
-					$etat = 0 ;
-				} else {
-					$etat = 1 ;
+			$user_infos = get_user_information($_GET['id']);
+			if(!empty($user_infos)) {
+				if(!a_priv('admin*', false, false, $_GET['id']) || a_priv('admin', false, true)) {
+					// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a le droit de le modifier
+					// NB : il faut être administrateur général pour avoir le droit de modifier les autres administrateurs.
+					if ($_GET['etat'] == 1) {
+						$etat = 0 ;
+					} else {
+						$etat = 1 ;
+					}
+					query('UPDATE peel_utilisateurs
+						SET etat="' . intval($etat) . '"
+						WHERE id_utilisateur="' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('utilisateurs', null, true));
+					$annonce_active = false;
+					if (check_if_module_active('annonces')) {
+						update_state_ads($_GET['id'], $etat);
+						$annonce_active = true;
+					}
+					if($etat == 1) {
+						tracert_history_admin(intval(vn($_GET['id'])), 'EDIT_PROFIL', sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_ACTIVATED_OK'], $user_infos['email']));
+						$message = $GLOBALS['STR_ADMIN_UTILISATEURS_MSG_ACTIVATED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_ACTIVATED'] : '');
+					} else {
+						tracert_history_admin(intval(vn($_GET['id'])), 'EDIT_PROFIL', sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'], $user_infos['email']));
+						$message = $GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : '');
+					}
+					$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($message, $user_infos['email'])))->fetch();
+				}
+				if (!empty($GLOBALS['site_parameters']['validating_registration_by_admin'])) {
+					// Vérification de l'état actuel de l'utilisateur. On envoie un email lors d'un changement d'état uniquement.
+					if($user_infos['etat'] != $etat && $etat == 1) {
+						// activation de l'utilisateur, on avertit l'utilisateur de l'activation de son compte
+						send_email($user_infos['email'],'','','validating_registration_by_admin');
+					}
 				}
 				query('UPDATE peel_utilisateurs
 					SET etat="' . intval($etat) . '"
@@ -65,32 +91,8 @@ switch (vb($_REQUEST['mode'])) {
 					update_state_ads($_GET['id'], $etat);
 					$annonce_active = true;
 				}
-				if($etat == 1) {
-					$message = $GLOBALS['STR_ADMIN_UTILISATEURS_MSG_ACTIVATED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_ACTIVATED'] : '');
-				} else {
-					$message = $GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : '');
-				}
-				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($message, vb($utilisateur['email']))))->fetch();
-			}
-			if (!empty($GLOBALS['site_parameters']['validating_registration_by_admin'])) {
-				// Vérification de l'état actuel de l'utilisateur. On envoie un email lors d'un changement d'état uniquement.
-				$query = query("SELECT etat, email
-					FROM peel_utilisateurs
-					WHERE id_utilisateur='" . intval($_GET['id']) . "'");
-				if ($result = fetch_assoc($query)) {
-					if($result['etat'] != $etat && $etat == 1) {
-						// activation de l'utilisateur, on avertit l'utilisateur de l'activation de son compte
-						send_email($result['email'],'','','validating_registration_by_admin');
-					}
-				}
-			}
-			query('UPDATE peel_utilisateurs
-				SET etat="' . intval($etat) . '"
-				WHERE id_utilisateur="' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('utilisateurs', null, true));
-			$annonce_active = false;
-			if (check_if_module_active('annonces')) {
-				update_state_ads($_GET['id'], $etat);
-				$annonce_active = true;
+			} else {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 			}
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
@@ -104,20 +106,26 @@ switch (vb($_REQUEST['mode'])) {
 		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		break;
 
 	case "suppr" :
 		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
-			$utilisateur = get_user_information($id_utilisateur);
-			$output .= efface_utilisateur($id_utilisateur);
-			$annonce_active = false;
-			if (check_if_module_active('annonces')) {
-				$output .= delete_user_ads($id_utilisateur);
-				$annonce_active = true;
+			$user_infos = get_user_information($id_utilisateur);
+			if(!empty($user_infos)) {
+				$output .= efface_utilisateur($id_utilisateur);
+				$annonce_active = false;
+				if (check_if_module_active('annonces')) {
+					$output .= delete_user_ads($id_utilisateur);
+					$annonce_active = true;
+				}
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $user_infos['email'])))->fetch();
 			}
-			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $utilisateur['email'])))->fetch();
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
@@ -127,6 +135,8 @@ switch (vb($_REQUEST['mode'])) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= supprime_logo($id_utilisateur);
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		break;
 
@@ -201,18 +211,20 @@ switch (vb($_REQUEST['mode'])) {
 			WHERE id_utilisateur!='" . intval($frm['id_utilisateur']) . "' AND pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "' AND " . get_filter_site_cond('utilisateurs', null, true) . "")) > 0)) {
 			$form_error_object->add('pseudo', $GLOBALS['STR_ERR_NICKNAME_STILL']);
 		}
-		if (!empty($GLOBALS['site_parameters']['validating_registration_by_admin'])) {
-			// Vérification de l'état actuel de l'utilisateur. On envoie un email lors d'un changement d'état uniquement.
-			$query = query("SELECT etat, email
-				FROM peel_utilisateurs
-				WHERE id_utilisateur='" . intval($frm['id_utilisateur']) . "'");
-			if ($result = fetch_assoc($query)) {
-				if($result['etat'] != $frm['etat'] && $frm['etat'] == 1) {
+		// Vérification de l'état actuel de l'utilisateur. On envoie un email lors d'un changement d'état uniquement.
+		$user_infos = get_user_information($frm['id_utilisateur']);
+		if (!empty($user_infos)) {
+			if($user_infos['etat'] != $frm['etat'] && $frm['etat'] == 1) {
+				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_PROFIL', sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_ACTIVATED_OK'], $user_infos['email']));
+				if(!empty($GLOBALS['site_parameters']['validating_registration_by_admin'])) {
 					// activation de l'utilisateur, on avertit l'utilisateur de l'activation de son compte
-					send_email($result['email'],'','','validating_registration_by_admin');
+					send_email($user_infos['email'],'','','validating_registration_by_admin');
 				}
+			} elseif ($user_infos['etat'] != $frm['etat'] && $frm['etat'] == 0) {
+				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_PROFIL', sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'], $user_infos['email']));
 			}
 		}
+
 		if (!$form_error_object->count()) {
 			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
 			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
@@ -260,6 +272,8 @@ switch (vb($_REQUEST['mode'])) {
 			if ($user = fetch_object($qid)) {
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_NEW_PASSWORD_SENT'], vb($user->email))))->fetch();
 			}
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
 
@@ -609,6 +623,7 @@ function affiche_formulaire_modif_utilisateur($id_utilisateur)
 		}
 		$frm['nouveau_mode'] = "maj";
 		$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+		
 		$output .= afficher_formulaire_utilisateur($frm);
 	} else {
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NOT_FOUND']))->fetch();
@@ -638,7 +653,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 	$tpl->assign('wwwroot_in_admin', $GLOBALS['wwwroot_in_admin']);
 	// user_site_id permet de désactiver le champ select pour éviter les erreur d'administration. Le select est désactivé avec disabled="disabled", la valeur de site_id est transmis via un champ hidden.
-	$tpl->assign('disable_user_siteweb',isset($frm['site_id']) && nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) === 0);
+	$tpl->assign('disable_user_siteweb',isset($frm['site_id']) && get_site_id_sql_set_value($frm['site_id']) === 0);
 	if (!empty($frm['date_insert'])) {
 		$tpl->assign('date_insert', get_formatted_date($frm['date_insert']));
 	}
@@ -881,7 +896,9 @@ function afficher_formulaire_utilisateur(&$frm)
 	if (!empty($frm['user_ip'])) {
 		// Insertion du module de géoip permettant de définir en fonction de la dernière ip le lieu où s'est connecté la personne dernièrement
 		if (!isset($_SESSION['session_site_country']) && check_if_module_active('geoip')) {
-			include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+			if (!class_exists('geoIP')) {
+				include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+			}
 			$geoIP = new geoIP();
 			$_SESSION['session_site_country'] = $geoIP->geoIPCountryIDByAddr($frm['user_ip']);
 			$geoIP->geoIPClose();

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: Multipage.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 47592 2015-10-30 16:40:22Z sdelaporte $
+ * @version $Id: Multipage.php 48447 2016-01-11 08:40:08Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -68,6 +68,7 @@ class Multipage {
 	var $nb1;
 	var $nb2;
 	var $nb3;
+	var $nb4;
 	var $LimitSQL;
 	var $first_link_page = true;
 	var $allow_get_sort = true;
@@ -93,8 +94,7 @@ class Multipage {
 		$this->tpl_name = $template_name;
 		$this->no_pagination_displayed = $no_pagination_displayed;
 		$this->sqlRequest = $sqlRequest;
-		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
-		if ($this->DefaultResultsPerPage != '*') {
+			$this->DefaultResultsPerPage = $DefaultResultsPerPage;
 			if($this->DefaultResultsPerPage<20) {
 				$divisor = 2;
 			} else {
@@ -103,10 +103,13 @@ class Multipage {
 			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
 			$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
 			$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
-		}
+			if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
+				$this->nb4 = '*';
+			}
+
 		$this->LinkPerPage = $LinkPerPage;
 		$this->AddToColspan = $AddToColspan;
-		$this->always_show = $always_show;
+		$this->always_show = ($this->DefaultResultsPerPage != '*' && $always_show) || !empty($GLOBALS['site_parameters']['multipage_show_force']);
 		$this->external_results_to_merge_at_beginning = $external_results_to_merge_at_beginning;
 		if(!empty($nombre_session_var_name)){
 			$this->nombre_session_var_name = 'session_multipage_' . $nombre_session_var_name;
@@ -149,7 +152,7 @@ class Multipage {
 	function setResultsNumberPerPage()
 	{
 		if ($this->DefaultResultsPerPage != '*') {
-			if (isset($_GET['nombre']) && is_numeric($_GET['nombre']) && $_GET['nombre'] >= $this->nb1 && $_GET['nombre'] <= $this->nb3) {
+			if (isset($_GET['nombre']) && ((is_numeric($_GET['nombre']) && $_GET['nombre'] >= $this->nb1 && $_GET['nombre'] <= $this->nb3) || $_GET['nombre'] =='*')) {
 				if(!empty($this->nombre_session_var_name)){
 					$_SESSION[$this->nombre_session_var_name] = $_GET['nombre'];
 				}
@@ -161,7 +164,9 @@ class Multipage {
 			}
 			$ResultsPerPage = $this->DefaultResultsPerPage;
 			if (!empty($this->nombre_session_var_name) && isset($_SESSION[$this->nombre_session_var_name])) {
-				if (($_SESSION[$this->nombre_session_var_name] <= $this->nb1) || ($_SESSION[$this->nombre_session_var_name] < (($this->nb2 + $this->nb1) / 2))) {
+				if ($_SESSION[$this->nombre_session_var_name] == '*') {
+					$ResultsPerPage = $this->nb4;
+				} elseif (($_SESSION[$this->nombre_session_var_name] <= $this->nb1) || ($_SESSION[$this->nombre_session_var_name] < (($this->nb2 + $this->nb1) / 2))) {
 					$ResultsPerPage = $this->nb1;
 				} elseif (($_SESSION[$this->nombre_session_var_name] < $this->nb3) && ($_SESSION[$this->nombre_session_var_name] < (($this->nb3 + $this->nb2) / 2))) {
 					$ResultsPerPage = $this->nb2;
@@ -200,13 +205,15 @@ class Multipage {
 	function Query($return_objects = false)
 	{
 		$results_array = array();
+		if ($this->ResultPerPage !='*') {
 		$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning));
 		$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning)));
+		}
 		$this->LimitSQL = $this->sqlRequest;
-		if($lines_count > 0) {
+		if((isset($lines_count) && $lines_count > 0) || $this->ResultPerPage =='*') {
 			$this->LimitSQL .= ' ' . $this->getOrderBy();
 		}
-		if ($this->DefaultResultsPerPage != '*') {
+		if ($this->DefaultResultsPerPage != '*' && $this->ResultPerPage != '*') {
 			// Si le nombre de $this->external_results_to_merge_at_beginning est élevé, potentiellement sur les premières pages on a uniquement des éléments extérieurs à cette requête SQL
 			// Donc on obtient ci-dessous LIMIT 0,0 => c'est nécessaire néanmoins de lancer la requête, car elle sert puisqu'elle contient SQL_CALC_FOUND_ROWS qui va servir ensuite au calcul pour le nombre de pages
 			$this->LimitSQL .= " LIMIT " . intval($lines_begin) . ", " . intval($lines_count);
@@ -218,8 +225,10 @@ class Multipage {
 			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($sql, 0, 10)) . String::substr($sql, 10);
 		}
 		$query = query($sql);
+		if ($this->ResultPerPage != '*') {
 		for($i=max(0, intval($this->ResultPerPage * ($this->page - 1)));isset($this->external_results_to_merge_at_beginning[$i]) && $i<max(0, intval($this->ResultPerPage * $this->page));$i++) {
 			$results_array[] = $this->external_results_to_merge_at_beginning[$i];
+		}
 		}
 		if ($return_objects) {
 			while ($ligne = fetch_object($query)) {
@@ -255,7 +264,7 @@ class Multipage {
 		} else {
 			$this->nbRecord = count($this->external_results_to_merge_at_beginning);
 		}
-		if (!empty($this->ResultPerPage) && ($this->ResultPerPage < $this->nbRecord)) {
+		if ($this->ResultPerPage != '*' && !empty($this->ResultPerPage) && ($this->ResultPerPage < $this->nbRecord)) {
 			$this->pages_count = ceil($this->nbRecord / $this->ResultPerPage);
 		}
 
@@ -270,7 +279,7 @@ class Multipage {
 		if ($this->LinkPerPage == '*') {
 			$this->LinkPerPage = $this->pages_count;
 		}
-		if (($this->always_show && $this->DefaultResultsPerPage != '*') || $this->pages_count > 1) {
+		if ($this->always_show || $this->pages_count > 1) {
 			$this->ParseTemplate();
 		} else {
 			// On n'affiche pas la navigation
@@ -330,8 +339,12 @@ class Multipage {
 			$links_per_page = $GLOBALS['STR_PER_PAGE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':  ' .
 			(($this->nb1 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb1)) . '" rel="nofollow">' . $this->nb1 . '</a>'):('<b>' . $this->nb1 . '</b>')) . ' ' .
 			(($this->nb2 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb2)) . '" rel="nofollow">' . $this->nb2 . '</a>'):('<b>' . $this->nb2 . '</b>')) . ' ' .
-			(($this->nb3 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb3)) . '" rel="nofollow">' . $this->nb3 . '</a>'):('<b>' . $this->nb3 . '</b>')) . ' ' .
-			(($this->nb1 != $this->ResultPerPage && $this->nb2 != $this->ResultPerPage && $this->nb3 != $this->ResultPerPage)?(' (' . $this->ResultPerPage . ')'):'');
+			(($this->nb3 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb3)) . '" rel="nofollow">' . $this->nb3 . '</a>'):('<b>' . $this->nb3 . '</b>'));
+			if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
+				// Activation du lien pour afficher tous les résultats
+				$links_per_page .= ' ' .(($this->nb4 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb4)) . '" rel="nofollow">' . $GLOBALS['STR_ALL_RESULTS'] . '</a>'):('<b>' . $GLOBALS['STR_ALL_RESULTS'] . '</b>')) . ' ';
+			}
+			$links_per_page .= (($this->nb1 != $this->ResultPerPage && $this->nb2 != $this->ResultPerPage && $this->nb3 != $this->ResultPerPage && (empty($GLOBALS['site_parameters']['multipage_show_all_result']) || $this->nb4 != $this->ResultPerPage))?(' (' . $this->ResultPerPage . ')'):'');
 		}
 		$tpl->assign('results_per_page', $links_per_page);
 		$liens = array();

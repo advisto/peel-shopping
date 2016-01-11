@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 47740 2015-11-09 09:17:42Z sdelaporte $
+// $Id: admin_commande_details.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -85,6 +85,18 @@
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ order_id }}</td>
 		</tr>
+		{% if is_kiala_module_active && shortkpid %}
+		<tr>
+			<td>{{ STR_MODULE_KIALA_TRACKING_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{{ shortkpid }}</td>
+		</tr>
+		{% endif %}
+		{% if marketplace_orderid %}
+		<tr>
+			<td>{{ STR_ADMIN_MARKETPLACE_ORDER_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{{ marketplace_orderid }}</td>
+		</tr>
+		{% endif %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_PAYMENT_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>

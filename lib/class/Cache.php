@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Cache.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: Cache.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Cache.php 47592 2015-10-30 16:40:22Z sdelaporte $
+ * @version $Id: Cache.php 48447 2016-01-11 08:40:08Z sdelaporte $
  * @access public
  */
 class Cache {
@@ -68,7 +68,7 @@ class Cache {
 		$lifeTime = round($lifeTime);
 		// $update_timestamp_now permet de mettre à jour immédiatement le timestamp du fichier pour éviter que plusieurs utilisateurs
 		// cherchent à mettre à jour en même temps le même fichier (car décalage entre test des caches et sauvegarde du nouveau cache)
-		if (file_exists($this->file) === false || (($this->filemtime = @filemtime($this->file)) < time() - $lifeTime) || (!empty($_GET['update']) && $_GET['update'] == 1)) {
+		if (!empty($GLOBALS['site_parameters']['cache_disable']) || file_exists($this->file) === false || (($this->filemtime = @filemtime($this->file)) < time() - $lifeTime) || (!empty($_GET['update']) && $_GET['update'] == 1)) {
 			// Fichier de cache absent ou pas à jour
 			if ($update_timestamp_now && file_exists($this->file)) {
 				// On fait en sorte que le fichier de cache soit considéré comme OK si d'autres appels sont faits en parallèle,
@@ -91,7 +91,7 @@ class Cache {
 	 */
 	function testDate($lifeDate)
 	{
-		if (file_exists($this->file) === false || @filemtime($this->file) < $lifeDate || (!empty($_GET['update']) && $_GET['update'] == 1)) {
+		if (!empty($GLOBALS['site_parameters']['cache_disable']) || file_exists($this->file) === false || @filemtime($this->file) < $lifeDate || (!empty($_GET['update']) && $_GET['update'] == 1)) {
 			return false;
 		} else {
 			return true;

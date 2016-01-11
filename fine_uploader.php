@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fine_uploader.php 48447 2016-01-11 08:40:08Z sdelaporte $
 
 include("configuration.inc.php");
 
@@ -77,13 +77,24 @@ if($load) {
 		}
 	}
 	// On renvoie le HTML qu'on veut afficher à la place du bouton upload
+	unset($GLOBALS['js_ready_content_array']);
 	$tpl = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
 	$file_infos = get_uploaded_file_infos($uploader->inputName, $save_path.'/'.$result['uploadName'], 'javascript:reinit_upload_field("'.$uploader->inputName.'");');
 	$tpl->assign('f', $file_infos);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$result['html'] = $tpl->fetch();
-	
+	if(!empty($GLOBALS['js_ready_content_array'])) {
+		$result['html'] .= '
+<script><!--//--><![CDATA[//><!--
+	(function($) {
+		$(document).ready(function() {
+			' . implode("\n", $GLOBALS['js_ready_content_array']) . '
+		});
+	})(jQuery);
+//--><!]]></script>
+';
+	}
 	// On renvoie le résultat au jQuery
 	header("Content-Type: text/plain");
 	echo json_encode($result);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -84,16 +84,16 @@ function save_mail_db($frm)
 	$ip = ipGet();
 	$Ipclient = $ip . " / " . getFAI($ip);
 	$sql = 'INSERT INTO peel_webmail SET
-		Titre = "' . nohtml_real_escape_string(vb($frm['sujet'])) . '"
-		, Message = "' . nohtml_real_escape_string(vb($frm['texte']) . "\n" . vb($frm['adresse']) . ' ' . vb($frm['code_postal']) . ' ' . vb($frm['ville']) . ' ' . vb($frm['pays'])) . '"
-		, Nom = "' . nohtml_real_escape_string(vb($frm['nom']) . (!empty($frm['societe']) ? ' / ' . vb($frm['societe']) : '')) . '"
-		, Prenom = "' . nohtml_real_escape_string(vb($frm['prenom'])) . '"
+		titre = "' . nohtml_real_escape_string(vb($frm['sujet'])) . '"
+		, message = "' . nohtml_real_escape_string(vb($frm['texte']) . "\n" . vb($frm['adresse']) . ' ' . vb($frm['code_postal']) . ' ' . vb($frm['ville']) . ' ' . vb($frm['pays'])) . '"
+		, nom = "' . nohtml_real_escape_string(vb($frm['nom']) . (!empty($frm['societe']) ? ' / ' . vb($frm['societe']) : '')) . '"
+		, prenom = "' . nohtml_real_escape_string(vb($frm['prenom'])) . '"
 		, telephone = "' . nohtml_real_escape_string(vb($frm['telephone'])) . '"
 		, dispo = "' . nohtml_real_escape_string(vb($frm['dispo'])) . '"
-		, Ip = "' . nohtml_real_escape_string($Ipclient) . '"
-		, Email = "' . nohtml_real_escape_string(vb($frm['email'])) . '"
-		, Date = "' . nohtml_real_escape_string(date('Y-m-d')) . '"
-		, Heure = "' . nohtml_real_escape_string(date('H:i:s')) . '"
+		, ip = "' . nohtml_real_escape_string($Ipclient) . '"
+		, email = "' . nohtml_real_escape_string(vb($frm['email'])) . '"
+		, date = "' . nohtml_real_escape_string(date('Y-m-d')) . '"
+		, heure = "' . nohtml_real_escape_string(date('H:i:s')) . '"
 		, site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id'])) . '"';
 	if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 		$sql .= "

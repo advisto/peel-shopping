@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_formulaire_nom.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: attributsAdmin_formulaire_nom.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
@@ -55,16 +55,12 @@
 			<td><input type="text" class="form-control" name="technical_code" value="{$technical_code|str_form_value}"></td>
 		</tr>
 		<tr>
-			<td class="right"><input type="radio" id="texte_libre_attribute" name="attribut_type" value="0" {if $texte_libre == '0' OR empty($texte_libre)} checked="checked"{/if} /></td>
-			<td><label for="texte_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_OPTIONS_LIST_ATTRIBUTE}</label></td>
-		</tr>
-		<tr>
-			<td class="right"><input type="radio" id="texte_non_libre_attribute" name="attribut_type" value="1" {if $texte_libre == '1' && $upload == '0'} checked="checked"{/if} /></td>
-			<td><label for="texte_non_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE}</label></td>
-		</tr>
-		<tr>
-			<td class="right"><input type="radio" id="upload_attribute" name="attribut_type" value="2" {if $upload == '1'} checked="checked"{/if} /></td>
-			<td><label for="upload_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE}</label></td>
+			<td>{$STR_TYPE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" id="texte_libre_attribute" name="attribut_type" value="0" {if $texte_libre == '0' OR empty($texte_libre)} checked="checked"{/if} /> <label for="texte_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_OPTIONS_LIST_ATTRIBUTE}</label><br />
+				<input type="radio" id="texte_non_libre_attribute" name="attribut_type" value="1" {if $texte_libre == '1' && $upload == '0'} checked="checked"{/if} /> <label for="texte_non_libre_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE}</label><br />
+				<input type="radio" id="upload_attribute" name="attribut_type" value="2" {if $upload == '1'} checked="checked"{/if} /> <label for="upload_attribute">{$STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE}</label>
+			</td>
 		</tr>
 		<tr>
 			<td>{$STR_MODULE_ATTRIBUTS_ADMIN_DISPLAY_MODE}{$STR_BEFORE_TWO_POINTS}:</td>

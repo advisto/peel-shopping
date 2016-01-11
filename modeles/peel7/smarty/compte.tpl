@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: compte.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
 *}<h1 property="name" class="page_title">{$compte}</h1>
 <div class="page_content account_icons">
 {if $est_identifie}
@@ -24,16 +24,22 @@
 		<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{$logout.href|escape:'html'}"><span class="glyphicon glyphicon-log-out"></span> {$logout.txt}</a>
 		<p>{$msg_support}</p>
 		<p>{$compte} {$number} <b>{$code_client}</b></p>
-		
-			{if isset($code_promo_utilise)}
-		<h2 class="well">{$code_promo_utilise.header}</h2>
+
+			{if isset($modules_data)}
+				{foreach $modules_data as $group => $modules_data_array}
+					{if !empty($modules_data_group.$group) && !empty($modules_data_group.$group.header)}
+		<h2 class="well">{$modules_data_group.$group.header}</h2>
+					{/if}
 		<div class="row">
-			<div class="col-xs-12">
-			{foreach $code_promo_utilise.data as $item}
-				- {$item.code_promo} {$item.discount_text}<br />
-			{/foreach}
-			</div>
+					{foreach $modules_data_array as $module}
+			<div class="col-sm-4 col-md-3 col-lg-3"><a class="btn btn-default" href="{$module.href|escape:'html'}">{$module.txt}</a></div>
+					{/foreach}
+					{if !empty($modules_data_group.$group) && !empty($modules_data_group.$group.comments)}
+			<div class="clearfix"></div>
+			<div class="col-xs-12"><p>{$modules_data_group.$group.comments}</p></div>
+					{/if}
 		</div>
+				{/foreach}
 			{/if}
 
 			{if isset($code_promo_valide)}
@@ -59,22 +65,19 @@
 			{/if}
 		</div>
 		{/if}
-			{if isset($modules_data)}
-				{foreach $modules_data as $group => $modules_data_array}
-					{if !empty($modules_data_group.$group) && !empty($modules_data_group.$group.header)}
-		<h2 class="well">{$modules_data_group.$group.header}</h2>
-					{/if}
+
+		{if isset($code_promo_utilise)}
+		<h2 class="well">{$code_promo_utilise.header}</h2>
 		<div class="row">
-					{foreach $modules_data_array as $module}
-			<div class="col-sm-4 col-md-3 col-lg-3"><a class="btn btn-default" href="{$module.href|escape:'html'}">{$module.txt}</a></div>
-					{/foreach}
-					{if !empty($modules_data_group.$group) && !empty($modules_data_group.$group.comments)}
-			<div class="clearfix"></div>
-			<div class="col-xs-12"><p>{$modules_data_group.$group.comments}</p></div>
-					{/if}
+			<div class="col-xs-12">
+			{foreach $code_promo_utilise.data as $item}
+				- {$item.code_promo} {$item.discount_text}<br />
+			{/foreach}
+			</div>
 		</div>
-				{/foreach}
 			{/if}
+
+
 			{if isset($disable_account)}
 		<a class="btn btn-danger" style="margin-bottom:10px" data-confirm="{$confirm_disable_account}" href="{$disable_account_href|escape:'html'}">{$disable_account_text}</a></div></div>
 			{/if}

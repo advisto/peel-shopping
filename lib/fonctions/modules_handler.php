@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 47716 2015-11-06 16:26:21Z gboussin $
+// $Id: modules_handler.php 48447 2016-01-11 08:40:08Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -122,6 +122,9 @@ function check_if_module_active($module_name, $specific_file_name = null, $skip_
  * Appelle la fonction correspondant au $hook pour chaque module installé
  * La fonction doit s'appeler : [nom du module]_[nom du hook]
  *
+ * @param string $hook
+ * @param array $params
+ * @param string $mode
  * @return
  */
 function call_module_hook($hook, $params, $mode = 'boolean') {
@@ -144,7 +147,8 @@ function call_module_hook($hook, $params, $mode = 'boolean') {
 		if(function_exists($function_name)) {
 			$result = $function_name($params);
 		} elseif(method_exists($class_name, $method_name)) {
-			$result = $class_name::$method_name($params);
+			// La syntaxe $class_name::$method_name($params) n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
+			$result = call_user_func_array(array($class_name, $method_name), array($params));
 		}
 		if(isset($result)) {
 			if($mode == 'boolean') {

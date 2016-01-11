@@ -365,6 +365,7 @@ p > input + label , div > input + label {
 }
 iframe {
 	max-width: 100%;
+	border: 0px;
 }
 .navbar-toggle {
 	/* Correction float right en mode xs sur 2 lignes */

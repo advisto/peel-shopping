@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 47722 2015-11-06 21:23:10Z gboussin $
+// $Id: configuration.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -56,7 +56,6 @@ $modules_lang_folders_array = array('forum' => '/modules/forum/lang/',
 		'sign_in_twitter' => '/modules/sign_in_twitter/lang/',
 		'references' => '/modules/references/lang/',
 		'icirelais' => '/modules/icirelais/lang/',
-		'exaprint' => '/modules/exaprint/lang/',
 		'groups_advanced' => '/modules/groups_advanced/lang/',
 		'annonces' => '/modules/annonces/lang/',
 		'abonnement' => '/modules/abonnement/lang/',
@@ -69,7 +68,8 @@ $modules_lang_folders_array = array('forum' => '/modules/forum/lang/',
 		'telechargement' => '/modules/telechargement/lang/', // Module de téléchargement
 		'vatlayer' => '/modules/vatlayer/lang/', // Module de vérification de numéro de TVA intracommunautaire par API
 		'devis' => '/modules/devis/lang/', // Module pour afficher un formulaire de demande de devis en front
-		'exaprint' => '/modules/exaprint/lang/', // Module pour afficher un formulaire de demande de devis en front
+		'exaprint' => '/modules/exaprint/lang/', // Module d'impression d'étiquettes pour les livraisons DPD (icirelais)
+		'kiala' => '/modules/kiala/lang/', // Module de sélection de point relais Kiala
 		);
 set_configuration_variable(array('technical_code' => 'modules_lang_folders_array', 'string' => $modules_lang_folders_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_configuration_variable_array = array('affiliation' => 'module_affilie', 'reseller' => 'module_retail', 'gift_check' => 'module_cadeau', 'tagcloud' => 'module_nuage',
@@ -227,7 +227,8 @@ foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
 	if(class_exists(String::ucfirst($this_module))) {
 		// Module complet avec classe permettant de gérer proprement l'installation
 		$class_name = String::ucfirst($this_module);
-		if(!$class_name::check_install()) {
+		// La syntaxe $class_name::check_install() n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
+		if(!call_user_func_array(array($class_name, 'check_install'), array())) {
 			if(!isset($GLOBALS[$class_name])) {
 				$GLOBALS[$class_name] = new $class_name();
 			}

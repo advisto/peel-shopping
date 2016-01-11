@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: codes_promos.php 48464 2016-01-11 13:42:43Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -25,11 +25,11 @@ $form_error_object = new FormError();
 
 switch ($mode) {
 	case "ajout" :
-		affiche_formulaire_ajout_code_promo($frm);
+		affiche_formulaire_ajout_code_promo($frm, $form_error_object);
 		break;
 
 	case "modif" :
-		affiche_formulaire_modif_code_promo(intval($_GET['id']), $frm);
+		affiche_formulaire_modif_code_promo(intval($_GET['id']), $frm, $form_error_object);
 		break;
 
 	case "suppr" :
@@ -40,6 +40,10 @@ switch ($mode) {
 	case "insere" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+		}
+		if (empty($frm['nom'])) {
+			// Il faut autoriser la création d'un code promo sans titre, cela permet de faire des réductions avec des critères sur des catégories ou produits sans avoir besoin que l'utilisateur ne rentre de code promo
+			// $form_error_object->add('nom', $GLOBALS['STR_EMPTY_FIELD']);
 		}
 		if (!$form_error_object->count()) {
 			$frm['source'] = 'ADM';
@@ -54,13 +58,17 @@ switch ($mode) {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
 			}
-			affiche_formulaire_ajout_code_promo($frm);
+			affiche_formulaire_ajout_code_promo($frm, $form_error_object);
 		}
 		break;
 
 	case "maj" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+		}
+		if (empty($frm['nom'])) {
+			// Il faut autoriser la mise à jour d'un code promo sans titre, cela permet de faire des réductions avec des critères sur des catégories ou produits sans avoir besoin que l'utilisateur ne rentre de code promo
+			// $form_error_object->add('nom', $GLOBALS['STR_EMPTY_FIELD']);
 		}
 		if (!$form_error_object->count()) {
 			maj_code_promo($_POST['id'], $_POST);
@@ -70,7 +78,7 @@ switch ($mode) {
 			if ($form_error_object->has_error('token')) {
 				echo $form_error_object->text('token');
 			}
-			affiche_formulaire_modif_code_promo($_REQUEST['id'], $frm);
+			affiche_formulaire_modif_code_promo($_REQUEST['id'], $frm, $form_error_object);
 		}
 		break;
 
@@ -116,7 +124,7 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
  * @param array $frm Array with all fields data
  * @return
  */
-function affiche_formulaire_ajout_code_promo(&$frm)
+function affiche_formulaire_ajout_code_promo(&$frm, &$form_error_object)
 {
 	/* Valeurs par défaut */
 	if(empty($frm)) {
@@ -134,7 +142,7 @@ function affiche_formulaire_ajout_code_promo(&$frm)
 	$frm["date_debut"] = get_formatted_date(time());
 	$frm["date_fin"] = get_formatted_date(time() + 7 * 24 * 3600);
 	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_CODES_PROMOS_CREATE'];
-	affiche_formulaire_code_promo($frm);
+	affiche_formulaire_code_promo($frm, $form_error_object);
 }
 
 /**
@@ -144,7 +152,7 @@ function affiche_formulaire_ajout_code_promo(&$frm)
  * @param array $frm Array with all fields data
  * @return
  */
-function affiche_formulaire_modif_code_promo($id, &$frm)
+function affiche_formulaire_modif_code_promo($id, &$frm, &$form_error_object)
 {
 	if(empty($frm)){
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
@@ -161,7 +169,7 @@ function affiche_formulaire_modif_code_promo($id, &$frm)
 	$frm["nouveau_mode"] = "maj";
 	$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
 
-	affiche_formulaire_code_promo($frm);
+	affiche_formulaire_code_promo($frm, $form_error_object);
 }
 
 /**
@@ -170,10 +178,11 @@ function affiche_formulaire_modif_code_promo($id, &$frm)
  * @param array $frm Array with all fields data
  * @return
  */
-function affiche_formulaire_code_promo(&$frm)
+function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_code_promo.tpl');
 	$tpl->assign('action', get_current_url(false) . '?start=0');
+	$tpl->assign('none_is_selected', frmvalide(vb($frm['cat_not_apply_code_promo'])=='', ' selected="selected"'));
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . vb($frm['nouveau_mode']) . intval(vb($frm['id']))));
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval(vb($frm['id'])));
@@ -194,6 +203,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('titre_bouton', vn($frm['titre_bouton']));
+	$tpl->assign('name_error', $form_error_object->text('nom'));
 	if($frm["nouveau_mode"] != "insere") {
 		$tpl->assign('STR_ADMIN_CODES_PROMOS_ALREADY_USED', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_ALREADY_USED'], vn($frm['compteur_utilisation'])));
 	}
@@ -206,6 +216,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_NB_FORECASTED', $GLOBALS['STR_ADMIN_CODES_PROMOS_NB_FORECASTED']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_NB_FORECASTED_EXPLAIN', $GLOBALS['STR_ADMIN_CODES_PROMOS_NB_FORECASTED_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ALL_CATEGORIES', $GLOBALS['STR_ADMIN_ALL_CATEGORIES']);
+	$tpl->assign('STR_NONE', $GLOBALS['STR_NONE']);
 	$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
 	$tpl->assign('STR_ADMIN_CATEGORIES_TO_EXCLUDE', $GLOBALS['STR_ADMIN_CATEGORIES_TO_EXCLUDE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_MIN', sprintf($GLOBALS['STR_ADMIN_CODES_PROMOS_MIN'], $GLOBALS['site_parameters']['symbole']));
@@ -218,6 +229,7 @@ function affiche_formulaire_code_promo(&$frm)
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER', $GLOBALS['STR_ADMIN_CODES_PROMOS_ADD_CODE_PROMO_HEADER']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_STATUS', $GLOBALS['STR_ADMIN_CODES_PROMOS_STATUS']);
 	$tpl->assign('STR_ADMIN_PRODUCT_NAME', $GLOBALS['STR_ADMIN_PRODUCT_NAME']);
+	$tpl->assign('STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO', $GLOBALS['STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO']);
 	echo $tpl->fetch();
 }
 
@@ -327,6 +339,7 @@ function affiche_liste_code_promo()
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
 	$tpl->assign('STR_ADMIN_ALL_CATEGORIES', $GLOBALS['STR_ADMIN_ALL_CATEGORIES']);
+	$tpl->assign('STR_NONE', $GLOBALS['STR_NONE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_NOT_FOUND', $GLOBALS['STR_ADMIN_CODES_PROMOS_NOT_FOUND']);
 	echo $tpl->fetch();
 }

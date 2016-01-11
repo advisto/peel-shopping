@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ru.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: ru.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -41,6 +41,7 @@ $GLOBALS["STR_AFFILIATION"] = "присоединение";
 $GLOBALS["STR_AJOUT_PENSE_BETE"] = "добавить в глупости";
 $GLOBALS["STR_ALL_BRAND"] = "";
 $GLOBALS["STR_ALL"] = "Все";
+$GLOBALS["STR_ALL_RESULTS"] = "";
 $GLOBALS["STR_ALT_AD_DETAIL"] = "";
 $GLOBALS["STR_AMOUNT"] = "цена";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "";
@@ -73,7 +74,7 @@ $GLOBALS["STR_BY"] = "через";
 $GLOBALS["STR_CADDIE_OBJECTS_COUNT"] = "";
 $GLOBALS["STR_CADDIE"] = "Ваша корзина";
 $GLOBALS["STR_CANCEL"] = "Назад";
-$GLOBALS["STR_CART_IS_NOT_ENOUGHT"] = "Le montant de votre caddie est inferieur au montant minimum du code promotionnel";
+$GLOBALS["STR_CART_IS_NOT_ENOUGHT"] = "";
 $GLOBALS["STR_CART_PRESERVATION_TITLE"] = "";
 $GLOBALS["STR_CAT_LB"] = "";
 $GLOBALS["STR_CATALOG"] = "наш каталог";
@@ -158,7 +159,7 @@ $GLOBALS["STR_DELETE"] = "удалить";
 $GLOBALS["STR_DELETE_CONFIRM"] = "";
 $GLOBALS["STR_DELIVERY_STOCK"] = "дата ориентировочной доставки";
 $GLOBALS["STR_DELIVERY"] = "";
-$GLOBALS["STR_DEMO_RIGHTS_LIMITED"] = "";
+$GLOBALS["STR_RIGHTS_LIMITED"] = "";
 $GLOBALS["STR_DESC"] = "";
 $GLOBALS["STR_DESCRIPTION_WEBSITE"] = "описание";
 $GLOBALS["STR_DESIGNATION"] = "определение";
@@ -182,7 +183,7 @@ $GLOBALS["STR_DOWNLOAD_CENTER"] = "центр ссылок";
 $GLOBALS["STR_DOWNLOAD_DOCUMENT"] = "";
 $GLOBALS["STR_DOWNLOAD"] = "";
 $GLOBALS["STR_EAN_CODE"] = "";
-$GLOBALS["STR_EASY_LIST"] = "easy list";
+$GLOBALS["STR_EASY_LIST"] = "";
 $GLOBALS["STR_ECOTAXE_INCLUDE"] = "";
 $GLOBALS["STR_ECOTAXE"] = "с экотарифом";
 $GLOBALS["STR_EMAIL_ABSENT"] = "";
@@ -318,11 +319,11 @@ $GLOBALS["STR_INCLUDED"] = "включено";
 $GLOBALS["STR_INCLUDING"] = "включая";
 $GLOBALS["STR_INFORMATIONS"] = "свободная информация";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "";
-$GLOBALS["STR_INSERT_A_LOGO"] = "Insérer un Logo";
+$GLOBALS["STR_INSERT_A_LOGO"] = "";
 $GLOBALS["STR_INSERT_EMAIL"] = "введите ваш электронный адрес чтобы узнать пароль  заполнив этот формуляр ваш пароль будет изменен и новый пароль будет отправлен на ваш электронный адрес";
 $GLOBALS["STR_INSERT_LOGIN_AND_PASSWORD"] = "вставьте логин и пароль";
 $GLOBALS["STR_INSERT_NEW_PASSWORD"] = "";
-$GLOBALS["STR_INSERT"] = "Insérer";
+$GLOBALS["STR_INSERT"] = "";
 $GLOBALS["STR_INSTALLATION_DELETE_EXPLAIN_ALTERNATIVE"] = "";
 $GLOBALS["STR_INSTALLATION_DELETE_EXPLAIN"] = "";
 $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "";
@@ -375,7 +376,7 @@ $GLOBALS["STR_MODIFY_CONTENT_CATEGORY"] = "";
 $GLOBALS["STR_MODIFY_PRODUCT"] = "функция администртора изменить продукт";
 $GLOBALS["STR_MODIFY"] = "";
 $GLOBALS["STR_MODULE_ACCOUNTING_OK"] = "да";
-$GLOBALS["STR_MODULE_ARIANE_PANIER_SOMMARY"] = "Résumé";
+$GLOBALS["STR_MODULE_ARIANE_PANIER_SOMMARY"] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS"] = "опции";
 $GLOBALS["STR_MODULE_AVIS_AVERAGE_RATING_GIVEN"] = "средний балл";
 $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "на данный момент ни одного отзыва";
@@ -411,8 +412,8 @@ $GLOBALS["STR_MODULE_PAYPAL_BOUTON"] = "";
 $GLOBALS["STR_MODULE_PAYPAL_BUTTON_ALT"] = "оплатите через пейбол быстрое и разумное решение";
 $GLOBALS["STR_MODULE_PENSEBETE_HAS_BEEN_ADD_REMINDER"] = "добавлено к глупостям";
 $GLOBALS["STR_MODULE_PENSEBETE_NO_PRODUCT_IN_REMINDER"] = "ваша тележка не содержит товаров";
-$GLOBALS["STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP"] = "de notre site";
-$GLOBALS["STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT"] = "Mon pense-bête de produits";
+$GLOBALS["STR_MODULE_PENSEBETE_OF_OUR_ONLINE_SHOP"] = "";
+$GLOBALS["STR_MODULE_PENSEBETE_PENSE_BETE_PRODUIT"] = "";
 $GLOBALS["STR_MODULE_PENSEBETE_YOUR_REMINDER_ON_RUB"] = "ваша глупость в рубрике";
 $GLOBALS["STR_MODULE_PREMIUM_ACCUEIL_AFFILIATION"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"] = "";
@@ -433,7 +434,7 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "вопросы";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "чтобы скопировать по номеру";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "ввести код HTLM";
-$GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Liste des mots";
+$GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "поле почты обязательно";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "нет в наличии  вы оповестим вас по почте что он в продаже";
@@ -578,7 +579,7 @@ $GLOBALS["STR_PAYMENT_FAILED"] = "ваш запрос не зарегистри�
 $GLOBALS["STR_PAYMENT_MEAN"] = "";
 $GLOBALS["STR_PAYMENT_SUCCEED"] = "ваш запрос принят. Спасибо за доверие";
 $GLOBALS["STR_PAYMENT"] = "оплата";
-$GLOBALS["STR_PAYPAL_IMG"] = "<img src=\"{$GLOBALS['wwwroot']}/images/logo-xclickBox.gif\" width=\"152\" height=\"29\" alt=\"paiements via Paypal\" />";
+$GLOBALS["STR_PAYPAL_IMG"] = "<img src=\"{$GLOBALS['wwwroot']}/images/logo-xclickBox.gif\" width=\"152\" height=\"29\" alt=\"\" />";
 $GLOBALS["STR_PAYPAL"] = "счет";
 $GLOBALS["STR_PDF_AVOIR"] = "стать клиентом";
 $GLOBALS["STR_PDF_BILL_DATE"] = "дата";
@@ -599,9 +600,9 @@ $GLOBALS["STR_PDF_NET"] = "чистая стоимость";
 $GLOBALS["STR_PDF_PAIEMENT"] = "способ оплаты";
 $GLOBALS["STR_PDF_PRIX_HT"] = "цена НТ";
 $GLOBALS["STR_PDF_PRIX_TTC"] = "цена ТТС";
-$GLOBALS["STR_PDF_QUOTATION"] = "Devis";
+$GLOBALS["STR_PDF_QUOTATION"] = "";
 $GLOBALS["STR_PDF_RCS"] = "РЦС";
-$GLOBALS["STR_PDF_REF"] = "Références :";
+$GLOBALS["STR_PDF_REF"] = " :";
 $GLOBALS["STR_PDF_REFERENCE"] = "отчет";
 $GLOBALS["STR_PDF_SHIPMENT"] = "транспорт";
 $GLOBALS["STR_PDF_SIGNATURE"] = "подпись";
@@ -619,7 +620,7 @@ $GLOBALS["STR_PICTURE"] = "";
 $GLOBALS["STR_PLEASE_LOGIN"] = "";
 $GLOBALS["STR_PORTABLE"] = "номер сотового";
 $GLOBALS["STR_POSTED_OPINION"] = "мнение";
-$GLOBALS["STR_POSTED_OPINIONS"] = "Avis déposés";
+$GLOBALS["STR_POSTED_OPINIONS"] = "";
 $GLOBALS["STR_PREV"] = "предыдущая";
 $GLOBALS["STR_PREVIOUS_PAGE"] = "предыдущая";
 $GLOBALS["STR_PREVIOUS"] = "предыдущая";
@@ -653,7 +654,7 @@ $GLOBALS["STR_QUANTITY_PRODUCT_ADD"] = "товар добавлен в корз�
 $GLOBALS["STR_QUANTITY_PRODUCTS_ADD"] = "товары добавлены в корзину";
 $GLOBALS["STR_QUANTITY_SHORT"] = "высокий";
 $GLOBALS["STR_QUANTITY"] = "Количество";
-$GLOBALS["STR_QUOTATION"] = "Devis";
+$GLOBALS["STR_QUOTATION"] = "";
 $GLOBALS["STR_REBATE_NOW"] = "если у вас есть скидка";
 $GLOBALS["STR_RECOVER_PASSWORD_OK"] = "";
 $GLOBALS["STR_RECURRENT"] = "";
@@ -663,18 +664,18 @@ $GLOBALS["STR_REFERENCE"] = "отчет";
 $GLOBALS["STR_REFRESH"] = "";
 $GLOBALS["STR_REGISTER"] = "";
 $GLOBALS["STR_REGLEMENT_CARTE_BANCAIRE"] = "оплата банковской картой";
-$GLOBALS["STR_REMINDING_CHAR"] = "caracteres restants";
+$GLOBALS["STR_REMINDING_CHAR"] = "";
 $GLOBALS["STR_REMISE"] = "отложить";
 $GLOBALS["STR_REQUEST_OK"] = "ваш заказ принят к сведению";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "резуьтат поиска";
-$GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Inscription revendeurs";
+$GLOBALS["STR_RETAILER_SUBSCRIBE"] = "";
 $GLOBALS["STR_RETAILER"] = "стать перекупщиком";
-$GLOBALS["STR_RETAILERS"] = "Détaillants";
+$GLOBALS["STR_RETAILERS"] = "";
 $GLOBALS["STR_REFERENCE_IF_KNOWN"] = "";
 $GLOBALS["STR_RETOUR"] = "Обратно";
-$GLOBALS["STR_REVENDEURS"] = "Revendeurs";
+$GLOBALS["STR_REVENDEURS"] = "";
 $GLOBALS["STR_RSS_TITLE"] = "";
 $GLOBALS["STR_RSS"] = "поток РСС";
 $GLOBALS["STR_SAVE_CART"] = "";
@@ -708,7 +709,7 @@ $GLOBALS["STR_SCAN_CODE_AND_ADD_LIST"] = "";
 $GLOBALS["STR_SCAN_HELP"] = "";
 $GLOBALS["STR_SHIP_ADDRESS"] = "адрес доставки";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "выберите тип отправки";
-$GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Choisissez votre zone d'expédition";
+$GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "";
 $GLOBALS["STR_SHIPPING_COST"] = "расходы за доставку";
 $GLOBALS["STR_SHIPPING_TYPE"] = "тип отправки";
 $GLOBALS["STR_SHIPPING_ZONE"] = "зона отправки";
@@ -805,7 +806,6 @@ $GLOBALS["STR_VIA"] = "Via";
 $GLOBALS["STR_VOIR_LISTE_CADEAU"] = "";
 $GLOBALS["STR_VOIR_PENSE_BETE"] = "просмотреть мои глупости";
 $GLOBALS["STR_VOTE"] = "";
-$GLOBALS["STR_WARNING_SIZE_PICTURE_ADS"] = "";
 $GLOBALS["STR_WARNING"] = "";
 $GLOBALS["STR_WEBSITE"] = "интернет сайт";
 $GLOBALS["STR_WEEK"] = "";
@@ -816,7 +816,7 @@ $GLOBALS["STR_WITH_ECOTAX"] = "с экотарифом";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "промо код";
 $GLOBALS["STR_WITH"] = "";
 $GLOBALS["STR_WORLD"] = "";
-$GLOBALS["STR_WORD_RESELLER"] = "Revendeurs";
+$GLOBALS["STR_WORD_RESELLER"] = "";
 $GLOBALS["STR_WORD_SELLERS"] = "";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "";
 $GLOBALS["STR_YES"] = "";

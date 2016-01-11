@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: historique_commandes.php 48447 2016-01-11 08:40:08Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -22,6 +22,8 @@ define("IN_ORDER_HISTORY", true);
 $GLOBALS['page_name'] = 'historique_commandes';
 
 $output = '';
+$output .= call_module_hook('orders_history', array('mode' => vb($_REQUEST['mode'])), 'output');
+
 switch (vb($_REQUEST['mode'])) {
 	case "details" :
 		$sql = "SELECT c.*, sp.technical_code AS statut_paiement
@@ -51,11 +53,14 @@ switch (vb($_REQUEST['mode'])) {
 
 	case "product_ordered_history" :
 		// Récupération des produits des commandes réglées par l'utilisateur
-		$sql = "SELECT ca.nom_produit, ca.produit_id , ca.quantite, c.o_timestamp, c.numero, c.id
+		$tpl = $GLOBALS['tplEngine']->createTemplate('products_ordered_history.tpl');
+		$sql = "SELECT ca.id AS ca_id, ca.nom_produit, ca.reference, ca.produit_id , ca.quantite, c.o_timestamp, c.numero, c.id, c.email, ca.attributs_list
 			FROM peel_commandes_articles ca
 			INNER JOIN peel_commandes c ON ca.commande_id = c.id AND " . get_filter_site_cond('commandes', 'c') . "
 			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
-			WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND sp.technical_code = 'completed' AND " . get_filter_site_cond('commandes_articles', 'ca') . "";
+			WHERE sp.technical_code = 'completed' AND " . get_filter_site_cond('commandes_articles', 'ca') . "";
+		$sql .= " AND c.id_utilisateur='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";
+		$tpl->assign('STR_PRODUCTS_PURCHASED_LIST', $GLOBALS['STR_PRODUCTS_PURCHASED_LIST']);
 		$Links = new Multipage($sql, 'affiche_product_ordered_history');
 		$Links->OrderDefault = "o_timestamp";
 		$Links->SortDefault = "DESC";
@@ -63,18 +68,19 @@ switch (vb($_REQUEST['mode'])) {
 		$Links->HeaderTitlesArray = $HeaderTitlesArray;
 		$results_array = $Links->Query();
 
-		$tpl = $GLOBALS['tplEngine']->createTemplate('products_ordered_history.tpl');
 		if (empty($results_array)) {
 			$tpl->assign('STR_NO_ORDER', $GLOBALS['STR_NO_ORDER']);
 		} else {
 			foreach($results_array as $this_products_ordered_history) {
 				$product_object = new Product($this_products_ordered_history['produit_id']);
 				$tmpProd = array(
+					'reference' => $this_products_ordered_history['reference'],
 					'nom_produit' => $this_products_ordered_history['nom_produit'],
 					'href_produit' => $product_object->get_product_url(),
 					'quantite' => $this_products_ordered_history['quantite'],
 					'o_timestamp' => $this_products_ordered_history['o_timestamp'],
-					'numero' => $this_products_ordered_history['numero']
+					'numero' => $this_products_ordered_history['numero'],
+					'order_list_type' => $order_list_type
 				);
 				$products[] = $tmpProd;
 			}
@@ -83,7 +89,6 @@ switch (vb($_REQUEST['mode'])) {
 		$tpl->assign('links_header_row', $Links->getHeaderRow());
 		$tpl->assign('links_multipage', $Links->GetMultipage());
 		
-		$tpl->assign('STR_PRODUCTS_PURCHASED_LIST', $GLOBALS['STR_PRODUCTS_PURCHASED_LIST']);
 		$output .= $tpl->fetch();
 		break;
 

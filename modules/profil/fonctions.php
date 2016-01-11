@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 
 /**
  * Renvoie les tableaux d'informations à afficher dans Mon compte
@@ -27,7 +27,7 @@ function profil_hook_account_show($params) {
 		$result['modules_data']['profil'] = array();
 		foreach(array('document_'.$_SESSION['session_langue']) as $this_doc_name) {
 			if (!empty($profil[$this_doc_name])) {
-				$result['modules_data']['profil'][] = array('txt' => '<img src="' . $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($profil[$this_doc_name], 75, 75, 'fit') . '" /><br />' . $GLOBALS["STR_DOWNLOAD_DOCUMENT"], 'href' => $GLOBALS['repertoire_upload'] . '/' . $profil[$this_doc_name]);
+				$result['modules_data']['profil'][] = array('txt' => '<img src="' . thumbs($profil[$this_doc_name], 75, 75, 'fit', null, null, true, true) . '" /><br />' . $GLOBALS["STR_DOWNLOAD_DOCUMENT"], 'href' => $GLOBALS['repertoire_upload'] . '/' . $profil[$this_doc_name]);
 			}
 		}
 	}

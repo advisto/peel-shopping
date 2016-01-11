@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: produit.php 48446 2016-01-11 08:34:19Z sdelaporte $
 
 define('LOAD_NO_OPTIONAL_MODULE', true);
 include('../../configuration.inc.php');
@@ -64,12 +64,12 @@ if (vb($_POST['type']) == "update_session_add") {
 				// Prix hors ecotaxe
 				$display_picture = $product_object->get_product_main_picture(false);
 				if ($display_picture) {
-					$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($display_picture, 75, 75, 'fit');
-			} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
-				$product_picture = $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit');
-			} else {
-				$product_picture = null;
-			}
+					$product_picture = thumbs($display_picture, 75, 75, 'fit', null, null, true, true);
+				} elseif(!empty($GLOBALS['site_parameters']['default_picture'])) {
+					$product_picture = thumbs($GLOBALS['site_parameters']['default_picture'], 75, 75, 'fit', null, null, true, true);
+				} else {
+					$product_picture = null;
+				}
 				$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images'])?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />';
 				if(!in_array($this_label, $labels_array)) { 
 					$results_array[] = array(

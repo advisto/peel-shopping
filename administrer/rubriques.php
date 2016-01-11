@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 47736 2015-11-07 20:55:34Z gboussin $
+// $Id: rubriques.php 48447 2016-01-11 08:40:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -145,9 +145,8 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 	$qid = query($sql);
 	while ($rub = fetch_assoc($qid)) {
 		if (!empty($rub['image'])) {
-			$this_thumb = thumbs($rub['image'], 80, 50, 'fit');
 			$tpl->assign('image', $rub['image']);
-			$tpl->assign('image_src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb);
+			$tpl->assign('image_src', thumbs($rub['image'], 80, 50, 'fit', null, null, true, true));
 		} else {
 			$tpl->assign('image', null);
 			$tpl->assign('image_src', null);

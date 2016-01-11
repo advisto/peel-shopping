@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -296,11 +296,15 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 				}
 			}
 			if(String::strpos($output, 'googlesyndication')!==false && (String::strpos($output, 'x90')===false && String::strpos($output, 'x15')===false)) {
-				if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
-					// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
-					$output='';
-				} else {
-					$GLOBALS['google_pub_count']++;
+				// Cette bannière n'est pas un x90 ou x15 et est donc susceptible de compter dans la limite de 3 bannière Google maximum
+				if(String::strpos(String::strtolower($output), 'correspond')===false) {
+					// Cette bannière n'est pas identifiée comme un contenu correspondant => elle compte dans la limite de 3 bannière Google maximum
+					if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
+						// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
+						$output='';
+					} else {
+						$GLOBALS['google_pub_count']++;
+					}
 				}
 			} elseif(String::strpos($output, 'googlesyndication')!==false && !empty($GLOBALS['disable_google_ads'])) {
 				// On ne doit pas afficher de bannière adsense x90 ou x15 si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure définis par la fonction is_adsense_compliant

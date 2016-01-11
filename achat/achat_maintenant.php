@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2015 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 47592 2015-10-30 16:40:22Z sdelaporte $
+// $Id: achat_maintenant.php 48447 2016-01-11 08:40:08Z sdelaporte $
 include("../configuration.inc.php");
 
 $output = '';
@@ -27,6 +27,8 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 	// On veut vérifier s'il y a eu passage par la page SO de SoColissimo
 	put_session_commande_from_so_page();
 	$_SESSION['session_caddie']->update();
+} elseif (!empty($_GET['shortkpid'])){
+	put_session_commande_from_kiala_page($_GET);
 } elseif (!empty($_POST)) {
 	put_session_commande($_POST);
 	if(empty($GLOBALS['site_parameters']['user_multiple_addresses_disable'])) {
@@ -135,7 +137,7 @@ foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_ad
 		} else {
 			$this_new_address = 'original_address';
 		}
-	} elseif(empty($_POST) && !empty($_SESSION['session_utilisateur']["address_" . $address_type . "_default"])) {
+	} elseif(empty($_GET) && empty($_POST) && !empty($_SESSION['session_utilisateur']["address_" . $address_type . "_default"])) {
 		// Chargement de la configuration par défaut choisie depuis la page utilisateurs/adresse.php, si aucune valeur n'est envoyées en POST.
 		$this_new_address = vb($_SESSION['session_utilisateur']['address_' . $address_type . "_default"]);
 	} else {
@@ -276,6 +278,8 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			// On a le module So Colissimo activé, et la commande est liée auprocess SoColissimo
 			// On est en mode iframe pour SO Colissimo
 			$output .= '<iframe id="SOLivraison" name="SOLivraison" width="100%" height="800" src="' . $GLOBALS['wwwroot'] . '/modules/socolissimo/iframe.php"></iframe>';
+		} elseif (check_if_module_active('kiala') && is_type_linked_to_kiala($_SESSION['session_caddie']->typeId) && empty($_SESSION['session_commande']['client2']) && empty($_SESSION['session_commande']['is_kiala_order'])) {
+			$output .= getKialaForm($_SESSION['session_utilisateur'], $_SESSION['session_caddie']);
 		} else {
 			if (!isset($form_error_object)) {
 				$form_error_object = new FormError();
