@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: es.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ $GLOBALS["STR_AJOUT_PENSE_BETE"] = "Añadir al carrito";
 $GLOBALS["STR_ALL_BRAND"] = "Todas las marcas";
 $GLOBALS["STR_ALL"] = "Todos";
 $GLOBALS["STR_ALL_RESULTS"] = "Todos los resultados";
-$GLOBALS["STR_ALT_AD_DETAIL"] = "Detalle de la nota del vendedor";
+$GLOBALS["STR_ALT_AD_DETAIL"] = "Detalle de la nota";
 $GLOBALS["STR_AND"] = "y";
 $GLOBALS["STR_AMOUNT"] = "Importe";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Estoy interesado en las siguientes categorías:";
@@ -130,6 +130,7 @@ $GLOBALS["STR_CONFIRMATION"] = "Confirmación";
 $GLOBALS["STR_CONFIRM_DISABLE_ACCOUNT"] = "¿Seguro que quieres dar de baja?";
 $GLOBALS["STR_CONTACT_INFO"] = " Datos";
 $GLOBALS["STR_CONTACT_INTRO"] = "¿Necesita más información? ¿Preguntas? ¿una petición especial? Contacte con nosotros!";
+$GLOBALS["STR_CONTACT_INTRO_PRODUCT_INFO"] = "Solicite especificaciones técnicas";
 $GLOBALS["STR_CONTACT_LB"] = "Seleccione el objeto de su solicitud";
 $GLOBALS["STR_CONTACT_SELECT1"] = "Información";
 $GLOBALS["STR_CONTACT_SELECT2"] = "Sugerencias";
@@ -400,6 +401,7 @@ $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "Actualmente, ningún 
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "Nota";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Opinión presentada por";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Dejó su opinión sobre este producto";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "Las noticias de ";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "El opinión de los internautas sobre";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Enviar su opinión";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Desea hacer un comentario sobre el producto";
@@ -691,6 +693,7 @@ $GLOBALS["STR_REMISE"] = "Descuento";
 $GLOBALS["STR_REQUEST_OK"] = "Su petición ha sido considerada";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "necesaria para una reclamación";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = " se requiere para confirmar su pedido.";
+$GLOBALS["STR_RESULTS"] = "Resultados";
 $GLOBALS["STR_RESULT_SEARCH"] = "Resultados de su busqueda";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Regístrate revendedores";
 $GLOBALS["STR_RETAILER"] = "Conviértete en distribuidor";
@@ -731,7 +734,7 @@ $GLOBALS["STR_SHIPPING_COST"] = "Los costos de envío";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Typo de expedición";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Zona de expedición";
 $GLOBALS["STR_SHOPPING"] = "Continuar mis compras";
-$GLOBALS["STR_SHORT_FAX"] = "Fax.";
+$GLOBALS["STR_SHORT_FAX"] = "Fax";
 $GLOBALS["STR_SHORT_TEL"] = "Tél.";
 $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "Desactivar su eventual gestor de descarga ";
 $GLOBALS["STR_SIGNATURE"] = "Firma";
@@ -846,6 +849,7 @@ $GLOBALS["STR_YOU_ARE"] = "Usted es";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Le invitamos a editar su factura de su cuenta de usuario.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Su código promocional";
 $GLOBALS["STR_YOUR_EMAIL"] = "Su Correo electrónico";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "Su nombre";
 $GLOBALS["STR_YOUR_NAME"] = "Su apellido";
 $GLOBALS["STR_YOUR_NEW_ADDRESS_CREATE"] = "Su nueva dirección fue creado.";
 $GLOBALS["STR_YOUR_NOTE"] = "Su nota";

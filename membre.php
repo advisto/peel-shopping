@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: membre.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: membre.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_ACCES_ACCOUNT', true);
 include("configuration.inc.php");
 
@@ -37,7 +37,7 @@ if (!empty($_POST)) {
 	$form_error_object->valide_form($_POST,
 		array('mot_passe' => $GLOBALS['STR_ERR_PASSWORD_EMPTY'],
 			'email' => $GLOBALS['STR_ERR_EMAIL_VIDE']));
-	$output .= call_module_hook('user_login_check_form', array('email' => vb($_POST['email'])), 'output');
+	$output .= call_module_hook('user_login_check_form', array('email' => vb($_POST['email'])), 'string');
 	
 	if (!$form_error_object->count()) {
 		$utilisateur = user_login_now($_POST['email'], $_POST['mot_passe']);

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_formulaire.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: attributsAdmin_formulaire.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
@@ -27,13 +27,13 @@
 			</td>
 		</tr>
 		{% for lng in langs %}
-		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lng.code|upper }}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td class="title_label" style="width:350px">{{ STR_NAME }} {{ lng.code|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left"><input style="width: 100%" type="text" class="form-control" name="descriptif_{{ lng.code }}" value="{{ lng.descriptif|html_entity_decode_if_needed|str_form_value }}" />{{ lng.error }}</td>
 		</tr>
 		{% endfor %}
-		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</h2></td></tr>
 		<tr>
 			<td class="title_label">{{ STR_IMAGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left">

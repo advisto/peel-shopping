@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_ro.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: admin_ro.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -684,6 +684,7 @@ $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"] = "";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"] = "";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"] = "";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"] = "";
+$GLOBALS["STR_ADMIN_MODULE_ACTIVATE_LINK"] = "";
 $GLOBALS["STR_ADMIN_MORE_THAN"] = "";
 $GLOBALS["STR_ADMIN_MSG_CHANGES_OK"] = "";
 $GLOBALS["STR_ADMIN_MSG_ORDER_SENT_OK"] = "";
@@ -788,6 +789,7 @@ $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CLIENTS_ONLY"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE"] = "";
+$GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_LOWER"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK"] = "";
@@ -1238,7 +1240,6 @@ $GLOBALS["STR_ADMIN_SITES_TOP"] = "";
 $GLOBALS["STR_ADMIN_SITES_TRADEMARK_PROMOTION"] = "";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_KEY"] = "";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET"] = "";
-$GLOBALS["STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK"] = "";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_SIGN_IN"] = "";
 $GLOBALS["STR_ADMIN_SITES_URL_REWRITING_MODULE"] = "";
 $GLOBALS["STR_ADMIN_SITES_USER_SHOPS_BOTTOM"] = "";
@@ -1508,6 +1509,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "";
+$GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "";
@@ -1597,7 +1599,6 @@ $GLOBALS["STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_AD"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_UPDATE"] = "";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_ACTIVATE_LINK"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_ID"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_PLACE"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"] = "";

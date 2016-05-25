@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avisAdmin_formulaire.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: avisAdmin_formulaire.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
@@ -44,9 +44,10 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-				{for $this_note=$note_max; $this_note>=1; $this_note--}
-				<input type="radio" name="note" value="{$this_note}"{if $note == $this_note} checked="checked"{/if} />{for $i=1 to $this_note}<img src="{$star_src|escape:'html'}" style="vertical-align:middle" alt="*" />{/for}<br />
+				{for $this_note=$note_max; $this_note>=0; $this_note--}
+				<input type="radio" name="note" value="{$this_note}"{if $note == $this_note} checked="checked"{/if} />{if $this_note==0} -{else}{for $i=1 to $this_note}<img src="{$star_src|escape:'html'}" style="vertical-align:middle" alt="*" />{/for}{/if}<br />
 				{/for}
+				<input type="radio" name="note" value="-99"{if $note == -99} checked="checked"{/if} /> {$STR_MODULE_AVIS_POSTED_NEWS}<br />
 			</td>
 		</tr>
 		<tr>

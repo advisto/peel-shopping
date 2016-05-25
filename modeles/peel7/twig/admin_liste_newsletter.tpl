@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_newsletter.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_liste_newsletter.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="10">{{ STR_ADMIN_NEWSLETTERS_TITLE }}</td>
@@ -22,19 +22,8 @@
 	<tr>
 		<td colspan="10"><p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_NEWSLETTERS_CREATE }}</a></p></td>
 	</tr>
-	{% if (results) %}
-	<tr>
-		<td class="menu">{{ STR_ADMIN_ACTION }}</td>
-		<td class="menu">{{ STR_ADMIN_NAME }}</td>
-		<td class="menu">{{ STR_ADMIN_CREATION_DATE }}</td>
-		<td class="menu">{{ STR_ADMIN_NEWSLETTERS_SUBSCRIBERS_NUMBER }}</td>
-		<td class="menu">{{ STR_ADMIN_FORMAT }}</td>
-		<td class="menu">{{ STR_STATUS }}</td>
-		<td class="menu">{{ STR_ADMIN_NEWSLETTERS_LAST_SENDING }}</td>
-		<td class="menu">{{ STR_ADMIN_NEWSLETTERS_SEND_TO_USERS }}</td>
-		<td class="menu">{{ STR_ADMIN_NEWSLETTERS_SENDING_TEST }}</td>
-		<td class="menu">{{ STR_ADMIN_WEBSITE }}</td>
-	</tr>
+{% if (results) %}
+	{{ links_header_row }}
 	{% for res in results %}
 	{{ res.tr_rollover }}
 		<td><a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.sujet }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a></td>
@@ -49,7 +38,7 @@
 		<td class="center">{{ res.site_name }}</td>
 	</tr>
 	{% endfor %}
-	{% else %}
+{% else %}
 		<tr><td colspan="10"><b>{{ STR_ADMIN_NEWSLETTERS_NOTHING_FOUND }}</b></td></tr>
-	{% endif %}
+{% endif %}
 </table>

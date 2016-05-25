@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_haut.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -49,14 +49,10 @@ $tpl->assign('IN_INSTALLATION', IN_INSTALLATION);
 $tpl->assign('STR_ADMIN_DEMO_WARNING', $GLOBALS['STR_ADMIN_DEMO_WARNING']);
 $tpl->assign('STR_ADMINISTRATION', $GLOBALS['STR_ADMINISTRATION']);
 if (!empty($GLOBALS['site_parameters']['favicon'])) {
-	$tpl->assign('favicon_href', $GLOBALS['repertoire_upload'] . '/' . $GLOBALS['site_parameters']['favicon']);
+	$tpl->assign('favicon_href', get_url_from_uploaded_filename($GLOBALS['site_parameters']['favicon']));
 }
 $GLOBALS['js_files'][-10] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery.js';
 $GLOBALS['js_files'][-5] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery-ui.js';
-if (check_if_module_active('annonces')) {
-	$GLOBALS['css_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/annonces/rating_bar/rating.css';
-	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/annonces/rating_bar/js/rating.js';
-}
 $GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/advisto.js';
 $GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/admin_all_functions.js';
 if (vn($GLOBALS['site_parameters']['html_editor']) == '1') {
@@ -67,21 +63,13 @@ if(file_exists($GLOBALS['dirroot'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['
 	// Configuration pour une langue donnée
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/jquery.ui.datepicker-'.$_SESSION['session_langue'].'.js';
 }
-$GLOBALS['js_ready_content_array'][] = get_datepicker_javascript(!empty($GLOBALS['load_timepicker']));
+$GLOBALS['js_ready_content_array'][] = get_datepicker_javascript();
 
 if (vb($GLOBALS['site_parameters']['enable_prototype']) == 1 && empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 	// Attention, prototype.js a des incompatibilités avec Bootstrap
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/prototype.js';
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/effects.js';
 	$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/lib/js/controls.js';
-}
-if (!IN_INSTALLATION) {
-	if (check_if_module_active('forum')) {
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/forum/forum.js';
-	}
-	if (check_if_module_active('webmail')) {
-		$GLOBALS['js_files'][] = $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/function.js';
-	}
 }
 if (vb($GLOBALS['site_parameters']['used_uploader']) == 'fineuploader') {
 	// Par défaut on peut utiliser fineuploader sur toutes les pages de l'administration
@@ -130,6 +118,12 @@ $tpl->assign('notification_output', implode('', $GLOBALS['notification_output_ar
 $tpl->assign('css_files', get_css_files_to_load(!empty($GLOBALS['site_parameters']['minify_css'])));
 // Les fichiers js sont traités dans le footer
 $tpl->assign('js_files', null);
+
+$hook_result = call_module_hook('admin_header_template_data', array(), 'array');
+foreach($hook_result as $this_key => $this_value) {
+	$tpl->assign($this_key, $this_value);
+}
+
 output_general_http_header();
 echo $tpl->fetch();
 

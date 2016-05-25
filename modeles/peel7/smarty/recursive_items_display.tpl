@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: recursive_items_display.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: recursive_items_display.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}
 {if !empty($columns)}
 <div class="col-sm-{floor(12/$columns)}"><ul>
@@ -24,7 +24,7 @@
 		{$max_length=$max_length-3}
 	{/if}
 	{if $display_mode=='option'}
-<option value="{$it.value|str_form_value}"{if $it.is_selected} selected="selected" class="bold"{/if}>{$it.indent}{$it.name|str_shorten:$max_length}</option>{if $it.has_sons && !empty($it.SONS)}{$it.SONS}{/if}
+<option value="{$it.value|str_form_value}"{if $it.is_selected} selected="selected" class="bold"{/if}{if !empty($it.disabled)} style="color:#AAAAAA"{/if}>{$it.indent}{$it.name|str_shorten:$max_length}</option>{if $it.has_sons && !empty($it.SONS)}{$it.SONS}{/if}
 	{elseif $display_mode=='checkbox'}
 <div class="col-md-4"><input name="{$input_name|str_form_value}[]" type="checkbox" value="{$it.value|str_form_value}"{if $it.is_selected} checked="checked" class="bold"{/if} /> {$it.indent}{$it.name|str_shorten:$max_length}</div>{if $it.has_sons && !empty($it.SONS)}{$it.SONS}{/if}
 	{elseif $display_mode=='div'}

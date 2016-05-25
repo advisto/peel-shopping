@@ -3,16 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 48459 2016-01-11 11:13:02Z gboussin $
+// $Id: caddie_affichage.php 49982 2016-05-23 13:14:36Z sdelaporte $
 include("../configuration.inc.php");
-include("../lib/fonctions/display_caddie.php");
+include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
 define('IN_CADDIE', true);
 $GLOBALS['DOC_TITLE'] =  $GLOBALS['STR_CADDIE'];
@@ -48,8 +48,7 @@ if (!empty($_GET['code_promo']) && $_GET['code_promo'] == 'delete') {
 }
 $form_error_object = new FormError();
 
-
-call_module_hook('show_caddie_pre', array('frm'=>$_POST,'form_error_object'=>$form_error_object));
+call_module_hook('show_caddie_pre', array('frm'=>$_POST, 'form_error_object'=>$form_error_object));
 
 if (isset($_POST['func'])) {
 	$mode = $_POST['func'];
@@ -80,13 +79,13 @@ if ($mode) {
 						$form_error_object->add('pays_zone', $GLOBALS['STR_ERR_ZONE']);
 					} elseif (empty($_POST['type'])) {
 						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
-					} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone = '" . intval($_SESSION['session_caddie']->zoneId) . "' AND " . get_filter_site_cond('tarifs') . "")) == 0) {
+					} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone='" . intval($_SESSION['session_caddie']->zoneId) . "' AND " . get_filter_site_cond('tarifs') . "")) == 0) {
 						// Ici on teste la cohérence entre le type et la zone
 						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
-					} elseif(!count($_SESSION['session_caddie']->message_caddie)) {
+					} elseif(!count($_SESSION['session_caddie']->message_caddie) && empty($form_error_object->error)) {
 						$redirect_next_step = true;
 					}
-				} else {
+				} elseif(empty($form_error_object->error)) {
 					// Pas de frais de port (c'est la configuration pour tout le site)
 					$redirect_next_step = true;
 				}
@@ -94,11 +93,9 @@ if ($mode) {
 			break;
 	}
 }
-
 if (!empty($redirect_next_step)) {
 	if (!est_identifie() && empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
-		$_SESSION['session_redirect_after_login'] = get_current_url(true);
-		redirect_and_die(get_url('membre'));
+		necessite_identification();
 	} else {
 		call_module_hook('show_caddie_next_step_pre', array());
 		redirect_and_die(get_url('achat_maintenant'));

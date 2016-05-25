@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: email-templates.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -31,7 +31,8 @@ if (!empty($_GET['id'])) {
 		if (!verify_token('email-templates.php?id=' . $_GET['id'])) $form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		if (empty($_POST['form_text'])) {
 			$form_error_object->add('form_text');
-		} elseif (String::strip_tags($_POST['form_text']) != $_POST['form_text']) {
+		} elseif (strip_tags($_POST['form_text']) != $_POST['form_text']) {
+			// ATTENTION ne pas utiliser String::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessus
 			// On corrige le HTML si nécessaire
 			if (String::strpos($_POST['form_text'], '<br>') === false && String::strpos($_POST['form_text'], '<br />') === false && String::strpos($_POST['form_text'], '</p>') === false && String::strpos($_POST['form_text'], '<table') === false) {
 				// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne pour pouvoir nettoyer ensuite le HTML de manière cohérente
@@ -54,12 +55,12 @@ if (!empty($_GET['id'])) {
 		} else {
 			query('UPDATE peel_email_template SET
 					site_id="' . intval(vn($_POST['site_id'])) . '",
-					technical_code="' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
-					name="' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
-					subject="' . trim(real_escape_string($_POST['form_subject'])) . '",
+					technical_code="' . nohtml_real_escape_string(trim($_POST['form_technical_code'])) . '",
+					name="' . nohtml_real_escape_string(trim($_POST['form_name'])) . '",
+					subject="' . real_escape_string(trim($_POST['form_subject'])) . '",
 					text="' . real_escape_string($_POST['form_text']) . '",
 					id_cat="' .intval($_POST['form_id_cat']) . '",
-					lang="' . trim(nohtml_real_escape_string($_POST['form_lang'])) . '",
+					lang="' . nohtml_real_escape_string(trim($_POST['form_lang'])) . '",
 					default_signature_code ="' . nohtml_real_escape_string($_POST['default_signature_code']) . '"
 				WHERE id="' . intval($_GET['id']) . '"');
 			$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_MSG_UPDATED"]))->fetch();
@@ -76,11 +77,11 @@ if (!empty($_GET['id'])) {
 		FROM peel_email_template_cat
 		WHERE ' . get_filter_site_cond('email_template_cat', null) . '
 		ORDER BY name ASC';
-	$result_categories = query($sql);
+	$query = query($sql);
 	$tpl_categories_list = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_categories_list.tpl');
 	$tpl_categories_list->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl_options = array();
-	while ($row_categories = fetch_assoc($result_categories)) {
+	while ($row_categories = fetch_assoc($query)) {
 		$tpl_options[] = array('value' => intval($row_categories['id']),
 			'issel' => vb($_POST['form_id_cat']) == $row_categories['id'] || $row_categories['id'] == $template_infos['id_cat'],
 			'name' => get_site_info($row_categories) . $row_categories['name']
@@ -148,28 +149,28 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 	}
 	if (!$form_error_object->count()) {
 		query('INSERT INTO peel_email_template (site_id, technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
-			"' . trim(nohtml_real_escape_string($_POST['site_id'])) . '",
-			"' . trim(nohtml_real_escape_string($_POST['form_technical_code'])) . '",
-			"' . trim(nohtml_real_escape_string($_POST['form_name'])) . '",
-			"' . trim(real_escape_string($_POST['form_subject'])) . '",
-			"' . trim(real_escape_string($_POST['form_text'])) . '",
-			"' . trim(nohtml_real_escape_string($_POST['form_lang'])) . '",
+			"' . nohtml_real_escape_string(trim($_POST['site_id'])) . '",
+			"' . nohtml_real_escape_string(trim($_POST['form_technical_code'])) . '",
+			"' . nohtml_real_escape_string(trim($_POST['form_name'])) . '",
+			"' . real_escape_string(trim($_POST['form_subject'])) . '",
+			"' . real_escape_string(trim($_POST['form_text'])) . '",
+			"' . nohtml_real_escape_string(trim($_POST['form_lang'])) . '",
 			"' . intval($_POST['form_id_cat']) . '",
-			"' . trim(nohtml_real_escape_string($_POST['default_signature_code'])) . '")');
+			"' . nohtml_real_escape_string(trim($_POST['default_signature_code'])) . '")');
 		$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_MSG_TEMPLATE_CREATED']))->fetch();
 	}
 }
 // Insertion d'un template
 if (empty($_GET['id'])) {
 	// On va chercher les catégories
-	$result_categories = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name, site_id
+	$query = query('SELECT id, name_' . $_SESSION['session_langue'] . ' AS name, site_id
 		FROM peel_email_template_cat
 		WHERE ' . get_filter_site_cond('email_template_cat', null) . '
 		ORDER BY name ASC');
 	$tpl_categories_list = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_categories_list.tpl');
 	$tpl_categories_list->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 	$tpl_options = array();
-	while ($row_categories = fetch_assoc($result_categories)) {
+	while ($row_categories = fetch_assoc($query)) {
 		$tpl_options[] = array('value' => intval($row_categories['id']),
 			'issel' => vb($_POST['form_id_cat']) == $row_categories['id'],
 			'name' => get_site_info($row_categories) . $row_categories['name']
@@ -221,13 +222,13 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_search.tpl')
 $form_error_object = new FormError();
 $tpl_options = array();
 // Récupération des catégories de template email
-$result = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name, tc.site_id
+$query = query('SELECT tc.id, tc.name_' . $_SESSION['session_langue'] . ' AS name, tc.site_id
 	FROM peel_email_template_cat tc
 	INNER JOIN peel_email_template t ON t.id_cat=tc.id AND t.active="TRUE" AND ' . get_filter_site_cond('email_template', 't', true) . '
 	WHERE ' . get_filter_site_cond('email_template_cat', 'tc') . '
 	GROUP BY tc.id
 	ORDER BY name');
-while ($row_categories = fetch_assoc($result)) {
+while ($row_categories = fetch_assoc($query)) {
 	$tpl_options[] = array('value' => intval($row_categories['id']),
 		'issel' => vb($_GET['form_lang_template']) == $row_categories['id'],
 		'name' => get_site_info($row_categories) . $row_categories['name']
@@ -282,13 +283,19 @@ if (isset($_GET['etat']) && $_GET['etat'] == "0") {
 	$sql .= ' AND active = "FALSE"';
 }
 
-$sql .= ' ORDER BY technical_code ASC, lang ASC';
+$HeaderTitlesArray = array('id' => $GLOBALS['STR_ADMIN_ID'], 'technical_code' => $GLOBALS['STR_ADMIN_TECHNICAL_CODE'], 'id_cat' => $GLOBALS['STR_CATEGORY'], 'name' => $GLOBALS['STR_ADMIN_NAME'], 'subject' => $GLOBALS['STR_ADMIN_SUBJECT'], 'text' => $GLOBALS['STR_ADMIN_HTML_TEXT'], 'lang' => $GLOBALS['STR_ADMIN_LANGUAGE'], 'active' => $GLOBALS['STR_STATUS'], $GLOBALS['STR_ADMIN_ACTION'], 'site_id' => $GLOBALS['STR_ADMIN_WEBSITE']);
 
-$Links = new Multipage($sql, 'email_templates', 40);
+$Links = new Multipage($sql, 'email_templates', 100);
+$Links->HeaderTitlesArray = $HeaderTitlesArray;
+$Links->OrderDefault = "technical_code, lang";
+$Links->SortDefault = "ASC";
+
 $results_array = $Links->query();
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_report.tpl');
+$tpl->assign('links_header_row', $Links->getHeaderRow());
 $tpl->assign('links_multipage', $Links->GetMultipage());
+
 if (!empty($results_array)) {
 	$tpl_results = array();
 	$i = 0;
@@ -297,10 +304,10 @@ if (!empty($results_array)) {
 		// On récupère la catégorie du template (s'il en a une)
 		$category_name = '';
 		if ($this_template['id_cat'] != 0) {
-			$result_category = query('SELECT name_' . $_SESSION['session_langue'] . ' AS name, site_id
-			FROM peel_email_template_cat
-			WHERE id=' . intval($this_template['id_cat']) . ' AND ' . get_filter_site_cond('email_template_cat', null));
-			if($row_category = fetch_assoc($result_category)) {
+			$query = query('SELECT name_' . $_SESSION['session_langue'] . ' AS name, site_id
+				FROM peel_email_template_cat
+				WHERE id=' . intval($this_template['id_cat']) . ' AND ' . get_filter_site_cond('email_template_cat', null));
+			if($row_category = fetch_assoc($query)) {
 				$category_name = get_site_info($row_category) . $row_category['name'];
 			}else {
 				$category_name = '';

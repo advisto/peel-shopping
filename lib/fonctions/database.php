@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: database.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -196,7 +196,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 				// Si problème "Field doesn't have a default values" on passe en mode compatibilité définitivement pour les prochaines pages vues
 				set_configuration_variable(array('technical_code' => 'mysql_sql_mode_force', 'string' => 'MYSQL40', 'site_id' => 0, 'origin' => 'auto'), true);
 				// Pour le reste de la génération de page, on passe en mode compatibilité
-				query("SET @@session.sql_mode='MYSQL40");
+				query("SET @@session.sql_mode='MYSQL40'");
 				break;
 			} else {
 				// Si l'erreur n'est pas reconnue, on s'arrête là
@@ -498,11 +498,14 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
  */
 function get_table_field_names($table_name, $link_identifier = null, $silent_if_error = false)
 {
-	$fields = get_table_fields($table_name, $link_identifier, $silent_if_error);
-	if (empty($fields)) {
+	static $fields;
+	if(!isset($fields[$table_name])) {
+		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error);
+	}
+	if (empty($fields[$table_name])) {
 		return null;
 	} else {
-		foreach($fields as $this_field) {
+		foreach($fields[$table_name] as $this_field) {
 			$results[] = $this_field['Field'];
 		}
 		return $results;
@@ -519,11 +522,14 @@ function get_table_field_names($table_name, $link_identifier = null, $silent_if_
  */
 function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false)
 {
-	$fields = get_table_fields($table_name, $link_identifier, $silent_if_error);
-	if (empty($fields)) {
+	static $fields;
+	if(!isset($fields[$table_name])) {
+		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error);
+	}
+	if (empty($fields[$table_name])) {
 		return null;
 	} else {
-		foreach($fields as $this_field) {
+		foreach($fields[$table_name] as $this_field) {
 			$results[$this_field['Field']] = $this_field['Type'];
 		}
 		return $results;

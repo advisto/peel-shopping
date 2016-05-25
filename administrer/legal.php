@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: legal.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: legal.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -58,7 +58,7 @@ switch (vb($_REQUEST['mode'])) {
 	case "maj" :
 		if (!empty($_POST)) {
 			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-				$empty_field_messages_array['titre_' . $lng] = sprintf($GLOBALS['STR_ADMIN_LEGAL_ERR_EMPTY_TITLE'], String::strtoupper($lng));
+				$empty_field_messages_array['titre_' . $lng] = sprintf($GLOBALS['STR_ADMIN_LEGAL_ERR_EMPTY_TITLE'], String::strtoupper($GLOBALS['lang_names'][$lng]));
 			}
 			$empty_field_messages_array['token'] = $GLOBALS['STR_INVALID_TOKEN'];
 			$form_error_object->valide_form($frm, $empty_field_messages_array);
@@ -247,11 +247,11 @@ function affiche_liste_legal()
 	$sql = "SELECT *
 		FROM peel_legal
 		WHERE " . get_filter_site_cond('legal', null, true);
-	$result = query($sql);
-	if (!(num_rows($result) == 0)) {
+	$query = query($sql);
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?$ligne['titre_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],

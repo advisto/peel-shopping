@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,11 +36,16 @@ function affiche_formulaire_modif_avis($id, &$frm, &$form_error_object)
 {
 	if(empty($frm)){
 		// Pas de données venant de validation de formulaire, donc on charge le contenu de la base de données
-		/* Charge les infos de la avis. */
+		/* Charge les infos de l'avis. */
 		$qid = query("SELECT *
 			FROM peel_avis
 			WHERE id = " . intval($id));
 		$frm = fetch_assoc($qid);
+		if(empty($frm['pseudo']) && !empty($frm['id_utilisateur'])) {
+			if ($user_infos = get_user_information($frm['id_utilisateur'])) {
+				$frm['pseudo'] = $user_infos['pseudo'];
+			}
+		}
 	}
 	$frm["nouveau_mode"] = "maj";
 	$frm["titre_soumet"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
@@ -53,8 +58,6 @@ function affiche_formulaire_modif_avis($id, &$frm, &$form_error_object)
 }
 
 /**
- * supprime_avis()
- *
  * Supprime l'avis spécifiée par $id
  *
  * @param integer $id
@@ -62,7 +65,7 @@ function affiche_formulaire_modif_avis($id, &$frm, &$form_error_object)
  */
 function supprime_avis($id)
 {
-	/* Réaffecte toutes les sous-avis de cette avis à la avis parente */
+	/* Réaffecte toutes les sous-avis de cet avis à l'avis parente */
 	query("DELETE FROM peel_avis WHERE id = " . intval($id));
 	$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MODULE_AVIS_ADMIN_MSG_DELETED_OK']))->fetch();
 
@@ -77,12 +80,17 @@ function supprime_avis($id)
 function affiche_liste_avis()
 {
 	$sql = "SELECT *
-		FROM peel_avis
-		ORDER BY datestamp DESC";
+		FROM peel_avis";
+	
+	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_liste.tpl');
+
 	$Links = new Multipage($sql, 'avis');
+	$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ACTION"], 'id' => $GLOBALS["STR_REFERENCE"], 'nom_produit' => $GLOBALS["STR_ADMIN_SUBJECT"], 'note' => $GLOBALS["STR_ADMIN_NOTE"], 'datestamp' => $GLOBALS["STR_DATE"], 'date_validation' => $GLOBALS["STR_VALIDATION_DATE"], 'etat' => $GLOBALS["STR_STATUS"], 'email' => $GLOBALS["STR_BY"], $GLOBALS["STR_ADMIN_WEBSITE"]);
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = 'datestamp';
+	$Links->SortDefault = 'DESC';
 	$results_array = $Links->Query();
 
-	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avisAdmin_liste.tpl');
 	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 	$tpl->assign('add_prod_href', get_current_url(false) . '?mode=ajout&type=produit');
@@ -95,23 +103,47 @@ function affiche_liste_avis()
 	if (!empty($results_array)) {
 		$i = 0;
 		foreach ($results_array as $this_result) {
+			$site_id = null;
+			$reference_url = null;
+			if (!empty($this_result['id_produit'])) {
+				$product_object = new Product($this_result['id_produit'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+				if(!empty($product_object->id)) {
+					$site_id = $product_object->site_id;
+					$reference_url = $product_object->get_product_url();
+				}
+				unset($product_object);
+			} elseif (!empty($this_result['ref'])) {
+				$GLOBALS['site_parameters']['multisite_disable'] = true;
+				$annonce_object = new Annonce($this_result['ref']);
+				$GLOBALS['site_parameters']['multisite_disable'] = false;
+				if(!empty($annonce_object->ref)) {
+					$site_id = vb($annonce_object->site_id);
+					$reference_url = $annonce_object->get_annonce_url();
+				}
+				unset($annonce_object);
+			}
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $this_result['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $this_result['id'],
 				'reference' => $this_result['id'],
 				'nom' => $this_result['nom_produit'],
+				'reference_url' => $reference_url,
 				'note' => $this_result['note'],
+				'type' => ($this_result['note']>-99?$GLOBALS['STR_POSTED_OPINIONS']:$GLOBALS["STR_MODULE_AVIS_POSTED_NEWS"]),
 				'date' => get_formatted_date($this_result['datestamp'], 'short', 'long'),
+				'date_validation' => get_formatted_date($this_result['date_validation'], 'short', 'long'),
 				'etat_onclick' => 'change_status("avis", "' . $this_result['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($this_result['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'util_href' => $GLOBALS['administrer_url'] . '/utilisateurs.php?id_utilisateur=' . $this_result['id_utilisateur'] . '&mode=modif',
 				'prenom' => $this_result['prenom'],
-				'email' => $this_result['email']
+				'email' => $this_result['email'],
+				'site_name' => get_site_name($site_id)
 				);
 			$i++;
 		}
 	}
 	$tpl->assign('results', $tpl_results);
+	$tpl->assign('links_header_row', $Links->getHeaderRow());
 	$tpl->assign('links_multipage', $Links->GetMultipage());
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_AVIS_ADMIN_LIST', $GLOBALS['STR_MODULE_AVIS_ADMIN_LIST']);
@@ -162,6 +194,7 @@ function affiche_formulaire_avis(&$frm, &$form_error_object, $type)
 	$tpl->assign('STR_ADMIN_OFFLINE', $GLOBALS['STR_ADMIN_OFFLINE']);
 	$tpl->assign('STR_ADMIN_AVIS', $GLOBALS['STR_ADMIN_AVIS']);
 	$tpl->assign('STR_ADMIN_NOTE', $GLOBALS['STR_ADMIN_NOTE']);
+	$tpl->assign('STR_MODULE_AVIS_POSTED_NEWS', $GLOBALS['STR_MODULE_AVIS_POSTED_NEWS']);
 	echo $tpl->fetch();
 }
 
@@ -208,7 +241,7 @@ function formulaire_ajout_avis(&$frm, &$form_error_object, $type)
 	$tpl->assign('STR_YOUR_OPINION', $GLOBALS['STR_YOUR_OPINION']);
 	$tpl->assign('STR_REMINDING_CHAR', $GLOBALS['STR_REMINDING_CHAR']);
 	$tpl->assign('STR_YOUR_NOTE', $GLOBALS['STR_YOUR_NOTE']);
-	$tpl->assign('STR_MODULE_AVIS_SEND_YOUR_OPINION', $GLOBALS['STR_MODULE_AVIS_SEND_YOUR_OPINION']);
+	$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
 	$tpl->assign('STR_MODULE_AVIS_ADMIN_FORM_TITLE', $GLOBALS['STR_MODULE_AVIS_ADMIN_FORM_TITLE']);
 	$tpl->assign('STR_MODULE_AVIS_ADMIN_GIVE_OPINION', $GLOBALS['STR_MODULE_AVIS_ADMIN_GIVE_OPINION']);
 	$tpl->assign('STR_BY', $GLOBALS['STR_BY']);
@@ -218,12 +251,13 @@ function formulaire_ajout_avis(&$frm, &$form_error_object, $type)
 	$tpl->assign('STR_ADMIN_AVIS', $GLOBALS['STR_ADMIN_AVIS']);
 	$tpl->assign('STR_ADMIN_NOTE', $GLOBALS['STR_ADMIN_NOTE']);
 	$tpl->assign('STR_PRODUCT', $GLOBALS['STR_PRODUCT']);
+	$tpl->assign('STR_MODULE_AVIS_POSTED_NEWS', $GLOBALS['STR_MODULE_AVIS_POSTED_NEWS']);
 	
 	echo $tpl->fetch();
 }
 
 /*
- * Contruction du select des produits
+ * Construction du select des produits
  */
 
 function product_select_list($default = null)
@@ -252,7 +286,7 @@ function product_select_list($default = null)
 }
 
 /*
- * Contruction du select des annonces
+ * Construction du select des annonces
  */
 function annonce_select_list($default = null)
 {
@@ -279,59 +313,3 @@ function annonce_select_list($default = null)
 
 	return $output;
 }
-
-/**
- * Ajoute les infos dans la table avis
- *
- * @param array $frm Array with all fields data
- * @return
- */
-function ajout_avis($frm)
-{
-	$produit = explode("~", $frm["produit"]);
-
-	if (!empty($produit) && !empty($produit[0])) {
-		$sql = "INSERT INTO peel_avis (";
-		if ($frm['type'] == 'produit') {
-			$sql .= " id_produit";
-		} elseif ($frm['type'] == 'annonce') {
-			$sql .= " ref";
-		}
-		$sql .= "
-				, nom_produit
-				, id_utilisateur
-				, email
-				, prenom
-				, pseudo
-				, avis
-				, note
-				, datestamp
-				, etat
-				, lang
-			) VALUES (
-				'" . intval($produit[0]) . "'
-				, '" . nohtml_real_escape_string($produit[1]) . "'
-				, '" . intval($frm['id_utilisateur']) . "'
-				, '" . nohtml_real_escape_string($frm['email']) . "'
-				, '" . nohtml_real_escape_string(String::strtolower($frm['prenom'])) . "'
-				, '" . nohtml_real_escape_string($frm['pseudo']) . "'
-				, '" . nohtml_real_escape_string($frm['avis']) . "'
-				, '" . intval($frm['note']) . "'
-				, '" . date('Y-m-d H:i:s', time()) . "'
-				, '1'
-				, '" . nohtml_real_escape_string($frm['langue']) . "'
-			)";
-		$qid = query($sql);
-		if (!$qid) {
-			return false;
-		}
-		$custom_template_tags['PRENOM'] = vb($_SESSION['session_utilisateur']['prenom']);
-		$custom_template_tags['NOM_FAMILLE'] = vb($_SESSION['session_utilisateur']['nom_famille']);
-		$custom_template_tags['NOM_PRODUIT'] = String::html_entity_decode_if_needed($produit[1]);
-		$custom_template_tags['AVIS'] = $frm['avis'];
-		send_email($GLOBALS['support_sav_client'], '', '', 'insere_avis', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $frm['email']);
-		return true;
-	}
-	return false;
-}
-

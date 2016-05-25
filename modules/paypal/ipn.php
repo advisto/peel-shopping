@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: ipn.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);
@@ -79,7 +79,10 @@ if ($r = fetch_assoc($q)) {
 				if (strcmp(trim(strip_tags($res)), "VERIFIED") == 0) {
 					if ($payment_status == "Completed") {
 						$update_status = 'completed';
-						email_commande($item_number);
+						if(empty($GLOBALS['site_parameters']['send_order_email_after_payement'])) {
+							// Si send_order_email_after_payement alors l'email est envoyé par update_order_payment_status
+							email_commande($item_number);
+						}
 					} elseif ($payment_status == "Pending") {
 						$update_status = 'being_checked';
 					} elseif ($payment_status == "Failed") {
@@ -96,7 +99,7 @@ if ($r = fetch_assoc($q)) {
 					send_email($GLOBALS['support'], 'Problème d\'échange de données Paypal IPN - commande ' . $r['id'], 'Un paiement a été passé "en cours de vérification" sur votre site car Paypal n\'a pas confirmé ou infirmé le paiement.' . "\n\n" . ' Réponse par Paypal : ' . $res . "\n\n" . 'Les informations techniques sont : ' . "\n\n" . print_r($_REQUEST, true));
 				}
 				if (!empty($update_status)) {
-					if(in_array($update_status, array('being_checked', 'completed'))) {
+					if(!empty($GLOBALS['site_parameters']['billing_as_transaction_receipt']) && in_array($update_status, array('being_checked', 'completed'))) {
 						accounting_insert_transaction($r['id'], 'paypal', array('ORDER_ID' => $r['id'], 'MONTANT_CREDIT' => $payment_amount, 'CURRENCY_CODE' => $payment_currency));
 					}
 					update_order_payment_status($item_number, $update_status, true, null, null, false, 'paypal');

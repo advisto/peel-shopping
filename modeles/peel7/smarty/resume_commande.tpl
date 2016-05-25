@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: resume_commande.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: resume_commande.tpl 50019 2016-05-24 09:05:36Z sdelaporte $
 *}<h2>{$STR_ORDER_DETAIL}</h2>
 <div class="table-responsive">
 	<table class="full_width " cellpadding="3">
@@ -101,7 +101,7 @@
 							<th>{$STR_PRODUCT}</th>
 							<th>{$STR_SOLD_PRICE}</th>
 							<th>{$STR_QUANTITY}</th>
-							{if $is_conditionnement_module_active}<th>{$STR_CONDITIONNEMENT}</td><td class="center">{$STR_CONDITIONNEMENT_QTY}</th>{/if}
+							{if $is_conditionnement_module_active}<th>{$STR_CONDITIONNEMENT}</th><th>{$STR_CONDITIONNEMENT_QTY}</th>{/if}
 							<th>{$STR_TOTAL_TTC}</th>
 							{if isset($STR_MODULE_PAYBACK_RETURN_REQUEST)}<th>{$STR_MODULE_PAYBACK_RETURN_REQUEST}</th>{/if}
 						</tr>
@@ -130,7 +130,7 @@
 									<input type="hidden" name="prix_ht_produit" value="{$pd.prix_ht_produit|str_form_value}" />
 									<input type="hidden" name="prix_ttc_produit" value="{$pd.prix_ttc_produit|str_form_value}" />
 									<input type="hidden" name="tva_produit" value="{$pd.tva_produit|str_form_value}" />
-									<input type="submit" class="btn btn-primary" value="{$return_this_product_txt|str_form_value}" />
+									<input type="submit" class="btn btn-primary" value="{$STR_MODULE_PAYBACK_RETURN_THIS_PRODUCT|str_form_value}" />
 								</form>
 							</td>
 							{/if}

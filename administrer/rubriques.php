@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: rubriques.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -73,8 +73,19 @@ switch (vb($_REQUEST['mode'])) {
 			maj_rubrique($rubid, $frm);
 
 			if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
+				$sql = 'SELECT COUNT(image) as nb_image
+					FROM peel_diaporama
+					WHERE id_rubrique="' . intval($rubid) . '"';
+				$query = query($sql);
+				if ($result = fetch_assoc($query)) {
+					// Suppression de l'image sur le serveur
+					$nb_image = $result['nb_image'];
+				}
+				// Suppression des images en base de données
+				query('DELETE FROM `peel_diaporama` WHERE id_rubrique="' . intval($rubid) . '"');
+
 				// Ajoute des images du diaporama
-				for($i = 1;$i < 6;$i++) {
+				for($i = 1;$i<=vn($nb_image)+5;$i++) {
 					$img = upload('image' . $i, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image' . $i]));
 					if (!empty($img) && !empty($rubid)) {
 						query('INSERT INTO `peel_diaporama` SET id_rubrique="' . intval($rubid) . '", image="' . nohtml_real_escape_string($img) . '"');
@@ -144,13 +155,8 @@ function affiche_arbo_rubrique(&$sortie, $selectionne, $parent_id = 0, $indent =
 		ORDER BY r.position' . (!empty($GLOBALS['site_parameters']['content_category_primary_order_by'])? ", r." . $GLOBALS['site_parameters']['content_category_primary_order_by']  : '') . '';
 	$qid = query($sql);
 	while ($rub = fetch_assoc($qid)) {
-		if (!empty($rub['image'])) {
-			$tpl->assign('image', $rub['image']);
-			$tpl->assign('image_src', thumbs($rub['image'], 80, 50, 'fit', null, null, true, true));
-		} else {
-			$tpl->assign('image', null);
-			$tpl->assign('image_src', null);
-		}
+		$tpl->assign('image', $rub['image']);
+		$tpl->assign('image_src', thumbs($rub['image'], 80, 50, 'fit', null, null, true, true));
 		$tpl->assign('tr_rollover', tr_rollover($first_line, true));
 		$tpl->assign('ajout_rub_href', get_current_url(false) . '?mode=ajout&id=' . $rub['id']);
 		$tpl->assign('rubrique_src', $GLOBALS['administrer_url'] . '/images/rubrique-24.gif');
@@ -350,10 +356,10 @@ function insere_sous_rubrique($frm)
  */
 function maj_rubrique($id, $frm)
 {
-	if ($frm['parent_id'] == $id) {
+	if (vn($frm['parent_id']) == $id) {
 		$parent_id = 0;
 	} else {
-		$parent_id = $frm['parent_id'];
+		$parent_id = vn($frm['parent_id']);
 	}
 	
 	// Remplit les contenus vides

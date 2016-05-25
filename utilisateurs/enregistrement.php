@@ -3,18 +3,19 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 48447 2016-01-11 08:40:08Z sdelaporte $
-include("../configuration.inc.php");
-include("../lib/fonctions/display_user_forms.php");
-
+// $Id: enregistrement.php 49989 2016-05-23 14:52:08Z sdelaporte $
 define('IN_REGISTER', true);
+
+include("../configuration.inc.php");
+include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
+
 $GLOBALS['allow_fineuploader_on_page'] = true;
 if (est_identifie()) {
 	if (!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
@@ -70,7 +71,7 @@ if(empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && empty($GLOBALS['s
 		
 foreach($mandatory_fields as $key => $value) {
 	// Transformation des valeurs du tableau avec les variables de langue du même nom
-	if (!empty($GLOBALS[$value])) {
+	if (strpos($value, 'STR_') === 0 && !empty($GLOBALS[$value])) {
 		$mandatory_fields[$key] = $GLOBALS[$value];
 	}
 }
@@ -152,7 +153,7 @@ if (!empty($frm)) {
 			// Protection du formulaire contre les robots
 			die();
 		}
-		$user_id = insere_utilisateur($frm, false, true, true);
+		$user_id = insere_utilisateur($frm, false, !empty($GLOBALS['site_parameters']['user_register_send_password_by_email']), true);
 		$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
 
 		if(!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
@@ -188,6 +189,7 @@ if (!empty($frm)) {
 // Si on a tenté sans succès de se connecter via un site extérieur et que la connexion a réussi
 // alors on préremplit les champs d'inscription avec les données du site extérieur
 $hook_result = call_module_hook('account_create', $frm, 'array');
+$frm = array_merge_recursive_distinct($frm, vb($hook_result, array()));
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: template_mail.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: template_mail.php 49979 2016-05-23 12:29:53Z sdelaporte $
 include("../../../configuration.inc.php");
 
 $output = '';
@@ -18,8 +18,8 @@ if ((!empty($_POST['id']) || !empty($_POST['technical_code'])) && !empty($_POST[
 	$sql = 'SELECT subject, text, lang
 		FROM peel_email_template
 		WHERE ' . get_filter_site_cond('email_template', null) . ' AND id="' . intval(vb($_POST['id'])) . '"';
-	$result = query($sql);
-	if($row_template = fetch_assoc($result)) {
+	$query = query($sql);
+	if($row_template = fetch_assoc($query)) {
 		if ($_POST['mode'] == "message") {
 			$output .= $row_template['text'];
 		} elseif ($_POST['mode'] == "title") {

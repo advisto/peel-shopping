@@ -52,6 +52,18 @@
 						{% if intracom_for_billing_error %}
 							<div>{{ intracom_for_billing_error }}</div>
 						{% endif %}
+						{% if (captcha) %}
+						<table>
+							<tr>
+								<td class="left">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+								<td>{{ captcha.inside_form }}</td>
+							</tr>
+							<tr>
+								<td class="left">{{ captcha.validation_code_copy_txt }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
+								<td><input name="code" type="text" class="form-control" size="5" maxlength="5" id="code" value="{{ captcha.value|str_form_value }}" />{{ captcha.error }}</td>
+							</tr>
+						</table>
+						{% endif %}
 					{% endif %}
 						<div style="padding-top:15px; padding-bottom:15px">
 							<a href="#" onclick="return frmsubmit('recalc')"{% if (shipping_text) %} data-toggle="tooltip" title="{{ shipping_text|str_form_value }}"{% endif %} class="tooltip_link btn btn-success"><span class="glyphicon glyphicon-refresh"></span> {{ STR_UPDATE }}</a>

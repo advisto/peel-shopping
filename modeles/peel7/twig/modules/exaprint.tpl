@@ -10,8 +10,8 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: exaprint.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
-#}{% if results not empty %}
+// $Id: exaprint.tpl 50009 2016-05-23 22:26:47Z sdelaporte $
+#}{% if results is not empty %}
 <br />{{ STR_ADMIN_VENTES_FORM_EXPLAIN }}<br />
 <p class="title_label center">{{ period_text }}</p>
 <table class="main_table">
@@ -73,8 +73,8 @@
 		<td class="center title_label" >{{ totalTva_prix }}</td>
 	</tr>
 </table>
-<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_DELIVERY }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_livraison_name not empty %}{{ statut_livraison_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
-<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_CARRIER }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_transporteur_name not empty %}{{ statut_transporteur_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
+<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_DELIVERY }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_livraison_name is not empty %}{{ statut_livraison_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
+<p class="title_label center"><font size="+1" color="green">{{ LANG.STR_EXAPRINT_ASKED_CARRIER }}{{ STR_BEFORE_TWO_POINTS }}: {% if statut_transporteur_name is not empty %}{{ statut_transporteur_name }}{% else %}{{ STR_ADMIN_ALL_ORDERS }}{% endif %}</font></p>
 {% else %}
 <p class="title_label center">{{ period_text }}</p>
 <div class="center"><b>{{ STR_ADMIN_VENTES_NO_ORDER_FOUND }}</b></div>

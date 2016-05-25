@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: produits.php 50020 2016-05-24 09:28:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -269,7 +269,9 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 		$frm['on_download'] = "";
 		$frm['zip'] = "";
 		$frm['prix'] = 0;
+		$frm['prix_flash'] = 0;
 		$frm['prix_promo'] = 0;
+		$frm['prix_achat'] = 0;
 		$frm['prix_revendeur'] = 0;
 		$frm['default_image'] = "";
 		$frm['image1'] = "";
@@ -369,6 +371,24 @@ function affiche_formulaire_modif_produit($id, &$frm)
 			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 				$frm['site_country'] = explode(',', vb($frm['site_country']));
 			}
+
+			// On adapte les données récupérées en BDD pour les formulaires pour afficher en HT ou TTC comme on veut
+			// Ensuite on manipulera ces données même si N rechargement de formulaire sans les remodifier, et enfin on les renormalisera dans l'autre sens lors de l'insert ou la mise à jour en BDD.
+			if (!display_prices_with_taxes_in_admin ()) {
+				$frm['prix'] = $frm['prix'] / (1 + $frm['tva'] / 100);
+				if (check_if_module_active('flash')) {
+					$frm['prix_flash'] = $frm['prix_flash'] / (1 + $frm['tva'] / 100);
+				} else {
+					$frm['prix_flash'] = 0;
+				}
+			}
+			if (check_if_module_active('reseller') && (!display_prices_with_taxes_in_admin () || !empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes']))) {
+				$frm['prix_revendeur'] = round($frm['prix_revendeur'] / (1 + $frm['tva'] / 100), 2); // C'est le prix HT qui fait foi, pas le prix TTC pour le prix revendeur => on arrondit au centime le prix revendeur HT
+			} else {
+				$frm['prix_revendeur'] = 0;
+			}
+			// L'affichage du prix d'achat se fait toujours en HT, indépendemment de la configuration de l'affichage HT/TTC de la boutique.
+			$frm['prix_achat'] = round(vn($frm['prix_achat']) / (1 + $frm['tva'] / 100), 2);
 		} else {
 			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PRODUITS_ERR_NOT_FOUND']))->fetch();
 		}
@@ -423,7 +443,7 @@ function affiche_formulaire_modif_produit($id, &$frm)
  *
  * @param array $frm Array with all fields data
  * @param class $form_error_object
- * @param boolean $create_product_process Cette variable définit si la fonction affiche_formulaire_produit est utilisée lors de la création d'un produit ou pour une modification de produit.
+ * @param boolean $create_product_process Cette variable définie si la fonction affiche_formulaire_produit est utilisée lors de la création d'un produit ou pour une modification de produit.
  * @return
  */
 function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_process = false)
@@ -441,42 +461,13 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		// L'administrateur multisite peut voir des informations qui s'applique à tous les sites. Donc cette mention doit être retournée dans le tableau.
 		$all_sites_name_array[0] = $GLOBALS['STR_ADMIN_ALL_SITES'];
 	}
-	if ($frm['nouveau_mode'] == "maj") {
-		if (display_prices_with_taxes_in_admin ()) {
-			$prix = get_float_from_user_input($frm['prix']);
-		} else {
-			$prix = get_float_from_user_input($frm['prix']) / (1 + get_float_from_user_input($frm['tva']) / 100);
-		}
-		$prix = fprix($prix, false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-
-		if (display_prices_with_taxes_in_admin ()) {
-			$prix_promo = get_float_from_user_input($frm['prix_promo']);
-		} else {
-			$prix_promo = get_float_from_user_input($frm['prix_promo']) / (1 + get_float_from_user_input($frm['tva']) / 100);
-		}
-		$prix_promo = fprix($prix_promo, false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-		if (check_if_module_active('flash')) {
-			if (display_prices_with_taxes_in_admin ()) {
-				$prix_flash = get_float_from_user_input($frm['prix_flash']);
-			} else {
-				$prix_flash = get_float_from_user_input($frm['prix_flash']) / (1 + get_float_from_user_input($frm['tva']) / 100);
-			}
-			$prix_flash = fprix($prix_flash, false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-		}
-		if (check_if_module_active('reseller')) {
-			if (display_prices_with_taxes_in_admin () && empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes'])) {
-				$prix_revendeur = round(get_float_from_user_input($frm['prix_revendeur']), 2) ;
-			} else {
-				$prix_revendeur = round(get_float_from_user_input($frm['prix_revendeur']) / (1 + get_float_from_user_input($frm['tva']) / 100), 2);
-			}
-		} else {
-			$prix_revendeur = 0;
-		}
-		$prix_revendeur = fprix($prix_revendeur, false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-		// L'arrondi fait sur ce montant est nécessaire sur cette valeur spécifiquement car l'affichage du prix se fait toujours en HT, indépendemment de la configuration de l'affichage HT/TTC de la boutique.
-		$prix_achat = round(get_float_from_user_input($frm['prix_achat']) / (1 + get_float_from_user_input($frm['tva']) / 100), 2);
-		$prix_achat = fprix($prix_achat, false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-	}
+	// Les prix ci-dessous sont homogènes dans tous les cas, et doivent juste être reformatés. Ils sont :
+	// - soit chargés de la base de données et convertis en HT/TTC suivant la configuration adaptée
+	// - soit viennent du formulaire déjà validé mais qui avait des erreurs, et n'ont pas être remodifiés
+	$prix = fprix(get_float_from_user_input($frm['prix']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_flash = fprix(get_float_from_user_input($frm['prix_flash']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_revendeur = fprix(get_float_from_user_input($frm['prix_revendeur']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_achat = fprix(get_float_from_user_input($frm['prix_achat']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	// Si aucune référence n'est choisie on initialise le tableau des références.
 	if (!isset($frm['references'])) {
 		$frm['references'] = array();
@@ -485,7 +476,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	if (!isset($frm['couleurs'])) {
 		$frm['couleurs'] = array();
 	}
-	$categorie_options = get_categories_output(null, 'categories',  vb($frm['categories']));
+	$categorie_options = get_categories_output(null, 'categories',  vb($frm['categories']), 'option', '&nbsp;&nbsp;', null, null, true, 80);
 	if (empty($categorie_options) && (empty($frm['id']) || vb($_GET['mode'])!='modif')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_produit_table.tpl');
 		$tpl->assign('href', $GLOBALS['administrer_url'] . '/categories.php?mode=ajout');
@@ -521,8 +512,24 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		} else {
 			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_ADD'];		
 		}
-		$tpl->assign('categorie_options', $categorie_options);
 		$tpl->assign('categorie_error', $form_error_object->text('categories'));
+		$tpl->assign('categories_suggest_mode', vb($GLOBALS['site_parameters']['categories_suggest_mode']));
+		if(!empty($GLOBALS['site_parameters']['categories_suggest_mode'])) {
+			$i = 0;
+			$tpl_categories_options = array();
+			foreach(vb($frm['categories'], array()) as $this_id) {
+				$tpl_categories_options[] = array('value' => intval($this_id),
+					'name' => get_category_name($this_id, 10),
+					'i' => $i,
+				);
+				$i++;
+			}
+			$tpl->assign('categorie_options', $tpl_categories_options);
+			$tpl->assign('nb_categories', $i);
+		} else {
+			$tpl->assign('categorie_options', $categorie_options);
+			$tpl->assign('categorie_error', $form_error_object->text('categories'));
+		}
 		$tpl->assign('position', vn($frm['position']));
 
 		$tpl->assign('is_module_gift_checks_active', check_if_module_active('gift_check'));
@@ -591,8 +598,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				FROM peel_ecotaxes
 				WHERE " . get_filter_site_cond('ecotaxes') . "
 				ORDER BY code";
-			$result = query($sql);
-			while ($e = fetch_assoc($result)) {
+			$query = query($sql);
+			while ($e = fetch_assoc($query)) {
 				$tpl_ecotaxe_options[] = array('value' => intval($e['id']),
 					'issel' => $e['id'] == vb($frm['id_ecotaxe']),
 					'code' => $e['code'],
@@ -615,6 +622,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
 		}
 		
 		$tpl->assign('poids', vb($frm['poids']));
@@ -702,7 +710,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl_util_options = array();
 		$select = query("SELECT id_utilisateur, societe
 			FROM peel_utilisateurs
-			WHERE priv = 'supplier' AND " . get_filter_site_cond('utilisateurs') . "
+			WHERE CONCAT('+',priv,'+') LIKE '%+supplier+%' AND " . get_filter_site_cond('utilisateurs') . "
 			ORDER BY societe");
 		while ($nom = fetch_assoc($select)) {
 			$tpl_util_options[] = array('value' => intval($nom['id_utilisateur']),
@@ -765,7 +773,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 
 		while ($nom = fetch_assoc($select)) {
 			if (isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
-				// L'administrateur multisite consulte la liste des couleurs existantes. Dans ce cas toutes les couleurs des tous les sont affichées, on affiche dans ce cas le nom du site à coté du nom de la couleurs pour éviter des erreurs d'administration.
+				// L'administrateur multisite consulte la liste des couleurs existantes. Dans ce cas toutes les couleurs de tous les sites sont affichées, et on affiche le nom du site à coté du nom de la couleur pour éviter des erreurs d'administration.
 				$color_name = '[' . $all_sites_name_array[$nom['site_id']] . '] ' . $nom['nom_' . $_SESSION['session_langue']];
 			} else {
 				$color_name = $nom['nom_' . $_SESSION['session_langue']];
@@ -783,7 +791,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 			ORDER BY t.position ASC, t.prix ASC, t.nom_" . $_SESSION['session_langue'] . " ASC");
 		while ($nom = fetch_assoc($select)) {
 			if (isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
-				// L'administrateur multisite consulte la liste des couleurs existantes. Dans ce cas toutes les couleurs des tous les sont affichées, on affiche dans ce cas le nom du site à coté du nom de la couleurs pour éviter des erreurs d'administration.
+				// L'administrateur multisite consulte la liste des tailles existantes. Dans ce cas toutes les tailles de tous les sites sont affichées, et on affiche le nom du site à coté du nom de la taille pour éviter des erreurs d'administration.
 				$size_name = '[' . $all_sites_name_array[$nom['site_id']] . '] ' . $nom['nom_' . $_SESSION['session_langue']];
 			} else {
 				$size_name = $nom['nom_' . $_SESSION['session_langue']];
@@ -831,9 +839,6 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER', $GLOBALS['STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER']);
 		$tpl->assign('STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH', $GLOBALS['STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH']);
 		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
-		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
-		}
 		$tpl->assign('STR_ADMIN_ADD_EMPTY_LINE', $GLOBALS['STR_ADMIN_ADD_EMPTY_LINE']);
 		$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM', $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"]);
 		$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE', $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]);
@@ -844,6 +849,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
 		$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+		$tpl->assign('STR_DELETE_CONFIRM', $GLOBALS['STR_DELETE_CONFIRM']);
 		$tpl->assign('STR_ADMIN_PRODUITS_POSITION_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_POSITION_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_GIFT_CHECK', $GLOBALS['STR_ADMIN_PRODUITS_IS_GIFT_CHECK']);
@@ -1302,8 +1308,10 @@ function insere_produit($frm)
 
 	/* ajoute le produit sous les catégories spécifiées */
 	for ($i = 0; $i < count(vn($frm['categories'])); $i++) {
+		if (!empty($frm['categories'][$i])) {
 		$qid = query("INSERT INTO peel_produits_categories (categorie_id, produit_id)
 			VALUES ('" . nohtml_real_escape_string($frm['categories'][$i]) . "', '" . intval($product_id) . "')");
+	}
 	}
 
 	/* ajoute les références associées */
@@ -1390,8 +1398,8 @@ function maj_produit($id, $frm)
 	} else {
 		$prix_revendeur = 0;
 	}
-	if (check_if_module_active('payment_by_product') && !empty($frm['paiment_allowed'])) {
-		update_payment_by_product($frm['paiment_allowed'], $id);
+	if (check_if_module_active('payment_by_product')) {
+		update_payment_by_product(vb($frm['paiment_allowed'], array()), $id);
 	}
 	$prix_achat = get_float_from_user_input($frm['prix_achat']) * (1 + $frm['tva'] / 100);
 	/* Met à jour la table produits */

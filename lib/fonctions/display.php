@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 48452 2016-01-11 09:46:23Z gboussin $
+// $Id: display.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -591,6 +591,7 @@ if (!function_exists('get_brand_description_html')) {
 				$tmpData['nb_produits_txt'] = String::substr($tmpData['nb_produits_txt'], 0, String::strlen($tmpData['nb_produits_txt'])-1);
 			}
 			$tmpData['description'] = $brand_object->description;
+			correct_output($tmpData['description'], true, 'html', $_SESSION['session_langue']);
 			$tplData[] = $tmpData;
 		}
 
@@ -632,38 +633,43 @@ if (!function_exists('get_categories_output')) {
 	function get_categories_output($location = null, $mode = 'categories', $selected_item = null, $display_mode = 'option', $add_indent = '&nbsp;&nbsp;', $input_name = null, $technical_code = null, $use_admin_rights = false, $text_max_length = 30, $max_depth_allowed = null, $columns_if_related_display_mode = null, $parent_id=null, $exclude_id=null)
 	{
 		$output = '';
+		$item_name_array = array();
 		if($mode == 'categories') {
 			// Dans l'admin, il faut pouvoir voir les catégories qui n'ont pas de nom. Cela arrive lorque les information d'une catégorie ne sont pas renseigné pour toutes les langues,dans ce cas l'id entre crochet sera affiché en BO à la place du nom.
-			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom
+			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom, etat
 				FROM peel_categories c
-				WHERE c.etat="1" '.(!defined('IN_PEEL_ADMIN')?' AND nom_' . $_SESSION['session_langue'] . '!="" ':'').' '.(!empty($technical_code)?' AND technical_code ="' . nohtml_real_escape_string($technical_code) . '"':'').' AND ' . get_filter_site_cond('categories', 'c', $use_admin_rights) . ' '.(!empty($exclude_id)?' AND c.id !="' . intval($exclude_id) . '"':'').' '.($parent_id!==null?' AND parent_id ="' . intval($parent_id) . '"':'').'
+				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'c.etat="1"').(!defined('IN_PEEL_ADMIN')?' AND nom_' . $_SESSION['session_langue'] . '!="" ':'').' '.(!empty($technical_code)?' AND technical_code ="' . nohtml_real_escape_string($technical_code) . '"':'').' AND ' . get_filter_site_cond('categories', 'c', $use_admin_rights) . ' '.(!empty($exclude_id)?' AND c.id !="' . intval($exclude_id) . '"':'').' '.($parent_id!==null?' AND parent_id ="' . intval($parent_id) . '"':'').'
 				ORDER BY c.position ASC, nom ASC';
 		} elseif($mode == 'rubriques') {
-			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom
+			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom, etat
 				FROM peel_rubriques r
-				WHERE r.etat = "1" AND r.nom_' . $_SESSION['session_langue'] . '!="" AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', $use_admin_rights) . '
+				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'r.etat="1"').' AND r.nom_' . $_SESSION['session_langue'] . '!="" AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', $use_admin_rights) . '
 				ORDER BY r.position ASC, nom ASC';
 			if(!empty($GLOBALS['site_parameters']['content_categories_nb_limit_footer'])){
 				$sql .=' LIMIT '.$GLOBALS['site_parameters']['content_categories_nb_limit_footer'];
 			}
 		} elseif($mode == 'categories_annonces') {
-			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom
+			$sql = 'SELECT c.id, c.parent_id, c.nom_' . $_SESSION['session_langue'] . ' AS nom, etat
 				FROM peel_categories_annonces c
-				WHERE '.(!defined('IN_PEEL_ADMIN')?'c.nom_' . $_SESSION['session_langue'] . '!="" AND c.etat=1':'1') . ' AND ' . get_filter_site_cond('categories_annonces', 'c') . '
+				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'c.etat="1"').' AND '.(!defined('IN_PEEL_ADMIN')?'c.nom_' . $_SESSION['session_langue'] . '!=""':'1') . ' AND ' . get_filter_site_cond('categories_annonces', 'c', $use_admin_rights) . '
 				ORDER BY c.position ASC, '.word_real_escape_string($GLOBALS['site_parameters']['ads_categories_order_by']).' ASC';
 		} elseif($mode == 'partenaires_categories') {
-			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom
+			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom, etat
 				FROM peel_partenaires_categories r
-				WHERE 1
+				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'r.etat="1"').'
 				ORDER BY r.position ASC, nom ASC';
 		} else {
 			return null;
 		}
 		$qid = query($sql);
 		while ($result = fetch_assoc($qid)) {
+			if(isset($result['etat']) && empty($result['etat'])) {
+				$result['nom'] .= ' ['.$GLOBALS['STR_ADMIN_DEACTIVATED'].']';
+			}
 			$all_parents_with_ordered_direct_sons_array[$result['parent_id']][] = $result['id'];
 			$item_name_array[$result['id']] = (!empty($result['nom'])?$result['nom']:'['.$result['id'].']');
 		}
+		$GLOBALS['categories_output_last_count'] = count($item_name_array);
 		if (!empty($all_parents_with_ordered_direct_sons_array)) {
 			$class = null;
 			$columns = null;
@@ -780,6 +786,9 @@ if (!function_exists('get_recursive_items_display')) {
 						}
 					}
 					$tplItem['name'] = $item_name_array[$this_item];
+					if(!empty($GLOBALS['STR_ADMIN_DEACTIVATED']) && String::strpos($item_name_array[$this_item], ' ['.$GLOBALS['STR_ADMIN_DEACTIVATED'].']') !== false) {
+						$tplItem['disabled'] = true;
+					}
 				}
 
 				if ($tplItem['has_sons']) {
@@ -1077,10 +1086,6 @@ if (!function_exists('print_compte')) {
 		// On exclue ce fichier de la minification car usage ponctuel
 		$GLOBALS['site_parameters']['minify_css_exclude_array'][] = 'font-awesome.min.css';
 		
-		if (check_if_module_active('download')) {
-			$tpl->assign('downloadable_file_link_array', get_downloadable_file_link(array('user_id' => $_SESSION['session_utilisateur']['id_utilisateur'])));
-			$tpl->assign('STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD', $GLOBALS['STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD']);
-		}
 		$tpl->assign('compte', $GLOBALS['STR_COMPTE']);
 		$tpl->assign('msg_support', $GLOBALS['STR_SUPPORT']);
 		$tpl->assign('est_identifie', $est_identifie);
@@ -1095,6 +1100,10 @@ if (!function_exists('print_compte')) {
 			}
 			$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 
+
+			if(!empty($GLOBALS['site_parameters']['header_show_user_account_completion'])) {
+				$tpl->assign('user_account_completion_text', '<a href="' . get_url('/utilisateurs/change_params.php') . '">'. sprintf($GLOBALS["STR_USER_ACCOUNT_COMPLETION"], user_account_completion($_SESSION['session_utilisateur'])) . '</a>');
+			}
 			$modules_data_group['other'] = array('header' => $GLOBALS["STR_OTHER"], 'position' => null);
 			$modules_data_group['cart'] = array('header' => $GLOBALS['STR_MY_ORDER'], 'position' => 2);
 			$modules_data['cart'][] = array('txt' => '<span class="fa fa-shopping-cart fa-5x"></span> <span class="fa fa-history fa-3x"></span><br />' . $GLOBALS['STR_ORDER_HISTORY'], 'href' => get_url('/achat/historique_commandes.php'));
@@ -1147,15 +1156,12 @@ if (!function_exists('print_compte')) {
 			if (a_priv('admin*', true)) {
 				$tpl->assign('admin', array('href' => $GLOBALS['administrer_url'] . '/index.php', 'txt' => $GLOBALS['STR_ADMIN']));
 			}
-			if (check_if_module_active('abonnement')) {
-				$tpl->assign('ABONNEMENT_MODULE', verified_status_activated());
-			}
 			if (function_exists('get_user_infos_resume_array') && !empty($_GET['display_user_infos_resume_array'])) {
 				$tpl->assign('user_infos_resume_array',  get_user_infos_resume_array());
 			}
-			$hook_result = call_module_hook('account_show', $user_infos, 'array');
-			$modules_data = array_merge_recursive($modules_data, vb($hook_result['modules_data'], array()));
-			$modules_data_group = array_merge_recursive($modules_data_group, vb($hook_result['modules_data_group'], array()));
+			$hook_result = call_module_hook('account_show', array(), 'array');
+			$modules_data = array_merge_recursive_distinct($modules_data, vb($hook_result['modules_data'], array()));
+			$modules_data_group = array_merge_recursive_distinct($modules_data_group, vb($hook_result['modules_data_group'], array()));
 			if(!empty($modules_data)) {
 				$position_if_null = 100000;
 				foreach(array_keys($modules_data_group) as $this_group) {
@@ -1195,7 +1201,7 @@ if (!function_exists('print_compte')) {
 						unset($modules_data[$this_group]);
 					}
 				}
-				$modules_data = array_merge($temp, $modules_data);
+				$modules_data = array_merge_recursive_distinct($temp, $modules_data);
 				unset($temp);
 				foreach(array_keys($modules_data) as $this_key) {
 					usort($modules_data[$this_key], 'data_position_sort');
@@ -1215,6 +1221,12 @@ if (!function_exists('print_compte')) {
 			$tpl->assign('login_href', get_url('membre'));
 			$tpl->assign('login', $GLOBALS['STR_LOGIN']);
 		}
+
+		$hook_result = call_module_hook('account_show_template_data', array(), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
+		
 		$output .= $tpl->fetch();
 		if ($return_mode) {
 			return $output;
@@ -1482,12 +1494,24 @@ if (!function_exists('affiche_guide')) {
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('guide.tpl');
 		$tplLinks = array();
+		if(!empty($GLOBALS['site_parameters']['show_on_affiche_guide_article'])){
+			$sql = 'SELECT a.id, a.titre_' . $_SESSION['session_langue'] . ' AS nom
+				FROM peel_articles a
+				WHERE a.etat = "1" AND a.titre_' . $_SESSION['session_langue'] . '!="" AND a.technical_code NOT IN ("other", "iphone_content") AND a.position>=0 AND ' . get_filter_site_cond('articles', 'a', false) . '
+				ORDER BY a.position ASC, nom ASC';
+			$qid = query($sql);
+			while ($result = fetch_assoc($qid)) {
+				$tplLinks["art_".$result['id']] = array('href' => get_content_url($result['id']), 'label' => $result['nom'], 'selected' => false);
+			}
+		}
 		$tplLinks['cgv'] = array('href' => get_url('cgv'), 'label' => $GLOBALS['STR_CGV'], 'selected' => defined('IN_CGV'));
 		$tplLinks['contact'] = array('name' => 'contact', 'href' => get_url('/contacts.php'), 'label' => $GLOBALS['STR_CONTACT_INFO'], 'selected' => defined('IN_CONTACT_US'));
 		$tplLinks['contactus'] = array('name' => 'contact', 'href' => get_url('/utilisateurs/contact.php'), 'label' => $GLOBALS['STR_CONTACT_US'], 'selected' => defined('IN_CONTACT'));
-		
+		if(empty($GLOBALS['site_parameters']['disabled_link_legal_left'])){
+			$tplLinks['legal'] = array('href' => get_url('legal'), 'label' => $GLOBALS['STR_LEGAL_INFORMATION'], 'selected' => defined('IN_INFO_LEGALE'));
+		}
 		$hook_result = call_module_hook('affiche_guide', array('location' => $location), 'array');
-		$tplLinks = array_merge_recursive($tplLinks, $hook_result);
+		$tplLinks = array_merge_recursive_distinct($tplLinks, $hook_result);
 		$tplLinks['access_plan'] = array('name' => 'access_plan', 'href' => get_url('/plan_acces.php'), 'label' => $GLOBALS['STR_ACCESS_PLAN'], 'selected' => defined('IN_PLAN_ACCES'));
 		if(isset($GLOBALS['site_parameters']['show_on_affiche_guide']) && is_array($GLOBALS['site_parameters']['show_on_affiche_guide'])) {
 			$temp = array();
@@ -1499,8 +1523,10 @@ if (!function_exists('affiche_guide')) {
 			$tplLinks = $temp;
 		}
 		$tpl->assign('links', $tplLinks);
-		$content_categories = get_categories_output($location, 'rubriques', vn($_GET['rubid']), 'list', null);
-		$tpl->assign('menu_contenu', $content_categories);
+		if(empty($GLOBALS['site_parameters']['show_on_affiche_guide_rubrique_disabled']) && empty($GLOBALS['site_parameters']['disabled_menu_contenu_footer'])){
+			$content_categories = get_categories_output($location, 'rubriques', vn($_GET['rubid']), 'list', null);
+			$tpl->assign('menu_contenu', $content_categories);
+		}
 		$tpl->assign('affiche_guide_returned_link_list_without_ul', vb($GLOBALS['site_parameters']['affiche_guide_returned_link_list_without_ul']));
 
 		if ($return_mode) {
@@ -1527,13 +1553,20 @@ if (!function_exists('affiche_footer')) {
 		$tpl->assign('propulse', $GLOBALS['STR_PROPULSE']);
 		// Valeur par défaut de la colonne de liens du footer
 		$tplLinks = array();
-		$tplLinks['legal'] = array('href' => get_url('legal'), 'label' => $GLOBALS['STR_LEGAL_INFORMATION'], 'selected' => defined('IN_INFO_LEGALE'));
-		$tplLinks['cgv'] = array('href' => get_url('cgv'), 'label' => $GLOBALS['STR_CGV'], 'selected' => defined('IN_CGV'));
+		if(empty($GLOBALS['site_parameters']['disabled_link_legal_right'])){
+			$tplLinks['legal'] = array('href' => get_url('legal'), 'label' => $GLOBALS['STR_LEGAL_INFORMATION'], 'selected' => defined('IN_INFO_LEGALE'));
+		}
+		if(empty($GLOBALS['site_parameters']['disabled_link_cgv'])){
+			$tplLinks['cgv'] = array('href' => get_url('cgv'), 'label' => $GLOBALS['STR_CGV'], 'selected' => defined('IN_CGV'));
+		}
 		if (check_if_module_active('parrainage')) {
 			$tplLinks['parrain'] = array('href' => get_url('/modules/parrainage/conditions.php'), 'label' => $GLOBALS['STR_CONDITION_PARRAIN'], 'selected' => defined('IN_CONDITION_PARRAIN'));
 		}
 		if (check_if_module_active('affiliation')) {
 			$tplLinks['affiliate'] = array('href' => get_url('/modules/affiliation/conditions.php'), 'label' => $GLOBALS['STR_CONDITION_AFFILI'], 'selected' => defined('IN_CONDITION_AFFILI'));
+		}
+		foreach(vb($GLOBALS['site_parameters']['footer_disabled_links'], array()) as $this_disabled_link) {
+			unset($tplLinks[$this_disabled_link]);
 		}
 		$tpl->assign('links', vb($GLOBALS['site_parameters']['footer_links'], $tplLinks));
 		$tpl->assign('links_2', vb($GLOBALS['site_parameters']['footer_links_2'], array()));
@@ -1662,19 +1695,7 @@ if (!function_exists('affiche_compte')) {
 			if (function_exists('get_social_icone')) {
 				$tpl->assign('social_icone', get_social_icone());
 			}
-			$social = array('is_any' => false);
-			if (check_if_module_active('facebook_connect')) {
-				$social['is_any'] = true;
-				$social['facebook'] = get_facebook_connect_btn();
-			}
-			if (check_if_module_active('sign_in_twitter')) {
-				$social['is_any'] = true;
-				$social['twitter'] = get_sign_in_twitter_btn();
-			}
-			if (check_if_module_active('openid')) {
-				$social['is_any'] = true;
-				$social['openid'] = get_openid_btn();
-			}
+			$social = call_module_hook('social_login_buttons', array(), 'array');
 			$tpl->assign('social', $social);
 			$tpl->assign('STR_COMPTE', $GLOBALS['STR_COMPTE']);
 			$tpl->assign('STR_LOGIN', $GLOBALS['STR_LOGIN']);
@@ -1734,20 +1755,7 @@ if (!function_exists('getHTMLHead')) {
 		}
 
 		if (!empty($GLOBALS['site_parameters']['favicon'])) {
-			$tpl->assign('favicon_href', $GLOBALS['repertoire_upload'] . '/' . $GLOBALS['site_parameters']['favicon']);
-		}
-		if (check_if_module_active('vitrine')) {
-			$GLOBALS['css_files'][] = get_url('/modules/vitrine/css/vitrine.css');
-		}
-		if (check_if_module_active('annonces')) {
-			$GLOBALS['css_files'][] = get_url('/modules/annonces/rating_bar/rating.css');
-			$GLOBALS['css_files'][] = get_url('/modules/annonces/annonces.css');
-		}
-		if (check_if_module_active('carrousel')) {
-			// Librairie pour activer le carrousel Module a la carte et partenaire
-			// Chargé exprès sur toutes les pages pour avoir fichier CSS minifié unique
-			$GLOBALS['css_files'][] = get_url('/modules/carrousel/css/carrousel.css');
-			$GLOBALS['js_files'][-21] = get_url('/modules/carrousel/js/carrousel.js');
+			$tpl->assign('favicon_href', get_url_from_uploaded_filename($GLOBALS['site_parameters']['favicon']));
 		}
 		if (empty($GLOBALS['site_parameters']['lightbox_disable']) || !empty($GLOBALS['lightbox_force'])) {
 			// Lightbox peut servir à différents endroits du logiciel. Si on est sûr qu'on ne s'en sert pas, on peut le désactiver avec disable_lightbox
@@ -1763,9 +1771,6 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['css_files'][] = get_url('/lib/css/cloudzoom.css');
 		}
 		// Début des javascripts
-		if (check_if_module_active('fianet')) {
-			$GLOBALS['js_files'][] = get_url('/modules/fianet/lib/js/fianet.js');
-		}
 		if (vb($GLOBALS['site_parameters']['enable_jquery']) == 1) {
 			$GLOBALS['js_files'][-100] = get_url('/lib/js/jquery.js');
 		}
@@ -1790,9 +1795,6 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['js_files'][] = get_url('/lib/js/effects.js');
 			$GLOBALS['js_files'][] = get_url('/lib/js/controls.js');
 		}
-		if (check_if_module_active('annonces')) {
-			$GLOBALS['js_files'][] = get_url('/modules/annonces/rating_bar/js/rating.js');
-		}
 		if (!empty($GLOBALS['load_anythingslider'])) {
 			// Pour ajouter des vidéos ou des effets au carrousel nivo_slider, il faut inclure les fichiers suivants :
 			// AnythingSlider optional extensions
@@ -1805,13 +1807,6 @@ if (!function_exists('getHTMLHead')) {
 			$GLOBALS['css_files'][] = get_url('/modules/references/phoenixgallery/style/style.css');
 			$GLOBALS['js_files'][-60] = get_url('/lib/js/jquery.easing.min.js');
 			$GLOBALS['js_files'][] = get_url('/modules/references/phoenixgallery/js/phoenixgallery.js');
-		}
-		if (defined('IN_CONTACT') && check_if_module_active('photodesk')) {
-			$GLOBALS['css_files'][] = get_url('/modules/photodesk/css/style.css');
-			$GLOBALS['js_files'][-50] = get_url('/modules/photodesk/js/jquery.transform-0.6.2.min.js');
-			$GLOBALS['js_files'][-49] = get_url('/modules/photodesk/js/jquery.animate-shadow-min.js');
-			$GLOBALS['js_files'][-48] = get_url('/modules/photodesk/js/jquery-ui-1.8.16.custom.min.js');
-			$GLOBALS['js_files'][-47] = get_url('/modules/photodesk/js/photodesk.js');
 		}
 		// Librairie pour activer le zoom sur les produits
 		if (check_if_module_active('welcome_ad')) {
@@ -1829,7 +1824,6 @@ if (!function_exists('getHTMLHead')) {
 		}
 		if (check_if_module_active('cart_popup') && !empty($_SESSION['session_show_caddie_popup'])) {
 			$js_output .= get_cart_popup_script();
-			unset($_SESSION['session_show_caddie_popup']);
 		}
 		if (check_if_module_active('googlefriendconnect')) {
 			$js_output .= google_friend_connect_javascript_library();
@@ -1943,6 +1937,12 @@ if (!function_exists('getHTMLHead')) {
 				}
 			}
 		}
+
+		$hook_result = call_module_hook('front_html_header_template_data', array(), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
+
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -2021,8 +2021,8 @@ if (!function_exists('get_menu')) {
 				$GLOBALS['main_menu_items'][$this_key][vb($GLOBALS['site_parameters']['main_menu_custom_urls'][$this_key], '#')] = $this_title;
 			}			
 			$hook_result = call_module_hook('menu_items', array('indent' => $indent), 'array');
-			$GLOBALS['main_menu_items'] = array_merge_recursive($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
-			$GLOBALS['menu_items'] = array_merge_recursive($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
+			$GLOBALS['main_menu_items'] = array_merge_recursive_distinct($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
+			$GLOBALS['menu_items'] = array_merge_recursive_distinct($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
 			// $GLOBALS['main_menu_items']['news'] est ajouté dans le sous menu de "Autre" si il n'est pas présent dans les éléments principaux du menu
 			$GLOBALS['menu_items']['other'] = array_merge($GLOBALS['main_menu_items']['catalog'], $GLOBALS['menu_items']['news'], (!in_array('news', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['news']:array()), array('' => 'divider'), vb($GLOBALS['menu_items']['contact'], array()), $GLOBALS['menu_items']['devis'],(!in_array('contact', $GLOBALS['site_parameters']['main_menu_items_if_available'])? $GLOBALS['main_menu_items']['contact']:array()));
 		}
@@ -2803,9 +2803,10 @@ if (!function_exists('affiche_contenu_html')) {
 	 * @param mixed $place
 	 * @param boolean $return_mode
 	 * @param array $custom_template_tags
+	 * @param boolean $get_title_only
 	 * @return
 	 */
-	function affiche_contenu_html($place, $return_mode = false, $custom_template_tags = null)
+	function affiche_contenu_html($place, $return_mode = false, $custom_template_tags = null, $get_title_only = false)
 	{
 		$output = '';
 		if (!isset($_SESSION['session_site_country']) && !empty($_SERVER['REMOTE_ADDR']) && check_if_module_active('geoip')) {
@@ -2820,11 +2821,18 @@ if (!function_exists('affiche_contenu_html')) {
 		$sql_cond_array[] = 'etat="1"';
 		$sql_cond_array[] = get_filter_site_cond('html');
 		$sql_cond_array[] = '(lang="' . $_SESSION['session_langue'] . '" OR lang="")';
+		
+		$emplacement_sql_cond[] = 'emplacement="' . nohtml_real_escape_string($place) . '"';
 		if (!empty($_SESSION['session_site_country'])) {
-			$sql_cond_array[] = '(emplacement="' . nohtml_real_escape_string($place) . '|country='.$_SESSION['session_site_country'].'" OR emplacement="' . nohtml_real_escape_string($place) . '")';
-		} else {
-			$sql_cond_array[] = 'emplacement="' . nohtml_real_escape_string($place) . '"';
+			$emplacement_sql_cond[] = 'emplacement="' . nohtml_real_escape_string($place) . '|country='.$_SESSION['session_site_country'].'"';
 		}
+		if (est_identifie()) {
+			$emplacement_sql_cond[] = 'emplacement="' . nohtml_real_escape_string($place) . '|login"';
+		} else {
+			$emplacement_sql_cond[] = 'emplacement="' . nohtml_real_escape_string($place) . '|logout"';
+		}
+		$sql_cond_array[] = '('. implode(' OR ', $emplacement_sql_cond) . ')';
+		
 		$GLOBALS['affiche_contenu_html_last_found'] = false;
 		$sql = 'SELECT *
 			FROM peel_html
@@ -2837,11 +2845,16 @@ if (!function_exists('affiche_contenu_html')) {
 				break;
 			}
 			// On préserve le HTML mais on corrige les & isolés
-			$output .= String::htmlentities(String::html_entity_decode_if_needed($obj->contenu_html), ENT_COMPAT, GENERAL_ENCODING, false, true);
+			if($get_title_only) {
+				$output .= $obj->titre;
+			} else {
+				$output .= String::htmlentities(String::html_entity_decode_if_needed($obj->contenu_html), ENT_COMPAT, GENERAL_ENCODING, false, true);
+			}
 			$last_emplacement = $obj->emplacement;
 			$GLOBALS['affiche_contenu_html_last_found'] = true;
 		}
-		correct_output(template_tags_replace($output, $custom_template_tags, false, 'html'), false, 'html', $_SESSION['session_langue']);
+		$output = template_tags_replace($output, $custom_template_tags, false, 'html');
+		correct_output($output, false, 'html', $_SESSION['session_langue']);
 		if ($return_mode) {
 			return $output;
 		} else {
@@ -2962,7 +2975,7 @@ if (!function_exists('get_diaporama')) {
 		$total_img = num_rows($q);
 		while($img_diapo = fetch_assoc($q)) {
 			$tmpdiapo['j'] =  $j;
-			$tmpdiapo['image'] =  $GLOBALS['repertoire_upload'] .  '/' . $img_diapo["image"];
+			$tmpdiapo['image'] =  get_url_from_uploaded_filename($img_diapo["image"]);
 			$tmpdiapo['thumbs'] = thumbs($img_diapo["image"], 175, 275, 'fit', null, null, true, true);
 			$tmpdiapo['is_row'] = ($j % $nb_colonnes == 0);
 			$j++;
@@ -3007,7 +3020,8 @@ if (!function_exists('get_search_form')) {
 		$tpl_f->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 		$tpl_f->assign('action', get_url('search'));
 		$tpl_f->assign('value', $search);
-		$tpl_f->assign('match', ($display == 'full' ? $match : ''));
+		$tpl_f->assign('match', $match);
+		$tpl_f->assign('match_display', empty($GLOBALS['site_parameters']['search_match_disable']));
 		$tpl_f->assign('display', $display);
 		$tpl_f->assign('search', String::strtoupper($real_search));
 		$tpl_f->assign('prix_min', vb($frm['prix_min']));
@@ -3105,155 +3119,9 @@ if (!function_exists('get_search_form')) {
 			$tpl_f->assign('display_barcode', !empty($GLOBALS['site_parameters']['display_ean_code_on_product_list']));
 			$tpl_f->assign('search_product_list_save_cart', vb($GLOBALS['site_parameters']['search_product_list_save_cart']));
 		}
-
-		if(check_if_module_active('funding')) {
-			// Affichage des champs de recherche lié au module de financement
-			$tpl_f->assign('funding_display_search_funding_field', funding_display_search_funding_field($_GET));
-			$tpl_f->assign('STR_MODULE_FUNDING_TITLE', $GLOBALS['STR_MODULE_FUNDING_TITLE']);
-		}
-		if (check_if_module_active('sauvegarde_recherche')) {
-			$tpl_f->assign('display_save_search_button', display_save_search_button($frm));
-		}
-		if (check_if_module_active('search')) {
-			if (!check_if_module_active('annonces') || (check_if_module_active('annonces') && !empty($GLOBALS['site_parameters']['search_in_product_and_ads']))) {
-				// tableau regroupant les caractéristiques des attributs fixes dans peel
-				$search_attribute_tab = array('marque' => array('table' => 'marques', 'join' => 'produits', 'join_id' => 'id_marque', 'label' => $GLOBALS['STR_BRAND_LB']),
-					'couleur' => array('table' => 'couleurs', 'join' => 'produits_couleurs', 'join_id' => 'couleur_id', 'label' => $GLOBALS['STR_COLOR_LB']),
-					'taille' => array('table' => 'tailles', 'join' => 'produits_tailles', 'join_id' => 'taille_id', 'label' => $GLOBALS['STR_TALL_LB'])
-				);
-
-				// on construit la liste des catégories
-				if(empty($GLOBALS['select_categorie'])) {
-					// Si plusieurs formulaires de recherche sont présents sur la même page, on garde en mémoire $GLOBALS['select_categorie']
-					$GLOBALS['parent_categorie'] = vn($frm["categorie"]); // catégorie sélectionnée
-					$GLOBALS['select_categorie'] = get_categories_output(null, 'categories', vn($_GET["categorie"]), vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option'), '&nbsp;&nbsp;', null, null, false, vb($GLOBALS['site_parameters']['search_form_category_text_length_max'], 40));
-				}
-				$tpl_f->assign('select_categorie', $GLOBALS['select_categorie']);
-				$tpl_f->assign('STR_CAT_LB', $GLOBALS['STR_CAT_LB']);
-
-				$tpl_f_select_attributes = array();
-				// affichage des attributs fixes
-				foreach ($search_attribute_tab as $index => $attribute) {
-					$tpl_f_select_attributes[] = display_select_attribute($index, $attribute);
-				}
-				$tpl_f->assign('select_attributes', $tpl_f_select_attributes);
-				// affichage des attributs variables
-				if (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form_'.$display])) {
-					$technical_code = $GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form_'.$display];
-				} elseif (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'])) {
-					$technical_code = $GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'];
-				}
-				$tpl_f->assign('custom_attribute', display_custom_attribute(vb($frm['custom_attribut']), vb($technical_code), true));
-			}
-			if(check_if_module_active('annonces') && $display != 'module_products') {
-				$tpl_f_cat_ann_opts = array();
-				$ad_categories = get_ad_categories();
-				foreach ($ad_categories as $this_category_id => $this_category_name) {
-					$tpl_f_cat_ann_opts[] = array('value' => $this_category_id,
-						'issel' => (!empty($_GET['cat_select']) && ($_GET['cat_select'] == $this_category_id || (is_array($_GET['cat_select']) && in_array($this_category_id, $_GET['cat_select'])))),
-						'name' => $this_category_name
-						);
-				}
-				// Possibilités : option ou checkbox
-				$tpl_f->assign('search_form_category_display_mode', vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option'));
-				$tpl_f->assign('cat_ann_opts', $tpl_f_cat_ann_opts);
-				$tpl_f->assign('display_city_zip', empty($GLOBALS['site_parameters']['disable_city_zip_input_on_search_form']));
-				// Définit le type d'annonce détail,gros, etc.. Cependant il y a deux filtres sur Destockplus, d'où le test sur les deux get
-				if (!empty($frm['cat_statut_detail'])) {
-					$type_detail = $frm['cat_statut_detail'];
-				} elseif (!empty($frm['cat_detail'])) {
-					$type_detail = $frm['cat_detail'];
-				}
-				if (!empty($frm['cat_statut_detail'])) {
-					$type_statut = $frm['cat_statut_detail'];
-				} elseif (!empty($frm['cat_statut'])) {
-					$type_statut = $frm['cat_statut'];
-				}
-				$tpl_f->assign('cat_detail', vb($type_detail));
-				$tpl_f->assign('cat_statut', vb($type_statut));
-				if (count($GLOBALS['lang_names'])>1) {
-					$tpl_f->assign('ad_lang_select', get_lang_ads_choose(false));
-				}
-				$tpl_f->assign('city_zip', vb($frm['city_zip']));
-				if(!empty($GLOBALS['site_parameters']['ads_filter_countries_in_search'])) {
-					$sql = "SELECT u.pays AS pays
-						FROM peel_utilisateurs u
-						INNER JOIN peel_lot_vente a ON a.id_personne=u.id_utilisateur AND " . get_filter_site_cond('lot_vente', 'a') . "
-						WHERE a.enligne='OK'
-						GROUP BY u.pays";
-					$query = query($sql);
-					while ($result = fetch_assoc($query)) {
-						$country_allowed_ids[$result['pays']] = $result['pays'];
-					}
-					$sql = "SELECT u.pays
-						FROM peel_adresses u
-						INNER JOIN peel_funding f ON f.address_id=u.id
-						INNER JOIN peel_lot_vente a ON a.ref=f.project_id AND " . get_filter_site_cond('lot_vente', 'a') . "
-						WHERE a.enligne='OK'
-						GROUP BY u.pays";
-					$query = query($sql);
-					while ($result = fetch_assoc($query)) {
-						$country_allowed_ids[$result['pays']] = $result['pays'];
-					}
-				}
-				$tpl_f->assign('country', get_country_select_options(vb($frm['country']), null, 'name', false, null, false, null, vb($country_allowed_ids, null)));
-
-				if (empty($GLOBALS['site_parameters']['disable_continent_input_on_search_form'])) {
-					$tpl_continent_inps = array();
-					unset($sql);
-					if(!empty($GLOBALS['site_parameters']['ads_filter_countries_in_search'])) {
-						if(!empty($country_allowed_ids)) {
-							$sql = "SELECT c.id, c.name_" . $_SESSION['session_langue'] . " AS name
-								FROM peel_continents c
-								INNER JOIN peel_pays p ON p.continent_id=c.id AND p.id IN ('" . implode("','", real_escape_string($country_allowed_ids)) . "') AND " . get_filter_site_cond('pays', 'p') . "
-								WHERE " . get_filter_site_cond('continents', 'c') . "
-								GROUP BY c.id
-								ORDER BY c.name_".$_SESSION['session_langue'] . "";
-						}
-					} else {
-						$sql = "SELECT id, name_" . $_SESSION['session_langue'] . " AS name
-							FROM peel_continents
-							WHERE " . get_filter_site_cond('continents') . "
-							ORDER BY name_".$_SESSION['session_langue'];
-					}
-					if(!empty($sql)) {
-						$query_continent = query($sql);
-						while ($continent = fetch_assoc($query_continent)) {
-							$tpl_continent_inps[] = array('value' => $continent['id'],
-								'issel' => !empty($frm['continent']) && is_array($frm['continent']) && in_array($continent['id'], $frm['continent']),
-								'name' => $continent['name']
-								);
-						}
-					}
-					$tpl_f->assign('continent_inputs', $tpl_continent_inps);
-				}
-				if (check_if_module_active('maps') && empty($GLOBALS['site_parameters']['disable_near_position_input_on_search_form'])) {
-					if(empty($_SESSION['session_latitude'])){
-						$get_position_text = '<a href="javascript:load_position()">'.$GLOBALS['STR_GET_MY_POSITION'].'</a>';
-						$get_position_script = getPositionFromUser('document.getElementById("load_position").innerHTML="<span style=\"color:green\">Position OK</span>"; document.getElementById("latitude").value=latitude; document.getElementById("longitude").value=longitude;');
-					}else{
-						// On connait déjà la position
-						$get_position_text = '<span style="color:green">Position OK</span>';
-						$get_position_script = '';
-					}
-					$tpl_f->assign('near_position', sprintf($GLOBALS['STR_NEAR_POSITION_INPUT'], '<input type="text" id="near_position" name="near_position" class="form-control" size="6" value="' . String::str_form_value(vb($frm['near_position'])) . '" style="width:80px" />').' <input type="hidden" id="latitude" name="latitude" value="'.vb($_SESSION['session_latitude']).'" /><input type="hidden" id="longitude" name="longitude" value="'.vb($_SESSION['session_longitude']).'" /> - <span id="load_position">'.$get_position_text.'</span>'. $get_position_script);
-				}
-				if (empty($GLOBALS['site_parameters']['ads_search_end_date_past'])) {
-					$tpl_f->assign('date_end_past', !empty($frm['date_end_past']));
-					$tpl_f->assign('STR_MODULE_ANNONCES_DATE_END_PAST', $GLOBALS['STR_MODULE_ANNONCES_DATE_END_PAST']);
-				}
-				$tpl_f->assign('user_verified_status_disable', !empty($GLOBALS['site_parameters']['user_verified_status_disable']));
-				$tpl_f->assign('ads_contain_lot_sizes', $GLOBALS['site_parameters']['ads_contain_lot_sizes']);
-				$tpl_f->assign('STR_TYPE', $GLOBALS['STR_TYPE']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_AD_CATEGORY', $GLOBALS['STR_MODULE_ANNONCES_AD_CATEGORY']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_OFFER_GROS', $GLOBALS['STR_MODULE_ANNONCES_OFFER_GROS']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_OFFER_DEMIGROS', $GLOBALS['STR_MODULE_ANNONCES_OFFER_DEMIGROS']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_OFFER_DETAIL', $GLOBALS['STR_MODULE_ANNONCES_OFFER_DETAIL']);
-				$tpl_f->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_ALT_VERIFIED_ADS', $GLOBALS['STR_MODULE_ANNONCES_ALT_VERIFIED_ADS']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_NOT_VERIFIED_ADS', $GLOBALS['STR_MODULE_ANNONCES_NOT_VERIFIED_ADS']);
-				$tpl_f->assign('STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD']);
-			}
+		$hook_result = call_module_hook('search_form_template_data', array('frm' => $frm, 'search' => $search, 'match' => $match, 'real_search' => $real_search, 'display' => $display, 'quick_add_product_from_search_page' => $quick_add_product_from_search_page), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl_f->assign($this_key, $this_value);
 		}
 		return $tpl_f->fetch();
 	}
@@ -3310,8 +3178,8 @@ if (!function_exists('get_address_list')) {
 				</div>
 ';
 		$q = query('SELECT *
-			 FROM peel_adresses
-			WHERE id_utilisateur = "' . intval($user_id) . '"');
+			FROM peel_adresses
+			WHERE id_utilisateur = "' . intval($user_id) . '" AND address_type NOT LIKE "private_%" AND address_type!=""');
 		while($result = fetch_assoc($q)) {
 			$output .= '
 				<div class="col-sm-6 col-md-4">

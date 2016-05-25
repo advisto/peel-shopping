@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -103,8 +103,8 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			GROUP BY p.id
 			ORDER BY p.date_maj DESC, p.id DESC
 			LIMIT " . intval($limit);
-		$result = query($sql);
-		while ($prod = fetch_assoc($result)) {
+		$query = query($sql);
+		while ($prod = fetch_assoc($query)) {
 			if (!isset($last_site_id) || (isset($last_site_id) && $prod['site_id'] != $last_site_id)) {
 				// Premier passage ou changement de site_id (les résultats sont triés par site_id)
 				$GLOBALS['site_id'] = $prod['site_id'];

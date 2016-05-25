@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: produit_details.php 49979 2016-05-23 12:29:53Z sdelaporte $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -40,7 +40,8 @@ if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'
 	}
 }
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
-if (!empty($_GET['step']) && !empty($_POST) && function_exists('get_attribut_list_from_post_data')) {
+if (!empty($_GET['step'])) {
+	call_module_hook('attribut_step', array('product_object'=>$product_object, 'frm'=> $_POST, 'step'=> $_GET['step']));
 	$_SESSION['session_attributs_step'][$_GET['step']] = get_attribut_list_from_post_data($product_object, $_POST);
 }
 $url = $product_object->get_product_url();
@@ -68,7 +69,7 @@ if (check_if_module_active('url_rewriting')) {
 	$_GET['catid'] = $product_object->categorie_id;
 }
 
-$output .= call_module_hook('product_details_show', array('id' => intval($_GET['id'])), 'output');
+$output .= call_module_hook('product_details_show', array('id' => intval($_GET['id']), 'product_object' => $product_object), 'string');
 
 // Gestion des erreurs de téléchargement des fichiers (cas d'attribut d'upload)
 if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
@@ -88,7 +89,7 @@ if ($form_error_object->count() > 0) {
 		}
 	}
 }
-$output .= get_produit_details_html($product_object, intval(vb($_GET['cId'])));
+$output .= get_produit_details_html($product_object, intval(vb($_GET['cId'])), 50, 60, vn($_GET['product_ordered']));
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 echo $output;

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div class="row">
@@ -349,15 +349,6 @@
 				{% endif %}
 				</div>
 			{% endif %}
-				<div class="col-md-3 col-sm-4 col-xs-12 center">
-					<label for="search_group">{{ STR_ADMIN_GROUP }}{{ STR_BEFORE_TWO_POINTS }}:</label>
-					<select class="form-control" name="group" id="search_group">
-						<option value="">{{ STR_CHOOSE }}...</option>
-						{% for o in groupes_options %}
-						<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
-						{% endfor %}
-					</select>
-				</div>
 			</div>
 			<div id="search_col" class="col-md-3 col-sm-3 col-xs-12 center pull-right" style="margin-top: 20px; margin-bottom: 20px">
 				<input type="hidden" name="mode" value="search" /><input type="submit" class="btn btn-primary" value="{{ STR_SEARCH|str_form_value }}" />
@@ -416,7 +407,7 @@
 			</td>
 			{% endif %}
 			<td class="center">{{ res.date_insert }}</td>
-			<td class="center">{% if res.count_ordered %}}<a href="{{ administrer_url }}/commander.php?mode=recherche&amp;client_info={{ res.email }}" title="{{ STR_ADMIN_UTILISATEURS_ORDERS_LIST|str_form_value }}">{{ res.total_ordered }} ({{ res.count_ordered }})</a>{% else %}-{% endif %}</td>
+			<td class="center">{% if res.count_ordered %}<a href="{{ administrer_url }}/commander.php?mode=recherche&amp;client_info={{ res.email }}" title="{{ STR_ADMIN_UTILISATEURS_ORDERS_LIST|str_form_value }}">{{ res.total_ordered }} ({{ res.count_ordered }})</a>{% else %}-{% endif %}</td>
 			<td class="center">{{ res.remise_percent }} %</td>
 			<td class="center">{{ res.avoir_prix }}</td>
 			<td class="center">{{ res.points }}</td>

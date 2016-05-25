@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -51,7 +51,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 
 		if (!empty($recherche['account_type'])) {
 			// Gestion en fonction du type de compte
-			$sql_cond[] = ' u.priv = "' . nohtml_real_escape_string(vb($recherche['account_type'])) . '" ';
+			$sql_cond[] = ' CONCAT("+",u.priv,"+") LIKE "%+' . nohtml_real_escape_string(vb($recherche['account_type'])) . '+%" ';
 		}
 
 		if (!empty($recherche['admin_id'])) {
@@ -90,20 +90,7 @@ function affiche_list_admin_contact($recherche = null, $return_mode = false)
 	$tpl->assign('action', get_current_url(false));
 	$tpl->assign('login_to_contact', vb($recherche['login_to_contact']));
 	$tpl->assign('nom_to_contact', vb($recherche['nom_to_contact']));
-
-	$tpl_account_type_options = array();
-	$sql = "SELECT *, name_".$_SESSION['session_langue']." AS name
-		FROM peel_profil
-		WHERE  " . get_filter_site_cond('profil') . "";
-	$res = query($sql);
-	// Recherche des profils utilisateur disponible
-	while ($account_type = fetch_assoc($res)) {
-		$tpl_account_type_options[] = array('value' => $account_type['priv'],
-			'issel' => $account_type['priv'] == vb($recherche['account_type']),
-			'name' => vb($account_type['name'])
-			);
-	}
-	$tpl->assign('account_type_options', $tpl_account_type_options);
+	$tpl->assign('priv_options', get_priv_options(vb($recherche['account_type'])));
 
 	$tpl_admin_options = array();
 	$sql = "SELECT *
@@ -229,7 +216,7 @@ function update_state_contact($frm)
 {
 	if (!empty($frm['id']) && !empty($frm['etat'])) {
 		query("UPDATE peel_admins_contacts_planified
-			SET actif ='" . (nohtml_real_escape_string($frm['etat']) == 'TRUE'?'FALSE':'TRUE') . "'
+			SET actif ='" . nohtml_real_escape_string(($frm['etat'] == 'TRUE'?'FALSE':'TRUE')) . "'
 			WHERE id='" . intval(vn($frm['id'])) . "'");
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMERCIALE_MSG_STATUS_OK']))->fetch();
 	}

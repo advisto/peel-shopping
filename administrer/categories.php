@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: categories.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -252,6 +252,7 @@ function affiche_formulaire_ajout_produits_categorie($id, &$frm)
 	}
 	$frm['parent_id'] = $id;
 	$frm['site_id'] = '';
+	$frm['site_country'] =  vb($GLOBALS['site_parameters']['site_country_allowed_array'], array());
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
 	$frm["titre_soumet"] = $GLOBALS['STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON'];
@@ -274,6 +275,7 @@ function affiche_formulaire_modif_produits_categorie($id, &$frm)
 			FROM peel_categories
 			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('categories', null, true) . "");
 		if ($frm = fetch_assoc($qid)) {
+			$frm['site_country'] = explode(',', vb($frm['site_country']));
 		} else {
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CATEGORIES_ERR_NOT_FOUND'], $id)))->fetch();
 			return false;
@@ -338,6 +340,10 @@ function insere_categorie(&$frm)
 			, background_menu
 			, background_color
 			, site_id';
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$sql .= ", site_country
+			";
+		}
 		if (check_if_module_active('category_promotion')) {
 			$sql .= ', promotion_devises
 			, promotion_percent
@@ -365,6 +371,10 @@ function insere_categorie(&$frm)
 			, '" . nohtml_real_escape_string($frm['background_menu']) . "'
 			, '" . nohtml_real_escape_string($frm['background_color']) . "'
 			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$sql .= ", '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+			";
+		}
 		if (check_if_module_active('category_promotion')) {
 			$sql .= ", '" . floatval(get_float_from_user_input($frm['promotion_devises'])) . "'
 			, '" . floatval(get_float_from_user_input($frm['promotion_percent'])) . "'
@@ -427,6 +437,11 @@ function maj_produits_categorie($id, $frm)
 		, background_menu = '" . nohtml_real_escape_string($frm['background_menu']) . "'
 		, background_color = '" . nohtml_real_escape_string($frm['background_color']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= "
+		, site_country = '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+		";
+	}
 	if (check_if_module_active('category_promotion')) {
 		$sql .= ", promotion_devises = '" . nohtml_real_escape_string($frm['promotion_devises']) . "'
 		, promotion_percent = '" . nohtml_real_escape_string($frm['promotion_percent']) . "'
@@ -527,6 +542,10 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('etat', $frm['etat']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('type_affichage', $frm['type_affichage']);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 

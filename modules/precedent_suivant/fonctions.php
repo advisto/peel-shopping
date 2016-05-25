@@ -3,16 +3,28 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Ajout d'une section sur la page de détails d'un produit
+ *
+ * @param array $params
+ * @return
+ */
+function precedent_suivant_hook_product_details_additional_infos(&$params) {
+	$tpl_array['prev'] = show_preview_next($params['id'], $params['position'], 'prev', $params['current_catid']);
+	$tpl_array['next'] = show_preview_next($params['id'], $params['position'], 'next', $params['current_catid']);
+	return $tpl_array;
 }
 
 /**
@@ -77,8 +89,8 @@ function get_name_category($idcat){
 	$sql='SELECT nom_'. $_SESSION['session_langue'] . ' AS nom
 		FROM peel_categories
 		WHERE id = "' . intval(vn($idcat)) . '" AND ' . get_filter_site_cond('categories') . '';
-	$result = query($sql);
-	if($data = fetch_assoc($result)){
+	$query = query($sql);
+	if($data = fetch_assoc($query)){
 		$output .= $data['nom'];
 	}
 	return $output;

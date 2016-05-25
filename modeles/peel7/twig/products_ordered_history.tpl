@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: products_ordered_history.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: products_ordered_history.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}
 <h1 class="liste_commandes">{{ STR_PRODUCTS_PURCHASED_LIST }}</h1>
 {% if STR_NO_ORDER is defined %}
@@ -21,7 +21,7 @@
 		{{ links_header_row }}
 		{% for prod in products %}
 		<tr >
-			<td class="center"><a href="{{ prod.href_produit }}">{{ prod.nom_produit }}</a></td>
+			<td class="center">{% if prod.href_produit %}<a href="{{ prod.href_produit }}">{% endif %}{{ prod.nom_produit }}{% if prod.href_produit %}</a>{% endif %}</td>
 			<td class="center">{{ prod.quantite }}</td>
 			<td class="center">{{ prod.o_timestamp }}</td>
 			<td class="center">{{ prod.numero }}</td>

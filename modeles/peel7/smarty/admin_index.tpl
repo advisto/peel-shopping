@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_index.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_index.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}
 {if $all_sites_name_array|@count>1}
 <div class="home_block home_block_select_multisite home_block_black panel panel-primary">
@@ -38,15 +38,15 @@
 		<div class="row">
 			{if isset($KeyyoCalls)}<div class="col-lg-12 col-md-12 col-sm-12">{$KeyyoCalls}</div>
 			<div class="clearfix visible-md visible-sm"></div>{/if}
-			<div class="col-lg-4 col-md-6 col-sm-6">{$orders}</div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{$sales}</div>
+			{foreach $home_modules as $this_output name=data}
+			<div class="col-lg-4 col-md-6 col-sm-6">{$this_output}</div>
+				{if $smarty.foreach.data.iteration%2==0}
 			<div class="clearfix visible-md visible-sm"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{$products}</div>
+				{/if}
+				{if $smarty.foreach.data.iteration%3==0}
 			<div class="clearfix visible-lg"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{$delivery}</div>
-			<div class="clearfix visible-md visible-sm"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{$users}</div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{$peel}</div>
+				{/if}
+			{/foreach}
 		</div>
 	</div>
 </div>

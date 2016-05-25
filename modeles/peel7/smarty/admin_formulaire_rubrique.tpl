@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_rubrique.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_rubrique.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -69,7 +69,7 @@
 			</td>
 		</tr>
 	{foreach $langs as $l}
-		<tr><td  class="bloc" colspan="2">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
+		<tr><td  class="bloc" colspan="2"><h2>{$STR_ADMIN_LANGUAGES_SECTION_HEADER} - {$lang_names[$l.lng]|upper}</h2></td></tr>
 		<tr>
 			<td class="title_label" colspan="2">{$STR_ADMIN_NAME} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 		</tr>
@@ -101,7 +101,7 @@
 		</tr>
 	{/foreach}
 		{if isset($diapo)}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</h2></td></tr>
 			{foreach $diapo as $i => $f}
 				{if !empty($f)}
 				<tr>
@@ -113,7 +113,7 @@
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
-			{for $i=1+count($diapo) to 5}
+			{for $i=1+count($diapo) to 5+count($diapo)}
 		<tr>
 			<td class="title_label">{$STR_FILE} {$i}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input name="image{$i}" type="file" value="" /></td>

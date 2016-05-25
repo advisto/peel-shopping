@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,15 +36,16 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 	if (empty($source_filename)) {
 		return false;
 	}
-	if(get_file_type($source_filename) == 'pdf') {
+	$file_type = get_file_type($source_filename);
+	if($file_type == 'pdf') {
 		// Gestion des pdf
 		$source_filename = 'logoPDF_small.png';
 		$source_folder = $GLOBALS['dirroot'] .'/images/';
-	} elseif(get_file_type($source_filename) == 'zip') {
+	} elseif($file_type == 'zip') {
 		// Gestion des zip
 		$source_filename = 'zip.png';
 		$source_folder = $GLOBALS['dirroot'] .'/images/';
-	} elseif(get_file_type($source_filename) != 'image') {
+	} elseif($file_type != 'image') {
 		// Gestion des autres documents
 		$source_filename = 'document.png';
 		$source_folder = $GLOBALS['dirroot'] .'/images/';
@@ -253,7 +254,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 			}
 		}
 	}
-	if(!empty($return_absolute_path)) {
+	if(!empty($return_absolute_path) && !empty($thumb_filename)) {
 		if($return_absolute_path === true) {
 			return $GLOBALS['repertoire_upload'] . '/thumbs/' . String::rawurlencode($thumb_filename);
 		} else {

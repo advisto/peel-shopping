@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_societe_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_societe_form.tpl 49667 2016-04-25 12:13:08Z gboussin $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -145,6 +145,14 @@
 				</select>
 			</td>
 		</tr>
+	{if !empty($STR_ADMIN_SITE_COUNTRY)}
+		<tr>
+			<td class="title_label">{$STR_ADMIN_SITE_COUNTRY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				{$site_country_checkboxes}
+			</td>
+		</tr>
+	{/if}
 		<tr>
 			<td colspan="2" class="center"><p><input class="btn btn-primary" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>
 		</tr>

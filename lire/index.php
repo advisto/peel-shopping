@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: index.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (defined('PEEL_PREFETCH')) {
 	call_module_hook('configuration_end', array());
 } else {
@@ -36,14 +36,7 @@ $rub_query = query($sql);
 if ($rub = fetch_assoc($rub_query)) {
 	if(!empty($rub['technical_code']) && String::strpos($rub['technical_code'], 'R=') === 0) {
 		// redirection suivie que la rubrique soit active ou non
-		$url_rub = String::substr($rub['technical_code'], 2);
-		if(strpos($url_rub, '://') === false) {
-			if(String::substr($url_rub, 0, 1) != '/') {
-				$url_rub = '/' . $url_rub;
-			}
-			$url_rub = $GLOBALS['wwwroot'] . $url_rub;
-		}
-		redirect_and_die($url_rub, true);
+		redirect_and_die(get_url(String::substr($rub['technical_code'], 2)), true);
 	}
 	if($rub['etat']==0 && !a_priv('admin_content', false)) {
 		redirect_and_die(get_url('/'), true);
@@ -53,6 +46,9 @@ if ($rub = fetch_assoc($rub_query)) {
 		$GLOBALS['main_div_id'] = 'tradefair';
 	} elseif ($rub['technical_code'] == 'tradefloor') {
 		$GLOBALS['main_div_id'] = 'tradefloor';
+	}
+	if($rub['technical_code']=='timeline' && check_if_module_active('timeline')) {
+		$display_timeline = true;
 	}
 }
 if (check_if_module_active('url_rewriting')) {
@@ -73,6 +69,9 @@ if (function_exists('has_special_article') && has_special_article($rubid)) {
 $tpl = $GLOBALS['tplEngine']->createTemplate('lire.tpl');
 $tpl->assign('class', $class);
 $tpl->assign('articles_list_brief_html', get_articles_list_brief_html($rubid));
+if(!empty($display_timeline)){
+	$tpl->assign('display_timeline', get_display_timeline(true));
+}
 $output .= $tpl->fetch();
 
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['lire_index_page_columns_count'];

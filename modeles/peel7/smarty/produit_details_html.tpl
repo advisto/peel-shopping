@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: produit_details_html.tpl 49884 2016-05-16 12:32:36Z sdelaporte $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -139,8 +139,6 @@
 				{/if}
 			</div>
 			{/if}
-			{if !empty($qrcode_image_src)}<div class="qrcode"><img src="{$qrcode_image_src|escape:'html'}" alt="" /></div>{/if}
-			{if !empty($barcode_image_src)}<div class="qrcode"><img src="{$barcode_image_src|escape:'html'}" alt="" /></div>{/if}
 		</div>
 		<h1 property="name" class="titre_produit">{$product_name}</h1>
 		{if isset($subscribe_trip_form)}
@@ -182,6 +180,10 @@
 				{if !empty($descriptif)}<p>{$descriptif}</p>{/if}
 				{if !empty($description)}<div>{$description}</div>{/if}
 			</div>
+		
+		{if !empty($qrcode_image_src)}<div class="qrcode"><img src="{$qrcode_image_src|escape:'html'}" alt="" /></div>{/if}
+		{if !empty($barcode_image_src)}<div class="qrcode"><img src="{$barcode_image_src|escape:'html'}" alt="" /></div>{/if}
+		
 		{if !empty($extra_link)}
 			<p class="extra_link"><a href="{$extra_link}" onclick="return(window.open(this.href)?false:true);">{$extra_link}</a></p>
 		{/if}

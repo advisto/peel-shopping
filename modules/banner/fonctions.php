@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -172,7 +172,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						// Le champ location contient le nom de l'emplacement du module. L'application pourra ainsi positionner la bannière au bon endroit.
 						$q = query('SELECT location
 							FROM peel_modules
-							WHERE technical_code = "advertising' . intval($banner['position']) . '" AND etat = 1 AND ' . get_filter_site_cond('modules'));
+							WHERE technical_code = "advertising' . intval($banner['position']) . '" AND etat=1 AND ' . get_filter_site_cond('modules'));
 						if($result = fetch_assoc($q)) {
 							$banner_location = $result['location'];
 							// Traitement des positions des bannières. Si la bannière est associée à un module prévu pour se placer en haut d'une page, il contient top dans son nom par convention de nommage. La règle est la même pour les modules en bas de page. Il est donc possible de spécifier les seules positions gérées par l'application
@@ -216,7 +216,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							fclose($google_ad_handle);
 						}
 					}
-					$mobile_application_output_array[] = array("url_img" => (!empty($banner['image'])?$GLOBALS['repertoire_upload'] . '/' . $banner['image']:''), "url" => $url , "html"=> vb($banner['tag_html']), "position" => $banner_position);
+					$mobile_application_output_array[] = array("url_img" => get_url_from_uploaded_filename($banner['image']), "url" => $url , "html"=> vb($banner['tag_html']), "position" => $banner_position);
 				} elseif (!isset($last_rang) || $banner['rang'] != $last_rang) {
 					// On affiche une seule bannière par rang
 					// Nous récuperons la dimension de la bannière souhaitée et appliquons les limites initialiséss plus haut

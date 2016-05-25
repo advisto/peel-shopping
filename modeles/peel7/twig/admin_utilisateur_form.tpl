@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 48465 2016-01-11 13:46:09Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -26,6 +26,13 @@
 		<tr>
 			<td style="font-weight:bold;" colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="{{ administrer_url }}/commander.php?mode=ajout&id_utilisateur={{ id_utilisateur }}">{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER }} #{{ id_utilisateur }}</a></span></td>
 		</tr>
+	{% if display_projects_with_related_user_link %}
+		<tr>
+			<td style="font-weight:bold;" colspan="2">
+				<a href="{{ display_projects_with_related_user_link }}">{{ STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER }}</a>
+			</td>
+		</tr>
+	{% endif %}
 {% endif %}
 {% if hook_actions %}
 		<tr>
@@ -55,6 +62,43 @@
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_UTILISATEURS_UPDATE_EXPLAIN }}</div></td>
 		</tr>
+ 		<tr>
+			<td class="title_label">{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="email" class="form-control" name="email" style="width:100%" value="{{ email|str_form_value }}" />{{ email_infos }}</td>
+		</tr>
+{% if pseudo_is_not_used is empty %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{{ pseudo|str_form_value }}" /></td>
+		</tr>
+{% endif %}
+		<tr>
+			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="etat" id="etat">
+					<option value="">{{ STR_CHOOSE }}...</option>
+					<option value="1" {% if etat=='1' %} selected="selected"{% endif %}>{{ STR_ADMIN_ACTIVATED }}</option>
+					<option value="0" {% if etat=='0' %} selected="selected"{% endif %}>{{ STR_ADMIN_DEACTIVATED }}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ STR_ADMIN_PRIVILEGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" multiple="multiple" name="priv[]">
+				{{ priv_options }}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="site_id"  {% if disable_user_siteweb %}disabled="disabled"{% endif %}>
+					{{ site_id_select_options }}
+				</select>
+				{% if disable_user_siteweb %}<input type="hidden" name="site_id" value="0" />{% endif %}
+			</td>
+		</tr>
 {% if (date_insert) %}
 		<tr>
 			<td>{{ STR_ADMIN_UTILISATEURS_REGISTRATION_DATE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -83,11 +127,15 @@
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_UTILISATEURS_ADMIN_NOTE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
+	{% if user_admin_note_edit_forbidden is empty %}
 				<select class="form-control" name="note_administrateur">
-	{% for note_admin in {0:-1, 1:10, 2:20, 3:30, 4:40, 5:50} %}
+		{% for note_admin in {0:-1, 1:10, 2:20, 3:30, 4:40, 5:50} %}
 					<option value="{{ note_admin|str_form_value }}" {% if note_administrateur == note_admin %} selected="selected"{% endif %}>{% if note_admin == - 1 %}{{ STR_NONE }}{% else %}{{ note_admin/10|round }}{% endif %}</option>
-	{% endfor %}
+		{% endfor %}
 				</select>
+	{% else %}
+			{$note_administrateur}
+	{% endif %}
 			</td>
 		</tr>
 		<tr>
@@ -101,47 +149,6 @@
 			</td>
 		</tr>
 {% endif %}
- 		<tr>
-			<td class="title_label">{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<select class="form-control" name="site_id"  {% if disable_user_siteweb %}disabled="disabled"{% endif %}>
-					{{ site_id_select_options }}
-				</select>
-				{% if disable_user_siteweb %}<input type="hidden" name="site_id" value="0" />{% endif %}
-			</td>
-		</tr>
-		<tr>
-			<td class="title_label">{{ STR_EMAIL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="email" class="form-control" name="email" style="width:100%" value="{{ email|str_form_value }}" />{{ email_infos }}</td>
-		</tr>
-{% if pseudo_is_not_used is empty %}
-		<tr>
-			<td class="title_label">{{ STR_ADMIN_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{{ pseudo|str_form_value }}" /></td>
-		</tr>
-{% endif %}
-		<tr>
-			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<select class="form-control" name="etat" id="etat">
-					<option value="">{{ STR_CHOOSE }}...</option>
-					<option value="1" {% if etat=='1' %} selected="selected"{% endif %}>{{ STR_ADMIN_ACTIVATED }}</option>
-					<option value="0" {% if etat=='0' %} selected="selected"{% endif %}>{{ STR_ADMIN_DEACTIVATED }}</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_PRIVILEGE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-{% if (priv_options) %}
-				<select class="form-control" multiple="multiple" name="priv[]">
-				{% for o in priv_options %}
-					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
-				{% endfor %}
-				</select>
-{% endif %}
-			</td>
-		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_UTILISATEURS_ACCOUNT_MANAGER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -574,13 +581,20 @@
 </table>
 <br />
 {% endif %}
-{% if (add_credit_gold_user) %}
+{% if (add_credit_gold_user) and is_id_utilisateur %}
 <table class="full_width">
 	<tr><td>{{ add_credit_gold_user }}</td></tr>
+</table>
+<br />
+{% endif %}
+
+{% if (liste_annonces_admin) and (is_id_utilisateur) %}
+<table class="full_width">
 	<tr><td>{{ liste_annonces_admin }}</td></tr>
 </table>
 <br />
 {% endif %}
+
 {% if is_commerciale_module_active and is_id_utilisateur %}
 <table class="full_width">
 	<tr><td class="entete">{{ STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE }}</td></tr>
@@ -605,5 +619,9 @@
 <table id="download_files" class="full_width">
 	<tr><td>{{ download_files }}</td></tr>
 </table>
+<br />
+{% endif %}
+{% if user_alerts is defined and is_id_utilisateur %}
+	{$user_alerts}
 <br />
 {% endif %}

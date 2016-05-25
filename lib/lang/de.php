@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: de.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: de.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ $GLOBALS["STR_AJOUT_PENSE_BETE"] = "In den Warenkorb";
 $GLOBALS["STR_ALL_BRAND"] = "Alle Marken";
 $GLOBALS["STR_ALL"] = "Alle";
 $GLOBALS["STR_ALL_RESULTS"] = "Alle Ergebnisse";
-$GLOBALS["STR_ALT_AD_DETAIL"] = "Details der Verkäuferbewertung";
+$GLOBALS["STR_ALT_AD_DETAIL"] = "Details der Benutzer";
 $GLOBALS["STR_AND"] = "und";
 $GLOBALS["STR_AMOUNT"] = "Betrag";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Ich interessiere mich für die folgenden Kategorien:";
@@ -405,6 +405,7 @@ $GLOBALS["STR_MODULE_AVIS_AVERAGE_RATING_GIVEN"] = "Durchschnittsnote:";
 $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "Noch keine Meinungen zu diesem Artikel";
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "Bemerkung";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Meinung von";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Vielen Dank für Ihre Meinung zu diesem Artikel";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "Die Meinungen der Kunden zu ";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Senden Sie Ihre Meinung";
@@ -697,6 +698,7 @@ $GLOBALS["STR_REMISE"] = "Rabatt";
 $GLOBALS["STR_REQUEST_OK"] = "Ihre Nachfrage wurde in Behandlung genommen.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "obligatorisch für eine Reklamation";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "ist erforderlich, um Ihre Bestellung zu validieren.";
+$GLOBALS["STR_RESULTS"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "Ergebnis Ihrer Suche";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Registrierung Wiederverkäufer";
 $GLOBALS["STR_RETAILER"] = "Wiederverkäufer werden";
@@ -854,6 +856,7 @@ $GLOBALS["STR_YOU_ARE"] = "Sie sind";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Bearbeiten Sie Ihre Rechnung in Ihrem Nutzerkonto.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Ihr Rabattcode";
 $GLOBALS["STR_YOUR_EMAIL"] = "Ihre E-Mail-Adresse";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "Ihr Vorname";
 $GLOBALS["STR_YOUR_NAME"] = "Ihr Name";
 $GLOBALS["STR_YOUR_NEW_ADDRESS_CREATE"] = "Ihre neue Adresse wurde erstellt.";
 $GLOBALS["STR_YOUR_NOTE"] = "Ihre Anmerkung";

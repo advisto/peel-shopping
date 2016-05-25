@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 48453 2016-01-11 09:52:17Z gboussin $
+// $Id: import_produits.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -72,7 +72,7 @@ switch ($action) {
 				echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_ERR_FILE_NOT_FOUND']))->fetch();
 			} else {
 				$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_produits_fichier.tpl');
-				$tpl->assign('href', $GLOBALS['repertoire_upload'] . '/' . $fichier);
+				$tpl->assign('href', get_url_from_uploaded_filename($fichier));
 				$tpl->assign('name', $fichier);
 				$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 				$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);

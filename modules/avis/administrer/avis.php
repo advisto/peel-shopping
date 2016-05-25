@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: avis.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -39,7 +39,11 @@ switch (vb($_REQUEST['mode'])) {
 				'produit' => $GLOBALS['STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT'],
 				'note' => $GLOBALS['STR_DONT_FORGET_NOTE']));
 		if (!$form_error_object->count()) {
-			if (ajout_avis($frm)) {
+			$produit = explode("~", $frm["produit"]);
+			if (!empty($produit) && !empty($produit[0])) {
+				$frm['reference_id'] = $produit[0];
+				$frm['titre'] = $produit[1];
+				ajout_avis($frm);
 				affiche_liste_avis();
 			} else {
 				echo $form_error_object->text($GLOBALS['STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED']);

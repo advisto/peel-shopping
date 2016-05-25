@@ -45,7 +45,7 @@ label {
 	font-size: 13px;
 	font-weight: bold;
 	text-decoration: none;
-	background-color: #3353A1;
+	background-color: #3353A1 !important;
 	text-align: center;
 }
 .entete {
@@ -70,6 +70,13 @@ label {
 	font-weight: bold;
 	border-top: 1px solid #F4F4F4;
 	padding: 3px;
+}
+.bloc h2 {
+	font-size: 13px !important;
+	font-weight: bold !important;
+	margin: 0px;
+	padding: 0px;
+	line-height: 1.42857;
 }
 .change_status {
 	cursor:pointer;
@@ -381,7 +388,7 @@ tr.classe3 {
 	color: #000000;
 }
 .multipage_selected_field {
-	background-color:#5C5859;
+	background-color:#5C5859 !important;
 }
 
 /* Couleur des menus */

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: meta.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: meta.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -211,12 +211,12 @@ function affiche_liste_meta()
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_meta.tpl');
 
 	$anchor = '';
-	$result = query("SELECT * 
+	$query = query("SELECT * 
 		FROM peel_meta 
 		WHERE " . get_filter_site_cond('meta', null, true));
-	if (!(num_rows($result) == 0)) {
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			// On génère le lien vers les métas ici :
 			// - si le titre est vide, on se sert de la description, sinon des mots clés
 			$meta_titre = String::html_entity_decode_if_needed(trim($ligne['meta_titre_' . $_SESSION['session_langue']]));

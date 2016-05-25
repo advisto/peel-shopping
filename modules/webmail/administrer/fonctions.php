@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -44,7 +44,7 @@ function webmail_hook_list_user_mail($params) {
 	$Links_formulaire = new Multipage($sql_formulaire, 'affiche_liste_mail_annonce', '*');
 	$HeaderTitlesArray = array($GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_MESSAGE'], $GLOBALS['STR_DATE'], $GLOBALS['STR_ADMIN_INFO']);
 	$Links_formulaire->HeaderTitlesArray = $HeaderTitlesArray;
-	$result_formulaire = $Links_formulaire->Query();
+	$results_array = $Links_formulaire->Query();
 
 	$output .= '
 			<table class="full_width">
@@ -56,10 +56,10 @@ function webmail_hook_list_user_mail($params) {
 						<table id="tablesForm" style="width:100%;">
 						' . $Links_formulaire->getHeaderRow();
 	$i = 0;
-	if (empty($result_formulaire)) {
+	if (empty($results_array)) {
 		$output .= '<tr><td colspan="4" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
 	} else {
-		foreach($result_formulaire as $formulaire) {
+		foreach($results_array as $formulaire) {
 			$output .= tr_rollover($i, true) . '
 								<td class="center">' . vb($formulaire['titre']) . '</td>
 								<td class="center">' . vb($formulaire['message']) . '</td>
@@ -128,8 +128,8 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 		$q = 'SELECT email
 			FROM peel_utilisateurs
 			WHERE id_utilisateur IN("' . implode('","', real_escape_string($frm['user_ids'])) . '") AND ' . get_filter_site_cond('utilisateurs') . '';
-		$result = query($q);
-		while ($users_email = fetch_assoc($result)) {
+		$query = query($q);
+		while ($users_email = fetch_assoc($query)) {
 			$users_email_array[] = $users_email['email'];
 		}
 		$user_email = implode(';', $users_email_array);
@@ -192,8 +192,8 @@ function affiche_form_send_mail($frm, $return_mode = false, &$form_error_object 
 		WHERE ' . get_filter_site_cond('email_template_cat', 'tc') . '
 		GROUP BY tc.id
 		ORDER BY name';
-	$result = query($sql);
-	while ($row_categories = fetch_assoc($result)) {
+	$query = query($sql);
+	while ($row_categories = fetch_assoc($query)) {
 		$tpl_options[] = array(
 			'value' => intval(vn($row_categories['id'])),
 			'issel' => !empty($frm['id_cat']) && $frm['id_cat'] == $row_categories['id'],
@@ -360,8 +360,8 @@ function send_mail_admin($frm)
 				$sql = 'SELECT *
 					FROM peel_utilisateurs
 					WHERE email="' . nohtml_real_escape_string($this_destination_mail) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
-				$result_user = query($sql);
-				$user_infos = fetch_assoc($result_user);
+				$query_user = query($sql);
+				$user_infos = fetch_assoc($query_user);
 				$user_template_tags = array();
 				if (!empty($user_infos)) {
 					$user_template_tags['CIVILITE'] = $user_infos['civilite'];
@@ -415,12 +415,15 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 		FROM peel_admins_actions ac
 		INNER JOIN peel_utilisateurs u_admins ON u_admins.id_utilisateur = ac.id_user AND ' . get_filter_site_cond('utilisateurs', 'u_admins') . '
 		LEFT JOIN peel_utilisateurs u_users ON u_users.id_utilisateur = ac.id_membre AND ' . get_filter_site_cond('utilisateurs', 'u_users') . '
-		WHERE ac.action="SEND_EMAIL" ' . (!empty($sql_cond)? implode(' ', $sql_cond):'') . ' AND ' . get_filter_site_cond('admins_actions', 'ac') . '
-		ORDER BY ac.date DESC';
+		WHERE ac.action="SEND_EMAIL" ' . (!empty($sql_cond)? implode(' ', $sql_cond):'') . ' AND ' . get_filter_site_cond('admins_actions', 'ac') . '';
+
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
-	$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ADMINISTRATOR"], $GLOBALS['STR_DATE'], $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_EMAIL_SENT"], $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"], $GLOBALS["STR_ADMIN_USER"]);
+	$HeaderTitlesArray = array("admin_nom" => $GLOBALS["STR_ADMIN_ADMINISTRATOR"], 'date' => $GLOBALS['STR_DATE'], $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_EMAIL_SENT"], 'data' => $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"], 'user_nom' => $GLOBALS["STR_ADMIN_USER"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
-	$result = $Links->Query();
+	$Links->OrderDefault = "ac.date";
+	$Links->SortDefault = "DESC";
+	$results_array = $Links->Query();
+
 	$output .= '
 		<form method="post" action=""' . get_current_url(false) . '"">
 			<table class="affiche_list_send_mail">
@@ -439,13 +442,13 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 					<td>
 						<select name="admin" class="form-control">
 							<option value="">' . $GLOBALS['STR_CHOOSE'] . '...</option>';
-	// Requete récupérant la liste des admin disponible sur le site
+	// Requete récupérant la liste des admin disponibles sur le site
 	$sql = 'SELECT id_utilisateur, nom_famille , prenom
 		FROM peel_utilisateurs
-		WHERE priv = "admin" AND ' . get_filter_site_cond('utilisateurs') . '
+		WHERE CONCAT("+",priv,"+") LIKE "%+admin%" AND ' . get_filter_site_cond('utilisateurs') . '
 		ORDER BY id_utilisateur ASC';
-	$result_admins = query($sql);
-	while ($admins_array = fetch_assoc($result_admins)) {
+	$query_admins = query($sql);
+	while ($admins_array = fetch_assoc($query_admins)) {
 		$output .= '
 							<option value="' . intval(vn($admins_array['id_utilisateur'])) . '" ' . frmvalide(!empty($recherche['admin']) && $recherche['admin'] == $admins_array['id_utilisateur'], ' selected="selected"') . '>' . vb($admins_array['prenom']) . ' ' . vb($admins_array['nom_famille']) . '</option>';
 	}
@@ -470,21 +473,18 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 		</form>
 		<table class="main_table">
 			<tr>
-				<td>' . $Links->GetMultipage() . '</td>
-			</tr>
-			<tr>
 				<td>
 					<div class="table-responsive">
 						<table class="table">
 							' . $Links->getHeaderRow();
 	$i = 0;
-	if (empty($result)) {
+	if (empty($results_array)) {
 		$output .= '
 							<tr><td colspan="5" class="left"><div class="alert alert-warning">'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_SENT_FOUND'].'</div></td></tr>';
 	} else {
-		foreach($result as $mails_send_array) {
-			$template_infos = getTextAndTitleFromEmailTemplateLang(null, null, $mails_send_array['data']);
-			$send_email_list = explode(',', $mails_send_array['raison']);
+		foreach($results_array as $result) {
+			$template_infos = getTextAndTitleFromEmailTemplateLang(null, null, $result['data']);
+			$send_email_list = explode(',', $result['raison']);
 			$nb_send_email_list = count($send_email_list);
 			if ($nb_send_email_list > 1) {
 				$multi_send_texte = '<i style="color:red;">Envoi multiple</i><br />';
@@ -494,17 +494,17 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 			}
 			$output .= tr_rollover($i, true) . '
 								<td class="center">
-									' . $mails_send_array["admin_prenom"] . ' ' . $mails_send_array["admin_nom"] . '
+									' . $result["admin_prenom"] . ' ' . $result["admin_nom"] . '
 								</td>
 								<td class="center">
-									' . get_formatted_date(vb($mails_send_array['date']), 'short', true) . '
+									' . get_formatted_date(vb($result['date']), 'short', true) . '
 								</td>
 								<td class="center">';
 			// Si un template a été envoyé, alors on récupère le contenu de ce template
-			if (!empty($template_infos) && $mails_send_array['remarque'] == $template_infos['text']) {
+			if (!empty($template_infos) && $result['remarque'] == $template_infos['text']) {
 				$email_sended_infos = '<b>Template</b> : <br />' . $multi_send_texte . $template_infos["name"] . ($template_infos['text'] != String::strip_tags($template_infos['text'])?' (HTML)':'');
 			} else {
-				$email_sended_infos = $multi_send_texte . $mails_send_array['remarque'];
+				$email_sended_infos = $multi_send_texte . $result['remarque'];
 			}
 			$output .= $email_sended_infos . '
 								</td>
@@ -512,7 +512,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 			if (!empty($template_infos)) {
 				$output .= $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_BASE_TEMPLATE_USED'] . ' ' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':<br />' . $template_infos['technical_code'] . ' - ' . String::strtoupper($template_infos['lang']);
 			} else {
-				$output .= $mails_send_array["data"];
+				$output .= $result["data"];
 			}
 
 			$output .= '
@@ -521,10 +521,10 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 			// Si il y un id_membre nous affichons le lien de la fiche utilisateur
 			if ($nb_send_email_list > 1) {
 				$output .= sprintf($GLOBALS['STR_MODULE_WEBMAIL_ADMIN_EMAIL_SENT_TO_N_CLIENTS'], $nb_send_email_list);
-			} elseif (!empty($mails_send_array['id_membre'])) {
-				$output .= '<b><a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval($mails_send_array['id_membre']) . '">' . $mails_send_array["user_prenom"] . ' ' . $mails_send_array["user_nom"] . '</a></b><br />' . $mails_send_array["user_login"];
+			} elseif (!empty($result['id_membre'])) {
+				$output .= '<b><a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval($result['id_membre']) . '">' . $result["user_prenom"] . ' ' . $result["user_nom"] . '</a></b><br />' . $result["user_login"];
 			} else {
-				$output .= (!empty($mails_send_array['raison'])?$mails_send_array['raison']:$GLOBALS['STR_INFORMATION_NOT_AVAILABLE']);
+				$output .= (!empty($result['raison'])?$result['raison']:$GLOBALS['STR_INFORMATION_NOT_AVAILABLE']);
 			}
 			$output .= '
 								</td>
@@ -559,7 +559,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
  * @param boolean $return_mode
  * @return
  */
-function affiche_list_receveid_mail($recherche, $return_mode = false)
+function affiche_list_received_mail($recherche, $return_mode = false)
 {
 	$output = '';
 	$sql_cond = array();
@@ -580,12 +580,13 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 	$sql = "SELECT w.*, u.pseudo AS login
 		FROM peel_webmail w
 		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u') . "
-		WHERE " . get_filter_site_cond('webmail', 'w', true) . "  " . (!empty($sql_cond)?' AND ' . implode(' AND ', $sql_cond):'') . "
-		ORDER BY w.date DESC, w.heure DESC";
+		WHERE " . get_filter_site_cond('webmail', 'w', true) . "  " . (!empty($sql_cond)?' AND ' . implode(' AND ', $sql_cond):'') . "";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
-	$HeaderTitlesArray = array(' ', $GLOBALS['STR_ADMIN_TITLE'], $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], $GLOBALS['STR_MESSAGE'], 'IP', $GLOBALS["STR_ADMIN_WEBSITE"]);
+	$HeaderTitlesArray = array(' ', 'titre' => $GLOBALS['STR_ADMIN_TITLE'], 'nom' => $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], 'message' => $GLOBALS['STR_MESSAGE'], 'ip' => 'IP', 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
-	$result = $Links->Query();
+	$Links->OrderDefault = "w.Date, w.Heure";
+	$Links->SortDefault = "DESC";
+	$results_array = $Links->Query();
 
 	$output .= '
 <form method="post" action=""' . get_current_url(false) . '"">
@@ -693,12 +694,12 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 		<table id="tablesForm" class="table">
 			' . $Links->getHeaderRow();
 	$i = 0;
-	if (empty($result)) {
+	if (empty($results_array)) {
 		$output .= '<tr><td colspan="6" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
 	} else {
 		$read_title_array = array('NO' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER'], 'READ' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_READ'], 'SEND' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ANSWERED']);
 		
-		foreach($result as $message) {
+		foreach($results_array as $message) {
 			$output .= tr_rollover($i, true) . '
 				<td class="center" style="width:5px;">
 					<input name="form_delete[]" type="checkbox" value="' . intval(vn($message['id'])) . '" id="cbx_' . intval(vn($message['id'])) . '" />
@@ -710,7 +711,7 @@ function affiche_list_receveid_mail($recherche, $return_mode = false)
 					'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
 				</td>
 				<td class="center" style="width:35%">
-					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1">Voir message(s) envoyé(s) par nous à ' . vb($message['email']) . '</a></p>':'') . '
+					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1"> ' . sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"], vb($message['email'])) . '</a></p>':'') . '
 				</td>
 				<td class="center" style="width:15%">
 				' . vb($message['ip']) . '

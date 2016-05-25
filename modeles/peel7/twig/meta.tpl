@@ -10,15 +10,13 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: meta.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: meta.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}{% if (charset) %}<meta charset="{{ charset }}" />{% endif %}
 <title>{{ title|escape('html') }}</title>
 <meta name="keywords" content="{{ keywords|str_form_value }}" />
 <meta name="description" content="{{ description|str_form_value }}" />
-<meta name="robots" content="All" />
 {% if (site) %}
 <meta name="author" content="{{ site|str_form_value }}" />
-<meta name="publisher" content="{{ site|str_form_value }}" />
 {% endif %}
 <meta name="generator" content="{{ generator|str_form_value }}" />
 <meta name="robots" content="{{ robots|str_form_value }}" />

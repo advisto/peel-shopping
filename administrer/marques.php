@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: marques.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -253,7 +253,7 @@ function maj_marque(&$frm)
 	query($sql_promo);
 
 	// On met à jour tous les droits par pays des produits liés à cette marque
-	if(!empty($_REQUEST['update_product_countries_submit'])) {
+	if(!empty($_REQUEST['update_product_countries_submit']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql_site_country = "UPDATE peel_produits 
 			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "', site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 			WHERE id_marque='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
@@ -316,12 +316,20 @@ function affiche_liste_marque(&$frm)
 {
 	$sql = "SELECT m.*
 		FROM peel_marques m
-		WHERE " . get_filter_site_cond('marques', 'm', true) . "
-		ORDER BY position";
-	$Links = new Multipage($sql, 'marques');
-	$results_array = $Links->Query();
+		WHERE " . get_filter_site_cond('marques', 'm', true) . "";
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_marque.tpl');
+
+	$Links = new Multipage($sql, 'marques');
+	$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ACTION"], 'id' => $GLOBALS["STR_ADMIN_ID"], 'image' => $GLOBALS["STR_IMAGE"], 'nom_' . $_SESSION['session_langue'] => $GLOBALS["STR_BRAND"], 'position' => $GLOBALS["STR_ADMIN_POSITION"], 'etat' => $GLOBALS["STR_STATUS"], 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"]);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+		$HeaderTitlesArray['site_country'] = $GLOBALS["STR_ADMIN_SITE_COUNTRY"];
+	}
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = 'position';
+	$results_array = $Links->Query();
+
 	$tpl->assign('href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
@@ -336,7 +344,7 @@ function affiche_liste_marque(&$frm)
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $this_brand['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $this_brand['id'],
 				'id' => $this_brand['id'],
-				'img_src' => (!empty($this_brand['image']) ? thumbs($this_brand['image'], 80, 50, 'fit', null, null, true, true) : null),
+				'img_src' => thumbs($this_brand['image'], 80, 50, 'fit', null, null, true, true),
 				'position' => $this_brand['position'],
 				'site_name' => get_site_name($this_brand['site_id']),
 				'etat_onclick' => 'change_status("marques", "' . $this_brand['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
@@ -350,11 +358,9 @@ function affiche_liste_marque(&$frm)
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('links_header_row', $Links->getHeaderRow());
 	$tpl->assign('links_multipage', $Links->GetMultipage());
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
-	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
-	}
 	$tpl->assign('STR_ADMIN_MARQUES_TITLE', $GLOBALS['STR_ADMIN_MARQUES_TITLE']);
 	$tpl->assign('STR_ADMIN_MARQUES_ADD_BRAND', $GLOBALS['STR_ADMIN_MARQUES_ADD_BRAND']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
@@ -413,11 +419,9 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
-	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
-	}
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
 	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);

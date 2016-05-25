@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: user_register_form.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<h1 property="name" class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form {if !empty($short_register_form)}short_register_form{/if}">
 {if empty($short_register_form)}
@@ -43,13 +43,13 @@
 				<span class="enregistrementgauche"><label for="pwd_level">{$STR_PASSWORD_SECURITY}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite"><div id="pwd_level_image"></div><span class="enregistrementdroite">{$STR_STRONG_PASSWORD_NOTIFICATION} </span></span>
 			</div>
-			{if $is_annonce_module_active}
+		{if $is_annonce_module_active}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="mot_passe_confirm">{$STR_PASSWORD_CONFIRMATION}{if !empty($mandatory_fields['mot_passe_confirm'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" value="{$mot_passe_confirm|str_form_value}" /></span>
 				{$password_confirmation_error}
 			</div>
-			{/if}
+		{/if}
 		</div>
 		<div class="inscription_form" style="margin-top:10px;" >
 			<div class="enregistrement">
@@ -61,25 +61,37 @@
 				</span>{$gender_error}
 			</div>
 			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="prenom">{$STR_FIRST_NAME}{if !empty($mandatory_fields['prenom'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="{$first_name|html_entity_decode_if_needed|str_form_value}" /></span>{$first_name_error}
-			</div>
-			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="nom_famille">{$STR_NAME}{if !empty($mandatory_fields['nom_famille'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="{$name|html_entity_decode_if_needed|str_form_value}" /></span>{$name_error}
 			</div>
 			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="societe">{$STR_SOCIETE}{if !empty($mandatory_fields['societe'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" /></span>{$societe_error}
+				<span class="enregistrementgauche"><label for="prenom">{$STR_FIRST_NAME}{if !empty($mandatory_fields['prenom'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+				<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="{$first_name|html_entity_decode_if_needed|str_form_value}" /></span>{$first_name_error}
 			</div>
-			{foreach $specific_fields as $f}
-				{if $f.field_position=='company'}
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory)} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
+			<div class="company_section">
+				<div class="enregistrement">
+					<span class="enregistrementgauche"><label for="societe">{$STR_SOCIETE}{if !empty($mandatory_fields['societe'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{$societe|html_entity_decode_if_needed|str_form_value}" /></span>{$societe_error}
+				</div>
+				<div class="enregistrement">
+					<span class="enregistrementgauche"><label for="siret">{$siret_txt}{if !empty($mandatory_fields['siret'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span> {$siret_error}
+				</div>
+		{if !empty($TR_INTRACOM_FORM)}
+				<div class="enregistrement">
+					<span class="enregistrementgauche"><label for="intracom_for_billing">{$STR_INTRACOM_FORM}{if !empty($mandatory_fields['intracom_for_billing'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" /></span>{$intracom_form_error}
+				</div>
+		{/if}
+				{foreach $specific_fields as $f}
+					{if $f.field_position=='company'}
+				<div class="enregistrement">
+					<span class="enregistrementgauche"><label for="{$f.field_name}">{$f.field_title}{if !empty($f.mandatory)} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
+					<span class="enregistrementdroite">{include file="specific_field.tpl" f=$f}{$f.error_text}</span>
+				</div>
+					{/if}
+				{/foreach}
 			</div>
-				{/if}
-			{/foreach}
 		{if $add_b2b_form_inputs}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="url">{$STR_WEBSITE}{if !empty($mandatory_fields['url'])}<span class="etoile">*</span> {/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -110,14 +122,6 @@
 						<option value="recurrent" {if $activity=='recurrent'} selected="selected"{/if}>{$STR_RECURRENT}</option>
 					</select>
 				</span>{$activity_error}
-			</div>
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="siret">{$siret_txt}{if !empty($mandatory_fields['siret'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{$siret|html_entity_decode_if_needed|str_form_value}" /></span> {$siret_error}
-			</div>
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="intracom_for_billing">{$STR_INTRACOM_FORM}{if !empty($mandatory_fields['intracom_for_billing'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{$intracom_form|html_entity_decode_if_needed|str_form_value}" /></span>{$intracom_form_error}
 			</div>
 		{/if}
 		{if !empty($STR_FONCTION)}
@@ -256,7 +260,7 @@
 			</div>
 		{/if}
 	{/foreach}
-{if !empty($STR_LOGO)}
+	{if !empty($STR_LOGO)}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="logo">{$STR_LOGO}{if !empty($mandatory_fields['logo'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
 				<span class="enregistrementdroite">
@@ -267,7 +271,7 @@
 				{/if}
 				</span>
 			</div>
-{/if}
+	{/if}
 	{if $language_for_automatic_emails_options|@count>1}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label >{$STR_LANGUAGE_FOR_AUTOMATIC_EMAILS}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -278,6 +282,7 @@
 				</span>
 			</div>
 	{/if}
+	{$hook_output}
 	{if isset($captcha)}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="code">{$captcha.validation_code_txt}{$STR_BEFORE_TWO_POINTS}:</label></span>

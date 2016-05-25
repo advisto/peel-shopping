@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: bas.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -30,6 +30,10 @@ if (defined('IN_HOME')) {
 	$tpl->assign('CONTENT_HOME_BOTTOM', affiche_contenu_html("home_bottom", true));
 }
 $tpl->assign('CONTENT_FOOTER', affiche_contenu_html("footer", true));
+if(!empty($GLOBALS['site_parameters']['display_footer_full_custom_html'])){
+	$tpl->assign('FOOTER_FULL_CUSTOM_HTML', affiche_contenu_html("footer_full_custom_html", true));
+	$tpl->assign('display_footer_full_custom_html', $GLOBALS['site_parameters']['display_footer_full_custom_html']);
+}
 $tpl->assign('MODULES_FOOTER', get_modules('footer', true, null, vn($_GET['catid'])));
 
 $tpl->assign('FOOTER', affiche_footer(true));
@@ -91,6 +95,11 @@ if(function_exists('get_footer_column')) {
 	$tpl->assign('footer_column', get_footer_column());
 }
 $tpl->assign('scroll_to_top', vb($GLOBALS['site_parameters']['scroll_to_top'], false));
+
+$hook_result = call_module_hook('footer_template_data', array(), 'array');
+foreach($hook_result as $this_key => $this_value) {
+	$tpl->assign($this_key, $this_value);
+}
 
 echo $tpl->fetch();
 

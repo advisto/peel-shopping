@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: achat_maintenant.php 49984 2016-05-23 13:45:30Z sdelaporte $
 include("../configuration.inc.php");
 
 $output = '';
@@ -18,7 +18,7 @@ if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
 	// Test sur l'identification, il faut obligatoirement être connecté à son compte pour renseigner un code promo. Les utilisateurs 'stop' (attente revendeur) ou 'stand' (attente affiliation) ne peuvent pas se connecter à leur compte, ne peuvent donc pas passer commande et ne bénéficient donc pas des avantages liés au statut final 'reve' (revendeur confirmé) ou 'affi' (affilié confirmé). Les utilisateurs 'load' (téléchargement) ou 'newsletter' (abonné newsletter) ne peuvent pas se connecter, et donc ne peuvent pas non plus passer commande.
 	necessite_identification();
 }
-include("../lib/fonctions/display_caddie.php");
+include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 	$user_table_fields_names = get_table_field_names('peel_utilisateurs');
 	$order_table_fields_names = get_table_field_names('peel_commandes');
@@ -56,7 +56,7 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			'code_postal1' => $GLOBALS['STR_ERR_ZIP'],
 			'ville1' => $GLOBALS['STR_ERR_TOWN'],
 			'cgv' => $GLOBALS['STR_ERR_CGV']);
-		// Le moyen de paiement n'est pas sélectionnable si la commande est égal à 0
+		// Le moyen de paiement n'est pas sélectionnable si la commande est égale à 0
 		if ($_SESSION['session_caddie']->total > 0) {
 			$check_fields['payment_technical_code'] = $GLOBALS['STR_ERR_PAYMENT'];
 		}
@@ -80,6 +80,9 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			if (!empty($GLOBALS['site_parameters']['order_mandatory_fields'])) {
 				$check_fields = array_merge($check_fields, $GLOBALS['site_parameters']['order_mandatory_fields']);
 			}
+		}
+		if(vb($_POST['payment_technical_code']) == 'order_form' && empty($_SESSION['session_commande']['commentaires'])) {
+			$form_error_object->add('order_form_payment_methods', $GLOBALS['STR_ORDER_FORM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $GLOBALS['STR_EMPTY_FIELD']);
 		}
 		$form_error_object->valide_form($_SESSION['session_commande'], $check_fields);
 		$_SESSION['session_caddie']->set_paiement($_POST['payment_technical_code']);
@@ -109,8 +112,13 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 						}
 					}
 				}
-				insere_utilisateur($frm, false, true);
-				user_login_now($frm['email'], '', false);
+				$inserted_user = insere_utilisateur($frm, false, true);
+				if(is_numeric($inserted_user)) {
+					// Compte créé à l'instant => on considère donc qu'on peut se logguer sans préciser de mot de passe 
+					user_login_now($frm['email'], null, false);
+				} elseif(is_array($inserted_user)) {
+					// Utilisateur existe déjà => il faudra se logguer normalement avec mot de passe 
+				}
 			}
 			define("IN_STEP2", true);
 			$GLOBALS['DOC_TITLE'] =  $GLOBALS['STR_STEP2'];
@@ -249,7 +257,7 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 		define("IN_STEP1", true);
 		$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_STEP1'];
 	}
-	if (!empty($GLOBALS['site_parameters']['short_order_process'])) {
+	if (!empty($_GET['short_order_process']) || !empty($GLOBALS['site_parameters']['short_order_process']) || (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0)) {
 		if ($_SESSION['session_caddie']->count_products() > 0) {
 			// Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l'absence de paiement et de validation des CGV => Utile pour des demandes de devis
 			// on prend les informations préremplies automatiquement ci-dessus dans $frm pour mettre dans $_SESSION['session_commande'] sans être passé par POST
@@ -265,7 +273,11 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			}
 			put_session_commande($frm);
 			$commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
-
+			if (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0) {
+				// Si le panier est égal à 0, on valide automatiquement la commande puisqu'il n'y a pas de paiement.
+				update_order_payment_status($commandeid, true);
+			}
+			
 			// Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 			$_SESSION['session_caddie']->init();
 			$output .= affiche_contenu_html('short_order_process', true);

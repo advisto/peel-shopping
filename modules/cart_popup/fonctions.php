@@ -3,16 +3,34 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Ajout de données pour le header en front-office
+ *
+ * @param array $params
+ * @return On renvoie un tableau sous la forme [variable smarty] => [contenu]
+ */
+function cart_popup_hook_header_template_data(&$params) {
+	$results = array();
+	if (!empty($_SESSION['session_show_caddie_popup'])) {
+		if (defined('IN_CATALOGUE_PRODUIT') && !empty($_GET['id'])) {
+			$product_added_id = $_GET['id'];
+		}
+		$results['cart_popup_div'] = get_cart_popup_div(vb($product_added_id));
+		unset($_SESSION['session_show_caddie_popup']);
+	}
+	return $results;
 }
 
 /**

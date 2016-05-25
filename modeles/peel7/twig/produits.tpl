@@ -83,7 +83,7 @@
 							<!-- Ajout au panier -->
 							{{ prod.check_critere_stock }}
 				{% else %}
-						<div class="fc_prix">{% if prod.on_estimate %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>
+						{% if prod.check_critere_stock is empty %}<div class="fc_prix">{% if prod.on_estimate %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>{% endif %}
 				{% endif %}
 						</div>
 					</div>
@@ -113,7 +113,7 @@
 								{% if  (prod.image.zoom) %}
 									{% if  prod.image.zoom.is_lightbox %}
 								<span class="fc_zoom"><a href="{{ prod.image.zoom.href|escape('html') }}" class="lightbox" onclick="return false;" title="{{ prod.name|str_form_value }}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
-									{% elseif (prod.image.zoom.is_pdf) %}
+									{% elseif prod.image.zoom.file_type and prod.image.zoom.file_type!='image' %}
 								<span class="fc_zoom"><a href="{{ prod.image.zoom.href|escape('html') }}" onclick="return(window.open(this.href)?false:true);" title="{{ prod.name|str_form_value }}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
 									{% endif %}
 								{% endif %}
@@ -137,6 +137,13 @@
 						<td class="fc_add_to_cart">
 							<!-- Ajout au panier -->
 							{{ prod.check_critere_stock }}
+						</td>
+					</tr>
+				{% endif %}
+				{% if prod.product_list_html_zone %}
+					<tr>
+						<td>
+							{{ prod.product_list_html_zone }}
 						</td>
 					</tr>
 				{% endif %}

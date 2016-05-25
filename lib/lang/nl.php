@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: nl.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -394,6 +394,7 @@ $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "No opinion has been p
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "note";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Opinion posted by";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Geef uw mening over dit product";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "Gebruikers meningen over dit product";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Uw advies verzenden";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "U wilt een reactie bestand op het product";
@@ -685,6 +686,7 @@ $GLOBALS["STR_REMISE"] = "Korting klant";
 $GLOBALS["STR_REQUEST_OK"] = "Uw vraag werd aangenomen";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "Verplicht voor een klacht";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "is nodig om uw bestelling te bevestigen.";
+$GLOBALS["STR_RESULTS"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "Resultaat van uw zoeken";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Aanmelden wederverkopers";
 $GLOBALS["STR_RETAILER"] = "Wederverkoper worden";
@@ -839,6 +841,7 @@ $GLOBALS["STR_YOU_ARE"] = "U bent";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Wij nodigen u uit om uw factuur te bewerken vanuit uw gebruikersaccount.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Uw promotiecode";
 $GLOBALS["STR_YOUR_EMAIL"] = "Uw e-mail";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "";
 $GLOBALS["STR_YOUR_NAME"] = "Uw naam";
 $GLOBALS["STR_YOUR_NOTE"] = "Uw aantekening";
 $GLOBALS["STR_YOUR_OPINION"] = "Uw mening";

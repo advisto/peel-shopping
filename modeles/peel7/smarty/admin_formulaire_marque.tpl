@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_marque.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_marque.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -31,7 +31,7 @@
 			</td>
 		</tr>
 {foreach $langs as $l}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_LANGUAGES_SECTION_HEADER} - {$lang_names[$l.lng]|upper}</h2></td></tr>
 		<tr>
 			<td class="title_label" colspan="2">{$STR_ADMIN_NAME}{$STR_BEFORE_TWO_POINTS}: {$l.error}</td>
 		</tr>
@@ -63,7 +63,7 @@
 			<td colspan="2"><textarea class="form-control" name="meta_desc_{$l.lng}" style="width:100%" rows="3" cols="54">{$l.meta_desc|nl2br_if_needed|html_entity_decode_if_needed|strip_tags}</textarea></td>
 		</tr>
 {/foreach}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</h2></td></tr>
 		<tr>
 			<td colspan="2" class="title_label">{$STR_IMAGE}{$STR_BEFORE_TWO_POINTS}:</td>
 		</tr>

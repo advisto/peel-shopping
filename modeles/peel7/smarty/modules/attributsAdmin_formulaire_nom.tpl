@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_formulaire_nom.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: attributsAdmin_formulaire_nom.tpl 49894 2016-05-16 13:46:15Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
 	<input type="hidden" name="id" value="{$id|str_form_value}" />
@@ -41,14 +41,14 @@
 			</td>
 		</tr>
 		{foreach $langs as $lng}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$lng.code|upper}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_LANGUAGES_SECTION_HEADER} - {$lang_names[$lng.code]|upper}</h2></td></tr>
 		<tr>
 			<td class="title_label">{$STR_ADMIN_NAME} {$lng.code|upper}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" name="nom_{$lng.code}" value="{$lng.value|str_form_value}" /></td>
    	 	</tr>
 		{/foreach}
 		<tr>
-			<td class="bloc" colspan="2">{$STR_MODULE_ATTRIBUTS_ADMIN_PARAMETERS}</td>
+			<td class="bloc" colspan="2"><h2>{$STR_MODULE_ATTRIBUTS_ADMIN_PARAMETERS}</h2></td>
 		</tr>
 		<tr>
 			<td><label for="texte_libre_attribute">{$STR_ADMIN_TECHNICAL_CODE}{$STR_BEFORE_TWO_POINTS}:</label></td>

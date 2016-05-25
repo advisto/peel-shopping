@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 48460 2016-01-11 11:40:11Z sdelaporte $
+// $Id: produits.tpl 49918 2016-05-16 21:48:13Z sdelaporte $
 *}{if $is_associated_product}
 	<hr />
 	<div class="associated_product list-group">
@@ -113,7 +113,7 @@
 								{if isset($prod.image.zoom)}
 									{if $prod.image.zoom.is_lightbox}
 								<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" class="lightbox" onclick="return false;" title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
-									{elseif !empty($prod.image.zoom.file_type) && {$prod.image.zoom.file_type}!='image'}
+									{elseif !empty($prod.image.zoom.file_type) && $prod.image.zoom.file_type!='image'}
 								<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" onclick="return(window.open(this.href)?false:true);" title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
 									{/if}
 								{/if}
@@ -129,7 +129,7 @@
 							{if isset($prod.flash)}
 							<div class="alert alert-warning">{$prod.flash}</div>
 							{/if}
-							<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+							{if empty($prod.check_critere_stock)}<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>{/if}
 						</td>
 					</tr>
 				{if isset($prod.check_critere_stock)}
@@ -137,6 +137,13 @@
 						<td class="fc_add_to_cart">
 							<!-- Ajout au panier -->
 							{$prod.check_critere_stock}
+						</td>
+					</tr>
+				{/if}
+				{if !empty($prod.product_list_html_zone)}
+					<tr>
+						<td>
+							{$prod.product_list_html_zone}
 						</td>
 					</tr>
 				{/if}

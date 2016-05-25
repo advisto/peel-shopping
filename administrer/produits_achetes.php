@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits_achetes.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: produits_achetes.php 49989 2016-05-23 14:52:08Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -35,16 +35,27 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 /**
  * affiche_best_sell_products()
  *
- * @param integer $limit
  * @return
  */
-function affiche_best_sell_products($limit = 500)
+function affiche_best_sell_products()
 {
-	include("../lib/class/ProductsBought.php");
+	include($GLOBALS['dirroot']."/lib/class/ProductsBought.php");
+	$sql = ProductsBought::_sql_de_base(null, null, true);
+	
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_best_sell_products.tpl');
+	
+	$Links = new Multipage($sql, 'admin_best_sell_products');
+	$HeaderTitlesArray = array('nom_produit' => $GLOBALS["STR_PRODUCT"], $GLOBALS["STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED"], 'quantite_totale' => $GLOBALS["STR_QUANTITY"], 'montant_total' => $GLOBALS["STR_AMOUNT"]);
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = 'quantite_totale';
+	$Links->SortDefault = 'DESC';
+	$results_array = $Links->Query();
+
 	$tpl_prods = array();
 	$i = 0;
-	foreach (ProductsBought::find_all() as $produit) {
+
+	foreach ($results_array as $result) {
+		$produit = new ProductsBought((object)$result);
 		$req = query("SELECT COUNT(*) as nombre
 			FROM peel_pensebete
 			WHERE id_produit='" . intval($produit->produit_id) . "'");
@@ -61,6 +72,8 @@ function affiche_best_sell_products($limit = 500)
 		$i++;
 	}
 	$tpl->assign('prods', $tpl_prods);
+	$tpl->assign('links_header_row', $Links->getHeaderRow());
+	$tpl->assign('links_multipage', $Links->GetMultipage());
 	$tpl->assign('STR_ADMIN_PRODUITS_ACHETES_MOST_WANTED', $GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MOST_WANTED']);
 	$tpl->assign('STR_PRODUCT', $GLOBALS['STR_PRODUCT']);
 	$tpl->assign('STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED', $GLOBALS['STR_ADMIN_PRODUITS_ACHETES_COUNT_IN_PREFERED']);

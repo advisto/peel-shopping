@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: user_register_form.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ STR_FIRST_REGISTER_TITLE }}</h1>
 <div class="user_register_form {% if short_register_form %}short_register_form{% endif %}">
 {% if short_register_form is empty %}
@@ -20,21 +20,21 @@
 	<h2>{{ LANG.STR_GENERAL_INFORMATION }}</h2>
 {% endif %}
 	<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
-{% if short_register_form %}
+{% if short_register_form is empty %}
 	{% if enable_display_only_user_specific_field is empty %}
 		<div class="inscription_form">
 			<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="email">{{ STR_EMAIL }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="{{ email|html_entity_decode_if_needed|str_form_value }}" /></span>{{ email_error }}
 		</div>
-	{% if (STR_PSEUDO) %}
+		{% if (STR_PSEUDO) %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="pseudo">{{ STR_PSEUDO }} {% if pseudo_is_optionnal is empty %}<span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>{% endif %}</span>
 			<span class="enregistrementdroite"><input type="text" class="form-control" id="pseudo" name="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" /></span>{{ pseudo_error }}<br />
 			<span class="enregistrementgauche">&nbsp;</span>
 			<span>{{ STR_STRONG_PSEUDO_NOTIFICATION }}</span>
 		</div>
-	{% endif %}
+		{% endif %}
 		<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="mot_passe">{{ STR_PASSWORD }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" /></span>{{ password_error }}
@@ -68,18 +68,30 @@
 			<span class="enregistrementgauche"><label for="nom_famille">{{ STR_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="{{ name|html_entity_decode_if_needed|str_form_value }}" /></span>{{ name_error }}
 		</div>
-		<div class="enregistrement">
-			<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}{% if is_societe_mandatory %}<span class="etoile">*</span>{% endif %}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" /></span>{{ societe_error }}
+		<div class="company_section">
+			<div class="enregistrement">
+				<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}{% if is_societe_mandatory %}<span class="etoile">*</span>{% endif %}:</label></span>
+				<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" /></span>{{ societe_error }}
+			</div>
+			<div class="enregistrement">
+				<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{% if mandatory_fields.siret %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+				<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span> {{ siret_error }}
+			</div>
+			<div class="enregistrement">
+				<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" /></span>{{ intracom_form_error }}
+			</div>
+			
+	{% endif %}
+	{% for f in specific_fields %}
+		{% if f.field_position=='company' %}
+			<div class="enregistrement">
+				<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+				<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
+			</div>
+		{% endif %}
+	{% endfor %}
 		</div>
-		{% for f in specific_fields %}
-			{% if f.field_position=='company' %}
-		<div class="enregistrement">
-			<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
-		</div>
-			{% endif %}
-		{% endfor %}
 	{% if add_b2b_form_inputs %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{% if mandatory_fields.url %}<span class="etoile">*</span> {% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -111,14 +123,6 @@
 				</select>
 			</span>{{ activity_error }}
 			</div>
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{% if mandatory_fields.siret %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-				<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span> {{ siret_error }}
-			</div>
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" /></span>{{ intracom_form_error }}
-			</div>
 	{% endif %}
 	{% if (STR_FONCTION) %}
 				<div class="enregistrement">
@@ -133,7 +137,7 @@
 	{% endif %}
 	{% if (STR_NAISSANCE) %}
 			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="naissance">{{ STR_NAISSANCE }}{% if mandatory_fields.naissance }} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+				<span class="enregistrementgauche"><label for="naissance">{{ STR_NAISSANCE }}{% if mandatory_fields.naissance %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input name="naissance" class="form-control datepicker" type="text" id="naissance" size="10" maxlength="10" value="{{ naissance|str_form_value }}" style="width:110px" /></span>
 			</div>
 	{% endif %}
@@ -147,7 +151,7 @@
 				<span class="enregistrementdroite"><input type="tel" class="form-control" id="portable" name="portable" value="{{ portable|str_form_value }}" /></span>
 			</div>
 	{% endif %}
-		{% if false %}
+	{% if false %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="fax">{{ STR_FAX }}{% if mandatory_fields.fax %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="tel" class="form-control" id="fax" name="fax" value="{{ fax|html_entity_decode_if_needed|str_form_value }}" /></span>
@@ -157,20 +161,19 @@
 				<span class="enregistrementgauche"><label for="adresse">{{ STR_ADDRESS }}{% if mandatory_fields.adresse %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><textarea class="form-control mono-colonne" rows="3" cols="54" id="adresse" name="adresse">{{ adresse|html_entity_decode_if_needed }}</textarea></span>{{ adresse_error }}
 			</div>
-		{% for f in specific_fields %}
-		{% for f in specific_fields %}
-			{% if f.field_position=='adresse' %}
+	{% for f in specific_fields %}
+		{% if f.field_position=='adresse' %}
 				<div class="enregistrement">
-				{% if f.field_title %}
+			{% if f.field_title %}
 					<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 					<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
-				{% else %}
-					{% include "specific_field.tpl" with {'f':f} %}
-					{{ f.error_text }}
-				{% endif %}
-				</div>
+			{% else %}
+				{% include "specific_field.tpl" with {'f':f} %}
+				{{ f.error_text }}
 			{% endif %}
-		{% endfor %}
+				</div>
+		{% endif %}
+	{% endfor %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="code_postal">{{ STR_ZIP }}{% if mandatory_fields.code_postal %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="{{ zip|str_form_value }}" /></span>{{ zip_error }}
@@ -187,19 +190,19 @@
 					</select>
 				</span>
 			</div>
-		{% if STR_PROMO_CODE %}
+	{% if STR_PROMO_CODE %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="promo_code">{{ STR_PROMO_CODE }}{% if mandatory_fields.promo_code %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="promo_code" name="promo_code" value="{{ promo_code|html_entity_decode_if_needed|str_form_value }}" /></span>
 			</div>
-		{% endif %}
-		{% if is_annonce_module_active %}
-			{% if id_categories or id_cat_1 %}
+	{% endif %}
+	{% if is_annonce_module_active %}
+		{% if id_categories or id_cat_1 %}
 			<div class="enregistrement">
 				<span>{{ STR_ANNOUNCEMENT_INDICATION }}</span>
 			</div>
-			{% endif %}
-			{% if id_categories %}
+		{% endif %}
+		{% if id_categories %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="id_categories">{{ STR_FIRST_CHOICE }}{% if mandatory_fields.id_categories %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
@@ -209,7 +212,7 @@
 				</span>
 				{{ id_categories_error }}
 			</div>
-			{% elseif id_cat_1 %}
+		{% elseif id_cat_1 %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche">
 				<label for="id_cat_1">{{ STR_FIRST_CHOICE }}{% if mandatory_fields.id_cat_1 %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -237,16 +240,15 @@
 					</select> {{ id_cat_3_error }}
 				</span>
 			</div>
-			{% endif %}
 		{% endif %}
-		{% if STR_USER_ORIGIN %}
+	{% endif %}
+	{% if STR_USER_ORIGIN %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="origin">{{ STR_USER_ORIGIN }}{% if mandatory_fields.origin %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">{% include "user_origins.tpl" with {'origin_infos':origin_infos} %}{{ origin_infos.error_text }}</span>
 			</div>
-		{% endif %}
 	{% endif %}
-{% for f in specific_fields %}
+	{% for f in specific_fields %}
 		{% if f.field_position!='company' and f.field_position!='adresse' %}
 			<div class="enregistrement">
 			{% if f.field_title %}
@@ -257,20 +259,20 @@
 			{% endif %}
 			</div>
 		{% endif %}
-{% endfor %}
-{% if STR_LOGO %}
+	{% endfor %}
+	{% if STR_LOGO %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="logo">{{ STR_LOGO }}{% if mandatory_fields.logo %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
-				{% if logo %}
-					{% include "uploaded_file.tpl" with {'f':logo, STR_DELETE=logo.STR_DELETE_THIS_FILE } %} 
-				{% else %}
+		{% if logo %}
+					{% include "uploaded_file.tpl" with {'f':logo, STR_DELETE:logo.STR_DELETE_THIS_FILE } %} 
+		{% else %}
 					<input name="logo" type="file" value="" />
-				{% endif %}
+		{% endif %}
 				</span>
 			</div>
-{% endif %}
-{% if language_for_automatic_emails_options|length>1}
+	{% endif %}
+	{% if language_for_automatic_emails_options|length>1 %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label >{{ STR_LANGUAGE_FOR_AUTOMATIC_EMAILS }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
@@ -281,8 +283,8 @@
 				</select>
 				</span>
 			</div>
-{% endif %}
-{% if (captcha) %}
+	{% endif %}
+	{% if (captcha) %}
 			<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
@@ -299,7 +301,7 @@
 		<p><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p>
 		</div>
 		<table class="inscription_form_table">
-{% if is_annonce_module_active %}
+	{% if is_annonce_module_active %}
 			<tr>
 				<td colspan="2">
 					<div>
@@ -309,8 +311,8 @@
 					</div>
 				</td>
 			</tr>
-{% endif %}
-{% if {{ STR_NEWSLETTER_YES }} %}
+	{% endif %}
+	{% if STR_NEWSLETTER_YES  %}
 			<tr>
 				<td colspan="2">
 					<div>
@@ -319,11 +321,11 @@
 					</div>
 				</td>
 			</tr>
-{% endif %}
+	{% endif %}
 			<tr>
 				<td colspan="2">
 					<div>
-{% if {{ STR_COMMERCIAL_YES }} %}
+	{% if STR_COMMERCIAL_YES %}
 					<input type="checkbox" id="commercial" name="commercial" value="1"{% if commercial_issel %} checked="checked"{% endif %} />
 					<label for="commercial">{{ STR_COMMERCIAL_YES }}</label>
 	{% endif %}

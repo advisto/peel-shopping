@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: access_account_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: access_account_form.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}{% if acces_account_txt %}<h1 property="name" class="page_title">{{ acces_account_txt }}</h1>{% endif %}
 <div class="row">
 	<div class="col-md-6">
@@ -36,9 +36,7 @@
 						<p>{{ token }}<input type="submit" value="{{ login_txt|str_form_value }}" class="btn btn-primary" /></p>
 					{% if social.is_any %}
 						<p class="social_link">
-							{% if (social.facebook) %}{{ social.facebook }}{% endif %} &nbsp;
-							{% if (social.twitter) %}{{ social.twitter }}{% endif %} &nbsp;
-							{% if (social.openid) %}{{ social.openid }}{% endif %}
+						{{ social|join('') }}
 						</p>
 					{% endif %}
 					</td>

@@ -3,16 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit.php 48446 2016-01-11 08:34:19Z sdelaporte $
+// $Id: produit.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
-define('LOAD_NO_OPTIONAL_MODULE', true);
 include('../../configuration.inc.php');
 
 if (!check_if_module_active('search')) {
@@ -25,7 +24,9 @@ output_general_http_header($page_encoding);
 $output='';
 $results_array = array();
 $labels_array = array();
-$maxRows = 10;
+$GLOBALS['found_words_array'] = array();
+
+$maxRows = vb($GLOBALS['site_parameters']['search_autocomplete_max_rows'], 10);
 
 if (vb($_POST['type']) == "update_session_add") {
 	$_SESSION['session_search_product_list'][$_POST['id']] = $_POST['quantite'];
@@ -36,9 +37,13 @@ if (vb($_POST['type']) == "update_session_add") {
 	$search = trim(vb($_POST['search']));
 	$search_category = intval(vb($_POST['search_category']));
 
+	if (!empty($GLOBALS['site_parameters']['main_site_id']) && $GLOBALS['site_id'] == $GLOBALS['site_parameters']['main_site_id']) {
+		// On cherche sur tous les sites pour l'autocomplete
+		$GLOBALS['multisite_disable_if_no_specific_site_id'] = true;
+	}
 	if (String::strlen($search)>0 || !empty($search_category)) {
-		if(String::strpos($search, vb($GLOBALS['site_parameters']['product_reference_prefix'])) !== false) {
-			// Si les références ont un préfix commun, on peut insérer plusieurs régérence d'un seul coup.
+		if(!empty($GLOBALS['site_parameters']['product_reference_prefix']) && String::strpos($search, $GLOBALS['site_parameters']['product_reference_prefix']) !== false) {
+			// Si les références ont un préfix commun, on peut insérer plusieurs références d'un seul coup.
 			$search_array = explode($GLOBALS['site_parameters']['product_reference_prefix'], $search);
 			$result_array=array();
 			foreach($search_array as $this_result) {
@@ -53,7 +58,8 @@ if (vb($_POST['type']) == "update_session_add") {
 			$cat_search_sql = "SELECT pc.produit_id, c.id as categorie_id, c.nom_" . $_SESSION['session_langue'] . " as categorie
 				FROM peel_produits_categories pc
 				LEFT JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
-				WHERE pc.produit_id IN (" . implode(', ', array_keys($queries_results_array)) . ")";
+				WHERE pc.produit_id IN (" . implode(', ', array_keys($queries_results_array)) . ")
+				GROUP BY pc.produit_id";
 			$query = query($cat_search_sql);
 			while ($result = fetch_assoc($query)) {
 				$queries_results_array[$result['produit_id']]->categorie_id = $result['categorie_id'];
@@ -70,12 +76,13 @@ if (vb($_POST['type']) == "update_session_add") {
 				} else {
 					$product_picture = null;
 				}
-				$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images'])?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />';
+				$url = get_product_url($result->id, $result->nom, $result->categorie_id, $result->categorie);
+				$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images'])?'<div>':'<div class="autocomplete_image"><a href="'.$url.'"><img src="'.$product_picture.'" /></a></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . '<a href="'.$url.'">'. highlight_found_text(String::html_entity_decode($result->nom), $search, $GLOBALS['found_words_array']) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</a></div><div class="clearfix" />';
 				if(!in_array($this_label, $labels_array)) { 
 					$results_array[] = array(
 						'id' => $result->id,
 						'reference' => $result->reference,
-						'urlprod' => get_product_url($result->id, $result->nom, $result->categorie_id, $result->categorie),
+						'href' => get_product_url($result->id, $result->nom, $result->categorie_id, $result->categorie),
 						'label' => $this_label,
 						'name' => $result->nom,
 						'category_name' => $product_object->categorie,
@@ -96,24 +103,30 @@ if (vb($_POST['type']) == "update_session_add") {
 				unset($product_object);
 			}
 		}
-	if (check_if_module_active('annonces')) {
-		$sql = get_ad_search_select($_POST, 10);
-		$query = query($sql);
-		while ($result = fetch_assoc($query)) {
-			$ad_object = new Annonce($result['ref'], $result);
-			$product_picture = $ad_object->get_annonce_picture(true, 75, 75);
-			$this_title = $ad_object->get_titre(); 
-			$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) || empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($this_title), $search, $found_words_array) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen(vb($ad_object->reference)) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($ad_object->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />';
-			$results_array[] = array(
-					'id' => $ad_object->ref,
-					'reference' => vb($ad_object->reference),
-					'urlprod' => $ad_object->get_annonce_url(),
-					'label' => $this_label,
-					'name' => $this_title
-				);
+		// Résultats du hook : à renvoyer sous le format 'XXX(modulename)' => array('results' => $results_found, 'title' => $GLOBALS['STR_XXX_TITLE'], 'no_result' => null)
+		$frm = $_POST;
+		$match = 1;
+		$terms = build_search_terms($search, $match);
+		$GLOBALS['search_complementary_results_array'] = call_module_hook('search_complementary', array('frm' => $frm, 'match' => $match, 'terms' => $terms, 'real_search' => $search, 'taille_texte_affiche' => 60, 'mode' => 'autocomplete'), 'array');
+		if(function_exists('resultsTypeCompareArgsOrder')) {
+			if(!empty($GLOBALS['site_parameters']['search_complementary_found_sort_array'])) {
+				// Tri des thématiques de résultats si défini
+				// Le tableau search_complementary_found_sort_array peut être sous la forme 'type' => N, ...  ou simplement 'type1', 'type2', ...
+				uksort($GLOBALS['search_complementary_results_array'], 'resultsTypeCompareArgsOrder');
+			} elseif(!empty($GLOBALS['site_parameters']['search_complementary_found_sort_by_count'])) {
+				// Tri des thématiques de résultats par nombre de résultats décroissant
+				uksort($GLOBALS['search_complementary_results_array'], 'resultsTypeCompareArgsOrder');
+			}
+		}
+		foreach($GLOBALS['search_complementary_results_array'] as $this_hook_result) {
+			$results_array = array_merge_recursive_distinct($results_array, $this_hook_result['results']);
+		}
+		foreach($results_array as $this_key => $this_infos) {
+			if(!isset($this_infos['label']) && !empty($this_infos['href']) && !empty($this_infos['name'])) {
+				$results_array[$this_key]['label'] = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) || empty($this_infos['photo_src'])?'<div>':'<div class="autocomplete_image"><a href="'.$this_infos['href'].'"><img src="'.$this_infos['photo_src'].'" /></a></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . '<a href="'.$this_infos['href'].'">'. highlight_found_text(String::html_entity_decode($this_infos['name']), $search, $GLOBALS['found_words_array']) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && String::strlen($this_infos['reference']) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($this_infos['reference']), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</a></div><div class="clearfix" />';
+			}
 		}
 	}
-}
 	if (!empty($_POST['return_json_array_with_raw_information'])) {
 		$output = json_encode($results_array);
 	} else {

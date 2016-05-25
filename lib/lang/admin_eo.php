@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: admin_eo.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -697,6 +697,7 @@ $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"] = "";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"] = "Listo de telefon-vokoj";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"] = "Listo de kunvenejestraj agoj";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"] = "";
+$GLOBALS["STR_ADMIN_MODULE_ACTIVATE_LINK"] = "";
 $GLOBALS["STR_ADMIN_MORE_THAN"] = "";
 $GLOBALS["STR_ADMIN_MSG_CHANGES_OK"] = "Bone enkalkuliĝis la ŝanĝoj.";
 $GLOBALS["STR_ADMIN_MSG_ORDER_SENT_OK"] = "La mendo %s estis sendita al %s";
@@ -804,6 +805,7 @@ $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM"] = "Elektu almenaŭ unu katego
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT"] = "Elektu varo(j)n";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CLIENTS_ONLY"] = "Nur klientoj";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE"] = "Enmetu elcentaĵon";
+$GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE"] = "";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN"] = "KONSILETO: Por elekti plurajn kategoriojn au plurajn varojn, lasu premita la klavon [CTRL].";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_LOWER"] = "Malaltigi";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK"] = "Bone enkalkuliĝis via operacio.";
@@ -1093,7 +1095,7 @@ $GLOBALS["STR_ADMIN_SITES_LIST_TITLE"] = "";
 $GLOBALS["STR_ADMIN_SITES_LIST_NOTHING_FOUND"] = "Neniu retejo ekzistas en la datumbazo.";
 $GLOBALS["STR_ADMIN_SITES_LIST_MODIFY"] = "";
 $GLOBALS["STR_ADMIN_SITES_LOGO_HEADER_DISPLAY"] = "Afiŝi la logotipon ĉe la rubando supre de la retpaĝoj";
-$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "retadreso de la logotipo";
+$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "Retadreso de la logotipo";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "La modulo pri entrepreneto devigas afiŝi prezojn sen impostoj. <br />ATENTU: por konservi koherecon, vi nepre agordu la varajn foliojn tiel, ke la vara prezo, ĝia medi-imposto kaj liver-kosto konsideru aldonvalor-impostan kvoton je 0%. Alikaze, la senimpostaj prezoj kalkuliĝos baze de la prezo ĉiujn impostojn inkluzivitaj, kiel indikite de la administro, kun mencio \"aldonvalor-imposta kvoto je 0%\", kaj la finaj prezoj aperos samaj, t.e. la impostoj ne enkalkuliĝas kaj la prezoj malsamos tiujn de la administro.";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Entrepreneto";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Por ke estos petita minimuman mendan monsumon, lasu la ĉi suban kampon je 0.";
@@ -1261,7 +1263,6 @@ $GLOBALS["STR_ADMIN_SITES_TOP"] = "";
 $GLOBALS["STR_ADMIN_SITES_TRADEMARK_PROMOTION"] = "Rabatoj laŭ marko";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_KEY"] = "";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET"] = "";
-$GLOBALS["STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK"] = "Twitter-oauth-callback-retadreso (retadreso revizitota post konektiĝo)";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_SIGN_IN"] = "";
 $GLOBALS["STR_ADMIN_SITES_URL_REWRITING_MODULE"] = "";
 $GLOBALS["STR_ADMIN_SITES_USER_SHOPS_BOTTOM"] = "";
@@ -1531,6 +1532,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "Aldonvalor-imposta kvoto";
+$GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "";
@@ -1621,7 +1623,6 @@ $GLOBALS["STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_AD"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_UPDATE"] = "";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_ACTIVATE_LINK"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_ID"] = "";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_PLACE"] = "Nombro da reklamoj post kiam la rubando afiŝiĝos";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"] = "";

@@ -24,7 +24,7 @@
 		{% set max_length=max_length-3 %}
 	{% endif %}
 	{% if display_mode=='option' %}
-<option value="{{ it.value|str_form_value }}"{% if it.is_selected %} selected="selected" class="bold"{% endif %}>{{ it.indent }}{{ it.name|str_shorten(max_length) }}</option>{% if it.has_sons and (it.SONS) %}{{ it.SONS }}{% endif %}
+<option value="{{ it.value|str_form_value }}"{% if it.is_selected %} selected="selected" class="bold"{% endif %}{% if it.disabled %} style="color:#AAAAAA"{% endif %}>{{ it.indent }}{{ it.name|str_shorten(max_length) }}</option>{% if it.has_sons and (it.SONS) %}{{ it.SONS }}{% endif %}
 	{% elseif display_mode=='checkbox' %}
 <div class="col-md-4"><input name="{{ input_name|str_form_value }}[]" type="checkbox" value="{{ it.value|str_form_value }}"{% if it.is_selected %} checked="checked" class="bold"{% endif %} /> {{ it.indent }}{{ it.name|str_shorten(max_length) }}</div>{% if it.has_sons and (it.SONS) %}{{ it.SONS }}{% endif %}
 	{% elseif display_mode=='div' %}

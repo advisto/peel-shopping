@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -193,13 +193,13 @@ function affiche_liste_devise($start)
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$tpl_results = array();
-	$result = query("SELECT * 
+	$query = query("SELECT * 
 		FROM peel_devises 
 		WHERE " . get_filter_site_cond('devises', null, true) . "
 		ORDER BY devise");
-	if (!(num_rows($result) == 0)) {
+	if (!(num_rows($query) == 0)) {
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
 				'devise' => $ligne['devise'],

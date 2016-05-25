@@ -3,18 +3,24 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: index.php 49979 2016-05-23 12:29:53Z sdelaporte $
 include("../configuration.inc.php");
+
+if (!check_if_module_active('lexique')) {
+	// This module is not activated => we redirect to the homepage
+	redirect_and_die(get_url('/'));
+}
 
 $GLOBALS['page_name'] = 'lexique';
 define('IN_LEXIQUE', true);
+
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");
 

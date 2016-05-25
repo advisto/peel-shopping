@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_change_params_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: user_change_params_form.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ STR_CHANGE_PARAMS }}</h1>
 {% if (token_error) %}{{ token_error }}{% endif %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
@@ -43,19 +43,29 @@
 		<span class="enregistrementgauche"><label for="nom_famille">{{ STR_NAME }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 		<span class="enregistrementdroite"><input type="text" class="form-control" name="nom_famille" id="nom_famille" value="{{ name|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ name_error }}
 	</div>
+	<div class="company_section">
+		<div class="enregistrement">
+			<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementdroite"><input type="text" class="form-control" name="societe" id="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ societe_error }}
+		</div>
 	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="societe">{{ STR_SOCIETE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" name="societe" id="societe" value="{{ societe|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ societe_error }}
+		<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span>{{ siret_error }}
+	</div>
+	<div class="enregistrement">
+		<span class="enregistrementgauche"><label for="tva">{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ intracom_form_error }}
 	</div>
 	{% endif %}
 	{% for f in specific_fields %}
 		{% if f.field_position=='company' %}
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
-	</div>
+		<div class="enregistrement">
+			<span class="enregistrementgauche"><label for="{{ f.field_name }}">{{ f.field_title }}{% if (f.mandatory) %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+			<span class="enregistrementdroite">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</span>
+		</div>
 		{% endif %}
 	{% endfor %}
+	</div>
 {% if add_b2b_form_inputs %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
@@ -86,14 +96,6 @@
 				<option value="recurrent" {% if activity=='recurrent' %} selected="selected"{% endif %}>{{ STR_RECURRENT }}</option>
 			</select>
 		</span>{{ activity_error }}
-	</div>
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span>{{ siret_error }}
-	</div>
-	<div class="enregistrement">
-		<span class="enregistrementgauche"><label for="tva">{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><input type="text" class="form-control" id="tva" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" {{ content_rows_info }} /></span>{{ intracom_form_error }}
 	</div>
 {% endif %}
 {% if (STR_FONCTION) %}

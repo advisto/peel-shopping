@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: bas.tpl 49873 2016-05-13 16:46:58Z gboussin $
 *}
 							</div>
 							<div class="bottom_middle row">
@@ -57,25 +57,30 @@
 			{/if}
 			<footer class="footer">
 				<div class="container">
+					{* FOOTER_FULL_CUSTOM_HTML est une zone HTML personnalisée dans laquelle à partir de l'administration on peut insérer des tags qui appellent des fonctions d'affichage. *}
 					<div class="row">
-						{$MODULES_FOOTER}
-					{if !empty($footer_column)}
-						<div class="footer_column">{$footer_column}</div>
-					{/if}
-						{$FOOTER}
-						<div class="clearfix visible-sm"></div>
-						{if isset($rss)}
-							{$rss}
+					{if empty($display_footer_full_custom_html)}
+							{$MODULES_FOOTER}
+						{if !empty($footer_column)}
+							<div class="footer_column">{$footer_column}</div>
 						{/if}
+							{$FOOTER}
+							<div class="clearfix visible-sm"></div>
+							{if isset($rss)}
+								{$rss}
+							{/if}
+					{else}
+						{$FOOTER_FULL_CUSTOM_HTML}
+					{/if}
 					</div>
 					<div class="clearfix"></div>
 					{if !empty($flags_links_array) || !empty($flags)}<div id="flags_xs" class="pull-right visible-xs">{if !empty($flags_links_array)}{'&nbsp;'|implode:$flags_links_array}{/if}{$flags}</div>{/if}
 					{if !empty($module_devise)}<div id="currencies_xs" class="pull-right visible-xs">{$module_devise}</div>{/if}
 					<div class="clearfix"></div>
-				{if !empty($footer_link)}
+					{if !empty($footer_link)}
 					<div class="footer_link">{$footer_link}</div>
 					<div class="clearfix"></div>
-				{/if}
+					{/if}
 				</div>
 			{if !empty($footer_bottom)}
 				<div class="footer_bottom">{$footer_bottom}</div>

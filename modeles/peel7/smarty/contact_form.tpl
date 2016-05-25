@@ -10,17 +10,20 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
-*}{if !$skip_introduction_text}<h1 property="name" class="page_title">{$STR_CONTACT}</h1>
+// $Id: contact_form.tpl 50019 2016-05-24 09:05:36Z sdelaporte $
+*}{if empty($skip_introduction_text)}<h1 property="name" class="page_title">{$STR_CONTACT}</h1>{/if}
 {if isset($token_error)}{$token_error}{/if}
 <div id="contact">
+{if empty($product_info_id)}
 	<div id="contact_info">{$contact_info}</div>
 {/if}
 	<div id="contact_form">{if isset($success_msg) && !empty($success_msg)}<div class="alert alert-success">{$success_msg|nl2br_if_needed}</div>{/if}
 		<div class="contact_intro">{$STR_CONTACT_INTRO}</div>
 			<form class="entryform form-inline well" role="form" method="post" action="{$action|escape:'html'}#contact_form" name="form_contact" id="form_contact">
+			<input type="hidden" id="product_info_id" name="product_info_id" value="{$product_info_id|str_form_value}" />
 			{$extra_field}
 			<table style="width:75%">
+{if !empty($STR_CONTACT_SUBJECT)}
 				<tr>
 					<td {if $short_form} colspan="2"{/if}><label for="sujet">{$STR_CONTACT_SUBJECT} <span class="etoile{if $short_form} no-display{/if}">*</span>{$STR_BEFORE_TWO_POINTS}:</label>
 		{if $short_form}
@@ -43,6 +46,11 @@
 					</td>
 				</tr>
 		{/if}
+{/if}
+				<tr>
+					<td><label for="texte">{$STR_TEXT} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></td>
+					<td><textarea class="form-control" id="texte" name="texte" rows="10">{$texte_value}</textarea>{$texte_error}</td>
+				</tr>
 				<tr>
 					<td><label for="societe">{$STR_SOCIETE} {$STR_BEFORE_TWO_POINTS}:</label></td>
 					<td class="{$align}">
@@ -78,10 +86,6 @@
 					<td colspan="2" style="height:14px;"></td>
 				</tr>
 				{/if}
-				<tr>
-					<td><label for="texte">{$STR_TEXT} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label>
-					<td><textarea class="form-control" id="texte" name="texte" rows="10">{$texte_value}</textarea>{$texte_error}</td>
-				</tr>
 				{if isset($captcha)}
 				<tr>
 					<td class="left">{$captcha.validation_code_txt}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -99,5 +103,8 @@
 			</table>
 		</form>
 		<p{if $short_form} class="no-display"{/if}><span class="form_mandatory">(*) {$STR_MANDATORY}</span></p>
+{if !empty($product_info_id)}
+		<div id="contact_info">{$contact_info}</div>
+{/if}
 	</div>
 {if !$skip_introduction_text}</div>{/if}

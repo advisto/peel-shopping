@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: haut.tpl 49936 2016-05-18 13:01:04Z sdelaporte $
 *}<!DOCTYPE html>
 <html lang="{$lang}" dir="ltr">
 	{$HTML_HEAD}
@@ -109,5 +109,6 @@
 								{if isset($CARROUSEL_CATEGORIE)}{$CARROUSEL_CATEGORIE}{/if}
 								<a href="#" id="haut_de_page"></a>
 								{$MODULES_TOP_MIDDLE}
+								<span class="clearfix"></span>
 								{$output_create_or_update_order}
 								{$notification_output}

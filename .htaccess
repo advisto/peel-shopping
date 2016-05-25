@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 48447 2016-01-11 08:40:08Z sdelaporte $
+# $Id: .htaccess 50024 2016-05-24 09:43:19Z sdelaporte $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -84,7 +84,7 @@
 # ErrorDocument 404 /monrepertoiredesite/search.php?type=error404
 ErrorDocument 404 /search.php?type=error404
 
-<FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">
+<FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css|map)$">
 	ErrorDocument 404 default
 </FilesMatch>
 # Si on appelle http://lesite.com/http://unsite.com/image.png => comme http: n'est pas un répertoire existant, FilesMatch ne va pas prendre en compte la fin de l'URL => png$ ne marche pas
@@ -150,6 +150,10 @@ AddDefaultCharset UTF-8
 	# ...ou... :
 	# RewriteBase /monrepertoiredesite/
 
+	# OPTIONNEL : REDIRECTION d'autres domaines
+	# RewriteCond %{HTTP_HOST} !^www\.mydomain\.com
+	# RewriteRule (.*) http://www.mydomain.com/$1 [R=301,L]
+
 	# DEBUT DE EDITION SUR MESURE
 	# Redirection des demandes qui auraient dues être faites via un CDN
 	# RewriteCond %{HTTP_HOST} !^cdn(.*)\.(.*)\.(.*)$
@@ -196,4 +200,12 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]
 	RewriteRule ^(lexicon|lexico|lexikon|lessico)/$ lexique/index.php [QSA,L]
 	RewriteRule ^(dire-a-un-ami|tell-a-friend|haga-conocer-a-amigos|vertel-een-vriend)$ modules/direaunami/direaunami.php [L,QSA]
+
+	# LAISSE EN FIN DE FICHIER - KEEP THE FOLLOWING AT END OF FILE
+	# Gestion des erreurs 404 si serveur utilise FastCGI : il faut capturer ici ces erreurs sinon "File not found" tout simple sera généré - au pire, ça fait double emploi avec ErrorDocument défini plus haut
+	RewriteRule ^search\.php$ - [L]
+	RewriteCond %{REQUEST_URI} !^(.*)\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule . search.php?type=error404 [L]
 </ifModule>

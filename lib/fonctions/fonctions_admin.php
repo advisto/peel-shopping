@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions_admin.php 49991 2016-05-23 15:11:29Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -221,6 +221,9 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['webmastering_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"];
 			}
 		}
+		$hook_result = call_module_hook('admin_menu_items', array(), 'array');
+		$GLOBALS['main_menu_items'] = array_merge_recursive_distinct($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
+		$GLOBALS['menu_items'] = array_merge_recursive_distinct($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
 		if(!empty($GLOBALS['site_parameters']['admin_menu_items_additional_menus_array']) && !empty($GLOBALS['site_parameters']['admin_menu_items_additional_titles_array'])) {
 			foreach($GLOBALS['site_parameters']['admin_menu_items_additional_menus_array'] as $this_type => $this_url_list) {
 				foreach(explode(',', str_replace(' ', '', $this_url_list)) as $this_url) {
@@ -237,9 +240,6 @@ function get_admin_menu()
 				}
 			}
 		}
-		$hook_result = call_module_hook('admin_menu_items', array(), 'array');
-		$GLOBALS['main_menu_items'] = array_merge_recursive($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
-		$GLOBALS['menu_items'] = array_merge_recursive($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
 		if (empty($GLOBALS['menu_items']['users_sales'])) {
 			// On affiche le menu relation client uniquement si $GLOBALS['menu_items']['users_sales'] n'est pas vide
 			unset($GLOBALS['menu_items']['users']['users_sales']);
@@ -489,7 +489,12 @@ function send_avis_expedition($commandeid, $delivery_tracking)
 		$custom_template_tags['SHIPPED_ITEMS'] .= $GLOBALS['STR_QUANTITY'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . $this_ordered_product["quantite"] . "\n";
 		$custom_template_tags['SHIPPED_ITEMS'] .= $GLOBALS['STR_PRICE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($this_ordered_product["total_prix"], true) . ' ' . $GLOBALS['STR_TTC'] . "\n\n";
 	}
-	send_email($commande->email, '', '', 'send_avis_expedition', $custom_template_tags, null, $GLOBALS['support_commande']);
+	$result = send_email($commande->email, '', '', 'send_avis_expedition', $custom_template_tags, null, $GLOBALS['support_commande']);
+	if($result) {
+		return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande->email)))->fetch();
+	} else {
+		return null;
+	}
 }
 
 /**
@@ -708,11 +713,11 @@ function execute_sql($file_path, $max_sql_lines_at_once = 10000, $disable_echo =
 						$sql_query .= $row;
 					}
 					ob_start();
-					$result = query($sql_query);
+					$query = query($sql_query);
 					$_SESSION['session_sql_output'] .= ob_get_contents();
 					ob_end_clean();
 
-					if (!$result) {
+					if (!$query) {
 						if (String::strpos($sql_query, 'CREATE TABLE') !== false) {
 							$_SESSION['session_sql_create']++;
 						} elseif (String::strpos($sql_query, 'DROP TABLE') !== false) {
@@ -1015,6 +1020,7 @@ function affiche_liste_commandes_admin($frm = null)
 			$tpl_results[] = $tpl_array;
 			$i++;
 		}
+		$tpl_results = call_module_hook('affiche_liste_commandes_admin', $tpl_results, 'array', true);
 		$tpl->assign('results', $tpl_results);
 
 		$tpl->assign('payment_status_options2', get_payment_status_options());
@@ -1060,6 +1066,7 @@ function affiche_liste_commandes_admin($frm = null)
  */
 function affiche_details_commande($id, $action, $user_id = 0)
 {
+	$output = '';
 	if(!empty($id)){
 		$qid_commande = query("SELECT *
 			FROM peel_commandes
@@ -1222,12 +1229,11 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				$tpl->assign('partial_amount_link_href', get_site_wwwroot($commande['site_id']) . '/modules/factures/commande_html.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc&partial=' .get_float_from_user_input(fprix(vn($commande['montant']), false, $GLOBALS['site_parameters']['code'], false, $commande['currency_rate'], false, false)));
 				$tpl->assign('partial_amount_link_target', 'facture' . $commande['code_facture']);
 			}
-			if (check_if_module_active('tnt')) {
+			if (!empty($commande) && check_if_module_active('tnt')) {
 				$q_type = query('SELECT * 
 					FROM peel_types 
 					WHERE is_tnt="1" AND ' . get_filter_site_cond('types') . ' AND nom_' . $commande['lang'] . ' = "' . nohtml_real_escape_string($commande['type']) . '"');
-				$result = fetch_assoc($q_type);
-				if (!empty($result)) {
+				if ($result = fetch_assoc($q_type)) {
 					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b><a target="_blank" href="' . $GLOBALS['wwwroot'] . '/modules/tnt/administrer/etiquette.php?order_id='.$commande['id'] .'">Imprimer l\'étiquette tnt (ouvre une nouvelle fenêtre)</a>');
 				}
 			}
@@ -1403,14 +1409,14 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$sql .= "FROM peel_commandes_articles oi
 				WHERE commande_id = '" . intval($id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi', true) . "
 				ORDER BY ".$order_by;
-			$result_requete = query($sql);
-			$nb_produits = num_rows($result_requete);
+			$query = query($sql);
+			$nb_produits = num_rows($query);
 		} else {
 			$nb_produits = 0;
 		}
 		$i = 1;
-		if (!empty($result_requete)) {
-			while ($line_data = fetch_assoc($result_requete)) {
+		if (!empty($query)) {
+			while ($line_data = fetch_assoc($query)) {
 				$product_object = new Product($line_data['id'], null, false, null, true, !check_if_module_active('micro_entreprise'));
 				// Code pour recupérer select des tailles
 				$possible_sizes = $product_object->get_possible_sizes();
@@ -1600,11 +1606,13 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER', $GLOBALS["STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER"]);
 		$tpl->assign('STR_ADMIN_UTILISATEURS_CREATE_ORDER', $GLOBALS["STR_ADMIN_UTILISATEURS_CREATE_ORDER"]);
 		$tpl->assign('STR_ADMIN_FORM_SAVE_CHANGES', $GLOBALS["STR_ADMIN_FORM_SAVE_CHANGES"]);
-
-		return $tpl->fetch();
+		
+		$output .= call_module_hook('affiche_details_commande', array('order_infos' => vb($commande), 'order_lines' => $tpl_order_lines), 'string');
+		$output .= $tpl->fetch();
 	} elseif (!empty($id)) {
-		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_COMMANDER_NO_ORDER_WITH_ID_FOUND"], $id)))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_COMMANDER_NO_ORDER_WITH_ID_FOUND"], $id)))->fetch();
 	}
+	return $output;
 }
 
 
@@ -1653,6 +1661,7 @@ function save_commande_in_database($frm)
 	$total_produit_ht = 0;
 	$total_remise = 0;
 	$total_remise_ht = 0;
+	$articles = array();
 	$frm['total_ecotaxe_ttc'] = 0;
 	$frm['total_ecotaxe_ht'] = 0;
 	$frm['total_poids'] = 0;
@@ -1660,7 +1669,13 @@ function save_commande_in_database($frm)
 	if (!isset($frm['delivery_tracking'])) {
 		$frm['delivery_tracking'] = null;
 	}
-	// handle_specific_fields définit la variable $frm['adresses_fields_array']
+	if (empty($frm['societe2']) && empty($frm['nom2']) && empty($frm['prenom2'])) {
+		// On ne remplit automatiquement la société et le nom que si vraiment l'ensemble de l'adresse de livraison n'était pas définie
+		// On remplit ces champs même pour un mode de livraison ne nécessitant pas d'adresse, c'est utile pour savoir à qui est destiné le colis.
+		$frm['societe2'] = vb($frm['societe1']);
+		$frm['nom2'] = vb($frm['nom1']);
+		$frm['prenom2'] = vb($frm['prenom1']);
+	}
 	handle_specific_fields($frm, 'order');
 
 	// Le code de préremplissage des informations de facturation est géré par la fonction create_or_update_order, et uniquement à cet endroit.
@@ -1721,7 +1736,7 @@ function save_commande_in_database($frm)
 			WHERE ' . get_filter_site_cond('commandes') . ' AND id = ' . intval(vn($frm['commandeid'])));
 		$result = fetch_assoc($query);
 		if((!empty($frm['autocomplete_order_adresses_with_account_info_if_order_email_change']) && $result['email'] != $frm['email']) || !empty($frm['autocomplete_order_adresses_with_account_info'])) {
-			// L'auteur de la commande a changé. On change les informations relatives à l'utilisateur de cette commande.
+			// L'auteur de la commande a changé. On change les informations relative à l'utilisateur de cette commande.
 			// Utile pour modifier une commande après une duplication de commande (module duplicate du module premium.)
 			$query = query('SELECT societe, prenom, nom_famille AS nom, adresse, code_postal AS zip, ville, pays, email, telephone
 				FROM peel_utilisateurs
@@ -1736,14 +1751,14 @@ function save_commande_in_database($frm)
 							$this_frm_item = 'code_postal';
 						} else {
 							$this_frm_item = $this_item;
-						}
+					}
 
 						$frm[$this_frm_item . '1'] = $result[$this_item];
 						$frm[$this_frm_item . '2'] = $result[$this_item];
-					}
 				}
 			}
 		}
+	}
 	}
 	// Calcul des coûts et insertion de la commande
 	if ((empty($frm['currency_rate']) || empty($frm['devise']))) {
@@ -1984,7 +1999,7 @@ function save_commande_in_database($frm)
 		$frm['type'] = get_delivery_type_name(vb($frm['type_transport']));
 		$frm['typeId'] = $frm['type_transport'];
 	}
-	if(a_priv('reve')) {
+	if(check_if_module_active('reseller') && is_reseller()) {
 		$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 	} else {
 		$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
@@ -2113,7 +2128,7 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 					<td>';
 		if (!empty($line_data['image'])) {
 			$output .= '
-						<a target="_image" href="' . String::str_form_value($GLOBALS['repertoire_upload'].'/'.$line_data['image']) . '"><img src="' . $line_data['image_thumbs'] . '" alt="'.String::str_form_value($line_data['nom']) . '" /></a>';
+						<a target="_image" href="' . String::str_form_value(get_url_from_uploaded_filename($line_data['image'])) . '"><img src="' . $line_data['image_thumbs'] . '" alt="'.String::str_form_value($line_data['nom']) . '" /></a>';
 		}
 	$output .= '
 					</td>
@@ -2161,7 +2176,7 @@ function affiche_actions_moderations_user($user_id)
 				</tr>';
 		}
 
-		$texte = nl2br($res['remarque']);
+		$texte = String::nl2br_if_needed($res['remarque']);
 
 		if ($res['data'] != "" && $res['action'] == 'SEND_EMAIL') {
 			// Si un template a été envoyé, alors on récupère le contenu de ce template
@@ -2271,6 +2286,7 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 	}
 	$HeaderTitlesArray['user_login'] = $GLOBALS["STR_ADMIN_LOGIN"];
 	$HeaderTitlesArray['user_id'] = $GLOBALS["STR_ADMIN_USER"];
+	$HeaderTitlesArray['site_id'] = $GLOBALS["STR_ADMIN_WEBSITE"];
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
 	$Links->OrderDefault = 'id';
 	$Links->SortDefault = 'DESC';
@@ -2293,10 +2309,12 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 
 			$i = 0;
 			foreach ($results_array as $connexion) {
+				// L'utilisateur a peut-être été supprimé, donc current_user peut valoir null.
 				$current_user = get_user_information($connexion['user_id'], true);
 				$tpl_result = array('id' => $connexion['id'],
 					'date' => get_formatted_date($connexion['date'], 'short', true),
 					'ip' => (!a_priv('demo') ? long2ip($connexion['user_ip']): '0.0.0.0 [demo]'),
+					'site_id' => get_site_name($connexion['site_id']),
 					'user_id' => (!a_priv('demo')?'<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&amp;id_utilisateur=' . intval($connexion['user_id']) . '">'.$connexion['user_id'].'</a>':'private [demo]'),
 					'prenom' => vb($current_user['prenom']),
 					'nom_famille' => vb($current_user['nom_famille']),
@@ -2322,7 +2340,8 @@ function affiche_recherche_connexion_user($frm = null, $display_search_form = tr
 					}
 				}
 				if(check_if_module_active('annonces')) {
-					$tpl_result['active_ads_count'] = $current_user['active_ads_count'];
+					// On utilise vb ici, puisque active_ads_count n'est pas obligatoirement défini, dans le cas où l'utilisateur a été supprimé de la base de données.
+					$tpl_result['active_ads_count'] = vn($current_user['active_ads_count']);
 				}
 				$tpl_result['tr_rollover'] = tr_rollover($i, true, $rollover_style);
 				$tpl_results[] = $tpl_result;
@@ -2846,7 +2865,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	$query_alter_table[] = 'ALTER TABLE `peel_tailles` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_types` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_zones` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
-	// Ajout de la gestion des langues pour le contenu des newsletters qui sont géré en fonction de la langue définit par l'utilisateur
+	// Ajout de la gestion des langues pour le contenu des newsletters qui sont géré en fonction de la langue définie par l'utilisateur
 	$query_alter_table[] = 'ALTER TABLE `peel_newsletter` ADD `sujet_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_newsletter` ADD `message_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
 
@@ -3124,7 +3143,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 				$months_options[] = array(
 					'value' => $this_month_number,
 					'name' => String::ucfirst($this_month),
-					'issel' => ((isset($_GET['mois1']) && $this_month_number == $_GET['mois1']) || (!isset($_GET['mois1']) && $this_month_number == $nowMonth))
+					'issel' => ((isset($_GET['mois1']) && $this_month_number == $_GET['mois1']) || (!isset($_GET['mois1']) && $this_month_number == date('m', mktime(0, 0, 0, date('m') - 1, date('d'), date('Y')))))
 				);
 			}
 		}
@@ -3201,10 +3220,10 @@ if (!function_exists('check_admin_date_data')) {
 	function check_admin_date_data(&$form_data)
 	{
 		$output = '';
-		if (!checkdate($_GET['mois1'], $_GET['jour1'], $_GET['an1'])) {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour1'] . '-' . $_GET['mois1'] . '-' . $_GET['an1'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
-		} elseif (!checkdate($_GET['mois2'], $_GET['jour2'], $_GET['an2'])) {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour2'] . '-' . $_GET['mois2'] . '-' . $_GET['an2'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
+		if (!checkdate(str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT), $_GET['jour1'], $_GET['an1'])) {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour1'] . '-' . str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['an1'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
+		} elseif (!checkdate(str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT), $_GET['jour2'], $_GET['an2'])) {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour2'] . '-' . str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['an2'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
 		} else {
 			$dateAdded1 = $_GET['an1'] . '-' . str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
 			$dateAdded2 = $_GET['an2'] . '-' . str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour2'], 2, 0, STR_PAD_LEFT) . " 23:59:59";
@@ -3623,19 +3642,29 @@ if (!function_exists('affiche_liste_articles')) {
 		}
 		$sql .= " FROM peel_articles a " . $table . " 
 			" . $inner . "
-			" . $where . "
-			ORDER BY a.id DESC";
+			" . $where . "";
+		
+		$tpl = $GLOBALS['tplEngine']->createTemplate('liste_articles.tpl');
+
 		$Links = new Multipage($sql, 'affiche_liste_articles');
+		$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ACTION"], $GLOBALS["STR_ADMIN_RUBRIQUE"], 'titre_' . $_SESSION['session_langue'] => $GLOBALS["STR_ADMIN_TITLE"], 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"], 'etat' => $GLOBALS["STR_STATUS"]);
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+			$HeaderTitlesArray['site_country'] = $GLOBALS["STR_ADMIN_SITE_COUNTRY"];
+		}
+		$Links->HeaderTitlesArray = $HeaderTitlesArray;
+		$Links->OrderDefault = 'a.id';
+		$Links->SortDefault = "DESC";
 		$results_array = $Links->Query();
 
-		$tpl = $GLOBALS['tplEngine']->createTemplate('liste_articles.tpl');
 		$tpl->assign('action', get_current_url(false) . '?start=0&mode=recherche');
 		$tpl->assign('rubrique_options', get_categories_output(null, 'rubriques', vb($frm['rubriques'])));
 		$tpl->assign('text_in_title', vb($_POST['text_in_title']));
 		$tpl->assign('text_in_article', vb($_POST['text_in_article']));
 		$tpl->assign('cat_search', vb($_GET['cat_search']));
 		$tpl->assign('ajout_href', get_current_url(false) . '?mode=ajout');
-		$tpl->assign('Multipage', $Links->GetMultipage());
+		$tpl->assign('links_header_row', $Links->getHeaderRow());
+		$tpl->assign('links_multipage', $Links->GetMultipage());
 		if (empty($results_array)) {
 			$tpl->assign('is_empty', true);
 			$tpl->assign('langue', $_SESSION['session_langue']);
@@ -3702,9 +3731,6 @@ if (!function_exists('affiche_liste_articles')) {
 		$tpl->assign('STR_ADMIN_RUBRIQUE', $GLOBALS['STR_ADMIN_RUBRIQUE']);
 		$tpl->assign('STR_ADMIN_TITLE', $GLOBALS['STR_ADMIN_TITLE']);
 		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
-		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
-		}
 		$tpl->assign('STR_WEBSITE', $GLOBALS['STR_WEBSITE']);
 		$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 		$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
@@ -3815,13 +3841,13 @@ function get_site_id_select_options($selected_site_id = null, $selected_site_nam
 }
 
 /**
- * Fonction permettant de récupérer les noms des catégories d'annonces, sous forme de liste séparée par des virgules. Cette liste sera exploitée ensuite par get_specific_field_infos pour générer les noms des options dans un champ select, via le tag [FUNCTION=get_tag_function_ad_options_titles_list] qui est remplacé par template_tags_replace.
+ * Fonction permettant de récupérer les noms des catégories d'annonces, sous forme de liste séparée par des virgules. Cette liste sera exploitée ensuite par get_specific_field_infos pour générer les noms des options dans un champ select, via le tag [FUNCTION=get_tag_function_site_options_values_list] qui est remplacé par template_tags_replace.
  *
  * @return
  */
-function get_tag_function_site_options_values_list($mode = 'id') {
+function get_tag_function_site_options_values_list($params = array()) {
 	$result_array = get_all_sites_name_array();
-	if($mode == 'id') {
+	if(vb($params['mode'], 'id') == 'id') {
 		return implode(',', array_keys($result_array));
 	} else {
 		return implode(',', $result_array);
@@ -3834,7 +3860,7 @@ function get_tag_function_site_options_values_list($mode = 'id') {
  * @return
  */
 function get_tag_function_site_options_titles_list() {
-	return get_tag_function_site_options_values_list('name');
+	return get_tag_function_site_options_values_list(array('mode'=>'name'));
 }
 
 /**
@@ -4104,7 +4130,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 	// Met à jour la table de configuration
 	foreach($frm as $this_key => $this_value) {
 		if(!in_array($this_key, array('token', 'keep_old_orders_intact_date', 'site_id'))) {
-			foreach(array('module_', 'display_mode_', 'etat_', 'position_', 'home_') as $this_begin) {
+			foreach(array('module_', 'display_mode_', 'etat_', 'position_', 'home_', 'install') as $this_begin) {
 				if(String::substr($this_key, 0, String::strlen($this_begin)) == $this_begin && is_numeric(String::substr($this_key, String::strlen($this_begin)))) {
 					// On ne traite pas ici les données qui concernent le contenu de peel_modules
 					$skip = true;
@@ -4370,7 +4396,8 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$sql_where_array[] = '(u.ville LIKE "%' . nohtml_real_escape_string(trim($frm['ville_cp'])) . '%" OR u.code_postal LIKE "' . nohtml_real_escape_string(trim($frm['ville_cp'])) . '%")';
 	}
 	if (a_priv('demo')) {
-		$sql_where_array[] = "u.priv NOT LIKE ('" . nohtml_real_escape_string('admin') . "%')";
+		// priv ne doit pas contenir de droit qui commence par "admin"
+		$sql_where_array[] = "CONCAT('+',u.priv,'+') NOT LIKE ('%+" . nohtml_real_escape_string('admin') . "%')";
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_UTILISATEURS_NO_ADMIN_RIGHT_TO_LIST']))->fetch();
 	}	
 	$basic_search_where_count = count($sql_where_array);
@@ -4517,7 +4544,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			$sql_where_array[] = 'pga.actif="' . nohtml_real_escape_string($frm['with_gold_ad']) . '"';
 		}
 	}
-	foreach(array('ads_count' => 'ads_count', 'date_last_paiement' => 'date_last_paiement', 'date_derniere_connexion' => 'date', 'date_insert' => 'u.date_insert', 'date_statut_commande' => 'c.o_timestamp', 'date_contact_prevu' => 'pacp.timestamp') as $this_get => $this_sql_field) {
+	foreach(array('ads_count' => 'ads_count', 'date_last_paiement' => 'MAX(cdlt.a_timestamp)', 'date_derniere_connexion' => 'date', 'date_insert' => 'u.date_insert', 'date_statut_commande' => 'c2.o_timestamp', 'date_contact_prevu' => 'pacp.timestamp') as $this_get => $this_sql_field) {
 		if (!empty($frm[$this_get])) {
 			if (substr($this_get, 0, 5) == 'date_') {				
 				if(vb($frm[$this_get . '_input1'])=='') {
@@ -4553,10 +4580,10 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 				$first_value = vb($frm[$this_get . '_input1']);
 				$last_value = vb($frm[$this_get . '_input2']);
 			}
-			$this_cond_temp_expression = word_real_escape_string($this_sql_field) . '>="' . nohtml_real_escape_string($first_value) . '"';
+			$this_cond_temp_expression = $this_sql_field . '>="' . nohtml_real_escape_string($first_value) . '"';
 			if ($last_value != '2030-12-31 23:59:59') {
 				// On ne passe jamais ici normalement car on ne serait pas dans le cas "à partir du" - mais on laisse pour sécurité
-				$this_cond_temp_expression .= ' AND ' . word_real_escape_string($this_sql_field) . '<"' . nohtml_real_escape_string($last_value) . '"';
+				$this_cond_temp_expression .= ' AND ' . $this_sql_field . '<"' . nohtml_real_escape_string($last_value) . '"';
 			}
 			// if ($this_get == 'next_contact_date') {
 			// $sql_where_array[] = 'u.' . $users_table_fields['users_' . str_replace('date', 'timestamp', $this_get)] . '>="' . strtotime($first_value) . '" AND u.' . $users_table_fields['users_' . str_replace('date', 'timestamp', $this_get)] . '<"' . strtotime($last_value) . '"';
@@ -4581,17 +4608,19 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 				}
 			} elseif ($this_get == 'date_last_paiement') {
 				// Utilisation de la date de paiement pour appliquer le filtre "Date de dernier paiement :"
-				$sql_columns_array[] = 'MAX(c.a_timestamp) AS date_last_paiement';
-				$sql_inner_array['peel_statut_paiement'] = 'LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . ' AND sp.technical_code IN ("being_checked","completed") AND sp.technical_code NOT IN ("cancelled") 
-';
-				$sql_having_array[] = $this_cond_temp_expression;
+				$sql_where_array[] = 'u.id_utilisateur IN (
+						SELECT cdlt.id_utilisateur
+						FROM peel_commandes cdlt
+						INNER JOIN peel_statut_paiement spdlt ON spdlt.id=cdlt.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'spdlt') . ' AND spdlt.technical_code IN ("being_checked","completed")
+						WHERE ' . get_filter_site_cond('commandes', 'cdlt', true) . '
+						HAVING ' . $this_cond_temp_expression . ')';
 			} elseif ($this_get == 'date_statut_commande') {
 				if ($frm['date_statut_commande'] == '5') {
 					// Pas de commande entre x et y (payée ou non)
 					$sql_where_array[] = 'u.id_utilisateur NOT IN (
 						SELECT c2.id_utilisateur
 						FROM peel_commandes c2
-						WHERE ' . get_filter_site_cond('commandes', 'c2', true) . ' AND ' . str_replace('c.', 'c2.', $this_cond_temp_expression) . ')';
+						WHERE ' . get_filter_site_cond('commandes', 'c2', true) . ' AND ' . $this_cond_temp_expression . ')';
 				} elseif ($frm['date_statut_commande'] == '6') {
 					// Commande non payée
 					$sql_where_array[] = $this_cond_temp_expression;
@@ -4643,15 +4672,14 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$sql_where_array[] = "(u.code_client LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.email LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.ville LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.nom_famille LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.code_postal LIKE '%" . nohtml_real_escape_string($cle) . "%') ";
 	}
 	if (!empty($priv) && $priv == "newsletter") {
-		$sql_where_array[] = "(u.priv = '" . nohtml_real_escape_string($priv) . "' OR u.newsletter = '1')";
+		$sql_where_array[] = "(CONCAT('+',u.priv,'+') LIKE '%+" . nohtml_real_escape_string($priv) . "+%' OR u.newsletter = '1')";
 	} elseif (!empty($priv)) {
-		$sql_where_array[] = "u.priv = '" . nohtml_real_escape_string($priv) . "'";
+		$sql_where_array[] = "CONCAT('+',u.priv,'+') LIKE '%+" . nohtml_real_escape_string($priv) . "+%'";
 	}
 	$sql = "SELECT " . implode(', ', $sql_columns_array) . ", p.name_".$_SESSION['session_langue']." AS profil_name, SUM(".(display_prices_with_taxes_active()?'montant':'montant_ht').") AS total_ordered, COUNT(c.id) AS count_ordered
 		FROM peel_utilisateurs u
 		LEFT JOIN peel_profil p ON p.priv=u.priv AND " . get_filter_site_cond('profil', 'p') . "
 		LEFT JOIN peel_commandes c ON c.id_utilisateur=u.id_utilisateur AND " . get_filter_site_cond('commandes', 'c', true) . " 
-		LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 		" . implode(' ', $sql_inner_array) . "
 		WHERE  " . implode(' AND ', $sql_where_array) . '
 		GROUP BY u.id_utilisateur';
@@ -4714,7 +4742,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		';
 
 		$tpl->assign('action', get_current_url(false));
-		$tpl->assign('profil_select_options', get_profil_select_options(vb($_GET['priv'])));
+		$tpl->assign('profil_select_options', get_priv_options(vb($_GET['priv']), 'output', true));
 		$tpl->assign('newsletter_options', formSelect('newsletter', tab_followed_newsletter(), vb($_GET['newsletter'])));
 		$tpl->assign('offre_commercial_options', formSelect('offre_commercial', tab_followed_newsletter(), vb($_GET['offre_commercial'])));
 		$tpl->assign('is_advanced_search', (count($sql_where_array) - $basic_search_where_count) > 0);
@@ -5211,7 +5239,7 @@ function preload_modules()
 				if(!in_array(String::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php')) && file_exists($folder_path . '/' . $this_filename)) {
 					// Fichier de classe ou de fonctions du module
 					$file_path = $folder_path . '/' . $this_filename;
-					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_before_others'], array())) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_after_others'], array()))) {
 						@include($file_path);
 					}
 					if($this_filename != String::ucfirst($this_module) . '.php' || (class_exists(String::ucfirst($this_module) && method_exists(String::ucfirst($this_module), 'check_install')))) {

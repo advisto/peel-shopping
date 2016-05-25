@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: search_form.tpl 49997 2016-05-23 17:25:46Z sdelaporte $
 #}
 {% if (quick_add_product_from_search_page) %}
 	<h1 class="products_list_brief">{{ LANG.STR_EASY_LIST }}</h1>
@@ -67,11 +67,13 @@
 	<ul class="attribute_select_search attribute_select_search_part1">
 		<li class="input">
 			{{ STR_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control"  id="search_advanced_input" name="search" size="48" value="{{ value|str_form_value }}" placeholder="{{ STR_ENTER_KEY|str_form_value }}"{% if quick_add_product_from_search_page %} oninput="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'search_product_list','#suggestions','search_product_list','{{ rpc_path }}');"{% endif %} />
+			{% if match_display %}
 			<select class="form-control" name="match">
 				<option value="1"{% if match == 1 %} selected="selected"{% endif %}>{{ STR_SEARCH_ALL_WORDS }}</option>
 				<option value="2"{% if match == 2 %} selected="selected"{% endif %}>{{ STR_SEARCH_ANY_WORDS }}</option>
 				<option value="3"{% if match == 3 %} selected="selected"{% endif %}>{{ STR_SEARCH_EXACT_SENTENCE }}</option>
 			</select>
+			{% endif %}
 		</li>
 	</ul>
 {% if is_advanced_search_active %}
@@ -99,6 +101,11 @@
 				{% endfor %}
 			</select>
 		</li>
+	{% if additional_fields_form %}
+		<li class="search_additional_field_form">
+			{{ additional_fields_form }}
+		</li>			
+	{% endif %}
 		<li class="select_type">
 		{% if ads_contain_lot_sizes %}
 			{{ STR_TYPE }}{{ STR_BEFORE_TWO_POINTS }}:
@@ -108,7 +115,7 @@
 				<option value="detail"{% if (cat_detail) and cat_detail == 'detail' %} selected="selected"{% endif %}>{{ STR_MODULE_ANNONCES_OFFER_DETAIL }}</option>
 			</select>
 		{% endif %}
-			{% if display == 'full' and user_verified_status_disable is emtpy %}<input name="cat_statut" type="checkbox" value="1" {% if (cat_statut) and cat_statut == 1 %} checked="checked"{% endif %} /> {{ STR_MODULE_ANNONCES_ALT_VERIFIED_ADS }}{% endif %}
+			{% if display == 'full' and user_verified_status_disable is empty %}<input name="cat_statut" type="checkbox" value="1" {% if (cat_statut) and cat_statut == 1 %} checked="checked"{% endif %} /> {{ STR_MODULE_ANNONCES_ALT_VERIFIED_ADS }}{% endif %}
 		</li>
 		{% if display == 'full' %}
 			{% if (ad_lang_select) %}

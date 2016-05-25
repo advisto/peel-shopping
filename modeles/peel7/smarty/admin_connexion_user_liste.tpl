@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_connexion_user_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_connexion_user_liste.tpl 49667 2016-04-25 12:13:08Z gboussin $
 *}<div class="entete">{$STR_ADMIN_CONNEXION_USER_TITLE}</div>
 {if $display_search_form}
 <form class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
@@ -59,6 +59,7 @@
 							{if isset($res.active_ads_count)}<td class="center">{$res.active_ads_count}</td>{/if}
 							<td class="center">{$res.user_login_displayed}</td>
 							<td class="center">{$res.user_id}</td>
+							<td class="center">{$res.site_id}</td>
 						</tr>
 						{/foreach}
 					</table>

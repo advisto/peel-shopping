@@ -10,8 +10,11 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
-#}{% if f.field_type == "radio" %}
+// $Id: specific_field.tpl 49997 2016-05-23 17:25:46Z sdelaporte $
+#}
+{% if text_only and f.field_type != "upload" %}
+	{{ f.field_value }}
+{% elseif f.field_type == "radio" %}
 	{% for o in f.options %}
 		<input type="radio" value="{{ o.value|str_form_value }}"{% if o.issel %} checked="checked"{% endif %} id="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}">{{ o.name }}</label><br />
 	{% endfor %}
@@ -20,20 +23,20 @@
 	<input type="checkbox" value="{{ o.value|str_form_value }}"{% if o.issel %} checked="checked"{% endif %} id="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name|str_form_value }}#{{ o.value|str_form_value }}">{{ o.name }}</label><br />
 	{% endfor %}
 {% elseif f.field_type == "select" %}
-<select id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control">
+<select id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control" {% if read_only %} disabled="disabled"{% endif %}>
 	<option value="">{{ f.STR_CHOOSE }}...</option>
 {% for o in f.options %}
 	<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name }}</option>
 {% endfor %}
 </select>
 {% elseif f.field_type == "password" %}
-<input type="password" id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" value="{{ f.field_value|str_form_value }}" class="form-control" />
+<input {% if read_only %} disabled="disabled"{% endif %} type="password" id="{{ f.field_name|replace({'[':'_openarray_'})|replace({']':'_closearray_'})|str_form_value }}" name="{{ f.field_name|str_form_value }}" value="{{ f.field_value|str_form_value }}" class="form-control" />
 {% elseif f.field_type == "datepicker" %}
-<input type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name|str_form_value }}#{{ f.field_value|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control datepicker" />
+<input {% if read_only %} disabled="disabled"{% endif %} type="text" value="{{ f.field_value|replace({'[':'_openarray_'})|replace({']':'_closearray_'})|str_form_value }}" id="{{ f.field_name|str_form_value }}#{{ f.field_value|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control datepicker" />
 {% elseif f.field_type == "upload" %}
 	{% if f.upload_infos %}
 		{% if  site_parameters.used_uploader=="fineuploader" %}
-{% if f.upload_file_display_title is not empty }<div class="upload_file_field_title">{{ f.field_title }}</div>{% endif %}<div id="{{ f.field_name|str_form_value }}" class="uploader"></div>
+{% if f.upload_file_display_title is not empty %}<div class="upload_file_field_title">{{ f.field_title }}</div>{% endif %}<div id="{{ f.field_name|str_form_value }}" class="uploader"></div>
 		{% else %}
 <input name="{{ f.field_name|str_form_value }}" type="file" value="" id="{{ f.field_name|str_form_value }}" />
 		{% endif %}
@@ -50,5 +53,5 @@
 {* Ici on permet de mettre du HTML. C'est pratique pour faire différents blocs dans un formulaire, avec un titre par bloc *}
 {{ f.field_value }}
 {% elseif f.field_type == "text" or f.field_type %}
-<input type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control" />
+<input {% if read_only %} disabled="disabled"{% endif %} type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_name|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control" {% if f.javascript %} onkeyup="{{ f.javascript|str_form_value }}" onchange="{{ f.javascript|str_form_value }}" onclick="{{ f.javascript|str_form_value }}" data-onload="{{ f.javascript|str_form_value }}" {% endif %}{% if f.field_maxlength %} maxlength="{{ f.field_maxlength|str_form_value }}"{% endif %} />
 {% endif %}

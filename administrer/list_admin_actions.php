@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: list_admin_actions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: list_admin_actions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -129,7 +129,7 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 	$tpl->assign('title', $title);
 	$q = query('SELECT id_utilisateur, pseudo, email
 		FROM peel_utilisateurs
-		WHERE priv LIKE "admin%" AND ' . get_filter_site_cond('utilisateurs', null, true) . '');
+		WHERE CONCAT("+",priv,"+") LIKE "%+admin%" AND ' . get_filter_site_cond('utilisateurs', null, true) . '');
 	if (!empty($q)) {
 		$tpl_options = array();
 		while ($user_admin = fetch_assoc($q)) {
@@ -183,6 +183,7 @@ function affiche_list_admin_action($frm = null, $return_mode = false)
 	$tpl->assign('STR_ADMIN_ADMIN_ACTIONS_NO_ACTION_FOUND', $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_NO_ACTION_FOUND']);
 	$tpl->assign('STR_ADMIN_ADMIN_ACTIONS_TEMPLATE', $GLOBALS['STR_ADMIN_ADMIN_ACTIONS_TEMPLATE']);
 	$tpl->assign('STR_ADMIN_REMARK', $GLOBALS['STR_ADMIN_REMARK']);
+	$tpl->assign('STR_ADMIN_REASON', $GLOBALS['STR_ADMIN_REASON']);
 
 	$sql = 'SELECT paa.id AS id, paa.action AS action, paa.data AS data, paa.raison AS raison, paa.remarque AS remarque, paa.date as date, pu1.pseudo AS pseudo_admin, pu2.pseudo AS pseudo_membre, pu1.id_utilisateur AS id_admin, pu1.email AS email_admin, pu2.id_utilisateur AS id_membre, pu2.email AS email_membre
 		FROM peel_admins_actions paa

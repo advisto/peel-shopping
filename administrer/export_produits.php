@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: export_produits.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -22,7 +22,7 @@ $excluded_fields = array('stock');
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']);
 
 $hook_result = call_module_hook('export_products_get_configuration_array', array(), 'array');
-$specific_fields_array = array_merge_recursive($specific_fields_array, vb($hook_result['product_field_names'], array()));
+$specific_fields_array = array_merge_recursive_distinct($specific_fields_array, vb($hook_result['product_field_names'], array()));
 
 // FIN PARAMETRAGE
 if (!empty($_GET['encoding'])) {
@@ -81,7 +81,7 @@ while ($result = fetch_assoc($query)) {
 	$result[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']] = implode(',', $product_object->get_possible_categories());
 
 	$hook_result = call_module_hook('export_products_get_line_infos_array', array('id' => $product_object->id), 'array');
-	$result = array_merge_recursive($result, $hook_result);
+	$result = array_merge_recursive_distinct($result, $hook_result);
 	
 	// On génère la ligne
 	$this_line_output = array();

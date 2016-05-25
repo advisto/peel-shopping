@@ -2,14 +2,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: check-integrity.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: check-integrity.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -24,8 +24,8 @@ $dir_array = vb($GLOBALS['site_parameters']['check_integrity_directories_by_type
 $fields_to_check_array['products'] = array('photo1', 'photo2', 'photo3', 'photo4', 'photo5', 'photo6', 'photo7', 'photo8', 'photo9', 'photo10');
 
 $hook_result = call_module_hook('check_integrity_get_configuration_array', array(), 'array');
-$fields_to_check_array = array_merge_recursive($fields_to_check_array, $hook_result['fields_to_check_array']);
-$dir_array = array_merge_recursive($dir_array, $hook_result['dir_array']);
+$fields_to_check_array = array_merge_recursive_distinct($fields_to_check_array, $hook_result['fields_to_check_array']);
+$dir_array = array_merge_recursive_distinct($dir_array, $hook_result['dir_array']);
 
 $photos_to_keep_array = vb($GLOBALS['site_parameters']['photos_to_keep_array'], array());
 
@@ -141,7 +141,7 @@ foreach($dir_array as $type => $dir) {
 				$file_bad[] = $dir . '/' . $this_file_relative_path_to_dir;
 			} elseif (filesize($GLOBALS['dirroot'] . '/' . $dir .  '/' . $this_file_relative_path_to_dir) < $min_file_size && !in_array(substr($file, 0, strlen($file)-4), $photos_to_keep_array)) {
 				$file_bad_size[] = $dir . '/' . $this_file_relative_path_to_dir;
-			} elseif ((preg_match('advisto.com', $GLOBALS['wwwroot']) != false && is_numeric(substr($file, 0, 1))) || is_numeric(substr($file, 0, strlen($file)-4)) || (in_array(substr($file, 0, strlen($file)-4), $photos_to_keep_array))) {
+			} elseif ((preg_match('advisto.com', $GLOBALS['wwwroot']) && is_numeric(substr($file, 0, 1))) || is_numeric(substr($file, 0, strlen($file)-4)) || (in_array(substr($file, 0, strlen($file)-4), $photos_to_keep_array))) {
 				if (!empty($file_in_db[$file])) {
 					unset($file_in_db[$file]);
 				} elseif (!in_array(substr($file, 0, strlen($file)-4), $photos_to_keep_array)) {
@@ -204,9 +204,9 @@ foreach($dir_array as $type => $dir) {
             if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == 'file_in_db') {
                 foreach($sql_delete_link as $sql) {
                     if (strpos($file, '.')) {
-                    	if (preg_match('destockplus', $GLOBALS['wwwroot']) != false) {
+                    	if (preg_match('destockplus', $GLOBALS['wwwroot'])) {
                         	$value_for_query = $file;
-                        } elseif (preg_match('ame-soeur.com', $GLOBALS['wwwroot']) != false) {
+                        } elseif (preg_match('ame-soeur.com', $GLOBALS['wwwroot'])) {
 							$temp_array = explode('.', $file);
 							$value_for_query = $temp_array[0];
 						}

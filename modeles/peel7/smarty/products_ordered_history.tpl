@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: products_ordered_history.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: products_ordered_history.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}
 <h1 class="liste_commandes">{$STR_PRODUCTS_PURCHASED_LIST}</h1>
 {if isset($STR_NO_ORDER)}
@@ -21,7 +21,7 @@
 		{$links_header_row}
 		{foreach $products as $prod}
 		<tr style="background-color: #{cycle values="F4F4F4,ffffff"}">
-			<td class="center"><a href="{$prod.href_produit}">{$prod.nom_produit}</a></td>
+			<td class="center">{if !empty($prod.href_produit)}<a href="{$prod.href_produit}">{/if}{$prod.nom_produit}{if !empty($prod.href_produit)}</a>{/if}</td>
 			<td class="center">{$prod.quantite}</td>
 			<td class="center">{$prod.o_timestamp}</td>
 			<td class="center">{$prod.numero}</td>

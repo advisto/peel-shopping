@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: admin_fr.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -277,7 +277,7 @@ $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_CREATED"] = "La couleur <b>%s</b> a été
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_DELETED"] = "La couleur <b>%s</b> a été effacée.";
 $GLOBALS["STR_ADMIN_COULEURS_MSG_COLOR_UPDATED"] = "Les changements apportés à la couleur %s ont bien été pris en compte.";
 $GLOBALS["STR_ADMIN_COULEURS_NO_COLOR_FOUND"] = "Aucune couleur enregistrée dans la base.";
-$GLOBALS["STR_ADMIN_CREATE_BILL_NUMBER_BEFORE"] = "Les liens vers les factures seront disponible après l'émission d'un numéro de facture pour cette commande.";
+$GLOBALS["STR_ADMIN_CREATE_BILL_NUMBER_BEFORE"] = "Les liens vers les factures seront disponibles après l'émission d'un numéro de facture pour cette commande.";
 $GLOBALS["STR_ADMIN_CREATION_DATE"] = "Date de création";
 $GLOBALS["STR_ADMIN_ORDER_CREATION_DATE"] = "Date de création de la commande";
 $GLOBALS["STR_ADMIN_CUSTOM_ATTRIBUTES"] = "Attributs personnalisés";
@@ -658,6 +658,7 @@ $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"] = "Zones HTML personnalisées";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_BANNERS"] = "Bannières publicitaires";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_CATEGORIES"] = "Gestion des catégories des partenaires";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"] = "Gestion des partenaires";
+$GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_STATISTICS"] = "Statistiques des liens vers les partenaires";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"] = "Webmastering";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"] = "MARKETING";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"] = "Gestion des avis d'internautes";
@@ -698,6 +699,7 @@ $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"] = "Appels téléphonique
 $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"] = "Liste des appels téléphoniques";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"] = "Liste des actions de modération";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"] = "Liste des connexions utilisateurs";
+$GLOBALS["STR_ADMIN_MODULE_ACTIVATE_LINK"] = "Vous devez activer préalablement ce module dans le panneau de configuration";
 $GLOBALS["STR_ADMIN_MORE_THAN"] = "Supérieur à";
 $GLOBALS["STR_ADMIN_MSG_CHANGES_OK"] = "Les changements apportés ont bien été pris en compte.";
 $GLOBALS["STR_ADMIN_MSG_ORDER_SENT_OK"] = "La commande %s a été envoyée à %s";
@@ -785,7 +787,7 @@ $GLOBALS["STR_ADMIN_PLACE"] = "Emplacement";
 $GLOBALS["STR_ADMIN_PLAN_ERR_TAG_VALID_NEEDED"] = "Vous devez insérer des tags valides.";
 $GLOBALS["STR_ADMIN_PLAN_MSG_UPDATED_OK"] = "La mise à jour de votre Google map a été effectuée.";
 $GLOBALS["STR_ADMIN_PLAN_TAG_CODE"] = "Votre code Google map";
-$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>Comment obtenir le code HTML nécessaire pour afficher la carte sur votre site</h2><ul><li>Rendez vous sur la page de <a href=\"http://maps.google.fr/\" title=\"Google Map\">Google Map</a></li><li>Tapez dans la barre de recherche la localisation que vous souhaitez afficher sur votre site internet</li><li>Cliquez sur le bouton <em>Partagez</em> sur le panneau latéral gauche de la carte</li><li>Cliquez sur <em>intégrer la carte intégrée</em></li><li>Sélectionnez <em>personnalisée</em> sur la gauche pour definir votre largeur et hauteur préférée</li><li>Copiez le code iframe que Google a généré</li><li>Et collez ce code dans la zone de texte ci-dessous.</li></ul>";
+$GLOBALS["STR_ADMIN_PLAN_TAG_EXPLAIN"] = "<h2>Comment obtenir le code HTML nécessaire pour afficher la carte sur votre site</h2><ul><li>Rendez-vous sur la page de <a href=\"http://maps.google.fr/\" title=\"Google Map\">Google Map</a></li><li>Tapez dans la barre de recherche la localisation que vous souhaitez afficher sur votre site internet</li><li>Cliquez sur le bouton <em>Partagez</em> sur le panneau latéral gauche de la carte</li><li>Cliquez sur <em>intégrer la carte intégrée</em></li><li>Sélectionnez <em>personnalisée</em> sur la gauche pour definir votre largeur et hauteur préférée</li><li>Copiez le code iframe que Google a généré</li><li>Et collez ce code dans la zone de texte ci-dessous.</li></ul>";
 $GLOBALS["STR_ADMIN_PLAN_TITLE"] = "Gérer le plan d'accès de la société";
 $GLOBALS["STR_ADMIN_PLAN_UPDATE"] = "Modifier le plan d'accès de la société";
 $GLOBALS["STR_ADMIN_POSITION"] = "Position";
@@ -805,6 +807,7 @@ $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM"] = "Vous devez choisir au moin
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT"] = "Choisissez un ou des produit(s)";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CLIENTS_ONLY"] = "Clients uniquement";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE"] = "Entrer le pourcentage";
+$GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE"] = "Entrer le pourcentage du prix du produit. Si ce champ est rempli, le prix de la couleur sera le pourcentage du prix du produit";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN"] = "ASTUCE : Pour sélectionner plusieurs catégories ou plusieurs produits, gardez la touche [CTRL] enfoncée.";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_LOWER"] = "Diminuer";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK"] = "Votre opération a bien été prise en compte.";
@@ -1094,7 +1097,7 @@ $GLOBALS["STR_ADMIN_SITES_LIST_TITLE"] = "Gérer les sites";
 $GLOBALS["STR_ADMIN_SITES_LIST_NOTHING_FOUND"] = "Aucun site enregistré dans la base.";
 $GLOBALS["STR_ADMIN_SITES_LIST_MODIFY"] = "Modifier ce site";
 $GLOBALS["STR_ADMIN_SITES_LOGO_HEADER_DISPLAY"] = "Afficher le logo dans la bannière d'en-tête du site";
-$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "URL du logo";
+$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "Chemin du logo";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "Le module micro-entreprise impose que les prix TTC affichés sur le site soient égaux aux prix HT, c'est-à-dire qu'aucune TVA ne soit jamais appliquée.<br />ATTENTION : Pour que tout soit cohérent, vous devez configurer les produits, l'écotaxe et les frais de port avec une TVA à 0% ; sinon, les prix HT seront calculés à partir des prix TTC indiqués dans l'administration et de la mention du taux de TVA, et les prix TTC affichés aux clients seront égaux à ces prix HT, et donc différents des prix TTC indiqués dans l'administration.";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro-entreprise";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Pour ne pas demander un montant minimum de commande, laissez le champ ci-dessus à 0.";
@@ -1191,7 +1194,7 @@ $GLOBALS["STR_ADMIN_SITES_ROLLOVER_EXPLAIN"] = "Pour insérer un produit dans ce
 $GLOBALS["STR_ADMIN_SITES_ROLLOVER_HEADER"] = "Afficher le bloc \"Produits à la une\"";
 $GLOBALS["STR_ADMIN_SITES_RSS_MODULE"] = "Flux RSS";
 $GLOBALS["STR_ADMIN_SITES_SECURITY"] = "Sécurité";
-$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "Plus les sessions sont courtes, plus les utilistaeurs seront déconnectés rapidement mais plus le site sera sécurisé";
+$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "Plus les sessions sont courtes, plus les utilisateurs seront déconnectés rapidement mais plus le site sera sécurisé";
 $GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION"] = "Durée des sessions utilisateur";
 $GLOBALS["STR_ADMIN_SITES_SIPS_CERTIFICATE"] = "N° du fichier certificat";
 $GLOBALS["STR_ADMIN_SITES_SIPS_EXPLAIN"] = "<strong>Rappel des n° de tests : </strong><br />E-transactions Crédit Agricole : 013044876511111<br />Sogenactif Société générale : 014213245611111<br />Mercanet BNP Paribas : 082584341411111<br />Cyberplus Banque Populaire : 038862749811111<br />Sherlock's Crédit Lyonnais : 014295303911111<br />Elysnet CCF : 014102450311111<br />Scellius LA POSTE : 014141675911111";
@@ -1262,7 +1265,6 @@ $GLOBALS["STR_ADMIN_SITES_TOP"] = "Haut";
 $GLOBALS["STR_ADMIN_SITES_TRADEMARK_PROMOTION"] = "Promotions par marques";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_KEY"] = "Twitter consumer key";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET"] = "Twitter consumer secret (le code secret de l'application)";
-$GLOBALS["STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK"] = "Twitter oauth callback URL (l'URL de retour sur le site après connexion)";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_SIGN_IN"] = "Sign in twitter";
 $GLOBALS["STR_ADMIN_SITES_URL_REWRITING_MODULE"] = "Réécriture d'URLs (URL Rewriting)";
 $GLOBALS["STR_ADMIN_SITES_USER_SHOPS_BOTTOM"] = "Bas des vitrines";
@@ -1536,6 +1538,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "Particulier";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "Pas d'information";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "INFORMATIONS GENERALES";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "Taux de TVA";
+$GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "(Exporter toutes les commandes au format CSV en cliquant sur ce lien)";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Exporter le détail des commandes au format CSV avec une ligne par produit commandé";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exporter le détail des commandes au format CSV avec une ligne par commande";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Exporter le détail des quantités commandées par produit";
@@ -1616,7 +1619,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD"] = "Champs d'upload";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_AD"] = "Ajouter un avis sur une annonce";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT"] = "Ajouter un avis sur un produit";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED"] = "L'avis n'a pas été ajouté : Problème technique";
-$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Avis de l'interaute concernant";
+$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Avis de l'internaute concernant";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_GIVE_OPINION"] = "Donner un avis";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_LIST"] = "Liste des avis";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_MSG_DELETED_OK"] = "L'avis a été effacé.";
@@ -1626,7 +1629,6 @@ $GLOBALS["STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT"] = "Veuillez selectionner
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_AD"] = "Sélectionner l'annonce";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT"] = "Sélectionner le produit";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_UPDATE"] = "Modifier cet avis";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_ACTIVATE_LINK"] = "Vous devez activer préalablement ce module dans le panneau de configuration";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_ID"] = "Préciser le(s) dernier(s) chiffre(s) du numéro de l'annonce. Le champ \"Autoriser la bannière sur les pages de détail d'annonces\" doit être coché.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_PLACE"] = "Nombre d'annonces à partir duquel la bannière s'affichera";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"] = "Ajouter la bannière";
@@ -1832,7 +1834,7 @@ $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Ajouter un partenaire";
 $GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Modifier le partenaire";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "La catégorie a été effacée.";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_DELETED_OK"] = "Le partenaire <b>%s</b> a été effacé.";
-$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (précisez le protocol.<br />Exemple : http://)";
+$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (précisez le protocole, par exemple : http://)";
 $GLOBALS["STR_MODULE_PARTENAIRES_LIST_TITLE"] = "Gérer les partenaires";
 $GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "Aucun partenaire enregistré dans la base.";
 $GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
@@ -1902,7 +1904,7 @@ $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_TITLE"] = "Gestion du nuage de tags - mots l
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE"] = "Gérer les recherches";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_ADD_SEARCH"] = "Ajouter une recherche";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_TAG_NAME"] = "Mot / Tag";
-$GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_SEARCH_COUNT"] = "Nombre de recherche";
+$GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_SEARCH_COUNT"] = "Nombre de recherches";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_MODIFY_THIS_TAG"] = "Modifier cette recherche";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND"] = "Aucune recherche enregistrée dans la base.";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_CREATE"] = "Ajouter un tag";
@@ -1910,7 +1912,7 @@ $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_MSG_CREATED_OK"] = "Le tag <b>%s</b> a été
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_MSG_SEARCH_DELETED_OK"] = "Le tag a été effacé.";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_MSG_UPDATED_OK"] = "Les changements apportés au tag %s ont bien été pris en compte.";
 $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_SEARCH_ON_WORD"] = "recherche(s) sur le mot";
-$GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_SEARCHES_COUNT"] = "Nombre de recherche pour ce mot";
+$GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_SEARCHES_COUNT"] = "Nombre de recherches pour ce mot";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"] = "Répondre à nouveau à %s";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_EMAIL_SENT_BY"] = "Répondre à l'email envoyé par";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"] = "Répondre à %s";
@@ -1951,6 +1953,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECEIVED_LIST_TITLE"] = "Liste d'emails";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL_EXPLAIN"] = "Liste d'emails possible avec séparation par point virgule";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL"] = "Email destinataire";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENTS"] = "Destinataires";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"] = "Voir les messages que nous avons déjà envoyés à %s";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS"] = "Envoyer l'email à %s utilisateurs";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS_LINK"] = " !! ATTENTION : envoyer un email à %s utilisateurs !! ";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL"] = "Envoyer l'email";

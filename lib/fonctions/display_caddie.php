@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 48452 2016-01-11 09:46:23Z gboussin $
+// $Id: display_caddie.php 50019 2016-05-24 09:05:36Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -99,6 +99,18 @@ if (!function_exists('get_caddie_content_html')) {
 						'value' => vb($_SESSION['session_utilisateur']['intracom_for_billing']),
 					));
 				}
+				
+				if ($_SESSION['session_caddie']->total == 0 && !empty($GLOBALS['site_parameters']['caddie_include_captcha_form']) && check_if_module_active('captcha')) {
+					// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
+					$tpl->assign('captcha', array(
+						'validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE'],
+						'inside_form' => get_captcha_inside_form($frm),
+						'validation_code_copy_txt' => $GLOBALS['STR_VALIDATION_CODE_COPY'],
+						'error' => $form_error_object->text('code'),
+						'value' => vb($frm['code'])
+					));
+				}
+		
 			} else {
 				$tpl->assign('membre_href', get_url('membre'));
 				$tpl->assign('STR_LOGIN_FOR_REBATE', $GLOBALS['STR_LOGIN_FOR_REBATE']);
@@ -188,7 +200,7 @@ if (!function_exists('get_caddie_content_html')) {
 			if (round($_SESSION['session_caddie']->avoir_user, 2) > round($_SESSION['session_caddie']->avoir, 2))
 				$tpl->assign('STR_SUGGEST', $GLOBALS['STR_SUGGEST']);
 
-			if(a_priv('reve')) {
+			if(check_if_module_active('reseller') && is_reseller()) {
 				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 			} else {
 				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
@@ -300,7 +312,7 @@ if (!function_exists('get_order_step1')) {
 					$tpl->assign('STR_ERR_PAYMENT', $GLOBALS['STR_ERR_PAYMENT']);
 				}
 				$tpl->assign('payment_error', $form_error_object->text('payment_technical_code'));
-				$tpl->assign('payment_select', get_payment_select($_SESSION['session_caddie']->payment_technical_code));
+				$tpl->assign('payment_select', get_payment_select($_SESSION['session_caddie']->payment_technical_code, false, false, $form_error_object));
 				$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
 			} else {
 				$tpl->assign('is_payment_cgv', false);
@@ -571,11 +583,7 @@ if (!function_exists('affiche_resume_commande')) {
 			}
 			if (check_if_module_active('payback')){
 				$tpl->assign('STR_MODULE_PAYBACK_RETURN_REQUEST', $GLOBALS['STR_MODULE_PAYBACK_RETURN_REQUEST']);
-				if(!defined('STR_RETURN_THIS_PRODUCT')) {
-					$tpl->assign('return_this_product_txt', '');
-				} else {
-					$tpl->assign('return_this_product_txt', $GLOBALS['STR_MODULE_PAYBACK_RETURN_THIS_PRODUCT']);
-				}
+				$tpl->assign('STR_MODULE_PAYBACK_RETURN_THIS_PRODUCT', $GLOBALS['STR_MODULE_PAYBACK_RETURN_THIS_PRODUCT']);
 			}
 			$tpl->assign('is_conditionnement_module_active', check_if_module_active('conditionnement'));
 			if ($commande->statut_paiement == 'completed' && check_if_module_active('download')) {
@@ -603,7 +611,7 @@ if (!function_exists('affiche_resume_commande')) {
 					'conditionnement_qty' => vb($qte_total),
 					'quantite' => $this_ordered_product['quantite'],
 					'total_prix' => fprix($this_ordered_product['total_prix'], true, $commande->devise, true, $commande->currency_rate),
-					'is_form_retour' => (check_if_module_active('payback') && in_array($commande->statut_paiement, array('being_checked', 'completed')) && $commande->statut_livraison == 'dispatched' && $this_ordered_product['statut'] = 1 && $this_ordered_product['quantite'] > 0),
+					'is_form_retour' => (check_if_module_active('payback') && in_array($commande->statut_paiement, array('being_checked', 'completed')) && $commande->statut_livraison == 'dispatched' && $this_ordered_product['statut'] = 1 && $this_ordered_product['quantite'] > 0 && defined('IN_ORDER_HISTORY')),
 					'action' => get_url('/modules/payback/form_retour.php'),
 					'commandeid' => $commande->id,
 					'utilisateurid' => $commande->id_utilisateur,
@@ -768,7 +776,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		$tpl->assign('taxes_displayed', $taxes_displayed);
 		$tpl->assign('suppression_src', $GLOBALS['repertoire_images'] . '/suppression.png');
 		if(!empty($GLOBALS['site_parameters']['default_picture'])) {
-			$tpl->assign('no_photo_src', $GLOBALS['repertoire_upload'] . '/' . $GLOBALS['site_parameters']['default_picture']);
+			$tpl->assign('no_photo_src', get_url_from_uploaded_filename($GLOBALS['site_parameters']['default_picture']));
 		}
 		$tpl->assign('with_form_fields', $with_form_fields);
 		$tpl->assign('is_conditionnement_module_active', check_if_module_active('conditionnement'));
@@ -798,6 +806,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		$tpl->assign('STR_ECOTAXE', $GLOBALS['STR_ECOTAXE']);
 		$tpl->assign('STR_INCLUDED', $GLOBALS['STR_INCLUDED']);
 		$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+		$tpl->assign('STR_LAST_NAME', $GLOBALS['STR_LAST_NAME']);
 
 		$products = array();
 		foreach ($_SESSION['session_caddie']->articles as $numero_ligne => $product_id) {
@@ -831,7 +840,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					$etat_stock = vn($_SESSION['session_caddie']->etat_stock[$numero_ligne]);
 					$delivery_stock = vb($_SESSION['session_caddie']->delai_stock[$numero_ligne]);
 				}
-				$email_check = vb($_SESSION['session_caddie']->email_check[$numero_ligne]);
+				$data_check = vb($_SESSION['session_caddie']->data_check[$numero_ligne]);
 				if (check_if_module_active('ecotaxe')) {
 					$ecotaxe = vb($_SESSION['session_caddie']->ecotaxe_ttc[$numero_ligne]);
 				}
@@ -867,13 +876,12 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					'id_attribut' => vb($_SESSION['session_caddie']->id_attribut[$numero_ligne]),
 					'name' => $product_object->name,
 					'reference' => $product_object->reference,
-					'configuration_attributs_description' => (!empty($product_object->configuration_attributs_list) ? $product_object->configuration_attributs_description : NULL),
-					'email_check' => $email_check,
+					'configuration_attributs_description' => (!empty($product_object->configuration_attributs_list) ? String::nl2br_if_needed($product_object->configuration_attributs_description) : NULL),
+					'data_check' => $data_check,
 					'prix' => fprix($prix_cat_displayed, true),
 					'conditionnement' => $product_object->conditionnement,
 					'conditionnement_qty' => $product_object->conditionnement * $quantite,
 					'on_download' => $product_object->on_download
-					
 				);
 				if ($display_picture) {
 					$tmpProd['src'] = thumbs($display_picture, 75, 75, 'fit', null, null, true, true);
@@ -932,6 +940,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					$display_form_fields = $with_form_fields;
 				}
 				if ($display_form_fields) {
+					
 					$tmpProd['quantite'] = array(
 						'value' => $quantite,
 					);
@@ -952,10 +961,15 @@ if (!function_exists('get_caddie_products_summary_table')) {
 						$tmpProd['quantite']['message'] = $this_prepared_javascript_message;
 						$tmpProd['quantite']['stock_commandable'] = $stock_commandable;
 					}
-					$tmpProd['quantite']['hidden_fields'] = ($product_object->on_download == 1);
+					if(empty($GLOBALS['site_parameters']['disable_modify_quantity_on_cart'])){
+						$tmpProd['quantite']['hidden_fields'] = ($product_object->on_download == 1);
+					}else {
+						$tmpProd['quantite']['hidden_fields'] = $GLOBALS['site_parameters']['disable_modify_quantity_on_cart'];
+					}
 				} else {
 					$tmpProd['quantite'] = $quantite;
 				}
+				
 				if(check_if_module_active('conditionnement')) {
 					if(!empty($product_object->conditionnement)){
 						$tmpProd['conditionnement_qty'] = intval($quantite) * intval($product_object->conditionnement);
@@ -973,6 +987,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 			unset($product_object);
 		}
 		$tpl->assign('products', $products);
+		$tpl->assign('cart_disable_delete_product_link', !empty($GLOBALS['site_parameters']['cart_disable_delete_product_link']));
 		$tpl->assign('with_totals_summary', $with_totals_summary);
 		$tpl->assign('STR_WITH_PROMO_CODE', $GLOBALS['STR_WITH_PROMO_CODE']);
 		$tpl->assign('STR_ON_CATEGORY', $GLOBALS['STR_ON_CATEGORY']);
@@ -1003,7 +1018,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					));
 				}
 			}
-			if(a_priv('reve')) {
+			if(check_if_module_active('reseller') && is_reseller()) {
 				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 			} else {
 				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];

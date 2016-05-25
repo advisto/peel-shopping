@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: admin_en.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -658,6 +658,7 @@ $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"] = "Custom HTML Zones";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_BANNERS"] = "Banners";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_CATEGORIES"] = "Partner categories";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"] = "Partner management";
+$GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_STATISTICS"] = "Statistics relative to partner links";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"] = "Webmastering";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"] = "MARKETING";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"] = "Managing opinions of online users";
@@ -698,6 +699,7 @@ $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"] = "Keyyo phone calls";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"] = "List of calls";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"] = "List of actions moderation";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"] = "List of user connections";
+$GLOBALS["STR_ADMIN_MODULE_ACTIVATE_LINK"] = "You must first activate this module in the Control Panel";
 $GLOBALS["STR_ADMIN_MORE_THAN"] = "Superior to";
 $GLOBALS["STR_ADMIN_MSG_CHANGES_OK"] = "The changes have been taken into account.";
 $GLOBALS["STR_ADMIN_MSG_ORDER_SENT_OK"] = "The order %s was sent to %s";
@@ -805,6 +807,7 @@ $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM"] = "You must select at least o
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT"] = "Choose the product(s)";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CLIENTS_ONLY"] = "Client only";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE"] = "Enter percentage";
+$GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE"] = "Enter the percentage of the product price. If this field is filled, the price of the color will be the product price percentage";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN"] = "HINT: To select multiple categories or multiple products, hold down the [CTRL].";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_LOWER"] = "Lower";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK"] = "Your update has been taken into account.";
@@ -1094,7 +1097,7 @@ $GLOBALS["STR_ADMIN_SITES_LIST_TITLE"] = "Manage Sites";
 $GLOBALS["STR_ADMIN_SITES_LIST_NOTHING_FOUND"] = "No sites recorded in the database.";
 $GLOBALS["STR_ADMIN_SITES_LIST_MODIFY"] = "Edit this site";
 $GLOBALS["STR_ADMIN_SITES_LOGO_HEADER_DISPLAY"] = "Display the logo in the banner header site";
-$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "Logo URL";
+$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "Logo path";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "The module micro-enterprise tax requires that prices on the site are equal to price excl. VAT, that is to say, no VAT is not applied.<br />ATTENTION : Just to be consistent, you must configure the products, environmental taxes and shipping costs with VAT at 0%, otherwise the price will be calculated from VAT inclusive price indicated in the administration and the mention of VAT rates, tax rates and displayed to clients will be equal to the price excluding VAT, and therefore different prices indicated in the tax administration.";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro Business";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "If you do not ask for a minimum order value, leave the field above 0.";
@@ -1191,7 +1194,7 @@ $GLOBALS["STR_ADMIN_SITES_ROLLOVER_EXPLAIN"] = "To add a product in this block, 
 $GLOBALS["STR_ADMIN_SITES_ROLLOVER_HEADER"] = "Show block \"Featured Products\"";
 $GLOBALS["STR_ADMIN_SITES_RSS_MODULE"] = "RSS Feed";
 $GLOBALS["STR_ADMIN_SITES_SECURITY"] = "Security";
-$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "More sessions are shorter, the utilistaeurs be quickly disconnected but the site is secure";
+$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "More sessions are shorter, the users be quickly disconnected but the site is secure";
 $GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION"] = "Length of user sessions";
 $GLOBALS["STR_ADMIN_SITES_SIPS_CERTIFICATE"] = "No certificate file";
 $GLOBALS["STR_ADMIN_SITES_SIPS_EXPLAIN"] = "Reminder <strong> No. of tests:</strong><br />E-transactions Crédit Agricole: 013044876511111<br />Sogenactif Societe Generale: 014213245611111<br />Mercanet BNP Paribas : 082584341411111<br />Cyberplus Banque Populaire: 038862749811111<br />Sherlock's Crédit Lyonnais: 014295303911111<br />Elysnet CCF: 014102450311111<br />Scellius MAIL: 014141675911111 ";
@@ -1262,7 +1265,6 @@ $GLOBALS["STR_ADMIN_SITES_TOP"] = "High";
 $GLOBALS["STR_ADMIN_SITES_TRADEMARK_PROMOTION"] = "Promotions by marks";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_KEY"] = "Twitter consumer key";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET"] = "Twitter consumer secret (the secret code of the application)";
-$GLOBALS["STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK"] = "Twitter oauth callback URL (url back to the site after connection)";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_SIGN_IN"] = "Sign in twitter";
 $GLOBALS["STR_ADMIN_SITES_URL_REWRITING_MODULE"] = "Rewriting URLs (URL Rewriting)";
 $GLOBALS["STR_ADMIN_SITES_USER_SHOPS_BOTTOM"] = "Lower showcases";
@@ -1399,7 +1401,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_CLIENT_PROJECT_CHANCES"] = "Chances of success 
 $GLOBALS["STR_ADMIN_UTILISATEURS_CLIENT_TYPE"] = "Client Type";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_LAST"] = "Last coupon";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_COUNT"] = "Number of<br />coupon codes received";
-$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_RECEIVED"] = "Receveid on";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_RECEIVED"] = "Received on";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_OFFER_TO_BEST_CLIENTS"] = "Offer coupon codes to the best customers";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_EXPLAIN"] = "Send the coupon code";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND"] = "Send this coupon code users checked above";
@@ -1536,6 +1538,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "Individual";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "No information";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "GENERAL INFORMATION";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "VAT rate";
+$GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "(Export all orders in CSV format by clicking on this link)";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Export order details in CSV format with one line per product ordered";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Export order details in CSV format with one line per order";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Export details of the quantities ordered by product";
@@ -1616,7 +1619,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD"] = "upload boxes";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_AD"] = "Add a comment on an ad";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT"] = "Add a review about a product";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED"] = "The notice has not been added: Technical problem";
-$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Notice of interaute on";
+$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Notice of user on";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_GIVE_OPINION"] = "Review";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_LIST"] = "List of opinions";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_MSG_DELETED_OK"] = "The opinion has been deleted.";
@@ -1626,7 +1629,6 @@ $GLOBALS["STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT"] = "Please select a produ
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_AD"] = "Select page";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT"] = "Select product";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_UPDATE"] = "Modify this view";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_ACTIVATE_LINK"] = "You must first activate this module in the Control Panel";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_ID"] = "Specify the last number(s) of the ad id. The field \"Allow the banner on the detail pages of ads\" must be checked.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_PLACE"] = "Ad number from which the banner displays";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"] = "Add the banner";
@@ -1831,7 +1833,7 @@ $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Add a partner";
 $GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Update the partner";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "The category has been deleted.";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_DELETED_OK"] = "Partner <b>%s</b> has been deleted.";
-$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (specify protocol. <br /> Example: http://)";
+$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (specify protocol. Example: http://)";
 $GLOBALS["STR_MODULE_PARTENAIRES_LIST_TITLE"] = "Managing partners";
 $GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "No partner registered in the database.";
 $GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";
@@ -1950,6 +1952,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECEIVED_LIST_TITLE"] = "List of email";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL_EXPLAIN"] = "List of possible emails separated by semicolon";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL"] = "Email recipient";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENTS"] = "Recipients";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"] = "See the messages taht we already sent to %s";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS"] = "Send email to %s users";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS_LINK"] = "!! WARNING: send an email to user %s !!";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL"] = "Send email";

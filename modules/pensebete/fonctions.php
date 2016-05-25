@@ -3,16 +3,31 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Ajout d'une section sur la page de détails d'un produit
+ *
+ * @param array $params
+ * @return
+ */
+function pensebete_hook_product_details_additional_infos(&$params) {
+	$tpl_array['pensebete'] = array(
+		'href' => $GLOBALS['wwwroot'] . '/modules/pensebete/ajouter.php?mode=ajout&prodid=' . $params['id'],
+		'src' => $GLOBALS['site_parameters']['general_add_notepad_image'],
+		'txt' => $GLOBALS['STR_AJOUT_PENSE_BETE']
+	);
+	return $tpl_array;
 }
 
 /**
@@ -52,6 +67,7 @@ function insere_pense($item_id = null, $type = null)
 		$this_item = $GLOBALS['STR_MODULE_ANNONCES_THE_AD'];
 		$back_to_item = $GLOBALS['STR_MODULE_ANNONCES_BACK_TO_ADS'];
 		$this_field = 'id_annonce';
+		unset($annonce_object);
 	}
 	$query = query("SELECT 1
 		FROM peel_pensebete

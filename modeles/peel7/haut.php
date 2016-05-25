@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: haut.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,29 +40,8 @@ $tpl->assign('page_name', vb($GLOBALS['page_name']));
 if (!defined('IN_PEEL_ADMIN') && vb($GLOBALS['site_parameters']['site_suspended'])) {
 	$tpl->assign('update_msg', $GLOBALS['STR_UPDATE_WEBSITE']);
 }
-if (check_if_module_active('facebook_connect')) {
-	if (empty($_SESSION['session_utilisateur']['email']) && empty($_SESSION['disable_facebook_autologin'])) {
-		$tpl->assign('auto_login_with_facebook', auto_login_with_facebook(true));
-	} elseif (!empty($_SESSION['session_utilisateur']['email'])) {
-		$tpl->assign('logout_with_facebook', logout_with_facebook(true));
-	}
-}
-
-if (check_if_module_active('welcome_ad')) {
-	load_welcome_ad();
-	$tpl->assign('welcome_ad_div', get_welcome_ad_div());
-}
-if (check_if_module_active('cart_popup') && !empty($_SESSION['session_show_caddie_popup'])) {
-	if (defined('IN_CATALOGUE_PRODUIT') && !empty($_GET['id'])) {
-		$product_added_id = $_GET['id'];
-	}
-	$tpl->assign('cart_popup_div', get_cart_popup_div(vb($product_added_id)));
-}
 $tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], false, 26));
 
-if (check_if_module_active('devises')) {
-	$tpl->assign('module_devise', affiche_module_devise(true));
-}
 if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) && $GLOBALS['site_parameters']['on_logo'] == 1) {
 	$this_logo = $GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']];
 	if(String::strpos($this_logo, '//') === false && String::substr($this_logo, 0, 1) == '/') {
@@ -71,7 +50,7 @@ if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) &
 	}
 	if (!empty($GLOBALS['site_parameters']['main_site_id'])) {
 		// Il y a plusieurs sites et un site principal est défini. L'url du logo dans le header doit pointer vers le site principal.
-		$logo_href = get_site_wwwroot($GLOBALS['site_parameters']['main_site_id']);
+		$logo_href = get_site_wwwroot($GLOBALS['site_parameters']['main_site_id'], $_SESSION['session_langue']);
 	} else {
 		// Lien vers la home défini pour la configuration du site.
 		$logo_href = $GLOBALS['wwwroot'];
@@ -142,14 +121,14 @@ if(!empty($_SESSION['session_utilisateur']['email'])) {
 if(!empty($_SESSION['session_utilisateur']['logo'])) {
 	$tpl->assign('user_logo_src', thumbs($_SESSION['session_utilisateur']['logo'], 40, 28, 'fit', null, null, true, true));
 }
+if(!empty($GLOBALS['site_parameters']['header_show_user_account_completion']) && est_identifie()) {
+	$tpl->assign('user_account_completion', user_account_completion($_SESSION['session_utilisateur']));
+}
 $tpl->assign('account_dropdown', affiche_compte(true, 'popup'));
 $tpl->assign('STR_LOGIN', $GLOBALS['STR_LOGIN']);
 $tpl->assign('account_register_url', get_account_register_url(false, false));
 $tpl->assign('STR_OPEN_ACCOUNT', $GLOBALS['STR_OPEN_ACCOUNT']);
 
-if (check_if_module_active('messaging')) {
-	$tpl->assign('unread_messages_info', get_unread_messages_info());
-}
 if (!empty($GLOBALS['allow_fineuploader_on_page']) && vb($GLOBALS['site_parameters']['used_uploader']) == 'fineuploader') {
 	// Il faut explicitement autoriser fineuploader sur une page en front-office
 	init_fineuploader_interface();
@@ -169,6 +148,11 @@ if ($GLOBALS['page_columns_count'] == 3) {
 		$GLOBALS['modules_right'] .= get_modules('right_annonce', true, null, vn($_GET['catid'])); 
 	}
 	$GLOBALS['modules_right'] .= get_modules('right', true, null, vn($_GET['catid']));
+}
+
+$hook_result = call_module_hook('header_template_data', array(), 'array');
+foreach($hook_result as $this_key => $this_value) {
+	$tpl->assign($this_key, $this_value);
 }
 
 echo $tpl->fetch();

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: modules_handler.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -28,7 +28,7 @@ function load_modules($technical_code = null) {
 		// Si la variable de configuration n'existe pas, il faut obligatoirement définir thumbs dans la configuration, sinon le site ne charge pas.
 		$GLOBALS['site_parameters']['modules_front_office_functions_files_array'] = array('thumbs' => '/modules/thumbs/fonctions.php');
 	}
-	$modules_to_check = array_keys(array_merge_recursive(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
+	$modules_to_check = array_keys(array_merge_recursive_distinct(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
 	foreach($modules_to_check as $this_module) {
 		if((empty($technical_code) || $technical_code == $this_module) && empty($GLOBALS['modules_installed'][$this_module])) {
 			// Pour la compatibilité avec d'anciennes versions, on stocke le chemin vers les fichiers de fonctions dans une variable globale
@@ -92,29 +92,37 @@ function load_modules($technical_code = null) {
  * @return
  */
 function check_if_module_active($module_name, $specific_file_name = null, $skip_activation_test = false) {
-	$automatically_activate_if_no_configuration_available = array('thumbs');
-	if (empty($module_name) || (!isset($GLOBALS['site_parameters']['modules_configuration_variable_array']) && !in_array($module_name, $automatically_activate_if_no_configuration_available))) {
-		// Nom du module vide ou pas renseigné - Ou pas de configuration valide disponible, comme lors de l'installation
-		return false;
-	}
-	$module_configuration_variable = vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$module_name], 'module_' . $module_name);
-	$module_configured = ($skip_activation_test || (in_array($module_name, $automatically_activate_if_no_configuration_available) && !isset($GLOBALS['site_parameters'][$module_configuration_variable])) || !empty($GLOBALS['site_parameters'][$module_configuration_variable]));
-	$module_enable_for_this_lang = (empty($GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']));
-	if ($module_configured && $module_enable_for_this_lang) {
-		// Si le paramètre est absent, ou qu'il est activé en back office. La validité de l'absence du paramètre est nécessaire pour des raisons de compatibilité pour certains modules. Donc la désactivation du module est à faire depuis le back office, en passant la valeur à 0 ou false (selon le type de la configuration)
-		if (empty($specific_file_name)) {
-			// cas standard
-			if (file_exists($GLOBALS['dirroot'] . '/modules/'.$module_name)) {
-				// dossier trouvé et module actif, la fonction retourne un résultat positif
-				return true;
+	static $results_array;
+	$cache_id = serialize(array($module_name,$specific_file_name,$skip_activation_test));
+	if(!isset($results_array[$cache_id]) || defined('IN_INSTALLATION') || defined('IN_PEEL_CONFIGURE')) {
+		$automatically_activate_if_no_configuration_available = array('thumbs');
+		if (empty($module_name) || (!isset($GLOBALS['site_parameters']['modules_configuration_variable_array']) && !in_array($module_name, $automatically_activate_if_no_configuration_available))) {
+			// Nom du module vide ou pas renseigné - Ou pas de configuration valide disponible, comme lors de l'installation
+			$results_array[$cache_id] = false;
+		} else {
+			$module_configuration_variable = vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$module_name], 'module_' . $module_name);
+			$module_configured = ($skip_activation_test || (in_array($module_name, $automatically_activate_if_no_configuration_available) && !isset($GLOBALS['site_parameters'][$module_configuration_variable])) || !empty($GLOBALS['site_parameters'][$module_configuration_variable]));
+			$module_enable_for_this_lang = (empty($GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']) || in_array($_SESSION['session_langue'], $GLOBALS['site_parameters'][$module_name . '_allowed_langs_array']));
+			if ($module_configured && $module_enable_for_this_lang) {
+				// Si le paramètre est absent, ou qu'il est activé en back office. La validité de l'absence du paramètre est nécessaire pour des raisons de compatibilité pour certains modules. Donc la désactivation du module est à faire depuis le back office, en passant la valeur à 0 ou false (selon le type de la configuration)
+				if (empty($specific_file_name)) {
+					// cas standard
+					if (file_exists($GLOBALS['dirroot'] . '/modules/'.$module_name)) {
+						// dossier trouvé et module actif, la fonction retourne un résultat positif
+						$results_array[$cache_id] = true;
+					}
+				} elseif (file_exists($GLOBALS['dirroot'] . '/modules/' . $module_name . '/' . $specific_file_name)) {
+					// fichier trouvé et module actif, la fonction retourne un résultat positif
+					$results_array[$cache_id] = true;
+				}
 			}
-		} elseif (file_exists($GLOBALS['dirroot'] . '/modules/' . $module_name . '/' . $specific_file_name)) {
-			// fichier trouvé et module actif, la fonction retourne un résultat positif
-			return true;
+		}
+		if(!isset($results_array[$cache_id])) {
+			// Si on passe par ici, les tests qui permettent l'activation du module ont échoué. Soit la désactivation du module est faite depuis l'administration, ou aucun fichier respectant la norme de nommage n'est présent dans le module
+			$results_array[$cache_id] = false;
 		}
 	}
-	// Si on passe par ici, les tests qui permettent l'activation du module ont échoué. Soit la désactivation du module est faite depuis l'administration, ou aucun fichier respectant la norme de nommage n'est présent dans le module
-	return false;
+	return $results_array[$cache_id];
 }
 
 
@@ -125,16 +133,18 @@ function check_if_module_active($module_name, $specific_file_name = null, $skip_
  * @param string $hook
  * @param array $params
  * @param string $mode
+ * @param boolean $return_params_by_default
  * @return
  */
-function call_module_hook($hook, $params, $mode = 'boolean') {
+function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_default = false) {
 	if($mode == 'boolean') {
-		$output = true;
+		$output_default = true;
 	} elseif($mode == 'array') {
-		$output = array();	
+		$output_default = array();	
 	} else {
-		$output = null;
+		$output_default = null;
 	}
+	$output = $output_default;
 	if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 		$start_time = microtime_float();
 	}
@@ -154,16 +164,22 @@ function call_module_hook($hook, $params, $mode = 'boolean') {
 			if($mode == 'boolean') {
 				$output = ($output && $result);
 			} elseif($mode == 'array') {
-				if(!is_array($result)) {
-					$result = array($result);
+				if($result !== null) {
+					if(!is_array($result)) {
+						$result = array($result);
+					}
+					$output = array_merge_recursive_distinct($output, $result);
 				}
-				$output = array_merge_recursive($output, $result);
 			} elseif($mode == 'max') {
-				$output = max($output, $result);
+				if($output === null) {
+					$output = $result;
+				} elseif($result !== null) {
+					$output = max($output, $result);
+				}
 			} elseif($mode == 'min') {
 				if($output === null) {
 					$output = $result;
-				} else {
+				} elseif($result !== null) {
 					$output = min($output, $result);
 				}
 			} elseif($mode == 'unique') {
@@ -180,6 +196,9 @@ function call_module_hook($hook, $params, $mode = 'boolean') {
 	if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 		$end_time = microtime_float();
 		$GLOBALS['peel_debug'][] = array('text' => 'Hook ' . $hook, 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
+	}
+	if($return_params_by_default && $output === $output_default) {
+		$output = $params;
 	}
 	return $output; 
 }

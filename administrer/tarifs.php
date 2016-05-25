@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tarifs.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: tarifs.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -288,15 +288,15 @@ function affiche_liste_tarif()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 
-	$result = query("SELECT t.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
+	$query = query("SELECT t.*, z.nom_" . $_SESSION['session_langue'] . " AS zone_name
 		FROM peel_tarifs t
 		LEFT JOIN peel_zones z ON z.id=t.zone AND " . get_filter_site_cond('zones', 'z') . "
 		WHERE " . get_filter_site_cond('tarifs', 't', true) . "
 		ORDER BY zone_name ASC, t.type ASC, t.tarif ASC");
-	if (!(num_rows($result) == 0)) {
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'poidsmin' => $ligne['poidsmin'],
 				'poidsmax' => $ligne['poidsmax'],

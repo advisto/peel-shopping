@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: bas.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}
 							</div>
 							<div class="bottom_middle row">
@@ -55,16 +55,22 @@
 			<footer class="footer">
 				<div class="container">
 					<div class="row">
-						{{ MODULES_FOOTER }}
-					{% if footer_column %}
-						<div class="footer_column">{{ footer_column }}</div>
-					{% endif %}
-						{{ FOOTER }}
-						<div class="clearfix visible-sm"></div>
-						{% if rss is defined %}
-							{{ rss }}
+					{% if display_footer_full_custom_html is empty %}
+							{{ MODULES_FOOTER }}
+						{% if footer_column %}
+							<div class="footer_column">{{ footer_column }}</div>
 						{% endif %}
+							{{ FOOTER }}
+							<div class="clearfix visible-sm"></div>
+							{% if rss is defined %}
+								{{ rss }}
+							{% endif %}
+					{% else %}
+						{{ FOOTER_FULL_CUSTOM_HTML }}
+					{% endif %}
+	
 					</div>
+					
 					<div class="clearfix"></div>
 						{% if (flags_links_array) or (flags) %}<div id="flags_xs" class="pull-right visible-xs">{% if (flags_links_array) %}{{ flags_links_array|join('&nbsp;') }}{% endif %}{{ flags }}</div>{% endif %}
 						{% if (module_devise) %}<div id="currencies_xs" class="pull-right visible-xs">{{ module_devise }}</div>{% endif %}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: display_product.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,13 +23,17 @@ if (!function_exists('get_produit_details_html')) {
 	 * @param integer $color_id
 	 * @param integer $secondary_images_width
 	 * @param integer $secondary_images_height
+	 * @param integer $product_ordered_id Id de produit si on veut des informations sur un produit commandé par le passé en réutilisant des informations de la table de produits commandés
 	 * @return
 	 */
-	function get_produit_details_html(&$product_object, $color_id = null, $secondary_images_width = 50, $secondary_images_height = 60)
+	function get_produit_details_html(&$product_object, $color_id = null, $secondary_images_width = 50, $secondary_images_height = 60, $product_ordered_id = null)
 	{
 		$output = '';
 		if (empty($product_object->id) || (empty($GLOBALS['site_parameters']['allow_command_product_ongift']) && !empty($product_object->on_gift) && $product_object->on_gift_points > intval($_SESSION['session_utilisateur']['points']))) {
 			$output .= $GLOBALS['STR_NO_FIND_PRODUCT'];
+		} elseif(!empty($_GET['timestamp']) && $_GET['timestamp'] < strtotime('-10 day')) {
+			// Si une date d'expiration de la consultation du produit a été défini par GET['timestamp'], et que le timestamp est vieux de plus de 10 jours
+			$output .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_OFFER_EXPIRE'];
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('produit_details_html.tpl');
 			$tpl->assign('medium_width', $GLOBALS['site_parameters']['medium_width']);
@@ -38,7 +42,7 @@ if (!function_exists('get_produit_details_html')) {
 			$tpl->assign('STR_CONDITIONING', $GLOBALS['STR_CONDITIONING']);
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			if(!empty($GLOBALS['site_parameters']['default_picture'])) {
-				$tpl->assign('no_photo_src', $GLOBALS['repertoire_upload'] . '/' . $GLOBALS['site_parameters']['default_picture']);
+				$tpl->assign('no_photo_src', get_url_from_uploaded_filename($GLOBALS['site_parameters']['default_picture']));
 			}
 			if(empty($GLOBALS['site_parameters']['avoid_increment_products_nb_view'])) {
 				// On comptatilise le nombre de fois où le produit est vu
@@ -94,7 +98,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					$a_zoom_attributes = '';
 				}
 				$tpl->assign('main_image', array(
-						'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($product_images[0]),
+						'href' => get_url_from_uploaded_filename($product_images[0]),
 						'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
 						'file_type' => get_file_type($product_images[0])
 					));
@@ -122,34 +126,16 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					'value' => false
 					));
 			}
-			if (check_if_module_active('participants') && est_identifie() && $_SESSION['session_utilisateur']['id_utilisateur'] != $product_object->id_utilisateur) {
-				$tpl->assign('subscribe_trip_form', get_subscribe_trip_form($product_object->id, vn($_SESSION['session_utilisateur']['id_utilisateur'])));
-				$tpl->assign('display_registred_user', display_registred_user($product_object->id));
-			}
-			if (check_if_module_active('vacances')) {
-				if (get_vacances_type() == 1) {
-					$tpl->assign('global_error', array(
-						'txt' => vb($GLOBALS['site_parameters']['module_vacances_client_msg_' . $_SESSION['session_langue']]), 
-						'date' => false
-					));
-				} elseif (get_vacances_type() == 2) {
-					// on récupère le fournisseur pour afficher sa date de retour
-					$supplier_back = query("SELECT on_vacances, on_vacances_date
-						FROM peel_utilisateurs
-						WHERE id_utilisateur = " . $product_object->id_utilisateur . " AND " . get_filter_site_cond('utilisateurs') . "");
-					$res_supplier_back = fetch_assoc($supplier_back);
-					if (num_rows($supplier_back) == 1 && !empty($res_supplier_back['on_vacances_date']) && !empty($res_supplier_back['on_vacances'])) {
-						$tpl->assign('global_error', array(
-							'txt' => $GLOBALS['STR_HOLIDAY_AVAILABLE'], 
-							'date' => get_formatted_date($res_supplier_back['on_vacances_date'])
-						));
-					}
-				}
-			}
-			if (function_exists('get_attributs_step') && !empty($GLOBALS['site_parameters']['header_product_page_for_attributs_step'][$product_object->technical_code])) {
+			if (empty($product_ordered_id) && function_exists('get_attributs_step') && !empty($GLOBALS['site_parameters']['header_product_page_for_attributs_step'][$product_object->technical_code])) {
 				$tpl->assign('header_product', vb($GLOBALS['site_parameters']['header_product_page_for_attributs_step'][$product_object->technical_code]));
 				$tpl->assign('attributs_step', get_attributs_step($_GET, $product_object));
-				$tpl->assign('step', vn($_GET["step"],1));
+				$step = vn($_GET["step"],1);
+				$tpl->assign('step', $step);
+				if ($product_object->technical_code == 'capsule_capzzle') {
+					$tpl->assign('STR_STEP_DESCRIPTIF', vb($GLOBALS["STR_STEP_CAPZZLE_DESCRIPTIF_".$step]));
+				} else {
+					$tpl->assign('STR_STEP_DESCRIPTIF', vb($GLOBALS["STR_STEP_DESCRIPTIF_".$step]));
+				}
 			}
 			$tpl->assign('link_contact', get_url('/utilisateurs/contact.php'));
 			$tpl->assign('contact', $GLOBALS["STR_CONTACT"]);
@@ -165,12 +151,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$current_catid = intval($_GET['catid']);
 			} else {
 				$current_catid = $product_object->categorie_id;
-			}
-			$prev = (check_if_module_active('precedent_suivant') ? show_preview_next($product_object->id, $product_object->position, 'prev', $current_catid) : '');
-			$next = (check_if_module_active('precedent_suivant') ? show_preview_next($product_object->id, $product_object->position, 'next', $current_catid) : '');
-			$tpl->assign('prev', $prev);
-			$tpl->assign('next', $next);
-			
+			}			
 			if ($product_object->is_price_flash(check_if_module_active('reseller') && is_reseller())) {
 				$tpl->assign('flash_txt', $GLOBALS['STR_TEXT_FLASH1'] . ' ' . get_formatted_duration(strtotime($product_object->flash_end) - time(), false, 'day') . ' ' . $GLOBALS['STR_TEXT_FLASH2']);
 			}
@@ -233,13 +214,13 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 							$tmp_imgs[] = array(
 								'is_image' => true,
 								'id' => $vignette_id,
-								'a_attr' => str_replace(array('[SMALL_IMAGE]', '[ZOOM_IMAGE]', '[VIGNETTE_CLASS]'), array($small_image, $GLOBALS['repertoire_upload'] . '/' . $name, $vignette_id), $a_other_pictures_attributes),
+								'a_attr' => str_replace(array('[SMALL_IMAGE]', '[ZOOM_IMAGE]', '[VIGNETTE_CLASS]'), array($small_image, get_url_from_uploaded_filename($name), $vignette_id), $a_other_pictures_attributes),
 								'src' => thumbs($name, $secondary_images_width, $secondary_images_height, 'fit', null, null, true, true),
 							);
 						} else {
 							$tmp_imgs[] = array(
 								'is_image' => false,
-								'href' => $GLOBALS['repertoire_upload'] . '/' . $name,
+								'href' => get_url_from_uploaded_filename($name),
 								'src' => thumbs($name, $secondary_images_width, $secondary_images_height, 'fit', null, null, true, true),
 							);
 						}
@@ -254,57 +235,10 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					'txt' => $GLOBALS['STR_TELL_FRIEND']
 				));
 			}
-			if (check_if_module_active('facebook') && empty($GLOBALS['site_parameters']['facebook_like_disable'])) {
-				$tpl->assign('display_facebook_like', display_facebook_like(get_current_url(true)));
-			}
-			if (check_if_module_active('avis')) {
-				$q_average_rating = query("SELECT AVG(note) AS average_rating
-					FROM peel_avis
-					WHERE id_produit = '" . intval($product_object->id) . "' AND etat = '1'");
-				$r_average_rating = fetch_assoc($q_average_rating);
-				$average_rating = number_format($r_average_rating['average_rating'], 0);
-				$sqlAvis = "SELECT note
-					FROM peel_avis
-					WHERE id_produit = '" . intval($product_object->id) . "' AND etat = '1' AND lang = '" . nohtml_real_escape_string($_SESSION['session_langue']) . "'
-					ORDER BY note DESC";
-				$resAvis = query($sqlAvis);
-				$notation_array = array();
-				while ($Avis = fetch_assoc($resAvis)) {
-					if (!isset($notation_array[$Avis['note']])) {
-						$notation_array[$Avis['note']] = 0;
-					}
-					$notation_array[$Avis['note']]++;
-				}
-
-				$tpl->assign('avis', array(
-					'href' => $GLOBALS['wwwroot'] . '/modules/avis/avis.php?prodid=' . $product_object->id,
-					'src' => $GLOBALS['site_parameters']['general_give_your_opinion_image'],
-					'txt' => $GLOBALS['STR_DONNEZ_AVIS']
-				));
-				$tpl->assign('tous_avis', array(
-					'href' => (!empty($GLOBALS['site_parameters']['display_opinion_on_product_tab'])? get_current_url(true) . '#tab_opinion' : $GLOBALS['wwwroot'] . '/modules/avis/liste_avis.php?prodid=' . $product_object->id),
-					'src' => $GLOBALS['site_parameters']['general_read_all_reviews_image'],
-					'txt' => $GLOBALS['STR_TOUS_LES_AVIS'],
-					'STR_POSTED_OPINION' => $GLOBALS['STR_POSTED_OPINION'],
-					'STR_POSTED_OPINIONS' => $GLOBALS['STR_POSTED_OPINIONS'],
-					'STR_MODULE_AVIS_NOTE' => $GLOBALS['STR_MODULE_AVIS_NOTE'],
-					'nb_avis' => array_sum($notation_array),
-					'star_src' => get_url('/images/star1.gif'),
-					'average_rating' => $average_rating,
-					'display_opinion_resume_in_product_page' => !empty($GLOBALS['site_parameters']['display_opinion_resume_in_product_page'])
-				));
-			}
 			if (!empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
 				$tpl->assign('add_easy_list', array(
 					'href' => $GLOBALS['wwwroot']. '/search.php?type=quick_add_product_from_search_page&prodid=' . $product_object->id . '&quantite=1',
 					'txt' => $GLOBALS['STR_PRODUCT_ADD_TO_EASY_LIST']
-				));
-			}
-			if (check_if_module_active('pensebete')) {
-				$tpl->assign('pensebete', array(
-					'href' => $GLOBALS['wwwroot'] . '/modules/pensebete/ajouter.php?mode=ajout&prodid=' . $product_object->id,
-					'src' => $GLOBALS['site_parameters']['general_add_notepad_image'],
-					'txt' => $GLOBALS['STR_AJOUT_PENSE_BETE']
 				));
 			}
 			$tpl->assign('print', array(
@@ -312,7 +246,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				'txt' => $GLOBALS['STR_PRINT_PAGE']
 			));
 			
-			if ((!empty($product_object->reference))) {
+			if (!empty($product_object->reference) && empty($GLOBALS['site_parameters']['product_detail_reference_hide']) && empty($product_ordered_id)) {
 				$tpl->assign('reference', array(
 					'label' => $GLOBALS['STR_REFERENCE'],
 					'txt' => $product_object->reference
@@ -346,7 +280,24 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 			} else {
 				$tpl->assign('descriptif', '');
 			}
-			$tpl->assign('description', String::nl2br_if_needed(trim($product_object->description)));
+			if (!empty($product_ordered_id)) {
+				// On veut afficher les détails d'un produit commandé.
+				$sql = "SELECT nom_attribut, attributs_list
+					FROM peel_commandes_articles ca
+					INNER JOIN peel_commandes c ON c.id=ca.commande_id
+					WHERE ca.id='" . intval($product_ordered_id) . "' AND id_utilisateur='" . intval(vn($_SESSION['session_utilisateur']['id_utilisateur'])."'");
+				$query = query($sql);
+				if($result = fetch_assoc($query)) {
+					if(function_exists('display_specific_attribut')) {
+						$description = display_specific_attribut($product_object, $result['attributs_list']);
+					} else {
+						$description = str_replace("\n", '<br />', display_option_image(vb($result['nom_attribut']), true));
+					}
+				}
+			} else {
+				$description = String::nl2br_if_needed(trim($product_object->description));
+			}
+			$tpl->assign('description', $description);
 			if(!empty($GLOBALS['site_parameters']['show_qrcode_on_product_pages'])) {
 				$tpl->assign('qrcode_image_src', $product_object->qrcode_image_src());
 			}
@@ -354,17 +305,16 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$tpl->assign('barcode_image_src', $product_object->barcode_image_src());
 			}
 			$tpl->assign('extra_link', $product_object->extra_link);
-
-			if (check_if_module_active('lot')) {
-				$tpl->assign('explanation_table', get_lot_explanation_table($product_object->id, $product_object->categorie_id));
-			}
-
+			if (empty($product_ordered_id)) {
 			if (!empty($product_object->on_check) && check_if_module_active('gift_check')) {
 				$tpl->assign('check', affiche_check($product_object->id, 'cheque', null, true));
 			} else {
 				if (empty($product_object->on_estimate)) {
 					if(!empty($product_object->on_gift) || $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), false, false, 1, true, true, false)!=0 || vb($GLOBALS['site_parameters']['show_add_to_cart_on_free_products'])) {
-						$tpl->assign('critere_stock', affiche_critere_stock($product_object, 'details', null, true));
+						if(!empty($_GET['liste'])) {
+							$liste = explode('|', $_GET['liste']);
+						}
+						$tpl->assign('critere_stock', affiche_critere_stock($product_object, 'details', null, true, false, null, vn($liste[0]), vn($liste[1])));
 					} else {
 						$tpl->assign('critere_stock', '');
 					}
@@ -376,24 +326,25 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					));
 				}
 			}
+			}
 
 			if (!empty($product_object->display_tab)) {
 				// Onglets
 				$sql = 'SELECT
-tab1_html_' . $_SESSION['session_langue'] . ' AS tab1_html,
-tab2_html_' . $_SESSION['session_langue'] . ' AS tab2_html,
-tab3_html_' . $_SESSION['session_langue'] . ' AS tab3_html,
-tab4_html_' . $_SESSION['session_langue'] . ' AS tab4_html,
-tab5_html_' . $_SESSION['session_langue'] . ' AS tab5_html,
-tab6_html_' . $_SESSION['session_langue'] . ' AS tab6_html,
-tab1_title_' . $_SESSION['session_langue'] . ' AS tab1_title,
-tab2_title_' . $_SESSION['session_langue'] . ' AS tab2_title,
-tab3_title_' . $_SESSION['session_langue'] . ' AS tab3_title,
-tab4_title_' . $_SESSION['session_langue'] . ' AS tab4_title,
-tab5_title_' . $_SESSION['session_langue'] . ' AS tab5_title,
-tab6_title_' . $_SESSION['session_langue'] . ' AS tab6_title
-FROM peel_produits
-WHERE id="' . $product_object->id . '" AND ' . get_filter_site_cond('produits') . '';
+					tab1_html_' . $_SESSION['session_langue'] . ' AS tab1_html,
+					tab2_html_' . $_SESSION['session_langue'] . ' AS tab2_html,
+					tab3_html_' . $_SESSION['session_langue'] . ' AS tab3_html,
+					tab4_html_' . $_SESSION['session_langue'] . ' AS tab4_html,
+					tab5_html_' . $_SESSION['session_langue'] . ' AS tab5_html,
+					tab6_html_' . $_SESSION['session_langue'] . ' AS tab6_html,
+					tab1_title_' . $_SESSION['session_langue'] . ' AS tab1_title,
+					tab2_title_' . $_SESSION['session_langue'] . ' AS tab2_title,
+					tab3_title_' . $_SESSION['session_langue'] . ' AS tab3_title,
+					tab4_title_' . $_SESSION['session_langue'] . ' AS tab4_title,
+					tab5_title_' . $_SESSION['session_langue'] . ' AS tab5_title,
+					tab6_title_' . $_SESSION['session_langue'] . ' AS tab6_title
+					FROM peel_produits
+					WHERE id="' . $product_object->id . '" AND ' . get_filter_site_cond('produits') . '';
 				$q_tab = query($sql);
 				$tabs = array();
 				// pour connaitre le nombre total d'onglets, on initialise un compteur
@@ -446,8 +397,13 @@ WHERE id="' . $product_object->id . '" AND ' . get_filter_site_cond('produits') 
 			}
 			$tpl->assign('display_share_tools_on_product_pages', !empty($GLOBALS['site_parameters']['display_share_tools_on_product_pages']));
 			$tpl->assign('associated_products', affiche_produits(null, 3, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], vb($GLOBALS['site_parameters']['associated_products_display_mode']), true, $product_object->id, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), false));
-			$tpl->assign('breadcrumb', affiche_ariane(false, $product_object->name, $prev.$next));
 			$tpl->assign('javascript', null); // Pour compatibilité anciens templates avant restructuration javascript v7.1
+			$hook_result = call_module_hook('product_details_additional_infos', array('id' => $product_object->id, 'id_utilisateur' => $product_object->id_utilisateur, 'categorie_id' => $product_object->categorie_id, 'current_catid' => $current_catid, 'position' => $product_object->position), 'array');
+			foreach($hook_result as $this_key => $this_value) {
+				$tpl->assign($this_key, $this_value);
+			}
+			// Utilisation exceptionnelle d'un élément 
+			$tpl->assign('breadcrumb', affiche_ariane(false, $product_object->name, vb($hook_result['prev']).vb($hook_result['next'])));
 			$output .= $tpl->fetch();
 		}
 		unset($product_object);
@@ -500,15 +456,16 @@ if (!function_exists('get_products_list_brief_html')) {
 				$cat['offline'] = $GLOBALS['STR_OFFLINE_CATEGORY'];
 			}
 			if (!empty($cat_infos['image'])) {
-				$this_thumb = thumbs($cat_infos['image'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+				$this_thumb = thumbs($cat_infos['image'], $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit', null, null, true, true);
 				if(!empty($this_thumb)) {
 					$cat['image'] = array(
-						'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb,
+						'src' => $this_thumb,
 						'name' => String::html_entity_decode_if_needed($cat_infos['nom_' . $_SESSION['session_langue']])
 					);
 				}
 			}
 			$cat['description'] = $cat_infos['description_' . $_SESSION['session_langue']];
+			correct_output($cat['description'], true, 'html', $_SESSION['session_langue']);
 			if (check_if_module_active('category_promotion') && (vn($cat_infos['promotion_devises']) > 0 || vn($cat_infos['promotion_percent']) > 0)) {
 				$cat['promotion'] = array(
 					'label' => $GLOBALS['STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE'],
@@ -546,6 +503,7 @@ if (!function_exists('get_products_list_brief_html')) {
 		}
 		$additional_sql_cond = '';
 		$tpl->assign('associated_products', affiche_produits($catid, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond));
+		$tpl->assign('breadcrumb', affiche_ariane(true, null, null));
 		return $tpl->fetch();
 	}
 }
@@ -569,7 +527,7 @@ if (!function_exists('affiche_prix')) {
 	 * @param boolean $display_minimal_price
 	 * @return
 	 */
-	function affiche_prix(&$product_object, $with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $force_display_with_vat_symbol = true, $add_rdfa_properties = false, $display_minimal_price = null)
+	function affiche_prix(&$product_object, $with_taxes = true, $reseller_mode = false, $return_mode = false, $display_with_measurement = false, $item_id = null, $display_ecotax = true, $display_old_price = true, $table_css_class = 'full_width', $display_old_price_inline = true, $force_display_with_vat_symbol = true, $add_rdfa_properties = false, $display_minimal_price = null, $quantity = 1)
 	{
 		static $tpl;
 		$output = '';
@@ -593,7 +551,7 @@ if (!function_exists('affiche_prix')) {
 			if (!empty($display_minimal_price)) {
 				$tpl->assign('final_price', $GLOBALS['STR_FROM'] . ' ' . $product_object->get_minimal_price());
 			} else {
-				$tpl->assign('final_price', $product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode, true, $display_with_vat_symbol, 1, true, true, $add_rdfa_properties));
+				$tpl->assign('final_price', $product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode, true, $display_with_vat_symbol, $quantity, true, true, $add_rdfa_properties));
 			}
 			if (($product_object->get_original_price($with_taxes, $reseller_mode) != $product_object->get_final_price(get_current_user_promotion_percentage(), $with_taxes, $reseller_mode)) && $display_old_price) {
 				$tpl->assign('original_price', $product_object->get_original_price($with_taxes, $reseller_mode, true));
@@ -799,7 +757,7 @@ if (!function_exists('affiche_produits')) {
 						'height' => $GLOBALS['site_parameters']['small_height'],
 						'alt' => $product_object->name,
 						'zoom' => array(
-							'href' => $GLOBALS['repertoire_upload'] . '/' . $display_picture,
+							'href' => get_url_from_uploaded_filename($display_picture),
 							'is_lightbox' => false,
 							'file_type' => get_file_type($display_picture),
 							'label' => $GLOBALS['STR_ZOOM']
@@ -812,8 +770,9 @@ if (!function_exists('affiche_produits')) {
 						'height' => false,
 						'alt' => $product_object->name,
 						'zoom' => array(
-							'href' => $GLOBALS['repertoire_upload'] . '/' . $display_picture,
+							'href' => get_url_from_uploaded_filename($display_picture),
 							'is_lightbox' => empty($GLOBALS['site_parameters']['lightbox_disable']),
+							'file_type' => get_file_type($display_picture),
 							'label' => $GLOBALS['STR_ZOOM']
 						)
 					);
@@ -869,6 +828,9 @@ if (!function_exists('affiche_produits')) {
 				);
 			}
 			$tmpProd['last_month'] = ($prod['date_insere'] > date("Y-m-d", time() - 30 * 24 * 3600));
+			if (!empty($product_object->technical_code)) {		
+				$tmpProd['product_list_html_zone'] = affiche_contenu_html('product_list_html_zone_'.$product_object->technical_code, true);
+			}
 			if (est_identifie() && !empty($GLOBALS['site_parameters']['enable_create_product_in_front']) && $product_object->id_utilisateur == $_SESSION['session_utilisateur']['id_utilisateur']) {
 				// On récupère les informations manquantes
 				$sql = "SELECT p.id, p.titre_" . $_SESSION['session_langue'] . " AS titre, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
@@ -892,7 +854,7 @@ if (!function_exists('affiche_produits')) {
 		$tpl->assign('nb_col_sm', min($params['nb_colonnes'],3));
 		$tpl->assign('nb_col_md', $params['nb_colonnes']);
 		$tpl->assign('vars', $template_additional_variables);
-
+		
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_TOTAL', $GLOBALS['STR_TOTAL'] .' '. (display_prices_with_taxes_active() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 		if (!empty($total)) {
@@ -1002,7 +964,7 @@ if (!function_exists('affiche_critere_stock')) {
 		$tpl->assign('product_id', vn($product_object->id));
 			
 		if (empty($product_object->on_rupture)) {
-			$colors_array = $product_object->get_possible_colors();
+			$colors_infos_array = $product_object->get_possible_colors('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 			$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 			$attributs_infos_array = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 			
@@ -1012,14 +974,19 @@ if (!function_exists('affiche_critere_stock')) {
 			}
 			$update_class = (!empty($attributs_infos_array) ? 'special_select' : '');
 
+			$action = $GLOBALS['wwwroot'] . '/achat/caddie_ajout.php?prodid=' . $product_object->id;
+			if (!empty($_GET['reference'])) {
+				// On peut définir une autre référence pour ce produit. C'est utilisé pour que le produit porte une information supplémentaire, comme un ID d'annonce par exemple.
+				$action .= '&reference=' . $_GET['reference'];
+			}
 			$tpl->assign('is_form', true);
-			$tpl->assign('action', $GLOBALS['wwwroot'] . '/achat/caddie_ajout.php?prodid=' . $product_object->id);
+			$tpl->assign('action', $action);
 			$tpl->assign('form_id', $form_id);
 			$tpl->assign('update_class', $update_class);
 			$tpl->assign('condensed_display_mode', $condensed_display_mode);
 			if (!$condensed_display_mode) {
 				// DISPLAY BY DEFAULT OF $GLOBALS['STR_COLOR'] AND $GLOBALS['STR_SIZE'] SELECTS BEGINS HERE
-				if (!empty($colors_array)) {
+				if (!empty($colors_infos_array)) {
 					$tpl->assign('is_color', true);
 					$id_select_color = 'couleur' . $save_suffix_id;
 					if (!empty($save_cart_id)) {
@@ -1038,25 +1005,32 @@ if (!function_exists('affiche_critere_stock')) {
 					$tpl->assign('id_select_color', $id_select_color);
 					$tpl->assign('color_on_change_action', $on_change_action);
 					$tplColors = array();
-					foreach ($colors_array as $this_color_id => $this_color_name) {
+					foreach ($colors_infos_array as $this_color) {
+						$option_content = '';
 						$isavailable = true;
 						if (check_if_module_active('stock_advanced') && $product_object->on_stock == 1 && empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
 							// Récupération du stock pour la couleur.
-							$this_color_product_stock_infos = get_product_stock_infos($product_object->id, $product_object->configuration_size_id, $this_color_id);
+							$this_color_product_stock_infos = get_product_stock_infos($product_object->id, $product_object->configuration_size_id, $this_color['couleur_id']);
 							// Par défaut on considère que le produit n'est pas disponible dans la configuration de stock étudiée
 							// Si $product_stock_infos est incomplet, cela ne posera donc pas de problème
 							$isavailable = false;
 							foreach ($this_color_product_stock_infos as $this_stock_info) {
-								if ($this_stock_info['couleur_id'] == $this_color_id && $this_stock_info['stock_temp'] > 0) {
+								if ($this_stock_info['couleur_id'] == $this_color['couleur_id'] && $this_stock_info['stock_temp'] > 0) {
 									$isavailable = true;
 								}
 							}
 						}
+						if (!empty($this_color['row_final_price']) && $this_color['row_final_price'] > 0) {
+							$option_content .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': +' . fprix($this_color['final_price_formatted'], true);
+						} elseif (!empty($this_color['row_final_price']) && $this_color['row_final_price'] < 0) {
+							$option_content .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . fprix($this_color['final_price_formatted'], true);
+						}
 						$tplColors[] = array(
-							'id' => $this_color_id,
-							'issel' => ($selected_color_id == $this_color_id),
+							'id' => $this_color['couleur_id'],
+							'issel' => ($selected_color_id == $this_color['couleur_id']),
 							'isavailable' => $isavailable,
-							'name' => $this_color_name,
+							'suffix' => $option_content,
+							'name' => $this_color['nom_' . $_SESSION['session_langue']]
 						);
 					}
 					$tpl->assign('colors', $tplColors);
@@ -1197,7 +1171,9 @@ if (!function_exists('affiche_critere_stock')) {
 						$stock_remain_all += $stock_infos['stock_temp'];
 					}
 				}
-				$tpl->assign('affiche_etat_stock', affiche_etat_stock($stock_remain_all, false, true));
+				if(empty($GLOBALS['site_parameters']['disabled_affiche_etat_stock'])){
+					$tpl->assign('affiche_etat_stock', affiche_etat_stock($stock_remain_all, false, true));
+				}
 				if (!empty($stock_remain_all)) {
 					if ($product_object->affiche_stock == 1 && !empty($product_stock_infos)) {
 						$tpl->assign('stock_remain_all', $stock_remain_all);
@@ -1244,7 +1220,11 @@ if (!function_exists('affiche_critere_stock')) {
 			if (empty($product_object->on_estimate)) {
 				$tpl->assign('on_estimate', false);
 				if (empty($product_object->on_download) && empty($product_object->on_gift)) {
-					$tpl->assign('qte_hidden', false);
+					if (!empty($GLOBALS['site_parameters']['product_disable_quantity_field']) && in_array($product_object->technical_code, $GLOBALS['site_parameters']['product_disable_quantity_field'])) {
+						$tpl->assign('qte_hidden', true);
+					} else {
+						$tpl->assign('qte_hidden', false);
+					}
 					$tpl->assign('qte_value', (!empty($saved_quantity) ? intval($saved_quantity) : vn($q_owner)));
 				} else {
 					$tpl->assign('qte_hidden', true);
@@ -1405,7 +1385,7 @@ if (!function_exists('affiche_arbre_categorie')) {
 		$nom = '';
 		if(empty($categories_treated[$catid])) {
 			// On évite les cas de boucles entre catégories qui ont pour Nème parent une catégorie dont elles sont elles-même parents => sinon boucle sans fin
-			// Fonction utilisée également en back office pour le module comparateur => utilisation de use_admin_right inutile, on veux pouvoir récupérer les catégories ste_id = 0 dans l'export pour les comparateurs également.
+			// Fonction utilisée également en back office pour le module comparateur => utilisation de use_admin_right inutile, on veut pouvoir récupérer les catégories ste_id = 0 dans l'export pour les comparateurs également.
 			$qid = query('SELECT parent_id, nom_' . $_SESSION['session_langue'] . ' AS nom
 				FROM peel_categories
 				WHERE id = "' . intval($catid) . '" AND etat = "1" AND ' . get_filter_site_cond('categories') . '');
@@ -1546,15 +1526,21 @@ if (!function_exists('display_javascript_for_price_update')) {
 			}
 		}
 		$sizes_infos_array = $product_object->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
+		$colors_infos_array = $product_object->get_possible_colors('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller());
 		if(!empty($product_object2)) {
 			foreach($product_object2->get_possible_sizes('infos', get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller()) as $this_key => $this_value) {
 				$sizes_infos_array[$this_key] = $this_value;
 			}
 		}
-		if (!empty($sizes_infos_array) || (check_if_module_active('attributs') && !empty($attributs_infos_array))) {
+
+		if ((!empty($colors_infos_array) && count($colors_infos_array)>1) || (!empty($sizes_infos_array) && count($sizes_infos_array)>1) || (check_if_module_active('attributs') && !empty($attributs_infos_array))) {
 			$output .= '
 <script><!--//--><![CDATA[//><!--
 ';
+			if (function_exists('build_extra_var_js')) {
+				$get_infos_js .= '
+	' . build_extra_var_js();
+			}
 			if (check_if_module_active('attributs') && !empty($attributs_infos_array)) {
 				$get_infos_js .= '
 	' . build_attr_var_js('attribut_list', $attributs_infos_array, $form_id);
@@ -1580,12 +1566,26 @@ if (!function_exists('display_javascript_for_price_update')) {
 ';
 				}
 			}
+			if(!empty($colors_infos_array) && count($colors_infos_array)>1){
+				$get_infos_js .= '
+	select_color = document.getElementById("couleur' . $save_suffix_id . '");
+	color_id = select_color.options[select_color.selectedIndex].value;';
+			}
 			$output .= '
 function update_product_price' . ($save_suffix_id) . '(){
 	var attribut_list="";
 	var size_id="";
+	var quantite="";
+	var color_id="";
+	if(typeof sel != "undefined"){
+		var value = sel.value.substring(2,sel.value.length);
+		var first_elem = false;
+		jQuery("#image_attribut").html("");
+	}else{
+		var first_elem = true;
+	}
 	' . $get_infos_js . '
-	jQuery.post("'.$GLOBALS['wwwroot'].'/get_product_price.php", {product_id: '.$product_object->id.', product2_id: '.(!empty($product_object2)?$product_object2->id:'""').', size_id: size_id, attribut_list: attribut_list, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\'}, function(data){
+	jQuery.post("'.$GLOBALS['wwwroot'].'/get_product_price.php", {product_id: '.$product_object->id.', product2_id: '.(!empty($product_object2)?$product_object2->id:'""').', size_id: size_id, attribut_list: attribut_list, quantite: quantite, hash: \''.sha256('HFhza8462naf'.$product_object->id).'\', color_id: color_id}, function(data){
 		var divtoshow = "#prix_' . vn($product_object->id) . $save_suffix_id . '";
 		if(data.length >0) {
 			jQuery(divtoshow).show();

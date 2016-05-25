@@ -10,22 +10,14 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_home.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_liste_home.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_HTML_TITLE }}</div>
 <p><img src="{{ add_src|escape('html') }}" width="16" height="16" alt="" class="middle" /><a href="{{ add_href|escape('html') }}">{{ STR_ADMIN_HTML_CREATE }}</a></p>
 <div class="alert alert-info"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_HTML_EXPLAIN }}</div>
 <div class="table-responsive">
 	<table class="table">
 	{% if (results) %}
-		<tr>
-			<td class="menu">{{ STR_ADMIN_ACTION }}</td>
-			<td class="menu">{{ STR_ADMIN_LANGUAGE }}</td>
-			<td class="menu">{{ STR_ADMIN_TITLE }}</td>
-			<td class="menu">{{ STR_DATE }}</td>
-			<td class="menu">{{ STR_ADMIN_PLACE }}</td>
-			<td class="menu">{{ STR_STATUS }}</td>
-			<td class="menu">{{ STR_ADMIN_WEBSITE }}</td>
-		</tr>
+		{{ links_header_row }}
 		{% for res in results %}
 		{{ res.tr_rollover }}
 		<td class="center" width="50">
@@ -45,6 +37,7 @@
 	{% endif %}
 	</table>
 </div>
+{{ links_multipage }}
 {% if is_welcome_ad_module_active %}
 <br /><a href="{{ wwwroot }}/" onclick="thisdate=new Date;thisdate.setFullYear(thisdate.getFullYear()-1);document.cookie='info_inter=; path=/; expires='+thisdate.toGMTString();">{{ STR_ADMIN_HTML_DELETE_COOKIE_LINK }}</a>
 {% endif %}

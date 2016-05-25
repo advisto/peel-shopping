@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: paiement.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: paiement.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -310,11 +310,11 @@ function affiche_liste_paiement()
 		FROM peel_paiement p
 		WHERE " . get_filter_site_cond('paiement', 'p', true) . " 
 		ORDER BY p.position";
-	$result = query($sql);
-	if (!(num_rows($result) == 0)) {
+	$query = query($sql);
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			if ($ligne['technical_code'] == 'paypal' && empty($GLOBALS['site_parameters']['email_paypal'])) {
 				$explain = '<br /><span class="red">' . String::strtoupper($GLOBALS["STR_ADMIN_DEACTIVATED"]) . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': <a href="'.$GLOBALS['administrer_url'].'/sites.php" style="color:#999999">' . $GLOBALS["STR_ADMIN_SITES_PAYPAL_EMAIL"].'</a></span>';
 			}elseif ($ligne['technical_code'] == 'moneybookers' && empty($GLOBALS['site_parameters']['email_moneybookers'])) {

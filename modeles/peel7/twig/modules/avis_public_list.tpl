@@ -10,11 +10,11 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_public_list.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: avis_public_list.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}
-<h1 property="name">{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h1>
+<h1 property="name">{% if mode == 'avis' %}{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}{% else %}{{ STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT }}{% endif %}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h1>
 {% if are_results %}
-	{% if not module_avis_no_notation and not ad_owner_opinion %}
+	{% if not module_avis_no_notation and mode=='avis' %}
 		<b>{{ STR_MODULE_AVIS_AVERAGE_RATING_GIVEN }}</b> 
 	{% endif %}
 	{% for foo in 1..avisnote %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}
@@ -44,9 +44,9 @@
 	<div class="td_avis">
 		<i>{{ STR_MODULE_AVIS_OPINION_POSTED_BY }} {{ res.pseudo }} {% if not module_avis_no_notation %} {% for foo in 1..res.note %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}{% endif %} {{ STR_ON_DATE_SHORT }} {{ res.date }}</i><br />{{ res.avis|html_entity_decode_if_needed|nl2br_if_needed }}
 	</div>
-	{% if res.allow_edit_and_suppr_avis %}
-		<a href="{{ wwwroot }}/modules/avis/avis.php?{% if type == 'annonce' %}ref{% else %}prodid{% endif %}={{ id }}&amp;type={{ type }}&amp;id={{ res.id }}&amp;mode=edit">{{ LANG.STR_MODIFY }}</a> - 
-		<a href="{{ wwwroot }}/modules/avis/avis.php?{% if type == 'annonce' %}ref{% else %}prodid{% endif %}={{ id }}&amp;type={{ type }}&amp;id={{ res.id }}&amp;mode=suppr">{{ LANG.STR_DELETE }}</a>
+	{% if res.edit_allowed %}
+		<a href="{{ wwwroot }}/modules/avis/avis.php?id={{ res.id }}&amp;mode=edit">{{ LANG.STR_MODIFY }}</a> - 
+		<a href="{{ wwwroot }}/modules/avis/avis.php?id={{ res.id }}&amp;mode=suppr">{{ LANG.STR_DELETE }}</a>
 	{% endif %}
 	{% endfor %}
 {% else %}
@@ -58,13 +58,15 @@
 {% endif %}
 {% if type == 'produit' %}
 <p style="margin-top: 20px;">
-	<a href="{{ urlprod }}">{{ STR_BACK_TO_PRODUCT|escape('html') }}</a>
+	<a href="{{ urlprod }}" class="btn btn-default">{{ STR_BACK_TO_PRODUCT|escape('html') }}</a>
 </p>
-{% elseif type == 'annonce' and not ad_owner_opinion %}
+{% elseif type == 'annonce' and not is_owner and mode=='avis' %}
 <p style="margin-top: 20px;">
-	<a href="{{ urlannonce }}">{{ STR_MODULE_ANNONCES_BACK_TO_AD|escape('html') }}</a>
+	<a href="{{ urlannonce }}" class="btn btn-default">{{ STR_MODULE_ANNONCES_BACK_TO_AD|escape('html') }}</a>
 </p>
 {% endif %}
-{% if ad_owner_opinion %}
-	- <a href="{{ wwwroot }}/modules/avis/avis.php?id={{ id }}&amp;type=annonce">{{ LANG.STR_ADD_NEWS|escape('html') }}</a>
+{% if type == 'annonce' and is_owner % and mode == 'news'}
+<p style="margin-top: 20px;">
+	<a href="{{ wwwroot }}/modules/avis/avis.php?ref={{ id }}&amp;mode=news" class="btn btn-default">{{ LANG.STR_MODULE_AVIS_YOUR_NEWS_ADD|escape('html') }}</a>
+</p>
 {% endif %}

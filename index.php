@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 48447 2016-01-11 08:40:08Z sdelaporte $
-/*! \mainpage PEEL Shopping 8.0.2 - Open eCommerce
+// $Id: index.php 49979 2016-05-23 12:29:53Z sdelaporte $
+/*! \mainpage PEEL Shopping 8.0.3 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -23,7 +23,7 @@ $GLOBALS['page_name'] = 'index';
 
 $output = '';
 
-if (strpos($_SERVER['REQUEST_URI'], '/index.php') !== false) {
+if (empty($GLOBALS['site_parameters']['disable_index_redirection']) && strpos($_SERVER['REQUEST_URI'], '/index.php') !== false) {
 	redirect_and_die(get_url('/'), true);
 }
 $rubrique_template = 'home';
@@ -80,30 +80,15 @@ $tpl->assign('actu', print_actu(true, 0));
 $tpl->assign('image_accueil', vb($GLOBALS['site_parameters']['general_home_image1']));
 $tpl->assign('image_accueil_2', vb($GLOBALS['site_parameters']['general_home_image2']));
 
-if(empty($GLOBALS['site_parameters']['skip_home_ad_categories_presentation']) && check_if_module_active('annonces')) {
-	// Ajoute la liste des catégories d'annonces sur la home
-	$tpl->assign('categorie_annonce', get_ad_categories_presentation(true));
-	// Présentation des annonces récentes. Fonction multisite qui affiche toutes les annonces récente et les classe par site.
-	if (!empty($GLOBALS['site_parameters']['display_home_fresh_ad_presentation'])) {
-		// L'entête de la liste d'annonce est différent selon les sites :
-		$tpl->assign('fresh_ad_presentation', get_fresh_ad_presentation());
-	}
-}
-
-
 $tpl->assign('contenu_html', affiche_contenu_html("home", true));
-$tpl->assign('contenu_html_bottom', affiche_contenu_html("home_bottom", true));
 $tpl->assign('center_middle_home', get_modules('center_middle_home', true));
 $tpl->assign('center_middle_top', get_modules('center_middle_top', true));
-if(check_if_module_active('abonnement')) {
-	$tpl->assign('vitrine_list', getVerifiedVitrineList());
+
+$hook_result = call_module_hook('index_form_template_data', array(), 'array');
+foreach($hook_result as $this_key => $this_value) {
+	$tpl->assign($this_key, $this_value);
 }
-if(check_if_module_active('carrousel')) {
-	$tpl->assign('carrousel_html',  Carrousel::display('top_home', true, vb($GLOBALS['site_parameters']['module_carrousel_top_home_show_pagination'], true), vb($GLOBALS['site_parameters']['module_carrousel_top_home_show_previous_next_buttons'], false)));
-	if(vb($GLOBALS['site_parameters']['module_carrousel_display_categorie_on_homepage'])) {
-		$tpl->assign('CARROUSEL_CATEGORIE', '<div class="affiche_contenu_entre_module">'. affiche_contenu_html("entre_carrousel", true) .'</div>' . Carrousel::display('categorie', true, false, false));
-	}
-}
+
 $output .= $tpl->fetch();
 
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['site_index_page_columns_count'];

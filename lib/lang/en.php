@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: en.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -77,7 +77,7 @@ $GLOBALS["STR_BUTTON_UPDATE_ADDRESS_CREATE"] = "I modify this address";
 $GLOBALS["STR_BUY"] = "Buy";
 $GLOBALS["STR_BUYERS"] = "Buyers";
 $GLOBALS["STR_BY"] = "By";
-$GLOBALS["STR_CADDIE_OBJECTS_COUNT"] = "product(s)";
+$GLOBALS["STR_CADDIE_OBJECTS_COUNT"] = "Product(s)";
 $GLOBALS["STR_CADDIE"] = "Your cart";
 $GLOBALS["STR_CANCEL"] = "Cancel";
 $GLOBALS["STR_CART_IS_NOT_ENOUGHT"] = "The amount of your shopping cart is less than the minimum amount of the promotional code.";
@@ -116,9 +116,10 @@ $GLOBALS["STR_COMING_PRODUCT_FLASH"] = "Next product flash";
 $GLOBALS["STR_COMMENTS"] = "Comments";
 $GLOBALS["STR_COMMERCIAL_AGENT"] = "Sales representative";
 $GLOBALS["STR_COMMERCIAL_YES"] = "From time to time, {$GLOBALS['site']} may wish to share customer information with selected third party companies. Check out this box if you do not wish to have your information shared.";
+$GLOBALS["STR_COMPANY"] = "Company";
 $GLOBALS["STR_COMPANY_IDENTIFICATION"] = "Identification number of the company";
 $GLOBALS["STR_COMPANY_NAME"] = "Society Name";
-$GLOBALS["STR_COMPANY"] = "Company";
+$GLOBALS["STR_COMPANY_TYPE"] = "Legal form";
 $GLOBALS["STR_COMPLETE_SEND"] = "Your email has been sent";
 $GLOBALS["STR_COMPTE"] = "My Account";
 $GLOBALS["STR_CONDITION_AFFILI"] = "Conditions of affiliation ";
@@ -130,6 +131,7 @@ $GLOBALS["STR_CONFIRMATION"] = "Confirmation";
 $GLOBALS["STR_CONFIRM_DISABLE_ACCOUNT"] = "Are you sure you want to unsubscribe?";
 $GLOBALS["STR_CONTACT_INFO"] = "Information";
 $GLOBALS["STR_CONTACT_INTRO"] = "Need information? Questions? A special request? Contact Us!";
+$GLOBALS["STR_CONTACT_INTRO_PRODUCT_INFO"] = "Datasheet request";
 $GLOBALS["STR_CONTACT_LB"] = "Select your request subject";
 $GLOBALS["STR_CONTACT_SELECT1"] = "Piece of information";
 $GLOBALS["STR_CONTACT_SELECT2"] = "Suggestion";
@@ -155,7 +157,7 @@ $GLOBALS["STR_CUSTOMER"] = "Customer";
 $GLOBALS["STR_DATE"] = "Date";
 $GLOBALS["STR_DAY_AM"] = "Morning";
 $GLOBALS["STR_DAY_PM"] = "Afternoon";
-$GLOBALS["STR_DAYS"] = "day";
+$GLOBALS["STR_DAYS"] = "days";
 $GLOBALS["STR_DECONNECT"] = "Log out";
 $GLOBALS["STR_DEFAULT"] = "by default";
 $GLOBALS["STR_DEFAULT_ADDRESS"] = "Main address";
@@ -279,6 +281,7 @@ $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Facebook logout";
 $GLOBALS["STR_FILE_EMPTY"] = "File is empty";
 $GLOBALS["STR_FILE"] = "File";
+$GLOBALS["STR_FILTERED_SEND"] = "Your message has been filtered and has not been sent";
 $GLOBALS["STR_FIRST_CHOICE"] = "first choice";
 $GLOBALS["STR_FIRST_NAME"] = "First name";
 $GLOBALS["STR_FIRST_PAGE"] = "First page";
@@ -314,7 +317,7 @@ $GLOBALS["STR_GZOPEN_FAILED"] = "Compressed file opening failed";
 $GLOBALS["STR_HALF_WHOLESALER"] = "Half Wholesaler";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "has been deleted";
 $GLOBALS["STR_HAUT_DE_PAGE"] = "Top";
-$GLOBALS["STR_HAVE_YOU_THINK_ABOUT"] = "Have you think about ... ";
+$GLOBALS["STR_HAVE_YOU_THINK_ABOUT"] = "Some recommendations for you ... ";
 $GLOBALS["STR_HELLO"] = "Hello";
 $GLOBALS["STR_HERE"] = "You are here";
 $GLOBALS["STR_HOLIDAY_AVAILABLE_CADDIE"] = "You will not receive the product for a period of ";
@@ -400,7 +403,9 @@ $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "No opinion has been p
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "note";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Opinion posted by";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "You have wished to leave a comment on the product";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "The news from ";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "Users opinions about";
+$GLOBALS["STR_MODULE_AVIS_POSTED_NEWS"] = "News";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Send your opinion";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "You want to file a comment on the product";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Your comment on the product";
@@ -688,9 +693,10 @@ $GLOBALS["STR_REGISTER_ORDER_ADDRESS"] = "Create another address";
 $GLOBALS["STR_REGLEMENT_CARTE_BANCAIRE"] = "Payment by credit card";
 $GLOBALS["STR_REMINDING_CHAR"] = "remaining char";
 $GLOBALS["STR_REMISE"] = "Cust. rebate";
-$GLOBALS["STR_REQUEST_OK"] = "Your request was indeed taken into account.<br />You will be notified by email when this product is back in stock.";
+$GLOBALS["STR_REQUEST_OK"] = "Your request was indeed taken into account.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "required for a claim";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = " is required to validate your order.";
+$GLOBALS["STR_RESULTS"] = "Results";
 $GLOBALS["STR_RESULT_SEARCH"] = "Search result";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Retailer subscription";
 $GLOBALS["STR_RETAILER"] = "Open a wholesale account";
@@ -731,7 +737,7 @@ $GLOBALS["STR_SHIPPING_COST"] = "Shipping cost";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Means of shipping";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Shipping zone";
 $GLOBALS["STR_SHOPPING"] = "Continue my shopping";
-$GLOBALS["STR_SHORT_FAX"] = "Fax.";
+$GLOBALS["STR_SHORT_FAX"] = "Fax";
 $GLOBALS["STR_SHORT_TEL"] = "Tel.";
 $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "Disable your download manager";
 $GLOBALS["STR_SIGNATURE"] = "Signature";
@@ -800,6 +806,7 @@ $GLOBALS["STR_UNAVAILABLE"] = "Indisponible";
 $GLOBALS["STR_UNIT_PRICE"] = "Unit price";
 $GLOBALS["STR_UPDATE_WEBSITE"] = "The website {$GLOBALS['site']} is currently under maintenance for a few minutes.";
 $GLOBALS["STR_UPDATE"] = "Update your cart";
+$GLOBALS["STR_UPLOAD"] = "Upload";
 $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"] = "Problem when transferring the file - Please try again.";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_IS_TOO_BIG"] = "The file is too big (limit: %s ko)";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"] = "The type of file (%s) you are trying to upload is not allowed, you can only upload files type:";
@@ -807,6 +814,7 @@ $GLOBALS["STR_UPLOAD_ERROR_FILE_TYPE_NOT_VALID"] = "The type of the file is not 
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_HIGHER_THAN"] = "Your picture should not be higher than %s pixels";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_LARGER_THAN"] = "Your picture should not be larger than %s pixels";
 $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"] = "You did not upload a file.";
+$GLOBALS["STR_USER_ACCOUNT_COMPLETION"] = "Your profile is %s complete.";
 $GLOBALS["STR_USER_CANCEL"] = "Cancellation of the Internet user.";
 $GLOBALS["STR_USER_ORIGIN"] = "How do you know our website?";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "By a friend or parent";
@@ -816,6 +824,8 @@ $GLOBALS["STR_USER_ORIGIN_OPTIONS_4"] = "On another website";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_5"] = "By one of our sales representatives";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_6"] = "At an exhibition";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_7"] = "Other";
+$GLOBALS["STR_USER_TYPE_COMPANY"] = "Legal person";
+$GLOBALS["STR_USER_TYPE_PERSON"] = "Natural person";
 $GLOBALS["STR_VALIDATE_ORDER"] = "Confirm the order";
 $GLOBALS["STR_VALIDATION_CODE_COPY"] = "Copy this code";
 $GLOBALS["STR_VALIDATION_CODE"] = "Confirmation code";
@@ -846,6 +856,7 @@ $GLOBALS["STR_YOU_ARE"] = "You are";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "We are inviting you to edit your invoice from your personal account";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Your promotional code";
 $GLOBALS["STR_YOUR_EMAIL"] = "Your Email";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "Your first name";
 $GLOBALS["STR_YOUR_NAME"] = "Your first name";
 $GLOBALS["STR_YOUR_NEW_ADDRESS_CREATE"] = "Your new address was created.";
 $GLOBALS["STR_YOUR_NOTE"] = "Your note";

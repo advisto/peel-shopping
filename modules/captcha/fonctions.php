@@ -3,16 +3,38 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
+}
+
+/**
+ * Traitement de la fin de la génération d'une page
+ *
+ * @param array $params
+ * @return
+ */
+function captcha_hook_show_caddie_pre($params) {
+	if ($_SESSION['session_caddie']->total == 0 && !empty($GLOBALS['site_parameters']['caddie_include_captcha_form']) && check_if_module_active('captcha')) {
+		if (!empty($params['frm']) && empty($params['frm']['code'])) {
+			// Pas de tentative de déchiffrement, on laisse le captcha
+			$params['form_error_object']->add('code', $GLOBALS['STR_EMPTY_FIELD']);
+		} elseif(!empty($params['frm'])) {
+			if (!check_captcha($params['frm']['code'], $params['frm']['code_id'])) {
+				$params['form_error_object']->add('code', $GLOBALS['STR_CODE_INVALID']);
+				// Code mal déchiffré, on en donne un autre
+				delete_captcha(vb($params['frm']['code_id']));
+				unset($params['frm']['code']);
+			}
+		}
+	}
 }
 
 /**

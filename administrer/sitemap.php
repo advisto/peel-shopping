@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: sitemap.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -110,7 +110,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		$created_report[] = $sql;
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
-			$product_object = new Product($result['produit_id'], $result, true, null, true, !check_if_module_active('micro_entreprise'));
+			$product_object = new Product($result['produit_id'], $result, true, null, true, !check_if_module_active('micro_entreprise'), false, true);
 			$tpl_products[] = $product_object->get_product_url();
 			unset($product_object);
 		}
@@ -183,7 +183,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	fclose($create_xml);
 
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITEMAP_MSG_CREATED_OK']))->fetch();
-	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . nl2br(implode('<hr />', $created_report)) . '</p>';
+	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . String::nl2br_if_needed(implode('<hr />', $created_report)) . '</p>';
 }
 
 /**

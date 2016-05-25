@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_site.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_site.tpl 49918 2016-05-16 21:48:13Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<div class="tabbable">
@@ -33,7 +33,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_MANDATORY }}</div></td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_GENERAL_PARAMETERS }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_GENERAL_PARAMETERS }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_SITE_ACTIVATION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -179,7 +179,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_CSS_FILES_EXPLAIN }}</div></td>
    	 	</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_SECURITY }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_SECURITY }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_ADMIN_FORCE_SSL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -209,7 +209,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_DISPLAY_ERRORS_FOR_IP_EXPLAIN }}</div></td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_PRODUCTS_DISPLAY }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_PRODUCTS_DISPLAY }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_PRODUCTS_COUNT_IN_MENU }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -321,7 +321,7 @@
    	 	</tr>
 
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_NO_VAT_FOR_INTRACOM_FOREIGNERS }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_NO_VAT_FOR_INTRACOM_FOREIGNERS }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_NO_VAT_FOR_INTRACOM_FOREIGNERS_LOCAL_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -335,7 +335,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_BILLING_HEADER }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_BILLING_HEADER }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_BILLING_NUMBER_FORMAT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -345,7 +345,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_BILLING_NUMBER_FORMAT_EXPLAIN }}</div></td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_HEADER }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_HEADER }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_VALIDITY_DAYS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -355,7 +355,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_REQUEST_FOR_PROPOSAL_VALIDITY_DAYS_EXPLAIN }}</div></td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_SMALL_ORDERS }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_SMALL_ORDERS }}</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_SMALL_ORDERS_EXPLAIN }}</div></td>
@@ -398,7 +398,7 @@
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_ORDERS_UPDATING_OLD_FORBIDDEN_IF_OLDER_THAN_DATE_EXPLAIN }}</div></td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_DELIVERY_COST_HEADER }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_DELIVERY_COST_HEADER }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_DELIVERY_COST_GENERAL_FRANCO_LIMIT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -433,7 +433,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_VAT_DISPLAY_MODE_HEADER }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_VAT_DISPLAY_MODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -451,7 +451,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_TEXT_EDITOR }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_TEXT_EDITOR }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_TEXT_EDITOR_EXPLAIN }}</td>
@@ -464,7 +464,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_EMAIL_CONFIGURATION }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_EMAIL_CONFIGURATION }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_EMAIL_SENDING_ALLOWED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -500,7 +500,7 @@
 			<td><input style="max-width:250px" type="text" class="form-control" name="email_client" value="{{ email_client|str_form_value }}" /> {{ STR_ADMIN_SITES_EMAIL_EMPTY_DEFAULT_EXPLAIN }}</td>
 		</tr>
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_ANALYTICS_TAG }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_ANALYTICS_TAG }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_ANALYTICS_TAG_EXPLAIN|htmlspecialchars }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -512,9 +512,9 @@
 	<table class="main_table">
 	{% for m in modules_infos %}
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ m.name }} {{ m.package }} {{ m.version }}{{ STR_BEFORE_TWO_POINTS }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_MODULE }}{{ STR_BEFORE_TWO_POINTS }}: {{ m.name }} {{ m.package }} {{ m.version }}{{ STR_BEFORE_TWO_POINTS }}</h2></td>
 		</tr>
-		{% if m.contact %}
+		{% if m.contact is empty %}
 			{% if m.type == "light" %}
 		<tr>
 			<td colspan="2">{{ STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT }}</td>
@@ -595,13 +595,13 @@
 			{% endif %}
 			{% if m.technical_code == "precedent_suivant" %}
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION }}</h2></td>
 		</tr>
-{% if	(STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN) %}
+			{% if (STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN) %}
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{{ STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_ACTIVATION_EXPLAIN }}</div></td>
 		</tr>
-{% endif %}
+			{% endif %}
 		<tr>
 			<td>{{ STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -654,7 +654,7 @@
 		</tr>
 		<tr>
 			<td>{{ STR_ADMIN_SITES_AFFILIATION_LOGO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="width:100px" type="text" class="form-control" name="logo_affiliation" value="{{ logo_affiliation|str_form_value }}" /></td>
+			<td><input style="width:500px" type="text" class="form-control" name="logo_affiliation" value="{{ logo_affiliation|str_form_value }}" /></td>
 		</tr>
 			{% endif %}
 			{% if m.technical_code == "parrainage" %}
@@ -671,10 +671,6 @@
 		<tr>
 			<td>{{ STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input style="" type="text" class="form-control" name="twitter_consumer_secret" value="{{ twitter_consumer_secret|str_form_value }}" /></td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input style="" type="text" class="form-control" name="twitter_oauth_callback" value="{{ twitter_oauth_callback|str_form_value }}" /></td>
 		</tr>
 			{% endif %}
 			{% if m.technical_code == "vacances" %}
@@ -834,12 +830,6 @@
 			<td><input style="" type="text" class="form-control" name="fb_baseurl" value="{{ fb_baseurl|str_form_value }}" /></td>
 		</tr>
 			{% endif %}
-			{% if m.technical_code == "facebook_connect" %}
-			{% endif %}
-			{% if m.technical_code == "facebook_connect" %}
-			{% endif %}
-			{% if m.technical_code == "facebook_connect" %}
-			{% endif %}
 		{% else %}
 		<tr>
 			<td colspan="2"><a href="https://www.peel.fr/utilisateurs/contact.php">{{ STR_ADMIN_CONTACT_PEEL_FOR_MODULE }}</a></td>
@@ -853,7 +843,7 @@
 			<div class="tab-pane" id="tab3">
 	<table class="main_table">
 		<tr>
-			<td class="bloc" colspan="2">{{ STR_ADMIN_SITES_MODULES_POSITIONS }}</td>
+			<td class="bloc" colspan="2"><h2>{{ STR_ADMIN_SITES_MODULES_POSITIONS }}</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2">

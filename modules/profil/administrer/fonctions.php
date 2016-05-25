@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -185,20 +185,19 @@ function maj_profil($id, &$frm)
  */
 function affiche_liste_profil($start)
 {
-
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/profilAdmin_liste.tpl');
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 
-	$result = query("SELECT id, name_".$_SESSION['session_langue']." AS name, priv, site_id
+	$query = query("SELECT id, name_".$_SESSION['session_langue']." AS name, priv, site_id
 		FROM peel_profil
 		WHERE " . get_filter_site_cond('profil', null, true) . "
-		ORDER BY name");
-	if (!(num_rows($result) == 0)) {
+		ORDER BY name ASC");
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],

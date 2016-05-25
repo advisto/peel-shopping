@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -143,12 +143,14 @@ function affiche_formulaire_banniere(&$frm)
 		// Charge les informations sur les catégorie annonces lorsque le module est activée.
 		$qid = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
 			FROM peel_categories_annonces
-			WHERE " . get_filter_site_cond('categories_annonces') . "");
+			WHERE " . get_filter_site_cond('categories_annonces') . "
+			ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
 	} else {
 		// Charge les informations sur les catégorie présentes en base de donnée.
 		$qid = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
 			FROM peel_categories
-			WHERE " . get_filter_site_cond('categories') . "");
+			WHERE " . get_filter_site_cond('categories') . "
+			ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
 	}
 	$tpl_cat_opts = array();
 	while ($cat = fetch_assoc($qid)) {
@@ -414,11 +416,15 @@ function affiche_liste_banniere($inner = '', $cond = '')
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$sql = "SELECT *
 		FROM peel_banniere pb " . $inner . "
-		WHERE 1
-		" . $cond . " AND " .  get_filter_site_cond('banniere', 'pb', true) .
-		" ORDER BY date_debut DESC";
-	$Links = new Multipage($sql, 'utilisateurs');
+		WHERE 1	" . $cond . " AND " .  get_filter_site_cond('banniere', 'pb', true);
+
+	$Links = new Multipage($sql, 'bannerAdmin_liste');
+	$HeaderTitlesArray = array($GLOBALS["STR_ADMIN_ACTION"], 'position' => $GLOBALS["STR_MODULE_BANNER_ADMIN_PLACE"], 'rang' => $GLOBALS["STR_ADMIN_POSITION"], 'description' => $GLOBALS["STR_NAME"], 'image' => $GLOBALS["STR_IMAGE"], 'date_debut' => $GLOBALS["STR_ADMIN_BEGIN_DATE"], 'date_fin' => $GLOBALS["STR_ADMIN_END_DATE"], 'hit' => $GLOBALS["STR_MODULE_BANNER_ADMIN_HIT"], 'vue' => $GLOBALS["STR_MODULE_BANNER_ADMIN_VIEWED"], 'lang' => $GLOBALS["STR_ADMIN_LANGUAGE"], 'etat' => $GLOBALS["STR_STATUS"], 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"]);
+	$Links->HeaderTitlesArray = $HeaderTitlesArray;
+	$Links->OrderDefault = 'date_debut';
+	$Links->SortDefault = 'DESC';
 	$results_array = $Links->Query();
+
 	if (!empty($results_array)) {
 		$tpl_results = array();
 		$i = 0;
@@ -453,6 +459,7 @@ function affiche_liste_banniere($inner = '', $cond = '')
 		}
 		$tpl->assign('results', $tpl_results);
 	}
+	$tpl->assign('links_header_row', $Links->getHeaderRow());
 	$tpl->assign('links_multipage', $Links->GetMultipage());
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_MODULE_BANNER_ADMIN_LIST_TITLE', $GLOBALS['STR_MODULE_BANNER_ADMIN_LIST_TITLE']);

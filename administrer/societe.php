@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: societe.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: societe.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -122,6 +122,8 @@ function afficher_formulaire_ajout_societe()
 		$frm['iban'] = "";
 		$frm['swift'] = "";
 		$frm['fax'] = "";
+		$frm['site_id'] = "";
+		$frm['site_country'] =  vb($GLOBALS['site_parameters']['site_country_allowed_array'], array());
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_SOCIETE_UPDATE'];
@@ -146,6 +148,7 @@ function affiche_formulaire_modif_societe($id, &$frm)
 			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('societe', null, true) . "");
 		if (num_rows($qid) > 0) {
 			$frm = fetch_assoc($qid);
+			$frm['site_country'] = explode(',', vb($frm['site_country']));
 		} else {
 			$frm = array();
 		}
@@ -204,6 +207,10 @@ function affiche_formulaire_societe(&$frm)
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS', $GLOBALS['STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS']);
 	$tpl->assign('STR_ADMIN_SOCIETE_FORM_EXPLAIN', $GLOBALS['STR_ADMIN_SOCIETE_FORM_EXPLAIN']);
@@ -284,6 +291,11 @@ function maj_societe($frm)
 			, iban = '" . nohtml_real_escape_string($frm['iban']) . "'
 			, swift = '" . nohtml_real_escape_string($frm['swift']) . "'
 			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= "
+			, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+		";
+	}
 	if($update) {
 		$sql = "UPDATE peel_societe " . $sql . "
 			WHERE id = '" . intval($frm['id']) . "' AND " . get_filter_site_cond('societe', null, true);
@@ -311,11 +323,22 @@ function liste_societe($frm)
 		WHERE " . get_filter_site_cond('societe', null, true) . "
 		ORDER BY id DESC");
 	while ($r = fetch_object($query)) {
+		$site_country_array = array();
+		if (!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			if(String::strlen($r->site_country)>0) {
+				foreach(explode(',', $r->site_country) as $this_id) {
+					$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
+				}
+			}
+		}
+		
 		$tpl_results[] = array(
 			'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $r->id,
 			'modif_href' => get_current_url(false) . '?mode=modif&id=' . $r->id,
 			'societe' => $r->societe,
-			'email' => $r->email
+			'email' => $r->email,
+			'site_name' => get_site_name($r->site_id),
+			'site_country' => implode(', ', $site_country_array)
 			);
 	}
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
@@ -332,6 +355,9 @@ function liste_societe($frm)
 	$tpl->assign('STR_EMAIL', $GLOBALS['STR_EMAIL']);
 	$tpl->assign('STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND', $GLOBALS['STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND']);
 	$tpl->assign('STR_ADMIN_ADD', $GLOBALS['STR_ADMIN_ADD']);
-	
+	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	return $tpl->fetch();
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: statut_livraison.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: statut_livraison.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -224,14 +224,14 @@ function maj_statut($id, $frm)
 function affiche_liste_statut()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_statut_livraison.tpl');
-	$result = query("SELECT id, position, nom_" . $_SESSION['session_langue'] . ", site_id, technical_code
+	$query = query("SELECT id, position, nom_" . $_SESSION['session_langue'] . ", site_id, technical_code
 		FROM peel_statut_livraison
 		WHERE " . get_filter_site_cond('statut_livraison', null, true) . "
 		ORDER BY position ASC, id ASC");
-	if (!(num_rows($result) == 0)) {
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'technical_code' => $ligne['technical_code'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],

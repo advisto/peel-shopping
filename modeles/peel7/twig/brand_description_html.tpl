@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: brand_description_html.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: brand_description_html.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}{% if is_error %}
 <h1 property="name" class="brand_description_html">{{ error_header }}</h1>
 <p class="alert alert-danger">{{ error_content }}</p>
@@ -52,10 +52,10 @@
 			{% if (item.href) %}<a href="{{ item.href|escape('html') }}">{% endif %}{{ item.nb_produits_txt }}{% if (item.href) %}</a>{% endif %}
 		</div>
 	</div>
-	{% if loop.index0%4==0 %}
+	{% if loop.index%4==0 %}
 	<div class="clearfix visible-md visible-lg"></div>
 	{% endif %}
-	{% if loop.index0%3==0 %}
+	{% if loop.index%3==0 %}
 	<div class="clearfix visible-sm"></div>
 	{% endif %}
 	{% endif %}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: mini_caddie.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: mini_caddie.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<div id="fly_to_basket_destination"></div>
 <div class="dropdown">
 	<a class="dropdown-toggle btn btn-default caddie-button" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart"></span><span class="badge minicaddie_badge_xs">{$count_products}</span><span class="caret"></span></a>
@@ -29,7 +29,7 @@
 			{if isset($total)}
 				<tr><td>{$total.label}:</td><td class="right">{$total.value}</td></tr>
 			{/if}
-			<tr><td colspan="2" class="center"><a href="{$affichage_href|escape:'html'}" class="btn btn-primary bouton">{$STR_DETAILS_ORDER}</a></td></tr>
+			<tr><td colspan="2" class="center"><a href="{$affichage_href|escape:'html'}" class="btn btn-primary">{$STR_DETAILS_ORDER}</a></td></tr>
 		</table>
 	</div>
 </div>

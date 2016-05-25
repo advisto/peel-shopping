@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_article.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_article.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}{% if not rubrique_options %}
 <div class="entete">{{ STR_ADMIN_ARTICLES_FORM_ADD }}</div>
 <p><a href="{{ add_category_url }}">{{ STR_ADMIN_ARTICLES_CREATE_CATEGORY_FIRST }}</a></p>
@@ -26,7 +26,7 @@
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
-		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</h2></td></tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_ARTICLES_CATEGORIE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -102,7 +102,7 @@
 			</td>
 		</tr>
 		{% for l in langs %}
-		<tr><td colspan="2" class="bloc">{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ l.lng|upper }}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td colspan="2"><b>{{ STR_ADMIN_TITLE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</b></td>
 		</tr>

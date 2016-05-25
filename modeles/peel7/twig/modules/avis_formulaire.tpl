@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_formulaire.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: avis_formulaire.tpl 50000 2016-05-23 18:55:49Z sdelaporte $
 #}<h2>{{ STR_DONNEZ_AVIS }}</h2>
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table class="avis_formulaire">
@@ -23,16 +23,16 @@
 			{% endif %}
 			</td>
 		</tr>
-		{% if not ad_owner_opinion %}
-			<tr>
-				<td class="title_label top"> {{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-				<td>{{ prenom }} {{ nom_famille }}</td>
-			</tr>
-			<tr>
-				<td class="title_label top"> {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-				<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
-			</tr>
-		{% endif %}
+	{% if mode =='avis' %}
+		<tr>
+			<td class="title_label top"> {{ STR_YOU_ARE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{{ prenom }} {{ nom_famille }}</td>
+		</tr>
+		<tr>
+			<td class="title_label top"> {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
+		</tr>
+	{% endif %}
 		<tr>
 			{% if (html_editor) %}
 			<td class="top" colspan="2">
@@ -49,21 +49,19 @@
 			</td>
 			{% endif %}
 		</tr>
-		{% if not ad_owner_opinion %}
-			{% if not (no_notation) %}
-			<tr>
-				<td class="top"><b>{{ STR_YOUR_NOTE }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
-					<br />{{ error_note }}
-				</td>
-				<td>
-					<input type="radio" name="note" value="5" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-					<input type="radio" name="note" value="4" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-					<input type="radio" name="note" value="3" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-					<input type="radio" name="note" value="2" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-					<input type="radio" name="note" value="1" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
-				</td>
-			</tr>
-			{% endif %}
+		{% if not (no_notation) and mode == 'avis' %}
+		<tr>
+			<td class="top"><b>{{ STR_YOUR_NOTE }} <span class="etoile">*</span></b>{{ STR_BEFORE_TWO_POINTS }}:
+				<br />{{ error_note }}
+			</td>
+			<td>
+				<input type="radio" name="note" value="5" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+				<input type="radio" name="note" value="4" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+				<input type="radio" name="note" value="3" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+				<input type="radio" name="note" value="2" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+				<input type="radio" name="note" value="1" /><img src="{{ star_src|escape('html') }}" style="vertical-align:middle" alt="*" /><br />
+			</td>
+		</tr>
 		{% endif %}
 		<tr>
 			<td colspan="2" class="center">
@@ -79,15 +77,13 @@
 				<input type="hidden" name="titre_annonce" value="{{ annonce_titre|str_form_value }}" />
 				{% endif %}
 				<input type="hidden" name="type" value="{{ type|str_form_value }}" />
-				<input type="hidden" name="mode" value="insere" />
+				<input type="hidden" name="update_or_create" value="{% if opinion_id %}modif{% else %}insere{% endif %}" />
 				<input type="hidden" name="langue" value="{{ langue|str_form_value }}" />
-				<input class="btn btn-primary" type="submit" value="{{ STR_MODULE_AVIS_SEND_YOUR_OPINION|str_form_value }}" />
+				<input class="btn btn-primary" type="submit" value="{{ STR_SEND|str_form_value }}" />
 			</td>
 		</tr>
-		{% if not ad_owner_opinion %}
 		<tr>
 			<td colspan="2"><p><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p></td>
 		</tr>
-		{% endif %}
 	</table>
 </form>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: rpc.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -49,19 +49,22 @@ if (String::strlen($search)>0) {
 		if(!empty($queries_results_array)) {
 			$is_reseller = false;
 			if(!empty($id_utilisateur)) {
-				$priv = query("SELECT priv
+				$user_query = query("SELECT *
 					FROM peel_utilisateurs
 					WHERE id_utilisateur='" . intval($id_utilisateur) . "' AND " . get_filter_site_cond('utilisateurs') . "");
-				$rep = fetch_assoc($priv);
-				if ($rep['priv'] == 'reve') {
+				$user_infos = fetch_assoc($user_query);
+				if ($user_infos['priv'] == 'reve') {
 					$is_reseller = true;
 				}
+				$promotion_percentage = get_current_user_promotion_percentage($user_infos);
+			} else {
+				$promotion_percentage = 0;
 			}
 			foreach($queries_results_array as $result) {
 				$product_object = new Product($result->id, $result, true, null, true, !check_if_module_active('micro_entreprise'));
 				// Prix hors ecotaxe
-				$purchase_prix_ht = $product_object->get_final_price(0, false, $is_reseller) * $currency_rate;
-				$purchase_prix = $product_object->get_final_price(0, $apply_vat, $is_reseller) * $currency_rate;
+				$purchase_prix_ht = $product_object->get_final_price($promotion_percentage, false, $is_reseller) * $currency_rate;
+				$purchase_prix = $product_object->get_final_price($promotion_percentage, $apply_vat, $is_reseller) * $currency_rate;
 				$prix_cat_ht = $product_object->get_original_price(false, false, false, false) * $currency_rate;
 				$prix_cat = $product_object->get_original_price($apply_vat, false, false, false) * $currency_rate;
 				if (display_prices_with_taxes_in_admin()) {
@@ -98,7 +101,7 @@ if (String::strlen($search)>0) {
 				$tva_options_html = get_vat_select_options($result->tva);
 				$results_array[] = array('id' => $result->id,
 					'reference' => $result->reference,
-					'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) && !empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $found_words_array) . (String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $found_words_array) . '</span>' : '') . '</div><div class="clearfix" />',
+					'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) && !empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $GLOBALS['found_words_array']) . (String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</div><div class="clearfix" />',
 					'nom' => $result->nom,
 					'image' => $display_picture,
 					'image_thumbs' => $product_picture,
@@ -122,6 +125,13 @@ if (String::strlen($search)>0) {
 			$results_array[] = array('id' => $result->id_offre,
 				'nom' => $result->num_offre,
 				'user_id' => $id_utilisateur
+				);
+		}
+	} elseif($mode=="categories") {
+		$queries_results_array = get_quick_search_results($search, $maxRows, false, null, "categories");
+		foreach($queries_results_array as $result) {
+			$results_array[] = array('id' => $result->id,
+				'nom' => $result->name
 				);
 		}
 	} elseif($mode == "offer_add_user" && !empty($GLOBALS['site_parameters']['user_offers_table_enable'])) {

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: order.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -183,9 +183,6 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	if ($status_or_is_payment_validated === true) {
 		// Commande payée
 		$statut_paiement_new = 'completed';
-		if (check_if_module_active('download')) {
-			send_mail_product_download($order_id);
-		}
 	} elseif ($status_or_is_payment_validated === false) {
 		// Commande à annuler
 		$statut_paiement_new = 'cancelled';
@@ -245,6 +242,13 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 	$query = query($sql);
 	// On vérifie si la commande existe déjà
 	if ($commande = fetch_assoc($query)) {
+		if(empty($delivery_status_id_by_technical_code_array[$statut_livraison_new]) && in_array($statut_paiement_new, array('cancelled', 'refunded')) && !in_array($commande['statut_paiement'], array('cancelled', 'refunded'))) {
+			// La commande n'a pas de statut de livraison demandé, et elle passe par ailleurs en annulé ou remboursé
+			if ($commande['id_statut_livraison'] != intval($delivery_status_id_by_technical_code_array['dispatched'])) {
+				// Alors changement aussi du statut de livraison en annulé s'il n'était pas déjà en statut livré
+				$statut_livraison_new = intval($delivery_status_id_by_technical_code_array['cancelled']);
+			}
+		}
 		if (empty($GLOBALS['site_parameters']['payment_status_create_bill']) || in_array($statut_paiement_new, explode(',', $GLOBALS['site_parameters']['payment_status_create_bill']))) {
 			// Quel que soit l'ancien statut, si la facture est souhaitée dans un statut qui doit avoir la génération de facture, alors on s'assure que le numéro et la date sont bien remplis 
 			// get_bill_number crée un numéro de facture si il n'existe pas déjà à partir de $GLOBALS['site_parameters']['format_numero_facture']
@@ -268,78 +272,45 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			}
 			query($sql);
 		}
+
 		if ($statut_paiement_new !== null && in_array($statut_paiement_new, array('being_checked', 'completed')) && !in_array($commande['statut_paiement'], array('being_checked','completed'))) {
+			// passage en payé de la commande alors qu'elle ne l'était pas avant
+			// => ça déclenche la prise en compte d'abonnements, d'activation de chèque cadeau, etc.
+			if (!empty($GLOBALS['site_parameters']['send_order_email_after_payement'])) {
+				email_commande($order_id);
+			}
 			if (check_if_module_active('gift_check')) {
 				$output .= cree_cheque_cadeau($order_id);
 			}
 			if (!empty($GLOBALS['fonctionsfianet_sac']) && file_exists($GLOBALS['fonctionsfianet_sac'])) {
 				require_once($GLOBALS['fonctionsfianet_sac']);
-				// envoi des informations sur la commande au service d'analyse des commande FIANET
+				// envoi des informations sur la commande au service d'analyse des commandes FIANET
 				send_fianet_sac($order_id);
 			}
 			// Mise à jour de la date de paiement si le statut est en réglé (et ne l'était pas avant)
 			$sql_set_array[] = "a_timestamp='" . date('Y-m-d H:i:s', time()) . "'";
-			if (check_if_module_active('annonces')) {
-				// On gère les crédits d'annonces GOLD
-				$sql = "SELECT pp.technical_code, pca.attributs_list, pca.reference, pca.quantite
-					FROM peel_produits pp
-					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND " . get_filter_site_cond('commandes_articles', 'pca') . " 
-					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND " . get_filter_site_cond('commandes', 'pc') . "
-					WHERE pc.id = " . intval($order_id) . " AND " . get_filter_site_cond('produits', 'pp') . "";
-				$query_t = query($sql);
-				while ($product_ordered_infos = fetch_assoc($query_t)) {
-					if (substr($product_ordered_infos['technical_code'], 0, strlen('annonce_g_')) == 'annonce_g_' || substr($product_ordered_infos['technical_code'], 0, strlen('gold_credit_')) == 'gold_credit_') {
-						if(substr($product_ordered_infos['technical_code'], 0, strlen('gold_credit_separated_')) == 'gold_credit_separated_') {
-							// Quand il y a _separated_ dans le nom, on considère que chaque crédit doit être mis sur une ligne séparée. Comme ça on pourra l'utiliser quand on veut
-							// (on aurait pu aussi ne mettre qu'une ligne mais diminuer le Xc en (X-1)x à chaque usage, mais c'est plus simple de mettre des lignes séparées
-							$temp = end(explode('_', $product_ordered_infos['technical_code']));
-							$lines_by_credit = String::substr($temp,0, String::strlen($temp)-1);
-							if($lines_by_credit == '*') {
-								// On n'insère qu'une ligne car illimité - dans ce cas, on ne la supprimera pas
-								$lines_by_credit = 1;
-							}
-						} else {
-							$lines_by_credit = 1;
-						}
-						for($i=1;$i<=$product_ordered_infos['quantite']*$lines_by_credit;$i++) {
-							// Format : annonce_g_12m_1c ou credit_gold_sales_6m_3c
-							add_credit_gold_user($commande['id_utilisateur'], $product_ordered_infos['technical_code'], $commande['id']);
-						}
-					} elseif (substr($product_ordered_infos['technical_code'], 0, strlen('ad_')) == 'ad_' && $product_ordered_infos['quantite']>=1) {
-						// On ajoute les attributs commandés à l'annonce
-						$update_attributs = 'UPDATE peel_lot_vente
-							SET attributs_list=CONCAT(attributs_list,IF(attributs_list="", "", "§"), "'.nohtml_real_escape_string($product_ordered_infos['attributs_list']).'")
-							WHERE ref ="' . intval($product_ordered_infos['reference']) . '" ' . get_filter_site_cond('lot_vente');
-						query($update_attributs);
-					}
-				}
-			}
-			if (!empty($GLOBALS['activate_platinum_auto']) && check_if_module_active('abonnement')) {
-				// On gère les crédits d'abonnement platinum
-				$sql = 'SELECT technical_code
-					FROM peel_produits pp
-					INNER JOIN peel_commandes_articles pca ON pca.produit_id = pp.id AND ' . get_filter_site_cond('commandes_articles', 'pca') . ' 
-					INNER JOIN peel_commandes pc ON pc.id = pca.commande_id AND ' . get_filter_site_cond('commandes', 'pc') . '
-					WHERE pc.id = ' . intval($order_id). " AND " . get_filter_site_cond('produits', 'pp') . "";
-				$query_t = query($sql);
-				while ($product_ordered_infos = fetch_assoc($query_t)) {
-					if (substr($product_ordered_infos['technical_code'], 0, strlen('forfait_p_')) == 'forfait_p_') {
-						// Format : forfait_p_3
-						$n_days = 30 * substr($product_ordered_infos['technical_code'], strlen('forfait_p_'));
-						$update_credit = 'UPDATE peel_utilisateurs
-							SET platinum_status ="YES", platinum_activation_date ="' . date('Y-m-d H:i:s') . '", platinum_until =GREATEST(' . time() . ',platinum_until)+' . (3600 * 24 * $n_days).'
-							WHERE id_utilisateur ="' . intval($commande['id_utilisateur']) . '" AND ' . get_filter_site_cond('utilisateurs') . '';
-						query($update_credit);
-					}
-				}
-			}
-			call_module_hook('order_status_completed', array('order_id' => $order_id));
+			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisit l'annulation de livraison.
+			$output .= call_module_hook('order_status_completed', array('order_id' => $order_id, 'order_infos' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
+		}
+		if(in_array($statut_paiement_new, array('cancelled', 'refunded')) && !in_array($commande['statut_paiement'], array('cancelled', 'refunded'))) {
+			// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée :
+			// On devrait gérer ici le fait de recréditer les points de la commande de cadeaux, mais ça nécessite de stocker en BDD les informations de points dépensés des commandes
+			// => ça nécessite actuellement une intervention manuelle par un administrateur pour recréditer le compte utilisateur
+			$output .= call_module_hook('order_status_cancelled', array('order_id' => $order_id, 'commande' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
 		}
 		if (!empty($payment_status_id_by_technical_code_array[$statut_paiement_new])) {
 			$sql_set_array[] = "id_statut_paiement='" . intval($payment_status_id_by_technical_code_array[$statut_paiement_new]) . "'";
 		}
 		if (!empty($delivery_status_id_by_technical_code_array[$statut_livraison_new])) {
 			$sql_set_array[] = "id_statut_livraison='" . intval($delivery_status_id_by_technical_code_array[$statut_livraison_new]) . "'";
+		}
+		if ($statut_livraison_new == 'dispatched' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
+			// Le statut de livraison passe à expédié (pour la première fois, ou pas) alors qu'il ne l'était pas juste avant
+			// Création de la date d'expédition pour la commande. Cette date est administrable par l'administrateur en back office.
+			$sql_set_array[] = "e_datetime='" . date('Y-m-d H:i:s', time()) . "'";
+			// On envoie l'email d'expédition (avec ou sans les infos de delivery_tracking qui peut être vide)
+			// Si on veut désactiver cet email, désactiver le tempate d'email "send_avis_expedition"
+			$output .= send_avis_expedition($order_id, $delivery_tracking);
 		}
 		if ($delivery_tracking !==null) {
 			// Attention, il faut pouvoir forcer la mise à "" => ne pas faire de test !empty
@@ -352,74 +323,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				SET ' . implode(', ', $sql_set_array) . '
 				WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes'));
 		}
-		if ($statut_paiement_new !== null && $commande['statut_paiement'] != $statut_paiement_new) {
-			// On vérifie le statut paiement avant la mise à jour de la base avec celui du formulaire. Ils doivent être différents,
-			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisit l'annulation de livraison.
-			if (in_array($statut_paiement_new, array('cancelled', 'refunded')) && !in_array($commande['statut_paiement'], array('cancelled', 'refunded'))) {
-				// La commande passe en annulé ou remboursé
-				if ($statut_paiement_new === null || $statut_paiement_new === '') {
-					// Changement aussi du statut de livraison en annulé s'il n'était pas déjà en statut livré
-					query("UPDATE peel_commandes
-						SET id_statut_livraison=" . intval($delivery_status_id_by_technical_code_array['cancelled']) . "
-						WHERE id='" . intval($order_id) . "' AND id_statut_livraison!=" . intval($delivery_status_id_by_technical_code_array['dispatched']) . " AND " . get_filter_site_cond('commandes') . "");
-				}
-				// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée
-				// On devrait gérer ici le fait de recréditer les points de la commande de cadeaux, mais ça nécessite de stocker en BDD les informations de points dépensés des commandes
-				// => ça nécessite actuellement une intervention manuelle par un administrateur pour recréditer le compte utilisateur
-			}
-		}
-		if(check_if_module_active('stock_advanced') && $statut_paiement_new !== null) {
-			// Les stocks sont gérés sur le site, et un statut de paiement est spécifié => Il faut éventuellement modifier les stocks des produits de la commande. 
-			// (Si statut_paiement est vide, il n'est pas nécessaire de faire le calcul).
-			$payment_status_decrement_stock_array = explode(',', $GLOBALS['site_parameters']['payment_status_decrement_stock']);
-			// $payment_status_decrement_stock_array vaut : pending,being_checked,completed   ou   being_checked,completed
-			$want_decrement = in_array($statut_paiement_new, $payment_status_decrement_stock_array);
-			$ex_decrement = in_array($commande['statut_paiement'], $payment_status_decrement_stock_array);
-			// Quand on appelle cette fonction à partir de create_or_update_order
-			// on a remis à 0 la prise en compte des stocks des produits, puisqu'on est susceptible d'avoir changé les produits de la commande
-			// donc on arrive ici avec $no_stock_decrement_already_done=true
-			// Dans les autres cas, $no_stock_decrement_already_done=false
-			$already_decrement = (!$no_stock_decrement_already_done && $ex_decrement);
-			if(($want_decrement && !$already_decrement) || (!$want_decrement && $already_decrement)){
-				$product_infos_array = get_product_infos_array_in_order($order_id);
-				if (!empty($product_infos_array)) {
-					foreach ($product_infos_array as $this_ordered_product) {
-						if ($this_ordered_product['etat_stock'] == 1) {
-							if ($want_decrement && !$already_decrement) {
-								// Décrémentation des stocks (par exemple en cas de commande qui était en statut paiement annulé et qui finalement ne doit pas être annulée)
-								// si le statut passe dans un statut où on doit décrémenter le stock, alors qu'il ne l'était pas avant
-								// $this_order_stock contient le montant à réapprovisionner
-								$this_order_stock = decremente_stock($this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id'], $this_ordered_product['quantite']);
-							}elseif (!$want_decrement && $already_decrement) {
-								// on réincrémente de quantite-order_stock
-								incremente_stock($this_ordered_product['quantite']-$this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
-								// On annule la demande de réapprovisionnement
-								$this_order_stock = 0;
-							}
-							if(isset($this_order_stock)){
-								query("UPDATE peel_commandes_articles
-									SET order_stock='".intval($this_order_stock)."'
-									WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles'));
-								unset($this_order_stock);
-							}
-						}
-					}
-				}
-			}
-		}
-		if((!empty($commande['marketplace_orderid']) && ($id_statut_paiement_ex != $id_statut_paiement || $id_statut_livraison_ex != $id_statut_livraison) && check_if_module_active('sellermania')) && !empty($GLOBALS['site_parameters']['enable_sellermania_update_order'])) {
-			// Pas d'envoi d'email de livraison pour les commandes Sellermania. Ce sont les emails d'expédition sont envoyé par Sellermania.
-			sellermania_update_order($commande['marketplace_orderid'], $id_statut_paiement, $id_statut_livraison, $sellermania_status = null);
-		} elseif ($statut_livraison_new == 'dispatched' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
-			// Le statut de livraison passe à expédié pour la première fois
-			// => on envoie l'email d'expédition (avec ou sans les infos de delivery_tracking qui peut être vide)
-			send_avis_expedition($order_id, $delivery_tracking);
-			// Création de la date d'expédition pour la commande. Cette date est administrable par l'administrateur en back office.
-			query("UPDATE peel_commandes
-				SET e_datetime = '" . date('Y-m-d H:i:s', time()) . "'
-				WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes') . "");
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande['email'])))->fetch();
-		}
+		$output .= call_module_hook('update_order_payment_status', array('no_stock_decrement_already_done' => $no_stock_decrement_already_done,'order_id' => $order_id, 'commande' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
 	}
 	return $output;
 }
@@ -468,6 +372,9 @@ function put_session_commande(&$frm)
 	}
 	$_SESSION['session_commande']['commande_interne'] = vb($frm['commande_interne']);
 	$_SESSION['session_commande']['commentaires'] = vb($frm['commentaires']);
+	if(!empty($frm['order_form_payment_methods'])) {
+		$_SESSION['session_commande']['commentaires'] = $GLOBALS['STR_ORDER_FORM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] .': '. $frm['order_form_payment_methods'] . "\n" . $_SESSION['session_commande']['commentaires'];
+	}
 	$_SESSION['session_commande']['payment_technical_code'] = vb($frm['payment_technical_code']);
 	if ($_SESSION['session_commande']['payment_technical_code'] == 'moneybookers') {
 		$_SESSION['session_commande']['moneybookers_payment_methods'] = vb($frm['moneybookers_payment_methods']);
@@ -516,21 +423,13 @@ function create_or_update_order($order_infos, $articles_array)
 		if (isset($order_infos[$key])) {
 			// Nécessite une conversion du nom de l'index.
 			$order_infos[$value] = $order_infos[$key];
-			// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage
+			// On ne laisse pas d'index inutile, ça complique la lecture lors du déboguage
 			unset($order_infos[$key]);
 		}
 	}
-	if (empty($order_infos['societe2']) && empty($order_infos['nom2']) && empty($order_infos['prenom2'])) {
-		// On ne remplit automatiquement la société et le nom que si vraiment l'ensemble de l'adresse de livraison n'était pas définie
-		$order_infos['societe2'] = vb($order_infos['societe1']);
-		$order_infos['nom2'] = vb($order_infos['nom1']);
-		$order_infos['prenom2'] = vb($order_infos['prenom1']);
-	}
-	// handle_specific_fields définit la variable $frm['adresses_fields_array']
 	handle_specific_fields($order_infos, 'order');
 	foreach(vb($order_infos['adresses_fields_array'], array()) as $this_item) {
-		// En complément de name_compatibility_array, dans le cas d'une duplication de commande.
-		// Traitement spécifique des champs zip et telephone pour mettre en cohérence avec le nom prévu dans order_infos
+		// En complément de name_compatibility_array
 		if ($this_item == 'zip') {
 			$this_field = 'code_postal';
 		} elseif($this_item == 'telephone') {
@@ -538,27 +437,20 @@ function create_or_update_order($order_infos, $articles_array)
 		} else {
 			$this_field = $this_item;
 		}
-		if (!empty($order_infos[$this_field . '_bill'])) {
-			$order_infos[$this_field . '1'] = $order_infos[$this_field . '_bill'];
+		if (!empty($order_infos[$this_item . '_bill'])) {
+			$order_infos[$this_field . '1'] = $order_infos[$this_item . '_bill'];
+		} elseif (!empty($order_infos[$this_item]) && !isset($order_infos[$this_field . '1'])) {
+			$order_infos[$this_field . '1'] = $order_infos[$this_item];
 		}
-		if (!empty($order_infos[$this_field . '_ship'])) {
-			$order_infos[$this_field . '2'] = $order_infos[$this_field . '_ship'];
+		if (!empty($order_infos[$this_item . '_ship'])) {
+			$order_infos[$this_field . '2'] = $order_infos[$this_item . '_ship'];
 		}
 	}
-
 	// On complète les données si nécessaire
 	if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($order_infos['typeId']) || is_delivery_address_necessary_for_delivery_type($order_infos['typeId']))) {
 		foreach(vb($order_infos['adresses_fields_array'], array()) as $this_item) {
-			// Traitement spécifique des champs zip et telephone pour mettre en cohérence avec le nom prévu dans order_infos
-			if ($this_item == 'zip') {
-				$this_field = 'code_postal';
-			} elseif($this_item == 'telephone') {
-				$this_field = 'contact';
-			} else {
-				$this_field = $this_item;
-			}
-			if (!in_array($this_field, array('prenom', 'nom', 'societe')) && empty($order_infos[$this_field . '2']) && isset($order_infos[$this_field . '1'])) {
-				$order_infos[$this_field . '2'] = $order_infos[$this_field . '1'];
+			if (empty($order_infos[$this_item . '2']) && isset($order_infos[$this_item . '1'])) {
+				$order_infos[$this_item . '2'] = $order_infos[$this_item . '1'];
 			}
 		}
 	}
@@ -834,11 +726,11 @@ function create_or_update_order($order_infos, $articles_array)
 	foreach ($articles_array as $article_infos) {
 		// On rend compatible des entrées du tableau 
 		foreach($name_compatibility_array as $key => $value) {
-		// On rend compatible des entrées du tableau article_infos
+			// On rend compatible des entrées du tableau article_infos
 			if (isset($article_infos[$key])) {
 				// Nécessite une conversion du nom de l'index.
 				$article_infos[$value] = $article_infos[$key];
-				// On ne laisse pas d'index inutile, ça complique la lecture lors du débogage;
+				// On ne laisse pas d'index inutile, ça complique la lecture lors du déboguage;
 				unset($article_infos[$key]);
 			}
 		}
@@ -927,9 +819,11 @@ function create_or_update_order($order_infos, $articles_array)
 		if (isset($article_infos['poids'])) {
 			$sql .= ", poids = '" . nohtml_real_escape_string(vn($article_infos['poids'])) . "'";
 		}
-		// Email_check correspond à l'email d'envoi de chèque cadeau qui peut être différent
-		if (isset($article_infos['email_check'])) {
-			$sql .= ", email_check = '" . nohtml_real_escape_string(vb($article_infos['email_check'])) . "'";
+		// data_check correspond au tableau qui contient l'email d'envoi, le nom et le prénom du destinataire du chèque cadeau qui peut être différent
+		if (isset($article_infos['data_check'])) {
+			$sql .= ", email_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['email_check'])) . "'";
+			$sql .= ", nom_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['nom_check'])) . "'";
+			$sql .= ", prenom_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['prenom_check'])) . "'";
 		}
 		if (isset($product_object->on_download)) {
 			$sql .= ", on_download = '" . intval($product_object->on_download) . "'
@@ -1017,6 +911,7 @@ function email_commande($order_id)
 		$custom_template_tags['CLIENT_INFOS_BILL'] = String::htmlspecialchars_decode($order_infos['client_infos_bill'], ENT_QUOTES);
 		$custom_template_tags['CLIENT_INFOS_SHIP'] = String::htmlspecialchars_decode($order_infos['client_infos_ship'], ENT_QUOTES);
 		$custom_template_tags['COUT_TRANSPORT'] = (display_prices_with_taxes_active()? fprix($order_object->cout_transport, true) . " " . $GLOBALS['STR_TTC'] : fprix($order_object->cout_transport_ht, true) . " " .$GLOBALS['STR_HT']);
+		$custom_template_tags['URL_FACTURE'] = get_site_wwwroot($order_object->site_id) . '/factures/commande_pdf.php?code_facture=' . urlencode($order_object->code_facture) . '&mode=facture';
 		$custom_template_tags['BOUGHT_ITEMS'] = '';
 		$custom_template_tags['COMMENT'] = $order_object->commentaires;
 
@@ -1032,7 +927,9 @@ function email_commande($order_id)
 				send_email($GLOBALS['support_commande'], '', '', 'confirm_ordered_'.$this_ordered_product['technical_code'], $custom_template_tags, null, $GLOBALS['support_commande']);
 			}
 		}
+
 		$template_technical_codes_array = array('email_commande_' . $order_object->paiement, 'email_commande');
+	
 		send_email($order_object->email, '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
 		send_email($GLOBALS['support_commande'], '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
 		if(!defined('IN_PEEL_ADMIN') || (defined('IN_PEEL_ADMIN') && !empty($GLOBALS['site_parameters']['send_email_order_in_admin']))) {
@@ -1069,16 +966,29 @@ function send_mail_order_admin($order_id)
  * get_payment_name()
  *
  * @param mixed $id_or_code Id or technical_code of the payment mean
+ * @param mixed $mode
  * @return
  */
-function get_payment_name($id_or_code)
+function get_payment_name($id_or_code, $mode = 'nom')
 {
-	$sql_paiement = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom
+	static $tab_paiement_by_sql;
+	$sql = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom, p.technical_code
 		FROM peel_paiement p
 		WHERE (p.id="' . intval($id_or_code) . '" OR p.technical_code="' . nohtml_real_escape_string($id_or_code) . '") AND ' .  get_filter_site_cond('paiement', 'p') . '';
-	$res_paiement = query($sql_paiement);
-	if ($tab_paiement = fetch_assoc($res_paiement)) {
-		return $tab_paiement['nom'];
+	if(!isset($tab_paiement_by_sql[md5($sql)])) {
+		$query = query($sql);
+		$tab_paiement_by_sql[md5($sql)] = fetch_assoc($query);
+		if($tab_paiement_by_sql[md5($sql)] === null) {
+			// Pour pouvoir faire test avec isset par la suite sur la variable static, on met false à la place de null
+			$tab_paiement_by_sql[md5($sql)] = false;
+		}
+	}
+	if (!empty($tab_paiement_by_sql[md5($sql)])) {
+		if($mode == 'nom') {
+			return $tab_paiement_by_sql[md5($sql)]['nom'];
+		} else {
+			return $tab_paiement_by_sql[md5($sql)]['technical_code'];
+		}
 	} else {
 		return '';
 	}
@@ -1097,8 +1007,8 @@ function get_payment_status_name($id)
 		$sql_paiement = 'SELECT p.nom_' . $_SESSION['session_langue'] . ' AS nom
 			FROM peel_statut_paiement p
 			WHERE p.id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_paiement', 'p');
-		$res_paiement = query($sql_paiement);
-		if ($tab_paiement = fetch_assoc($res_paiement)) {
+		$query = query($sql_paiement);
+		if ($tab_paiement = fetch_assoc($query)) {
 			$payment_status_name_by_id[$id] = String::html_entity_decode_if_needed($tab_paiement['nom']);
 		} else {
 			$payment_status_name_by_id[$id] = $id;
@@ -1115,12 +1025,16 @@ function get_payment_status_name($id)
  */
 function get_delivery_status_name($id)
 {
-	$sql_livraison = 'SELECT nom_' . $_SESSION['session_langue'] . ' AS nom
-		FROM peel_statut_livraison
-		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_livraison');
-	$res_livraison = query($sql_livraison);
-	if ($tab_livraison = fetch_assoc($res_livraison)) {
-		return String::html_entity_decode_if_needed($tab_livraison['nom']);
+	static $tab_livraison_by_id;
+	if(!isset($tab_livraison_by_id)) {
+		$sql_livraison = 'SELECT nom_' . $_SESSION['session_langue'] . ' AS nom
+			FROM peel_statut_livraison
+			WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_livraison');
+		$res_livraison = query($sql_livraison);
+		$tab_livraison_by_id[$id] = fetch_assoc($res_livraison);
+	}
+	if (!empty($tab_livraison_by_id[$id])) {
+		return String::html_entity_decode_if_needed($tab_livraison_by_id[$id]['nom']);
 	} elseif (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 		return $id;
 	} else {
@@ -1270,25 +1184,6 @@ function get_delivery_cost_infos($total_weight, $total_price, $type_id = null, $
 	}
 
 	return $delivery_cost_infos;
-}
-
-/**
- * get_payment_technical_code()
- *
- * @param mixed $id_or_code
- * @return
- */
-function get_payment_technical_code($id_or_code)
-{
-	$sql_paiement = 'SELECT technical_code
-		FROM peel_paiement
-		WHERE (id="' . intval($id_or_code) . '" OR technical_code="' . nohtml_real_escape_string($id_or_code) . '") AND ' .  get_filter_site_cond('paiement') . '';
-	$res_paiement = query($sql_paiement);
-	if ($tab_paiement = fetch_assoc($res_paiement)) {
-		return $tab_paiement['technical_code'];
-	} else {
-		return false;
-	}
 }
 
 /**
@@ -1586,9 +1481,10 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		$sql_paiement = 'SELECT p.technical_code
 			FROM peel_paiement p
 			WHERE p.etat = "1" AND ' .  get_filter_site_cond('paiement', 'p') . '
+			GROUP BY technical_code, nom_' . $_SESSION['session_langue'] . '
 			ORDER BY p.position';
-		$res_paiement = query($sql_paiement);
-		while ($tab_paiement = fetch_assoc($res_paiement)) {
+		$query = query($sql_paiement);
+		while ($tab_paiement = fetch_assoc($query)) {
 			if (!empty($tab_paiement['technical_code'])) {
 				$this_output = get_payment_form($order_id, $tab_paiement['technical_code'], $send_admin_email, $amount_to_pay, $allow_autosend);
 				if(!empty($this_output)) {

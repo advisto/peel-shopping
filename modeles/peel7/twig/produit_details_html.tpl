@@ -104,7 +104,7 @@
 									</td>
 								</tr>
 							{% endif %}
-							{% if !empty($add_easy_list) %}
+							{% if add_easy_list %}
 								<tr class="picto-tous_avis">
 									<td colspan="2" class="txtdetail-tous_avis">
 										<a href="{{ add_easy_list.href|escape('html') }}" class="title_label">{{ add_easy_list.txt|escape('html') }}</a>
@@ -139,8 +139,6 @@
 				{% endif %}
 			</div>
 			{% endif %}
-			{% if (qrcode_image_src) %}<div class="qrcode"><img src="{{ qrcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
-			{% if (barcode_image_src) %}<div class="qrcode"><img src="{{ barcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
 		</div>
 		<h1 property="name" class="titre_produit" property="name">{{ product_name }}</h1>
 		{% if subscribe_trip_form is defined %}
@@ -182,6 +180,8 @@
 				{% if (descriptif) %}<p>{{ descriptif }}</p>{% endif %}
 				{% if (description) %}<div>{{ description }}</div>{% endif %}
 			</div>
+		{% if (qrcode_image_src) %}<div class="qrcode"><img src="{{ qrcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
+		{% if (barcode_image_src) %}<div class="qrcode"><img src="{{ barcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
 		{% if (extra_link) %}
 			<p class="extra_link"><a href="{{ extra_link }}" onclick="return(window.open(this.href)?false:true);">{{ extra_link }}</a></p>
 		{% endif %}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_index.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_index.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}
 {% if all_sites_name_array|length >1 %}
 <div class="home_block home_block_select_multisite home_block_black panel panel-primary">
@@ -33,15 +33,15 @@
 		<div class="row">
 			{% if (KeyyoCalls) %}<div class="col-lg-12 col-md-12 col-sm-12">{{ KeyyoCalls }}</div>
 			<div class="clearfix visible-md visible-sm"></div>{% endif %}
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ orders }}</div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ sales }}</div>
+			{% for this_output in home_modules %}
+			<div class="col-lg-4 col-md-6 col-sm-6">{{ this_output }}</div>
+				{% if loop.index%2==0 %}
 			<div class="clearfix visible-md visible-sm"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ products }}</div>
+				{% endif %}
+				{% if loop.index%3==0 %}
 			<div class="clearfix visible-lg"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ delivery }}</div>
-			<div class="clearfix visible-md visible-sm"></div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ users }}</div>
-			<div class="col-lg-4 col-md-6 col-sm-6">{{ peel }}</div>
+				{% endif %}
+			{% endfor %}
 		</div>
 	</div>
 </div>

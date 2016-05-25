@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: caddie_products_summary_table.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}
 <div class="col-sm-12">
 	<div class="table-responsive">
@@ -30,9 +30,11 @@
 		{foreach $products as $p}
 			<tr>
 				<td class="lignecaddie_suppression">
+					{if empty($cart_disable_delete_product_link)}
 					<a data-confirm="{$STR_DELETE_PROD_CART|str_form_value}" href="{$p.delete_href|escape:'html'}">
 						<span class="glyphicon glyphicon-remove-sign" title="{$STR_DELETE_PROD_CART|str_form_value}" style="color: #FF0000; font-size:22px;"></span>
 					</a>
+					{/if}
 				</td>
 				<td class="lignecaddie_produit_image">
 					{if !empty($p.src)}<a href="{$p.urlprod_with_cid}"><img src="{$p.src|escape:'html'}" alt="" /></a>{/if}
@@ -66,9 +68,14 @@
 					{else}
 					<input type="hidden" name="tailleId[{$p.numero_ligne}]" value="0" />
 					{/if}
-					{if !empty($p.email_check)}
-					{$STR_EMAIL_FRIEND}{$STR_BEFORE_TWO_POINTS}: {$p.email_check}<input type="hidden" name="email_check[{$p.numero_ligne}]" value="{$p.email_check|str_form_value}" /><br />
+					{if !empty($p.data_check)}
+						{$STR_EMAIL_FRIEND}{$STR_BEFORE_TWO_POINTS}: {$p.data_check.email_check}<br />
+						{$STR_LAST_NAME}{$STR_BEFORE_TWO_POINTS}: {$p.data_check.prenom_check} {$p.data_check.nom_check}<br />
+						<input type="hidden" name="email_check[{$p.numero_ligne}]" value="{$p.data_check.email_check|str_form_value}" /><br />
+						<input type="hidden" name="nom_check[{$p.numero_ligne}]" value="{$p.data_check.nom_check|str_form_value}" /><br />
+						<input type="hidden" name="prenom_check[{$p.numero_ligne}]" value="{$p.data_check.prenom_check|str_form_value}" /><br />
 					{else}
+					
 					<input type="hidden" value="" name="email_check[{$p.numero_ligne}]" />
 					{/if}
 					{if isset($p.vacances)}
@@ -78,8 +85,10 @@
 					{/if}
 				</td>
 				<td class="lignecaddie_prix_unitaire center">
-					{if isset($p.prix_promo)}
+					{if isset($p.prix_promo) && $p.prix_promo < $p.prix}
 						<del>{$p.prix}</del><br />{$p.prix_promo}
+					{elseif isset($p.prix_promo)}
+						{$p.prix_promo}
 					{else}
 						{$p.prix}
 					{/if}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: user.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,26 +23,6 @@ if (!defined('IN_PEEL')) {
 function est_identifie()
 {
 	return isset($_SESSION) && isset($_SESSION['session_utilisateur']) && !empty($_SESSION['session_utilisateur']['id_utilisateur']);
-}
-
-/**
- * get_profil_select_options()
- *
- * @param mixed $selected_priv
- * @return
- */
-function get_profil_select_options($selected_priv = null)
-{
-	$output = '';
-	$sql_profil = "SELECT id, name_".$_SESSION['session_langue']." AS name, priv
-		FROM peel_profil
-		WHERE " . get_filter_site_cond('profil') . "
-		ORDER BY name DESC";
-	$res_profil = query($sql_profil);
-	while ($tab_profil = fetch_assoc($res_profil)) {
-		$output .= '<option value="' . String::str_form_value($tab_profil['priv']) . '" ' . frmvalide($selected_priv == $tab_profil['priv'], ' selected="selected"') . '>' . $tab_profil['name'] . '</option>';
-	}
-	return $output;
 }
 
 /**
@@ -70,7 +50,7 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
 		$user_infos = get_user_information($user_id);
 		$user_priv = vb($user_infos['priv']);
 	}
-	if (!empty($user_priv)) {
+	if (!empty($user_priv) && is_string($user_priv)) {
 		 if($site_configuration_modification && !empty($GLOBALS['site_parameters']['admin_configuration_only_by_user_ids']) && !in_array(vn($_SESSION['session_utilisateur']['id_utilisateur']), $GLOBALS['site_parameters']['admin_configuration_only_by_user_ids'])) {
 			// Des droits de modification de la configuration du site sont nécessaires et définis par une variable de configuration qui ne comprends pas dans sa liste l'id de l'utilisateur
 			return false;
@@ -149,7 +129,10 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		if(!empty($GLOBALS['site_parameters']['user_creation_default_profile'])) {
 			// ce paramètre permet de définir un privilège utilisateur dès l'inscription en front-office, ou lorsqu'aucun privilège n'est demandé explicitement via l'administration
 			$allowed_profil = array();
-			$query = query("SELECT priv FROM peel_profil WHERE priv NOT LIKE 'admin%' AND " . get_filter_site_cond('profil') . "");
+			$sql = "SELECT priv
+				FROM peel_profil
+				WHERE priv NOT LIKE 'admin%' AND " . get_filter_site_cond('profil') . "";
+			$query = query($sql);
 			while($result = fetch_assoc($query)) {
 				// Création du tableau des privilèges provenant de la BDD, sans les privilèges admin pour éviter la création non controllée d'administrateur sur la boutique
 				$allowed_profil[] = $result['priv'];
@@ -178,8 +161,8 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			$sql = "SELECT id_utilisateur, priv
 				FROM peel_utilisateurs
 				WHERE (" . implode(' OR ', $sql_condition_array).") AND priv IN ('" . implode("', '", real_escape_string($user_low_priviledges_array)) . "') AND " . get_filter_site_cond('utilisateurs') . '';
-			$result = query($sql);
-			if ($user_already_exists_infos = fetch_assoc($result)) {
+			$query = query($sql);
+			if ($user_already_exists_infos = fetch_assoc($query)) {
 				query("DELETE FROM peel_utilisateurs
 					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 			}
@@ -190,50 +173,34 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			$sql = "SELECT id_utilisateur
 				FROM peel_utilisateurs
 				WHERE (" . implode(' OR ', $sql_condition_array).") AND " . get_filter_site_cond('utilisateurs') . "";
-			$result = query($sql);
-			if ($user_already_exists_infos = fetch_assoc($result)) {
+			$query = query($sql);
+			if ($user_already_exists_infos = fetch_assoc($query)) {
 				// L'utilisateur existe déjà, on donne son id
 				return $user_already_exists_infos['id_utilisateur'];
 			}
 		}
 	}
-	if (!isset($frm['remise_percent'])) {
-		$remise_percent = 0;
-	} else {
-		$remise_percent = (float)$frm['remise_percent'];
-	}
+	
+	// Préparation de la création du compte utilisateur
 	if (!empty($frm['mot_passe']) && $password_already_encoded) {
 		$password_hash = trim($frm['mot_passe']);
 	} elseif (!empty($frm['mot_passe'])) {
 		$password_hash = get_user_password_hash(trim($frm['mot_passe']));
 	} elseif(empty($frm['mot_passe']) && (!empty($GLOBALS['site_parameters']['register_during_order_process']) || !empty($create_password_on_behalf_of_user))) {
-		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur
+		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur^en fin de fonction
 		$frm['mot_passe'] = MDP();
 		$password_hash = get_user_password_hash($frm['mot_passe']);
 	} else {
 		// On crée un utilisateur qui ne pourra pas se connecter avant de demander un mot de passe
 		$password_hash = get_user_password_hash(MDP());
 	}
-	if (!empty($frm['date_insert'])) {
-		$date_insert = $frm['date_insert'];
-	} else {
-		$date_insert = date('Y-m-d H:i:s', time());
+	foreach(explode('+', $frm['priv']) as $this_priv) {
+		if (in_array($this_priv, $manual_validation_registration)) {
+			// L'état d'activation par défaut lors de l'inscription d'un utilisateur dépend du statut. Pour les utilisateurs revendeur en attente, ou les affiliés en attente on ne souhaite pas qu'ils puissent se connecter à leur compte pendant le délai de validation. L'utilisateur est informé de ce fonctionnement via l'email qui a pour code technique "send_mail_for_account_creation_" . $priv (cf. à la fin de cette fonction) 
+			$frm['etat'] = 0;
+		}
 	}
-	if (!empty($frm['date_update'])) {
-		$date_update = $frm['date_update'];
-	} else {
-		$date_update = date('Y-m-d H:i:s', time());
-	}
-	if (isset($frm['points'])) {
-		$points = $frm['points'];
-	} else {
-		$points = 0;
-	}
-
-	if (in_array($frm['priv'], $manual_validation_registration)) {
-		// L'état d'activation par défaut lors de l'inscription d'un utilisateur dépend du statut. Pour les utilisateurs revendeur en attente, ou les affiliés en attente on ne souhaite pas qu'ils puissent se connecter à leur compte pendant le délai de validation. L'utilisateur est informé de ce fonctionnement via l'email qui a pour code technique "send_mail_for_account_creation_" . $priv (cf. à la fin de cette fonction) 
-		$frm['etat'] = 0;
-	} elseif (!isset($frm['etat'])) {
+	if (!isset($frm['etat'])) {
 		// Par sécurité on fait ce test. On ne peut pas laisser le champs etat sans valeur.
 		$frm['etat'] = 1;
 	}
@@ -250,11 +217,11 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		$frm['lang'] = $_SESSION['session_langue'];
 	}
 	if(!isset($frm['site_id'])) {
-		$frm['site_id'] = $GLOBALS['site_id'];
+		$frm['site_id'] = vb($GLOBALS['site_parameters']['user_create_default_site_id'], $GLOBALS['site_id']);
 	}
 	if(!defined('PEEL_ADMIN')) {
 		if(!empty($GLOBALS['site_parameters']['devise_force_user_choices']) && check_if_module_active('devises')) {
-			$frm['devise'] = $_SESSION['session_devise'];
+			$frm['devise'] = $_SESSION['session_devise']['code'];
 		}
 		if(!empty($GLOBALS['site_parameters']['site_country_forced_by_user']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			if(in_array(strval(vb($frm['pays'])), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
@@ -264,161 +231,58 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			}
 		}
 	}
-	$sql = "INSERT INTO peel_utilisateurs (
-		date_insert
-		, date_update
-		, email
-		, mot_passe
-		, priv
-		, civilite
-		, prenom
-		, pseudo
-		, nom_famille
-		, telephone
-		, fax
-		, portable
-		, adresse
-		, code_postal
-		, ville
-		, pays
-		, newsletter
-		, commercial
-		, remise_percent
-		, points
-		, format
-		, societe
-		, intracom_for_billing
-		, siret
-		, ape
-		, code_banque
-		, code_guichet
-		, numero_compte
-		, cle_rib
-		, domiciliation
-		, iban
-		, bic
-		, url
-		, description
-		, avoir
-		, naissance
-		, id_groupe
-		, origin
-		, origin_other
-		, lang
-		, on_vacances
-		, on_vacances_date
-		, promo
-		" . (!empty($frm['id_categories'])?', id_categories':'') . "
-		" . (!empty($frm['id_cat_1'])?', id_cat_1':'') . "
-		" . (!empty($frm['id_cat_2'])?', id_cat_2':'') . "
-		" . (!empty($frm['id_cat_3'])?', id_cat_3':'') . "
-		, activity
-		, seg_who
-		, seg_want
-		, seg_think
-		, seg_followed
-		, seg_buy
-		, project_product_proposed
-		, project_date_forecasted
-		, commercial_contact_id
-		, type
-		, on_client_module
-		, on_photodesk
-		, site_id
-		, fonction
-		, etat
-		" . (!empty($frm['id_utilisateur'])?', id_utilisateur':'') . "
-		" . (!empty($frm['control_plus'])?', control_plus':'') . "
-		" . (!empty($frm['note_administrateur'])?', note_administrateur':'') . "
-		" . (isset($frm['logo'])?', logo':'') . "
-		" . (isset($frm['devise'])? ", devise":'') . "
-		" . (isset($frm['site_country'])? ", site_country":'') . "
-		, description_document
-		" . (!empty($frm['document'])? ", document " : "") . "
-		" . (!empty($frm['specific_field_values'])? ',' . implode(',', word_real_escape_string(array_keys($frm['specific_field_values']))) : "") . "
-		, message
-		, alerte
-		, address_bill_default
-		, address_ship_default
-	) VALUES (
-		'" . nohtml_real_escape_string($date_insert) . "'
-		, '" . nohtml_real_escape_string($date_update) . "'
-		, '" . nohtml_real_escape_string(trim($frm['email'])) . "'
-		, '" . nohtml_real_escape_string($password_hash) . "'
-		, '" . nohtml_real_escape_string(vb($frm['priv'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['prenom'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['pseudo'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['nom_famille'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['telephone'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['fax'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['portable'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['adresse'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['code_postal'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['ville'])) . "'
-		, '" . intval(vn($frm['pays'])) . "'
-		, '" . intval(vn($frm['newsletter'])) . "'
-		, '" . intval(vn($frm['commercial'])) . "'
-		, '" . nohtml_real_escape_string(vb($remise_percent)) . "'
-		, '" . intval(vb($points)) . "'
-		, '" . nohtml_real_escape_string(vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['societe'])) . "'
-		, '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
-		, '" . nohtml_real_escape_string(vb($frm['siret'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['ape'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['code_banque'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['code_guichet'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['numero_compte'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['cle_rib'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['domiciliation'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['iban'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['bic'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['url'])) . "'
-		, '" . real_escape_string(vb($frm['description'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['avoir'])) . "'
-		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['naissance']))) . "'
-		, '" . nohtml_real_escape_string(vn($frm['id_groupe'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['origin'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['origin_other'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['lang'])) . "'
-		, '" . intval(vn($frm['on_vacances'])) . "'
-		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['on_vacances_date']))) . "'
-		, '" . nohtml_real_escape_string(vb($frm['promo_code'])) . "'
-		" . (!empty($frm['id_categories'])? ",'" . implode("','", $frm['id_categories']) : "") . "
-		" . (!empty($frm['id_cat_1'])? ', ' . intval(vn($frm['id_cat_1'])):'') . "
-		" . (!empty($frm['id_cat_2'])? ', ' . intval(vn($frm['id_cat_2'])):'') . "
-		" . (!empty($frm['id_cat_3'])? ', ' . intval(vn($frm['id_cat_3'])):'') . "
-		, '" . nohtml_real_escape_string(vb($frm['activity'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['seg_who'], 'no_info')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['seg_want'], 'no_info')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['seg_think'], 'no_info')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['seg_followed'], 'no_info')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['seg_buy'], 'no_info')) . "'
-		, '" . nohtml_real_escape_string(vb($frm['project_product_proposed'])) . "'
-		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['project_date_forecasted']))) . "'
-		, '" . intval(vn($frm['commercial_contact_id'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['type'])) . "'
-		, '" . intval(vn($frm['on_client_module'])) . "'
-		, '" . intval(vn($frm['on_photodesk'])) . "'
-		, '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'
-		, '" . nohtml_real_escape_string(vb($frm['fonction'])) . "'
-		, '" . intval($frm['etat']) . "'
-		" . (!empty($frm['id_utilisateur'])?', ' . intval($frm['id_utilisateur']):'') . "
-		" . (!empty($frm['control_plus'])?', ' . intval($frm['control_plus']):'') . "
-		" . (!empty($frm['note_administrateur'])?', ' . intval($frm['note_administrateur']):'') . "
-		" . (isset($frm['logo'])?', "' . nohtml_real_escape_string(vb($frm['logo'])).'"':'') . "
-		" . (isset($frm['devise'])? ", '" . nohtml_real_escape_string($frm['devise']) . "'" : "") . "
-		" . (isset($frm['site_country'])? ", '" . nohtml_real_escape_string($frm['site_country']) . "'" : "") . "
-		, '" . nohtml_real_escape_string(vb($frm['description_document'])) . "'
-		" . (!empty($frm['document'])? ", '" . nohtml_real_escape_string(vb($frm['document'])) . "'" : "") . "
-		" . (!empty($frm['specific_field_values'])? ", '" . implode("','", real_escape_string($frm['specific_field_values'])) . "'" : "") . "
-		, ''
-		, ''
-		, 'original_address'
-		, 'original_address'
-		)";
-	$qid = query($sql);
-
+	$frm['date_insert'] = vb($frm['date_insert'], date('Y-m-d H:i:s', time()));
+	$frm['date_update'] = vb($frm['date_update'], date('Y-m-d H:i:s', time()));
+	$frm['email'] = trim($frm['email']);
+	$frm['format'] = vb($from['format'], vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html'));
+	$frm['seg_who'] = vb($frm['seg_who'], 'no_info');
+	$frm['seg_want'] = vb($frm['seg_want'], 'no_info');
+	$frm['seg_think'] = vb($frm['seg_think'], 'no_info');
+	$frm['seg_followed'] = vb($frm['seg_followed'], 'no_info');
+	$frm['seg_buy'] = vb($frm['seg_buy'], 'no_info');
+	$frm['address_bill_default'] = 'original_address';
+	$frm['address_ship_default'] = 'original_address';
+	if(!empty($_SESSION['session_parameters'])) {
+		// Paramètres divers tels que des informations sur les réseaux sociaux connectés pour lesquels on va garder souvenir de l'id
+		$frm['parameters'] = serialize($_SESSION['session_parameters']);
+	}
+	$frm = call_module_hook('user_create_or_update_pre', $frm, 'array', true);
+		
+	$user_table_fields_types = get_table_field_types('peel_utilisateurs');
+	foreach($user_table_fields_types as $this_field => $this_type) {
+		if(isset($frm['specific_field_sql_set'][$this_field])) {
+			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
+			continue;
+		} elseif($this_field == 'mot_passe' && isset($password_hash)) {
+			// $frm['mot_passe'] contient le mot de passe en clair, pour éventuel envoi par email
+			// Ici il faut utiliser $password_hash
+			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($password_hash) . "'";
+			continue;
+		} elseif(!isset($frm[$this_field])) {
+			continue;
+		}
+		if(is_array($frm[$this_field])) {
+			$frm[$this_field] = implode(',', $frm[$this_field]);
+		}
+		if(in_array($this_field, array('intracom_for_billing'))) {
+			$frm[$this_field] = strtoupper($frm[$this_field]);
+		} elseif(String::strpos($this_type, 'int(')!==false) {
+			$frm[$this_field] = intval($frm[$this_field]);
+		} elseif(String::strpos($this_type, 'float(')!==false) {
+			$frm[$this_field] = floatval($frm[$this_field]);
+		} elseif($this_type == 'date' || $this_type == 'datetime') {
+			$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
+		}
+		if(in_array($this_field, array('description', 'parameters'))) {
+			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . real_escape_string($frm[$this_field]) . "'";
+		} else {
+			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($frm[$this_field]) . "'";
+		}
+	}
+	$sql = "INSERT INTO peel_utilisateurs SET
+			" . implode(',', $sql_fields_array) . "";
+	query($sql);
+	
 	$frm['id'] = insert_id();
 	$code_client = "CLT" . date("Y") . $frm['id'];
 
@@ -432,13 +296,8 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	}
 	if ($warn_admin_if_template_active) {
 		// Prévenir l'administrateur d'une création d'utilisateur
-		$qid = query("SELECT name_".$_SESSION['session_langue']." AS name
-			FROM `peel_profil`
-			WHERE priv = '" . nohtml_real_escape_string(vb($frm['priv'])) . "' AND " . get_filter_site_cond('profil') . "
-			LIMIT 0 , 30");
-		$qid = fetch_assoc($qid);
-		$custom_template_tags['PRIV'] = $qid['name'];
-		$custom_template_tags['CIVILITE'] = $frm['civilite'];
+		$custom_template_tags['PRIV'] = get_profil(vb($frm['priv']), 'name');
+		$custom_template_tags['CIVILITE'] = vb($frm['civilite']);
 		$custom_template_tags['PRENOM'] = $frm['prenom'];
 		$custom_template_tags['NOM_FAMILLE'] = $frm['nom_famille'];
 		$custom_template_tags['EMAIL'] = $frm['email'];
@@ -470,22 +329,18 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	if (empty($frm['id_utilisateur'])) {
 		return false;
 	}
-	if (isset($frm['priv'])) {
-		if(is_array($frm['priv'])) {
-			$priv = implode('+', $frm['priv']);
-		} else {
-			$priv = $frm['priv'];
-		}
+	if (isset($frm['priv']) && is_array($frm['priv'])) {
+		$frm['priv'] = implode('+', $frm['priv']);
 	}
 	if(!$update_current_session && !a_priv('admin', false, true)) {
 		if(a_priv('admin*', false, false, $frm['id_utilisateur'])) {
 			// L'utilisateur qu'on veut modifier est un administrateur et l'utilisateur loggué n'a pas le droit de le faire
 			return false;
-		} elseif(!empty($priv) && String::strpos($priv, 'admin') === 0) {
-			unset($priv);
+		} elseif(!empty($frm['priv']) && String::strpos($frm['priv'], 'admin') === 0) {
+			unset($frm['priv']);
 		}
 	}
-	if(check_if_module_active('reseller') && $frm['priv'] == 'reve') {
+	if(check_if_module_active('reseller') && vb($frm['priv']) == 'reve') {
 		$form_usage = 'reseller';
 	}else{
 		$form_usage = 'user';
@@ -503,91 +358,66 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$frm['site_id'] = $GLOBALS['site_id'];
 		}
 	}
-	// MAJ du pseudo interdite pour les sites d'annonces en front office, pour éviter problèmes de traçabilité d'utilisateurs
+	$frm['site_id'] = get_site_id_sql_set_value(vn($frm['site_id']));
+	$frm['format'] = vb($from['format'], vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html'));
+	$frm['date_update'] = date('Y-m-d H:i:s', time());
+	if(!empty($frm['email'])) {
+		// Réinitilisation des informations de bounces d'email
+		$frm['email_bounce'] = '';
+		$frm['email'] = trim($frm['email']);
+	}
+	if(check_if_module_active('annonces') && !defined('IN_PEEL_ADMIN')) {
+		// MAJ du pseudo interdite pour les sites d'annonces en front office, pour éviter problèmes de traçabilité d'utilisateurs
+		unset($frm['pseudo']);
+	}
+	if(check_if_module_active('maps')) {
+		// Initialisation des données de hash de l'adresse pour savoir qu'il faudra géocoder l'adresse à nouveau
+		$frm['address_hash'] = '';
+	}
+	$frm = call_module_hook('user_create_or_update_pre', $frm, 'array', true);
+
+	$user_table_fields_types = get_table_field_types('peel_utilisateurs');
+	foreach($user_table_fields_types as $this_field => $this_type) {
+		if(isset($frm['specific_field_sql_set'][$this_field])) {
+			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
+			continue;
+		} elseif(!isset($frm[$this_field])) {
+			if ($this_field == 'newsletter' || $this_field == 'commercial') {
+				// Ce sont les deux champs en checkbox du formulaire. Si pas coché, alors il faut mettre 0 en base de données.
+				$frm[$this_field] = 0;
+			} else {
+				continue;
+			}
+		}
+		if(is_array($frm[$this_field])) {
+			$frm[$this_field] = implode(',', $frm[$this_field]);
+		}
+		if(in_array($this_field, array('intracom_for_billing'))) {
+			$frm[$this_field] = strtoupper($frm[$this_field]);
+		} elseif(String::strpos($this_type, 'int(')!==false) {
+			$frm[$this_field] = intval($frm[$this_field]);
+		} elseif(String::strpos($this_type, 'float(')!==false) {
+			$frm[$this_field] = floatval($frm[$this_field]);
+		} elseif($this_type == 'date' || $this_type == 'datetime') {
+			$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
+		}
+		if(in_array($this_field, array('description', 'parameters'))) {
+			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . real_escape_string($frm[$this_field])."'";
+		} else {
+			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($frm[$this_field])."'";
+		}
+	}
 	$sql = "UPDATE peel_utilisateurs SET
-			civilite = '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
-			, prenom = '" . nohtml_real_escape_string($frm['prenom']) . "'
-			" . (isset($frm['pseudo']) && (!check_if_module_active('annonces') || (check_if_module_active('annonces') && !defined('IN_PEEL_ADMIN')))?", pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'":"") . "
-			, nom_famille = '" . nohtml_real_escape_string($frm['nom_famille']) . "'
-			" . (isset($frm['societe'])?", societe = '" . nohtml_real_escape_string($frm['societe']) . "'":"") . "
-			, intracom_for_billing  = '" . nohtml_real_escape_string(String::strtoupper(vb($frm['intracom_for_billing']))) . "'
-			" . (isset($frm['telephone'])?", telephone = '" . nohtml_real_escape_string(vb($frm['telephone'])) . "'":"") . "
-			" . (isset($frm['fax'])?", fax = '" . nohtml_real_escape_string(vb($frm['fax'])) . "'":"") . "
-			" . (isset($frm['portable'])?", portable = '" . nohtml_real_escape_string(vb($frm['portable'])) . "'":"") . "
-			" . (isset($frm['adresse'])?", adresse = '" . nohtml_real_escape_string($frm['adresse']) . "'":"") . "
-			" . (isset($frm['code_postal'])?", code_postal = '" . nohtml_real_escape_string($frm['code_postal']) . "'":"") . "
-			, ville = '" . nohtml_real_escape_string($frm['ville']) . "'
-			, pays = '" . intval($frm['pays']) . "'
-			, newsletter = '" . intval(vn($frm['newsletter'])) . "'
-			, commercial = '" . intval(vn($frm['commercial'])) . "'
-			, format = '" . nohtml_real_escape_string(vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html')) . "'
-			, date_update = '" . date('Y-m-d H:i:s', time()) . "'
-			" . (!empty($frm['email'])?", email = '" . nohtml_real_escape_string($frm['email']) . "'":"") . "
-			" . (!empty($frm['email'])?", email_bounce = ''":"") . "
-			" . (!empty($frm['activity'])?", activity = '" . nohtml_real_escape_string($frm['activity']) . "'":"") . "
-			" . (isset($frm['etat'])?", etat = '" . nohtml_real_escape_string($frm['etat']) . "'":"") . "
-			" . (isset($frm['type'])?", type = '" . nohtml_real_escape_string($frm['type']) . "'":"") . "
-			" . (isset($frm['note_administrateur'])?", note_administrateur = '" . intval($frm['note_administrateur']) . "'":"") . "
-			" . (isset($frm['control_plus'])?", control_plus = '" . intval($frm['control_plus']) . "'":"") . "
-			" . (isset($frm['fonction'])?", fonction = '" . nohtml_real_escape_string($frm['fonction']) . "'":"") . "
-			" . (isset($frm['code_client'])?", code_client = '" . nohtml_real_escape_string($frm['code_client']) . "'":"") . "
-			" . (isset($priv)?", priv = '" . nohtml_real_escape_string($priv) . "'":"") . "
-			" . (isset($frm['remise_percent'])?", remise_percent = '" . nohtml_real_escape_string(floatval($frm['remise_percent'])) . "'":"") . "
-			" . (isset($frm['points'])?", points = '" . intval($frm['points']) . "'":"") . "
-			" . (isset($frm['siret'])?", siret = '" . nohtml_real_escape_string($frm['siret']) . "'":"") . "
-			" . (isset($frm['ape'])?", ape = '" . nohtml_real_escape_string($frm['ape']) . "'":"") . "
-			" . (isset($frm['code_banque'])?", code_banque = '" . nohtml_real_escape_string($frm['code_banque']) . "'":"") . "
-			" . (isset($frm['code_guichet'])?", code_guichet = '" . nohtml_real_escape_string($frm['code_guichet']) . "'":"") . "
-			" . (isset($frm['numero_compte'])?", numero_compte = '" . nohtml_real_escape_string($frm['numero_compte']) . "'":"") . "
-			" . (isset($frm['cle_rib'])?", cle_rib = '" . nohtml_real_escape_string($frm['cle_rib']) . "'":"") . "
-			" . (isset($frm['domiciliation'])?", domiciliation = '" . nohtml_real_escape_string($frm['domiciliation']) . "'":"") . "
-			" . (isset($frm['iban'])?", iban = '" . nohtml_real_escape_string($frm['iban']) . "'":"") . "
-			" . (isset($frm['bic'])?", bic = '" . nohtml_real_escape_string($frm['bic']) . "'":"") . "
-			" . (isset($frm['url'])?", url = '" . nohtml_real_escape_string($frm['url']) . "'":"") . "
-			" . (isset($frm['description'])?", description = '" . real_escape_string($frm['description']) . "'":"") . "
-			" . (isset($frm['avoir'])?", avoir = '" . nohtml_real_escape_string(vn($frm['avoir'])) . "'":"") . "
-			" . (isset($frm['naissance'])?", naissance = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['naissance']))) . "'":"") . "
-			" . (isset($frm['on_vacances_date'])?", on_vacances_date = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['on_vacances_date'])) . "'":"") . "
-			, on_vacances = '" . intval(vn($frm['on_vacances'])) . "'
-			" . (isset($frm['id_groupe'])?", id_groupe = '" . intval(vn($frm['id_groupe'])) . "'":"") . "
-            , origin = '" . nohtml_real_escape_string(vb($frm['origin'])) . "'
-            , origin_other = '" . nohtml_real_escape_string(vb($frm['origin_other'])) . "'
-			, lang = '" . nohtml_real_escape_string(vb($frm['lang'])) . "'
-			, project_budget_ht = '" . nohtml_real_escape_string(vb($frm['project_budget_ht'])) . "'
-			, project_chances_estimated = '" . nohtml_real_escape_string(vb($frm['project_chances_estimated'])) . "'
-			" . (isset($frm['type'])?", type = '" . nohtml_real_escape_string(vb($frm['type'])) . "'":"") . "
-            , seg_who = '" . nohtml_real_escape_string(vb($frm['seg_who'])) . "'
-			, seg_want = '" . nohtml_real_escape_string(vb($frm['seg_want'])) . "'
-			, seg_think = '" . nohtml_real_escape_string(vb($frm['seg_think'])) . "'
-			, seg_followed = '" . nohtml_real_escape_string(vb($frm['seg_followed'])) . "'
-			, seg_buy = '" . nohtml_real_escape_string(vb($frm['seg_buy'])) . "'
-			, project_product_proposed = '" . nohtml_real_escape_string(vb($frm['project_product_proposed'])) . "'
-			, project_date_forecasted = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($frm['project_date_forecasted']))) . "'
-			" . (isset($frm['url'])?", url = '" . nohtml_real_escape_string(vb($frm['url'])) . "'":"") . "
-			" . (isset($frm['id_categories'])?", id_categories = '" . implode(',', nohtml_real_escape_string($frm['id_categories'])) . "'":"") . "
-			" . (isset($frm['id_cat_1'])?", id_cat_1 = '" . nohtml_real_escape_string(vb($frm['id_cat_1'])) . "'":"") . "
-			" . (isset($frm['id_cat_2'])?", id_cat_2 = '" . nohtml_real_escape_string(vb($frm['id_cat_2'])) . "'":"") . "
-			" . (isset($frm['id_cat_3'])?", id_cat_3 = '" . nohtml_real_escape_string(vb($frm['id_cat_3'])) . "'":"") . "
-			" . (isset($frm['commercial_contact_id'])?", commercial_contact_id = '" . intval(vn($frm['commercial_contact_id'])) . "'":"") . "
-			, on_client_module = '" . intval(vn($frm['on_client_module'])) . "'
-			, on_photodesk = '" . intval(vn($frm['on_photodesk'])) . "'
-			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'
-			, description_document =  '" . nohtml_real_escape_string(vb($frm['description_document'])) . "'
-			" . (!empty($frm['document'])? ", document =  '" . nohtml_real_escape_string($frm['document']) . "'" : "") . "
-			" . (isset($frm['logo'])? ", logo =  '" . nohtml_real_escape_string($frm['logo']) . "'" : "") . "
-			" . (isset($frm['devise'])? ", devise =  '" . nohtml_real_escape_string($frm['devise']) . "'" : "") . "
-			" . (isset($frm['site_country'])? ", site_country =  '" . nohtml_real_escape_string($frm['site_country']) . "'" : "") . "
-			" . (check_if_module_active('maps')?", address_hash = ''" : "") . "
-			" . (!empty($frm['specific_field_sql_set'])? "," . implode(',', $frm['specific_field_sql_set']) : "") . "
+			" . implode(',', $sql_fields_array) . "
 		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
-		query($sql);
+	query($sql);
 		
 	if ($update_current_session) {
 		// Mise à jour de la session en cours
-		$requete = "SELECT *
+		$sql = "SELECT *
 			FROM peel_utilisateurs
 			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "";
-		$qid = query($requete);
+		$qid = query($sql);
 		if($user_infos = fetch_assoc($qid)) {
 			$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
 			$_SESSION['session_utilisateur']['civilite'] = vb($user_infos['civilite']);
@@ -609,11 +439,11 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	}
 	if (!empty($frm['email'])) {
 		if (check_if_module_active('bounces')) {
-			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounce_driver.php");
+			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php");
 			resolve_bounce($frm['id_utilisateur'], $frm['email']);
 		}
 	}
-	if (!empty($frm['comments'])) {
+	if (isset($frm['comments'])) {
 		create_or_update_comments($frm);
 	}
 	call_module_hook('user_update', $frm);
@@ -689,10 +519,11 @@ function maj_mot_passe($user_id, $nouveau_mot_passe)
  * @param string $mot_passe
  * @param boolean $check_password
  * @param boolean $password_given_as_first_password_hash
- * @param mixed $password_length_if_given_as_first_password_hash
+ * @param integer $password_length_if_given_as_first_password_hash
+ * @param array $check_parameters_array
  * @return
  */
-function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $password_given_as_first_password_hash = false, $password_length_if_given_as_first_password_hash = null)
+function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $password_given_as_first_password_hash = false, $password_length_if_given_as_first_password_hash = null, $check_parameters_array = null)
 {
 	if (empty($_SESSION['session_login_tried'])) {
 		$_SESSION['session_login_tried'] = 0;
@@ -700,12 +531,13 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 	$_SESSION['session_login_tried']++;
 	if ($_SESSION['session_login_tried'] < 30) {
 		// Limitation à 30 tentatives de login dans la même session
-		$utilisateur = verifier_authentification(trim($email_or_pseudo), trim($mot_passe), null, $check_password, $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash);
+		$utilisateur = verifier_authentification(trim($email_or_pseudo), trim($mot_passe), null, $check_password, $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash, $check_parameters_array);
 		if ($utilisateur) {
 			// On force la prochaine mise à jour des informations du compte utilisateur
 			unset($_SESSION['session_update_account']);
 			
 			$_SESSION['session_utilisateur'] = $utilisateur;
+			// si $_SESSION['session_utilisateur']['parameters'] n'est pas vide, il a déjà été désérialisé dans verifier_authentification() ci-dessus
 			$_SESSION['session_ip'] = vb($_SERVER['REMOTE_ADDR']);
 			$_SESSION['session_url'] = $_SERVER['HTTP_HOST'];
 			if (!empty($_SESSION['session_caddie'])) {
@@ -733,26 +565,29 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				// Définition de session_site_country à partir de l'information de la table utilisateurs, et non pas à partir de la géolocalisation IP
 				$_SESSION['session_site_country'] = intval($_SESSION['session_utilisateur']['site_country']);
 			}
-			if (a_priv('admin*')) {
-				// On met à jour les appels de clients dont l'heure de cloture n'est pas précisée
-				// NB : On pourrait faire cela par cron plutôt qu'ici, mais sans cron c'est plus facilement gérable
-				updateTelContactNotClosed();
-				// On avertit le contact boutique du login d'un administrateur
-				$custom_template_tags['USER'] = $email_or_pseudo;
-				$custom_template_tags['REVERSE_DNS'] = gethostbyaddr(vb($_SERVER['REMOTE_ADDR']));
-				send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
-			}
 			// On enregistre la connexion de l'utilisateur
 			if (!empty($_SESSION['session_utilisateur']['pseudo'])) {
 				$user_pseudo = $_SESSION['session_utilisateur']['pseudo'];
 			} else {
 				$user_pseudo = $_SESSION['session_utilisateur']['email'];
 			}
-
+			if (a_priv('admin*')) {
+				// On met à jour les appels de clients dont l'heure de cloture n'est pas précisée
+				// NB : On pourrait faire cela par cron plutôt qu'ici, mais sans cron c'est plus facilement gérable
+				updateTelContactNotClosed();
+				// On avertit le contact boutique du login d'un administrateur
+				$custom_template_tags['USER'] = $user_pseudo;
+				$custom_template_tags['REVERSE_DNS'] = gethostbyaddr(vb($_SERVER['REMOTE_ADDR']));
+				send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
+			}
+			
 			query('INSERT INTO peel_utilisateur_connexions (user_id, user_login, user_ip, date, site_id)
 				VALUES (' . intval($_SESSION['session_utilisateur']['id_utilisateur']) . ', "' . nohtml_real_escape_string($user_pseudo) . '", "' . ip2long(ipget()) . '", "' . date('Y-m-d H:i:s', time()) . '",  "' . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id'])) . '")');
 
 			$_SESSION['session_login_tried'] = 0;
+			
+			$hook_result = call_module_hook('user_login_now', array(), 'array');
+			$_SESSION['session_utilisateur'] = array_merge_recursive_distinct($_SESSION['session_utilisateur'], vb($hook_result, array()));
 		}
 		if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']])) {
 			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
@@ -774,10 +609,11 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
  * @param integer $user_id
  * @param boolean $check_password
  * @param boolean $password_given_as_first_password_hash
- * @param mixed $password_length_if_given_as_first_password_hash
+ * @param integer $password_length_if_given_as_first_password_hash
+ * @param array $check_parameters_array
  * @return
  */
-function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null, $check_password = true, $password_given_as_first_password_hash = false, $password_length_if_given_as_first_password_hash = null)
+function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null, $check_password = true, $password_given_as_first_password_hash = false, $password_length_if_given_as_first_password_hash = null, $check_parameters_array = null)
 {
 	$get_table_field_names = get_table_field_names('peel_configuration');
 	if (!in_array('site_id', $get_table_field_names)) {
@@ -785,23 +621,56 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 		$skip_state_test = true;
 	}
 	
-	$requete = "SELECT *
+	$sql = "SELECT *
 		FROM peel_utilisateurs
-		WHERE " . (empty($skip_state_test)? "etat=1 AND":"") . " " . get_filter_site_cond('utilisateurs') . " AND priv NOT IN ('".implode("','", $GLOBALS['disable_login_by_privilege'])."') AND ";
+		WHERE " . (empty($skip_state_test)? "etat=1 AND":"") . " " . get_filter_site_cond('utilisateurs') . " AND priv NOT IN ('".implode("','", $GLOBALS['disable_login_by_privilege'])."')";
 	if (!empty($email_or_pseudo)) {
-		$requete .= "(email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
-	} else {
-		$requete .= "id_utilisateur='" . intval($user_id) . "'";
-	}
-	$qid = query($requete);
-	$user_infos = fetch_assoc($qid);
-	if (!empty($user_infos) && (!$check_password || get_user_password_hash($mot_passe, $user_infos['mot_passe'], $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash))) {
-		if(!$check_password && String::strpos($user_infos['priv'], 'admin') === 0) {
-			// Utilisateur avec droits d'administration, loggué via processus simplifié => on désactive les droits d'administration
-			$user_infos['priv'] = 'util';
+		$sql .= " AND (email='" . nohtml_real_escape_string($email_or_pseudo) . "' OR pseudo ='" . nohtml_real_escape_string($email_or_pseudo) . "')";
+	} elseif (!empty($user_id)) {
+		$sql .= " AND id_utilisateur='" . intval($user_id) . "'";
+	} elseif(!empty($check_parameters_array)) {
+		foreach($check_parameters_array as $this_key => $this_value) {
+			$sql .= " AND parameters LIKE '%\"" . nohtml_real_escape_string($this_key) . "\"%' AND parameters LIKE '%\"" . nohtml_real_escape_string($this_value) . "\"%'";
 		}
-		return $user_infos;
 	} else {
+		// Pas de recherche sur login ou id ou paramètre autre => pas de login autorisé
+		return false;
+	}
+	$sql .= " LIMIT 1";
+	$qid = query($sql);
+	if ($user_infos = fetch_assoc($qid)) {
+		if(!empty($user_infos['parameters'])) {
+			$user_infos['parameters'] = @unserialize($user_infos['parameters']);
+		} else {
+			$user_infos['parameters'] = array();
+		}
+		$password_check = (!$check_password || get_user_password_hash($mot_passe, $user_infos['mot_passe'], $password_given_as_first_password_hash, $password_length_if_given_as_first_password_hash));
+		if(empty($check_parameters_array)) {
+			$parameters_check = true;
+		} elseif(empty($user_infos['parameters'])) {
+			$parameters_check = false;
+		} else {
+			// On vérifie des paramètres du type twitter_id => user_id;
+			$parameters_check = true;
+			foreach($check_parameters_array as $this_key => $this_value) {
+				if($parameters[$this_key] != $this_value) {
+					$parameters_check = false;
+					break;
+				}
+			}
+		}
+		if ($password_check && $parameters_check) {
+			if(!$check_password && empty($GLOBALS['site_parameters']['login_allow_low_security_admin']) && String::strpos($user_infos['priv'], 'admin') === 0) {
+				// Utilisateur avec droits d'administration, loggué via processus simplifié => on désactive les droits d'administration
+				$user_infos['priv'] = 'util';
+			}
+			return $user_infos;
+		} else {
+			// Mot de passe ou paramètre erroné => login refusé
+			return false;
+		}
+	} else {
+		// utilisateur non trouvé
 		return false;
 	}
 }
@@ -869,16 +738,20 @@ function send_mail_for_account_creation($email, $mot_passe, $priv)
 {
 	$custom_template_tags['EMAIL'] = $email;
 	$custom_template_tags['MOT_PASSE'] = $mot_passe;
+	
+	$hook_result = call_module_hook('send_mail_for_account_creation_custom_template_tags', array('email' => $email, 'priv' => $priv, 'mot_passe' => $mot_passe, 'custom_template_tags' => $custom_template_tags), 'array');
+	$custom_template_tags = array_merge_recursive_distinct($custom_template_tags, $hook_result);
 
 	// Template d'email spécifique pour le profil d'utilisateur. Cet email est envoyé en plus de l'email d'inscription. L'email d'inscription contient les identifiants du compte.
 	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.$priv, $_SESSION['session_langue']);
+	
 	if (!empty($template_infos) && (!empty($template_infos['subject']) || !empty($template_infos['text']))) {
 		// Le template d'email existe, il faut l'utiliser
 		send_email($email, $template_infos['subject'], $template_infos['text'], "", $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	}
 
-	// Il faut utiliser le template de création de compte standard.
-	$result = send_email($email, "", "",  'send_mail_for_account_creation', $custom_template_tags, null, $GLOBALS['support_sav_client']);
+	// Par ailleurs on utilise le template de création de compte standard.
+	$result = send_email($email, "", "", 'send_mail_for_account_creation', $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	return $result;
 }
 
@@ -902,9 +775,10 @@ function getUsername($user_id)
  *
  * @param integer $user_id Si vide, alors on renvoie les informations de l'utilisateur connecté
  * @param boolean $get_full_infos
+ * @param boolean $skip_cache
  * @return
  */
-function get_user_information($user_id = null, $get_full_infos = false)
+function get_user_information($user_id = null, $get_full_infos = false, $skip_cache = false)
 {
 	static $result_array;
 	$sql_cond = '';
@@ -916,14 +790,17 @@ function get_user_information($user_id = null, $get_full_infos = false)
 	}
 	$cache_id = md5($user_id.$sql_cond.($get_full_infos?'full':''));
 	if (!empty($user_id)) {
-		if (!isset($result_array[$cache_id])) {
+		if (!isset($result_array[$cache_id]) || $skip_cache) {
 			$qid = query("SELECT *
 				FROM peel_utilisateurs
 				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
-			$result_array[$cache_id] = fetch_assoc($qid);
-			if(!empty($result_array[$cache_id]) && $get_full_infos) {
-				$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat'], 'user_infos' => $result_array[$cache_id]), 'array');
-				$result_array[$cache_id] = array_merge_recursive($result_array[$cache_id], $hook_result);
+			if($result_array[$cache_id] = fetch_assoc($qid)) {
+				// L'utilisateur a été trouvé, on complète les informations
+				$result_array[$cache_id]['parameters'] = unserialize(vb($result_array[$cache_id]['parameters']));
+				if(!empty($result_array[$cache_id]) && $get_full_infos) {
+					$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat'], 'user_infos' => $result_array[$cache_id]), 'array');
+					$result_array[$cache_id] = array_merge_recursive_distinct($result_array[$cache_id], $hook_result);
+				}
 			}
 		}
 		return $result_array[$cache_id];
@@ -937,11 +814,14 @@ function get_user_information($user_id = null, $get_full_infos = false)
  *
  * @return
  */
-function get_current_user_promotion_percentage()
+function get_current_user_promotion_percentage($user_info = null)
 {
+	if (empty($user_info)) {
+		$user_info = vb($_SESSION['session_utilisateur']);
+	}
 	if(!isset($_SESSION['session_utilisateur']['calculated_promotion_percentage'])) {
-		$hook_result_percent = call_module_hook('user_promotion_percentage', vb($_SESSION['session_utilisateur'], array()), 'max');
-		$user_specific_discount = vn($_SESSION['session_utilisateur']['remise_percent']);
+		$hook_result_percent = call_module_hook('user_promotion_percentage', vb($user_info, array()), 'max');
+		$user_specific_discount = vn($user_info['remise_percent']);
 		if(!empty($GLOBALS['site_parameters']['group_and_user_discount_cumulate_disable'])) {
 			$_SESSION['session_utilisateur']['calculated_promotion_percentage'] = max($user_specific_discount, $hook_result_percent);
 		} else {
@@ -965,7 +845,7 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 7 && String::strlen(str_replace(' ', '', $user_infos['intracom_for_billing'])) <= 14) {
+			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($user_infos['intracom_for_billing']) && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 7 && String::strlen(str_replace(' ', '', $user_infos['intracom_for_billing'])) <= 14) {
 				// Utilisateur avec un n° de TVA intracom, en Europe mais pas dans le pays de référence de la boutique dont le code ISO sur 2 chiffres est dans "pays_exoneration_tva"
 				return true;
 			}
@@ -977,34 +857,64 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 /**
  * get_priv_options()
  *
- * @param integer $preselectionne
- * @param boolean $return_mode
+ * @param integer $selected
+ * @param string $mode
+ * @param string $search_mode
  * @return
  */
-function get_priv_options($preselectionne, $return_mode = false)
+function get_priv_options($selected, $mode = 'output', $search_mode = false)
 {
 	$output = '';
+	$tpl_options = array();
+	$in_wait_priv = 0;
+	if(empty($selected) && !$search_mode) {
+		// Sélection du privilège du l'utilisateur. Si le privilège de l'utilisateur n'est pas défini dans la table, le privilège 'util' est présélectionné
+		$selected = array('util');
+	} elseif(!is_array($selected)) {
+		// Des profils avec privilèges multiples : ces privilèges sont séparés par  des + en base de données
+		$selected = explode('+', $selected);
+	}
 	$resProfil = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
-		WHERE " . get_filter_site_cond('profil') . "");
-	$tpl = $GLOBALS['tplEngine']->createTemplate('priv_options.tpl');
-	$tpl_options = array();
-	if (num_rows($resProfil)) {
-		while ($Profil = fetch_assoc($resProfil)) {
-			$tpl_options[] = array(
-				'value' => $Profil['priv'],
-				'issel' => ($Profil['priv'] == $preselectionne),
-				'name' => $Profil['name']
-			);
+		WHERE " . get_filter_site_cond('profil') . " 
+		ORDER BY name ASC");
+	while ($Profil = fetch_assoc($resProfil)) {
+		$priv_name = $Profil['name'];
+		if (defined('IN_PEEL_ADMIN') && isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
+			// L'administrateur multisite consulte la liste des privilèges existants. Dans ce cas tous les privilèges de tous les sites sont affichées, et on affiche le nom du site à coté du nom du privilège pour éviter des erreurs d'administration.
+			if(!isset($all_sites_name_array)) {
+				$all_sites_name_array = get_all_sites_name_array(true);
+			}
+			if(!empty($all_sites_name_array[$Profil['site_id']])) {
+				$priv_name = '[' . $all_sites_name_array[$Profil['site_id']] . '] ' . $priv_name;
+			}
+		}
+		$tpl_options[$Profil['priv']] = array(
+			'value' => $Profil['priv'],
+			'issel' => in_array($Profil['priv'], $selected),
+			'name' => $priv_name
+		);
+		if(String::strpos($Profil['priv'], 'stop') !== false) {
+			$in_wait_priv++;
 		}
 	}
-	$tpl->assign('options', $tpl_options);
-	$output .= $tpl->fetch();
-
-	if ($return_mode) {
+	if($search_mode && $in_wait_priv>1) {
+		// Ajout d'un choix pour voir tous les utilisateurs en attente de validation de leurs droits
+		$tpl_options = array_merge(array(array(
+				'value' => 'stop%',
+				'issel' => in_array('stop%', $selected),
+				'name' => $GLOBALS["STR_ADMIN_OFFLINE"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $GLOBALS["STR_ADMIN_ALL"]
+			)), $tpl_options);
+	}
+	if($mode == 'output') {
+		if(!empty($tpl_options)) {
+			$tpl = $GLOBALS['tplEngine']->createTemplate('priv_options.tpl');
+			$tpl->assign('options', $tpl_options);
+			$output .= $tpl->fetch();
+		}
 		return $output;
 	} else {
-		echo $output;
+		return $tpl_options;
 	}
 }
 
@@ -1068,9 +978,9 @@ function get_trader_select_options($selected_trader_name = null, $selected_trade
 	if (!$display_inactive_trader) {
 		$sql_condition .= ' AND u.etat = "1"';
 	}
-	$sql_trader = 'SELECT u.id_utilisateur, u.nom_famille , u.prenom
+	$sql_trader = 'SELECT u.id_utilisateur, u.nom_famille, u.prenom
 		FROM peel_utilisateurs u
-		WHERE u.priv LIKE "admin%" AND ' . get_filter_site_cond('utilisateurs', 'u') . ' ' . $sql_condition . '
+		WHERE CONCAT("+",u.priv,"+") LIKE "%+admin%" AND ' . get_filter_site_cond('utilisateurs', 'u') . ' ' . $sql_condition . '
 		ORDER BY u.id_utilisateur';
 	$res_trader = query($sql_trader);
 	$tpl_options = array();
@@ -1182,4 +1092,107 @@ function insert_or_update_address($frm) {
 		return query("INSERT INTO peel_adresses SET 
 		".$set_sql."");
 	}
+}
+
+/**
+ * Calcule l'état de complétude du compte utilisateur
+ *
+ * @param array $user_infos
+ * @return
+ */
+function user_account_completion($user_infos) {
+	$account_fields = vb($GLOBALS['site_parameters']['user_account_completion_fields'], array('nom_famille', 'prenom', 'adresse', 'code_postal', 'ville', 'pays'));
+	$weight = 0;
+	$total_weight = 0;
+	
+	$hook_result = call_module_hook('user_account_completion_fields', array(), 'array');
+	$account_fields = array_merge_recursive_distinct($account_fields, vb($hook_result, array()));
+	
+	$account_fields = array_merge_recursive_distinct($account_fields, array_keys(vb($GLOBALS['site_parameters']['user_mandatory_fields'], array())));
+	$account_fields = array_unique($account_fields);
+
+	foreach($account_fields as $this_field) {
+		if(!empty($user_infos[$this_field])) {
+			$weight += 1;
+		}
+		if(isset($user_infos[$this_field])) {
+			$total_weight += 1;
+		}
+	}
+	if($total_weight) {
+		$percentage = round($weight / $total_weight *100) . '%';
+	} else {
+		$percentage = '';
+	}
+	return $percentage;
+}
+
+/**
+ * Affiche une vignette de présentation d'un profil
+ *
+ * @param array $user_infos
+ * @param integer $ad_id
+ * @param string $additional_text
+ * @return
+ */
+function get_profile_bloc($user_infos, $ad_id = null, $additional_text = null, $message_id = null) {
+	if (!empty($user_infos['user_public_profil_url'])) {
+		$url = $user_infos['user_public_profil_url'];
+	} elseif(function_exists('get_vote_profil_url')) {
+		$url = get_vote_profil_url($user_infos['id_utilisateur'], $user_infos['pseudo']);
+	} elseif(function_exists('get_user_profil_link')) {
+		$url = get_user_profil_link($user_infos['id_utilisateur']);
+	} else {
+		$url = '#';
+	}
+	if (!empty($ad_id)) {
+		// Si présente : id de l'annonce relative à l'utilisateur, dans le cas où on affiche tous les profils par annonce
+		$url .= '?ad_related='.$ad_id.'&user_related='.$user_infos['id_utilisateur'];
+	}
+	if (!empty($message_id)) {
+		// Si présente : id du message relatif à la candidateur d'un utilisateur, dans le cas où on affiche tous les profils par annonce
+		$url .= '&msgid='.$message_id;
+	}
+	if(empty($user_infos['logo'])) {
+		$user_infos['logo'] = $GLOBALS['site_parameters']['default_picture'];
+	}
+	if (!empty($ad_id)) {
+		$query_ads_related = query('SELECT user_id
+			FROM peel_ads_related
+			WHERE ad_id="' . intval($ad_id) . '" AND user_id='.intval($user_infos['id_utilisateur']).'
+			LIMIT 1');
+		if ($result=fetch_assoc($query_ads_related)) {
+			$additional_text .= '
+			<h4>'. $GLOBALS["STR_RECIPIENT_CHOSEN"] .'</h4>';
+		}
+	}
+	$output = '
+	<div class="user' . String::substr($user_infos['civilite'], 0, 1) . '">
+		<table>
+			<tr>
+				<td class="center"><h3><a href="' . $url . '">' . (function_exists('get_user_picto')?get_user_picto($user_infos['civilite'],$user_infos['priv']):'') . (!empty($user_infos['pseudo'])?$user_infos['pseudo']:$user_infos['prenom'].' '.$user_infos['nom_famille']) . '</a></h3></td>
+			</tr>
+			<tr>
+				<td class="center">
+					<div class="img_link"><a href="' . $url . '"><img src="'. thumbs($user_infos['logo'], 150, 150, 'fit', null, null, true, true) . '" alt="" /></a></div>
+					' . (empty($GLOBALS['site_parameters']['groups_advanced_user_age_show_disable'])?'<div>' . userAgeFormat($user_infos['naissance']) . '</div>':'') . '
+					' . $additional_text . '
+				</td>
+			</tr>
+			<tr>
+				<td class="center">
+					<a class="btn btn-primary" href="' . $url . '">'.$GLOBALS['STR_MORE_DETAILS'].'</a>
+				</td>
+			</tr>
+		</table>
+	</div>
+';
+	$output = '
+<div class="col-sm-4 col-md-3 col-lg-3">
+	<div class="get_profile_user_bloc">
+		' . $output . '
+	</div>
+</div>
+';
+	return $output;
 }

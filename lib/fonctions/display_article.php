@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: display_article.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -38,7 +38,7 @@ if (!function_exists('get_article_details_html')) {
 
 			if (!empty($article['image1'])) {
 				$tpl->assign('main_image', array(
-					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($article['image1']),
+					'href' => get_url_from_uploaded_filename($article['image1']),
 					'src' => thumbs($article['image1'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true),
 					'file_type' => get_file_type($article['image1'])
 				));
@@ -167,7 +167,7 @@ if (!function_exists('get_articles_html')) {
 				}
 				$data[] = array(
 					'href' => get_content_url($art['id'], $art['titre'], $art['rubrique_id'], $art["rubrique_nom"]),
-					'src' => (!empty($art['image1']) ? $GLOBALS['repertoire_upload'] . '/' . $art['image1'] : false),
+					'src' => get_url_from_uploaded_filename($art['image1']),
 					'titre' => $art['titre'],
 					'chapo' => $chapo,
 					'texte' => $art['texte'],
@@ -212,7 +212,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 			}
 			if (!empty($rowrub['image'])) {
 				$tpl->assign('main_image', array(
-					'href' => $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($rowrub['image']),
+					'href' => get_url_from_uploaded_filename($rowrub['image']),
 					'src' => thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true),
 					'file_type' => get_file_type($rowrub['image'])
 				));
@@ -251,7 +251,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 			));
 		}
 		if (!empty($rubid) && !empty($GLOBALS['site_parameters']['show_special_on_content_category'])) {
-			$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom
+			$sql = "SELECT p.id, p.surtitre_" . $_SESSION['session_langue'] . " AS surtitre, p.titre_" . $_SESSION['session_langue'] . " AS titre , p.chapo_" . $_SESSION['session_langue'] . " AS chapo, p.texte_" . $_SESSION['session_langue'] . " AS texte, p.image1, p.on_special, pc.rubrique_id, r.nom_" . $_SESSION['session_langue'] . " AS rubrique_nom, on_reseller
 				FROM peel_articles p
 				INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id AND pc.rubrique_id = '" . intval($rubid) . "'
 				INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'r') . "
@@ -260,7 +260,6 @@ if (!function_exists('get_articles_list_brief_html')) {
 			$res = query($sql);
 			if (num_rows($res) > 0) {
 				$plus = array(
-					'src' => $GLOBALS['repertoire_images'] . '/coin.png',
 					'arts' => array()
 				);
 				while ($art = fetch_assoc($res)) {
@@ -396,11 +395,11 @@ if (!function_exists('get_articles_in_container_html')) {
 				$tpl->assign('href', $urlprod);
 				$tpl->assign('name', $articles_data_array['name']);
 				if (!empty($display_picture)) {
-					$this_picture = thumbs($display_picture, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], "fit");
+					$this_picture = thumbs($display_picture, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], "fit", null, null, true, true);
 					if($only_show_article_with_picture && empty($this_picture)) {
 						return false;
 					}
-					$tpl->assign('src', $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_picture);
+					$tpl->assign('src', $this_picture);
 				} else {
 					$tpl->assign('src', null);
 				}

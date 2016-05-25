@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: alertes_24h.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: alertes_24h.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,11 +22,11 @@ if (!defined('IN_PEEL')) {
  */
 function warnAdminContactPlanified ()
 {
-	// Condition AND u2.priv LIKE "%admin%" : Sécurité, si un contact planifié venait à être attribué par erreur à un non-admin, pas d'emai envoyé
+	// Condition AND u2.priv LIKE "%admin%" : Sécurité, si un contact planifié venait à être attribué par erreur à un non-admin, pas d'email envoyé
 	$q = query('SELECT acp.*, u.email AS client_login, u.id_utilisateur AS client_id, u2.email AS admin_login, u2.email AS admin_email
 		FROM `peel_admins_contacts_planified` acp
 		LEFT JOIN `peel_utilisateurs` u  ON u.id_utilisateur = acp.user_id AND ' . get_filter_site_cond('utilisateurs', 'u') . '
-		INNER JOIN `peel_utilisateurs` u2 ON u2.id_utilisateur = acp.admin_id AND u2.priv LIKE "%admin%" AND ' . get_filter_site_cond('utilisateurs', 'u2') . '
+		INNER JOIN `peel_utilisateurs` u2 ON u2.id_utilisateur = acp.admin_id AND CONCAT("+",u2.priv,"+") LIKE "%+admin%" AND ' . get_filter_site_cond('utilisateurs', 'u2') . '
 		WHERE acp.timestamp BETWEEN UNIX_TIMESTAMP("' . date('Y-m-d 00:00:00') . '") AND UNIX_TIMESTAMP("' . date('Y-m-d 23:59:59') . '")');
 
 	while ($result = fetch_assoc($q)) {

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 48465 2016-01-11 13:46:09Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 49887 2016-05-16 12:52:16Z sdelaporte $
 *}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -26,6 +26,13 @@
 		<tr>
 			<td style="font-weight:bold;" colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="{$administrer_url}/commander.php?mode=ajout&id_utilisateur={$id_utilisateur}">{$STR_ADMIN_UTILISATEURS_CREATE_ORDER_TO_THIS_USER} #{$id_utilisateur}</a></span></td>
 		</tr>
+	{if !empty($display_projects_with_related_user_link)}
+		<tr>
+			<td style="font-weight:bold;" colspan="2">
+				<a href="{$display_projects_with_related_user_link}">{$STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER}</a>
+			</td>
+		</tr>
+	{/if}
 {/if}
 {if $hook_actions}
 		<tr>
@@ -55,6 +62,48 @@
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_UPDATE_EXPLAIN}</div></td>
 		</tr>
+		<tr>
+			<td>{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="email" style="width:100%" value="{$email|str_form_value}" /> {$email_infos}</td>
+		</tr>
+		{if empty($pseudo_is_not_used)}
+		<tr>
+			<td>{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{$pseudo|str_form_value}" /></td>
+		</tr>
+		<tr>
+			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<select class="form-control" name="etat" id="etat">
+					<option value="">{$STR_CHOOSE}...</option>
+					<option value="1" {if $etat=='1'} selected="selected"{/if}>{$STR_ADMIN_ACTIVATED}</option>
+					<option value="0" {if $etat=='0'} selected="selected"{/if}>{$STR_ADMIN_DEACTIVATED}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_ADMIN_PRIVILEGE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<select class="form-control" multiple="multiple" name="priv[]">
+					{$priv_options}
+				</select>
+				{if !empty($specific_profile_results)}
+					{$specific_profile_results}
+				{/if}
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_ADMIN_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<select class="form-control" {if $disable_user_siteweb}disabled="disabled"{/if} {if $site_id_select_multiple} name="site_id[]" multiple="multiple" size="5"{else} name="site_id"{/if}>
+					{$site_id_select_options}
+				</select>
+				{if $disable_user_siteweb}
+					<input type="hidden" name="site_id" value="0" />
+				{/if}
+			</td>
+		</tr>
+		{/if}
 {if isset($date_insert)}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_REGISTRATION_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -81,17 +130,21 @@
 {/if}
 {if $is_annonce_module_active}
 		<tr>
-			<td class="title_label">{$STR_ADMIN_UTILISATEURS_ADMIN_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{$STR_ADMIN_UTILISATEURS_ADMIN_NOTE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
+	{if !$user_admin_note_edit_forbidden}
 				<select class="form-control" name="note_administrateur">
-	{foreach array(-1, 10, 20, 30, 40, 50) as $note_admin}
+		{foreach array(-1, 10, 20, 30, 40, 50) as $note_admin}
 					<option value="{$note_admin|str_form_value}" {if $note_administrateur == $note_admin} selected="selected"{/if}>{if $note_admin == - 1}{$STR_NONE}{else}{$note_admin / 10|round}{/if}</option>
-	{/foreach}
+		{/foreach}
 				</select>
+	{else}
+			{$note_administrateur}
+	{/if}
 			</td>
 		</tr>
 		<tr>
-			<td class="title_label">{$STR_ADMIN_UTILISATEURS_MODERATION_MORE_STRICT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{$STR_ADMIN_UTILISATEURS_MODERATION_MORE_STRICT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
 				<select class="form-control" id="control_plus" name="control_plus">
 					<option value="">{$STR_CHOOSE}...</option>
@@ -101,49 +154,6 @@
 			</td>
 		</tr>
 {/if}		
-		<tr>
-			<td class="title_label">{$STR_ADMIN_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<select class="form-control" {if $disable_user_siteweb}disabled="disabled"{/if} {if $site_id_select_multiple} name="site_id[]" multiple="multiple" size="5"{else} name="site_id"{/if}>
-					{$site_id_select_options}
-				</select>
-				{if $disable_user_siteweb}
-					<input type="hidden" name="site_id" value="0" />
-				{/if}
-			</td>
-		</tr>
-		<tr>
-			<td class="title_label">{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" class="form-control" name="email" style="width:100%" value="{$email|str_form_value}" /> {$email_infos}</td>
-		</tr>
-		{if empty($pseudo_is_not_used)}
-		<tr>
-			<td class="title_label">{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{$pseudo|str_form_value}" /></td>
-		</tr>
-		{/if}
-		<tr>
-			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-				<select class="form-control" name="etat" id="etat">
-					<option value="">{$STR_CHOOSE}...</option>
-					<option value="1" {if $etat=='1'} selected="selected"{/if}>{$STR_ADMIN_ACTIVATED}</option>
-					<option value="0" {if $etat=='0'} selected="selected"{/if}>{$STR_ADMIN_DEACTIVATED}</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>{$STR_ADMIN_PRIVILEGE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td>
-{if isset($priv_options)}
-				<select class="form-control" multiple="multiple" name="priv[]">
-				{foreach $priv_options as $o}
-					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
-				{/foreach}
-				</select>
-{/if}
-			</td>
-		</tr>
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_ACCOUNT_MANAGER}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -403,7 +413,7 @@
 			<td>{$STR_ADMIN_UTILISATEURS_CLIENT_PROJECT_CHANCES}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" name="project_chances_estimated" style="width:100%" value="{$project_chances_estimated|str_form_value}" /></td>
 		</tr>
-		<tr>
+		<tr id="comments">
 			<td>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><textarea class="form-control" name="comments" style="width:100%">{$comments}</textarea></td>
 		</tr>
@@ -456,7 +466,7 @@
 		{/if}
 		{if !empty($STR_ADMIN_SITE_COUNTRY)}
 		<tr>
-			<td class="title_label">{$STR_ADMIN_SITE_COUNTRY}{$STR_BEFORE_TWO_POINTS}: </td>
+			<td>{$STR_ADMIN_SITE_COUNTRY}{$STR_BEFORE_TWO_POINTS}: </td>
 			<td>
 				<select class="form-control" name="site_country">
 					<option value="">{$STR_ALL}...</option>
@@ -476,6 +486,13 @@
 					<tr>
 						<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CLIENT_INFORMATION}</td>
 					</tr>
+					{if !empty($get_user_stat_by_site)}
+					<tr>
+						<td colspan="2">
+							{$get_user_stat_by_site}
+						</td>
+					</tr>
+					{/if}
 					{if $is_annonce_module_active}
 					<tr>
 						<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -575,10 +592,16 @@
 {if !empty($add_credit_gold_user) && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td>{$add_credit_gold_user}</td></tr>
-	<tr><td>{$liste_annonces_admin}</td></tr>
 </table>
 <br />
 {/if}
+
+{if !empty($liste_annonces_admin) && $is_id_utilisateur}
+<table class="full_width">
+	<tr><td>{$liste_annonces_admin}</td></tr>
+</table>
+{/if}
+
 {if $is_commerciale_module_active && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td class="entete">{$STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE}</td></tr>
@@ -603,5 +626,9 @@
 <table id="download_files" class="full_width">
 	<tr><td>{$download_files}</td></tr>
 </table>
+<br />
+{/if}
+{if isset($user_alerts) && $is_id_utilisateur}
+	{$user_alerts}
 <br />
 {/if}

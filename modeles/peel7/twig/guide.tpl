@@ -18,7 +18,10 @@
 	{% for l in links %}
 	<li class="minus"><a href="{{ l.href|escape('html') }}">{% if l.selected %}<b>{% endif %}{{ l.label }}{% if l.selected %}</b>{% endif  %}</a></li>
 	{% endfor %}
-	{{ menu_contenu }}
+	{% if menu_contenu %}
+		{{ menu_contenu }}
+	{% endif  %}
+	
 {% if not affiche_guide_returned_link_list_without_ul %}
 </ul>
 {% endif %}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -46,6 +46,9 @@ function ariane_panier()
 	}
 	$tpl->assign('STR_MODULE_ARIANE_PANIER_SOMMARY', $GLOBALS['STR_MODULE_ARIANE_PANIER_SOMMARY']);
 	$tpl->assign('STR_CONFIRMATION', $GLOBALS['STR_CONFIRMATION']);
+	if (!empty($GLOBALS['site_parameters']['short_order_process']) || (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0)){
+		$tpl->assign('short_ariane_order_process', true);
+	}
 	return $tpl->fetch();
 }
 

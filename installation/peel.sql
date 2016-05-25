@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 48447 2016-01-11 08:40:08Z sdelaporte $
+# $Id: peel.sql 50023 2016-05-24 09:41:48Z sdelaporte $
 #
 
 --
@@ -183,9 +183,11 @@ CREATE TABLE IF NOT EXISTS `peel_avis` (
   `note` smallint(5) NOT NULL DEFAULT '0',
   `avis` varchar(255) NOT NULL DEFAULT '',
   `datestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_validation` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `email` varchar(255) NOT NULL DEFAULT '',
   `lang` char(2) NOT NULL DEFAULT '',
+  `detail` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -471,6 +473,8 @@ CREATE TABLE IF NOT EXISTS `peel_commandes_articles` (
   `points` int(11) NOT NULL DEFAULT '0',
   `poids` float(10,2) NOT NULL DEFAULT '0.00',
   `email_check` varchar(255) NOT NULL DEFAULT '',
+  `prenom_check` varchar(255) NOT NULL DEFAULT '',
+  `nom_check` varchar(255) NOT NULL DEFAULT '',
   `on_download` tinyint(1) NOT NULL DEFAULT '0',
   `statut_envoi` varchar(255) NOT NULL DEFAULT '',
   `nb_envoi` int(11) NOT NULL DEFAULT '0',
@@ -557,6 +561,9 @@ CREATE TABLE IF NOT EXISTS `peel_continents` (
 
 CREATE TABLE IF NOT EXISTS `peel_couleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `prix` float(15,5) NOT NULL default '0.00000',
+  `prix_revendeur` float(15,5) NOT NULL DEFAULT '0.00000',
+  `percent` float(15,5) NOT NULL DEFAULT '0.00000',
   `position` int(11) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) unsigned NOT NULL DEFAULT '0',

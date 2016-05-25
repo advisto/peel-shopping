@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: Invoice.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 48447 2016-01-11 08:40:08Z sdelaporte $
+ * @version $Id: Invoice.php 49979 2016-05-23 12:29:53Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -193,9 +193,28 @@ class Invoice extends TCPDF {
 			$x1 = 10;
 			$y1 = 6;
 		}
-		if (!empty($logo)) {
-			// Positionnement du logo à droite des informations sur la société
-			$this->Image($logo, $x1 + 50, $y1, 35);
+		if (!empty($logo) && empty($GLOBALS['site_parameters']['invoice_pdf_logo_display_disable'])) {
+			if (String::strpos($logo, '://') !== false) {
+				// Le fichier est hébergé sur un autre serveur que celui-ci, sinon la fonction getSocieteLogoPath aurait changé le lien URL en chemin serveur
+				$logo = thumbs($logo, 125, 80, 'fit', null, null, true, true);
+				$this->Image($logo, $x1 + vb($GLOBALS['site_parameters']['logo_pdf_locationX'], 45), $y1 + vb($GLOBALS['site_parameters']['logo_pdf_locationY'], 0));
+			} else {
+				$destinationW = vb($GLOBALS['site_parameters']['logo_pdf_destinationW'], 35); // Espace max disponible en largeur pour le logo
+				$destinationH = vb($GLOBALS['site_parameters']['logo_pdf_destinationH'], 35); // Espace max disponible en hauteur pour le logo
+				$imgInfo = @getimagesize($logo);
+				$sourceW = $imgInfo[0];
+				$sourceH = $imgInfo[1];
+				if (!empty($sourceW) && !empty($sourceH)) {
+					// on met au même format que celui de la taille demandée
+					if ($sourceH * $destinationW > $destinationH * $sourceW) {
+						$destinationW = ($sourceW * $destinationH) / $sourceH;
+					} else {
+						$destinationH = ($sourceH * $destinationW) / $sourceW;
+					}
+				}
+				// Positionnement du logo à droite des informations sur la société
+				$this->Image($logo, $x1 + vb($GLOBALS['site_parameters']['logo_pdf_locationX'], 50), $y1 + vb($GLOBALS['site_parameters']['logo_pdf_locationY'], 0), $destinationW, $destinationH);
+			}
 		}
 		if ($bill_mode != 'user_custom_products_list') {
 			$this->SetXY($x1, $y1);
@@ -350,15 +369,16 @@ class Invoice extends TCPDF {
 	 * Affiche un cadre avec un numéro de page (en haut, a droite)
 	 *
 	 * @param mixed $page
+	 * @param integer $font_size
 	 * @return
 	 */
-	function addPageNumber($page)
+	function addPageNumber($page, $font_size = 8)
 	{
 		$r1 = $this->w / 2 - 15;
 		$y1 = $this->h - 12;
 
 		$this->SetXY($r1, $y1);
-		$this->SetFont("Helvetica", "", 8);
+		$this->SetFont("Helvetica", "", $font_size);
 		$this->Cell(30, 4, $GLOBALS['STR_PDF_BILL_PAGE'] . ' ' . $page, 0, 0, "C");
 	}
 
@@ -497,10 +517,13 @@ class Invoice extends TCPDF {
 	/**
 	 * Trace le cadre des colonnes du devis/facture
 	 *
-	 * @param mixed $y_max_allowed
+	 * @param integer $y_max_allowed
+	 * @param string $bill_mode
+	 * @param integer $y1
+	 * @param integer $font_size
 	 * @return
 	 */
-	function addCols($y_max_allowed, $bill_mode=null)
+	function addCols($y_max_allowed, $bill_mode=null, $y1 = 92, $font_size = 8)
 	{
 
 		$r1 = 10;
@@ -509,9 +532,9 @@ class Invoice extends TCPDF {
 			$y1 = 60;
 			$height = 8;
 		} else {
-			$y1 = 92;
 			$height = 5;
 		}
+		//$y2 = $this->h - 27 - $this->remarque_lignes * 5;
 		$y2 = $y_max_allowed - 10 - $y1;
 		$this->SetXY($r1, $y1);
 		$this->Rect($r1, $y1, $r2, $y2, "D");
@@ -520,7 +543,7 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $r2, $height, "DF");
 
 		$colX = $r1;
-		$this->SetFont("Helvetica", "B", 8);
+		$this->SetFont("Helvetica", "B", $font_size);
 		if(!empty($this->colonnes)) {
 			foreach($this->colonnes as $lib => $pos) {
 				$this->SetXY($colX, $y1 + 1);
@@ -582,18 +605,21 @@ class Invoice extends TCPDF {
 	 *
 	 * @param mixed $ligne
 	 * @param mixed $tab
+	 * @param string $bill_mode
+	 * @param boolean $fill
+	 * @param integer $font_size
+	 * @param float $line_height
 	 * @return
 	 */
-	function addLine($ligne, $tab, $bill_mode = null)
+	function addLine($ligne, $tab, $bill_mode = null, $fill = false, $font_size = 8, $line_height = 3.5)
 	{
 		$x = 10;
 		$max_y_reached = $ligne;
 		if($bill_mode == 'user_custom_products_list') {
 			$this->SetFont("Helvetica", "", 7);
 		} else {
-			$this->SetFont("Helvetica", "", 8);
+			$this->SetFont("Helvetica", "", $font_size);
 		}
-		$line_height = 3.5;
 		if($bill_mode == 'user_custom_products_list') {
 			$ligne = $ligne-3;
 		}
@@ -605,7 +631,7 @@ class Invoice extends TCPDF {
 				$tailleTexte = $this->sizeOfText($texte, $length);
 				$formText = $this->format[ $lib ];
 				$this->SetXY($x, $ligne);
-				$this->MultiCell($longCell, $line_height, $texte, 0, $formText);
+				$this->MultiCell($longCell, $line_height, $texte, 0, $formText, $fill);
 				if ($max_y_reached < ($this->GetY())) {
 					$max_y_reached = $this->GetY() ;
 				}
@@ -1085,12 +1111,11 @@ class Invoice extends TCPDF {
 				WHERE t.orders_id='".intval($order_object->id)."'
 				LIMIT 1";
 			$query = query($sql_transaction);
-		}
-		$this->document_name = '';
-		if(!empty($GLOBALS['site_parameters']['billing_as_transaction_receipt']) && $result = fetch_assoc($query)) {
+			$result = fetch_assoc($query);
 			$this->document_name = String::strtoupper($GLOBALS['STR_TRANSACTION']);
 			$this->document_id = $result['reference'];
 		} else {
+			$this->document_name = '';
 			if ($bill_mode == "user_custom_products_list") {
 				$this->document_id = 0;
 			} elseif ($bill_mode == "bdc") {
@@ -1113,6 +1138,7 @@ class Invoice extends TCPDF {
 			}
 		}
 		if(!empty($document_title)) {
+			// On force le nom de document avec $document_title
 			$this->document_name = String::strtoupper($document_title);
 		}
 		// On refera un test de saut de page juste avant l'affichage des remarques et blocs de fin
@@ -1223,9 +1249,9 @@ class Invoice extends TCPDF {
 				} else {
 					if (!empty($this_ordered_product["photo"])) {
 						$this_thumb = thumbs($this_ordered_product["photo"], 50, 35);
-						if (!empty($this_thumb) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.$this_thumb)) {
+						if (!empty($this_thumb) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.String::rawurlencode($this_thumb))) {
 							// Positionnement du logo à droite des informations sur la société
-							$this->Image($GLOBALS['uploaddir'].'/thumbs/'.$this_thumb, 15, $y-4);
+							$this->Image($GLOBALS['uploaddir'].'/thumbs/'.String::rawurlencode($this_thumb), 15, $y-4);
 						}
 					}
 					if (!empty($this_ordered_product["barcode_image_src"])) {
@@ -1294,14 +1320,15 @@ class Invoice extends TCPDF {
 	/**
 	 * getSocieteInfoText()
 	 *
+	 * @param boolean $use_admin_rights
+	 * @param boolean $skip_registration_number
 	 * @return string
 	 */
-	function getSocieteInfoText()
+	function getSocieteInfoText($use_admin_rights = true, $skip_registration_number = false)
 	{
 		$qid = query("SELECT * 
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe') . "
-			LIMIT 1");
+			WHERE " . get_filter_site_cond('societe', null, $use_admin_rights) . "");
 		if ($ligne = fetch_object($qid)) {
 			$pdf_societe = filtre_pdf($ligne->societe) . "\n" ;
 			$pdf_adresse = filtre_pdf($ligne->adresse) . "\n" ;
@@ -1314,12 +1341,12 @@ class Invoice extends TCPDF {
 				$pdf_tel = "" ;
 			}
 			$pdf_fax = $ligne->fax ;
-			if (!empty($ligne->siren)) {
+			if (!empty($ligne->siren) && !$skip_registration_number) {
 				$pdf_siret = $GLOBALS['STR_PDF_RCS'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . filtre_pdf($ligne->siren) . "\n";
 			} else {
 				$pdf_siret = "" ;
 			}
-			if (!empty($ligne->tvaintra)) {
+			if (!empty($ligne->tvaintra) && !$skip_registration_number) {
 				$pdf_tvaintra_company = $GLOBALS['STR_VAT_INTRACOM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . filtre_pdf($ligne->tvaintra) . "\n";
 			} else {
 				$pdf_tvaintra_company = "" ;
@@ -1356,18 +1383,20 @@ class Invoice extends TCPDF {
 		}
 		if(!empty($pdf_logo) && strpos($pdf_logo, $GLOBALS['dirroot']) === false) {
 			// on découpe le contenu du champs à la recherche du non de l'image fixe
-			// ceci évitera d'envoyer la transmition du logo avec un chemin en http::// (qui n'est pas pris en compte)
+			// ceci évitera d'envoyer la transmition du logo avec un chemin en http://
 			$pdf_logo = String::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $pdf_logo));
 			if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
-				// si le logo renseigné n'existe pas, on ne retourne pas d'information
+				// le logo existe sur le serveur
 				$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;
 			} elseif (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/images/' . $pdf_logo)) {
-				// si le logo renseigné n'existe pas, on ne retourne pas d'information
+				// le logo existe sur le serveur dans le dossier images
 				$pdf_logo = $GLOBALS['dirroot'] . '/images/' . $pdf_logo;
 			} elseif (empty($pdf_logo) || !($handle = @String::fopen_utf8($pdf_logo, 'rb'))) {
 				// si le logo renseigné n'existe pas, on ne retourne pas d'information
 				$pdf_logo = false;
 			}
+			// Si :// Alors logo_path par thumbs pour récupérer l'image, faire la bonne taille.
+			// 
 			if(!empty($handle)) {
 				fclose($handle);
 			}

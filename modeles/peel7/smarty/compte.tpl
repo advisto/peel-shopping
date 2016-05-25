@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: compte.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<h1 property="name" class="page_title">{$compte}</h1>
 <div class="page_content account_icons">
 {if $est_identifie}
@@ -24,7 +24,8 @@
 		<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{$logout.href|escape:'html'}"><span class="glyphicon glyphicon-log-out"></span> {$logout.txt}</a>
 		<p>{$msg_support}</p>
 		<p>{$compte} {$number} <b>{$code_client}</b></p>
-
+		{if !empty($user_account_completion_text)}<p>{$user_account_completion_text}</p>{/if}
+		{if isset($data)}{$data}{/if}
 			{if isset($modules_data)}
 				{foreach $modules_data as $group => $modules_data_array}
 					{if !empty($modules_data_group.$group) && !empty($modules_data_group.$group.header)}

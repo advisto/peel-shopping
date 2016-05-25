@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: guide.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: guide.tpl 49536 2016-04-11 12:55:29Z sdelaporte $
 *}
 {if !$affiche_guide_returned_link_list_without_ul}
 <ul>
@@ -18,7 +18,9 @@
 	{foreach $links as $l}
 	<li class="minus"><a href="{$l.href|escape:'html'}">{if $l.selected}<b>{/if}{$l.label}{if $l.selected}</b>{/if}</a></li>
 	{/foreach}
-	{$menu_contenu}
+	{if !empty($menu_contenu)}
+		{$menu_contenu}
+	{/if}
 {if !$affiche_guide_returned_link_list_without_ul}
 </ul>
 {/if}

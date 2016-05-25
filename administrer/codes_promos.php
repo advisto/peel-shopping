@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: codes_promos.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -194,8 +194,8 @@ function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('remise_valeur', vn($frm['remise_valeur']));
 	$tpl->assign('montant_min', vn($frm['montant_min']));
-	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie'])));
-	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo']))));
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie']), 'option', '&nbsp;&nbsp;', null, null, true, 80));
+	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo'])), 'option', '&nbsp;&nbsp;', null, null, true, 80));
 	$tpl->assign('nombre_prevue', vb($frm["nombre_prevue"]));
 	$tpl->assign('nb_used_per_client', vb($frm["nb_used_per_client"]));
 	$tpl->assign('product_filter', vb($frm['product_filter']));
@@ -273,7 +273,7 @@ function maj_code_promo($id, $frm)
 			, nombre_prevue = '" . intval($frm['nombre_prevue']) . "'
 			, nb_used_per_client = '" . intval($frm['nb_used_per_client']) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
-			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true)) . "'
+			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true), true) . "'
 		WHERE id='" . intval($id) . "'";
 	query($sql);
 }

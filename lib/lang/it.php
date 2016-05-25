@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: it.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -385,6 +385,7 @@ $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "";
@@ -671,6 +672,7 @@ $GLOBALS["STR_REMISE"] = "Remise";
 $GLOBALS["STR_REQUEST_OK"] = "La sua richiesta è stata registrata.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "";
+$GLOBALS["STR_RESULTS"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "RISULTATO DELLA RICERCA";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "";
 $GLOBALS["STR_RETAILER"] = "";
@@ -710,7 +712,7 @@ $GLOBALS["STR_SHIPPING_COST"] = "Spese di spedizione";
 $GLOBALS["STR_SHIPPING_TYPE"] = "";
 $GLOBALS["STR_SHIPPING_ZONE"] = "";
 $GLOBALS["STR_SHOPPING"] = "";
-$GLOBALS["STR_SHORT_FAX"] = "Fax.";
+$GLOBALS["STR_SHORT_FAX"] = "Fax";
 $GLOBALS["STR_SHORT_TEL"] = "";
 $GLOBALS["STR_SHUTDOWN_DOWNLOAD_HELPER"] = "";
 $GLOBALS["STR_SIGNATURE"] = "";
@@ -820,6 +822,7 @@ $GLOBALS["STR_YOU_ARE"] = "";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "";
 $GLOBALS["STR_YOUR_EMAIL"] = "";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "";
 $GLOBALS["STR_YOUR_NAME"] = "";
 $GLOBALS["STR_YOUR_NOTE"] = "";
 $GLOBALS["STR_YOUR_OPINION"] = "";

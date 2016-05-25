@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: String.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: String.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ $GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: String.php 48447 2016-01-11 08:40:08Z sdelaporte $
+ * @version $Id: String.php 49979 2016-05-23 12:29:53Z sdelaporte $
  * @access public
  */
 class String {
@@ -53,6 +53,9 @@ class String {
 	 */
 	public static function strpos($haystack, $needle, $offset = 0)
 	{
+		if(is_array($haystack) && defined('PEEL_DEBUG')) {
+			var_dump(debug_backtrace());
+		}
 		if($needle!=='' && $needle!== null) {
 			if (function_exists('mb_strpos')) {
 				return mb_strpos($haystack, $needle, $offset);
@@ -233,7 +236,7 @@ class String {
 	public static function str_shorten($string, $length_limit, $middle_separator = '', $ending_if_no_middle_separator = '...', $ideal_length_with_clean_cut_if_possible = null)
 	{
 		$length = String::strlen($string);
-		if (!empty($ideal_length_with_clean_cut_if_possible) && $length > $ideal_length_with_clean_cut_if_possible) {
+		if ($ideal_length_with_clean_cut_if_possible > 0 && $length > $ideal_length_with_clean_cut_if_possible) {
 			// Gestion d'une coupure propre si possible entre $ideal_length_with_clean_cut_if_possible et $length_limit
 			$middle_separator = null;
 			foreach(array('.', '!', '?', ';', ':', ',', ' ', '=', '+', '-', '{', '}', '[', ']', '(', ')', '<', '>', '_', '#', '*') as $this_separator) {
@@ -264,11 +267,11 @@ class String {
 				// On coupe au milieu
 				$cut_start = ceil(($length - $cut_size) / 2);
 				$ending_text = String::substr($string, $cut_start + $cut_size);
-				if (String::strpos(String::substr($ending_text, 0, 8), '&') === false && String::strpos(String::substr($ending_text, 0, 8), ';') !== false) {
+				if (String::strlen($ending_text) && String::strpos(String::substr($ending_text, 0, 8), '&') === false && String::strpos(String::substr($ending_text, 0, 8), ';') !== false) {
 					// Si le texte de fin commence par un morceau de fin d'entité, alors on retire ce morceau.
 					$ending_text = String::substr($ending_text, String::strpos($ending_text, ';') + 1);
 				}
-				if (String::strpos(String::substr($ending_text, - 8), '&') !== false && String::strpos(String::substr($ending_text, - 8), ';') === false) {
+				if (String::strlen($ending_text)>=8 && String::strpos(String::substr($ending_text, - 8), '&') !== false && String::strpos(String::substr($ending_text, - 8), ';') === false) {
 					// Si le texte se termine par une entité pas finie (ex : &#34) on la retire.
 					$ending_text = String::substr($ending_text, 0, String::strrpos($ending_text, '&'));
 				}
@@ -278,7 +281,7 @@ class String {
 				$ending_text = '';
 			}
 			$beginning_text = String::substr($string, 0, $cut_start);
-			if (String::strpos(String::substr($beginning_text, - 8), '&') !== false && String::strpos(String::substr($beginning_text, - 8), ';') === false) {
+			if (String::strlen($beginning_text)>=8 && String::strpos(String::substr($beginning_text, -8), '&') !== false && String::strpos(String::substr($beginning_text, -8), ';') === false) {
 				// Si le texte se termine par une entité pas finie (ex : &#34) on la retire.
 				$beginning_text = String::substr($beginning_text, 0, String::strrpos($beginning_text, '&'));
 			}
@@ -543,7 +546,6 @@ class String {
 	 * String::strip_tags()
 	 *
 	 * @param string $string
-	 * @param array $allowed_tags
 	 * @return
 	 */
 	public static function strip_tags($string, $allowed_tags = null)

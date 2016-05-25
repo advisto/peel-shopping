@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: eo.php 50032 2016-05-24 12:30:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -42,7 +42,7 @@ $GLOBALS["STR_AJOUT_PENSE_BETE"] = "Aldoni ĉe la not-listo";
 $GLOBALS["STR_ALL_BRAND"] = "Ĉiuj markoj";
 $GLOBALS["STR_ALL"] = "Ĉiuj";
 $GLOBALS["STR_ALL_RESULTS"] = "";
-$GLOBALS["STR_ALT_AD_DETAIL"] = "Detalo de la vendista noto";
+$GLOBALS["STR_ALT_AD_DETAIL"] = "Detalo de la noto";
 $GLOBALS["STR_AND"] = "kaj";
 $GLOBALS["STR_AMOUNT"] = "Monsumo";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Mi interesiĝas pri la sekvaj kategorioj:";
@@ -392,6 +392,7 @@ $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "Nun neniu opinio esti
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Opinio deponita de";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Vi lasis opinion pri ĉi varo";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "La opinio de retumantoj pri";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Sendi la opinion";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Vi deziris komenti pri la varo";
@@ -683,6 +684,7 @@ $GLOBALS["STR_REMISE"] = "Rabato";
 $GLOBALS["STR_REQUEST_OK"] = "Via peto bone enkalkuliĝis.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "nepra por reklamacio";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "nepras por validigi vian mendon.";
+$GLOBALS["STR_RESULTS"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "Rezultoj pri via serĉo";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Revendista aliĝo";
 $GLOBALS["STR_RETAILER"] = "Iĝi revendisto";
@@ -836,6 +838,7 @@ $GLOBALS["STR_YOU_ARE"] = "Vi estas";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Ni peta vin eldoni vian fakturon ĉe via uzanto-konto.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Via rabata kodo";
 $GLOBALS["STR_YOUR_EMAIL"] = "Via retpoŝtadreso";
+$GLOBALS["STR_YOUR_FIRST_NAME"] = "";
 $GLOBALS["STR_YOUR_NAME"] = "Via nomo";
 $GLOBALS["STR_YOUR_NOTE"] = "Via pritakso";
 $GLOBALS["STR_YOUR_OPINION"] = "Via opinio";

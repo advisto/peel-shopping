@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: critere_stock.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: critere_stock.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}{% if is_form %}
 <form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}" id="{{ form_id }}">
 {% endif %}
@@ -27,7 +27,7 @@
 					<select class="form-control" name="couleur" id="{{ id_select_color }}" onchange="{{ color_on_change_action }}">
 						<option value="0">{{ STR_CHOOSE_COLOR }}</option>
 						{% for c in colors %}
-							<option value="{{ c.id|str_form_value }}"{% if c.issel %} selected="selected"{% endif %}{% if not c.isavailable %} disabled="disabled"{% endif %}>{{ c.name }}{% if not c.isavailable %} - {{ STR_NO_AVAILABLE }}{% endif %}</option>
+							<option value="{{ c.id|str_form_value }}"{% if c.issel %} selected="selected"{% endif %}{% if not c.isavailable %} disabled="disabled"{% endif %}>{{ c.name }}{{ c.suffix }}{% if not c.isavailable %} - {{ STR_NO_AVAILABLE }}{% endif %}</option>
 						{% endfor %}
 					</select>
 				</td>

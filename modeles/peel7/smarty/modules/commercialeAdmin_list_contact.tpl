@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commercialeAdmin_list_contact.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: commercialeAdmin_list_contact.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<table class="full_width">
 		<tr>
@@ -39,9 +39,7 @@
 			<td>
 				<select class="form-control" name="account_type"  style="width:200px;">
 					<option value="">{$STR_ADMIN_ANY}</option>
-					{foreach $account_type_options as $o}
-					<option value="{$o.value|html_entity_decode_if_needed|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
-					{/foreach}
+					{$priv_options}
 				</select>
 			</td>
 		</tr>

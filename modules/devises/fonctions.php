@@ -3,26 +3,37 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 /**
- * Initialisation de la devise si demandée par l'utilisateur
+ * Ajout de données pour le header en front-office
+ *
+ * @param array $params
+ * @return On renvoie un tableau sous la forme [variable smarty] => [contenu]
+ */
+function devises_hook_header_template_data(&$params) {
+	$results['module_devise'] = affiche_module_devise(true);
+	return $results;
+}
+
+/**
+ * Initialisation des variables générales après exécution de configuration.inc.php : initialisation de la devise si demandée par l'utilisateur
  *
  * @param array $params
  * @return
  */
 function devises_hook_configuration_end($params) {
-	if (!empty($_GET['devise'])) {
+	if (!empty($_GET['devise']) && !defined('IN_PEEL_ADMIN')) {
 		set_current_devise($_GET['devise']);
 		// On redirige 302 après avoir défini la devise (les moteurs ont déjà plus tôt eu droit à redirection 301)
 		redirect_and_die(get_current_url(true, false, array('devise')));
@@ -49,8 +60,8 @@ function devises_hook_general_actions_24h($params) {
  */
 function set_current_devise($currency_id_or_code, $reference_country_id = null)
 {
-	if (!empty($_SESSION['session_utilisateur']['devise']) || !empty($currency_id_or_code) || !empty($reference_country_id)) {
-		if(!empty($_SESSION['session_utilisateur']['devise'])) {
+	if ((!empty($_SESSION['session_utilisateur']['devise']) && !defined('IN_PEEL_ADMIN')) || !empty($currency_id_or_code) || !empty($reference_country_id)) {
+		if(!empty($_SESSION['session_utilisateur']['devise']) && !defined('IN_PEEL_ADMIN')) {
 			// Devise forcée pour l'utilisateur, pas de possibilité d'en choisir une autre
 			$cond = "d.id='" . intval($_SESSION['session_utilisateur']['devise']) . "'";
 		} elseif(!empty($currency_id_or_code)) {
@@ -68,7 +79,7 @@ function set_current_devise($currency_id_or_code, $reference_country_id = null)
 		$sql = "SELECT d.*
 			FROM peel_devises d
 			" . vb($join) . "
-			WHERE d.etat='1' AND " . get_filter_site_cond('devises', 'd') . "
+			WHERE d.etat='1'" . (!defined('IN_PEEL_ADMIN') || empty($currency_id_or_code) ? " AND " . get_filter_site_cond('devises', 'd') : '') . "
 			ORDER BY IF(" . $cond . ", -1, 1) ASC
 			LIMIT 1";
 		$resDevise = query($sql);

@@ -3,15 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
-/* Fonctions de nom_attributs.php */
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -30,7 +29,7 @@ function attributs_hook_admin_menu_items($params) {
 }
 
 /**
- * Génération d'informations pour l'exportde produits
+ * Génération d'informations pour l'export de produits
  *
  * @param array $params
  * @return
@@ -279,12 +278,12 @@ function maj_nom_attribut($id, $frm)
 		$sql = "SELECT DISTINCT produit_id 
 			FROM peel_produits_attributs 
 			WHERE nom_attribut_id = '" . intval($id) . "'";
-		$resultat = query($sql);
+		$query = query($sql);
 		$sql = "DELETE FROM peel_attributs WHERE id_nom_attribut = '" . intval($id) . "'";
 		query($sql);
 		$sql = "DELETE FROM peel_produits_attributs WHERE nom_attribut_id = '" . intval($id) . "'";
 		query($sql);
-		while ($produit = fetch_assoc($resultat)) {
+		while ($produit = fetch_assoc($query)) {
 			$sql = query("INSERT INTO peel_produits_attributs (`produit_id`,`nom_attribut_id`,`attribut_id`) VALUES ('" . intval($produit['produit_id']) . "','" . intval($id) . "','0');");
 		}
 	}
@@ -303,16 +302,16 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$result = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description, site_id
+	$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description, site_id
 		FROM peel_nom_attributs 
 		WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'] . "");
-	$nr = num_rows($result);
+	$nr = num_rows($query);
 	$tpl->assign('num_results', $nr);
 	$tpl_results = array();
 	if ($nr != 0) {
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
@@ -661,8 +660,6 @@ function affiche_choix_nom_attribut()
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_SEARCH_UPDATE_LIST', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_SEARCH_UPDATE_LIST']);
 	echo $tpl->fetch();
 }
-
-/* Fonctions de produits_attributs.php */
 
 /**
  * affiche_liste_attributs_by_id()

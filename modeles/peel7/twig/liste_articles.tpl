@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_articles.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: liste_articles.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div style="margin-top:15px; margin-bottom:15px">
@@ -57,16 +57,7 @@
 {% else %}
 <div class="table-responsive">
 	<table class="table">
-		<tr>
-			<th class="menu">{{ STR_ADMIN_ACTION }}</th>
-			<th class="menu">{{ STR_ADMIN_RUBRIQUE }}</th>
-			<th class="menu">{{ STR_ADMIN_TITLE }}</th>
-			<th class="menu">{{ STR_WEBSITE }}</th>
-			<th class="menu">{{ STR_STATUS }}</th>
-	{% if (STR_ADMIN_SITE_COUNTRY) %}
-			<td class="menu">{{ STR_ADMIN_SITE_COUNTRY }}</td>
-	{% endif %}
-		</tr>
+		{{ links_header_row }}
 	{% for li in lignes %}
 		{{ li.tr_rollover }}
 			<td class="center"><a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ li.titre|htmlspecialchars }}" href="{{ li.drop_href|escape('html') }}"><img src="{{ li.drop_src|escape('html') }}" alt="" /></a></td>
@@ -97,4 +88,4 @@
 	</table>
 </div>
 {% endif %}
-<div class="center">{{ Multipage }}</div>
+<div class="center">{{ links_multipage }}</div>

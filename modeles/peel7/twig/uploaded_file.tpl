@@ -21,10 +21,12 @@
 	{% endif %}
 	<br />
 	{{ f.name }}&nbsp;
-	<a href="{{ f.drop_href|escape('html') }}"><img src="{{ f.drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_DELETE }}</a>
-	{% if f.form_name %}<input type="hidden" name="{{ f.form_name|str_form_value }}" value="{{ f.form_value|str_form_value }}" />{% endif %}
+	{% if read_only is empty %}
+			<a href="{{ f.drop_href|escape('html') }}"><img src="{{ f.drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_DELETE }}</a>
+	{% endif %}
+	{% if f.form_name %}<input type="hidden" name="{{ f.form_name|replace({'[':'_openarray_'})|replace({']':'_closearray_'})|str_form_value }}" value="{{ f.form_value|str_form_value }}" />{% endif %}
 {% elseif site_parameters.used_uploader=="fineuploader" %}
-	<div {% if (f.form_name) %}id="{{ f.form_name|str_form_value }}"{% endif %} class="uploader"></div>
+	<div {% if (f.form_name) %}id="{{ f.form_name|replace({'[':'_openarray_'})|replace({']':'_closearray_'})|str_form_value }}"{% endif %} class="uploader"></div>
 {% elseif f.form_name %}
 	<input name="{{ f.form_name|str_form_value }}" type="file" value="" />
 {% endif %}

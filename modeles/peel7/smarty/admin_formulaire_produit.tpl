@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 49947 2016-05-18 16:44:11Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -28,7 +28,7 @@
 			<div class="tab-pane active" id="tab1">
 	<table class="main_table">
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td class="title_label top">{$STR_CATEGORY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</td>
@@ -222,7 +222,7 @@
 		</tr>
 	{if $is_lot_module_active}
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_LOT_PRICE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_LOT_PRICE}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		{if $mode == "maj"}
 		<tr>
@@ -243,7 +243,7 @@
 		{/if}
 	{/if}
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_LINK_PRODUCT_TO_SUPPLIER}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_LINK_PRODUCT_TO_SUPPLIER}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2">
@@ -256,7 +256,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_CHOOSE_BRAND}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_CHOOSE_BRAND}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2">
@@ -272,12 +272,12 @@
 		{$gestion_stock}
 	{/if}
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_CHOOSE_REFERENCE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_CHOOSE_REFERENCE}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2">
 				<script><!--//--><![CDATA[//><!--
-					 var new_order_line_html = '<tr class="top" id="line[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="references[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
+					 var new_order_line_html = '<tr class="top" id="sortable_[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="references[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
 				//--><!]]></script>
 				<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
 					<table class="table admin_commande_details">
@@ -287,7 +287,7 @@
 							</tr>
 						</thead>
 						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
-						<tbody id="dynamic_order_lines">{foreach $produits_options as $o}<tr class="top" id="line{$o.i}">
+						<tbody id="dynamic_order_lines">{foreach $produits_options as $o}<tr class="top" id="sortable_{$o.i}">
 									<td>
 										<img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm('{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line({$o.i}, true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" />
 										<input type="hidden" name="references[]" value="{$o.value|str_form_value}">
@@ -315,7 +315,7 @@
 			<td><input name="nb_ref_produits" type="text" class="form-control" value="{$nb_ref_produits|str_form_value}" /></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA}</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA}</h2></td>
 		</tr>
 	{if $is_attributes_module_active}
 		<tr>
@@ -356,7 +356,7 @@
 		</tr>
 	{if $is_download_module_active}
 		<tr>
-			<td class="bloc" colspan="2">{$STR_ADMIN_PRODUITS_DOWNLOAD_PRODUCTS_HEADER}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td class="bloc" colspan="2"><h2>{$STR_ADMIN_PRODUITS_DOWNLOAD_PRODUCTS_HEADER}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td class="top title_label">{$STR_ADMIN_PRODUITS_IS_ON_DOWLOAD}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -368,7 +368,7 @@
 		</tr>
 	{/if}
 	{if $is_flash_sell_module_active}
-		<tr><td class="bloc" colspan="2">{$STR_ADMIN_PRODUITS_FLASH_SALE}</td></tr>
+		<tr><td class="bloc" colspan="2"><h2>{$STR_ADMIN_PRODUITS_FLASH_SALE}</h2></td></tr>
 		<tr>
 			<td colspan="2">
 				<div class="alert alert-info">{$STR_ADMIN_PRODUITS_FLASH_SALE_EXPLAIN}</div>
@@ -392,7 +392,7 @@
 		</tr>
 	{/if}
 	{if $is_gifts_module_active}
-		<tr><td class="bloc" colspan="2">{$STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER}</td></tr><tr>
+		<tr><td class="bloc" colspan="2"><h2>{$STR_ADMIN_PRODUITS_GIFT_CHECK_HEADER}</h2></td></tr><tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN}</div></td>
 		</tr>
 		<tr>
@@ -413,7 +413,7 @@
 			<div class="tab-pane" id="tab2">
 	<table class="main_table">
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_PRODUITS_FILES_HEADER}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_FILES_HEADER}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="title_label">{$STR_ADMIN_PRODUITS_VIDEO_TAG}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -477,7 +477,7 @@
 			</div>
 	{foreach $langs as $l}
 			<div class="tab-pane" id="tab_{$l.lng|upper}">
-			<div class="bloc">{$STR_ADMIN_PRODUITS_TEXT_RELATED_IN} {$l.lng|upper}</div>
+			<div class="bloc"><h2>{$STR_ADMIN_PRODUITS_TEXT_RELATED_IN} {$l.lng|upper}</h2></div>
 		{if empty($product_name_forced_lang) || $l.lng==$product_name_forced_lang}
 		<label>{$STR_ADMIN_NAME} {$l.lng|upper} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label>
 		<input type="text" class="form-control" name="nom_{$l.lng}" value="{$l.nom|html_entity_decode_if_needed|str_form_value}" /><br />
@@ -500,11 +500,11 @@
 		<textarea class="form-control" name="meta_desc_{$l.lng}" style="width:100%" rows="3" cols="54">{$l.meta_desc|nl2br_if_needed|html_entity_decode_if_needed|strip_tags}</textarea>
 		<br />
 		{if $is_id}
-		<div class="bloc">{$STR_ADMIN_PRODUITS_MANAGE_TABS_TITLE} {$l.lng|upper}</div>
+		<div class="bloc"><h2>{$STR_ADMIN_PRODUITS_MANAGE_TABS_TITLE} {$l.lng|upper}</h2></div>
 		<div class="alert alert-info">{$STR_ADMIN_PRODUITS_MANAGE_TABS_EXPLAIN}</div>
 		<label><a href="{$l.modif_tab_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_ADMIN_PRODUITS_MANAGE_TAB} {$l.lng|upper}</a></label>
 		{else}
-		<div class="bloc">{$STR_ADMIN_PRODUITS_MANAGE_TAB_EXPLAIN}</div>
+		<div class="bloc"><h2>{$STR_ADMIN_PRODUITS_MANAGE_TAB_EXPLAIN}</h2></div>
 		{/if}
 			</div>
 	{/foreach}

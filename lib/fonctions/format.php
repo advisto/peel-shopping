@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 48453 2016-01-11 09:52:17Z gboussin $
+// $Id: format.php 50006 2016-05-23 22:16:55Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -46,7 +46,7 @@ function cleanDataDeep(&$value, $key = null)
 			if($key!==null){
 				// On ne passe ici que si $key est défini, donc si on appelle cette fonction avec array_walk_recursive et non pas array_map
 				$key_parts=explode('_', str_replace('form_', '', $key));
-				if (!empty($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && !in_array($key_parts[0], $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'])) {
+				if (!empty($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && (!in_array($key, $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && !in_array($key_parts[0], $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'])) && preg_match('|\</?([a-zA-Z]+[1-6]?)(\s[^>]*)?(\s?/)?\>|', $value)) {
 					// Un utilisateur sans droit administrateur ne peut jamais donner de HTML => protège de toute sorte de XSS
 					$value = String::strip_tags($value);
 				}
@@ -495,7 +495,11 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
  */
 function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_missing = false)
 {
-	if (is_numeric(substr($string, 0, 4)) && substr($string, 4, 1) == '-' && !is_numeric(substr($GLOBALS['date_format_short'], 0, 4))) {
+	if(is_numeric($string) && $string>100000000) {
+		// $string est un timestamp
+		$string = date('Y-m-d H:i:s', $string);
+		$supposed_string_format = 'Y-m-d H:i:s';
+	} elseif (is_numeric(substr($string, 0, 4)) && substr($string, 4, 1) == '-' && !is_numeric(substr($GLOBALS['date_format_short'], 0, 4))) {
 		// Date au format MySQL
 		$supposed_string_format = 'Y-m-d H:i:s';
 	} else {
@@ -614,13 +618,14 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
-	if(strpos($text, '[') !== false && strpos($text, ']') !== false) {
+	if(String::strpos($text, '[') !== false && String::strpos($text, ']') !== false) {
 		$template_tags = array();
 		if(!$replace_only_custom_tags) {
 			// On rajoute les tags génériques au site
 			$template_tags['SITE'] = $GLOBALS['site'];
 			$template_tags['SITE_NAME'] = $GLOBALS['site'];
 			$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
+		$template_tags['REPERTOIRE_IMAGES'] = $GLOBALS['repertoire_images'];
 			if(!$avoid_load_urls) {
 				$template_tags['CATALOG_URL'] = get_product_category_url();
 			}
@@ -659,8 +664,10 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 								$query = query($sql);
 							}
 						} elseif($this_function_tag == 'FUNCTION') {
+							// Syntaxe d'appel [FUNCTION=my_function_name] ou [FUNCTION=my_function_name,arg_array_key1=>arg_array_value1,arg_array_key2=>arg_array_value2,...]
 							// SECURITE : Liste des fonctions autorisées ci-dessous, sinon la fonction appelée doit commencer par le préfixe 'get_tag_function_'
-							$allowed_functions = array('');
+							// Non administrable en base de données par sécurité, pour éviter une attaque qui permet à partir de la BDD d'exécuter n'importe quelle fonction
+							$allowed_functions = array('affiche_footer', 'get_categories_output', 'get_brand_link_html', 'get_newsletter_form', 'affiche_social_icons', 'affiche_banner', 'affiche_guide', 'affiche_footer', 'get_footer_column', 'affiche_menu_recherche');
 							$this_arg_array=explode(',', $this_arg, 2);
 							$this_arg = $this_arg_array[0];
 							$this_params_array = get_array_from_string(vb($this_arg_array[1]));
@@ -669,8 +676,28 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							} else {
 								$function_name = 'get_tag_function_' . $this_arg;
 							}
+							// liste des arguments de la fonction
+							$reflection_object = new ReflectionFunction($function_name);
+							$function_args = array();
+							foreach ($reflection_object->getParameters() as $this_arg) {
+								$function_args[] = $this_arg->name;
+								$function_args_is_array[] = ($this_arg->isArray() || ($this_arg->isOptional() && is_array(@$this_arg->getDefaultValue())));
+								if(!$this_arg->isOptional() && count($this_params_array)<count($function_args)) {
+									// Ajout d'un paramètre obligatoire, qui n'est pas défini dans l'appel au tag
+									$this_params_array[] = null;
+								}
+							}
+							// On veut pouvoir donner les paramètres donnés par l'utilisateur en tant que tableau d'informations dans le paramètre 1, ou répartir les paramètres dans la liste des arguments de la fonction
+							if(!empty($function_args_is_array[0]) && (!isset($this_params_array[$function_args[0]]) || !is_array($this_params_array[$function_args[0]]))) {
+								// On regroupe les paramètres dans un tableau donné au premier argument
+								$this_params_array = array($this_params_array);
+							} else {
+								// On va donner les N paramètres aux N arguments
+							}
+							// La fonction doit avoir un seul paramètre $params qui va contenir arg_array_key1=>arg_array_value1,arg_array_key2=>arg_array_value2,...
 							if(function_exists($function_name)) {
-								$template_tags[$this_tag] = $function_name($this_params_array);
+								// NB : Pas possible d'utiliser la syntaxe $function_name($this_params_array) si on veut donner N arguments
+								$template_tags[$this_tag] = call_user_func_array($function_name, $this_params_array);
 							} else {
 								$template_tags[$this_tag] = '[' . $function_name . ' not found]'; 
 							}
@@ -688,7 +715,10 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							$template_tags[$this_tag] = get_rss_feed_content($this_arg);
 						} elseif($this_function_tag == 'HTML') {
 							// Pour chaque tag HTML, on remplace par le contenu de la zone HTML correspondante
-							$template_tags[$this_tag] = affiche_contenu_html($this_arg, true);
+							if (!empty($_SESSION['session_utilisateur']['pseudo'])) {
+								$custom_template_tags['PSEUDO'] = $_SESSION['session_utilisateur']['pseudo'];
+							}
+							$template_tags[$this_tag] = affiche_contenu_html($this_arg, true, $custom_template_tags);
 						} 
 					}
 				}
@@ -992,6 +1022,10 @@ function get_string_from_array($array, $disable_ad_quote=false)
 				} elseif($this_value === null){
 					$array[$this_key] = 'null';
 				} else {
+					if(is_array($this_value) && a_priv('admin*', false)) {
+						// On n'est pas censé passer par là, on avertit si l'utilisateur est admin.
+						var_dump($this_value, $array);
+					}
 					$array[$this_key] = '"' . $this_value . '"';
 				}
 			}
@@ -1012,15 +1046,15 @@ function get_string_from_array($array, $disable_ad_quote=false)
  */
 function get_array_from_string($string)
 {
-	$string = str_replace('Array ', 'Array', trim(str_replace(array("\t", "\r\n", "\r"), array(' ', "\n", ''), $string)));
+	$string = str_replace('Array ', 'Array', trim(str_replace(array("\t", "\r\n", "\r", '\,'), array(' ', "\n", '', '¤#'), $string)));
 	if(String::substr($string, 0, String::strlen('Array')) == 'Array') {
 		$string = String::substr($string, String::strlen('Array('), String::strlen($string) - String::strlen('Array(')-1);
 	}
-	$parts = explode(',', str_replace("\n", ',', $string));
+	$parts = explode(',', str_replace(array("\n", '=&gt;'), array(',', '=>'), $string));
 	$result = array();
 	foreach($parts as $this_part_key => $this_part) {
 		if(empty($skip_part_key_array) || !in_array($this_part_key, $skip_part_key_array)) {
-			$this_part = trim($this_part);
+			$this_part = trim(str_replace(array('¤#', "\\'"), array(',', "'"), $this_part));
 			if(!empty($this_part)){
 				$line = explode('=>', $this_part, 2);
 				if(!isset($line[1])) {
@@ -1042,11 +1076,11 @@ function get_array_from_string($string)
 					// On retire le séparateur de fin
 					$this_value = String::substr($this_value, 0, String::strlen($this_value)-1);
 				}
-				if($this_value == 'true'){
+				if($this_value == 'true' || $this_value == 'TRUE'){
 					$this_value = true;
-				} elseif($this_value == 'false'){
+				} elseif($this_value == 'false' || $this_value == 'FALSE'){
 					$this_value = false;
-				} elseif($this_value == 'null'){
+				} elseif($this_value == 'null' || $this_value == 'NULL'){
 					$this_value = null;
 				}
 				if(!isset($line[1])) {
@@ -1121,7 +1155,9 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
  */
 function highlight_found_text($text, $terms, &$found_words_array, $found_tags = array('<span class="search_tag">', '</span>')) {
 	$bbcode = array('[tagsearch]', '[/tagsearch]');
-	if(!is_array($terms)) {
+	if(empty($terms)) {
+		return $text;
+	} elseif(!is_array($terms)) {
 		$terms = array($terms);
 	}
 	foreach ($terms as $this_term) {
@@ -1145,7 +1181,13 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
  */
 function userAgeFormat ($date)
 {
- return floor((date('Ymd') - str_replace("-", "", $date)) / 10000);
+	if(!empty($date)) {
+		$date = str_replace("-", "", String::substr($date, 0, 10));
+		$age = floor((date('Ymd') - $date) / 10000);
+		if($age > 0 && $age < 150) {
+			return $age . ' ' . $GLOBALS['strYears'];
+		}
+	}
 }
 
 /**
@@ -1182,4 +1224,124 @@ function check_password_format($string) {
 	} else {
 		return true;
 	}
+}
+
+/**
+ * Détecte la présence d'un téléphone dans une chaine de caractères
+ * 
+ * @param array $string
+ * @return
+ */
+function PhoneIn ($string)
+{
+	$string = String::strtolower($string);
+	$string = str_replace(array(')', '(', '.', '-', ' '), array(''), $string);
+	
+	return preg_match('/([0-9]{8})/', $string);
+}
+
+/**
+ * Détecte la présence d'un email dans une chaine de caractères
+ * 
+ * @param array $string
+ * @return
+ */
+function MailIn ($string)
+{
+	$string_test = String::strtolower($string);
+	$adresse = array('hotmail', 'h0tmail', 'yahoo', 'yah00', 'yah0o', 'yaho0', 'gmail', 'caramail');
+	$at = array('@', '[at]', '(at)', '{at}');
+
+	foreach($adresse as $value) {
+		if (String::strpos($string_test, $value) !== false) return true;
+	}
+
+	foreach($at as $value) {
+		while (String::strpos($string_test, $value) !== false) {
+			$pos = String::strpos($string_test, $value);
+			$string_tmp = String::substr($string_test, $pos + 1, 15);
+
+			if (String::strpos($string_tmp, '+') === false && strpos($string_tmp, 'plus') === false) {
+				if (String::strpos($string_tmp, '.', 1) !== false) return true;
+				elseif (String::strpos($string_tmp, 'dot', 1) !== false) return true;
+				elseif (String::strpos($string_tmp, 'point', 1) !== false) return true;
+				elseif (String::strpos($string_tmp, 'pt', 1) !== false) return true;
+			}
+			$string_test = String::substr($string_test, $pos + 1);
+		}
+	}
+	return false;
+}
+
+/**
+ * Détecte la présence d'une URL dans une chaine de caractères
+ * 
+ * @param array $string
+ * @return
+ */
+function urlIn ($string)
+{
+	$string_test = String::strtolower($string);
+	$array = array('http', 'www', '3w', '.com', '. com', '.fr', '. fr', '.net', '. net',
+		'.org', '. org', '.eu', '. eu', '.biz', '. biz', '.info', '. info', '.name',
+		'. name', '.be', '. be', '.cc', '. cc', '.ws', '. ws', '.mobi', '. mobi');
+
+	foreach($array as $value) {
+		if (strpos($string_test, $value) !== false) return true;
+	}
+
+	return false;
+}
+
+/**
+* array_merge_recursive does indeed merge arrays, but it converts values with duplicate
+* keys to arrays rather than overwriting the value in the first array with the duplicate
+* value in the second array, as array_merge does. I.e., with array_merge_recursive,
+* this happens (documented behavior):
+*
+* array_merge_recursive(array('key' => 'org value'), array('key' => 'new value'));
+*     => array('key' => array('org value', 'new value'));
+*
+* array_merge_recursive_distinct does not change the datatypes of the values in the arrays.
+* Matching keys' values in the second array overwrite those in the first array, as is the
+* case with array_merge, i.e.:
+*
+* array_merge_recursive_distinct(array('key' => 'org value'), array('key' => 'new value'));
+*     => array('key' => array('new value'));
+*
+* @param array $array1, $array2, ...
+* @return array
+*/
+function array_merge_recursive_distinct() {
+	// N tableaux autorisés en arguments 
+    $arrays = func_get_args();
+	if (count($arrays) < 2) {
+		if ($arrays === array()) {
+		  return array();
+		} else {
+		  return $arrays[0];
+		}
+    }
+    $merged = array_shift($arrays);
+
+    foreach ($arrays as $array) {
+		foreach ($array as $key => $value) {
+			if (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
+				// Merge récursif, comme array_merge_recursive et non pas comme array_merge
+				if (is_numeric($key)) {
+					$merged[] = array_merge_recursive_distinct($merged[$key], $value);
+				} else {
+					$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
+				}
+			} elseif(is_numeric($key)) {
+				// Clé numérique : ajout en fin de tableau, sans effacer ce qui existe déjà => comme array_merge ou array_merge_recursive
+				$merged[] = $value;
+			} else {
+				// Clé alphanumérique : efface toute autre version déjà présente dans le tableau (=> d'où le nom array_merge_recursive_distinct, contrairement à array_merge_recursive qui créerait un tableau)
+				$merged[$key] = $value;
+			}
+		}
+		unset($key, $value);
+    }
+    return $merged;
 }

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: Multipage.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 48447 2016-01-11 08:40:08Z sdelaporte $
+ * @version $Id: Multipage.php 49979 2016-05-23 12:29:53Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -76,6 +76,7 @@ class Multipage {
 	var $order_get_variable = 'order';
 	var $order_sql_prefix = null;
 	var $no_pagination_displayed = false;
+	var $href_suffix = '';
 
 	/**
 	 * Constructeur
@@ -94,18 +95,18 @@ class Multipage {
 		$this->tpl_name = $template_name;
 		$this->no_pagination_displayed = $no_pagination_displayed;
 		$this->sqlRequest = $sqlRequest;
-			$this->DefaultResultsPerPage = $DefaultResultsPerPage;
-			if($this->DefaultResultsPerPage<20) {
-				$divisor = 2;
-			} else {
-				$divisor = 5;
-			}
-			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
-			$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
-			$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
-			if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
-				$this->nb4 = '*';
-			}
+		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
+		if($this->DefaultResultsPerPage<20) {
+			$divisor = 2;
+		} else {
+			$divisor = 5;
+		}
+		$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
+		$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
+		$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
+		if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
+			$this->nb4 = '*';
+		}
 
 		$this->LinkPerPage = $LinkPerPage;
 		$this->AddToColspan = $AddToColspan;
@@ -200,9 +201,10 @@ class Multipage {
 	 * Exécute le SQL avec LIMIT pour retourner les résultats, et calcule juste après car on a besoin que FOUND_ROWS soit exécuté immédiatement après
 	 *
 	 * @param mixed $return_objects
+	 * @param string $key_used
 	 * @return
 	 */
-	function Query($return_objects = false)
+	function Query($return_objects = false, $key_used = null)
 	{
 		$results_array = array();
 		if ($this->ResultPerPage !='*') {
@@ -232,11 +234,19 @@ class Multipage {
 		}
 		if ($return_objects) {
 			while ($ligne = fetch_object($query)) {
-				$results_array[] = $ligne;
+				if(empty($key_used)) {
+					$results_array[] = $ligne;
+				} else {
+					$results_array[$ligne->$key_used] = $ligne;
+				}
 			}
 		} else {
 			while ($ligne = fetch_assoc($query)) {
-				$results_array[] = $ligne;
+				if(empty($key_used)) {
+					$results_array[] = $ligne;
+				} else {
+					$results_array[$ligne[$key_used]] = $ligne;
+				}
 			}
 		}
 		$this->Calcul(!empty($query));
@@ -269,7 +279,7 @@ class Multipage {
 		}
 
 		$GLOBALS['all_multipage_limit'] = max($this->pages_count, vn($GLOBALS['all_multipage_limit']));
-		if (empty($GLOBALS['multipage_avoid_redirect_if_page_over_limit']) && $this->page > $GLOBALS['all_multipage_limit']) {
+		if (empty($GLOBALS['multipage_avoid_redirect_if_page_over_limit']) && !in_array(str_replace('session_multipage_', '', $this->nombre_session_var_name), vb($GLOBALS['site_parameters']['multipage_avoid_redirect_if_page_over_limit_technical_codes_array'], array())) && $this->page > $GLOBALS['all_multipage_limit']) {
 			$new_url = $this->getPageURL($this->pages_count);
 			if ($new_url != get_current_url(true)) {
 				redirect_and_die($new_url);
@@ -307,6 +317,16 @@ class Multipage {
 			} else {
 				$link .= (strstr($link, '?') ? '&' : '?') . 'nombre=' . urlencode($nombre) . '&multipage=' . $this->nombre_session_var_name;
 			}
+		}
+		if(!empty($this->href_suffix)) {
+			foreach(explode('&', $this->href_suffix) as $this_suffix) {
+				$this_get_array = explode('=', $this_suffix);
+				if(isset($_GET[$this_get_array[0]])) {
+					$link = str_replace($this_get_array[0].'='.$_GET[$this_get_array[0]], '', $link);
+					$link = str_replace(array('?&', '&&'), array('?', '&'), $link);
+				}
+			}
+			$link .= $this->href_suffix;
 		}
 		return $link;
 	}
@@ -440,7 +460,7 @@ class Multipage {
 					$url_desc = str_replace($this->sort_get_variable.'=' . $_GET[$this->sort_get_variable], $this->sort_get_variable.'=desc', $link_url);
 					$url_asc = str_replace($this->sort_get_variable.'=' . $_GET[$this->sort_get_variable], $this->sort_get_variable.'=asc', $link_url);
 				}
-				$output .= '<a href="' . $url_desc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/desc.gif" width="7" height="7" alt="-" /></a> ' . $this_title . ' <a href="' . $url_asc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/up.gif" width="7" height="7" alt="+" /></a>';
+				$output .= '<a href="' . $url_asc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/up.gif" width="7" height="7" alt="+" /></a> ' . $this_title . ' <a href="' . $url_desc . '"><img src="' . $GLOBALS['administrer_url'] . '/images/desc.gif" width="7" height="7" alt="-" /></a>';
 			} else {
 				$output .= $this_title;
 			}

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: menu.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: menu.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}			</div>
 		</div>
 	</div>
@@ -23,7 +23,7 @@
 							{% if item.label=='divider' %}
 						<li role="presentation" class="divider"></li>
 							{% else %}
-						<li class="menu_main_item menu_{{ item.name }}{% if item.selected %} active{% endif %}{% if (item.submenu) or (item.submenu_global) %} dropdown{% endif %}{% if item.class %} {{ item.class }}{% endif %}}">
+						<li class="menu_main_item menu_{{ item.name }}{% if item.selected %} active{% endif %}{% if (item.submenu) or (item.submenu_global) %} dropdown{% endif %}{% if item.class %} {{ item.class }}{% endif %}">
 							{% if item.href %}
 							<a id="{{ item.id|str_form_value }}" {% if (item.submenu) or (item.submenu_global) %}href="{{ item.href|htmlspecialchars }}" class="dropdown-toggle" data-toggle="dropdown" role="button"{% else %}href="{{ item.href|htmlspecialchars }}"{% endif %}>{% if item.name == 'home' %}<span class="glyphicon glyphicon-home"></span>{% else %}{{ item.label }}{% endif %}{% if (item.submenu) or (item.submenu_global) %} <span class="caret"></span>{% endif %}</a>
 								{% else %}

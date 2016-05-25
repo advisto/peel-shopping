@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: url_standard.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: url_standard.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -268,23 +268,43 @@ if (!function_exists('get_url')) {
 		if(empty($get_array)) {
 			$get_array = array();
 		}
-		if(strpos($uri, '/') === false && strpos($uri, '.') === false) {
+		if(String::strpos($uri, '/') === false && String::strpos($uri, '.') === false) {
 			$uri .= '.php';
+		}
+		if($uri == '/achat/marque.php' && !empty($get_array['id'])) {
+			// On récupère les informations manquantes
+			$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
+				FROM peel_marques p
+				WHERE p.id='" . intval($get_array['id']) . "'";
+			$query = query($sql);
+			if($result = fetch_assoc($query)){
+				$uri = '/' . rewriting_urlencode($GLOBALS['STR_BRAND']) . '/' . String::ucfirst(rewriting_urlencode($result['marque']));
+				unset($get_array['id']);
+			}
 		}
 		if(function_exists('convertHrefUri') && empty($forced_site_id)) {
 			$url = convertHrefUri($uri, $get_array, $lang);
 		} else {
-			if(substr($uri, 0, 1) !== '/') {
+			if(String::substr($uri, 0, 1) !== '/') {
 				$uri = '/' . $uri;
 			}
 			if (count($get_array) > 0) {
 				foreach ($get_array as $key => $value) {
 					$queryString[] = $key . '=' . urlencode($value);
 				}
-				$uri .= '?' . implode('&', $queryString);
+				if(String::strpos($uri, '?') !== false) {
+					$uri .= '&';
+				} else {
+					$uri .= '?';
+				}
+				$uri .= implode('&', $queryString);
 			}
-			$url = handle_setup_redirections(get_site_wwwroot($forced_site_id, $lang) . $uri, 'value');
+			if(String::strpos($uri, '://') === false) {
+				$uri = get_site_wwwroot($forced_site_id, $lang) . $uri;
+			}
+			$url = handle_setup_redirections($uri, 'value');
 		}
 		return $url;
 	}
 }
+

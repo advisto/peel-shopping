@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_clients_par_produit.tpl 46357 2015-07-14 20:54:45Z sdelaporte $
+// $Id: admin_liste_clients_par_produit.tpl 49897 2016-05-16 14:38:12Z sdelaporte $
 *}<div class="entete">{$STR_ADMIN_PRODUITS_ACHETES_LIST_TITLE} {$nom}</div>
 <div class="table-responsive">
 	<table class="table admin_liste_clients_par_produit">
@@ -36,8 +36,8 @@
 	{/foreach}
 	<tr>
 	{if $is_module_export_ventes_active}
-		<td colspan="5" class="label" align="right" style="padding-bottom:15px"><a href="{$export_href|escape:'html'}" class="label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a></td>
-		<td colspan="2" class="label">&nbsp;</td>
+		<td align="left" style="padding-bottom:15px"><a href="{$export_href|escape:'html'}" class="title_label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a></td>
+		<td colspan="6" class="label">&nbsp;</td>
 	{else}
 		<td colspan="7" class="label">&nbsp;</td>
 	{/if}

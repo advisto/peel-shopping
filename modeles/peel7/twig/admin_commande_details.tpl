@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_commande_details.tpl 49918 2016-05-16 21:48:13Z sdelaporte $
 #}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{{ STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE }}</td>
@@ -53,7 +53,7 @@
 							<input type="hidden" name="bdc_mode" value="bdc" />
 							<input type="text" class="form-control" id="bdc_partial" name="bdc_partial" value="{{ bdc_partial|str_form_value }}" style="width:90px" /> {{ bdc_devise }}{{ STR_BEFORE_TWO_POINTS }}:
 							<a id="partial_amount_link" onclick="get_partial_amount_link('{{ partial_amount_link_js }}');" target="{{ partial_amount_link_target }}" class="btn btn-primary" href="{{ partial_amount_link_href|escape('html') }}">{{ STR_ADMIN_COMMANDER_OPEN_IN_BROWSER }}</a>
-							<input type="submit" name="bdc_sendclient" class="btn btn-primary" value="{{ STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value }}" onclick="return confirm('{{ STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|filtre_javascript(true:true:true) }}');" /></p>
+							<input type="submit" name="bdc_sendclient" class="btn btn-primary" value="{{ STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL|str_form_value }}" onclick="return confirm('{{ STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM|filtre_javascript(true,true,true) }}');" /></p>
 						</form>
 					{% endif %}
 					{% if is_duplicate_module_active %}
@@ -79,13 +79,13 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{{ STR_ADMIN_COMMANDER_INFORMATION_ON_THIS_ORDER }}</td>
+			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_COMMANDER_INFORMATION_ON_THIS_ORDER }}</h2></td>
 		</tr>
 		<tr>
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ order_id }}</td>
 		</tr>
-		{% if is_kiala_module_active && shortkpid %}
+		{% if is_kiala_module_active and shortkpid %}
 		<tr>
 			<td>{{ STR_MODULE_KIALA_TRACKING_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ shortkpid }}</td>
@@ -310,7 +310,7 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{{ STR_ADMIN_COMMANDER_CLIENT_INFORMATION }}</td>
+			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_COMMANDER_CLIENT_INFORMATION }}</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_INVOICE_ADDRESS }}</td>
@@ -369,7 +369,7 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{{ STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST }}</td>
+			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST }}</h2></td>
 		</tr>
 	</table>
 	<div class="table-responsive">

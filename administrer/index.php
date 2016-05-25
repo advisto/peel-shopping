@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: index.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -82,27 +82,32 @@ if (check_if_module_active('phone_cti') && check_if_module_active('multisite')) 
 }
 $delivery = '';
 if(a_priv('admin_sales', true)) {
-	if(!empty($GLOBALS['site_parameters']['mode_transport'])) {
-		$delivery .= backoffice_home_block('delivery', 'purple', true);	
-	} else {
-		$home_modules = call_module_hook('get_admin_home_block', array(), 'array');
-		if(!empty($home_modules)) {
-			$delivery .= current($home_modules);
-		}
-	}
+	$home_modules['orders'] = backoffice_home_block('orders', 'green', true);
+	$home_modules['sales'] = backoffice_home_block('sales', 'blue', true);
 }
+if(a_priv('admin_products', true)) {
+	$home_modules['products'] = backoffice_home_block('products', 'orange', true);
+}
+if(a_priv('admin_sales', true)) {
+	if(!empty($GLOBALS['site_parameters']['mode_transport'])) {
+		$home_modules['delivery'] = backoffice_home_block('delivery', 'purple', true);	
+	}	
+}
+if(a_priv('admin_users', true)) {
+	$home_modules['users'] = backoffice_home_block('users', 'red', true);
+}
+$home_modules['peel'] = backoffice_home_block('peel', 'black', true);
+// On transmet les blocs par défaut en paramètre du hook, pour pouvoir les retirer ou en rajouter d'autres, ou même changer l'ordre dans le tableau
+
+$home_modules = call_module_hook('get_admin_home_block', $home_modules, 'array', true);
+
 if(vb($GLOBALS['site_parameters']['peel_database_version']) != PEEL_VERSION) {
 	$tpl->assign('version_update_link', $GLOBALS['administrer_url'] . '/update.php');
 	$tpl->assign('STR_ADMIN_UPDATE_VERSION_INVITE', $GLOBALS['STR_ADMIN_UPDATE_VERSION_INVITE']);
 }
 $tpl->assign('all_sites_name_array', get_all_sites_name_array(true));
-$tpl->assign('orders', (a_priv('admin_sales', true) ? backoffice_home_block('orders', 'green', true) : ''));
-$tpl->assign('sales', (a_priv('admin_sales', true) ? backoffice_home_block('sales', 'blue', true) : ''));
-$tpl->assign('products', (a_priv('admin_products', true) ? backoffice_home_block('products', 'orange', true) : ''));
-$tpl->assign('delivery', $delivery);
-$tpl->assign('users', (a_priv('admin_users', true) ? backoffice_home_block('users', 'red', true) : ''));
+$tpl->assign('home_modules', $home_modules);
 $tpl->assign('link', $GLOBALS['administrer_url'] . '/sites.php');
-$tpl->assign('peel', backoffice_home_block('peel', 'black', true));
 $tpl->assign('data_lang', get_data_lang());
 $tpl->assign('current_url', get_current_url());
 $tpl->assign('sortie_href', $GLOBALS['wwwroot_in_admin'] . '/sortie.php');

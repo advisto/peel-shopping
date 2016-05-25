@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_meta.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_meta.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -23,7 +23,7 @@
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
-			<td class="bloc">{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</td>
+			<td class="bloc"><h2>{{ STR_ADMIN_VARIOUS_INFORMATION_HEADER }}</h2></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_TECHNICAL_CODE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -46,7 +46,7 @@
 		</tr>
 		{% for l in langs %}
 		<tr>
-			<td class="bloc">{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ l.lng|upper }}</td>
+			<td class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ l.lng|upper }}</h2></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_META_TITLE }} {{ l.lng|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>

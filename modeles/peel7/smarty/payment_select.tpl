@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: payment_select.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: payment_select.tpl 49667 2016-04-25 12:13:08Z gboussin $
 *}<table>
 	<tr>
 		<td>
@@ -31,7 +31,15 @@
 				<input {if $moneybookers_payment_methods == 'WLT'}checked="checked"{/if} type="radio" name="moneybookers_payment_methods" value="WLT" /> Moneybookers e-wallet<br />
 			</span>
 {else}
-			<input {if $moneybookers_active}onclick="document.getElementById('payment_method').style.display='none';"{/if} type="radio" name="payment_technical_code" value="{$technical_code|str_form_value}"{if $issel} checked="checked"{/if} /> {$nom|html_entity_decode_if_needed}
+{if $technical_code == 'order_form'}
+			<input type="radio" onclick="document.getElementById('payment_method').style.display='block';" name="payment_technical_code" value="{$technical_code|str_form_value}"{if $issel} checked="checked"{/if} /> {$nom|html_entity_decode_if_needed}
+			<br />
+			<span id="payment_method" class="well" style="display: {if !$issel} none{else} block{/if};">
+				{$STR_ORDER_FORM} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: <input type="text" class="form-control" name="{$technical_code}_payment_methods" value="" /> <br />{if isset($order_form_payment_methods_error)}{$order_form_payment_methods_error}{/if}
+			</span>
+{else}
+			<input onclick="if(document.getElementById('payment_method')) {ldelim}document.getElementById('payment_method').style.display='none';{rdelim}" type="radio" name="payment_technical_code" value="{$technical_code|str_form_value}"{if $issel} checked="checked"{/if} /> {$nom|html_entity_decode_if_needed}
+{/if}
 	{if !empty($fprix_tarif)}
 			{$STR_BEFORE_TWO_POINTS}: + {$fprix_tarif}
 	{/if}

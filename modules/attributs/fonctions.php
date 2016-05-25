@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,9 +22,12 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function attributs_hook_product_init_post(&$params) {
-	// On ajoute au prix les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner)
-	$price_calculation = affiche_attributs_form_part($params['this'], 'price_calculation', null, null, null, null, null, check_if_module_active('reseller') && is_reseller(), false, false, true);
-	$params['this']->prix_ht += vn($GLOBALS['last_calculation_additional_price_ht']);
+	// On ajoute au prix les attributs à options uniques, puisque ces attributs ne seront pas sélectionnables par ailleurs (car rien à sélectionner).
+	if (empty($GLOBALS['site_parameters']['disable_attributs_hook_product_init_post'])) {
+		// disable_attributs_hook_product_init_post => dans certain cas spécifique on souhaite gèrer le surcout des options unique comme des attributs normaux, avec la variable configuration_total_original_price_attributs_ht donc on désactive ce morceau de code pour éviter une double prise en compte du surcout de l'attribut.
+		$price_calculation = affiche_attributs_form_part($params['this'], 'price_calculation', null, null, null, null, null, check_if_module_active('reseller') && is_reseller(), false, false, true);;
+		$params['this']->prix_ht += vn($GLOBALS['last_calculation_additional_price_ht']);
+	}
 }
 
 /**
@@ -55,6 +58,72 @@ function attributs_hook_product_set_configuration(&$params) {
  */
 function attributs_hook_product_get_options(&$params) {
 	return get_product_options($params['id_or_technical_code'], $params['lang'], $params['return_mode']);
+}
+
+
+/**
+ * Ajout de données pour le formulaire de création ou la mise à jour d'annonce
+ *
+ * @param array $params
+ * @return On renvoie un tableau sous la forme [variable smarty] => [contenu]
+ */
+function attributs_hook_ad_create_or_update_pre(&$params) {
+	// Gestion des attributs
+	if (!empty($params['attributs_list'])) {
+		$ad_product = 'ad';
+		$max_description_length = null;
+		$additional_line_price = 0;
+		$additional_line_attribut_id = 0;
+		$additional_line_size = 50;
+		if($max_description_length !== null && String::strlen($params['description_annonce_' . $_SESSION['session_langue']]) > $max_description_length) {
+			$additionnal_text = String::substr($params['description_annonce_' . $_SESSION['session_langue']], $max_description_length);
+			$params['description_annonce_' . $_SESSION['session_langue']] = String::substr($params['description_annonce_' . $_SESSION['session_langue']], 0, $max_description_length);
+			$additional_lines = ceil(String::strlen($additionnal_text)/$additional_line_size);
+			$GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']['additionnal_text'] = $additional_line_price*$additional_lines;
+			$temp = explode('§',$params['attributs_list']);
+			$temp[] = $additional_line_attribut_id . '|0|'.$additionnal_text;
+			$params['attributs_list'] = implode('§', $temp);
+		}
+		return $params;
+	} else {
+		return null;
+	}
+}
+
+/**
+ * Affiche des résultats complémentaires après la création ou la mise à jour d'une annonce
+ *
+ * @param array $params
+ * @return output
+ */
+function attributs_hook_ad_create_or_update_post(&$params) {
+	$output = '';
+	if (!empty($params['frm']['attributs_list']) && empty($GLOBALS['site_parameters']['ads_disable_product_attributes'])) {
+		$ad_product = 'ad';
+		// Gestion des attributs commandables pour l'annonce
+		// On met le produit dans le caddie pour que l'utilisateur puisse payer ses attributs
+		$product_object = get_ad_product(vb($params['frm']['attributs_list']), $ad_product);
+		$journal_attributs_list = get_attribut_list_from_post_data($product_object, $params['frm'], false, false);
+		$product_object_internet = get_ad_product(vb($params['frm']['attributs_list']), $ad_product.'_internet');
+		$costly_attributs_list_internet = get_attribut_list_from_post_data($product_object_internet, $params['frm'], false, true);
+		if(!empty($journal_attributs_list) && !empty($params['frm']['ad_quantity'])) {
+			$product_object->set_configuration(0, 0, $journal_attributs_list, check_if_module_active('reseller') && is_reseller(), false);
+			$_SESSION['session_caddie']->add_product($product_object, $params['frm']['ad_quantity'], '', null, $params['frm']['ad_id']);
+			$_SESSION['session_caddie']->update();
+			if (check_if_module_active('cart_popup')) {
+				$_SESSION['session_show_caddie_popup'] = true;
+			}
+		}
+		if(!empty($costly_attributs_list_internet)) {
+			$product_object_internet->set_configuration(0, 0, $costly_attributs_list_internet, check_if_module_active('reseller') && is_reseller(), false);
+			$_SESSION['session_caddie']->add_product($product_object_internet, 1, '', null, $params['frm']['ad_id']);
+			$_SESSION['session_caddie']->update();
+			if (check_if_module_active('cart_popup')) {
+				$_SESSION['session_show_caddie_popup'] = true;
+			}
+		}
+	}
+	return $output;
 }
 
 /**
@@ -124,6 +193,10 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 				$result['type_affichage_attribut'] = $GLOBALS['site_parameters']['type_affichage_attribut'];
 			}
 			$result['descriptif'] = String::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
+			$call_module_hook = call_module_hook('result_possible_attributs', array('result'=>$result, 'produit_id' =>$product_id), 'array');
+			if (!empty($call_module_hook['prix'])) {
+				$result['prix'] = $call_module_hook['prix'];
+			}
 			$possible_attributs[$product_id . '-' . $_SESSION['session_langue'] . '-' . $attributs_list][] = $result;
 		}
 	}
@@ -228,7 +301,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
  * @param boolean $get_attributes_with_single_options_only
  * @return
  */
-function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true, $filter_using_show_description = false, $get_attributes_with_single_options_only = false, $update_last_calculation_additional_price_ht = true)
+function affiche_attributs_form_part(&$product_object, $display_mode = 'table', $save_cart_id = null, $save_suffix_id = null, $form_id = null, $technical_code_array = null, $excluded_technical_code_array = null, $force_reseller_mode = null, $get_attributes_with_multiple_options_only = true, $filter_using_show_description = false, $get_attributes_with_single_options_only = false, $update_last_calculation_additional_price_ht = true, $display_name_attribut = false)
 {
 	$output = '';
 	$GLOBALS['last_calculation_additional_price_ht'] = 0;
@@ -297,12 +370,16 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				$attribut_additional_price_ttc += $additional_price_ttc;
 				$additional_price_ht = $additional_price_ttc / (1 + $product_object->tva / 100);
 				// On garde en mémoire le calcul pour utilisation potentielle après exécution de cette fonction
-				if (!empty($update_last_calculation_additional_price_ht)) {
+				if (!empty($update_last_calculation_additional_price_ht) && !in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
 					$GLOBALS['last_calculation_additional_price_ht'] += $additional_price_ht;
 				}
 				if ($additional_price_ttc != 0 && $show_additionnal_price) {
-					$final_additional_price_ht = $additional_price_ht * (1 - $product_object->get_all_promotions_percentage($reseller_mode, get_current_user_promotion_percentage(), false) / 100);
-					$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, true);
+					if (in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
+						$price_text = ' + '.$additional_price_ht.'%';
+					} else {
+						$final_additional_price_ht = $additional_price_ht * (1 - $product_object->get_all_promotions_percentage($reseller_mode, get_current_user_promotion_percentage(), false) / 100);
+						$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, true);
+					}
 				} else {
 					$price_text = '';
 				}
@@ -444,8 +521,14 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 		$tpl->assign('input_type', $input_type);
 		$tpl->assign('input_on_change', $input_on_change);
 		$tpl->assign('technical_code', $product_object->technical_code);
-		// Dans le cas où on veut le résultat en mode texte, il faut retirer les sauts de ligne et tabulations => on applique trim()
-		$output .= trim(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $tpl->fetch()));
+		$tpl->assign('display_name_attribut', $display_name_attribut);
+		if(empty($GLOBALS['site_parameters']['attribut_display_formated_text'])) {
+			// Dans le cas où on veut le résultat en mode texte, il faut retirer les sauts de ligne et tabulations => on applique trim()
+			$output .= trim(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $tpl->fetch()));
+		} else {
+			// On veut conserver la mise en forme des attributs, pour l'affichage.
+			$output .=  $tpl->fetch();
+		}
 	}
 	return $output;
 }
@@ -472,7 +555,7 @@ function display_option_image($str_image, $set = false)
 					$small_option_image = thumbs($str_img, 0, 25, 'fit', null, null, true, true);
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 							'set' => true,
-							'href' => $GLOBALS['repertoire_upload'] . '/' . $str_img,
+							'href' => get_url_from_uploaded_filename($str_img),
 							'src' => $small_option_image,
 							'file_type' => get_file_type($str_img),
 							'lightbox' => !defined('IN_PEEL_ADMIN')
@@ -486,7 +569,7 @@ function display_option_image($str_image, $set = false)
 		$small_option_image = thumbs($str_image, 0, 25, 'fit', null, null, true, true);
 		$output .= $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 				'set' => false,
-				'href' => $GLOBALS['repertoire_upload'] . '/' . $str_image,
+				'href' => get_url_from_uploaded_filename($str_image),
 				'file_type' => get_file_type($str_image),
 				'src' => $small_option_image,
 				'lightbox' => !defined('IN_PEEL_ADMIN')
@@ -753,8 +836,8 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 					}
 				}
 			} elseif($this_key == 'submit_all_value' && function_exists('handle_all_attributs_from_step_form')) {
-				// Traitement de l'enregistrement de l'utilisateur, sauvegarde en base de donnée de l'id utilisateur dans un champ attribut
-				$combinaisons_array = array_merge($combinaisons_array, handle_all_attributs_from_step_form($frm));
+				// Traitement de l'enregistrement de l'utilisateur, sauvegarde en base de donnée de l'id utilisateur dans un champ attribut. On passe $combinaisons_array à handle_all_attributs_from_step_form pour récupérer des information utile à la création d'utiilisateur
+				$combinaisons_array = array_merge($combinaisons_array, handle_all_attributs_from_step_form($frm, $combinaisons_array, $product_object));
 			}
 		}
 	}

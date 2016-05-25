@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: emails.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -33,10 +33,17 @@ if (!defined('IN_PEEL')) {
  * @param string $lang 
  * @param array $additional_infos_array contient des informations additionnelles pour d'éventuels hooks 
  * @param array $attachment_not_sent_by_email pour que la pièce jointe ne soit pas envoyé par email, mais pourra toujours être utilisée par une fonction hookable
+ * @param boolean $filter_html_to_be_safe A activer si message envoyé par un utilisateur
  * @return
  */
-function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false)
+function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false, $filter_html_to_be_safe = false)
 {
+	$emails_force_delivery_technical_codes = array('new_message', 'warn_message_filtered', 'initialise_mot_passe');
+	if(!empty($GLOBALS['site_parameters']['email_webmaster_by_technical_code']) && !empty($GLOBALS['site_parameters']['email_webmaster_by_technical_code'][$template_technical_code])) {
+		if($to == $GLOBALS['support'] || $to == $GLOBALS['support_sav_client'] || $to == $GLOBALS['support_commande']) {
+			$to = $GLOBALS['site_parameters']['email_webmaster_by_technical_code'][$template_technical_code];
+		}
+	}
 	// Suivant les hébergements, on peut remplacer \r\n par \n
 	$eol = "\r\n";
 	// $eol = PHP_EOL;
@@ -62,10 +69,13 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$recipient_array = explode(',', str_replace(';', ',', $to));
 	$used_template_technical_code = null;
 	if (!empty($template_technical_code)) {
+		// Si on demande plusieurs codes de modèle d'email dans un tableau, alors on prend en priorité le premier si trouvé, sinon le second (qui peut par exemple être un modèle plus générique)
 		if(!is_array($template_technical_code)) {
-			$template_technical_code = array($template_technical_code);
+			$template_technical_codes_array = array($template_technical_code);
+		} else {
+			$template_technical_codes_array = $template_technical_code;
 		}
-		foreach($template_technical_code as $this_template_technical_code) {
+		foreach($template_technical_codes_array as $this_template_technical_code) {
 			$template_infos = getTextAndTitleFromEmailTemplateLang($this_template_technical_code, $lang);
 			if (!empty($template_infos)) {
 				// Si l'on envoie un email avec un sujet, un message et un template d'email, le template n'est pas prioritaire.
@@ -126,6 +136,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	}
 	if ($format != "text") {
 		// On traite le modèle d'email avant de remplacer les tags car le modèle est peut-être en texte brut contrairement aux tags
+		// ATTENTION ne pas utiliser String::strip_tags car sinon les rempalcements d'espaces divers altèreraient la validité du test ci-dessous
 		if (strip_tags($mail_content) != $mail_content) {
 			// On passe le contenu de l'email en HTML si ce n'est pas déjà le cas
 			// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne
@@ -136,7 +147,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			$mail_content = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), array("\n", "\n"), $mail_content));
 		}
 	}
-	// On complète ci-dessous les tags avec les informations relatives à la première adresse email auquel on veut envoyer l'email
+	// On complète ci-dessous les tags avec les informations relatives à la première adresse email à laquelle on veut envoyer l'email
 	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
 	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
 	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
@@ -170,7 +181,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$mail_content = String::htmlentities($mail_content, null, GENERAL_ENCODING, false, true, false);
 		if ($html_correct_conformity) {
 			// On corrige le HTML si demandé
-			$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, false);
+			$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, $filter_html_to_be_safe);
 		}
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
@@ -235,13 +246,79 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$msg .= "--" . $mime_boundary_main . "--" . "" . $eol . $eol;
 		$mail_body = $msg;
 	}
+	// Filtrage du message si la configuration l'exige
+	if (!empty($GLOBALS['site_parameters']['filter_user_message_with_contact_information']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
+		if(!defined('IN_PEEL_ADMIN') && !empty($additional_infos_array['allow_content_filter'])) {
+			if(PhoneIn($mail_subject) || MailIn($mail_subject) || PhoneIn($mail_content) || MailIn($mail_content)) {
+				$custom_template_tags_warn = array();
+				$custom_template_tags_warn['SUBJECT'] = $mail_subject;
+				$custom_template_tags_warn['MESSAGE'] = $mail_content;
+				$custom_template_tags_warn['DETECTED'] = (PhoneIn($mail_subject) || PhoneIn($mail_content)?'phone':'email');
+				$custom_template_tags_warn['AUTHOR_ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . vb($additional_infos_array['id_utilisateur']) . '&start=0';
+		
+				// $additional_infos_array n'est pas utilisé ci-dessous, et donc le filtrage de l'admin à l'administrateur ne sera pas fait, donc pas de problème de récursivité infinie
+				send_email($GLOBALS['support_sav_client'], '', '', 'warn_message_filtered', $custom_template_tags_warn, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
+				return false;
+			}
+		}
+	}
 	$result = false;
 	$i = 0;
 	foreach($recipient_array as $this_email) {
 		$this_email = trim($this_email);
+		// Gestion d'actions complémentaires via un hook, par exemple messagerie interne
+		if(is_array($sender)) {
+			$params = $sender;
+		} else {
+			$params = array();
+		}
+		$params = array_merge($params, array('recipient_array' => array($this_email), 'from' => $from, 'mail_subject' => $mail_subject, 'mail_content' => $mail_content, 'technical_code' => $used_template_technical_code, 'document' => vb($main_document_attached)), $additional_infos_array);
+		if(empty($params['id_expediteur']) && !empty($from)) {
+			if(!empty($params['id_utilisateur'])) {
+				$params['id_expediteur'] = $params['id_utilisateur'];
+			} else {
+				$query = query('SELECT id_utilisateur
+					FROM peel_utilisateurs
+					WHERE email="' . real_escape_string($from) . '"');
+				if($result = fetch_assoc($query)) {
+					$params['id_expediteur'] = $result['id_utilisateur'];
+				}
+			}
+		}
+		if(empty($GLOBALS['send_email_just_warn_new_message']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
+			call_module_hook('send_email', $params);
+			// Pendant le hook ci-dessus, $GLOBALS['send_email_just_warn_new_message'] peut être modifié
+		}
+		if(!empty($GLOBALS['skip_send_this_email'])) {
+			unset($GLOBALS['skip_send_this_email']);
+			continue;
+		}
+		// Envoi de l'email si adapté
 		if(empty($used_template_technical_code) || !in_array($used_template_technical_code, vb($GLOBALS['site_parameters']['send_email_technical_codes_no_email'], array()))) {
 			if (empty($this_email) || $i > 10) {
 				// Limitation à 10 destinataires en même temps par sécurité
+				continue;
+			}
+			if(!empty($GLOBALS['send_email_just_warn_new_message']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
+				// Un message interne vient d'être créé en base de données et donc le contenu de l'email envoyé est à changer : on envoie par email le template 'new_message' au destinataire et non pas le texte prévu
+				if(!empty($params['id_expediteur'])) {
+					$sender_infos = get_user_information($params['id_expediteur']);
+				} else {
+					$sender_infos = array();
+				}
+				$custom_template_tags_warn = array();
+				$custom_template_tags_warn['NOM_FAMILLE'] = vb($template_tags['NOM_FAMILLE'], vb($sender_infos['nom_famille']));
+				$custom_template_tags_warn['PRENOM'] = vb($template_tags['PRENOM'], vb($sender_infos['prenom']));
+				$custom_template_tags_warn['SOCIETE'] = vb($template_tags['SOCIETE'], vb($sender_infos['societe']));
+				$custom_template_tags_warn['ADRESSE'] = vb($template_tags['ADRESSE'], vb($sender_infos['adresse']));
+				$custom_template_tags_warn['TELEPHONE'] = vb($template_tags['TELEPHONE'], vb($sender_infos['telephone']));
+				$custom_template_tags_warn['EMAIL'] = vb($template_tags['EMAIL'], vb($from, vb($sender_infos['email'])));
+				$custom_template_tags_warn['DISPO'] = vb($template_tags['DISPO'], vb($sender_infos['dispo']));
+				$custom_template_tags_warn['SUJET'] = $mail_subject;
+				$custom_template_tags_warn['TEXTE'] = '<a href="'.get_url('/modules/messaging/messaging.php').'">'. String::str_shorten(trim(String::html_entity_decode(String::strip_tags($mail_content))), 50) . '</a>';
+				// On désactive le paramètre d'envoi d'un nouveau message 
+				unset($GLOBALS['send_email_just_warn_new_message']);
+				send_email($to, '', '', 'new_message', $custom_template_tags_warn, $format, $sender, $html_add_structure, $html_correct_conformity, $html_convert_url_to_links, $reply_to, null, $lang, $additional_infos_array, true);	
 				continue;
 			}
 			if (((strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false) || !empty($GLOBALS['site_parameters']['localhost_send_email_active'])) && !empty($GLOBALS['site_parameters']['send_email_active'])) {
@@ -264,25 +341,6 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 				}
 			}
 		}
-		if(is_array($sender)) {
-			$params = $sender;
-		} else {
-			$params = array();
-		}
-		$params = array_merge($params, array('recipient_array' => array($this_email), 'from' => $from, 'mail_subject' => $mail_subject, 'mail_content' => $mail_content, 'technical_code' => $used_template_technical_code, 'document' => vb($main_document_attached)), $additional_infos_array);
-		if(empty($params['id_expediteur']) && !empty($from)) {
-			if(!empty($params['id_utilisateur'])) {
-				$params['id_expediteur'] = $params['id_utilisateur'];
-			} else {
-				$query = query('SELECT id_utilisateur
-					FROM peel_utilisateurs
-					WHERE email="' . real_escape_string($from) . '"');
-				if($result = fetch_assoc($query)) {
-					$params['id_expediteur'] = $result['id_utilisateur'];
-				}
-			}
-		}
-		call_module_hook('send_email', $params);
 		$i++;
 	}
 	return $result;

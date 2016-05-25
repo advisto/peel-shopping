@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: ventes.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -175,6 +175,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_ADMIN_VENTES_NO_ORDER_FOUND', $GLOBALS['STR_ADMIN_VENTES_NO_ORDER_FOUND']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER', $GLOBALS['STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER']);
+		$tpl->assign('STR_ADMIN_VENTES_ALL_EXPORT_EXCEL', $GLOBALS['STR_ADMIN_VENTES_ALL_EXPORT_EXCEL']);
 		$output .= $tpl->fetch();
 	} else {
 		$output .= $check_admin_date_data;

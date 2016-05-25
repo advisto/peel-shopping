@@ -10,25 +10,14 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_report.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_email-templates_report.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}{% if (results) %}
 <br />
 <div class="entete">{{ STR_ADMIN_EMAIL_TEMPLATES_TITLE }}</div>
 <div>{{ links_multipage }}</div>
 <div class="table-responsive email_templates_report">
 	<table class="table">
-		<tr>
-			<th class="menu">{{ STR_ADMIN_ID }}</th>
-			<th class="menu">{{ STR_ADMIN_TECHNICAL_CODE }}</th>
-			<th class="menu">{{ STR_CATEGORY }}</th>
-			<th class="menu">{{ STR_ADMIN_NAME }}</th>
-			<th class="menu">{{ STR_ADMIN_SUBJECT }}</th>
-			<th class="menu">{{ STR_ADMIN_HTML_TEXT }}</th>
-			<th class="menu">{{ STR_ADMIN_LANGUAGE }}</th>
-			<th class="menu">{{ STR_STATUS }}</th>
-			<th class="menu">{{ STR_ADMIN_ACTION }}</th>
-			<th class="menu">{{ STR_ADMIN_WEBSITE }}</th>
-		</tr>
+		{{ links_header_row }}
 		{% for res in results %}
 		{{ res.tr_rollover }}
 			<td class="center"><b>{{ res.id }}</b></td>

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_ventes.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_ventes.tpl 49896 2016-05-16 14:21:24Z sdelaporte $
 #}{% if (results) %}
 <br /><div class="alert alert-info">{{ STR_ADMIN_VENTES_FORM_EXPLAIN }}</div><br />
 <p class="title_label center">{{ period_text }}</p>
@@ -76,9 +76,9 @@
 	</div>
 {% if is_module_export_ventes_active %}
 	<div style="padding-bottom:15px">
-		<input type="radio" name="mode" value="standard" /><a href="{{ export_href|escape('html') }}" class="title_label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL }}</a><br />
-		<input type="radio" name="mode" value="one_line_per_order"/><a href="{{ export_href_one_line_per_order|escape('html') }}" class="title_label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER }}</a><br />
-		<input type="radio" name="mode" value="one_line_per_product" /><a href="{{ export_href_one_line_per_product|escape('html') }}" class="title_label"><img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT }}</a>
+		<input type="radio" name="mode" value="standard" />&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL }}.</span><a href="{{ export_href|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a><br />
+		<input type="radio" name="mode" value="one_line_per_order"/>&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER }}.</span><a href="{{ export_href_one_line_per_order|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a><br />
+		<input type="radio" name="mode" value="one_line_per_product" />&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT }}.</span><a href="{{ export_href_one_line_per_product|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a>
 	</div>
 	<input type="submit" class="btn btn-primary" name="export_selected_order" value="{{ STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER }}" />
 </form>

@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commande_pdf.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: commande_pdf.php 49989 2016-05-23 14:52:08Z sdelaporte $
 include("../configuration.inc.php");
 
 if (!empty($_GET['code_facture']) && !empty($_GET['mode']) && in_array($_GET['mode'], array('standard', 'facture', 'bdc', 'proforma', 'devis')) && !is_user_bot()) {
 	$mode = $_GET['mode'];
 	$code_facture = $_GET['code_facture'];
 
-	include("../lib/class/Invoice.php");
+	include($GLOBALS['dirroot']."/lib/class/Invoice.php");
 	$invoice_object = new Invoice('P', 'mm', 'A4');
 	$is_pdf_generated = $invoice_object->FillDocument($code_facture, null, null, null, null, null, null, $mode, false);
 	if (!$is_pdf_generated) {

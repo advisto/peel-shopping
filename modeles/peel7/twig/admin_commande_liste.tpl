@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_commande_liste.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ links_nbRecord }}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div style="margin-top: 15px; margin-bottom: 15px">
@@ -68,7 +68,7 @@
 			{% for res in results %}
 			{{ res.tr_rollover }}
 				<td class="center">
-					<a href="commander.php?mode=modif&amp;commandeid={{ res.id }}">{{ STR_MODIFY }}</a><br />
+					<a href="commander.php?mode=modif&amp;commandeid={{ res.order_id }}">{{ STR_MODIFY }}</a><br />
 				{% if is_duplicate_module_active %}
 					<a href="{{ res.dup_href|escape('html') }}" data-confirm="{{ STR_ADMIN_ORDER_DUPLICATE_WARNING|str_form_value }}" title="{{ STR_ADMIN_ORDER_DUPLICATE|str_form_value }}"><img src="{{ res.dup_src|escape('html') }}" alt="" /></a>
 				{% endif %}

@@ -10,27 +10,14 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bannerAdmin_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: bannerAdmin_liste.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}
 <div class="entete">{$STR_MODULE_BANNER_ADMIN_LIST_TITLE}</div>
 <div><img src="{$add_src|escape:'html'}" width="16" height="16" alt="" class="middle" /><a href="{$add_href|escape:'html'}">{$STR_MODULE_BANNER_ADMIN_CREATE}</a></div>
 {if isset($results)}
 <div class="table-responsive">
 	<table class="table">
-		<tr>
-			<td class="menu">{$STR_ADMIN_ACTION}</td>
-			<td class="menu">{$STR_MODULE_BANNER_ADMIN_PLACE}</td>
-			<td class="menu">{$STR_ADMIN_POSITION}</td>
-			<td class="menu">{$STR_ADMIN_NAME}</td>
-			<td class="menu">{$STR_IMAGE}</td>
-			<td class="menu">{$STR_ADMIN_BEGIN_DATE}</td>
-			<td class="menu">{$STR_ADMIN_END_DATE}</td>
-			<td class="menu">{$STR_MODULE_BANNER_ADMIN_HIT}</td>
-			<td class="menu">{$STR_MODULE_BANNER_ADMIN_VIEWED}</td>
-			<td class="menu">{$STR_ADMIN_LANGUAGE}</td>
-			<td class="menu">{$STR_STATUS}</td>
-			<td class="menu">{$STR_ADMIN_WEBSITE}</td>
-		</tr>
+		{$links_header_row}
 		{foreach $results as $res}
 		{$res.tr_rollover}
 			<td class="center"><a data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}" title="{$STR_DELETE|str_form_value} {$res.description}" href="{$res.drop_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="{$STR_DELETE|str_form_value}" /></a>

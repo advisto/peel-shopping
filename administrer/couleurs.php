@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: couleurs.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: couleurs.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -89,6 +89,9 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 function affiche_formulaire_ajout_couleur(&$frm)
 {
 	if(empty($frm)) {
+		$frm['prix'] = 0;
+		$frm['prix_revendeur'] = 0;
+		$frm['percent'] = 0;
 		$frm['position'] = 0;
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['nom_' . $lng] = "";
@@ -149,12 +152,20 @@ function affiche_formulaire_couleur(&$frm)
 	$tpl->assign('position', $frm["position"]);
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	$tpl->assign('prix', $frm["prix"]);
+	$tpl->assign('prix_revendeur', $frm["prix_revendeur"]);
+	$tpl->assign('percent', $frm["percent"]);
+	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
+	$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 	$tpl->assign('STR_ADMIN_COULEURS_FORM_TITLE', $GLOBALS['STR_ADMIN_COULEURS_FORM_TITLE']);
+	$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
+	$tpl->assign('STR_ADMIN_RESELLER_PRICE', $GLOBALS['STR_ADMIN_RESELLER_PRICE']);
+	$tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE']);
 	return $tpl->fetch();
 }
 
@@ -186,7 +197,10 @@ function supprime_couleur($id)
 function insere_couleur($frm)
 {
 	$sql = "INSERT INTO peel_couleurs (
-			site_id
+			prix
+			, prix_revendeur
+			, percent
+			, site_id
 			, position
 			";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -194,8 +208,11 @@ function insere_couleur($frm)
 	}
 	$sql .= "
 	) VALUES (
-		'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-		,'" . intval($frm['position']) . "'";
+		'" . nohtml_real_escape_string($frm['prix']) . "',
+		'" . nohtml_real_escape_string($frm['prix_revendeur']) . "',
+		'" . nohtml_real_escape_string($frm['percent']) . "',
+		'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "',
+		'" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -215,8 +232,11 @@ function maj_couleur($id, $frm)
 {
 	/* Met à jour la table couleur */
 	$sql = "UPDATE peel_couleurs
-			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-			, position = '" . intval($frm['position']) . "'";
+			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "',
+				position = '" . intval($frm['position']) . "',
+				prix = '" . nohtml_real_escape_string($frm['prix']) . "',
+				prix_revendeur = '" . nohtml_real_escape_string($frm['prix_revendeur']) . "',
+				percent = '" . nohtml_real_escape_string($frm['percent']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -235,16 +255,16 @@ function affiche_liste_couleur()
 		FROM peel_couleurs c
 		WHERE " .  get_filter_site_cond('couleurs', 'c', true) . "
 		ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
-	$result = query($sql);
+	$query = query($sql);
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_couleur.tpl');
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
-	if (!(num_rows($result) == 0)) {
+	if (!(num_rows($query) == 0)) {
 		$tpl_results = array();
 		$i = 0;
-		while ($ligne = fetch_assoc($result)) {
+		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],

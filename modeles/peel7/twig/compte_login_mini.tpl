@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte_login_mini.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: compte_login_mini.tpl 49919 2016-05-17 11:10:14Z sdelaporte $
 #}
 <div id="compte_login_mini" class="{% if location=='header' %}hidden-xs{% elseif location=='footer' %}visible-xs{% endif %}">
 	<form class="entryform form-inline" role="form" method="post" action="{{ wwwroot }}/membre.php">
@@ -30,12 +30,8 @@
 			</tr>
 			<tr>
 				<td class="center" style="padding-top:5px;" colspan="2">
-					{% if social.is_any %}
-						<p class="social_link">
-							{% if (social.facebook) %}{{ social.facebook }}{% endif %} &nbsp;
-							{% if (social.twitter) %}{{ social.twitter }}{% endif %} &nbsp;
-							{% if (social.openid) %}{{ social.openid }}{% endif %}
-						</p>
+					{% if social %}
+						{{ social|join('') }}
 					{% endif %}
 					{% if (enregistrement_lbl) %}
 						<div class="divider" role="presentation"></div>

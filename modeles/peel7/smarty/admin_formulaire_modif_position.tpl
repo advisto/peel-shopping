@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_modif_position.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_formulaire_modif_position.tpl 49892 2016-05-16 13:21:59Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="positionner" />
@@ -28,7 +28,7 @@
 		{$res.tr_rollover}
 			<td class="center"><input type="hidden" name="id[]" value="{$res.value|str_form_value}" /><a href="{$res.modif_href|escape:'html'}">{$res.name}</a></td>
 			<td class="center">{$res.prix}</td>
-			<td class="center"><input type="text" class="form-control" name="position[]" value="{$res.position|str_form_value}" /></td>
+			<td class="center"><input type="text" class="form-control" name="position[]" value="{$res.position|str_form_value}" style="width:50px;" /></td>
 		</tr>
 {/foreach}
 		<tr><td colspan="3" align="center"><p><input type="submit" value="{$STR_ADMIN_POSITIONS_POSITION_PRODUCTS|str_form_value}" class="btn btn-primary" /></p></td></tr>

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: haut.tpl 50001 2016-05-23 20:34:24Z gboussin $
 #}<!DOCTYPE html>
 <html lang="{{ lang }}" dir="ltr">
 	{{ HTML_HEAD }}
@@ -34,7 +34,7 @@
 						<div class="container">
 							<div class="navbar-header">
 								{% if (logo_link) and logo_link.src %}
-								<div class="navbar-brand"><a href="{{ logo_link.href }}"><img src="{{ logo_link.src }}" alt="" /></a></div>
+								<div class="navbar-brand"><a href="{{ logo_link.href }}"><img src="{{ logo_link.src }}" alt="{{ logo_link.alt|str_form_value }}" /></a>{% if header_custom_baseline_html %}{{ header_custom_baseline_html }}{% endif %}</div>
 								{% endif %}
 								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 									<span class="icon-bar"></span>
@@ -109,5 +109,6 @@
 						{% if (CARROUSEL_CATEGORIE) %}{{ CARROUSEL_CATEGORIE }}{% endif %}
 								<a href="#" id="haut_de_page"></a>
 							{{ MODULES_TOP_MIDDLE }}
+							<span class="clearfix"></span>
 							{{ output_create_or_update_order }}
 							{{ notification_output }}

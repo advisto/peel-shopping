@@ -10,22 +10,11 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_marque.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_liste_marque.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<table class="admin_liste_marque">
 	<tr><td colspan="8" class="entete">{$STR_ADMIN_MARQUES_TITLE}</td></tr>
 	<tr><td colspan="8"><p><img src="{$add_src}" width="16" height="16" alt="" class="middle" /><a href="{$href|escape:'html'}">{$STR_ADMIN_MARQUES_ADD_BRAND}</a></p></td></tr>
-	<tr>
-		<td class="menu">{$STR_ADMIN_ACTION}</td>
-		<td class="menu">{$STR_ADMIN_ID}</td>
-		<td class="menu">{$STR_IMAGE}</td>
-		<td class="menu">{$STR_BRAND}</td>
-		<td class="menu">{$STR_ADMIN_POSITION}</td>
-		<td class="menu">{$STR_STATUS}</td>
-		<td class="menu">{$STR_ADMIN_WEBSITE}</td>
-	{if !empty($STR_ADMIN_SITE_COUNTRY)}
-		<td class="menu">{$STR_ADMIN_SITE_COUNTRY}</td>
-	{/if}
-	</tr>
+	{$links_header_row}
 	{if isset($results)}
 	{foreach $results as $res}
 	{$res.tr_rollover}

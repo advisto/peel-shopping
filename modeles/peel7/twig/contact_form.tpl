@@ -10,17 +10,20 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
-#}{% if not skip_introduction_text %}<h1 property="name" class="page_title">{{ STR_CONTACT }}</h1>
+// $Id: contact_form.tpl 50019 2016-05-24 09:05:36Z sdelaporte $
+#}{% if not skip_introduction_text %}<h1 property="name" class="page_title">{{ STR_CONTACT }}</h1>{% endif %}
 {% if (token_error) %}{{ token_error }}{% endif %}
 <div id="contact">
+{% if product_info_id is empty %}
 	<div id="contact_info">{{ contact_info }}</div>
 {% endif %}
 	<div id="contact_form">{% if (success_msg) and (success_msg) %}<div class="alert alert-success">{{ success_msg|nl2br_if_needed }}</div>{% endif %}
 		<div class="contact_intro">{{ STR_CONTACT_INTRO }}</div>
 		<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" name="form_contact" id="form_contact">
+		<input type="hidden" id="product_info_id" name="product_info_id" value="{{ product_info_id|str_form_value }}" />
 			{{ extra_field }}
 			<table style="width:75%">
+{% if STR_CONTACT_SUBJECT %}
 				<tr>
 					<td {% if short_form %} colspan="2"{% endif %}><label for="sujet">{{ STR_CONTACT_SUBJECT }} <span class="etoile{% if short_form %} no-display{% endif %}">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
 		{% if short_form %}
@@ -45,6 +48,11 @@
 					</td>
 				</tr>
 		{% endif %}
+{% endif %}		
+				<tr>
+					<td><label for="texte">{{ STR_TEXT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label></td>
+					<td><textarea class="form-control" id="texte" name="texte" rows="10">{{ texte_value }}</textarea>{{ texte_error }}</td>
+				</tr>
 				<tr>
 					<td><label for="societe">{{ STR_SOCIETE }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
@@ -105,10 +113,6 @@
 				</tr>
 				{% endif %}
 				<tr>
-					<td><label for="texte">{{ STR_TEXT }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>
-					<td><textarea class="form-control" id="texte" name="texte" rows="10">{{ texte_value }}</textarea>{{ texte_error }}</td>
-				</tr>
-				<tr>
 					<td><label for="dispo">{{ STR_DISPO }}{{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
 					   <select class="form-control" id="dispo" name="dispo">
@@ -134,5 +138,8 @@
 			</table>
 			<p{% if short_form %} class="no-display"{% endif %}><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p>
 		</form>
+{% if product_info_id %}
+	<div id="contact_info">{$contact_info}</div>
+{% endif %}
 	</div>
 	{% if not skip_introduction_text %}</div>{% endif %}

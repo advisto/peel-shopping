@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 48464 2016-01-11 13:42:43Z sdelaporte $
+// $Id: admin_es.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -698,6 +698,7 @@ $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS_KEYYO"] = "Llamadas telefónicas
 $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"] = "Lista de llamadas";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"] = "Lista de moderación acciones";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"] = "Lista de conexiones de usuario";
+$GLOBALS["STR_ADMIN_MODULE_ACTIVATE_LINK"] = "Usted debe activar antes de este módulo en el panel de control";
 $GLOBALS["STR_ADMIN_MORE_THAN"] = "Mayor que";
 $GLOBALS["STR_ADMIN_MSG_CHANGES_OK"] = "Los cambios que se han tenido en cuenta.";
 $GLOBALS["STR_ADMIN_MSG_ORDER_SENT_OK"] = "El comando %s fue enviado a %s";
@@ -805,6 +806,7 @@ $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM"] = "Debe seleccionar al menos 
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_PRODUCT"] = "Elija el producto";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_CLIENTS_ONLY"] = "cliente único";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE"] = "Introduzca porcentaje";
+$GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE"] = "Introduzca el porcentaje del precio del producto. Si se llena este campo, el precio del tamaño será el porcentaje del precio del producto";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_EXPLAIN"] = "SUGERENCIA: Para seleccionar varias categorías o productos, múltiples, mantenga pulsada la tecla [CTRL].";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_LOWER"] = "Baja";
 $GLOBALS["STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK"] = "Su transacción ha sido tomado en cuenta.";
@@ -1094,7 +1096,7 @@ $GLOBALS["STR_ADMIN_SITES_LIST_TITLE"] = "Administrar sitios";
 $GLOBALS["STR_ADMIN_SITES_LIST_NOTHING_FOUND"] = "No hay sitio registrado en la base de datos.";
 $GLOBALS["STR_ADMIN_SITES_LIST_MODIFY"] = "Editar esta página";
 $GLOBALS["STR_ADMIN_SITES_LOGO_HEADER_DISPLAY"] = "Mostrar el logo en el sitio de cabecera banner";
-$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "URL Logo";
+$GLOBALS["STR_ADMIN_SITES_LOGO_URL"] = "Ruta del logo";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_EXPLAIN"] = "El módulo de microempresas fiscal requiere que los precios en el sitio son igual al precio de HT, es decir, sin el IVA no se aplica.<br />ATENCIÓN: Para ser coherente, debe configurar los productos, los impuestos ambientales y costes de envío con el IVA al 0%, de lo contrario el precio se calcula a partir de los precios con IVA incluido indicada en la administración y la mención de los tipos de IVA, tasas de impuestos y se muestran a los clientes será igual al precio sin IVA, y por lo tanto diferentes precios indicados en la administración tributaria.";
 $GLOBALS["STR_ADMIN_SITES_MICROBUSINESS_MODULE"] = "Micro Empresas";
 $GLOBALS["STR_ADMIN_SITES_MINIMUM_ORDER_AMOUNT_ALLOWED_EXPLAIN"] = "Si no pregunten por un valor de pedido mínimo, deje el campo por encima de 0.";
@@ -1191,7 +1193,7 @@ $GLOBALS["STR_ADMIN_SITES_ROLLOVER_EXPLAIN"] = "Para añadir un producto en esta
 $GLOBALS["STR_ADMIN_SITES_ROLLOVER_HEADER"] = "Mostrar bloque \"Productos Destacados\"";
 $GLOBALS["STR_ADMIN_SITES_RSS_MODULE"] = "Feed RSS";
 $GLOBALS["STR_ADMIN_SITES_SECURITY"] = "Seguridad";
-$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "Más sesiones son más cortas, las utilistaeurs ser desconectado rápidamente, pero el sitio es seguro";
+$GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION_EXPLAIN"] = "Más sesiones son más cortas, las usuarios ser desconectado rápidamente, pero el sitio es seguro";
 $GLOBALS["STR_ADMIN_SITES_SESSIONS_DURATION"] = "Duración de las sesiones de usuario";
 $GLOBALS["STR_ADMIN_SITES_SIPS_CERTIFICATE"] = "No hay archivo de certificado";
 $GLOBALS["STR_ADMIN_SITES_SIPS_EXPLAIN"] = "No <strong> Recordatorio de pruebas:</strong><br />transacciones de e-Crédit Agricole: 013044876511111<br />SOGENACTIF Societe Generale: 014213245611111<br />Mercanet BNP Paribas : 082584341411111<br />Cyberplus Banque Populaire: 038862749811111<br />Sherlock Crédit Lyonnais: 014295303911111<br />Elysnet CCF: 014102450311111<br />MAIL Scellius: 014141675911111 ";
@@ -1262,7 +1264,6 @@ $GLOBALS["STR_ADMIN_SITES_TOP"] = "Alto";
 $GLOBALS["STR_ADMIN_SITES_TRADEMARK_PROMOTION"] = "Promociones de marcas";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_KEY"] = "Twitter clave del consumidor";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET"] = "Twitter consumidor secreto (el código secreto de la aplicación)";
-$GLOBALS["STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK"] = "URL de devolución de llamada Twitter OAuth (la dirección URL al sitio después de la conexión)";
 $GLOBALS["STR_ADMIN_SITES_TWITTER_SIGN_IN"] = "Entrar en twitter";
 $GLOBALS["STR_ADMIN_SITES_URL_REWRITING_MODULE"] = "Reescribir URL (reescritura de URL)";
 $GLOBALS["STR_ADMIN_SITES_USER_SHOPS_BOTTOM"] = "vitrinas inferiores";
@@ -1536,6 +1537,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_PERSON"] = "Privado";
 $GLOBALS["STR_ADMIN_UTILISATEURS_WHO_NO_INFO"] = "No hay información";
 $GLOBALS["STR_ADMIN_VARIOUS_INFORMATION_HEADER"] = "INFORMACIÓN GENERAL";
 $GLOBALS["STR_ADMIN_VAT_PERCENTAGE"] = "IVA";
+$GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "(Exportar todos los pedidos en formato CSV haciendo clic en este enlace)";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato CSV con una línea por cada producto solicitado";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exportar detalles de la orden en formato CSV con una línea por orden";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Exportar los detalles de exportación de las cantidades ordenadas por producto";
@@ -1616,7 +1618,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD"] = "cajas de carga";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_AD"] = "Agregar un comentario sobre un anuncio";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT"] = "Añadir una crítica sobre un producto";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED"] = "El anuncio no ha añadido: Problema técnico";
-$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Aviso de interaute on";
+$GLOBALS["STR_MODULE_AVIS_ADMIN_FORM_TITLE"] = "Aviso de usuario on";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_GIVE_OPINION"] = "Review";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_LIST"] = "Lista de opiniones";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_MSG_DELETED_OK"] = "El dictamen ha sido eliminado.";
@@ -1626,7 +1628,6 @@ $GLOBALS["STR_MODULE_AVIS_ADMIN_PLEASE_SELECT_PRODUCT"] = "Por favor seleccione 
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_AD"] = "Seleccionar página";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_SELECT_PRODUCT"] = "Seleccione un producto";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_UPDATE"] = "Modificar esta vista";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_ACTIVATE_LINK"] = "Usted debe activar antes de este módulo en el panel de control";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_ID"] = "Especifique el número de la convocatoria. Campo \"Permitir el banner en las páginas de detalles de anuncios\" deben ser controlados.";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_AD_PLACE"] = "Número de anuncios de la bandera que muestra el mensaje";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"] = "Añadir el banner";
@@ -1831,7 +1832,7 @@ $GLOBALS["STR_MODULE_PARTENAIRES_ADD_PARTNER"] = "Añadir un socio";
 $GLOBALS["STR_MODULE_PARTENAIRES_MODIFY_PARTNER"] = "Cambiar el socio";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_CATEGORY_DELETED_OK"] = "La categoría ha sido eliminada.";
 $GLOBALS["STR_MODULE_PARTENAIRES_MSG_DELETED_OK"] = "Socio <b>%s</b> ha sido borrado.";
-$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (especificar protocolo.<br />Ejemplo: http://)";
+$GLOBALS["STR_MODULE_PARTENAIRES_URL_LONG"] = "URL (especificar protocolo. Ejemplo: http://)";
 $GLOBALS["STR_MODULE_PARTENAIRES_LIST_TITLE"] = "Gestión de socios";
 $GLOBALS["STR_MODULE_PARTENAIRES_NOTHING_FOUND"] = "Ningún socio registrado en la base de datos.";
 $GLOBALS["STR_MODULE_PARTENAIRES_URL"] = "URL";

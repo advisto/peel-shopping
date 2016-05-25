@@ -20,11 +20,16 @@ class FineUploader {
      * Get the original filename
      */
     public function getName(){
-        if (isset($_REQUEST['qqfilename']))
-            return $_REQUEST['qqfilename'];
-
-        if (isset($_FILES[$this->inputName]))
-            return $_FILES[$this->inputName]['name'];
+        if (isset($_REQUEST['qqfilename'])) {
+            $this_name = $_REQUEST['qqfilename'];
+		}
+        if (isset($_FILES[$this->inputName])) {
+            $this_name = $_FILES[$this->inputName]['name'];
+		}
+		if(is_array($this_name)) {
+			$this_name = current($this_name);
+		}
+		return $this_name;
     }
 
     /**
@@ -69,7 +74,10 @@ class FineUploader {
         // Get size and name
 
         $file = vb($_FILES[$this->inputName]);
-        $size = vb($file['size']);
+		$size = vb($file['size']);
+ 		if(is_array($size)) {
+			$size = current($size);
+		}
 
         if ($name === null){
             $name = $this->getName();
@@ -104,6 +112,11 @@ class FineUploader {
         // Save a chunk
 
         $totalParts = isset($_REQUEST['qqtotalparts']) ? (int)$_REQUEST['qqtotalparts'] : 1;
+		
+		$file_tmp = vb($_FILES[$this->inputName]['tmp_name']);
+		if(is_array($file_tmp)) {
+			$file_tmp = current($file_tmp);
+		}
 
         if ($totalParts > 1){
 
@@ -122,7 +135,7 @@ class FineUploader {
             }
 
             $target = $targetFolder.'/'.$partIndex;
-            $success = move_uploaded_file($_FILES[$this->inputName]['tmp_name'], $target);
+			$success = move_uploaded_file($file_tmp, $target);
 
             // Last chunk saved successfully
             if ($success AND ($totalParts-1 == $partIndex)){
@@ -161,7 +174,7 @@ class FineUploader {
             if ($target){
                 $this->uploadName = basename($target);
 
-                if (move_uploaded_file($file['tmp_name'], $target)){
+                if (move_uploaded_file($file_tmp, $target)){
                     return array('success'=> true);
                 }
             }

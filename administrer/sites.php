@@ -3,15 +3,16 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: sites.php 49979 2016-05-23 12:29:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
+define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin_manage", true, true);
@@ -22,7 +23,7 @@ $output = '';
 $frm = $_POST;
 $form_error_object = new FormError();
 
-if (!empty($frm['logo']) && strpos($frm['logo'], 'http') === false) {
+if (!empty($frm['logo']) && strpos($frm['logo'], '://') === false) {
 	if (String::substr($frm['logo'], 0, 1) != '/') {
 		$frm['logo'] = '/' . $frm['logo'];
 	}
@@ -473,7 +474,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 					}
 				}
 				// Intallation Express automatique, exécutée une seule fois :
-				if(!empty($GLOBALS['modules_on_disk_infos'][$this_module]['to_install']) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), $GLOBALS['site_parameters']['load_site_specific_files_before_others']) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), $GLOBALS['site_parameters']['load_site_specific_files_after_others'])) {
+				if(!empty($GLOBALS['modules_on_disk_infos'][$this_module]['to_install']) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), vb($GLOBALS['site_parameters']['load_site_specific_files_before_others'], array())) && !in_array(str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']), vb($GLOBALS['site_parameters']['load_site_specific_files_after_others'],array()))) {
 					// on ajoute la configuration du fichier de fonctions à modules_front_office_functions_files_array pour que le module puisse être chargé (et pas forcément activé)
 					$GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $GLOBALS['modules_on_disk_infos'][$this_module]['to_install']);
 					set_configuration_variable(array('technical_code' => 'modules_front_office_functions_files_array', 'string' => $GLOBALS['site_parameters']['modules_front_office_functions_files_array'], 'type' => 'array', 'origin' => 'sites.php', 'site_id' => 0), true);
@@ -608,7 +609,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 
 	if (!empty($frm["favicon"])) {
-		$tpl->assign('favicon', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["favicon"],
+		$tpl->assign('favicon', array('src' => get_url_from_uploaded_filename($frm["favicon"]),
 				'favicon' => vb($frm['favicon']),
 				'sup_href' => get_current_url(false) . '?mode=supprfavicon&id=' . vb($frm['id']) . '&favicon=' . String::str_form_value(vb($frm["favicon"]))
 				));
@@ -648,14 +649,14 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('default_picture_delete_url', get_current_url(false) . '?mode=supprdefault_picture&id=' . vb($frm['id']) . '&default_picture=' . vb($frm["default_picture"]));
 	$tpl->assign('default_picture_delete_icon_url', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('default_picture', vb($frm["default_picture"]));
-	$tpl->assign('default_picture_url',  $GLOBALS['repertoire_upload'] . '/' . vb($frm["default_picture"]));
+	$tpl->assign('default_picture_url',  get_url_from_uploaded_filename(vb($frm["default_picture"])));
 
 	$tpl->assign('devises_href', $GLOBALS['wwwroot_in_admin'] . '/modules/devises/administrer/devises.php');
 	$tpl_devices_options = array();
 	if (file_exists($GLOBALS['fonctionsdevises'])) {
 		$req = "SELECT *
-		FROM peel_devises
-		WHERE etat = '1' AND " . get_filter_site_cond('devises') . " AND site_id = " . intval(vn($frm['id']));
+			FROM peel_devises
+			WHERE etat = '1' AND " . get_filter_site_cond('devises') . " AND site_id = " . intval(vn($frm['id']));
 		$res = query($req);
 		while ($tab_devise = fetch_assoc($res)) {
 			$tpl_devices_options[] = array('value' => intval($tab_devise['id']),
@@ -761,7 +762,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('sign_in_twitter', vb($frm['sign_in_twitter']));
 	$tpl->assign('twitter_consumer_key', vb($frm['twitter_consumer_key']));
 	$tpl->assign('twitter_consumer_secret', vb($frm['twitter_consumer_secret']));
-	$tpl->assign('twitter_oauth_callback', vb($frm['twitter_oauth_callback']));
 	$tpl->assign('commission_affilie', vb($frm['commission_affilie']));
 	$tpl->assign('logo_affiliation', vb($frm['logo_affiliation']));
 	$tpl->assign('avoir', vb($frm['avoir']));
@@ -1068,7 +1068,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_MODE', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_MODE']);
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_DIRECT_PARENT', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_DIRECT_PARENT']);
 	$tpl->assign('STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS', $GLOBALS['STR_ADMIN_SITES_PREVIOUS_NEXT_BUTTONS_DISPLAY_ALL_PARENTS']);
-	$tpl->assign('STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT', $GLOBALS['STR_ADMIN_SITES_PRESENT_AND_ACTIVATED_BY_DEFAULT']);
 	$tpl->assign('STR_ADMIN_SITES_ALLOW_ORDERS_WITHOUT_STOCKS', $GLOBALS['STR_ADMIN_SITES_ALLOW_ORDERS_WITHOUT_STOCKS']);
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS', $GLOBALS['STR_ADMIN_SITES_STOCKS_BOOKING_SECONDS']);
 	$tpl->assign('STR_ADMIN_SITES_STOCKS_BOOKING_DEFAULT', $GLOBALS['STR_ADMIN_SITES_STOCKS_BOOKING_DEFAULT']);
@@ -1088,7 +1087,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_SIGN_IN', $GLOBALS['STR_ADMIN_SITES_TWITTER_SIGN_IN']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_CONSUMER_KEY', $GLOBALS['STR_ADMIN_SITES_TWITTER_CONSUMER_KEY']);
 	$tpl->assign('STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET', $GLOBALS['STR_ADMIN_SITES_TWITTER_CONSUMER_SECRET']);
-	$tpl->assign('STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK', $GLOBALS['STR_ADMIN_SITES_TWITTER_OAUTH_CALLBACK']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE_ADMIN', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE_ADMIN']);
 	$tpl->assign('STR_ADMIN_SITES_VACANCY_MODULE_TYPE_SUPPLIER', $GLOBALS['STR_ADMIN_SITES_VACANCY_MODULE_TYPE_SUPPLIER']);

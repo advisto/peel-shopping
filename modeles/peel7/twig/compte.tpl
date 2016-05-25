@@ -10,21 +10,22 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: compte.tpl 49997 2016-05-23 17:25:46Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ compte }}</h1>
 <div class="page_content account_icons">
 {% if est_identifie %}
 	{% if user_infos_resume_array %}
 		{* Si cette variable est active, on affiche qu'elle sur la page de compte. *}
 		{{ user_infos_resume_array }}
-	{% else  %}
+	{% else %}
 		{% if admin %}
 		<a class="btn btn-warning pull-right" style="margin-right:10px; margin-left:10px" href="{{ admin.href|escape('html') }}">{{ admin.txt }}</a>
 		{% endif  %}	
 		<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{{ logout.href|escape('html') }}"><span class="glyphicon glyphicon-log-out"></span> {{ logout.txt }}</a>
 		<p>{{ msg_support }}</p>
 		<p>{{ compte }} {{ number }} <b>{{ code_client }}</b></p>
-		
+		{% if user_account_completion_text %}<p>{{ user_account_completion_text }}</p>{% endif %}
+		{% if data is defined %}{{ data }}{% endif %}
 		{% if code_promo_utilise %}
 		<h2 class="well">{{ code_promo_utilise.header }}</h2>
 		<div class="row">

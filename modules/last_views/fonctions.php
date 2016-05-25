@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -29,7 +29,8 @@ if (!empty($GLOBALS['site_parameters']['nb_last_views'])) {
  * @return
  */
 function last_views_hook_product_details_show($params) {
-	if (isset($_COOKIE['last_views'])) {
+	if (isset($_COOKIE['last_views']) && !preg_match('/(^|;|{|})O:\+?[0-9]+:"/', $_COOKIE['last_views'])) {	
+		// Protection avec preg_match pour éviter injection via cookie de demande de création de n'importe quel objet
 		$tab_last_views = @unserialize($_COOKIE['last_views']);
 	}
 	if(empty($tab_last_views) || !is_array($tab_last_views)) {
@@ -63,7 +64,8 @@ function affiche_last_views($location)
 {
 	$output = '';
 	$products_html_array = array();
-	if (!empty($_COOKIE['last_views'])) {
+	if (!empty($_COOKIE['last_views']) && !preg_match('/(^|;|{|})O:\+?[0-9]+:"/', $_COOKIE['last_views'])) {	
+		// Protection avec preg_match pour éviter injection via cookie de demande de création de n'importe quel objet
 		$this_tab_last_views = @unserialize($_COOKIE['last_views']);
 		$tab_last_views =array();
 		if(is_array($this_tab_last_views)) {

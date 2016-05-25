@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_commande_details.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -81,7 +81,7 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_COMMANDER_INFORMATION_ON_THIS_ORDER}</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_COMMANDER_INFORMATION_ON_THIS_ORDER}</h2></td>
 		</tr>
 		<tr>
 			<td>{$STR_ADMIN_TECHNICAL_ORDER_NUMBER}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -320,7 +320,7 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_COMMANDER_CLIENT_INFORMATION}</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_COMMANDER_CLIENT_INFORMATION}</h2></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="title_label">{$STR_INVOICE_ADDRESS}</td>
@@ -389,7 +389,7 @@
 			<td colspan="2">&nbsp;</td>
 		</tr>
 		<tr>
-			<td colspan="2" class="bloc">{$STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST}</td>
+			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_COMMANDER_ORDERED_PRODUCTS_LIST}</h2></td>
 		</tr>
 	</table>
 	<div class="table-responsive">

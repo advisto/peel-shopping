@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: configuration.inc.php 49979 2016-05-23 12:29:53Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '8.0.2');
+define('PEEL_VERSION', '8.0.3');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -120,6 +120,10 @@ if (empty($_SERVER["HTTP_HOST"])) {
 // Si $GLOBALS['wwwroot'] est précisé dans /lib/setup/info.inc.php, alors il aura la priorité
 $GLOBALS['apparent_folder'] = get_apparent_folder();
 $GLOBALS['apparent_folder_main'] = $GLOBALS['apparent_folder'];
+if (substr($GLOBALS['apparent_folder'], 0, 1) != '/') {
+	// Protection contre des requêtes de hackers du type GET http://xxxxx/  qui ne commencent anormalement pas par / et qui pourraient permettre d'inclure l'URL dans wwwroot
+	$GLOBALS['apparent_folder'] = '/' . $GLOBALS['apparent_folder'];
+}
 
 require($GLOBALS['dirroot'] . "/lib/fonctions/database.php");
 
@@ -272,16 +276,6 @@ foreach(array('_POST', '_GET', '_COOKIE', '_REQUEST') as $this_global_array) {
 		$$this_global_array = array_map('cleanDataDeep', $$this_global_array);
 	}
 }
-
-// Nettoyage des données et suppressions des magic_quotes si nécessaire
-@set_magic_quotes_runtime(0);
-foreach(array('_POST', '_GET', '_COOKIE', '_REQUEST') as $this_global_array) {
-	if (function_exists('array_walk_recursive')) {
-		array_walk_recursive($$this_global_array, 'cleanDataDeep');
-	} else {
-		$$this_global_array = array_map('cleanDataDeep', $$this_global_array);
-	}
-}
 	
 // Nom pour le cookie qui contiendra les produits du panier. Le nom du cookie est différent pour chaque installation de PEEL.
 // Le cookie sera initialisé dans la fonction update de la classe Caddie, uniquement si la variable de configuration save_caddie_in_cookie === true.
@@ -320,10 +314,10 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/url_standard.php");
 
 $GLOBALS['repertoire_modele'] = $GLOBALS['dirroot'] . "/modeles/" . vb($GLOBALS['site_parameters']['template_directory']);
 
-$GLOBALS['lang_codes'] = array(); // Variable globale récuperant les codes Langue
-$GLOBALS['admin_lang_codes'] = array(); // Variable globale récuperant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
-$GLOBALS['lang_flags'] = array(); // Variable globale récuperant l'URL des drapeaux de langues
-$GLOBALS['lang_names'] = array(); // Variable globale récuperant le nom de la langue dans sa propre langue
+$GLOBALS['lang_codes'] = array(); // Variable globale récupérant les codes Langue
+$GLOBALS['admin_lang_codes'] = array(); // Variable globale récupérant les codes Langue des langues administrables (actives, ou désactivées mais administrables : pastille orange)
+$GLOBALS['lang_flags'] = array(); // Variable globale récupérant l'URL des drapeaux de langues
+$GLOBALS['lang_names'] = array(); // Variable globale récupérant le nom de la langue dans sa propre langue
 $GLOBALS['langs_flags_correspondance'] = array(); // Possibilité de mettre correspondance entre langue et drapeau de pays si aucune image de langue n'existe. Par exemple : 'en'=>'uk.gif'
 $GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'] = null;
 // We get the activated languages
@@ -630,6 +624,9 @@ if(!isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters
 			$_SESSION['session_site_country'] = 0;
 		}
 	}
+}
+if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_404_ERROR_PAGE')) {
+	$_SESSION['session_redirect_after_login'] = get_current_url(true); 
 }
 account_update();
 if(!defined('PEEL_PREFETCH')) {

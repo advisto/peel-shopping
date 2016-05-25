@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_plan_formulaire_contact.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_plan_formulaire_contact.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -28,7 +28,7 @@
 			</td>
 		</tr>
 		{foreach $langs as $l}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_LANGUAGES_SECTION_HEADER} {$l.lng|upper}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_LANGUAGES_SECTION_HEADER} - {$lang_names[$l.lng]|upper}</h2></td></tr>
 
 		<tr>
 			<td class="title_label" colspan="2">{$STR_ADMIN_HEADER_HTML_TEXT} {$l.lng}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -37,7 +37,7 @@
 			<td colspan="2">{$l.text_te}</td>
 		</tr>
 		{/foreach}
-		<tr><td colspan="2" class="bloc">{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}</h2></td></tr>
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_PLAN_TAG_EXPLAIN}</div></td>
 		</tr>
