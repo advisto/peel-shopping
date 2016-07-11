@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 49556 2016-04-12 12:56:05Z sdelaporte $
+// $Id: caddie_content_html.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -21,6 +21,7 @@
 		{$erreur_caddie}
 		{if !empty($zone_error)}{$zone_error}{/if}
 		{if !empty($shipping_type_error)}{$shipping_type_error}{/if}
+		{if !empty($minimum_error)}{$minimum_error}{/if}
 		<form class="entryform form-inline" role="form" id="caddieFormArticle" method="post" action="{$action|escape:'html'}">
 			<input type="hidden" value="commande" name="func" id="form_mode" />
 			<div class="row">

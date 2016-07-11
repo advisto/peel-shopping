@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 50019 2016-05-24 09:05:36Z sdelaporte $
+// $Id: contact_form.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}{if empty($skip_introduction_text)}<h1 property="name" class="page_title">{$STR_CONTACT}</h1>{/if}
 {if isset($token_error)}{$token_error}{/if}
 <div id="contact">
@@ -25,17 +25,12 @@
 			<table style="width:75%">
 {if !empty($STR_CONTACT_SUBJECT)}
 				<tr>
-					<td {if $short_form} colspan="2"{/if}><label for="sujet">{$STR_CONTACT_SUBJECT} <span class="etoile{if $short_form} no-display{/if}">*</span>{$STR_BEFORE_TWO_POINTS}:</label>
-		{if $short_form}
-						<br />
-		{else}
-					</td>
+					<td><label for="sujet">{$STR_CONTACT_SUBJECT} <span class="etoile{if $short_form} no-display{/if}">*</span>{$STR_BEFORE_TWO_POINTS}:</label></td>
 					<td>
-		{/if}
-					<select class="form-control" id="sujet" name="sujet" style="">
-						{html_options options=$sujet_options selected=$sujet_options_selected}
-					</select>
-					{$sujet_error}
+						<select class="form-control" id="sujet" name="sujet" style="">
+							{html_options options=$sujet_options selected=$sujet_options_selected}
+						</select>
+						{$sujet_error}
 					</td>
 				</tr>
 		{if !empty($STR_REQUIRED_ORDER_NUMBER)}
@@ -67,7 +62,7 @@
 				<tr>
 					<td><label for="email">{$STR_EMAIL} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</label></td>
 					<td class="{$align}">
-						<input type="email" class="form-control" id="email" name="email" value="{$email_value|str_form_value}" />{$email_error}
+						<input type="email" class="form-control" id="email" name="email" value="{$email_value|str_form_value}" autocapitalize="none" />{$email_error}
 						<input type="hidden" id="adresse" name="adresse" value="{$address_value|str_form_value}" />
 						<input type="hidden" id="code_postal" name="code_postal" value="{$zip_value|str_form_value}" />
 						<input type="hidden" id="dispo" name="dispo" value="" />
@@ -107,4 +102,4 @@
 		<div id="contact_info">{$contact_info}</div>
 {/if}
 	</div>
-{if !$skip_introduction_text}</div>{/if}
+{if empty($skip_introduction_text)}</div>{/if}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: bas.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -66,7 +66,7 @@ if (!empty($GLOBALS['site_parameters']['google_premium_account_id']) && !empty($
 		$end_javascript .= get_google_afc_script((isset($_GET['page'])?$_GET['page']:1));
 	}
 }
-if (!empty($GLOBALS['site_parameters']['twenga_ads_account_url']) && !empty($GLOBALS['integrate_twenga_ads']) && !empty($GLOBALS['twenga_ads_searched']) && strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false && check_if_module_active('annonces')) {
+if (!empty($GLOBALS['integrate_twenga_ads']) && !empty($GLOBALS['twenga_ads_searched']) && strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false && check_if_module_active('annonces')) {
 	include($GLOBALS['dirroot'] . '/modules/annonces/fonctions_twenga_ads.php');
 	$end_javascript .= get_twenga_ads_script($GLOBALS['twenga_ads_searched'], (isset($_GET['page'])?$_GET['page']:1));
 }

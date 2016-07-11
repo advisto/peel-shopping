@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: admin_en.php 50582 2016-07-08 10:15:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -352,6 +352,7 @@ $GLOBALS["STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER"] = "No email known for order %
 $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "Could not find the requested item";
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "No user has been selected.";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "Unable to find the page!";
+$GLOBALS["STR_ADMIN_EXPORT"] = "Export";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "Export mode";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Related Products";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Mark";
@@ -388,7 +389,7 @@ $GLOBALS["STR_ADMIN_HTML_PLACE_ERROR404"] = "404 error page";
 $GLOBALS["STR_ADMIN_HTML_PLACE_FOOTER_LINK"] = "Links footer";
 $GLOBALS["STR_ADMIN_HTML_PLACE_FOOTER"] = "Bottom";
 $GLOBALS["STR_ADMIN_HTML_PLACE_HEADER"] = "Top";
-$GLOBALS["STR_ADMIN_HTML_PLACE_HOME_BOTTOM"] = "Bottom of page";
+$GLOBALS["STR_ADMIN_HTML_PLACE_HOME_BOTTOM"] = "Bottom of Homepage";
 $GLOBALS["STR_ADMIN_HTML_PLACE_HOME"] = "Top of page";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTERSTITIEL"] = "interstitial advertising";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE"] = "Introduction to the sponsorship page";
@@ -1972,6 +1973,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE"] = "Unknown serv
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Signature";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "To be answered";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "Email webmaster / support";
+$GLOBALS['STR_ADMIN_SUPPLIER_LIST'] = "Supplier list";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Add a shipping method";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "You can set this page the names of the modes of delivery. These modes of delivery will then bind to the <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">shipping rates</a>.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Add or edit a shipping method";

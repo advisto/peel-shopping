@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -28,14 +28,15 @@ if (!defined('IN_PEEL')) {
  * @param string $thumb_folder
  * @param boolean $thumb_rename
  * @param boolean $return_absolute_path
- * @return string Nom du fichier de la vignette
+ * @param boolean $allow_return_path_to_local_original_if_unchanged
  */
-function thumbs($source_filename, $width, $height, $method = 'fit', $source_folder = null, $thumb_folder = null, $thumb_rename = true, $return_absolute_path=false)
+function thumbs($source_filename, $width, $height, $method = 'fit', $source_folder = null, $thumb_folder = null, $thumb_rename = true, $return_absolute_path=false, $allow_return_path_to_local_original_if_unchanged = true)
 {
 	static $tpl_error;
 	if (empty($source_filename)) {
 		return false;
 	}
+	$source_filename = str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $source_filename);
 	$file_type = get_file_type($source_filename);
 	if($file_type == 'pdf') {
 		// Gestion des pdf
@@ -76,7 +77,11 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		if(String::substr($source_folder, -1) != '/') {
 			$source_folder .= '/';
 		}
-		$source_path = $source_folder . $source_filename;
+		if(strpos($source_filename, $source_folder) === false) {
+			$source_path = $source_folder . $source_filename;
+		} else {
+			$source_path = $source_filename;
+		}
 		// On récupère la date et l'heure de dernière modification de l'image
 		$srcTime = @filemtime($source_path);
 	}
@@ -97,7 +102,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 	} elseif($thumb_rename === true) {
 		$extension = @pathinfo($source_path , PATHINFO_EXTENSION);
 		$nom = @basename($source_path, '.' . $extension);
-		// On récupère la taille de l'image^pour l'adjoindre au nom
+		// On récupère la taille de l'image pour l'adjoindre au nom
 		$inWidth = vb($width);
 		$inHeight = vb($height);
 		// On génère le nom de l'image cache
@@ -119,7 +124,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 	// => ALORS : Si la vignette n'existe pas ou qu'elle est plus vieille que la source, alors on la calcule
 	// Sinon, si image source accessible via HTTP et on ne peut pas avoir la date de modification de 'image source srcTime :
 	// => ALORS : Si la vignette n'existe pas ou qu'elle est datée de plus de 10 jours, on la calcule
-	if ((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($srcTime) && $srcTime > $thumb_path_filemtime) || (empty($srcTime) && (empty($thumb_path_filemtime) || time()-24*10*3600>$thumb_path_filemtime))) {
+	if ((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($_GET['update_thumbs']) && $_GET['update_thumbs'] == 1) || (!empty($srcTime) && $srcTime > $thumb_path_filemtime) || (empty($srcTime) && (empty($thumb_path_filemtime) || time()-24*10*3600>$thumb_path_filemtime))) {
 		if(!empty($GLOBALS['site_parameters']['skip_images_keywords'])){
 			// On ne veut pas générer le thumb, et ATTENTION : on le prend si il existe
 			foreach($GLOBALS['site_parameters']['skip_images_keywords'] as $this_keyword){
@@ -175,6 +180,12 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 				$ratio = max($xRatio, $yRatio, 1);
 				$outWidth = intval($srcWidth / $ratio);
 				$outHeight = intval($srcHeight / $ratio);
+			}
+			if($allow_return_path_to_local_original_if_unchanged && strpos($source_path, '//') === false && ($return_absolute_path === true || strpos($return_absolute_path, '//') !== false) && $srcWidth == $outWidth && $srcHeight == $outHeight) {
+				// On évite de générer un thumbs de la même taille que l'image originale
+				// Du coup à chaque appel au thumb, il y aura eu un @getimagesize en plus du @filemtime => un peu plus lent, mais pas beaucoup tant que ce n'est pas un appel http
+				// On gagne au final ici le fait de ne pas avoir généré de thumb qui soit stocké sur le disque, et la qualité de l'image est celle de l'original, et si c'est un GIF animé il l'est toujours
+				return str_replace($GLOBALS['dirroot'], $GLOBALS['wwwroot'], $source_path);
 			}
 			// Création de l'image de sortie
 			$outImg = imagecreatetruecolor ($outWidth, $outHeight);

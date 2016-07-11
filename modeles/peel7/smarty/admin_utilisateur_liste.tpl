@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div class="row">
 		<div class="col-md-3 col-sm-4 col-xs-12 center">
 			<label for="search_email">{$STR_ADMIN_ID} / {$STR_EMAIL}{if empty($pseudo_is_not_used)} / {$STR_PSEUDO}{/if} {$STR_BEFORE_TWO_POINTS}:</label>
-			<input type="text" class="form-control" id="search_email" name="email" value="{$email|str_form_value}" />
+			<input type="text" class="form-control" id="search_email" name="email" value="{$email|str_form_value}" autocapitalize="none" />
 		</div>
 		<div class="col-md-3 col-sm-4 col-xs-12 center">
 			<label for="search_client_info">{$STR_FIRST_NAME} / {$STR_LAST_NAME}{$STR_BEFORE_TWO_POINTS}:</label>

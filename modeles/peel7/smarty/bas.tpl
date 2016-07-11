@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.tpl 49873 2016-05-13 16:46:58Z gboussin $
+// $Id: bas.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}
 							</div>
 							<div class="bottom_middle row">
@@ -43,6 +43,8 @@
 		</div>
 		<!-- Fin Total -->
 		{if !empty($scroll_to_top)}<div class="scroll_to_top"><a href="#"><span class="glyphicon glyphicon-circle-arrow-up"></span></a></div>{/if}
+		{if !empty($call_back_form)} {$call_back_form} {/if}
+
 		<!-- Début Footer -->
 		<div id="footer" class="clearfix">
 			{if !empty($CONTENT_HOME_BOTTOM) || !empty($CONTENT_FOOTER) || !empty($footer_column)}

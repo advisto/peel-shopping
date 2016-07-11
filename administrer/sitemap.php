@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: sitemap.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -155,7 +155,7 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 		while ($result = fetch_assoc($query)) {
 			$content_category_url_array[] = get_content_category_url($result['id'], $result['nom']);
 		}
-		$content_url_array[] = get_url('/utilisateurs/contact.php');
+		$content_url_array[] = get_contact_url(false, false);
 		$legal_url_array[] = get_url('legal');
 		$legal_url_array[] = get_url('cgv');
 		$account_register_url_array[] = get_account_register_url();

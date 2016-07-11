@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: recursive_items_display.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
+// $Id: recursive_items_display.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}
 {if !empty($columns)}
 <div class="col-sm-{floor(12/$columns)}"><ul>
@@ -57,10 +57,10 @@
 	{else}
 <li class="{if $it.has_sons}dropdown-submenu plus{else}minus{/if}{if $it.is_current} active{/if}{if isset($it.technical_code)} m_item_{$it.technical_code}{/if}{if $it.class} {$it.class}{/if}">
 	{if $it.has_sons && !empty($it.SONS)}
-		{$it.indent}<a id="{$it.id}" class="dropdown-toggle" href="{$it.href}">{if !empty($it.nb)}<span class="nb_item badge pull-right">{$it.nb}</span> {/if}{$it.name|str_shorten:$max_length}</a>
+		{$it.indent}{if !empty($it.nb)}<span class="nb_item badge pull-right">{$it.nb}</span> {/if}<a id="{$it.id}" class="dropdown-toggle" href="{$it.href}">{$it.name|str_shorten:$max_length}</a>
 		<ul class="sousMenu level{$it.depth} dropdown-menu" aria-labelledby="{$it.id}" role="menu">{$it.SONS}</ul>
 	{elseif isset($it.href)}
-		{$it.indent}<a href="{$it.href|escape:'html'}">{if $it.has_sons && $location == 'left'}<span class="menu_categorie_link">{if !empty($it.nb)} <span class="nb_item badge pull-right">{$it.nb}</span> {/if}{$it.name|str_shorten:$max_length}</span> <span class="glyphicon glyphicon-chevron-right" title="+"></span>{else}{if !empty($it.nb)}<span class="nb_item badge pull-right">{$it.nb}</span> {/if}{$it.name|str_shorten:$max_length}{/if}</a>
+		{$it.indent}{if !empty($it.nb)}<span class="nb_item badge pull-right">{$it.nb}</span> {/if}<a href="{$it.href|escape:'html'}">{if $it.has_sons && $location == 'left'}<span class="menu_categorie_link">{$it.name|str_shorten:$max_length}</span> <span class="glyphicon glyphicon-chevron-right" title="+"></span>{else}{$it.name|str_shorten:$max_length}{/if}</a>
 	{/if}
 </li>
 	{/if}

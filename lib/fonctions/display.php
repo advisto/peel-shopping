@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: display.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -257,7 +257,7 @@ if (!function_exists('affiche_meta')) {
 		if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 			$tpl->assign('specific_meta', '<meta name="viewport" content="width=device-width, initial-scale=1.0" />');
 		}
-		if((!empty($_GET['update']) && $_GET['update'] == 1) || !empty($GLOBALS['robots_noindex'])|| !empty($_GET['follow']) || !empty($_GET['nofollow'])) {
+		if((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($_GET['update_thumbs']) && $_GET['update_thumbs'] == 1) || !empty($GLOBALS['robots_noindex']) || !empty($_GET['follow']) || !empty($_GET['nofollow'])) {
 			$robots = 'noindex, nofollow';
 		} else {
 			$robots = 'all';
@@ -348,11 +348,7 @@ if (!function_exists('affiche_ariane')) {
 				$other['href'] = get_account_url(false, false);
 			} elseif (defined('IN_CONTACT')) {
 				$other['txt'] = $GLOBALS['STR_CONTACT'];
-				if (check_if_module_active('url_rewriting')) {
-					$other['href'] = get_contact_url(false, false);
-				} else {
-					$other['href'] = get_url('/utilisateurs/contact.php');
-				}
+				$other['href'] = get_contact_url(false, false);
 			} elseif (defined('IN_CONTACT_US')) {
 				$other['txt'] = $GLOBALS['STR_CONTACT_US'];
 				$other['href'] = get_url('/contacts.php');
@@ -1386,8 +1382,11 @@ if (!function_exists('affiche_block')) {
 	 */
 	function affiche_block($display_mode = 'sideblocktitle', $location = '', $technical_code = '', $title = '', $content = '', $block_class = '', $block_style = '', $return_mode = true, $is_slider_mode = false, $is_simplify_mode = false, $extra_class = false)
 	{
+		static $tpl;
 		$mode = (!empty($rewrite_mame_mode)) ? clean_str($display_mode) : $display_mode;
-		$tpl = $GLOBALS['tplEngine']->createTemplate('block.tpl');
+		if(empty($tpl)){
+			$tpl = $GLOBALS['tplEngine']->createTemplate('block.tpl');
+		}
 		$tpl->assign('is_slider_mode', $is_slider_mode);
 		$tpl->assign('extra_class', $extra_class);
 		$tpl->assign('is_simplify_mode', $is_simplify_mode);
@@ -1422,62 +1421,72 @@ if (!function_exists('affiche_menu_recherche')) {
 	 */
 	function affiche_menu_recherche($return_mode = false, $display_mode = 'header')
 	{
-		$tpl = $GLOBALS['tplEngine']->createTemplate('menu_recherche.tpl');
-		// Sur la homepage on veut des microdatas pour préciser le moteur de recherche du site
-		// comme défini sur : https://developers.google.com/webmasters/richsnippets/sitelinkssearch et http://schema.org/WebSite
-		$tpl->assign('add_webpage_microdata', defined('IN_HOME'));
-		$tpl->assign('action', get_url('search'));
-		$tpl->assign('display_mode', $display_mode);
-		if (check_if_module_active('search')) {
-			$tpl->assign('advanced_search_script', get_advanced_search_script());
-			$tpl->assign('select_marque', affiche_select_marque(true));
-		}
-		// on construit la liste des catégories
-		if(check_if_module_active('annonces')) {
-			// on construit les options du select des catégories
-			if(empty($GLOBALS['site_parameters']['advanced_fields_in_search_bar_disabled'])) {
-				$tpl->assign('select_categorie', get_categories_output(null, 'categories_annonces', vn($_GET["categorie"]), 'option', '&nbsp;&nbsp;', null, null, false, 40));
-			}
-			$tpl->assign('STR_CATEGORY', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD']);
-			if(!empty($GLOBALS['STR_MODULE_ANNONCES_SEARCH_TYPOLOGIE']) && empty($GLOBALS['site_parameters']['ad_search_typologie_disable'])) {
-				$additionnal_select = '';
-				if (!empty($GLOBALS['site_parameters']['ads_verified_status_per_subscription'])) {
-					$additionnal_select .= '
-						<option value="1" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 1), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_ALT_VERIFIED_ADS'] . '</option>
-';
-				}
-				if(!empty($GLOBALS['site_parameters']['ads_contain_lot_sizes'])) {
-					$additionnal_select .= '
-						<option value="gros" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'gros'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_GROS'] . '</option>
-						<option value="demigros" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'demigros'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_DEMIGROS'] . '</option>
-						<option value="detail" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'detail'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_DETAIL'] . '</option>';
-				}
-				if(!empty($additionnal_select)) {
-					$additionnal_select = '	<select class="form-control" name="cat_statut_detail">
-						<option value="">' . $GLOBALS['STR_MODULE_ANNONCES_SEARCH_TYPOLOGIE'] . '</option>
-						' . $additionnal_select . '
-					</select>
-';
-					$tpl->assign('additionnal_select', $additionnal_select);
-				}
-			}
+		$cache_id = 'menu_recherche_' . $display_mode . '_' . vn($_GET["categorie"]) . '_' . vb($_GET['cat_statut_detail']). '_' . (defined('IN_HOME')?'home':'other');
+		$this_cache_object = new Cache($cache_id, array('group' => 'html_block'));
+		if ($this_cache_object->testTime(5400, true)) {
+			$output = $this_cache_object->get();
 		} else {
-			// on construit les options du select des catégories
-			if(empty($GLOBALS['site_parameters']['advanced_fields_in_search_bar_disabled'])) {
-				$tpl->assign('select_categorie', get_categories_output(null, 'categories', vb($_GET["categorie"]), 'option', '&nbsp;&nbsp;', null, null, false, 40));
+			$tpl = $GLOBALS['tplEngine']->createTemplate('menu_recherche.tpl');
+			// Sur la homepage on veut des microdatas pour préciser le moteur de recherche du site
+			// comme défini sur : https://developers.google.com/webmasters/richsnippets/sitelinkssearch et http://schema.org/WebSite
+			$tpl->assign('add_webpage_microdata', defined('IN_HOME'));
+			$tpl->assign('action', get_url('search'));
+			$tpl->assign('display_mode', $display_mode);
+			if (check_if_module_active('search')) {
+				$tpl->assign('advanced_search_script', get_advanced_search_script());
+				$tpl->assign('select_marque', affiche_select_marque(true));
 			}
-			$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
+			// on construit la liste des catégories
+			if(check_if_module_active('annonces')) {
+				// on construit les options du select des catégories
+				if(empty($GLOBALS['site_parameters']['advanced_fields_in_search_bar_disabled'])) {
+					$tpl->assign('select_categorie', get_categories_output(null, 'categories_annonces', vn($_GET["categorie"]), 'option', '&nbsp;&nbsp;', null, null, false, 40));
+				}
+				$tpl->assign('category_input_name', 'cat_select');
+				$tpl->assign('STR_CATEGORY', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD']);
+				if(!empty($GLOBALS['STR_MODULE_ANNONCES_SEARCH_TYPOLOGIE']) && empty($GLOBALS['site_parameters']['ad_search_typologie_disable'])) {
+					$additionnal_select = '';
+					if (!empty($GLOBALS['site_parameters']['ads_verified_status_per_subscription'])) {
+						$additionnal_select .= '
+							<option value="1" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 1), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_ALT_VERIFIED_ADS'] . '</option>
+	';
+					}
+					if(!empty($GLOBALS['site_parameters']['ads_contain_lot_sizes'])) {
+						$additionnal_select .= '
+							<option value="gros" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'gros'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_GROS'] . '</option>
+							<option value="demigros" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'demigros'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_DEMIGROS'] . '</option>
+							<option value="detail" ' . frmvalide((!empty($_GET['cat_statut_detail']) && $_GET['cat_statut_detail'] == 'detail'), 'selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_OFFER_DETAIL'] . '</option>';
+					}
+					if(!empty($additionnal_select)) {
+						$additionnal_select = '	<select class="form-control" name="cat_statut_detail">
+							<option value="">' . $GLOBALS['STR_MODULE_ANNONCES_SEARCH_TYPOLOGIE'] . '</option>
+							' . $additionnal_select . '
+						</select>
+	';
+						$tpl->assign('additionnal_select', $additionnal_select);
+					}
+				}
+			} else {
+				// on construit les options du select des catégories
+				if(empty($GLOBALS['site_parameters']['advanced_fields_in_search_bar_disabled'])) {
+					$tpl->assign('select_categorie', get_categories_output(null, 'categories', vb($_GET["categorie"]), 'option', '&nbsp;&nbsp;', null, null, false, 40));
+				}
+				$tpl->assign('category_input_name', 'categorie');
+				$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
+			}
+			if(!empty($GLOBALS['site_parameters']['header_search_form_additionnal_button'])) {
+				$additionnal_button = '<a class="btn btn-default btn-header_search" href="'.$GLOBALS['site_parameters']['header_search_form_additionnal_button']['href'].'" title="">'.$GLOBALS['site_parameters']['header_search_form_additionnal_button']['anchor'] . '</a>
+	';
+				$tpl->assign('additionnal_button', $additionnal_button);
+			}
+			$tpl->assign('STR_SEARCH', $GLOBALS["STR_SEARCH"]);
+			$output = $tpl->fetch();
+			$this_cache_object->save($output);
 		}
-		if(!empty($GLOBALS['site_parameters']['header_search_form_additionnal_button'])) {
-			$additionnal_button = '<a class="btn btn-default btn-header_search" href="'.$GLOBALS['site_parameters']['header_search_form_additionnal_button']['href'].'" title="">'.$GLOBALS['site_parameters']['header_search_form_additionnal_button']['anchor'] . '</a>
-';
-			$tpl->assign('additionnal_button', $additionnal_button);
-		}
-		$tpl->assign('STR_SEARCH', $GLOBALS["STR_SEARCH"]);
 		if ($return_mode) {
-			return $tpl->fetch();
+			return $output;
 		} else {
-			echo $tpl->fetch();
+			echo $output;
 		}
 	}
 }
@@ -1495,18 +1504,37 @@ if (!function_exists('affiche_guide')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('guide.tpl');
 		$tplLinks = array();
 		if(!empty($GLOBALS['site_parameters']['show_on_affiche_guide_article'])){
-			$sql = 'SELECT a.id, a.titre_' . $_SESSION['session_langue'] . ' AS nom
-				FROM peel_articles a
-				WHERE a.etat = "1" AND a.titre_' . $_SESSION['session_langue'] . '!="" AND a.technical_code NOT IN ("other", "iphone_content") AND a.position>=0 AND ' . get_filter_site_cond('articles', 'a', false) . '
-				ORDER BY a.position ASC, nom ASC';
-			$qid = query($sql);
-			while ($result = fetch_assoc($qid)) {
-				$tplLinks["art_".$result['id']] = array('href' => get_content_url($result['id']), 'label' => $result['nom'], 'selected' => false);
+			if(isset($GLOBALS['site_parameters']['show_on_affiche_guide']) && is_array($GLOBALS['site_parameters']['show_on_affiche_guide'])) {
+				foreach($GLOBALS['site_parameters']['show_on_affiche_guide'] as $this_value) {
+					if(String::substr($this_value, 0, 4) === 'art_') {
+						$art_ids_array[] = String::substr($this_value, 4);
+					}
+				}
+				if(!empty($art_ids_array)) {
+					$art_where = 'a.id IN (' . implode(', ', real_escape_string($art_ids_array)) . ')';
+				} else {
+					$skip_arts = true;
+				}
+			} else {
+				$art_where = '1';
+			}
+			if(empty($skip_arts)) {
+				$sql = 'SELECT a.id, a.titre_' . $_SESSION['session_langue'] . ' AS nom, pc.rubrique_id, r.nom_' . $_SESSION['session_langue'] . ' AS rubrique_nom
+					FROM peel_articles a
+					INNER JOIN peel_articles_rubriques pc ON a.id = pc.article_id
+					INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id AND ' . get_filter_site_cond('rubriques', 'r') . '
+					WHERE ' . $art_where . ' AND a.etat = "1" AND a.titre_' . $_SESSION['session_langue'] . '!="" AND a.technical_code NOT IN ("other", "iphone_content") AND a.position>=0 AND ' . get_filter_site_cond('articles', 'a', false) . '
+					GROUP BY a.id
+					ORDER BY a.position ASC, nom ASC';
+				$qid = query($sql);
+				while ($result = fetch_assoc($qid)) {
+					$tplLinks["art_".$result['id']] = array('href' => get_content_url($result['id'], $result['nom'], $result['rubrique_id'], $result['rubrique_nom']), 'label' => $result['nom'], 'selected' => false);
+				}
 			}
 		}
 		$tplLinks['cgv'] = array('href' => get_url('cgv'), 'label' => $GLOBALS['STR_CGV'], 'selected' => defined('IN_CGV'));
 		$tplLinks['contact'] = array('name' => 'contact', 'href' => get_url('/contacts.php'), 'label' => $GLOBALS['STR_CONTACT_INFO'], 'selected' => defined('IN_CONTACT_US'));
-		$tplLinks['contactus'] = array('name' => 'contact', 'href' => get_url('/utilisateurs/contact.php'), 'label' => $GLOBALS['STR_CONTACT_US'], 'selected' => defined('IN_CONTACT'));
+		$tplLinks['contactus'] = array('name' => 'contact', 'href' => get_contact_url(false, false), 'label' => $GLOBALS['STR_CONTACT_US'], 'selected' => defined('IN_CONTACT'));
 		if(empty($GLOBALS['site_parameters']['disabled_link_legal_left'])){
 			$tplLinks['legal'] = array('href' => get_url('legal'), 'label' => $GLOBALS['STR_LEGAL_INFORMATION'], 'selected' => defined('IN_INFO_LEGALE'));
 		}
@@ -1873,6 +1901,14 @@ if (!function_exists('getHTMLHead')) {
 			} else if($(".scroll_to_top").css("display") != "none") {
 				$(".scroll_to_top").stop(true, false).hide(400);
 			}
+			$test_reach_bottom = $(window).scrollTop() + $(window).height();
+			if ($test_reach_bottom == $(document).height()) {
+				if($(".touch_bottom").css("display") != "none") {
+					$(".touch_bottom").stop(true, false).hide(400);
+				}
+			} else if($(".touch_bottom").css("display") == "none") {
+				$(".touch_bottom").stop(true, false).show(800);
+			}
 		}
 ';
 		}
@@ -2000,10 +2036,10 @@ if (!function_exists('get_menu')) {
 			}
 			$GLOBALS['main_menu_items']['contact'] = array(get_contact_url(false, false) => $GLOBALS['STR_CONTACT']);
 			if(empty($GLOBALS['site_parameters']['disable_contact_submenu'])) {
-			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
-				$GLOBALS['menu_items']['contact'][get_contact_url(false, false)] = $GLOBALS['STR_CONTACT'];
-			}
-			$GLOBALS['menu_items']['contact'][get_url('/plan_acces.php')] = $GLOBALS['STR_ACCESS_PLAN'];
+				if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+					$GLOBALS['menu_items']['contact'][get_contact_url(false, false)] = $GLOBALS['STR_CONTACT'];
+				}
+				$GLOBALS['menu_items']['contact'][get_url('/plan_acces.php')] = $GLOBALS['STR_ACCESS_PLAN'];
 			}
 			if (a_priv('admin*', true)) {
 				$GLOBALS['main_menu_items']['admin'] = array($GLOBALS['administrer_url'] . '/' => $GLOBALS['STR_ADMIN']);
@@ -2093,21 +2129,24 @@ if (!function_exists('get_menu')) {
 		} elseif (check_if_module_active('sauvegarde_recherche') && est_identifie()) {
 			$GLOBALS['submenu_html_array']['catalog'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.display_ads_search_list($_SESSION['session_utilisateur']['id_utilisateur'], true).'</ul>';
 		}
-
-		// Lien d'articles dans le menu
+		
 		if(!empty($GLOBALS['site_parameters']['insert_article_in_menu'])) {
-			$sql = 'SELECT a.id, a.on_reseller, a.titre_' . $_SESSION['session_langue'] . ' as nom
+			// Lien d'articles (/lire/article_details.php) dans le menu principal. Il faut définir art_XX dans le paramètre main_menu_items_if_available depuis le back office pour que le lien de l'article s'affiche dans les onglets du menu principal
+			$sql = 'SELECT a.id, a.on_reseller, a.titre_' . $_SESSION['session_langue'] . ' as nom, pc.rubrique_id, r.nom_' . $_SESSION['session_langue'] . ' AS rubrique_nom
 				FROM peel_articles a
+				INNER JOIN peel_articles_rubriques pc ON a.id = pc.article_id
+				INNER JOIN peel_rubriques r ON r.id = pc.rubrique_id AND ' . get_filter_site_cond('rubriques', 'r') . '
 				WHERE a.etat = "1" AND a.technical_code NOT IN ("other", "iphone_content") AND a.position>=0 AND ' . get_filter_site_cond('articles', 'a') . '
+				GROUP BY a.id
 				ORDER BY a.position ASC, nom ASC';
 			$qid = query($sql);
-
 			while ($result = fetch_assoc($qid)) {
 				if ((!a_priv("admin_product") && !a_priv("reve")) && $result['on_reseller'] == 1) {
 					continue;
 				} else {
+					// Charge tous les articles dans main_menu_items, qui sera filtré avec ce que contient main_menu_items_if_available quelques lignes en dessous
 					// Il faut définir par la suite art_XX dans le paramètre main_menu_items_if_available depuis le back office pour que la rubrique s'affiche.
-					$GLOBALS['main_menu_items']["art_".$result['id']] = array(get_content_url($result['id']) => $result['nom']);
+					$GLOBALS['main_menu_items']["art_".$result['id']] = array(get_content_url($result['id'], $result['nom'], $result['rubrique_id'], $result['rubrique_nom']) => $result['nom']);
 				}
 			}
 		}
@@ -2167,36 +2206,8 @@ if (!function_exists('get_menu')) {
 			}
 		}
 		if(in_array('brand',$GLOBALS['site_parameters']['main_menu_items_if_available'])) {
-			$sql = "SELECT id, image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom
-				FROM peel_marques
-				WHERE etat=1 AND  " . get_filter_site_cond('marques') . "
-				ORDER BY position ASC, nom ASC";
-			$query = query($sql);
-
-			$GLOBALS['submenu_html_array']['brand'] = '<ul class="sousMenu dropdown-menu" role="menu">';
-			while ($result = fetch_assoc($query)) {
-				$GLOBALS['submenu_html_array']['brand'] .= '<li><a href="'.get_url('/achat/marque.php', array('id' => $result['id'])).'">
-				'.$result['nom'].'
-				</a></li>';	
-			}
-			$GLOBALS['submenu_html_array']['brand'] .= '</ul>';
-		}
-		if(!empty($GLOBALS['site_parameters']['insert_article_in_menu'])) {
-			// Lien d'articles (/lire/article_details.php) dans le menu principal. Il faut définir art_XX dans le paramètre main_menu_items_if_available depuis le back office pour que le lien de l'article s'affiche dans les onglets du menu principal
-			$sql = 'SELECT a.id, a.titre_' . $_SESSION['session_langue'] . ' as nom
-				FROM peel_articles a
-				WHERE a.etat = "1" AND a.technical_code NOT IN ("other", "iphone_content") AND a.position>=0 AND ' . get_filter_site_cond('articles', 'a') . '
-				ORDER BY a.position ASC, nom ASC';
-			$qid = query($sql);
-			while ($result = fetch_assoc($qid)) {
-				// Charge tous les articles dans main_menu_items, qui sera filtré avec ce que contient main_menu_items_if_available quelques lignes en dessous
-				$GLOBALS['main_menu_items']["art_".$result['id']] = array(get_content_url($result['id']) => $result['nom']);
-			}
-		}
-
-		if(in_array('brand',$GLOBALS['site_parameters']['main_menu_items_if_available'])) {
-		// On vérifie si "brand" fait parti des onglet à afficher au menu : administrable en back office
-		// Récupération des infos liées aux marques
+			// On vérifie si "brand" fait parti des onglets à afficher au menu : administrable en back office
+			// Récupération des infos liées aux marques
 			$sql = "SELECT id, image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom
 				FROM peel_marques
 				WHERE etat=1 AND  " . get_filter_site_cond('marques') . "
@@ -2682,11 +2693,7 @@ if (!function_exists('get_contact_sideblock')) {
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('contact_sideblock.tpl');
 		$tpl->assign('lang', $_SESSION['session_langue']);
-		if (check_if_module_active('url_rewriting')) {
-			$tpl->assign('href', get_contact_url(false, false));
-		} else {
-			$tpl->assign('href', get_url('/utilisateurs/contact.php'));
-		}
+		$tpl->assign('href', get_contact_url(false, false));
 		if ($return_mode) {
 			return $tpl->fetch();
 		} else {
@@ -2720,14 +2727,16 @@ if (!function_exists('get_newsletter_form')) {
 	/**
 	 * get_newsletter_form()
 	 *
+	 * @param string $value
 	 * @return
 	 */
-	function get_newsletter_form()
+	function get_newsletter_form($value = null)
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('newsletter_form.tpl');
 		$tpl->assign('form_token', get_form_token_input('get_simple_newsletter', true));
 		$tpl->assign('label', $GLOBALS['STR_NEWSLETTER'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('default', $GLOBALS['STR_WRITE_EMAIL_HERE']);
+		$tpl->assign('value', $value);
 		return $tpl->fetch();
 	}
 }
@@ -2736,8 +2745,8 @@ if (!function_exists('newsletter_desinscription_form')) {
 	/**
 	 * newsletter_desinscription_form()
 	 *
-	 * @param mixed $frm
-	 * @param mixed $form_error_object
+	 * @param array $frm
+	 * @param object $form_error_object
 	 * @return
 	 */
 	function newsletter_desinscription_form(&$frm, $form_error_object)
@@ -2761,13 +2770,10 @@ if (!function_exists('newsletter_validation')) {
 	 */
 	function newsletter_validation(&$frm, &$form_error_object)
 	{
-		if (empty($frm)) {
-			return false;
-		}
 		$message = "";
 		$tpl = $GLOBALS['tplEngine']->createTemplate('newsletter_validation.tpl');
 		$tpl->assign('header', $GLOBALS['STR_NEWSLETTER_TITLE']);
-		if (!$form_error_object->count()) {
+		if (!empty($frm) && !$form_error_object->count()) {
 			// MAJ du compte client s'il existe
 			$q_count_users = query("SELECT COUNT(id_utilisateur) AS nb_users
 				FROM peel_utilisateurs
@@ -2785,11 +2791,14 @@ if (!function_exists('newsletter_validation')) {
 			$custom_template_tags['EMAIL'] = $frm['email'];
 			// Envoi d'un email confirmant l'inscription à la newsletter
 			send_email($frm['email'], '', '', 'inscription_newsletter', $custom_template_tags, null, $GLOBALS['support']);
-			$message .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK'] . ' ' . $GLOBALS['STR_SEE_YOU_SOON'] . ' ' . $GLOBALS['wwwroot']))->fetch();
+			$message .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK'] . ' ' . $GLOBALS['STR_SEE_YOU_SOON'] . ' ' . $GLOBALS['wwwroot'] . '/'))->fetch();
 		} else {
-			foreach ($form_error_object->error as $key => $error) {
-				$message .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
+			if(!empty($frm)) {
+				foreach ($form_error_object->error as $key => $error) {
+					$message .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error))->fetch();
+				}
 			}
+			$message .= get_newsletter_form(vb($frm['email']));
 		}
 		$tpl->assign('message', $message);
 		return $tpl->fetch();
@@ -2887,19 +2896,19 @@ if (!function_exists('addthis_buttons')) {
 		<tr>';
 		if (!empty($text)) {
 			$output .= '
-				<td>
-					<span class="text_product" style="display:block;height:100%;float:left;vertical-align:middle;">' . $text . '</span>
-				</td>';
+			<td>
+				<span class="text_product" style="display:block;height:100%;float:left;vertical-align:middle;">' . $text . '</span>
+			</td>';
 		}
 		foreach($share_item_array as $this_item) {
 			$output .= '
-				<td>
-					<a class="addthis_button_' . $this_item . '"></a>
-				</td>';
+			<td>
+				<a class="addthis_button_' . $this_item . '"></a>
+			</td>';
 		}
 		$output .= '
-			</tr>
-		</table>';
+		</tr>
+	</table>';
 		if(empty($jquery_called)) {
 			// On ne veut pas minifier le fichier addthis avec le reste pour éviter de rajouter un délai de génération du minified ou poser un problème si addthis ne répond pas
 			// Par ailleurs ça permet à la page d'accueil d'un site d'aller plus vite si elle n'a pas addthis
@@ -3160,7 +3169,7 @@ if (!function_exists('get_address_list')) {
 		if(num_rows($q) < vb($GLOBALS['site_parameters']['addresses_per_user_max'], 1000)) {
 			// N adresses en plus maximum de l'adresse enregistrée lors de l'inscription.
 			$output .= '
-			<p><a class="btn btn-primary" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=create_new_adress" title="'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'">'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'</a></p>';
+			<p><a class="btn btn-primary" href="'.$GLOBALS['wwwroot'].'/utilisateurs/adresse.php?mode=create_new_address" title="'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'">'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'</a></p>';
 		}
 		$output .= '
 			<div class="row">
@@ -3179,7 +3188,7 @@ if (!function_exists('get_address_list')) {
 ';
 		$q = query('SELECT *
 			FROM peel_adresses
-			WHERE id_utilisateur = "' . intval($user_id) . '" AND address_type NOT LIKE "private_%" AND address_type!=""');
+			WHERE id_utilisateur = "' . intval($user_id) . '" AND address_type NOT LIKE "private_%"');
 		while($result = fetch_assoc($q)) {
 			$output .= '
 				<div class="col-sm-6 col-md-4">

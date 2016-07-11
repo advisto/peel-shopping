@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_result.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
+// $Id: search_result.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}{if $is_annonce_module_active}
 	{if !empty($res_affiche_annonces)}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if} - {$ads_found} {$STR_MODULE_ANNONCES_ADS}</h1>
@@ -57,7 +57,7 @@
 {if !empty($search_complementary_results_array)}
 	{foreach $search_complementary_results_array as $search_complementary_results}
 		{if !empty($search_complementary_results.results)}
-<h2 class="search_result">{$STR_RESULT_SEARCH} {$search|strtoupper} {$search_complementary_results.title} - {$search_complementary_results.results|@count} {$STR_RESULTS}</h2>
+<h2 class="search_result">{$STR_RESULT_SEARCH} {$search|strtoupper} {$search_complementary_results.title} - {$search_complementary_results.results|@count} {if ($search_complementary_results.results|@count)>1}{$STR_RESULTS|replace:'(s)':'s'}{else}{$STR_RESULTS|replace:'(s)':''}{/if}</h2>
 			{foreach $search_complementary_results.results as $result}
 				{if !empty($result.html)}
 {$result.html}

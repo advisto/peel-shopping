@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: Caddie.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 49979 2016-05-23 12:29:53Z sdelaporte $
+ * @version $Id: Caddie.php 50572 2016-07-07 12:43:52Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -723,9 +723,15 @@ class Caddie {
 				unset($product_object);
 				if($apply_code_on_this_product) {
 					// ATTENTION : la somme de $this->total_produit_related_to_code_promo n'est pas égale au total du caddie si des produits se retrouvent dans plusieurs catégories
-					$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne];
-					// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
-					$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
+					if (check_if_module_active('conditionnement') && !empty($this->conditionnement[$numero_ligne])) {
+						$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne] * $this->conditionnement[$numero_ligne];
+						// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
+						$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne] * $this->conditionnement[$numero_ligne];
+					} else {
+						$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne];
+						// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
+						$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
+					}
 				}
 			}
 			if ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat))) {

@@ -33,6 +33,9 @@ p.center {
 .right {
 	text-align: right;
 }
+.middle {
+	vertical-align: middle;
+}
 .bold {
 	font-weight: bold;
 }
@@ -46,6 +49,13 @@ p.center {
 }
 input.form-control[type="file"] {
 	height: auto;
+}
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+	background-color: #fff9f5;
+	color: #888888 !important;
+	-webkit-text-fill-color: #888888;
+	opacity: 1;
+	-webkit-opacity: 1;
 }
 .inline-block {
 	display: inline-block;
@@ -143,9 +153,8 @@ input.form-control[type="file"] {
 	height:300px;
 	padding-left: 30px;
 }
-
 .red_background{
-  background-color: rgba(255, 0, 0, 0.25);
+	background-color: rgba(255, 0, 0, 0.25);
 }
 
 /* Gestion de footer qui reste en bas de page avec astuces pour compatibilités avec tous navigateurs */
@@ -264,8 +273,42 @@ input.form-control[type="file"] {
 	border-left: 1px solid #DDDDDD;
 }
 
+.bottom_fixed_callback {
+	position: fixed;
+	bottom: 5px;
+	right: 80px;
+	width: 300px;
+	height: 110px;
+	background-image: url('../images/bg_bottom_fixed_callback.jpg');
+	background-position: bottom left;
+	background-repeat: no-repeat;
+	background-color: #ffffff;
+	z-index: 1000;
+	-webkit-box-shadow: 0px 1px 17px 0px rgba(0,0,0,0.25);
+	-moz-box-shadow: 0px 1px 17px 0px rgba(0,0,0,0.25);
+	box-shadow: 0px 1px 17px 0px rgba(0,0,0,0.25);
+}
+.bottom_fixed_callback > div {
+	font-family: calibri,"Lucida Sans Unicode","Lucida Grande",sans-serif;
+	padding: 10px;
+	width: 60%;
+	float: right;
+	text-align: center;
+}
+.bottom_fixed_callback a {
+	font-family: calibri,"Lucida Sans Unicode","Lucida Grande",sans-serif;
+	color: #ffffff;
+}
+.bottom_fixed_callback a > span {
+	margin-right: 5px;
+}
+
+
 /* Menus latéraux */
-.left_column li, .right_column li {
+.side_column ul {
+	padding-left: 0px;
+}
+.side_column li {
 	background-image: none;
 	display: block;
 	list-style: none outside none;
@@ -274,15 +317,15 @@ input.form-control[type="file"] {
 	padding-bottom: 0px;
 	position: relative;
 }
-.left_column li > span, .left_column li > a, .right_column li > span, .right_column li > a {
+.side_column li > span, .side_column li > a {
 	min-height: 26px;
 	line-height: 26px;
 	vertical-align: middle;
 	/*background: url('images/menu/menu_main_item.gif') center top no-repeat ;*/
-	padding: 10px 4px 10px 10px;
+	padding: 10px 0px 10px 0px;
 	text-decoration: none;
 }
-.left_column .sousMenu, .right_column .sousMenu {
+.side_column .sousMenu {
 	background-color: #F3FBFE;
 	display: none;
 	clear: both;
@@ -303,7 +346,7 @@ input.form-control[type="file"] {
 .right_column .sousMenu {
 	left: -199px;
 }
-.left_column .sousMenu li, .right_column .sousMenu li {
+.side_column .sousMenu li {
 	z-index: 104;
 	border: 0px;
 	display: block;
@@ -312,18 +355,18 @@ input.form-control[type="file"] {
 	background-repeat: repeat-y;
 	background-position: center;
 }
-.left_column .sousMenu li span, .left_column .sousMenu li a, .right_column .sousMenu li span, .right_column .sousMenu li a {
+.side_column .sousMenu li span, .side_column .sousMenu li a {
 	z-index: 105;
 }
-.left_column li:hover > a, .left_column li a:focus, .left_column li a:active, .left_column li.active > a, .right_column li:hover > a, .right_column li a:focus, .right_column li a:active, .right_column li.active > a {
+.side_column li:hover > a, .side_column li a:focus, .side_column li a:active, .side_column li.active > a {
 	background-color: #DCE2FF;
 	background-image: none;
 	color: #000000;
 }
-.left_column li.plus:hover > ul.sousMenu, .right_column li.plus:hover > ul.sousMenu {
+.side_column li.plus:hover > ul.sousMenu {
 	display: block;
 }
-.left_column .sousMenu:hover > a, .right_column .sousMenu:hover > a {
+.side_column .sousMenu:hover > a {
 	color: #FFFFFF;
 }
 .middle_column_header {
@@ -352,6 +395,9 @@ input.form-control[type="file"] {
 		/* Empêcher changement de taille par Chrome */
 		font-size: inherit !important;
 	}
+}
+.label_checkbox input[type=checkbox] {
+	margin-right: 7px;
 }
 p > label, div > label {
 	/* Eviter problème lié à inline-block => il n'y plus de place pour checkbox ou donnée autre */
@@ -789,6 +835,16 @@ table.table_order .btn-primary {
 	left: 0;
 	right: 0;
 }
+.yamm-content ul {
+	background-image: none;
+	display: block;
+	list-style: none outside none;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+	position: relative;
+	padding-left: 0px;
+}
 @media (max-width: 969px) {
 	.yamm .dropdown.yamm-fullwidth .dropdown-menu {
 		width: auto;
@@ -848,7 +904,7 @@ span.search_tag {
 #recherche .btn:hover, #recherche .btn:focus {
 	color:#FFFFFF;
 	background-color:#C16D00;
-	border-color:#d58512
+	border-color:#d58512;
 }
 #recherche .input-group-addon {
 	padding: 0px;
@@ -1710,6 +1766,12 @@ a.carousel-control:hover, a.carousel-control:focus {
 	.image_ssl {
 		display: none;
 	}
+	.attribute_select_search input[type=text] {
+		width: 100%;
+	}
+	.attribute_select_search select {
+		width: 100%;
+	}
 }
 @media (max-width: 279px) {
 	#top_search .input-group-addon select {
@@ -1785,6 +1847,9 @@ a.carousel-control:hover, a.carousel-control:focus {
 	}
 	#footer .li_separated {
 		padding-top:10px;
+	}
+	.side_column .well {
+		padding: 10px;
 	}
 }
 @media (min-width: 992px) {

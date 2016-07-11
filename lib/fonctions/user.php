@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: user.php 50602 2016-07-11 09:04:14Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -110,7 +110,7 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
  * @param boolean $warn_admin_if_template_active
  * @param boolean $skip_existing_account_tests
  * @param boolean $create_password_on_behalf_of_user
- * @return integer New user id
+ * @return mixed New user id or array with user information
  */
 function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false)
 {
@@ -176,7 +176,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			$query = query($sql);
 			if ($user_already_exists_infos = fetch_assoc($query)) {
 				// L'utilisateur existe déjà, on donne son id
-				return $user_already_exists_infos['id_utilisateur'];
+				return $user_already_exists_infos;
 			}
 		}
 	}
@@ -298,12 +298,12 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		// Prévenir l'administrateur d'une création d'utilisateur
 		$custom_template_tags['PRIV'] = get_profil(vb($frm['priv']), 'name');
 		$custom_template_tags['CIVILITE'] = vb($frm['civilite']);
-		$custom_template_tags['PRENOM'] = $frm['prenom'];
-		$custom_template_tags['NOM_FAMILLE'] = $frm['nom_famille'];
-		$custom_template_tags['EMAIL'] = $frm['email'];
+		$custom_template_tags['PRENOM'] = vb($frm['prenom']);
+		$custom_template_tags['NOM_FAMILLE'] = vb($frm['nom_famille']);
+		$custom_template_tags['EMAIL'] = vb($frm['email']);
 		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
-		$custom_template_tags['SOCIETE'] = $frm['societe'];
-		$custom_template_tags['TELEPHONE'] = $frm['telephone'];
+		$custom_template_tags['SOCIETE'] = vb($frm['societe']);
+		$custom_template_tags['TELEPHONE'] = vb($frm['telephone']);
 		$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $frm['id'] . '&start=0';
 
 		if ($frm['priv'] == 'stop') {

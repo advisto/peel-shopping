@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: Product.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 49979 2016-05-23 12:29:53Z sdelaporte $
+ * @version $Id: Product.php 50572 2016-07-07 12:43:52Z sdelaporte $
  * @access public
  */
 class Product {
@@ -332,9 +332,9 @@ class Product {
 				}
 			}
 			if (empty($GLOBALS['site_parameters']['display_extra_product_description_mode']) || $GLOBALS['site_parameters']['display_extra_product_description_mode']=='after') {
-				$this->description = String::html_entity_decode_if_needed($this->description) . $extra_description;
+				$this->description = String::html_entity_decode_if_needed($this->description) .'<br />'. $extra_description;
 			} elseif ($GLOBALS['site_parameters']['display_extra_product_description_mode']=='before') {
-				$this->description = $extra_description . String::html_entity_decode_if_needed($this->description);
+				$this->description = $extra_description .'<br />'. String::html_entity_decode_if_needed($this->description);
 			}
 			correct_output($this->descriptif, true, 'html', $lang);
 			correct_output($this->description, true, 'html', $lang);

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_origins.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
+// $Id: user_origins.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<select class="form-control" id="origin" name="origin" onchange="origin_change(this.value, {$origin_infos.origin_other_ids_for_javascript})">
 	<option value="">{$origin_infos.STR_CHOOSE}...</option>
 	{foreach $origin_infos.options as $o}

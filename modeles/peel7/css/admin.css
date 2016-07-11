@@ -18,6 +18,9 @@ h5 {
 label {
 	margin:5px;
 }
+.label_checkbox input[type=checkbox] {
+	margin-right: 7px;
+}
 .left {
 	text-align: left;
 }

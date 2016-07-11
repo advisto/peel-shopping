@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 49833 2016-05-11 16:52:56Z sdelaporte $
+// $Id: user_register_form.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<h1 property="name" class="page_title">{$STR_FIRST_REGISTER_TITLE}</h1>
 <div class="user_register_form {if !empty($short_register_form)}short_register_form{/if}">
 {if empty($short_register_form)}
@@ -25,7 +25,7 @@
 		<div class="inscription_form">
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="email">{$STR_EMAIL}{if !empty($mandatory_fields['email'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
+				<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" autocapitalize="none" /></span>{$email_error}
 			</div>
 		{if !empty($STR_PSEUDO)}
 			<div class="enregistrement">
@@ -37,7 +37,7 @@
 		{/if}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="mot_passe">{$STR_PASSWORD}{if !empty($mandatory_fields['mot_passe'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" value="{$mot_passe|str_form_value}" /></span>{$password_error}
+				<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" autocapitalize="none" value="{$mot_passe|str_form_value}" /></span>{$password_error}
 			</div>
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="pwd_level">{$STR_PASSWORD_SECURITY}{$STR_BEFORE_TWO_POINTS}:</label></span>
@@ -46,7 +46,7 @@
 		{if $is_annonce_module_active}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="mot_passe_confirm">{$STR_PASSWORD_CONFIRMATION}{if !empty($mandatory_fields['mot_passe_confirm'])} <span class="etoile">*</span>{/if}{$STR_BEFORE_TWO_POINTS}:</label></span>
-				<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" value="{$mot_passe_confirm|str_form_value}" /></span>
+				<span class="enregistrementdroite"><input type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" autocapitalize="none" value="{$mot_passe_confirm|str_form_value}" /></span>
 				{$password_confirmation_error}
 			</div>
 		{/if}
@@ -342,14 +342,14 @@
 			<span class=""><input placeholder="{$STR_NAME}*" type="text" class="form-control" id="nom_famille" name="nom_famille" value="{$name|html_entity_decode_if_needed|str_form_value}" /></span>{$name_error}
 		</div>
 		<div class="enregistrement col-md-6">
-			<span class=""><input placeholder="{$STR_EMAIL}*" type="email" class="form-control" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" /></span>{$email_error}
+			<span class=""><input placeholder="{$STR_EMAIL}*" type="email" class="form-control" id="email" name="email" value="{$email|html_entity_decode_if_needed|str_form_value}" autocapitalize="none" /></span>{$email_error}
 		</div>
 		<div class="enregistrement col-md-6">
-			<span class=""><input placeholder="{$STR_PASSWORD}*" type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" /></span>{$password_error}
+			<span class=""><input placeholder="{$STR_PASSWORD}*" type="password" class="form-control" id="mot_passe" name="mot_passe" size="32" autocapitalize="none" /></span>{$password_error}
 		</div>
 		{if $is_annonce_module_active}
 		<div class="enregistrement col-md-12">
-			<span class=""><input placeholder="{$STR_PASSWORD_CONFIRMATION}*" type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" /></span>
+			<span class=""><input placeholder="{$STR_PASSWORD_CONFIRMATION}*" type="password" class="form-control" id="mot_passe_confirm" name="mot_passe_confirm" size="32" autocapitalize="none" /></span>
 			{$password_confirmation_error}
 		</div>
 		{/if}

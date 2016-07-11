@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,7 +12,12 @@
 // +----------------------------------------------------------------------+
 // Id: produits.tpl 47083 2015-10-01 10:18:12Z sdelaporte 
 #}{% if is_associated_product %}
-	<hr />
+	{% if associated_product_multiple_add_to_cart and prods_line_mode %} 
+		<form action="{{ wwwroot }}/achat/caddie_ajout.php?multiprodid=true" method="post" enctype="multipart/form-data" role="form"> 
+	{% endif %}
+	{% if associated_product_multiple_add_to_cart is empty and prods_line_mode %} 
+		<hr />
+	{% endif %}
 	<div class="associated_product list-group">
 {% endif %}
 {% if (titre_mode) and (titre) %}
@@ -79,7 +84,12 @@
 				{% endif %}
 						</div>
 						<div class="fc_add_to_cart col-md-2">
-				{% if  (prod.check_critere_stock) %}
+				{% if is_associated_product and associated_product_multiple_add_to_cart %}
+						<div>
+							<input min="{% if prod.quantity %}{{ prod.quantity }} {% endif %}" type="number" style="width: 100px" value="{% if prod.quantity %}{{ prod.quantity }}{% endif %}" name="qte[]" class="form-control" style="display:inline;">
+							<input type="hidden" name="produit_id[]" value="{% prod.id %}" />
+						</div>
+				{% elseif prod.check_critere_stock is defined %}
 							<!-- Ajout au panier -->
 							{{ prod.check_critere_stock }}
 				{% else %}
@@ -169,4 +179,11 @@
 {% endif %}
 {% if is_associated_product %}
 </div>
+{% endif %}
+{% if is_associated_product %}
+</div>
+	{% if associated_product_multiple_add_to_cart and prods_line_mode %} 
+	<input class="btn btn-primary" type="submit" value="{{ STR_ADD_CART }}" />
+	</form> 
+	{% endif %}
 {% endif %}

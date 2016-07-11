@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 49989 2016-05-23 14:52:08Z sdelaporte $
+// $Id: enregistrement.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
@@ -52,6 +52,9 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 	$mandatory_fields['type'] = 'STR_ERR_YOU_ARE';
 	$mandatory_fields['activity'] = 'STR_ERR_ACTIVITY';
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
+}
+if(!empty($frm['user_type']) && $frm['user_type'] == 'company') {
+	$mandatory_fields['societe'] = 'STR_ERR_SOCIETY';
 }
 if(check_if_module_active('annonces')) {
 	if(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
@@ -153,7 +156,7 @@ if (!empty($frm)) {
 			// Protection du formulaire contre les robots
 			die();
 		}
-		$user_id = insere_utilisateur($frm, false, !empty($GLOBALS['site_parameters']['user_register_send_password_by_email']), true);
+		insere_utilisateur($frm, false, !empty($GLOBALS['site_parameters']['user_register_send_password_by_email']), true);
 		$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
 
 		if(!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {

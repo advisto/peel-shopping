@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 49999 2016-05-23 18:39:45Z sdelaporte $
+// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -130,7 +130,7 @@ function search_hook_search_form_template_data(&$params) {
 		}
 		$results['cat_detail'] = vb($type_detail);
 		$results['cat_statut'] = vb($type_statut);
-		if (count($GLOBALS['lang_names'])>1) {
+		if (count($GLOBALS['lang_codes'])>1) {
 			$results['ad_lang_select'] = get_lang_ads_choose(false);
 		}
 		$results['city_zip'] = vb($params['frm']['city_zip']);
@@ -234,27 +234,29 @@ function get_advanced_search_script() {
  */
 function affiche_select_marque($return_mode = false) {
 	$output = '';
-	$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
-		FROM peel_marques
-		WHERE etat=1 AND " . get_filter_site_cond('marques') . "
-		ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
-	if (num_rows($query) > 0) {
-		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_select_marque.tpl');
-		$tpl->assign('STR_SEARCH_BRAND', $GLOBALS['STR_SEARCH_BRAND']);
-		$tpl_options = array();
-		while ($brand = fetch_assoc($query)) {
-			$tpl_id = null;
-			if (check_if_module_active('url_rewriting')) {
-				$tpl_id = rewriting_urlencode($brand['marque']);
+	if(empty($GLOBALS['site_parameters']['affiche_select_marque_disable'])) {
+		$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
+			FROM peel_marques
+			WHERE etat=1 AND " . get_filter_site_cond('marques') . "
+			ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
+		if (num_rows($query) > 0) {
+			$tpl = $GLOBALS['tplEngine']->createTemplate('modules/search_select_marque.tpl');
+			$tpl->assign('STR_SEARCH_BRAND', $GLOBALS['STR_SEARCH_BRAND']);
+			$tpl_options = array();
+			while ($brand = fetch_assoc($query)) {
+				$tpl_id = null;
+				if (check_if_module_active('url_rewriting')) {
+					$tpl_id = rewriting_urlencode($brand['marque']);
+				}
+				$tpl_options[] = array(
+					'id' => $tpl_id,
+					'value' => intval($brand['id']),
+					'name' => String::str_shorten($brand['marque'], 50)
+				);
 			}
-			$tpl_options[] = array(
-				'id' => $tpl_id,
-				'value' => intval($brand['id']),
-				'name' => String::str_shorten($brand['marque'], 50)
-			);
+			$tpl->assign('options', $tpl_options);
+			$output .= $tpl->fetch();
 		}
-		$tpl->assign('options', $tpl_options);
-		$output .= $tpl->fetch();
 	}
 	if ($return_mode) {
 		return $output;

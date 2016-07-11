@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 49991 2016-05-23 15:11:29Z sdelaporte $
+// $Id: fonctions_admin.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1273,7 +1273,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		}
 
 		if((!empty($id) && $commande['montant'] > 0) || empty($id)) {
-			$tpl->assign('payment_select', get_payment_select(vb($commande['payment_technical_code']), false, true));
+			$tpl->assign('payment_select', get_payment_select(vb($commande['payment_technical_code']), false, true, null, vb($commande['site_id'])));
 		}
 
 		$tpl->assign('payment_status_options', get_payment_status_options(vn($commande['id_statut_paiement'])));
@@ -1724,7 +1724,17 @@ function save_commande_in_database($frm)
 				'pays' => vb($frm['pays1']),
 				'newsletter' => 1,
 				'commercial' => 1);
-			$frm['id_utilisateur'] = insere_utilisateur($new_user_infos, false, false, false);
+			$new_user_result = insere_utilisateur($new_user_infos, false, false, false);
+			if(is_numeric($new_user_result)) {
+				// Nouvelle id créée
+				$frm['id_utilisateur'] = $new_user_result;
+			} elseif(is_array($new_user_result)) {
+				// Ancien utilisateur trouvé - pas cohérent car on a déjà cherché l'utilisateur ci-dessus, mais sécurité quand même de traiter ce cas
+				$frm['id_utilisateur'] = $new_user_result['id_utilisateur'];
+			} else {
+				// Echec de création de l'utilisateur
+				$frm['id_utilisateur'] = 0;
+			}
 		} else {
 			// commande sans utilisateur associé.
 			$frm['id_utilisateur'] = 0;
@@ -3249,6 +3259,7 @@ if (!function_exists('affiche_liste_produits')) {
 	function affiche_liste_produits($frm)
 	{		
 		$categorie_options = get_categories_output(null, 'categories', vb($_GET['cat_search']));
+		$supplier_options = get_supplier_output();
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_produits.tpl');
 		if (empty($categorie_options)) {
 			$tpl->assign('is_empty', true);
@@ -3259,6 +3270,7 @@ if (!function_exists('affiche_liste_produits')) {
 			$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 			$tpl->assign('action', get_current_url(false) . '?page=' . (!empty($frm['page']) ? $frm['page'] : 1) . '&mode=recherche');
 			$tpl->assign('categorie_options', $categorie_options);
+			$tpl->assign('supplier_options', $supplier_options);
 			$tpl->assign('cat_search_zero_issel', (vb($frm['cat_search']) == '0'));
 			$tpl->assign('home_search_one_issel', (vb($frm['home_search']) == 1));
 			$tpl->assign('home_search_zero_issel', (vb($frm['home_search']) === "0"));
@@ -3404,6 +3416,7 @@ if (!function_exists('affiche_liste_produits')) {
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
 		}
+		$tpl->assign('STR_ADMIN_SUPPLIER', $GLOBALS['STR_ADMIN_SUPPLIER']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST', $GLOBALS['STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST']);
 		$tpl->assign('STR_ADMIN_SEARCH_CRITERIA', $GLOBALS['STR_ADMIN_SEARCH_CRITERIA']);
@@ -3781,54 +3794,58 @@ function get_email_template_options($option_id_nature = 'id', $category_id = nul
  * @return
  */
 function get_site_id_select_options($selected_site_id = null, $selected_site_name = null, $display_first_option = null, $select_current_site_id_by_default = false) {
-	if(!empty($GLOBALS['site_parameters']['multisite_disable'])) {
-		// Désactivation du multisite : par défaut on prend site_id=1
-		return '<input name="site_id" type="hidden" value="1" />';
-	}
-	// Création du template SMARTY
 	$tpl = $GLOBALS['tplEngine']->createTemplate('select_options.tpl');
 	$tpl_options = array();
-	$all_sites_name_array = get_all_sites_name_array(true);
-	if(is_array($selected_site_id) && count($selected_site_id) == 1) {
-		$selected_site_id = current($selected_site_id);
-	}
-	if(empty($display_first_option)) {
-		$display_first_option = (empty($_SESSION['session_utilisateur']['site_id']) && count($all_sites_name_array)>1?'STR_ADMIN_ALL_SITES':false);
-	}
-	if ($selected_site_id === '' || $selected_site_id === null) {
-		// le site_id passé en paramètre est vide. Pour présélectioner la bonne option du select il faut utiliser soit le site séléctionné par l'admin, soit le site_id correspondant au site consulté.
-		if($select_current_site_id_by_default && empty($_SESSION['session_admin_multisite'])) {
-			// On ne souhaite pas avoir zéro sélectionné dans le select => On prend l'id du site par défaut (défini par le nom de domaine du site)
-			$selected_site_id = $GLOBALS['site_id'];
-		} elseif (isset($_SESSION['session_admin_multisite'])) {
-			// On prend l'id de site de l'admin, il peut être égal à 0
-			$selected_site_id = $_SESSION['session_admin_multisite'];
-		}
-	}
-	if(!is_array($selected_site_name)) {
-		$selected_site_name = explode(',', $selected_site_name);
-	}
-	if(!is_array($selected_site_id)) {
-		$selected_site_id = explode(',', $selected_site_id);
-	}
-	if (!empty($display_first_option) && (String::substr($display_first_option, 0, 4) == 'STR_') && !empty($GLOBALS[$display_first_option])) {
-		// Si l'admin peut administrer tous les sites, il faut mettre une option supplémentaire pour pouvoir accéder au contenu de tous les sites.
-		if ($display_first_option == 'STR_ADMIN_ALL_SITES') {
-			$value = 0;
-		} else {
-			$value = '';
-		}
-		// la première option est ajoutée au tableau $all_sites_name_array qui contient les sites configurés.
-		$all_sites_name_array = array($value=>$GLOBALS[$display_first_option]) + $all_sites_name_array;
-	}
-	foreach($all_sites_name_array as $site_id=>$site_name) {
-		// Récupération des infos qui seront utilisées par les options
-		$site_selected = (($selected_site_name != array(null) && in_array($site_name, $selected_site_name)) || ($selected_site_id != array(null) && in_array($site_id, $selected_site_id)));
+	if(!empty($GLOBALS['site_parameters']['multisite_disable'])) {
+		// Désactivation du multisite : par défaut on prend site_id=1
 		$tpl_options[] = array(
-			'value' => $site_id,
-			'name' => $site_name,
-			'issel' => $site_selected
+			'value' => 1,
+			'name' => $GLOBALS['site'],
+			'issel' => true
 		);
+	} else {
+		$all_sites_name_array = get_all_sites_name_array(true);
+		if(is_array($selected_site_id) && count($selected_site_id) == 1) {
+			$selected_site_id = current($selected_site_id);
+		}
+		if(empty($display_first_option)) {
+			$display_first_option = (empty($_SESSION['session_utilisateur']['site_id']) && count($all_sites_name_array)>1?'STR_ADMIN_ALL_SITES':false);
+		}
+		if ($selected_site_id === '' || $selected_site_id === null) {
+			// le site_id passé en paramètre est vide. Pour présélectioner la bonne option du select il faut utiliser soit le site séléctionné par l'admin, soit le site_id correspondant au site consulté.
+			if($select_current_site_id_by_default && empty($_SESSION['session_admin_multisite'])) {
+				// On ne souhaite pas avoir zéro sélectionné dans le select => On prend l'id du site par défaut (défini par le nom de domaine du site)
+				$selected_site_id = $GLOBALS['site_id'];
+			} elseif (isset($_SESSION['session_admin_multisite'])) {
+				// On prend l'id de site de l'admin, il peut être égal à 0
+				$selected_site_id = $_SESSION['session_admin_multisite'];
+			}
+		}
+		if(!is_array($selected_site_name)) {
+			$selected_site_name = explode(',', $selected_site_name);
+		}
+		if(!is_array($selected_site_id)) {
+			$selected_site_id = explode(',', $selected_site_id);
+		}
+		if (!empty($display_first_option) && (String::substr($display_first_option, 0, 4) == 'STR_') && !empty($GLOBALS[$display_first_option])) {
+			// Si l'admin peut administrer tous les sites, il faut mettre une option supplémentaire pour pouvoir accéder au contenu de tous les sites.
+			if ($display_first_option == 'STR_ADMIN_ALL_SITES') {
+				$value = 0;
+			} else {
+				$value = '';
+			}
+			// la première option est ajoutée au tableau $all_sites_name_array qui contient les sites configurés.
+			$all_sites_name_array = array($value=>$GLOBALS[$display_first_option]) + $all_sites_name_array;
+		}
+		foreach($all_sites_name_array as $site_id=>$site_name) {
+			// Récupération des infos qui seront utilisées par les options
+			$site_selected = (($selected_site_name != array(null) && in_array($site_name, $selected_site_name)) || ($selected_site_id != array(null) && in_array($site_id, $selected_site_id)));
+			$tpl_options[] = array(
+				'value' => $site_id,
+				'name' => $site_name,
+				'issel' => $site_selected
+			);
+		}
 	}
 	// La variable contient le tableau des données, un foreach dans select_options exploitera ces infos dans le fichier SMARTY
 	$tpl->assign('options', $tpl_options);
@@ -5274,4 +5291,23 @@ function preload_modules()
 			$GLOBALS['modules_on_disk_infos'][$this_module]['file_path'] = $file_path;
 		}
 	}
+}
+
+/**
+ *
+ * Liste les founisseurs
+ *
+ * @return
+*/
+function get_supplier_output()
+{
+	$output = array();
+	$query = query("SELECT id_utilisateur, societe, priv, prenom, nom_famille
+		FROM peel_utilisateurs
+		WHERE priv = 'supplier' AND " . get_filter_site_cond('utilisateurs') . "
+		ORDER BY societe ASC");
+	while($result = fetch_assoc($query)) {
+		$output[] = array("id_utilisateur" => $result['id_utilisateur'], 'societe' => $result['societe'], 'priv' => $result['priv'], 'prenom' => $result['prenom'], 'nom_famille' => $result['nom_famille']);
+	}
+	return $output;
 }

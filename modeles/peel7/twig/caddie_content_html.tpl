@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -21,6 +21,7 @@
 		{{ erreur_caddie }}
 		{% if (zone_error) %}{{ zone_error }}{% endif %}
 		{% if (shipping_type_error) %}{{ shipping_type_error }}{% endif %}
+		{% if minimum_error %}{{ minimum_error }}{% endif %}
 		<form class="entryform form-inline" role="form" id="caddieFormArticle" method="post" action="{{ action|escape('html') }}">
 			<input type="hidden" value="commande" name="func" id="form_mode" />
 			<div class="row">

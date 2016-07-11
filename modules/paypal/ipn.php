@@ -3,14 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: ipn.php 50572 2016-07-07 12:43:52Z sdelaporte $
+
+// Procédure pour envoyer un nouvel appel à IPN depuis le compte paypal :
+// - Se connecter au compte paypal
+// - Se rendre sur la page "préférence" (lien en haut à droite du header)> "Paramètres du compte".
+// - Menu "Mes ventes"
+// - Dans l'encart "Obtenir des paiements et gérer mes risques", cliquer sur "Mettre à jour" au niveau de la ligne "Notifications instantanées de paiement"
+// - Sur la page qui s'affiche, cliquer sur "Choisir mes paramètres IPN"
+// - Choisir "Recevoir les messages IPN (activé)", et mettre l'url du fichier IPN dans le champ "URL de notification".
+// - Cliquer sur "enregistrer mes paramètres"
+// - Sur la page qui s'affiche, cliquer sur le lien "Historique des notifications instantanées de paiement" dans le texte.
+// La liste des appels à IPN s'affiche, il faut cocher une checkbox et cliquer sur le bouton "Renvoyer les éléments sélectionnés". Attention, le renvoi de l'appel n'est pas immédiat.
+
+
 define('DISABLE_INPUT_ENCODING_CONVERT', true);
 include("../../configuration.inc.php");
 include($fonctionspaypal);

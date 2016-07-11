@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rss_func.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: rss_func.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 #}<div class="rss_bloc col-sm-{{ block_columns_width_sm }} col-md-{{ block_columns_width_md }} footer_col">
 	{% if (fb_src) and (fb_href) %}
 	<a style="margin-right:5px;" href="{{ fb_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);"><img src="{{ fb_src|escape('html') }}" alt="F" title="Facebook" width="48" height="48" /></a>

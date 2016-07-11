@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: admin_fr.php 50582 2016-07-08 10:15:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -352,6 +352,7 @@ $GLOBALS["STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER"] = "Pas d'email connu pour la 
 $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "Impossible de trouver l'élément demandé";
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "Aucun utilisateur n'a été sélectionné.";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "Impossible de trouver la page !";
+$GLOBALS["STR_ADMIN_EXPORT"] = "Exporter";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "Mode d'export";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Produits associés";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Marque";
@@ -1973,6 +1974,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE"] = "Service inco
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Signature";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "A répondre";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "Email webmaster / support";
+$GLOBALS['STR_ADMIN_SUPPLIER_LIST'] = "Liste des fournisseur";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Ajouter un mode de livraison";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Vous pouvez définir sur cette page les noms des modes de livraison. Ces modes de livraison seront ensuite à lier aux <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">tarifs de livraison</a>. L'ordre d'affichage est administrable en déplaçant la ligne correspondant à un mode de livraison à la position souhaitée.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Ajouter ou modifier un mode de livraison";

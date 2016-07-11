@@ -3,16 +3,22 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 49918 2016-05-16 21:48:13Z sdelaporte $
-*}{if $is_associated_product}
-	<hr />
+// $Id: produits.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+*}
+{if $is_associated_product}
+	{if $associated_product_multiple_add_to_cart && $prods_line_mode} 
+		<form action="{$wwwroot}/achat/caddie_ajout.php?multiprodid=true" method="post" enctype="multipart/form-data" role="form"> 
+	{/if}
+	{if !$associated_product_multiple_add_to_cart && $prods_line_mode} 
+		<hr />
+	{/if}
 	<div class="associated_product list-group">
 {/if}
 {if isset($titre_mode) && !empty($titre)}
@@ -79,9 +85,14 @@
 				{/if}
 						</div>
 					<div class="fc_add_to_cart col-md-2">
-				{if isset($prod.check_critere_stock)}
-							<!-- Ajout au panier -->
-							{$prod.check_critere_stock}
+				{if $is_associated_product && $associated_product_multiple_add_to_cart}
+						<div>
+							<input min="{if !empty($prod.quantity)}{$prod.quantity}{/if}" type="number" style="width: 100px" value="{if !empty($prod.quantity)}{$prod.quantity}{/if}" name="qte[]" class="form-control" style="display:inline;">
+							<input type="hidden" name="produit_id[]" value="{$prod.id}" />
+						</div>				
+				{elseif isset($prod.check_critere_stock)}
+						<!-- Ajout au panier -->
+						{$prod.check_critere_stock}
 				{else}
 						<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
 				{/if}
@@ -169,4 +180,8 @@
 {/if}
 {if $is_associated_product}
 </div>
+	{if $associated_product_multiple_add_to_cart && $prods_line_mode} 
+	<input class="btn btn-primary" type="submit" value="{$STR_ADD_CART}" />
+	</form> 
+	{/if}
 {/if}

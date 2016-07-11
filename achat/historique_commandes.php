@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 49984 2016-05-23 13:45:30Z sdelaporte $
+// $Id: historique_commandes.php 50572 2016-07-07 12:43:52Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
 
@@ -53,7 +53,7 @@ switch (vb($_REQUEST['mode'])) {
 	case "product_ordered_history" :
 		// Récupération des produits des commandes réglées par l'utilisateur
 		$tpl = $GLOBALS['tplEngine']->createTemplate('products_ordered_history.tpl');
-		$sql = "SELECT ca.id AS ca_id, ca.nom_produit, ca.reference, ca.produit_id , ca.quantite, ca.nb_view, c.o_timestamp, c.numero, c.id, c.email, ca.attributs_list, c.nom_bill, p.technical_code
+		$sql = "SELECT ca.id AS ca_id, ca.nom_produit, ca.reference, ca.produit_id , ca.quantite, p.nb_view, c.o_timestamp, c.numero, c.id, c.email, ca.attributs_list, c.nom_bill, p.technical_code
 			FROM peel_commandes_articles ca
 			INNER JOIN peel_commandes c ON ca.commande_id = c.id AND " . get_filter_site_cond('commandes', 'c') . "
 			LEFT JOIN peel_produits p ON p.id = ca.produit_id AND " . get_filter_site_cond('produits', 'p') . "
@@ -71,7 +71,7 @@ switch (vb($_REQUEST['mode'])) {
 			$order_list_type = 'order';
 			$sql .= " AND c.id_utilisateur='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";
 			$tpl->assign('STR_PRODUCTS_PURCHASED_LIST', $GLOBALS['STR_PRODUCTS_PURCHASED_LIST']);
-			$HeaderTitlesArray = array('nom_produit' => $GLOBALS['STR_PRODUCT_NAME'], 'quantite' => $GLOBALS['STR_QUANTITY'], 'o_timestamp' => $GLOBALS['STR_CREATION_DATE'], 'numero' => $GLOBALS['STR_ORDER_NUMBER'],'' );
+			$HeaderTitlesArray = array('nom_produit' => $GLOBALS['STR_PRODUCT_NAME'], 'quantite' => $GLOBALS['STR_QUANTITY'], 'o_timestamp' => $GLOBALS['STR_DATE'], 'numero' => $GLOBALS['STR_ORDER_NUMBER'],'' );
 		}
 		$Links = new Multipage($sql, 'affiche_product_ordered_history');
 		$Links->OrderDefault = "o_timestamp";

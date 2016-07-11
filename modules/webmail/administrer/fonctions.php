@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -678,7 +678,7 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 		</tr>
 		<tr>
 			<th>' . $GLOBALS['STR_EMAIL'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
-			<td><input class="form-control" type="email" name="email" value="' . String::str_form_value(vb($recherche['email'])) . '" /></td>
+			<td><input class="form-control" type="email" name="email" value="' . String::str_form_value(vb($recherche['email'])) . '" autocapitalize="none" /></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
@@ -711,7 +711,7 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 					'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
 				</td>
 				<td class="center" style="width:35%">
-					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1"> ' . sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"], vb($message['email'])) . '</a></p>':'') . '
+					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="'. $GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1"> ' . sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"], vb($message['email'])) . '</a></p>':'') . '
 				</td>
 				<td class="center" style="width:15%">
 				' . vb($message['ip']) . '

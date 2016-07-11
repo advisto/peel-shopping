@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 49979 2016-05-23 12:29:53Z sdelaporte $
-/*! \mainpage PEEL Shopping 8.0.3 - Open eCommerce
+// $Id: index.php 50572 2016-07-07 12:43:52Z sdelaporte $
+/*! \mainpage PEEL Shopping 8.0.4 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -82,7 +82,10 @@ $tpl->assign('image_accueil_2', vb($GLOBALS['site_parameters']['general_home_ima
 
 $tpl->assign('contenu_html', affiche_contenu_html("home", true));
 $tpl->assign('center_middle_home', get_modules('center_middle_home', true));
-$tpl->assign('center_middle_top', get_modules('center_middle_top', true));
+$tpl->assign('home_middle_top', affiche_contenu_html('home_middle_top', true)); 
+
+$modules_left = get_modules('home_left', true, null, null);
+$tpl->assign('MODULES_LEFT', $modules_left);
 
 $hook_result = call_module_hook('index_form_template_data', array(), 'array');
 foreach($hook_result as $this_key => $this_value) {

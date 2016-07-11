@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: display_user_forms.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -751,7 +751,7 @@ if (!function_exists('get_address_form')) {
 		$output .= '
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="name_adresse">' .$GLOBALS['STR_NAME']  . ' ' . String::strtoupper($GLOBALS['STR_ADDRESS']) . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="name_adresse" name="name_adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="name_adresse" name="name_adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label>' . $GLOBALS['STR_TYPE']  .$GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
@@ -771,15 +771,15 @@ if (!function_exists('get_address_form')) {
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="nom_famille">' . $GLOBALS['STR_NAME'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom_famille']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom_famille']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="prenom">' . $GLOBALS['STR_FIRST_NAME'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['prenom']))).'" required /><span class="notice"></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['prenom']))).'" required="required" /><span class="notice"></span>
 				</div>
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="prenom">' . $GLOBALS['STR_EMAIL'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="email" name="email" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['email']))).'" required /><span class="notice"></span>
+					<span class="enregistrementgauche"><label for="email">' . $GLOBALS['STR_EMAIL'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
+					<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['email']))).'" required="required" autocapitalize="none" /><span class="notice"></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="societe">' . $GLOBALS['STR_SOCIETE'] . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
@@ -787,15 +787,15 @@ if (!function_exists('get_address_form')) {
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="adresse">' . $GLOBALS['STR_ADDRESS'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="adresse" name="adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['adresse']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="adresse" name="adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['adresse']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="code_postal">' . $GLOBALS['STR_ZIP'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['code_postal']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['code_postal']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="ville">' . $GLOBALS['STR_TOWN'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['ville']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['ville']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="pays">' . $GLOBALS['STR_COUNTRY'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
@@ -807,7 +807,7 @@ if (!function_exists('get_address_form')) {
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_TELEPHONE'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['portable']))).'" required /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['portable']))).'" required="required" /></span>
 				</div>
 				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg" type="submit" value="' . String::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
 			</fieldset>

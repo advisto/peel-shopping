@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 49989 2016-05-23 14:52:08Z sdelaporte $
+// $Id: utilisateurs.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -195,12 +195,14 @@ switch (vb($_REQUEST['mode'])) {
 			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
 			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
 			$frm['mot_passe'] = (!empty($frm['mot_passe']))?$frm['mot_passe']:MDP();
-			if (insere_utilisateur($frm, false, false, false)) {
+			$new_user_result = insere_utilisateur($frm, false, false, false);
+			if(is_numeric($new_user_result)) {
+				// Nouvel utilisateur créé
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_CREATED_OK'], vb($frm['email']))))->fetch();
-			}
-			// Envoi de l'e-mail de création de l'utilisateur avec le mot de passe
-			if (isset($frm['notify'])) {
-				send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']), vb($frm['priv']));
+				// Envoi de l'e-mail de création de l'utilisateur avec le mot de passe
+				if (isset($frm['notify'])) {
+					send_mail_for_account_creation(vb($frm['email']), vb($frm['mot_passe']), vb($frm['priv']));
+				}
 			}
 			$output .= afficher_liste_utilisateurs($priv, $cle);
 		} else {
@@ -922,18 +924,17 @@ function afficher_formulaire_utilisateur(&$frm)
 	}
 	if (!empty($frm['user_ip'])) {
 		// Insertion du module de géoip permettant de définir en fonction de la dernière ip le lieu où s'est connecté la personne dernièrement
-		if (!isset($_SESSION['session_site_country']) && check_if_module_active('geoip')) {
+		if (check_if_module_active('geoip')) {
 			if (!class_exists('geoIP')) {
 				include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
 			}
 			$geoIP = new geoIP();
-			$_SESSION['session_site_country'] = $geoIP->geoIPCountryIDByAddr($frm['user_ip']);
+			$this_site_country = $geoIP->geoIPCountryIDByAddr($frm['user_ip']);
 			$geoIP->geoIPClose();
-		}
-		if (!empty($_SESSION['session_site_country'])) {
+		
 			$query = query("SELECT pays_" . $_SESSION['session_langue'] . "
 				FROM peel_pays
-				WHERE id='" . intval($_SESSION['session_site_country']) . "' AND " .  get_filter_site_cond('pays') . "");
+				WHERE id='" . intval($this_site_country) . "' AND " .  get_filter_site_cond('pays') . "");
 			$result = fetch_assoc($query);
 			$country_name = vb($result['pays_' . $_SESSION['session_langue']]);
 		}

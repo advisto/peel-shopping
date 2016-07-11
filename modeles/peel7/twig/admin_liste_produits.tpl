@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_produits.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_liste_produits.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 #}{% if is_empty %}
 	<p><a href="{{ href|escape('html') }}">{{ STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST }}</a></p>
 {% else %}
@@ -116,7 +116,11 @@
 			<a title="{{ STR_ADMIN_PRODUITS_DUPLICATE|str_form_value }}" href="{{ li.dup_href|escape('html') }}"><img src="{{ li.dup_src|escape('html') }}" alt="" /></a>
 			{% endif %}
 		</td>
-		<td class="center">{{ li.reference }}</td>
+		<td class="center">
+		<input type="text" onchange="update_reference(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')" style="width:100px" value="{{ li.reference }}" id="reference{{ li.id }}" name="reference_product" class="form-control">
+		
+		
+		</td>
 		<td class="center">
 			{% if not (li.cats) %}
 				<span style="color:red">-</span><br />
@@ -149,11 +153,12 @@
 		{% endif %}
 		<td class="center">{{ li.date }}</td>
 		<td class="center">
-			{% if (li.utilisateur_href) %}
-				<a href="{{ li.utilisateur_href|escape('html') }}">{{ li.societe|html_entity_decode_if_needed }}</a><br />
-			{% else %}
-				<span style="color:red">-</span>
-			{% endif %}
+			<select style="width:120px" class="form-control" size="1" name="societe" id="societe{{ li.id }}" onchange="update_supplier(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')">
+				<option value="null">{{ STR_ADMIN_SUPPLIER }}</option>
+				{% for so in supplier_options %} 
+					 <option value="{{ so.id_utilisateur }}" {% if li.societe and li.societe == so.societe %} selected="selected"{% endif %}>{{ so.prenom }} {{ so.nom_famille }}</option>
+				{%for%}
+			</select>
 		</td>
 		<td class="center">
 			{% if (li.product_src) %}

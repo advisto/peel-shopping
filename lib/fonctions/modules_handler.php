@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: modules_handler.php 50572 2016-07-07 12:43:52Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -42,10 +42,9 @@ function load_modules($technical_code = null) {
 					if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 						foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
 							if(String::strpos($this_file, '.php') !== false && !in_array($this_file, vb($GLOBALS['modules_loaded_functions'], array()))) {
-								if(String::strpos($this_file, 'administrer/') === false || (defined('IN_PEEL_ADMIN') || defined('IN_CRON'))) {
+								if(String::strpos($this_file, 'administrer/') === false || String::strpos($this_file, 'admin/') === false || (defined('IN_PEEL_ADMIN') || defined('IN_CRON'))) {
 									include($GLOBALS['dirroot'] . $this_file);
 								}
-								$GLOBALS['modules_loaded_functions'][] = $this_file;
 								$GLOBALS['modules_loaded_functions'][] = $this_file;
 							}
 						}
@@ -93,7 +92,7 @@ function load_modules($technical_code = null) {
  */
 function check_if_module_active($module_name, $specific_file_name = null, $skip_activation_test = false) {
 	static $results_array;
-	$cache_id = serialize(array($module_name,$specific_file_name,$skip_activation_test));
+	$cache_id = md5(serialize(array($module_name,$specific_file_name,$skip_activation_test)));
 	if(!isset($results_array[$cache_id]) || defined('IN_INSTALLATION') || defined('IN_PEEL_CONFIGURE')) {
 		$automatically_activate_if_no_configuration_available = array('thumbs');
 		if (empty($module_name) || (!isset($GLOBALS['site_parameters']['modules_configuration_variable_array']) && !in_array($module_name, $automatically_activate_if_no_configuration_available))) {
@@ -156,7 +155,7 @@ function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_d
 		unset($result);
 		if(function_exists($function_name)) {
 			$result = $function_name($params);
-		} elseif(method_exists($class_name, $method_name)) {
+		} elseif(class_exists($class_name) && method_exists($class_name, $method_name)) {
 			// La syntaxe $class_name::$method_name($params) n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
 			$result = call_user_func_array(array($class_name, $method_name), array($params));
 		}

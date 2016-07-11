@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 50032 2016-05-24 12:30:40Z sdelaporte $
+// $Id: en.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -696,7 +696,7 @@ $GLOBALS["STR_REMISE"] = "Cust. rebate";
 $GLOBALS["STR_REQUEST_OK"] = "Your request was indeed taken into account.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "required for a claim";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = " is required to validate your order.";
-$GLOBALS["STR_RESULTS"] = "Results";
+$GLOBALS["STR_RESULTS"] = "Result(s)";
 $GLOBALS["STR_RESULT_SEARCH"] = "Search result";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Retailer subscription";
 $GLOBALS["STR_RETAILER"] = "Open a wholesale account";

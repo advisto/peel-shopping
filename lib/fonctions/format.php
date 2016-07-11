@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 50006 2016-05-23 22:16:55Z gboussin $
+// $Id: format.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -618,7 +618,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
-	if(String::strpos($text, '[') !== false && String::strpos($text, ']') !== false) {
+	if(String::strpos(str_replace('[]','', $text), '[') !== false && String::strpos(str_replace('[]','', $text), ']') !== false) {
 		$template_tags = array();
 		if(!$replace_only_custom_tags) {
 			// On rajoute les tags génériques au site
@@ -676,26 +676,26 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							} else {
 								$function_name = 'get_tag_function_' . $this_arg;
 							}
-							// liste des arguments de la fonction
-							$reflection_object = new ReflectionFunction($function_name);
-							$function_args = array();
-							foreach ($reflection_object->getParameters() as $this_arg) {
-								$function_args[] = $this_arg->name;
-								$function_args_is_array[] = ($this_arg->isArray() || ($this_arg->isOptional() && is_array(@$this_arg->getDefaultValue())));
-								if(!$this_arg->isOptional() && count($this_params_array)<count($function_args)) {
-									// Ajout d'un paramètre obligatoire, qui n'est pas défini dans l'appel au tag
-									$this_params_array[] = null;
-								}
-							}
-							// On veut pouvoir donner les paramètres donnés par l'utilisateur en tant que tableau d'informations dans le paramètre 1, ou répartir les paramètres dans la liste des arguments de la fonction
-							if(!empty($function_args_is_array[0]) && (!isset($this_params_array[$function_args[0]]) || !is_array($this_params_array[$function_args[0]]))) {
-								// On regroupe les paramètres dans un tableau donné au premier argument
-								$this_params_array = array($this_params_array);
-							} else {
-								// On va donner les N paramètres aux N arguments
-							}
-							// La fonction doit avoir un seul paramètre $params qui va contenir arg_array_key1=>arg_array_value1,arg_array_key2=>arg_array_value2,...
 							if(function_exists($function_name)) {
+								// liste des arguments de la fonction
+								$reflection_object = new ReflectionFunction($function_name);
+								$function_args = array();
+								foreach ($reflection_object->getParameters() as $this_arg) {
+									$function_args[] = $this_arg->name;
+									$function_args_is_array[] = ($this_arg->isArray() || ($this_arg->isOptional() && is_array(@$this_arg->getDefaultValue())));
+									if(!$this_arg->isOptional() && count($this_params_array)<count($function_args)) {
+										// Ajout d'un paramètre obligatoire, qui n'est pas défini dans l'appel au tag
+										$this_params_array[] = null;
+									}
+								}
+								// On veut pouvoir donner les paramètres donnés par l'utilisateur en tant que tableau d'informations dans le paramètre 1, ou répartir les paramètres dans la liste des arguments de la fonction
+								if(!empty($function_args_is_array[0]) && (!isset($this_params_array[$function_args[0]]) || !is_array($this_params_array[$function_args[0]]))) {
+									// On regroupe les paramètres dans un tableau donné au premier argument
+									$this_params_array = array($this_params_array);
+								} else {
+									// On va donner les N paramètres aux N arguments
+								}
+								// La fonction doit avoir un seul paramètre $params qui va contenir arg_array_key1=>arg_array_value1,arg_array_key2=>arg_array_value2,...
 								// NB : Pas possible d'utiliser la syntaxe $function_name($this_params_array) si on veut donner N arguments
 								$template_tags[$this_tag] = call_user_func_array($function_name, $this_params_array);
 							} else {
@@ -715,7 +715,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							$template_tags[$this_tag] = get_rss_feed_content($this_arg);
 						} elseif($this_function_tag == 'HTML') {
 							// Pour chaque tag HTML, on remplace par le contenu de la zone HTML correspondante
-							if (!empty($_SESSION['session_utilisateur']['pseudo'])) {
+							if (empty($custom_template_tags['PSEUDO']) && !empty($_SESSION['session_utilisateur']['pseudo'])) {
 								$custom_template_tags['PSEUDO'] = $_SESSION['session_utilisateur']['pseudo'];
 							}
 							$template_tags[$this_tag] = affiche_contenu_html($this_arg, true, $custom_template_tags);
@@ -1108,22 +1108,22 @@ function get_array_from_string($string)
  * @param integer $max_words
  * @return
  */
-function get_keywords_from_text($string_or_array, $min_length = 3, $max_length = 20, $allow_numeric = false, $get_long_keywords_first = true, $max_words = 7) {
+function get_keywords_from_text($string_or_array, $min_length = 3, $max_length = 20, $allow_numeric = false, $get_long_keywords_first = false, $max_words = 7) {
 	$keywords_array = array();
 	if(is_array($string_or_array)) {
-		$string = implode(' ', array_unique($string_or_array));
+		$string = implode(' ', $string_or_array);
 	} else {
 		$string = $string_or_array;
 	}
 	$filter_stop_words_array = array_unique(explode(' ', str_replace(array("\t", "\r", "\n"), ' ', vb($GLOBALS['site_parameters']['filter_stop_words']))));
 	// On passe le texte en minuscules
-	$string = String::strtolower(' '.String::convert_accents($string));
+	$string = String::strip_tags(String::strtolower(' '.String::convert_accents(String::html_entity_decode($string))));
 	// On retire les caractères de ponctuation divers
-	$string = str_replace(array(",", ".", "?", "!", ':', ';', "-", "+", '*', "d'", '/', '\\', '(', ')', '[', ']', '{', '}',  "'", '"', '<', '>', '«', '»', '´', '  '), " ", $string);
+	$string = str_replace(array(",", ".", "?", "!", ':', ';', "-", "+", '*', "d'", '/', '\\', '(', ')', '[', ']', '{', '}',  "'", '"', '<', '>', '«', '»', '´', '  ', "\r", "\n"), " ", $string);
 	// On récupère dans le texte les mots clés candidats
 	foreach(explode(' ', $string) as $this_word) {
 		if(String::strlen($this_word)>=$min_length && ($allow_numeric || !is_numeric($this_word))){
-			$keywords_array[$this_word] = $this_word;
+			$keywords_array[] = $this_word;
 		}
 	}
 	// On retire à la fin les stop words (moins il y a d'éléments à vérifier, plus c'est rapide)
@@ -1131,16 +1131,18 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
 	if($get_long_keywords_first) {
 		// On garde les mots les plus longs en priorité
 		$keywords_lengths = array();
-		foreach($keywords_array as $this_word) {
+		foreach(array_unique($keywords_array) as $this_word) {
 			$keywords_lengths[$this_word] = String::strlen($this_word);
 		}
 		arsort($keywords_lengths);
 		$keywords_array = array_keys($keywords_lengths);
+	} else {
+		$temp = array_count_values($keywords_array);
+		arsort($temp);
+		$keywords_array = array_keys($temp);
 	}
 	// On ne garde que la longueur de tableau demandée
-	while($max_words !== null && count($keywords_array)>$max_words) {
-		array_pop($keywords_array);
-	}
+	$keywords_array = array_slice($keywords_array, 0, $max_words, true);
 	return $keywords_array;
 }
 

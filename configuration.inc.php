@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: configuration.inc.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '8.0.3');
+define('PEEL_VERSION', '8.0.4');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -206,7 +206,7 @@ if (!IN_INSTALLATION) {
 	// On ne définit que le dossier modeles/ car dans l'installation on ne va pas chercher la configuration en BDD
 	load_site_parameters();
 }
-if (empty($GLOBALS['site_parameters']['peel_database_version']) || (!empty($GLOBALS['site_parameters']['peel_database_version']) && $GLOBALS['site_parameters']['peel_database_version'] != PEEL_VERSION)) {
+if ((empty($GLOBALS['site_parameters']['peel_database_version']) && empty($GLOBALS['installation_folder_active'])) || (!empty($GLOBALS['site_parameters']['peel_database_version']) && $GLOBALS['site_parameters']['peel_database_version'] != PEEL_VERSION)) {
 	// Contexte de migration
 	$GLOBALS['database_wrong_version'] = true;
 	if(empty($GLOBALS['site_parameters']['peel_database_version'])) {
@@ -226,7 +226,7 @@ if (empty($GLOBALS['site_parameters']['peel_database_version']) || (!empty($GLOB
 if (!isset($GLOBALS['site_parameters']['display_errors_for_ips']) && empty($GLOBALS['database_wrong_version'])) {
 	$GLOBALS['display_errors'] = 1;
 } elseif (empty($GLOBALS['database_wrong_version']) && !empty($GLOBALS['site_parameters']['display_errors_for_ips'])) {
-	// On ne veux pas afficher  les erreurs dans le contexte d'une migration
+	// On ne veut pas afficher  les erreurs dans le contexte d'une migration
 	foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['site_parameters']['display_errors_for_ips'])) as $this_ip_part) {
 		if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
 			// IP utilisée détectée comme commençant par une IP listée dans display_errors_for_ips
@@ -283,9 +283,9 @@ $GLOBALS['caddie_cookie_name'] = vb($GLOBALS['site_parameters']['caddie_cookie_n
 
 $GLOBALS['google_pub_count'] = 0;
 
-if ((!empty($_GET['update']) && $_GET['update'] == 1 && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) || ((!empty($_GET['devise']) || !empty($_GET['nombre'])) && is_user_bot())) {
+if ((((!empty($_GET['update']) && $_GET['update'] == 1) || (!empty($_GET['update_thumbs']) && $_GET['update_thumbs'] == 1)) && (!est_identifie() || !a_priv("admin*", true) || is_user_bot())) || ((!empty($_GET['devise']) || !empty($_GET['nombre'])) && is_user_bot())) {
 	// Page de MAJ du cache : les moteurs ne doivent pas pouvoir activer ou référencer ces pages => redirection 301
-	redirect_and_die(get_current_url(true, false, array('update', 'devise', 'nombre', 'multipage')), true);
+	redirect_and_die(get_current_url(true, false, array('update', 'update_thumbs', 'devise', 'nombre', 'multipage')), true);
 }
 
 if (IN_INSTALLATION >= 4 && empty($_SESSION['session_install_finished'])) {
@@ -534,31 +534,6 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	load_modules();
 }
 
-if (!IN_INSTALLATION) {
-	// Initialisation de l'objet caddie si nécessaire
-	if (!isset($_SESSION['session_caddie']) || empty($_SESSION['session_caddie'])) {
-		$_SESSION['session_caddie'] = new Caddie(get_current_user_promotion_percentage());
-	} elseif (!empty($_SESSION['session_caddie']->commande_id)) {
-		// Une commande est en cours : on vérifie son statut de paiement et si elle est payée, alors on réinitialise le caddie
-		$query_com = query("SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
-			FROM peel_commandes c
-			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
-			WHERE c.id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND c.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c') . "");
-		$result_com = fetch_object($query_com);
-		if ($result_com && in_array($result_com->statut_paiement, array('being_checked', 'completed'))) {
-			$_SESSION['session_caddie']->init();
-		}
-	}
-	// Initialisation de la session session_ariane_panier
-	if (!isset($_SESSION['session_ariane_panier']) || empty($_SESSION['session_ariane_panier'])) {
-		$_SESSION['session_ariane_panier'] = array('in_caddie' => false, 'in_step1' => false, 'in_step2' => false, 'in_step3' => false);
-	}
-	// Suppression de la session session_redirect_after_login si un utilisateur sort de la page membre.php après une redirection sans s'être connecté
-	if ((!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'membre') !== false) && !empty($_SESSION['session_redirect_after_login']) && !est_identifie() && !defined('LOAD_NO_OPTIONAL_MODULE') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD')) {
-		unset($_SESSION['session_redirect_after_login']);
-	}
-}
-
 if (!defined('SKIP_SET_LANG')) {
 	// On charge les fichiers de langue des modules
 	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), false, true, false);
@@ -589,6 +564,31 @@ if (!empty($_POST['password_first_hash']) && !empty($_POST['password_length']) &
 		redirect_and_die(get_current_url(true));
 	} else {
 		redirect_and_die(get_url('membre'));
+	}
+}
+
+if (!IN_INSTALLATION) {
+	// Initialisation de l'objet caddie si nécessaire
+	if (!isset($_SESSION['session_caddie']) || empty($_SESSION['session_caddie'])) {
+		$_SESSION['session_caddie'] = new Caddie(get_current_user_promotion_percentage());
+	} elseif (!empty($_SESSION['session_caddie']->commande_id)) {
+		// Une commande est en cours : on vérifie son statut de paiement et si elle est payée, alors on réinitialise le caddie
+		$query_com = query("SELECT c.*, sp.nom_" . $_SESSION['session_langue'] . " AS statut_paiement
+			FROM peel_commandes c
+			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
+			WHERE c.id ='" . intval($_SESSION['session_caddie']->commande_id) . "' AND c.id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('commandes', 'c') . "");
+		$result_com = fetch_object($query_com);
+		if ($result_com && in_array($result_com->statut_paiement, array('being_checked', 'completed'))) {
+			$_SESSION['session_caddie']->init();
+		}
+	}
+	// Initialisation de la session session_ariane_panier
+	if (!isset($_SESSION['session_ariane_panier']) || empty($_SESSION['session_ariane_panier'])) {
+		$_SESSION['session_ariane_panier'] = array('in_caddie' => false, 'in_step1' => false, 'in_step2' => false, 'in_step3' => false);
+	}
+	// Suppression de la session session_redirect_after_login si un utilisateur sort de la page membre.php après une redirection sans s'être connecté
+	if ((!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'membre') !== false) && !empty($_SESSION['session_redirect_after_login']) && !est_identifie() && !defined('LOAD_NO_OPTIONAL_MODULE') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD')) {
+		unset($_SESSION['session_redirect_after_login']);
 	}
 }
 

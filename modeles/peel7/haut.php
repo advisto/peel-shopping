@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: haut.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -68,17 +68,19 @@ if(empty($_COOKIE['page_warning_close']) || $_COOKIE['page_warning_close']!='clo
 } else {
 	$tpl->assign('CONTENT_HEADER', null);
 }
+$tpl->assign('CONTENT_HEADER_LOGIN', affiche_contenu_html('header_login', true));
 $tpl->assign('CONTENT_SCROLLING', affiche_contenu_html('scrolling', true));
 
 if(empty($GLOBALS['site_parameters']['skip_carrousel_categorie']) && check_if_module_active('carrousel')) {
 	$tpl->assign('CARROUSEL_CATEGORIE', Carrousel::display('categorie', true));
 }
+$tpl->assign('MODULES_ABOVE_MIDDLE', get_modules('above_middle', true, null, vn($_GET['catid'])));
 if ($GLOBALS['page_columns_count'] > 1) {
 	$modules_left = '';
 	if((defined('IN_CATALOGUE_ANNONCE') || defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE_DETAILS')) && check_if_module_active('annonces')) {
 		$modules_left .= get_modules('left_annonce', true, null, vn($_GET['catid'])); 
 	}
-	$modules_left .= get_modules('above_middle', true, null, vn($_GET['catid']));
+	$modules_left .= get_modules('left', true, null, vn($_GET['catid']));
 	$tpl->assign('MODULES_LEFT', $modules_left);
 }
 if (check_if_module_active('vitrine') && !empty($GLOBALS['vitrine_and_user_infos'])) {
@@ -149,6 +151,7 @@ if ($GLOBALS['page_columns_count'] == 3) {
 	}
 	$GLOBALS['modules_right'] .= get_modules('right', true, null, vn($_GET['catid']));
 }
+$tpl->assign('MODULES_RIGHT', vb($GLOBALS['modules_right']));
 
 $hook_result = call_module_hook('header_template_data', array(), 'array');
 foreach($hook_result as $this_key => $this_value) {

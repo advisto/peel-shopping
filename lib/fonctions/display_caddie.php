@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 50019 2016-05-24 09:05:36Z sdelaporte $
+// $Id: display_caddie.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -189,7 +189,8 @@ if (!function_exists('get_caddie_content_html')) {
 					}
 				}
 			}
-			
+
+			$tpl->assign('minimum_error', $form_error_object->text('minimum_error'));
 			$tpl->assign('is_cart_preservation_module_active', check_if_module_active('cart_preservation'));
 			$tpl->assign('preservation_href', $GLOBALS['wwwroot'] . '/modules/cart_preservation/cart_preservation.php?mode=save');
 			if (!empty($GLOBALS['site_parameters']['display_recommanded_product_on_cart_page'])) {

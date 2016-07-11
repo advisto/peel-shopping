@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: emails.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -136,7 +136,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	}
 	if ($format != "text") {
 		// On traite le modèle d'email avant de remplacer les tags car le modèle est peut-être en texte brut contrairement aux tags
-		// ATTENTION ne pas utiliser String::strip_tags car sinon les rempalcements d'espaces divers altèreraient la validité du test ci-dessous
+		// ATTENTION ne pas utiliser String::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessous
 		if (strip_tags($mail_content) != $mail_content) {
 			// On passe le contenu de l'email en HTML si ce n'est pas déjà le cas
 			// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne
@@ -312,12 +312,20 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 				$custom_template_tags_warn['SOCIETE'] = vb($template_tags['SOCIETE'], vb($sender_infos['societe']));
 				$custom_template_tags_warn['ADRESSE'] = vb($template_tags['ADRESSE'], vb($sender_infos['adresse']));
 				$custom_template_tags_warn['TELEPHONE'] = vb($template_tags['TELEPHONE'], vb($sender_infos['telephone']));
-				$custom_template_tags_warn['EMAIL'] = vb($template_tags['EMAIL'], vb($from, vb($sender_infos['email'])));
+				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
+					$custom_template_tags_warn['EMAIL'] = $GLOBALS['support'];
+				} else {
+					$custom_template_tags_warn['EMAIL'] = vb($template_tags['EMAIL'], vb($from, vb($sender_infos['email'])));
+				}
 				$custom_template_tags_warn['DISPO'] = vb($template_tags['DISPO'], vb($sender_infos['dispo']));
 				$custom_template_tags_warn['SUJET'] = $mail_subject;
 				$custom_template_tags_warn['TEXTE'] = '<a href="'.get_url('/modules/messaging/messaging.php').'">'. String::str_shorten(trim(String::html_entity_decode(String::strip_tags($mail_content))), 50) . '</a>';
 				// On désactive le paramètre d'envoi d'un nouveau message 
 				unset($GLOBALS['send_email_just_warn_new_message']);
+				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
+					$sender = $GLOBALS['support'];
+					$reply_to = $GLOBALS['support'];
+				}
 				send_email($to, '', '', 'new_message', $custom_template_tags_warn, $format, $sender, $html_add_structure, $html_correct_conformity, $html_convert_url_to_links, $reply_to, null, $lang, $additional_infos_array, true);	
 				continue;
 			}

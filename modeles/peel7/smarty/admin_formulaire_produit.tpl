@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 49947 2016-05-18 16:44:11Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -131,6 +131,12 @@
 			 <input type="radio" name="etat" value="0"{if $etat == '0' OR empty($etat)} checked="checked"{/if} /> {$STR_ADMIN_OFFLINE}
 			</td>
 		</tr>
+	{if !empty($product_multiple_references_form)}
+		<tr>
+			<td class="title_label top">{$STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>{$product_multiple_references_form}</td>
+		</tr>
+	{/if}
 		<tr>
 			<td class="title_label">{$STR_REFERENCE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" name="reference" value="{$reference|html_entity_decode_if_needed|str_form_value}" /></td>

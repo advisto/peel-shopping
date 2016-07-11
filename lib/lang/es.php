@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: es.php 50032 2016-05-24 12:30:40Z sdelaporte $
+// $Id: es.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -403,6 +403,7 @@ $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Opinión presentada por";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Dejó su opinión sobre este producto";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "Las noticias de ";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "El opinión de los internautas sobre";
+$GLOBALS["STR_MODULE_AVIS_POSTED_NEWS"] = "Noticias";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Enviar su opinión";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Desea hacer un comentario sobre el producto";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Su comentario sobre el producto";
@@ -693,7 +694,7 @@ $GLOBALS["STR_REMISE"] = "Descuento";
 $GLOBALS["STR_REQUEST_OK"] = "Su petición ha sido considerada";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "necesaria para una reclamación";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = " se requiere para confirmar su pedido.";
-$GLOBALS["STR_RESULTS"] = "Resultados";
+$GLOBALS["STR_RESULTS"] = "Resultado(s)";
 $GLOBALS["STR_RESULT_SEARCH"] = "Resultados de su busqueda";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Regístrate revendedores";
 $GLOBALS["STR_RETAILER"] = "Conviértete en distribuidor";
@@ -803,6 +804,7 @@ $GLOBALS["STR_UNAVAILABLE"] = "Indisponible";
 $GLOBALS["STR_UNIT_PRICE"] = "Precio unitario";
 $GLOBALS["STR_UPDATE_WEBSITE"] = "El sitio está actualmente cerrado por mantenimiento durante pocos minutos.";
 $GLOBALS["STR_UPDATE"] = "Actualización del carrito";
+$GLOBALS["STR_UPLOAD"] = "Transfierar";
 $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"] = "Problema cuando transfiera el archivo - Intente nuevamente";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_IS_TOO_BIG"] = "El archivo subido es demasiado pesado (límite : %s ko)";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"] = "El tipo de archivo (%s) que usted está tratando de subir no está permitido, solo usted puede subir archivos de tipo :";

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 49984 2016-05-23 13:45:30Z sdelaporte $
+// $Id: achat_maintenant.php 50572 2016-07-07 12:43:52Z sdelaporte $
 include("../configuration.inc.php");
 
 $output = '';
@@ -112,11 +112,11 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 						}
 					}
 				}
-				$inserted_user = insere_utilisateur($frm, false, true);
-				if(is_numeric($inserted_user)) {
+				$new_user_result = insere_utilisateur($frm, false, true);
+				if(is_numeric($new_user_result)) {
 					// Compte créé à l'instant => on considère donc qu'on peut se logguer sans préciser de mot de passe 
 					user_login_now($frm['email'], null, false);
-				} elseif(is_array($inserted_user)) {
+				} elseif(is_array($new_user_result)) {
 					// Utilisateur existe déjà => il faudra se logguer normalement avec mot de passe 
 				}
 			}

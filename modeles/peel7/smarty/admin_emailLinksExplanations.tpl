@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_emailLinksExplanations.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: admin_emailLinksExplanations.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<p class="center"><b>{$STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE}{$STR_BEFORE_TWO_POINTS}:</b></p>
 <div class="alert alert-info"><p>{$STR_ADMIN_EMAIL_TEMPLATES_TAGS_EXPLAIN}</p></div>
 <table>

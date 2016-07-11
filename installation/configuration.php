@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: configuration.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -70,6 +70,8 @@ $modules_lang_folders_array = array('forum' => '/modules/forum/lang/',
 		'devis' => '/modules/devis/lang/', // Module pour afficher un formulaire de demande de devis en front
 		'exaprint' => '/modules/exaprint/lang/', // Module d'impression d'étiquettes pour les livraisons DPD (icirelais)
 		'kiala' => '/modules/kiala/lang/', // Module de sélection de point relais Kiala
+		'call_back_form' => '/modules/call_back_form/lang/', // Module de demande de rappel téléphonique
+		'product_references_by_options' => '/modules/product_references_by_options/lang/', // Module de sélection de référence différentes par déclinaison de produit.
 		);
 set_configuration_variable(array('technical_code' => 'modules_lang_folders_array', 'string' => $modules_lang_folders_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_configuration_variable_array = array('affiliation' => 'module_affilie', 'reseller' => 'module_retail', 'gift_check' => 'module_cadeau', 'tagcloud' => 'module_nuage',
@@ -89,13 +91,13 @@ $modules_fonctions_variable_array = array('devises' => 'fonctionsdevises', 'sips
 		'facebook_connect' => 'fonctionfacebookconnect', 'ariane_panier' => 'fonctionsarianepanier'
 		);
 set_configuration_variable(array('technical_code' => 'modules_fonctions_variable_array', 'string' => $modules_fonctions_variable_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
-$modules_no_library_load_array = array('relance_avance', 'sips', 'cmcic', 'bluepaid', 'fianet', 'fianet_sac', 'ogone', 'omnikassa', 'paybox', 'spplus', 'systempay', 'moneybookers', 'paypal',
+$modules_no_library_load_array = array('sips', 'cmcic', 'bluepaid', 'fianet', 'fianet_sac', 'ogone', 'omnikassa', 'paybox', 'spplus', 'systempay', 'moneybookers', 'paypal',
 		'comparateur', 'birthday', 'good_clients', 'facture_advanced', 'statistiques', 'expeditor', 
-		'chart', 'kekoli', 'reseller_map', 'maps', 'photodesk');
+		'chart', 'reseller_map', 'photodesk');
 set_configuration_variable(array('technical_code' => 'modules_no_library_load_array', 'string' => $modules_no_library_load_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
-$modules_front_office_only_array = array('commerciale');
+$modules_front_office_only_array = array();
 set_configuration_variable(array('technical_code' => 'modules_front_office_only_array', 'string' => $modules_front_office_only_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
-$modules_back_office_only_array = array('exaprint');
+$modules_back_office_only_array = array('commerciale','exaprint');
 set_configuration_variable(array('technical_code' => 'modules_back_office_only_array', 'string' => $modules_back_office_only_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_front_office_js_array = array('forum' => '/modules/forum/forum.js');
 set_configuration_variable(array('technical_code' => 'modules_front_office_js_array', 'string' => $modules_front_office_js_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
@@ -123,7 +125,14 @@ $modules_admin_functions_array = array('tagcloud' => '/modules/tagcloud/administ
 		'telechargement' => '/modules/telechargement/administrer/fonctions.php', // Module de téléchargement
 		'faq' => '/modules/faq/administrer/fonctions.php', // Module de faq
 		'groups' => '/modules/groups/administrer/fonctions.php', // Module de groupes
-		'references' => '/modules/references/administrer/fonctions.php' // Module de references
+		'references' => '/modules/references/administrer/fonctions.php', // Module de references
+		'birthday' => '/modules/birthday/administrer/bons_anniversaires.php', // Module des bons anniversaires
+		'comparateur' => '/modules/comparateur/administrer/fonctions.php', // Modules comparateur de prix
+		'commerciale' => '/modules/commerciale/administrer/fonctions.php', 
+		'duplicate' => '/modules/duplicate/administrer/fonctions.php', // Module de duplication de produit
+		'relance_avance' => '/modules/relance_avance/administrer/fonctions.php', 
+		'kekoli' => '/modules/kekoli/administrer/fonctions.php', // Module KEKOLI
+		'exaprint' => '/modules/exaprint/administrer/fonctions.php',
 		);
 set_configuration_variable(array('technical_code' => 'modules_admin_functions_array', 'string' => $modules_admin_functions_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_crons_functions_array = array('annonces' => '/modules/annonces/administrer/fonctions.php');
@@ -135,7 +144,7 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'best_seller' => '/modules/best_seller/fonctions.php', // Affichage en page d'accueil des produits meilleures ventes, 
 		'last_views' => '/modules/last_views/fonctions.php', // Affichage en page d'accueil des produits récemment consultés
 		'gift_check' => '/modules/gift_check/fonctions.php', // Fonctions de gestion et utilisation de chèques cadeaux
-		'relance_avance' => '/modules/relance_avance/administrer/fonctions.php', 
+		'relance_avance' => '/modules/relance_avance', 
 		'spam' => '/modules/spam/fonctions.php', 
 		'carrousel' => '/modules/carrousel/fonctions.php',
 		'stock_advanced' => '/modules/stock_advanced/fonctions.php',
@@ -157,30 +166,30 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'faq' => '/modules/faq/fonctions.php', 
 		'lexique' => '/modules/lexique/fonctions.php',
 		'avis' => '/modules/avis/fonctions.php', // Module "donner son avis"
-		'comparateur' => '/modules/comparateur/administrer/fonctions.php', // Modules comparateur de prix
+		'comparateur' => '/modules/comparateur', // Modules comparateur de prix
 		'profil' => '/modules/profil/fonctions.php', // Module gestion des profils
 		'lot' => '/modules/lot/fonctions.php', // Module de gestion des lots
-		'birthday' => '/modules/birthday/administrer/bons_anniversaires.php', // Module des bons anniversaires
+		'birthday' => '/modules/birthday', // Module des bons anniversaires
 		'good_clients' => '/modules/good_clients', // Module des bons clients
 		'groups' => '/modules/groups/fonctions.php', // Module de gestion des groupes
 		'facture_advanced' => '/modules/facture_advanced', // Module de generation de facture pdf
 		'statistiques' => '/modules/statistiques', // Module de statistiques
 		'expeditor' => '/modules/expeditor', // Module d'interconnexion avec Expeditor
-		'duplicate' => '/modules/duplicate/administrer/fonctions.php', // Module de duplication de produit
+		'duplicate' => '/modules/duplicate', // Module de duplication de produit
 		'welcome_ad' => '/modules/welcome_ad/fonctions.php', // Module d'affichage d'interstitiel de publicité à l'arrivée d'un nouvel utilisateur sur le site
 		'chart' => '/modules/chart/open-flash-chart.php', // Module de graphiques flash 
-		'kekoli' => '/modules/kekoli/administrer/fonctions.php', // Module KEKOLI
+		'kekoli' => '/modules/kekoli', // Module KEKOLI
 		'tnt' => '/modules/tnt/fonctions.php,' . '/modules/tnt/class/Tnt.php',
 		'reseller_map' => '/modules/reseller_map/fonctions.php', // Module du google map des revendeurs
 		'clients' => '/modules/clients/fonctions.php', // Module Clients
 		'photodesk' => '/modules/photodesk/fonctions.php', // Module Photodesk
 		'conditionnement' => '/modules/conditionnement/fonctions.php', // Module de gestion de la vente en gros
-		'commerciale' => '/modules/commerciale/administrer/fonctions.php', 
+		'commerciale' => '/modules/commerciale', 
 		'webmail' => '/modules/webmail/fonctions.php', 
 		'agenda' => '/modules/agenda/fonctions.php',
 		'sauvegarde_recherche' => '/modules/sauvegarde_recherche/fonctions.php',
 		'crons' => '/modules/crons/functions/emails.php',
-		'exaprint' => '/modules/exaprint/administrer/fonctions.php',
+		'exaprint' => '/modules/exaprint',
 		'annonces' => '/modules/annonces/class/Annonce.php,' . '/modules/annonces/fonctions.php,'. '/modules/annonces/display_annonce.php',
 		'cart_popup' => '/modules/cart_popup/fonctions.php', // Module d'affichage de popup lors de l'ajout au caddie
 		'tagcloud' => '/modules/tagcloud/fonctions.php', // Module d'affichage des produits les plus recherchés sous forme de nuage de mots

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clients_segmentation.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: clients_segmentation.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -105,6 +105,10 @@ function updateClientsContactDates()
 		$user_id = $user['id_utilisateur'];
 		$seg_followed = '';
 		$is_actif = ($user['etat'] !== '0');
+		unset($next_contact_time_subscription_renewal_expected_array);
+		unset($next_contact_time);
+		$next_contact_reason = '';
+		$next_contact_timestamp = 0;
 		if ($is_actif) {
 			// Evaluation de la fréquence de suivi
 			if (!empty($contacts_counts) && !empty($contacts_counts[$user_id])) {
@@ -160,7 +164,6 @@ function updateClientsContactDates()
 				// on définit la date de contact pour un renouvellement, seulement si on n'a pas contacté l'utilisateur depuis cette date ou dans la semaine précédent
 				// NB: c'est max et non pas min car les abonnements sont des variantes d'abonnement
 				$next_contact_time['renewal_expected'] = max($next_contact_time_subscription_renewal_expected_array);
-				unset($next_contact_time_subscription_renewal_expected_array);
 			}
 			if (!empty($gold_ads_renewals_timestamps) && !empty($gold_ads_renewals_timestamps[$user_id])) {
 				// On regarde si annonce GOLD à renouveler
@@ -176,7 +179,7 @@ function updateClientsContactDates()
 			if (!empty($planified_contact_timestamps) && !empty($planified_contact_timestamps[$user_id])) {
 				// On regarde si un contact a été planifié spécifiquement pour cet utilisateur
 				foreach($planified_contact_timestamps[$user_id] as $this_timestamp) {
-					if ((empty($next_contact_time['already_planified']) || $this_timestamp < $next_contact_time['already_planified']) && $this_timestamp > $contact_time_basis) {
+					if ((empty($next_contact_time['already_planified']) || $this_timestamp < $next_contact_time['already_planified']) && $this_timestamp > $contact_time_basis + 7 * 24 * 3600) {
 						// Si l'annonce GOLD vient à expiration, on veut contacter l'auteur une semaine à l'avance
 						// mais on ne le fait que si on ne l'a pas contacté dans la semaine précédente
 						$next_contact_time['already_planified'] = $this_timestamp;
@@ -199,9 +202,6 @@ function updateClientsContactDates()
 						"' . nohtml_real_escape_string(vb($next_contact_timestamp)) . '",
 						"' . nohtml_real_escape_string(vb($next_contact_reason)) . '")');
 			}
-		} else {
-			$next_contact_reason = '';
-			$next_contact_timestamp = 0;
 		}
 		if ($seg_followed != $user['seg_followed']) {
 			// Mise à jour des utilisateurs dont la date de contact (et/ou la raison) a/ont changé
@@ -209,7 +209,6 @@ function updateClientsContactDates()
 				SET seg_followed="' . nohtml_real_escape_string($seg_followed) . '" AND ' . get_filter_site_cond('utilisateurs') . '
 				WHERE id_utilisateur=' . intval($user_id));
 		}
-		unset($next_contact_time);
 	}
 	$GLOBALS['contentMail'] .= 'MAJ des dates de contact : OK' . "\n";
 }

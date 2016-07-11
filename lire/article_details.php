@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: article_details.php 50572 2016-07-07 12:43:52Z sdelaporte $
 
 define('IN_RUBRIQUE_ARTICLE', true);
 if (defined('PEEL_PREFETCH')) {
@@ -60,6 +60,11 @@ if ($art = fetch_assoc($art_query)) {
 	redirect_and_die(get_url('/'));
 }
 
+// ATTENTION : la signification de rubid est historiquement trompeuse
+// On appelle des URL avec /lire/article_details.php?rubid=xxx mais en fait on utilise ensuite $_GET['id'] pour cettte valeur d'id
+// On force donc ici $_GET['rubid'] à la valeur de la rubrique correspondant au contenu, et non pas au contenu lui-même qui est $_GET['id']
+$_GET['rubid'] = $art['rubrique_id'];
+
 // Permet de définir l'id de la div principal du site.
 if ($art['technical_code'] == 'tradefair') {
 	$GLOBALS['main_div_id'] = 'tradefair';
@@ -68,15 +73,13 @@ if ($art['technical_code'] == 'tradefair') {
 }
 
 if (check_if_module_active('url_rewriting')) {
-	// Attention la redirection ne sera effectuée que si il n'y a pas de / sur le REQUEST_URI car cela permet de crée des urls courtes par le htaccess sans rediriger par la suite.
-	// Exemple redirection htaccess pour un article avec l'url /patrocinador-categoría.html
+	// Attention la redirection ne sera effectuée que si il y a un / dans le REQUEST_URI (hormis le premier caractère) 
+	// => les URL courtes ne sont pas redirigées ici (cela permet de créer des urls courtes par le htaccess sans rediriger par la suite, exemple /patrocinador-categoría.html ne sera pas redirigé ici)
 	if (get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]) != get_current_url(false) && String::strpos(substr($_SERVER['REQUEST_URI'], 1), '/') !== false) {
 		// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 		$theoretical_current_url = get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]);
 		redirect_and_die($theoretical_current_url, true);
 	}
-} else {
-	$_GET['rubid'] = $art['rubrique_id'];
 }
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('article_details.tpl');

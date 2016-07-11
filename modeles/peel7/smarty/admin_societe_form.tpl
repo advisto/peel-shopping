@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_societe_form.tpl 49667 2016-04-25 12:13:08Z gboussin $
+// $Id: admin_societe_form.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -36,7 +36,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_EMAIL}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="email" class="form-control" name="email" style="width:100%" value="{$email|str_form_value}" /></td>
+			<td><input type="email" class="form-control" name="email" style="width:100%" value="{$email|str_form_value}" autocapitalize="none" /></td>
 		</tr>
 		<tr>
 			<td>{$STR_WEBSITE}{$STR_BEFORE_TWO_POINTS}:</td>

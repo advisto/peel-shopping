@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 50027 2016-05-24 10:20:49Z sdelaporte $
+// $Id: fin.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 
@@ -53,7 +53,7 @@ if(empty($_SESSION['session_install_finished'])) {
 		'description_document' => '',
 		'parameters' => '',
 		'mot_passe' => $_POST['motdepasse']);
-	$id_utilisateur = insere_utilisateur($new_user_infos, false, true, false);
+	insere_utilisateur($new_user_infos, false, true, false);
 	foreach($_SESSION['session_install_langs'] as $this_lang) {
 		// Le nom du site est inséré pour toutes les langues par défaut. L'administrateur peut changer les noms des langues par la suite dans le back office.
 		set_configuration_variable(array('technical_code' => 'nom_' . $this_lang, 'string' => $_SESSION['session_install_site_name'], 'type' => 'string', 'site_id' => 1), true);

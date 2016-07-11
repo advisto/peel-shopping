@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: order.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -875,7 +875,7 @@ function create_or_update_order($order_infos, $articles_array)
 	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
 	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
 	// output_create_or_update_order sera afficher dans le fichier admin_haut.
-	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], true, $order_infos['statut_livraison'], vb($order_infos['delivery_tracking']), true, vb($order_infos['payment_technical_code']));
+	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], defined('IN_PEEL_ADMIN'), $order_infos['statut_livraison'], vb($order_infos['delivery_tracking']), true, vb($order_infos['payment_technical_code']));
 	if(check_if_module_active('nexway')) {
 		include_once($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 		Nexway::create_order($order_infos, $articles_array);
@@ -1026,7 +1026,7 @@ function get_payment_status_name($id)
 function get_delivery_status_name($id)
 {
 	static $tab_livraison_by_id;
-	if(!isset($tab_livraison_by_id)) {
+	if(!isset($tab_livraison_by_id[$id])) {
 		$sql_livraison = 'SELECT nom_' . $_SESSION['session_langue'] . ' AS nom
 			FROM peel_statut_livraison
 			WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('statut_livraison');

@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 50024 2016-05-24 09:43:19Z sdelaporte $
+# $Id: .htaccess 50576 2016-07-07 16:30:25Z gboussin $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -122,6 +122,9 @@ AddDefaultCharset UTF-8
 		# Mise en cache par le navigateur pendant 7j par défaut des images, CSS, Javascript.
 		Header set Cache-Control "max-age=604800, public"
 	</FilesMatch>
+	<FilesMatch "\.(ttf|otf|eot|woff)$">
+		Header set Access-Control-Allow-Origin "*"
+	</FilesMatch>
 </ifModule>
 
 <IfModule mod_deflate.c>
@@ -200,6 +203,7 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]
 	RewriteRule ^(lexicon|lexico|lexikon|lessico)/$ lexique/index.php [QSA,L]
 	RewriteRule ^(dire-a-un-ami|tell-a-friend|haga-conocer-a-amigos|vertel-een-vriend)$ modules/direaunami/direaunami.php [L,QSA]
+	RewriteRule ^(merk|marca|marque|brand)/(.*)$ achat/marque.php?brand=$2 [QSA,L]
 
 	# LAISSE EN FIN DE FICHIER - KEEP THE FOLLOWING AT END OF FILE
 	# Gestion des erreurs 404 si serveur utilise FastCGI : il faut capturer ici ces erreurs sinon "File not found" tout simple sera généré - au pire, ça fait double emploi avec ErrorDocument défini plus haut
@@ -207,5 +211,5 @@ AddDefaultCharset UTF-8
 	RewriteCond %{REQUEST_URI} !^(.*)\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteRule . search.php?type=error404 [L]
+	RewriteRule . search.php?type=error404 [L,R=404]
 </ifModule>

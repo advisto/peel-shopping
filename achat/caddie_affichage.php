@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 49982 2016-05-23 13:14:36Z sdelaporte $
+// $Id: caddie_affichage.php 50572 2016-07-07 12:43:52Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -82,6 +82,9 @@ if ($mode) {
 					} elseif (num_rows(query("SELECT 1 FROM peel_tarifs WHERE type='" . intval($_SESSION['session_caddie']->typeId) . "' AND zone='" . intval($_SESSION['session_caddie']->zoneId) . "' AND " . get_filter_site_cond('tarifs') . "")) == 0) {
 						// Ici on teste la cohérence entre le type et la zone
 						$form_error_object->add('type', $GLOBALS['STR_ERR_TYPE']);
+					} elseif ($GLOBALS['site_parameters']['minimal_amount_to_order'] > $_SESSION['session_caddie']->total_produit) {
+						// Ici on reteste le montant minimum d'achat 
+						$form_error_object->add('minimum_error', $GLOBALS['STR_MINIMUM_PURCHASE_OF'].fprix($GLOBALS['site_parameters']['minimal_amount_to_order'], true).$GLOBALS['STR_REQUIRED_VALIDATE_ORDER']);
 					} elseif(!count($_SESSION['session_caddie']->message_caddie) && empty($form_error_object->error)) {
 						$redirect_next_step = true;
 					}

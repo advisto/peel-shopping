@@ -20,6 +20,7 @@ class FineUploader {
      * Get the original filename
      */
     public function getName(){
+		$this_name = null;
         if (isset($_REQUEST['qqfilename'])) {
             $this_name = $_REQUEST['qqfilename'];
 		}

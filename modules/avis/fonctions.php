@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50030 2016-05-24 11:00:18Z sdelaporte $
+// $Id: fonctions.php 50594 2016-07-08 17:05:08Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -127,14 +127,16 @@ function avis_hook_search_complementary($params) {
 			LIMIT 40";
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
+			unset($nom);
 			if(!empty($result['id_produit'])) {
 				$url = get_product_url($result['id_produit']);
 			} else {
 				$annonce_object = new Annonce($result['ref']);
-				if(empty($annonce_object->ref)) {
+				if(empty($annonce_object->ref) || empty($annonce_object->etat)) {
 					continue;
 				}
 				$url = $annonce_object->get_annonce_url();
+				$nom = $annonce_object->get_titre();
 				unset($annonce_object);
 			}
 			if(in_array($url, $urls_array)) {
@@ -142,7 +144,12 @@ function avis_hook_search_complementary($params) {
 			}
 			$urls_array[] = $url;
 			// on supprime le HTML du contenu
-			$nom = String::strip_tags(String::html_entity_decode_if_needed($result['nom_produit']));
+			if(!empty($result['nom_produit'])) {
+				$nom = String::strip_tags(String::html_entity_decode_if_needed($result['nom_produit']));
+			}
+			if(empty($nom)) {
+				continue;
+			}
 			$description = String::strip_tags(String::html_entity_decode_if_needed($result['avis']));
 			// on coupe le texte si trop long
 			$nom = String::str_shorten($nom, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
@@ -272,7 +279,7 @@ function ajout_avis($frm, $update_user_account = false)
 			}
 			$sql .= " ref,";
 			$template_technical_code = 'insere_' . $frm['mode'] . '_ad';
-			if($frm['mode'] == 'avis' && !empty($frm['reference_id'])) {
+			if($frm['mode'] == 'avis' && !empty($frm['reference_id']) && isset($frm['note'])) {
 				// On met à jour les statistiques générales des votes liés à cette annonce 
 				$voted_assoc = get_vote_infos(null, $frm['reference_id']);
 				$count_new = $voted_assoc['nb_votes'] + 1;
@@ -419,24 +426,34 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 	$output = '';
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_public_list.tpl');
 	if ($type == 'produit') {
+		$sql_cond = '';
 		$product_object = new Product($prodid, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 		$urlprod = $product_object->get_product_url();
 		$is_owner = ($product_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
+		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
+			// Affichage des avis que pour la langue de l'interface.
+			$sql_cond .= " AND a.lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+		}
 		$sqlAvis = "SELECT a.*, u.civilite
 			FROM peel_avis a
 			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
-			WHERE a.id_produit='" . intval($prodid) . "' AND a.etat='1' AND a.lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!=''
+			WHERE a.id_produit='" . intval($prodid) . "' AND a.etat='1' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!='' ".$sql_cond."
 			ORDER BY a.datestamp DESC";
 		$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_OPINION_POSTED_BY']);
 	} elseif ($type == 'annonce') {
 		// Le mode news affiche des news qui sont publiées par le propriétaire de l'annonce
+		$sql_cond = '';
 		$annonce_object = new Annonce($prodid);
 		$urlannonce = $annonce_object->get_annonce_url();
 		$is_owner = ($annonce_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
+		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
+			// Affichage des avis que pour la langue de l'interface.
+			$sql_cond .= " AND lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+		}
 		$sqlAvis = "SELECT *
 			FROM peel_avis
-			WHERE ref='" . intval($prodid) . "' AND etat='1' AND lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!=''
-			ORDER BY datestamp DESC";
+			WHERE ref='" . intval($prodid) . "' AND etat='1' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!='' ".$sql_cond."
+			ORDER BY datestamp DESC, id ASC";
 		$tpl->assign('ad_admin_edit_option', !empty($annonce_object) && a_priv('admin*'));
 		if ($mode == 'avis') {
 			$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD']);

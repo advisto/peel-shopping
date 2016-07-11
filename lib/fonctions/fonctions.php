@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -548,7 +548,7 @@ function get_modules_array($only_active = false, $location = null, $technical_co
 
 /**
  * Récupère le contenu HTML des modules en fonction des contraintes données en paramètre
- * Il est possible d'autoriser la mise en cache de modules, en indiquant la durée de vie du cache dans $allowing_cache_modules_technical_codes en début de fonction
+ * Il est possible d'autoriser la mise en cache de modules, en indiquant la durée de vie du cache dans $modules_cache_allowed_technical_codes en début de fonction
  * Attention : ne mettre en cache que des modules qui ne font que générer du texte pour mettre dans $this_module_output, et rien d'autre
  *
  * @param string $location
@@ -566,7 +566,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 		$criterias = $_GET;
 	}
 	// Ne pas mettre upsell dans la liste ci-après car un cache est déjà mis en place à l'intérieur du module
-	$allowing_cache_modules_technical_codes = array('annonces' => 4500, 'tagcloud' => 120);
+	$modules_cache_allowed_technical_codes = vb($GLOBALS['site_parameters']['modules_cache_allowed_technical_codes'], array('annonces' => 4500, 'tagcloud' => 120));
 	// Pour annonces, si module de crons activé, le cron toutes les heures regénère les fichiers de cache pour éviter que ce soit un utilisateur qui le déclenche
 	$output = '';
 	$output_array = array();
@@ -582,10 +582,19 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 		} else {
 			$display_catalog_allowed = true;
 		}
-		if (!empty($allowing_cache_modules_technical_codes[$this_module['technical_code']]) && !a_priv('admin*')) {
-			$cache_id = $this_module['technical_code'] . '_' . $_SESSION['session_langue'] . '_' . vn($criterias['catid']) . '_' . $GLOBALS['site_id'] . '_' . vn($_SESSION['session_admin_multisite']);
+		if (!empty($modules_cache_allowed_technical_codes[$this_module['technical_code']]) && !a_priv('admin*')) {
+			$cache_id = $this_module['technical_code'] . '_' . $_SESSION['session_langue'] . '_' . vn($criterias['catid']) . '_' . vn($criterias['rubid']) . '_' . $GLOBALS['site_id'] . '_' . vn($_SESSION['session_admin_multisite']);
+			if($this_module['technical_code'] == 'menu' && !empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
+				// Le menu n'est pas généré de la même façon tout le temps, il faut préciser le contexte
+				if((String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'android') !== false || (String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'windows') !== false && String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'mobile') !== false))) {
+					$cache_id .= '_avoidlinkswhenhover';
+				}
+				if(!empty($_POST)) {
+					$cache_id .= '_withpost';
+				}
+			}
 			$this_module_output_cache_object = new Cache($cache_id, array('group' => 'html_block'));
-			if ($this_module_output_cache_object->testTime($allowing_cache_modules_technical_codes[$this_module['technical_code']], true)) {
+			if ($this_module_output_cache_object->testTime($modules_cache_allowed_technical_codes[$this_module['technical_code']], true)) {
 				$this_module_output = $this_module_output_cache_object->get();
 				$load_module = false;
 			}
@@ -672,6 +681,10 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				// affiche_banner rècupère l'espace publicitaire qui a été fourni par le technical_code du module. La fonction retourne la(les) bannière(s) associée(s) à cet espace par l'administrateur en back office, en plus des critères de dates, de contrainte sur les pages, etc....
 				// Exemple : advertising5 affiche la publicité en position 5
 
+				if (defined('IN_ACCES_ACCOUNT') && in_array($this_module['location'], array('left', 'right'))) {
+					// pour ne pas surcharger la page de login qui est courte
+					continue;
+				} 
 				// Définition du type de page pour ne sélectionner que les bannières adéquates
 				if (defined('IN_HOME')) {
 					$page_type = 'home_page';
@@ -687,9 +700,6 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					$page_type = 'ad_creation_page';
 				} else {
 					$page_type = 'other_page';
-				}
-				if (!empty($keywords_array)) {
-					$sql_cond .= ' AND ' . build_terms_clause($keywords_array, array('keywords'), 2);
 				}
 				$this_module_output = affiche_banner(String::substr($this_module['technical_code'], strlen('advertising')), true, (isset($criterias['page'])?$criterias['page']:null), $id_categorie, $this_annonce_number, $page_type, (isset($criterias['search'])?explode(' ', $criterias['search']):null), $_SESSION['session_langue'], $return_array_with_raw_information, (isset($criterias['ref'])?$criterias['ref']:null), vn($GLOBALS['page_related_to_user_id']));
 			} elseif ($this_module['technical_code'] == 'menu') {
@@ -1212,9 +1222,10 @@ function set_paiement(&$frm)
  * @param boolean $show_selected_even_if_not_available
  * @param boolean $show_site_info_if_needed
  * @param object $form_error_object
+ * @param integer $specific_site_id
  * @return
  */
-function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false, $show_site_info_if_needed = false, $form_error_object = null)
+function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false, $show_site_info_if_needed = false, $form_error_object = null, $specific_site_id = null)
 {
 	$output = '';
 	$sql_cond = '';
@@ -1224,7 +1235,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 	}
 	$sql_paiement = 'SELECT p.*
 		FROM peel_paiement p
-		WHERE ' .  get_filter_site_cond('paiement', 'p') . ' AND (totalmin<=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmin=0) AND (totalmax>=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmax=0) ' . $sql_cond . '
+		WHERE ' .  get_filter_site_cond('paiement', 'p', false, $specific_site_id) . ' AND (totalmin<=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmin=0) AND (totalmax>=' . floatval($_SESSION['session_caddie']->total) . ' OR totalmax=0) ' . $sql_cond . '
 		GROUP BY technical_code, nom_' . $_SESSION['session_langue'] . ', site_id
 		ORDER BY p.position';
 	$res_paiement = query($sql_paiement);
@@ -1839,6 +1850,7 @@ function get_current_generic_url()
 		$excluded_get[] = 'multipage';
 		$excluded_get[] = 'nombre';
 		$excluded_get[] = 'update';
+		$excluded_get[] = 'update_thumbs';
 		$excluded_get[] = 'brand';
 		if(!empty($params['type']) && $params['type']=='error404') {
 			$excluded_get[] = 'type';
@@ -3492,7 +3504,7 @@ function format_filename_base($original_name, $rename_file = true) {
 		$new_file_name_without_extension = strftime("%d%m%y_%H%M%S") . "_PEEL_" . MDP(4);
 	} else {
 		$extension = String::strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
-		$modified_old_name_without_extension = preg_replace('/([^.a-z0-9]+)/i', '-', String::strtolower(String::convert_accents(str_replace(array('%2520', '%20', ';', ',', ' ', '^', '$', '#', '<', '>', '[', ']', '{', '}', '(', ')', "'", '"'), array('-', '-', '-', '-', '-', '-', '-', '', '', '', '', '', '', '', '', '', '', ''), basename($original_name, '.' . $extension)))));
+		$modified_old_name_without_extension = preg_replace('/([^.a-z0-9]+)/i', '-', String::convert_accents(str_replace(array('%2520', '%20', ';', ',', ' ', '^', '$', '#', '<', '>', '[', ']', '{', '}', '(', ')', "'", '"'), array('-', '-', '-', '-', '-', '-', '-', '', '', '', '', '', '', '', '', '', '', ''), basename(String::strtolower($original_name), '.' . $extension))));
 		$new_file_name_without_extension = String::strtolower(String::substr(str_replace(array('-----', '----', '---', '--'), array('-', '-', '-', '-'), $modified_old_name_without_extension), 0, 33) . '-' . MDP(6));
 	}
 	return $new_file_name_without_extension;
@@ -3623,7 +3635,10 @@ function http_download_and_die($filename_with_realpath, $serve_download_with_php
 		header("Content-disposition: " . $content_disposition . "; filename=\"" . rawurlencode($file_name_given) . "\"");
 		header("Content-Transfer-Encoding: binary");
 		header("Content-Length: " . intval($content_length));
-		ob_clean();
+		if (ob_get_length()) {
+			// checks if there's a non empty string in the buffer => Avoid Notice: ob_clean(): failed to delete buffer.
+			ob_clean();
+		}
 		flush();
 		if (!empty($file_content_given)) {
 			echo $file_content_given;
@@ -3713,7 +3728,7 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 		'form_name' => $field_name,
 		'form_value' => $file,
 		'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
-		'drop_href' => str_replace(array('[DIV_ID]', "'".$field_name."'", '"'.$field_name.'"'),array($div_id, "'".$div_id."'", '"'.$div_id.'"'), $delete_url),
+		'drop_href' => str_replace(array('[DIV_ID]'),array($div_id), $delete_url),
 		'url' => (!empty($file)?get_url_from_uploaded_filename($file):null),
 		'type' => $file_type,
 		'crop' => !empty($_SESSION['apply_crop_after_upload'][$field_name]),
@@ -3745,6 +3760,7 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 ';
 		}
 	}
+	$GLOBALS['uploaded_file_div_id_last'] = $div_id;
 	return $result;
 }
 
@@ -4011,8 +4027,10 @@ function close_page_generation($html_page = true)
 		$utm_get[] = "guid=on";
 		$utm_get[] = "utmdt=" . urlencode(isset($GLOBALS['meta_title'])?$GLOBALS['meta_title']:'-');
 		$handle = fopen ('http://www.google-analytics.com/__utm.gif?'.implode('&', $utm_get), "r");
-		$test = fgets($handle);
-		fclose($handle);
+		if($handle !== false) {
+			$test = fgets($handle);
+			fclose($handle);
+		}
 	}
 	return $output;
 }
@@ -4249,14 +4267,14 @@ bkLib.onDomLoaded(function() {
 	} elseif ($this_html_editor == '3') {
 		$default_text = String::nl2br_if_needed($default_text);
 		// Editeur CKeditor
-		// La hauteur demandée sera celle de la zone éditable - donc la hauteur total sera bien supérieure
+		// La hauteur demandée sera celle de la zone éditable - donc la hauteur totale sera bien supérieure
 		include_once($GLOBALS['dirroot'] . "/lib/ckeditor/ckeditor.php");
 		$config = array('width' => $width, 'height' => $height, 'contentsCss' => $css_files);
 		$CKEditor = new CKEditor($GLOBALS['wwwroot'] . '/lib/ckeditor/');
 		$CKEditor->returnOutput = true;
 		$output .= '
 <div style="width:' . (is_numeric($width)?($width+10).'px':$width_css) . '; max-width: 100%; min-height:' . ($height+143) . 'px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-	<div style="min-width:270px">
+	<div style="min-width:250px">
 		'.$CKEditor->editor($instance_name, String::htmlspecialchars_decode($default_text, ENT_QUOTES), $config).'
 	</div>
 </div>
@@ -5109,34 +5127,39 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 			// Ce délai ne doit pas être trop long pour un utilisateur qui revalide son formulaire déjà tout rempli suite à premier envoi incomplet
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
-		if (!$form_error_object->count()) {
-			if (check_if_module_active('captcha')) {
-				// Code OK on peut effacer le code
-				delete_captcha(vb($frm['code_id']));
-			}
-			if(empty($_SERVER['HTTP_USER_AGENT']) || $_SERVER['REQUEST_METHOD'] != "POST" || is_user_bot()) {
-				// Protection du formulaire contre les robots
-				die();
-			}
-			// Limitation du nombre de messages envoyés dans une session
-			if (empty($_SESSION['session_form_contact_sent'])) {
-				$_SESSION['session_form_contact_sent'] = 0;
-			}
-			if ($_SESSION['session_form_contact_sent'] < vb($GLOBALS['site_parameters']['contact_form_max_sent_by_session'], 8)) {
-				if($_SESSION['session_form_contact_sent']>0) {
-					sleep($_SESSION['session_form_contact_sent']);
+		if (!$form_error_object->count() || !empty($frm['phone'])) {
+			// Si $frm['phone'] est défini, on ne fait pas de tests sur form_error_object
+			if(empty($frm['phone'])){
+				if (check_if_module_active('captcha')) {
+					// Code OK on peut effacer le code
+					delete_captcha(vb($frm['code_id']));
 				}
-				$mail_spam_points = floor($_SESSION['session_form_contact_sent']*10/vb($GLOBALS['site_parameters']['contact_form_max_sent_by_session'], 8));
-				if (check_if_module_active('spam')) {
-					$mail_spam_points += getSpamPoints($frm['texte'], $frm['email']);
+				if(empty($_SERVER['HTTP_USER_AGENT']) || $_SERVER['REQUEST_METHOD'] != "POST" || is_user_bot()) {
+					// Protection du formulaire contre les robots
+					die();
 				}
-				if($mail_spam_points <= vb($GLOBALS['site_parameters']['contact_form_max_spam_points_allowed'], 20)) {
-					insere_ticket($frm);
+				// Limitation du nombre de messages envoyés dans une session
+				if (empty($_SESSION['session_form_contact_sent'])) {
+					$_SESSION['session_form_contact_sent'] = 0;
 				}
-				$_SESSION['session_form_contact_sent']++;
+				if ($_SESSION['session_form_contact_sent'] < vb($GLOBALS['site_parameters']['contact_form_max_sent_by_session'], 8)) {
+					if($_SESSION['session_form_contact_sent']>0) {
+						sleep($_SESSION['session_form_contact_sent']);
+					}
+					$mail_spam_points = floor($_SESSION['session_form_contact_sent']*10/vb($GLOBALS['site_parameters']['contact_form_max_sent_by_session'], 8));
+					if (check_if_module_active('spam')) {
+						$mail_spam_points += getSpamPoints($frm['texte'], $frm['email']);
+					}
+					if($mail_spam_points <= vb($GLOBALS['site_parameters']['contact_form_max_spam_points_allowed'], 20)) {
+						insere_ticket($frm);
+					}
+					$_SESSION['session_form_contact_sent']++;
+				}
+				// Même si la limite d'envois autorisés est atteinte, on dit que c'est OK à l'utilisateur pour que le spammeur ne se rende pas compte qu'il est découvert
+				$frm['is_ok'] = true;
+			} else {
+				insere_ticket($frm);
 			}
-			// Même si la limite d'envois autorisés est atteinte, on dit que c'est OK à l'utilisateur pour que le spammeur ne se rende pas compte qu'il est découvert
-			$frm['is_ok'] = true;
 			// Si le module webmail est activé, on insère dans la table webmail la requête user
 			$output .= get_contact_success($frm);
 			$form_validated = true;
@@ -5498,7 +5521,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 				} elseif($field_type == 'upload') {
 					if(!empty($this_value)) {
 						// $delete_link = get_current_url(false) . '?mode=suppr&field=' . $this_field . '&file=' . $this_value;
-						$delete_link = 'javascript:reinit_upload_field("'.$this_field.'");';
+						$delete_link = 'javascript:reinit_upload_field("'.$this_field.'", "[DIV_ID]");';
 						$this_field_infos['upload_infos'] = get_uploaded_file_infos($this_field, $this_value, $delete_link, 100, 100);
 					}
 				} else {
@@ -5750,8 +5773,40 @@ function display_specific_field_form($specific_field_infos_array, $display_mode 
 }
 
 /**
-  * Définit les variables javascript nécessaires pour initialiser fineuploader
-  */
+ * Gère l'ajout de fichiers multiples dans la table peel_telechargement
+ * 
+ * @param array $frm
+ * @param string $source
+ * @return
+ */
+function handle_upload_use_specific_table($frm, $source = '')
+{
+	// On supprime tous les fichiers de peel_telechargement, pour remplir à nouveau la table ensuite.
+	$sql = "DELETE FROM peel_telechargement
+		WHERE ad_id='" . intval($frm['ref']) . "' AND source='" . real_escape_string($source) . "'";
+	query($sql);
+	if(!empty($frm['upload_multiple'])) {
+		$i = 1;
+		foreach($frm['upload_multiple'] as $this_cache_file) {
+			$_REQUEST['upload_multiple_'.$i] = $this_cache_file;
+			$this_uploaded_file = upload('upload_multiple_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+			$sql = "INSERT INTO peel_telechargement
+				SET url='" . nohtml_real_escape_string($this_uploaded_file) . "',
+					date='" . date('Y-m-d H:i:s', time()) . "',
+					ad_id='" . intval($frm['ref']) . "',
+					source='" . real_escape_string($source) . "'
+				ON DUPLICATE KEY UPDATE date=GREATEST(date,'" . date('Y-m-d H:i:s', time()) . "')";
+			query($sql);
+			$i++;
+		}
+	}
+}
+
+/**
+ * Définit les variables javascript nécessaires pour initialiser fineuploader
+ * 
+ * @return
+ */
  function init_fineuploader_interface() {
 	if(defined('IN_PEEL_ADMIN')) {
 		$wwwroot = $GLOBALS['wwwroot_in_admin'];
@@ -5766,7 +5821,7 @@ window.init_fineuploader = function(object) {
 		multiple: false,
 		request: {
 				endpoint: "' . $wwwroot . '/fine_uploader.php?origin=' . urlencode($_SERVER['SCRIPT_FILENAME']) . '",
-				inputName: object.attr("id").replace(/_openarray_/g, "[").replace(/_closearray_/g, "]")
+				inputName: object.data("name").replace(/_openarray_/g, "[").replace(/_closearray_/g, "]")
 			},
 		failedUploadTextDisplay: {
 				mode: "custom",
@@ -5784,14 +5839,17 @@ window.init_fineuploader = function(object) {
 		}
 	});
 };
-window.reinit_upload_field = function(input_name) {
-	$("#"+input_name).replaceWith("<div class=\"uploader\" id=\""+input_name+"\"></div>");
-	init_fineuploader($("#"+input_name));
+window.reinit_upload_field = function(input_name, input_id) {
+	if(!input_id) {
+		input_id=input_name;
+	}
+	$("#"+input_id).replaceWith("<div class=\"uploader\" id=\""+input_id+"\" data-name=\""+input_name+"\"></div>");
+	init_fineuploader($("#"+input_id));
 };
 ';
 	$GLOBALS['js_ready_content_array'][] = '
 $("input[type=file]").each(function () {
-	$(this).replaceWith("<div class=\"uploader\" id=\""+$(this).attr("name")+"\"></div>");
+	$(this).replaceWith("<div class=\"uploader\" id=\""+$(this).attr("name")+"\" data-name=\""+$(this).attr("name")+"\"></div>");
 });
 $(".uploader").each(function () {
 	init_fineuploader($(this));

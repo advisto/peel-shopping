@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: search.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -74,16 +74,13 @@ if (check_if_module_active('annonces')) {
 // Si vous mettez plusieurs multipage sur la page, on ne doit pas considérer que chacun connait le nombre de pages
 // => dans ce cas, repassez à false avant le dernier Multipage et pas avant
 $GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
-if (!empty($GLOBALS['site_parameters']['twenga_ads_account_url'])) {
+if (!empty($GLOBALS['site_parameters']['twenga_ads_account_url']) || !empty($GLOBALS['site_parameters']['twenga_ads_script'])) {
 	$GLOBALS['integrate_twenga_ads'] = true;
 }
 
 $output = '';
 $output_result = '';
-if(empty($_GET['match'])) {
-	$_GET['match'] = 1;
-}
-$match = $_GET['match'];
+$match = vb($_GET['match'], 1);
 $search = vb($_GET['search']);
 $real_search = '';
 $GLOBALS['meta_title'] = '';

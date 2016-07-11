@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: display_product.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -137,7 +137,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 					$tpl->assign('STR_STEP_DESCRIPTIF', vb($GLOBALS["STR_STEP_DESCRIPTIF_".$step]));
 				}
 			}
-			$tpl->assign('link_contact', get_url('/utilisateurs/contact.php'));
+			$tpl->assign('link_contact', get_contact_url(false, false));
 			$tpl->assign('contact', $GLOBALS["STR_CONTACT"]);
 			$tpl->assign('product_detail_image', $GLOBALS['site_parameters']['general_product_image']);
 			$tpl->assign('product_name', $product_object->name);
@@ -396,7 +396,7 @@ a_other_pictures_attributes=\'' . str_replace("'", "\'", $a_other_pictures_attri
 				$tpl->assign('addthis_buttons', addthis_buttons()); 
 			}
 			$tpl->assign('display_share_tools_on_product_pages', !empty($GLOBALS['site_parameters']['display_share_tools_on_product_pages']));
-			$tpl->assign('associated_products', affiche_produits(null, 3, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], vb($GLOBALS['site_parameters']['associated_products_display_mode']), true, $product_object->id, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), false));
+			$tpl->assign('associated_products', affiche_produits(null, 3, 'associated_product', $GLOBALS['site_parameters']['nb_produit_page'], (!empty($product_object->technical_code) && $product_object->technical_code== 'tuto'?'line':vb($GLOBALS['site_parameters']['associated_products_display_mode'])), true, $product_object->id, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), false));
 			$tpl->assign('javascript', null); // Pour compatibilité anciens templates avant restructuration javascript v7.1
 			$hook_result = call_module_hook('product_details_additional_infos', array('id' => $product_object->id, 'id_utilisateur' => $product_object->id_utilisateur, 'categorie_id' => $product_object->categorie_id, 'current_catid' => $current_catid, 'position' => $product_object->position), 'array');
 			foreach($hook_result as $this_key => $this_value) {
@@ -662,6 +662,7 @@ if (!function_exists('affiche_produits')) {
 		}
 
 		$tpl = $GLOBALS['tplEngine']->createTemplate('produits.tpl');
+		$tpl->assign('associated_product_multiple_add_to_cart', vb($GLOBALS['site_parameters']['associated_product_multiple_add_to_cart'])); 
 		$tpl->assign('is_associated_product', ((!$no_display_if_empty || !empty($results_array)) AND $type == 'associated_product'));
 		if (!$no_display_if_empty || !empty($results_array)) {
 			$tpl->assign('titre', $params['titre']);
@@ -855,6 +856,7 @@ if (!function_exists('affiche_produits')) {
 		$tpl->assign('nb_col_md', $params['nb_colonnes']);
 		$tpl->assign('vars', $template_additional_variables);
 		
+		$tpl->assign('STR_ADD_CART', $GLOBALS['STR_ADD_CART']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_TOTAL', $GLOBALS['STR_TOTAL'] .' '. (display_prices_with_taxes_active() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
 		if (!empty($total)) {

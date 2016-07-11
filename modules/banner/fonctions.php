@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -219,15 +219,26 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 					$mobile_application_output_array[] = array("url_img" => get_url_from_uploaded_filename($banner['image']), "url" => $url , "html"=> vb($banner['tag_html']), "position" => $banner_position);
 				} elseif (!isset($last_rang) || $banner['rang'] != $last_rang) {
 					// On affiche une seule bannière par rang
-					// Nous récuperons la dimension de la bannière souhaitée et appliquons les limites initialiséss plus haut
-					$width = min(intval($banner['width']), $max_banner_width);
-					$height = min(intval($banner['height']), $max_banner_height);
+					// Nous récuperons la dimension de la bannière souhaitée et appliquons les limites initialisées plus haut
+					if(strpos($banner['width'], '%')===false) {
+						$width = min(intval($banner['width']), $max_banner_width);
+					} else {
+						$width = $banner['width'];
+					}
+					if(strpos($banner['height'], '%')===false) {
+						$height = min(intval($banner['height']), $max_banner_height);
+					} else {
+						$height = $banner['height'];
+					}
 					if(!empty($banner['image'])) {
 						// Recupération de l'extension
 						$banner_file_extension = @pathinfo($banner['image'], PATHINFO_EXTENSION);
 						if ($banner_file_extension == 'swf') {
 							if ($disable_cache && !empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 								// Sur iOS, on ne prend pas le flash
+								unset($banner['image']);
+							} elseif(!empty($banner['tag_html']) && empty($GLOBALS['site_parameters']['banner_prefer_swf_to_html5'])) {
+								// Le HTML5 si présent est prioritaire par rapport au SWF
 								unset($banner['image']);
 							} else {
 								// Si on met en cache, ou si pas de cache en n'étant pas sur iOS : on prend le flash et pas une potentielle alternative HTML
@@ -252,10 +263,10 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							if (!empty($width)){
 								$style_banner .= ' width="' . $width . '" ';
 							}
-							if (!empty($height)){
+							if (!empty($height) && (strpos($width, '%')===false || strpos($height, '%')!==false)){
 								$style_banner .= ' height="' . $height . '" ';
 							}
-							$banner_html = '<img src="' . get_url_from_uploaded_filename($banner['image']) . '" alt="' . vb($banner['lien']) . '" ' . $style_banner . ' />';
+							$banner_html = '<img src="' . get_url_from_uploaded_filename($banner['image']) . '" alt="' . vb($banner['alt'], (!empty($banner['lien']) ? get_site_domain(true, $banner['lien'], true) : '')) . '" ' . $style_banner . ' />';
 							if (!empty($banner['lien'])) {
 								$banner_html = '<a href="' . $GLOBALS['wwwroot'] . '/modules/banner/bannerHit.php?id=' . $banner['id'] . '" ' . $banner['extra_javascript'] . ' ' . (!empty($banner['target']) && $banner['target'] != '_self' ? ($banner['target'] == '_blank' && String::strpos($banner['extra_javascript'], 'onclick=') === false?'onclick="return(window.open(this.href)?false:true);"':'target="' . $banner['target'] . '"'):'') . '>' . $banner_html . '</a>';
 							}

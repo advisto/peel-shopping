@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 50020 2016-05-24 09:28:53Z sdelaporte $
+// $Id: produits.php 50572 2016-07-07 12:43:52Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -549,6 +549,10 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_on_top', !empty($frm['on_top']));
 
 		$tpl->assign('is_conditionnement_module_active', check_if_module_active('conditionnement'));
+		if (check_if_module_active('product_references_by_options')) {
+			$tpl->assign('product_multiple_references_form', product_multiple_references_form($frm['id']));
+			$tpl->assign('STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM', $GLOBALS['STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM']);
+		}
 		$tpl->assign('conditionnement', vb($frm['conditionnement']));
 		$tpl->assign('unit_per_pallet', vb($frm['unit_per_pallet']));
 	
@@ -1371,6 +1375,9 @@ function maj_produit($id, $frm)
 		$upload_images_per_color = min(5, ceil(ini_get('max_file_uploads')) / count($frm['couleurs']));
 	} else {
 		$upload_images_per_color = 2;
+	}
+	if (check_if_module_active('product_references_by_options')) {
+		handle_product_multiple_references_form($frm);
 	}
 	if (display_prices_with_taxes_in_admin ()) {
 		$prix = get_float_from_user_input($frm['prix']);

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.3, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 49979 2016-05-23 12:29:53Z sdelaporte $
+// $Id: admin_es.php 50572 2016-07-07 12:43:52Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -388,7 +388,7 @@ $GLOBALS["STR_ADMIN_HTML_PLACE_ERROR404"] = "página de error 404";
 $GLOBALS["STR_ADMIN_HTML_PLACE_FOOTER_LINK"] = "footer Links";
 $GLOBALS["STR_ADMIN_HTML_PLACE_FOOTER"] = "Abajo";
 $GLOBALS["STR_ADMIN_HTML_PLACE_HEADER"] = "superior";
-$GLOBALS["STR_ADMIN_HTML_PLACE_HOME_BOTTOM"] = "Pie de página";
+$GLOBALS["STR_ADMIN_HTML_PLACE_HOME_BOTTOM"] = "Pie de página Arriba";
 $GLOBALS["STR_ADMIN_HTML_PLACE_HOME"] = "Arriba";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTERSTITIEL"] = "publicidad intersticial";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE"] = "Introducción a la página de patrocinio";
@@ -657,7 +657,8 @@ $GLOBALS["STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER"] = "Otro";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"] = "Custom HTML zonas";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_BANNERS"] = "Banners";
 $GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_CATEGORIES"] = "Gestión de categorías de socios";
-$GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"] = "Partner Management";
+$GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS"] = "Gestión de socios";
+$GLOBALS["STR_ADMIN_MENU_CONTENT_PARTNERS_STATISTICS"] = "Estadísticas enlaces a socios";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"] = "Webmastering";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"] = "MARKETING";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"] = "Opiniones Administración de usuarios";

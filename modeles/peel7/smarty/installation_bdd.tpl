@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: installation_bdd.tpl 48447 2016-01-11 08:40:08Z sdelaporte $
+// $Id: installation_bdd.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
 *}
 <p>{$STR_ADMIN_INSTALL_DATABASE_INTRO_1|escape:'html'}<br />
 {$STR_ADMIN_INSTALL_DATABASE_INTRO_2|escape:'html'}</p>
@@ -43,7 +43,7 @@
 	</div>
 	<div class="row" style="margin-bottom:10px">
 		<div class="col-sm-3"><label>{$STR_PASSWORD|escape:'html'}{$STR_BEFORE_TWO_POINTS}:</label></div>
-		<div class="col-sm-9"><input type="password" class="form-control" name="motdepasse" size="32" value="{$motdepasse_value|str_form_value}" /></div>
+		<div class="col-sm-9"><input type="password" class="form-control" name="motdepasse" size="32" value="{$motdepasse_value|str_form_value}" autocapitalize="none" /></div>
 	</div>
 	<h2>{$STR_ADMIN_INSTALL_LANGUAGE_CHOOSE|escape:'html'}</h2>
 	<p>{html_checkboxes name='langs' options=$select_languages selected=$install_langs_value separator='<br />'}</p>
