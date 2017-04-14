@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: index.php 53596 2017-04-14 09:38:09Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -71,7 +71,7 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('admin_index.tpl');
 $tpl->assign('site_id_select_options', get_site_id_select_options(vb($_SESSION['session_admin_multisite'])));
 $tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	
-if (check_if_module_active('phone_cti') && check_if_module_active('multisite')) {
+if (check_if_module_active('phone_cti')) {
 	$block_content = array();
 	$block_content['title'] = 'Liste des Appels';
 	$block_content['logo'] = '';
@@ -138,7 +138,7 @@ function backoffice_home_block($block_content, $title_bg_color, $return_mode = f
 		$block_content = get_home_block_content($block_content);
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_backoffice_home_block.tpl');
-	$tpl->assign('bg_src', $GLOBALS['repertoire_images'] .'/'. get_block_header_image(String::strtolower($title_bg_color)));
+	$tpl->assign('bg_src', $GLOBALS['repertoire_images'] .'/'. get_block_header_image(StringMb::strtolower($title_bg_color)));
 	$tpl->assign('title_bg_color', $title_bg_color);
 	$tpl->assign('link', $block_content['link']);
 	$tpl->assign('title', $block_content['title']);
@@ -214,7 +214,7 @@ function get_home_block_content($content_code)
 					'id' => $r->order_id,
 					'nom_bill' => $r->nom_bill,
 					'date' => get_formatted_date($r->o_timestamp, 'short', true),
-					'prix' => str_replace(' ', '&nbsp;', fprix($montant_displayed, true, $r->devise, true, $r->currency_rate)) . '<br />' . String::str_shorten(get_payment_name($r->paiement), 30, '', '...'),
+					'prix' => str_replace(' ', '&nbsp;', fprix($montant_displayed, true, $r->devise, true, $r->currency_rate)) . '<br />' . StringMb::str_shorten(get_payment_name($r->paiement), 30, '', '...'),
 					'statut_paiement' => get_payment_status_name($r->id_statut_paiement),
 					'this_sac_status' => vb($this_sac_status)
 					);
@@ -310,7 +310,7 @@ function get_home_block_content($content_code)
 					'id' => $r->id,
 					'nom_bill' => $r->nom_bill,
 					'date' => get_formatted_date($r->o_timestamp, 'short', true),
-					'prix' => str_replace(' ', '&nbsp;', fprix($r->montant, true, $r->devise, true, $r->currency_rate)) . '<br />' . String::str_shorten(get_payment_name($r->paiement), 30, '', '...'),
+					'prix' => str_replace(' ', '&nbsp;', fprix($r->montant, true, $r->devise, true, $r->currency_rate)) . '<br />' . StringMb::str_shorten(get_payment_name($r->paiement), 30, '', '...'),
 					'statut_livraison' => get_delivery_status_name($r->id_statut_livraison)
 					);
 				$i++;

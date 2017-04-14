@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -299,7 +299,7 @@ function quote_oanda_currency($to, $from)
 	$match = array();
 
 	if (!empty($page)) {
-		preg_match('/(.+),(\w{3,4}),([0-9.]+),([0-9.]+)/i', String::strip_tags(str_replace(array("\r", "\n"), '', implode('', $page))), $match);
+		preg_match('/(.+),(\w{3,4}),([0-9.]+),([0-9.]+)/i', StringMb::strip_tags(str_replace(array("\r", "\n"), '', implode('', $page))), $match);
 	}
 	if (sizeof($match) > 0) {
 		return $match[3];
@@ -322,7 +322,7 @@ function quote_xe_currency($to, $from)
 	// Debug : var_dump($url, $page);
 	$match = array();
 	if (!empty($page)) {
-		preg_match('/[0-9.]+\s*' . $from . '\s*=\s*([0-9.]+)\s*' . $to . '/', String::strip_tags(str_replace(array("\r", "\n", '&nbsp;'), array("", "", ' '), implode('', $page))), $match);
+		preg_match('/[0-9.]+\s*' . $from . '\s*=\s*([0-9.]+)\s*' . $to . '/', StringMb::strip_tags(str_replace(array("\r", "\n", '&nbsp;'), array("", "", ' '), implode('', $page))), $match);
 	}
 	if (sizeof($match) > 0) {
 		return $match[1];
@@ -343,8 +343,8 @@ function quote_google_currency($to, $from)
 	$page = @file('http://www.google.com/ig/calculator?hl=en&q=' . urlencode(1 . '' . $from . '=?' . $to));
 	$page = implode('', $page);
 	if (!empty($page)) {
-		$page = String::substr($page, String::strpos($page, 'rhs: "') + String::strlen('rhs: "'));
-		$amount = String::substr($page, 0, String::strpos($page, ' '));
+		$page = StringMb::substr($page, StringMb::strpos($page, 'rhs: "') + StringMb::strlen('rhs: "'));
+		$amount = StringMb::substr($page, 0, StringMb::strpos($page, ' '));
 	}
 	if (!empty($amount) && is_numeric($amount)) {
 		return $amount;

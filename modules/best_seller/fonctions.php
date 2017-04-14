@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,7 +34,7 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 			INNER JOIN peel_statut_paiement sp ON sp.id=pc.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 			INNER JOIN peel_produits p ON pca.produit_id = p.id AND " . get_filter_site_cond('produits', 'p') . "
 			INNER JOIN peel_categories c ON pca.categorie_id = c.id AND " . get_filter_site_cond('categories', 'c') . "
-			WHERE " . get_filter_site_cond('commandes_articles', 'pca', true) . " AND p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND sp.technical_code IN ('being_checked','completed')
+			WHERE " . get_filter_site_cond('commandes_articles', 'pca', true) . " AND p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND sp.technical_code IN ('being_checked','completed') " . (!empty($GLOBALS['site_parameters']['best_seller_produit_date'])?' AND pc.a_timestamp > "' . $GLOBALS['site_parameters']['best_seller_produit_date'] .'" ':' ') . "
 			GROUP BY pca.produit_id
 			ORDER BY quantite DESC
 			LIMIT 0, " . intval(vn($GLOBALS['site_parameters']['nb_on_top']));
@@ -61,7 +61,7 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 				// Faire attention que dans $prod on a bien les noms de colonnes correspondant à ce qui est nécessaire dans la classe product
 				$product_object = new Product($prod['id'], $prod, true, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 				if (empty($GLOBALS['site_parameters']['module_best_sellers_return_result_as_link'])) {
-				$this_product_in_container_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
+					$this_product_in_container_html = get_product_in_container_html($product_object, $GLOBALS['site_parameters']['only_show_products_with_picture_in_containers']);
 				} else {
 					$this_product_in_container_html = '<a href="' . $product_object->get_product_url() . '">' . $product_object->name . '</a>';
 				}

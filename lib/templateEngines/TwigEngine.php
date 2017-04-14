@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: TwigEngine.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: TwigEngine.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'TwigTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: TwigEngine.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: TwigEngine.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class TwigEngine extends EngineTpl {
@@ -40,14 +40,14 @@ class TwigEngine extends EngineTpl {
 		$this->twig = new Twig_Environment($loader, $twigConf);
 		// Ajout de fonctionnalités
 		$this->twig->addFilter(new Twig_SimpleFilter("filtre_javascript", "filtre_javascript"));
-		$this->twig->addFilter(new Twig_SimpleFilter("html_entity_decode_if_needed", "String::html_entity_decode_if_needed"));
-		$this->twig->addFilter(new Twig_SimpleFilter("str_shorten", "String::str_shorten"));
-		$this->twig->addFilter(new Twig_SimpleFilter("nl2br_if_needed", "String::nl2br_if_needed"));
-		$this->twig->addFilter(new Twig_SimpleFilter("str_form_value", "String::str_form_value"));
-		$this->twig->addFilter(new Twig_SimpleFilter("strtoupper", "String::strtoupper"));
-		$this->twig->addFilter(new Twig_SimpleFilter("html_entity_decode", "String::html_entity_decode"));
-		$this->twig->addFilter(new Twig_SimpleFilter("htmlentities", "String::htmlentities"));
-		$this->twig->addFilter(new Twig_SimpleFilter("textEncode", "String::textEncode"));
+		$this->twig->addFilter(new Twig_SimpleFilter("html_entity_decode_if_needed", "StringMb::html_entity_decode_if_needed"));
+		$this->twig->addFilter(new Twig_SimpleFilter("str_shorten", "StringMb::str_shorten"));
+		$this->twig->addFilter(new Twig_SimpleFilter("nl2br_if_needed", "StringMb::nl2br_if_needed"));
+		$this->twig->addFilter(new Twig_SimpleFilter("str_form_value", "StringMb::str_form_value"));
+		$this->twig->addFilter(new Twig_SimpleFilter("strtoupper", "StringMb::strtoupper"));
+		$this->twig->addFilter(new Twig_SimpleFilter("html_entity_decode", "StringMb::html_entity_decode"));
+		$this->twig->addFilter(new Twig_SimpleFilter("htmlentities", "StringMb::htmlentities"));
+		$this->twig->addFilter(new Twig_SimpleFilter("textEncode", "StringMb::textEncode"));
 		$this->twig->addFilter(new Twig_SimpleFilter("htmlspecialchars", "htmlspecialchars"));
 		$this->twig->addFilter(new Twig_SimpleFilter("addslashes", "addslashes"));
 		$this->twig->addFilter(new Twig_SimpleFilter("intval", "intval"));

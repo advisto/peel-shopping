@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 50576 2016-07-07 16:30:25Z gboussin $
+# $Id: .htaccess 53343 2017-03-28 17:11:29Z sdelaporte $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -77,6 +77,9 @@
 # AddType video/webm .webm
 # AddType application/x-shockwave-flash swf
 
+# Si lire/ par exemple ne marche pas alors que lire/index.php marche, alors activez :
+# DirectoryIndex index.html index.php
+
 # Gestion des 404
 # Une erreur 404 est associé à une mauvaise recherche (désactivée par défaut).
 # ATTENTION : configurez le ErrorDocument en précisant le bon chemin en cas d'installation dans un répertoire
@@ -100,6 +103,11 @@ ErrorDocument 404 /search.php?type=error404
 # SetEnvIfNoCase User-Agent "Excludeduseragent" bad_bot
 # Deny from env=bad_bot
 
+# Si le serveur ne compresse pas automatiquement les fichiers texte, décommenter ce qui suit
+# Attention, ce n'est compatible que sur certains serveur et sinon cela mettra une erreur 500
+# SetOutputFilter DEFLATE
+# AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/x-javascript
+
 <Files ~ "403\.shtml$">
 	Allow from all
 </Files>
@@ -118,12 +126,17 @@ AddDefaultCharset UTF-8
 </FilesMatch>
 
 <ifModule mod_headers.c>
-	<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf|doc|docx|xls|xlsx|ppt|pptx|woff|eot|svg|ttf)$">
+	<FilesMatch "\.(flv|gif|GIF|jpg|jpeg|JPG|png|PNG|ico|swf|js|css|pdf|PDF|doc|docx|xls|xlsx|ppt|pptx|woff|eot|svg|ttf)$">
 		# Mise en cache par le navigateur pendant 7j par défaut des images, CSS, Javascript.
 		Header set Cache-Control "max-age=604800, public"
+		Header set X-Content-Type-Options "nosniff"
 	</FilesMatch>
 	<FilesMatch "\.(ttf|otf|eot|woff)$">
 		Header set Access-Control-Allow-Origin "*"
+	</FilesMatch>
+	<FilesMatch "(.*)-(banner|static)\.html$">
+		# Mise en cache par le navigateur pendant 7j par défaut des bannières HTML
+		Header set Cache-Control "max-age=604800, public"
 	</FilesMatch>
 </ifModule>
 

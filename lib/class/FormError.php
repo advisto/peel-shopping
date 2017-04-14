@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: FormError.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: FormError.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: FormError.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: FormError.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class FormError {
@@ -46,7 +46,7 @@ class FormError {
 	 * @param mixed $name
 	 * @return
 	 */
-	function text($name = null)
+	function text($name = null, $return_without_style = false)
 	{
 		if (!empty($name) && isset($this->error[$name])) {
 			$output = ((!empty($this->error[$name])) ? $this->error[$name] : $GLOBALS['STR_EMPTY_FIELD']);
@@ -62,7 +62,11 @@ class FormError {
 			}
 		}
 		if(!empty($output)) {
-			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $output))->fetch();
+			if (!empty($return_without_style)) {
+				return $output;
+			} else {
+				return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $output))->fetch();
+			}
 		} else {
 			return false;
 		}
@@ -114,13 +118,17 @@ class FormError {
 	{
 		if(!empty($error_field_messages_array)) {
 			foreach($error_field_messages_array as $this_field => $this_message) {
-				if ((empty($frm[$this_field]) || (is_array($frm[$this_field]) && count($frm[$this_field]) == 0)) || (!empty($field_minimal_lengths_array[$this_field]) && String::strlen($frm[$this_field])<$field_minimal_lengths_array[$this_field]) || (!empty($field_validation_function_names_array[$this_field]) && $field_validation_function_names_array[$this_field]($frm[$this_field]) === false)) {
-					if(String::substr($this_message, 0, 4) == 'STR_' && isset($GLOBALS[$this_message])) {
+				if (((empty($frm[$this_field]) && vb($frm[$this_field]) !== '0') || (is_array($frm[$this_field]) && count($frm[$this_field]) == 0)) || (!empty($field_minimal_lengths_array[$this_field]) && StringMb::strlen($frm[$this_field])<$field_minimal_lengths_array[$this_field]) || (!empty($field_validation_function_names_array[$this_field]) && $field_validation_function_names_array[$this_field]($frm[$this_field]) === false)) {
+					if(StringMb::substr($this_message, 0, 4) == 'STR_' && isset($GLOBALS[$this_message])) {
 						$this_text = $GLOBALS[$this_message];
 					} else {
 						$this_text = $this_message;
 					}
 					$this->add($this_field, $this_text);
+				} elseif (is_array($this_message)) {
+					foreach($this_message as $key=>$error_message) {
+						$this->add($this_field[$key], $error_message);
+					}
 				}
 			}
 		}

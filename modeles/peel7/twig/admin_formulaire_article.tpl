@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_article.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_article.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}{% if not rubrique_options %}
 <div class="entete">{{ STR_ADMIN_ARTICLES_FORM_ADD }}</div>
 <p><a href="{{ add_category_url }}">{{ STR_ADMIN_ARTICLES_CREATE_CATEGORY_FIRST }}</a></p>
@@ -102,7 +102,7 @@
 			</td>
 		</tr>
 		{% for l in langs %}
-		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} - {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td colspan="2"><b>{{ STR_ADMIN_TITLE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</b></td>
 		</tr>
@@ -128,7 +128,7 @@
 			<td colspan="2"><input type="text" class="form-control" name="meta_titre_{{ l.lng }}" size="70" value="{{ l.meta_titre|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="title_label">{{ STR_ADMIN_META_KEYWORDS }}{{ STR_ADMIN_META_KEYWORDS }} {{ l.lng|upper }} ({{ STR_ADMIN_SEPARATE_KEYWORDS_EXPLAIN }}){{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td colspan="2" class="title_label">{{ STR_ADMIN_META_KEYWORDS }} {{ l.lng|upper }} ({{ STR_ADMIN_SEPARATE_KEYWORDS_EXPLAIN }}){{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
 		<tr>
 			<td colspan="2"><textarea class="form-control" name="meta_key_{{ l.lng }}" style="width:100%" rows="2" cols="54">{{ l.meta_key|nl2br_if_needed|html_entity_decode_if_needed|strip_tags }}</textarea></td>

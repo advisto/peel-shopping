@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 50602 2016-07-11 09:04:14Z gboussin $
+// $Id: user.php 53557 2017-04-11 17:15:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -143,6 +143,9 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 				// privilège par défaut
 				$frm['priv'] = 'util';
 			}
+		} elseif (!empty($GLOBALS['site_parameters']['site_suspended']) && !empty($GLOBALS['site_parameters']['user_default_priv_if_register_in_suspended_site'])) {
+			// privilège par défaut dans le cadre de l'inscription d'un utilisateur dans le cadre du site suspendu. Dans ce cas on souhaite enregistrer les utilisateurs malgré le fait que le site soit suspendu. C'est possible uniquement si la variable site_suspended_with_redirection_to_home est défini
+			$frm['priv'] = $GLOBALS['site_parameters']['user_default_priv_if_register_in_suspended_site'];
 		} else {
 			// privilège par défaut
 			$frm['priv'] = 'util';
@@ -176,6 +179,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 			$query = query($sql);
 			if ($user_already_exists_infos = fetch_assoc($query)) {
 				// L'utilisateur existe déjà, on donne son id
+				$GLOBALS['user_insert_existing_user'] = true;
 				return $user_already_exists_infos;
 			}
 		}
@@ -187,7 +191,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	} elseif (!empty($frm['mot_passe'])) {
 		$password_hash = get_user_password_hash(trim($frm['mot_passe']));
 	} elseif(empty($frm['mot_passe']) && (!empty($GLOBALS['site_parameters']['register_during_order_process']) || !empty($create_password_on_behalf_of_user))) {
-		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur^en fin de fonction
+		// Création d'un utilisateur lors du process de commande. Le mot de passe est envoyé à l'utilisateur en fin de fonction
 		$frm['mot_passe'] = MDP();
 		$password_hash = get_user_password_hash($frm['mot_passe']);
 	} else {
@@ -266,9 +270,9 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		}
 		if(in_array($this_field, array('intracom_for_billing'))) {
 			$frm[$this_field] = strtoupper($frm[$this_field]);
-		} elseif(String::strpos($this_type, 'int(')!==false) {
+		} elseif(StringMb::strpos($this_type, 'int(')!==false) {
 			$frm[$this_field] = intval($frm[$this_field]);
-		} elseif(String::strpos($this_type, 'float(')!==false) {
+		} elseif(StringMb::strpos($this_type, 'float(')!==false) {
 			$frm[$this_field] = floatval($frm[$this_field]);
 		} elseif($this_type == 'date' || $this_type == 'datetime') {
 			$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
@@ -278,13 +282,16 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		} else {
 			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($frm[$this_field]) . "'";
 		}
+		if(is_array($frm[$this_field])) {
+			$frm[$this_field] = implode(',', $frm[$this_field]);
+		}
 	}
 	$sql = "INSERT INTO peel_utilisateurs SET
 			" . implode(',', $sql_fields_array) . "";
 	query($sql);
 	
 	$frm['id'] = insert_id();
-	$code_client = "CLT" . date("Y") . $frm['id'];
+	$code_client = vb($frm['code_client'], "CLT" . date("Y") . $frm['id']);
 
 	query("UPDATE peel_utilisateurs
 		SET code_client = '" . nohtml_real_escape_string($code_client) . "'
@@ -336,7 +343,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 		if(a_priv('admin*', false, false, $frm['id_utilisateur'])) {
 			// L'utilisateur qu'on veut modifier est un administrateur et l'utilisateur loggué n'a pas le droit de le faire
 			return false;
-		} elseif(!empty($frm['priv']) && String::strpos($frm['priv'], 'admin') === 0) {
+		} elseif(!empty($frm['priv']) && StringMb::strpos($frm['priv'], 'admin') === 0) {
 			unset($frm['priv']);
 		}
 	}
@@ -363,8 +370,12 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	$frm['date_update'] = date('Y-m-d H:i:s', time());
 	if(!empty($frm['email'])) {
 		// Réinitilisation des informations de bounces d'email
-		$frm['email_bounce'] = '';
 		$frm['email'] = trim($frm['email']);
+		if(EmailOK($frm['email']) && strpos($frm['email'], '@migrated') === false) {
+			// Si email pas valide, on garde un warning sur le fait qu'il y a un problème
+			// Sinon, c'est ok, on vide email_bounce
+			$frm['email_bounce'] = '';
+		}
 	}
 	if(check_if_module_active('annonces') && !defined('IN_PEEL_ADMIN')) {
 		// MAJ du pseudo interdite pour les sites d'annonces en front office, pour éviter problèmes de traçabilité d'utilisateurs
@@ -382,7 +393,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
 			continue;
 		} elseif(!isset($frm[$this_field])) {
-			if ($this_field == 'newsletter' || $this_field == 'commercial') {
+			if ($this_field == 'newsletter' || $this_field == 'commercial' || in_array($this_field, vb($GLOBALS['site_parameters']['user_extra_database_fields_array'],array()))) {
 				// Ce sont les deux champs en checkbox du formulaire. Si pas coché, alors il faut mettre 0 en base de données.
 				$frm[$this_field] = 0;
 			} else {
@@ -394,9 +405,9 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 		}
 		if(in_array($this_field, array('intracom_for_billing'))) {
 			$frm[$this_field] = strtoupper($frm[$this_field]);
-		} elseif(String::strpos($this_type, 'int(')!==false) {
+		} elseif(StringMb::strpos($this_type, 'int(')!==false) {
 			$frm[$this_field] = intval($frm[$this_field]);
-		} elseif(String::strpos($this_type, 'float(')!==false) {
+		} elseif(StringMb::strpos($this_type, 'float(')!==false) {
 			$frm[$this_field] = floatval($frm[$this_field]);
 		} elseif($this_type == 'date' || $this_type == 'datetime') {
 			$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
@@ -425,7 +436,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$_SESSION['session_utilisateur']['pseudo'] = $user_infos['pseudo'];
 			$_SESSION['session_utilisateur']['nom_famille'] = $user_infos['nom_famille'];
 			$_SESSION['session_utilisateur']['societe'] = $user_infos['societe'];
-			$_SESSION['session_utilisateur']['intracom_for_billing'] = String::strtoupper(vb($user_infos['intracom_for_billing']));
+			$_SESSION['session_utilisateur']['intracom_for_billing'] = StringMb::strtoupper(vb($user_infos['intracom_for_billing']));
 			$_SESSION['session_utilisateur']['telephone'] = $user_infos['telephone'];
 			$_SESSION['session_utilisateur']['fax'] = $user_infos['fax'];
 			$_SESSION['session_utilisateur']['portable'] = $user_infos['portable'];
@@ -540,7 +551,7 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			// si $_SESSION['session_utilisateur']['parameters'] n'est pas vide, il a déjà été désérialisé dans verifier_authentification() ci-dessus
 			$_SESSION['session_ip'] = vb($_SERVER['REMOTE_ADDR']);
 			$_SESSION['session_url'] = $_SERVER['HTTP_HOST'];
-			if (!empty($_SESSION['session_caddie'])) {
+			if (!empty($_SESSION['session_caddie']) && empty($GLOBALS['forced_login'])) {
 				$_SESSION['session_caddie']->update(get_current_user_promotion_percentage());
 			}
 			if (!empty($_SESSION['session_utilisateur']['pays'])) {
@@ -601,6 +612,31 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 }
 
 /**
+ * Déconnexion de l'utilisateur
+ *
+ * @return
+ */
+function user_logout()
+{
+	// Désaffecte la variable de session $_SESSION['session_utilisateur'] pour déconnecter l'utilisateur.
+	unset($_SESSION['session_utilisateur']);
+	// Désaffecte la variable session_admin_multisite
+	unset($_SESSION['session_admin_multisite']);
+	// On ne détruit pas toutes les variables pour garder le cas échéant par exemple des variables de session
+	// de limitation de spam, le cookie conserve les produits dans le panier ou autres variables d'historique récent d'actions utilisateur
+	unset($_SESSION['session_download_rights']);
+	unset($_SESSION['session_form']);
+	$_SESSION['session_caddie']->init(false, false);
+	// On vient de se déconnecter volontairement, on ne veut donc pas se reconnecter automatiquement via Facebook - si on le veut, ce devra être une action manuelle
+	$_SESSION['disable_facebook_autologin'] = true;
+
+	unset($_SESSION['session_update_account']);
+	unset($_SESSION['session_parameters']);
+
+	call_module_hook('user_logout', array());
+}
+
+/**
  * On renvoie un tableau contenant les informations utilisateur si l'email et le mot de passe sont bons.
  * Sinon on renvoie false.
  *
@@ -617,6 +653,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 {
 	$get_table_field_names = get_table_field_names('peel_configuration');
 	if (!in_array('site_id', $get_table_field_names)) {
+		// La structure de données ne contient pas de site_id => pas normal, c'est une vieille version. Pour pouvoir aller se connecter et faire la mise à jour, on désactive le multisite pour cette page.
 		$GLOBALS['site_parameters']['multisite_disable'] = true;
 		$skip_state_test = true;
 	}
@@ -660,7 +697,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 			}
 		}
 		if ($password_check && $parameters_check) {
-			if(!$check_password && empty($GLOBALS['site_parameters']['login_allow_low_security_admin']) && String::strpos($user_infos['priv'], 'admin') === 0) {
+			if(!$check_password && empty($GLOBALS['site_parameters']['login_allow_low_security_admin']) && StringMb::strpos($user_infos['priv'], 'admin') === 0) {
 				// Utilisateur avec droits d'administration, loggué via processus simplifié => on désactive les droits d'administration
 				$user_infos['priv'] = 'util';
 			}
@@ -696,21 +733,21 @@ function get_user_password_hash($password, $tested_hash = null, $password_given_
 		// Création d'un premier hash du mot de passe
 		$first_password_hash = sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . $password);
 		// set where salt will appear in hash
-		$salt_start = String::strlen($password);
+		$salt_start = StringMb::strlen($password);
 	} else {
 		$first_password_hash = $password;
 		$salt_start = $password_length_if_given_as_first_password_hash;
 	}
 	// if no salt given create random one
 	if ($tested_hash == null) {
-		$salt_hash = String::substr(sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . uniqid(mt_rand(), true)), 0, 6);
+		$salt_hash = StringMb::substr(sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . uniqid(mt_rand(), true)), 0, 6);
 	} else {
-		$salt_hash = String::substr($tested_hash, 0, 6);
+		$salt_hash = StringMb::substr($tested_hash, 0, 6);
 	}
 	// add salt into text hash at pass length position and hash it
-	if ($salt_start > 0 && $salt_start < String::strlen($salt_hash)) {
-		$first_password_hash_start = String::substr($first_password_hash, 0, $salt_start);
-		$first_password_hash_end = String::substr($first_password_hash, $salt_start, strlen($salt_hash));
+	if ($salt_start > 0 && $salt_start < StringMb::strlen($salt_hash)) {
+		$first_password_hash_start = StringMb::substr($first_password_hash, 0, $salt_start);
+		$first_password_hash_end = StringMb::substr($first_password_hash, $salt_start, strlen($salt_hash));
 		$hash_rough = sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . $first_password_hash_end . $salt_hash . $first_password_hash_start);
 	} elseif ($salt_start > (strlen($salt_hash) - 1)) {
 		$hash_rough = sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . $first_password_hash . $salt_hash);
@@ -718,7 +755,7 @@ function get_user_password_hash($password, $tested_hash = null, $password_given_
 		$hash_rough = sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . $salt_hash . $first_password_hash);
 	}
 	// put salt at front of hash
-	$password_hash = $salt_hash . String::substr($hash_rough, 0, 26);
+	$password_hash = $salt_hash . StringMb::substr($hash_rough, 0, 26);
 	if (empty($tested_hash) || $tested_hash == $password_hash) {
 		return $password_hash;
 	} else {
@@ -845,7 +882,7 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && String::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($user_infos['intracom_for_billing']) && !is_numeric(String::substr($user_infos['intracom_for_billing'], 0, 2)) && String::substr(String::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && String::strlen($user_infos['intracom_for_billing']) >= 7 && String::strlen(str_replace(' ', '', $user_infos['intracom_for_billing'])) <= 14) {
+			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && StringMb::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($user_infos['intracom_for_billing']) && !is_numeric(StringMb::substr($user_infos['intracom_for_billing'], 0, 2)) && StringMb::substr(StringMb::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $user_infos['intracom_for_billing'])) >= 7 && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $user_infos['intracom_for_billing'])) <= 14) {
 				// Utilisateur avec un n° de TVA intracom, en Europe mais pas dans le pays de référence de la boutique dont le code ISO sur 2 chiffres est dans "pays_exoneration_tva"
 				return true;
 			}
@@ -894,7 +931,7 @@ function get_priv_options($selected, $mode = 'output', $search_mode = false)
 			'issel' => in_array($Profil['priv'], $selected),
 			'name' => $priv_name
 		);
-		if(String::strpos($Profil['priv'], 'stop') !== false) {
+		if(StringMb::strpos($Profil['priv'], 'stop') !== false) {
 			$in_wait_priv++;
 		}
 	}
@@ -950,7 +987,7 @@ function getUserAgentHash()
 {
 	// Returns an int on 4 bytes
 	if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-		return base_convert(String::substr(md5($_SERVER['HTTP_USER_AGENT']), 9, 8), 16, 10);
+		return base_convert(StringMb::substr(md5($_SERVER['HTTP_USER_AGENT']), 9, 8), 16, 10);
 	} else {
 		return 0;
 	}
@@ -1033,7 +1070,7 @@ function get_personal_address_form($id_utilisateur, $address_type = 'bill', $sel
 			WHERE id_utilisateur="' . intval($id_utilisateur) . '" AND address_type IN ("","'.real_escape_string($address_type).'")';
 		$q = query($sql);
 		$output = '
-		<select class="form-control" onchange="if(this.value){this.form.submit()}" name="personal_address_' . String::str_form_value($address_type) . '" style="' . $css_style. '">
+		<select class="form-control" onchange="if(this.value){this.form.submit()}" name="personal_address_' . StringMb::str_form_value($address_type) . '" style="' . $css_style. '">
 			<option value="">' . $GLOBALS['STR_ADDRESS'] . '....</option>
 			<option value="original_address"' . frmvalide($selected == 'original_address', ' selected="selected"') . '>' . $GLOBALS['STR_DEFAULT_ADDRESS'] . '</option>';
 		while($result = fetch_assoc($q)) {
@@ -1056,42 +1093,47 @@ function get_personal_address_form($id_utilisateur, $address_type = 'bill', $sel
 /**
  * Met à jour l'adresse en base de données
  *
- * @param class $frm
+ * @param array $frm
+ * @param integer $return_id
  * @return
  */
-function insert_or_update_address($frm) {
-	if(empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
-		return false;
+function insert_or_update_address($frm, $return_id = false) {
+	if(!empty($frm['contact1']) && empty($frm['telephone'])) {
+		$frm['telephone'] = $frm['contact1'];
 	}
-	if(!empty($frm['portable'])) {
-		$tel = $frm['portable'];
-	} elseif(!empty($frm['contact1'])) {
-		$tel = $frm['contact1'];
-	} else {
-		$tel = null;
+	if(empty($frm['id_utilisateur']) && !empty($_SESSION['session_utilisateur']['id_utilisateur']) && !defined('IN_PEEL_ADMIN')) {
+		$frm['id_utilisateur'] = intval($_SESSION['session_utilisateur']['id_utilisateur']);
 	}
-	$set_sql = "civilite = '" . nohtml_real_escape_string(vb($frm['civilite'])) . "'
-			, email = '" . nohtml_real_escape_string($frm['email']) . "'
-			, nom = '" . nohtml_real_escape_string($frm['name_adresse']) . "'
-			, prenom = '" . nohtml_real_escape_string($frm['prenom']) . "'
-			, nom_famille = '" . nohtml_real_escape_string($frm['nom_famille']) . "'
-			, societe = '" . nohtml_real_escape_string($frm['societe']) . "'
-			, telephone = '" . nohtml_real_escape_string($tel) . "'
-			, portable = '" . nohtml_real_escape_string($frm['portable']) . "'
-			, adresse = '" . nohtml_real_escape_string($frm['adresse']) . "'
-			, code_postal = '" . nohtml_real_escape_string($frm['code_postal']) . "'
-			, ville = '" . nohtml_real_escape_string($frm['ville']) . "'
-			".(isset($frm['address_type'])?", address_type = '" . nohtml_real_escape_string($frm['address_type']) . "'":'')."
-			, pays = '" . intval($frm['pays']) . "'
-			, id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";
+	$table_fields_types = get_table_field_types('peel_adresses');
+	foreach($table_fields_types as $this_field => $this_type) {
+		if(!isset($frm[$this_field])) {
+			continue;
+		}
+		if(StringMb::strpos($this_type, 'int(')!==false) {
+			$frm[$this_field] = intval($frm[$this_field]);
+		} elseif(StringMb::strpos($this_type, 'float(')!==false) {
+			$frm[$this_field] = floatval($frm[$this_field]);
+		} elseif($this_type == 'date' || $this_type == 'datetime') {
+			$frm[$this_field] = get_mysql_date_from_user_input($frm[$this_field]);
+		}
+		$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($frm[$this_field]) . "'";
+	}
 	if (!empty($frm['id'])) {
-		return query("UPDATE peel_adresses SET
-			".$set_sql."
-			WHERE id = '" . intval(vn($frm['id'])) . "'");
+		$sql = "UPDATE peel_adresses SET 
+			" . implode(',', $sql_fields_array) . "
+			WHERE id = '" . intval(vn($frm['id'])) . "'";
+		$result = query($sql);
 	} else {
-		return query("INSERT INTO peel_adresses SET 
-		".$set_sql."");
+		$sql = "INSERT INTO peel_adresses SET 
+			" . implode(',', $sql_fields_array) . "";
+		$result = query($sql);
+		$frm['id'] = insert_id();
 	}
+		if($return_id) {
+		return $frm['id'];
+		} else {
+		return $result;
+		}
 }
 
 /**
@@ -1135,7 +1177,7 @@ function user_account_completion($user_infos) {
  * @param string $additional_text
  * @return
  */
-function get_profile_bloc($user_infos, $ad_id = null, $additional_text = null, $message_id = null) {
+function get_profile_bloc($user_infos, $annonce_object = null, $additional_text = null, $message_id = null) {
 	if (!empty($user_infos['user_public_profil_url'])) {
 		$url = $user_infos['user_public_profil_url'];
 	} elseif(function_exists('get_vote_profil_url')) {
@@ -1145,29 +1187,76 @@ function get_profile_bloc($user_infos, $ad_id = null, $additional_text = null, $
 	} else {
 		$url = '#';
 	}
-	if (!empty($ad_id)) {
+	if (!empty($annonce_object->ref)) {
 		// Si présente : id de l'annonce relative à l'utilisateur, dans le cas où on affiche tous les profils par annonce
-		$url .= '?ad_related='.$ad_id.'&user_related='.$user_infos['id_utilisateur'];
+		$url .= '?ad_related='.$annonce_object->ref.'&user_related='.$user_infos['id_utilisateur'];
 	}
 	if (!empty($message_id)) {
-		// Si présente : id du message relatif à la candidateur d'un utilisateur, dans le cas où on affiche tous les profils par annonce
-		$url .= '&msgid='.$message_id;
+		// Si présente : id du message relatif à la candidateur d'un utilisateur, dans le cas où on affiche tous les profils par annonce. Avec le message_id on peut récupérer la campagne associé, puisque cette info est stockée dans le champ dispo de peel_user_contacts
+		$url .= '&msgid='.intval($message_id);
+		$sql = "SELECT dispo, product_id
+			FROM peel_user_contacts
+			WHERE id = " . intval($message_id);
+		$query = query($sql);
+		if ($result_campaign_id = fetch_assoc($query)) {
+			$url .= '&campaign_id='.intval($result_campaign_id['dispo']);
+			if (!empty($result_campaign_id['product_id'])) {
+				$url .= '&product_id='.intval($result_campaign_id['product_id']);
+			}
+			// On va récupérer les infos sur la campagne, pour afficher le nom dans le bloc.
+			$sql = "SELECT *
+				FROM peel_ads_users_activity
+				WHERE id=".intval($result_campaign_id['dispo']);
+			$query = query($sql);
+			if ($result = fetch_assoc($query)) {
+				if(vb($result['activity_type']) == 'item_campaign_quote') {
+					$additional_text .= $GLOBALS['STR_QUOTE'] . ' - ';
+				} elseif(vb($result['activity_type']) == 'item_campaign_contest') {
+					$additional_text .= $GLOBALS['STR_CONTEST'] . ' - ';
+				} elseif(vb($result['activity_type']) == 'item_campaign_tender') {
+					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_TENDER'] . ' - ';
+				} elseif(vb($result['activity_type']) == 'item_campaign_contribution') {
+					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_INNOV_CONTRIBUTION_SEARCH'] . ' - ';
+				} elseif(vb($result['activity_type']) == 'item_campaign_avis') {
+					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_OPINION_CAMPAIGN'] . ' - ';
+				} elseif(vb($result['activity_type']) == 'campaign_search') {
+					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_SEARCH_CAMPAIGN'] . ' - ';
+				}
+				$additional_text .= $result['title'];
+			}
+		}
 	}
 	if(empty($user_infos['logo'])) {
 		$user_infos['logo'] = $GLOBALS['site_parameters']['default_picture'];
 	}
-	if (!empty($ad_id)) {
-		$query_ads_related = query('SELECT user_id
+	if (!empty($annonce_object->ref)) {
+		$sql = 'SELECT user_id
 			FROM peel_ads_related
-			WHERE ad_id="' . intval($ad_id) . '" AND user_id='.intval($user_infos['id_utilisateur']).'
-			LIMIT 1');
+			WHERE ad_id="' . intval($annonce_object->ref) . '" AND user_id='.intval($user_infos['id_utilisateur']);
+		if (!empty($result_campaign_id['dispo'])) {
+			$sql .= ' AND campaign_id = ' . intval($result_campaign_id['dispo']);
+		}
+		if (!empty($result_campaign_id['product_id'])) {
+			$sql .= ' AND product_id = ' . intval($result_campaign_id['product_id']);
+		}
+		if ($annonce_object->site_id == 5 && !empty($message_id)) {
+			$sql .= ' AND message_id = ' . intval($message_id);
+		}
+		$sql .= '
+			LIMIT 1';
+		$query_ads_related = query($sql);
 		if ($result=fetch_assoc($query_ads_related)) {
-			$additional_text .= '
-			<h4>'. $GLOBALS["STR_RECIPIENT_CHOSEN"] .'</h4>';
+			if ($GLOBALS['site_id'] == 2) {
+				$additional_text .= '
+				<h4>'. $GLOBALS["STR_MODULE_DREAMTAKEOFF_SELECTED_ENTRANT"] .'</h4>';
+			} else {
+				$additional_text .= '
+				<h4>'. $GLOBALS["STR_RECIPIENT_CHOSEN"] .'</h4>';
+			}
 		}
 	}
 	$output = '
-	<div class="user' . String::substr($user_infos['civilite'], 0, 1) . '">
+	<div class="user' . StringMb::substr($user_infos['civilite'], 0, 1) . '">
 		<table>
 			<tr>
 				<td class="center"><h3><a href="' . $url . '">' . (function_exists('get_user_picto')?get_user_picto($user_infos['civilite'],$user_infos['priv']):'') . (!empty($user_infos['pseudo'])?$user_infos['pseudo']:$user_infos['prenom'].' '.$user_infos['nom_famille']) . '</a></h3></td>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -37,6 +37,10 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		return false;
 	}
 	$source_filename = str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $source_filename);
+	if(strpos($source_filename, '/') === 0 && !empty($source_folder)) {
+		// On force le chemin du dossier à root car le chemin relatif est imposé par le nom du fichier
+		$source_folder = $GLOBALS['dirroot'];
+	}
 	$file_type = get_file_type($source_filename);
 	if($file_type == 'pdf') {
 		// Gestion des pdf
@@ -68,13 +72,13 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		$srcTime = 0;
 	} else {
 		if ($source_folder === null) {
-			if(strpos($source_filename, '/'.$GLOBALS['site_parameters']['cache_folder'].'/') === false) {
+			if(strpos($source_filename, '/') === false) {
 				$source_folder = $GLOBALS['uploaddir'];
 			} else {
 				$source_folder = $GLOBALS['dirroot'];
 			}
 		}
-		if(String::substr($source_folder, -1) != '/') {
+		if(StringMb::substr($source_folder, -1) != '/') {
 			$source_folder .= '/';
 		}
 		if(strpos($source_filename, $source_folder) === false) {
@@ -106,11 +110,11 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		$inWidth = vb($width);
 		$inHeight = vb($height);
 		// On génère le nom de l'image cache
-		$folder_hash = String::substr(md5($source_path . '-' . $width . 'x' . $height . '-' . $method), 0, vn($GLOBALS['site_parameters']['thumbs_name_suffix_length'], 6));
+		$folder_hash = StringMb::substr(md5($source_path . '-' . $width . 'x' . $height . '-' . $method), 0, vn($GLOBALS['site_parameters']['thumbs_name_suffix_length'], 6));
 		$thumb_filename = $nom . '-' . $folder_hash . '.' . $extension;
 		if(!empty($use_subfolders)) {
-			$folder1 = String::substr($folder_hash, 0, 2);
-			$folder2 = ''; // String::substr($folder_hash, 2, 2);
+			$folder1 = StringMb::substr($folder_hash, 0, 2);
+			$folder2 = ''; // StringMb::substr($folder_hash, 2, 2);
 			$thumb_path = $thumb_folder . $folder1 . '/' . (!empty($folder2) ? $folder2 . '/':'') . $thumb_filename;
 		} else {
 			$thumb_path = $thumb_folder . $thumb_filename;
@@ -267,12 +271,12 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 	}
 	if(!empty($return_absolute_path) && !empty($thumb_filename)) {
 		if($return_absolute_path === true) {
-			return $GLOBALS['repertoire_upload'] . '/thumbs/' . String::rawurlencode($thumb_filename);
+			return $GLOBALS['repertoire_upload'] . '/thumbs/' . StringMb::rawurlencode($thumb_filename);
 		} else {
-			return $return_absolute_path . String::rawurlencode($thumb_filename);
+			return $return_absolute_path . StringMb::rawurlencode($thumb_filename);
 		}
 	} else {
-		return String::rawurlencode($thumb_filename);
+		return StringMb::rawurlencode($thumb_filename);
 	}
 }
 

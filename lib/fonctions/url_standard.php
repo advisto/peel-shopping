@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: url_standard.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: url_standard.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -258,7 +258,7 @@ if (!function_exists('get_url')) {
 	 * @access public
 	 */
 	function get_url($uri, $get_array = array(), $lang = null, $forced_site_id = null) {
-		$uri_by_technical_code = array('caddie_affichage' => '/achat/caddie_affichage.php', 'achat_maintenant' => '/achat/achat_maintenant.php');
+		$uri_by_technical_code = array('catalog' => '/achat/index.php', 'account' => '/compte.php', 'caddie_affichage' => '/achat/caddie_affichage.php', 'achat_maintenant' => '/achat/achat_maintenant.php');
 		if(!empty($uri_by_technical_code[$uri])){
 			$uri = $uri_by_technical_code[$uri];
 		}
@@ -268,7 +268,7 @@ if (!function_exists('get_url')) {
 		if(empty($get_array)) {
 			$get_array = array();
 		}
-		if(String::strpos($uri, '/') === false && String::strpos($uri, '.') === false) {
+		if(StringMb::strpos($uri, '/') === false && StringMb::strpos($uri, '.') === false) {
 			$uri .= '.php';
 		}
 		if($uri == '/achat/marque.php' && !empty($get_array['id'])) {
@@ -278,28 +278,28 @@ if (!function_exists('get_url')) {
 				WHERE p.id='" . intval($get_array['id']) . "'";
 			$query = query($sql);
 			if($result = fetch_assoc($query)){
-				$uri = '/' . rewriting_urlencode($GLOBALS['STR_BRAND']) . '/' . String::ucfirst(rewriting_urlencode($result['marque']));
+				$uri = '/' . rewriting_urlencode($GLOBALS['STR_BRAND']) . '/' . StringMb::ucfirst(rewriting_urlencode($result['marque']));
 				unset($get_array['id']);
 			}
 		}
 		if(function_exists('convertHrefUri') && empty($forced_site_id)) {
 			$url = convertHrefUri($uri, $get_array, $lang);
 		} else {
-			if(String::substr($uri, 0, 1) !== '/') {
+			if(StringMb::substr($uri, 0, 1) !== '/') {
 				$uri = '/' . $uri;
 			}
 			if (count($get_array) > 0) {
 				foreach ($get_array as $key => $value) {
 					$queryString[] = $key . '=' . urlencode($value);
 				}
-				if(String::strpos($uri, '?') !== false) {
+				if(StringMb::strpos($uri, '?') !== false) {
 					$uri .= '&';
 				} else {
 					$uri .= '?';
 				}
 				$uri .= implode('&', $queryString);
 			}
-			if(String::strpos($uri, '://') === false) {
+			if(StringMb::strpos($uri, '://') === false) {
 				$uri = get_site_wwwroot($forced_site_id, $lang) . $uri;
 			}
 			$url = handle_setup_redirections($uri, 'value');

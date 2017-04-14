@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_haut.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -19,7 +19,7 @@ $tpl = $GLOBALS['tplEngine']->createTemplate('admin_haut.tpl');
 $tpl->assign('lang', $_SESSION['session_langue']);
 $tpl->assign('sortie_href', get_url('sortie'));
 $tpl->assign('STR_ADMIN_DISCONNECT', $GLOBALS['STR_ADMIN_DISCONNECT']);
-$tpl->assign('doc_title', String::ucfirst(String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed(str_replace(array("\r", "\n"), '', vb($GLOBALS['DOC_TITLE']))))), 80, '', '', 65)));
+$tpl->assign('doc_title', StringMb::ucfirst(StringMb::str_shorten(trim(StringMb::strip_tags(StringMb::html_entity_decode_if_needed(str_replace(array("\r", "\n"), '', vb($GLOBALS['DOC_TITLE']))))), 80, '', '', 65)));
 $tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 $tpl->assign('wwwroot_in_admin', $GLOBALS['wwwroot_in_admin']);
 if($_SESSION['session_langue'] == 'fr') {
@@ -32,7 +32,7 @@ if (!IN_INSTALLATION) {
 } else {
 	$admin_welcome = $GLOBALS['STR_HELLO'];
 }
-if (String::strpos($GLOBALS['DOC_TITLE'], '<a ') === false) {
+if (StringMb::strpos($GLOBALS['DOC_TITLE'], '<a ') === false) {
 	$tpl->assign('page_title', str_replace($GLOBALS['site'], '<a href="' . $GLOBALS['wwwroot'] . '/">' . $GLOBALS['site'] . '</a>', $GLOBALS['DOC_TITLE']));
 } else {
 	// Un lien est déjà présent dans DOC_TITLE, il ne faut pas faire de remplacement de lien.

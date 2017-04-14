@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: produit_details.php 53261 2017-03-22 17:12:58Z sdelaporte $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -21,6 +21,12 @@ $output = '';
 $product_infos = array();
 $form_error_object = new FormError();
 
+if (function_exists('set_product_id')) {
+	$product_id = set_product_id($_GET);
+	if (!empty($product_id)) {
+		$_GET['id'] = $product_id;
+	}
+}
 if (empty($_GET['id'])) {
 	// Si aucun produit n'est spécifié, retour à la page d'accueil
 	redirect_and_die(get_url('/'), true);
@@ -39,6 +45,14 @@ if(!empty($GLOBALS['site_parameters']['allow_multiple_product_url_with_category'
 		$product_infos['categorie'] = get_category_name($product_infos['categorie_id']);
 	}
 }
+// On récupère l'information on_check du produit ici, pour le passer ensuite à la classe Product qui en a besoin pour savoir si il faut faire une jointure INNER JOIN ou LEFT JOIN sur la table de catégories, en fonction si on_check ou pas
+$sql = "SELECT on_check
+	FROM peel_produits
+	WHERE id = ". intval($_GET['id']);
+$query = query($sql);
+if ($result = fetch_assoc($query)) {
+	$product_infos['on_check'] = $result['on_check'];
+}
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 if (!empty($_GET['step'])) {
 	call_module_hook('attribut_step', array('product_object'=>$product_object, 'frm'=> $_POST, 'step'=> $_GET['step']));
@@ -50,7 +64,7 @@ if (empty($product_object->id) || ((!a_priv("admin_product") && !a_priv("reve"))
 	redirect_and_die(get_url('/'), true);
 }
 if (check_if_module_active('url_rewriting')) {
-	if (String::strpos($_SERVER['REQUEST_URI'], 'id=') !== false) {
+	if (StringMb::strpos($_SERVER['REQUEST_URI'], 'id=') !== false) {
 		if (empty($url)) {
 			$url = get_url('/');
 		}

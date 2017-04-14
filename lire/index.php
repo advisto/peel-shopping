@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: index.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (defined('PEEL_PREFETCH')) {
 	call_module_hook('configuration_end', array());
 } else {
@@ -27,6 +27,7 @@ if (empty($_GET['rubid']) && !empty($GLOBALS['site_parameters']['disallow_main_c
 $output = '';
 $GLOBALS['page_name'] = 'rubriques';
 $rubid = intval(vn($_GET['rubid']));
+$on_new = intval(vn($_GET['on_new']));
 $sql = "SELECT r.nom_" . $_SESSION['session_langue'] . " as nom, etat, technical_code
 	FROM peel_rubriques r
 	WHERE r.id ='" . intval($rubid) . "' AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
@@ -34,9 +35,9 @@ $sql = "SELECT r.nom_" . $_SESSION['session_langue'] . " as nom, etat, technical
 	";
 $rub_query = query($sql);
 if ($rub = fetch_assoc($rub_query)) {
-	if(!empty($rub['technical_code']) && String::strpos($rub['technical_code'], 'R=') === 0) {
+	if(!empty($rub['technical_code']) && StringMb::strpos($rub['technical_code'], 'R=') === 0) {
 		// redirection suivie que la rubrique soit active ou non
-		redirect_and_die(get_url(String::substr($rub['technical_code'], 2)), true);
+		redirect_and_die(get_url(StringMb::substr($rub['technical_code'], 2)), true);
 	}
 	if($rub['etat']==0 && !a_priv('admin_content', false)) {
 		redirect_and_die(get_url('/'), true);
@@ -68,7 +69,7 @@ if (function_exists('has_special_article') && has_special_article($rubid)) {
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('lire.tpl');
 $tpl->assign('class', $class);
-$tpl->assign('articles_list_brief_html', get_articles_list_brief_html($rubid));
+$tpl->assign('articles_list_brief_html', get_articles_list_brief_html($rubid, $on_new));
 if(!empty($display_timeline)){
 	$tpl->assign('display_timeline', get_display_timeline(true));
 }

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ProductsBought.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ProductsBought.php 53352 2017-03-28 20:41:24Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,19 +21,20 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: ProductsBought.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: ProductsBought.php 53352 2017-03-28 20:41:24Z gboussin $
  * @access public
  */
 class ProductsBought {
 	var $nom;
 	var $couleur;
 	var $lien;
+
 	/**
-	 * ProductsBought::ProductsBought()
+	 * 
 	 *
 	 * @param mixed $obj
 	 */
-	function ProductsBought($obj)
+	function __construct($obj)
 	{
 		foreach(get_object_vars($obj) as $name => $val) {
 			if ($name == 'nom_' . $_SESSION['session_langue'] || $name == 'nom_produit') {
@@ -59,7 +60,7 @@ class ProductsBought {
 	 * @param boolean $raw
 	 * @return string SQL
 	 */
-	function _sql_de_base($id = null, $limit = 500, $raw = false)
+	public static function _sql_de_base($id = null, $limit = 500, $raw = false)
 	{
 		$sql = "SELECT ca.produit_id,
 			ca.commande_id,
@@ -92,7 +93,7 @@ class ProductsBought {
 	 * @param integer $id
 	 * @return object
 	 */
-	function find($id)
+	public static function find($id)
 	{
 		$ret = null;
 		$req = query(ProductsBought::_sql_de_base($id));
@@ -112,7 +113,7 @@ class ProductsBought {
 	 * @param integer $limit
 	 * @return array
 	 */
-	function find_all($limit = 500)
+	public static function find_all($limit = 500)
 	{
 		$ret = array();
 		$req = query(ProductsBought::_sql_de_base(null, $limit));
@@ -123,11 +124,11 @@ class ProductsBought {
 	}
 
 	/**
-	 * ProductsBought::clients()
+	 * 
 	 *
 	 * @return array
 	 */
-	function clients()
+	public function clients()
 	{
 		$ret = array();
 		$req = query("SELECT u.*,

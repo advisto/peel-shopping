@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: societe.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: societe.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
@@ -22,11 +22,12 @@ $frm = $_POST;
 $form_error_object = new FormError();
 
 if (!isset($_REQUEST['mode']) && !empty($_SESSION['session_admin_multisite'])) {
+	
 	$all_sites_name_array = get_all_sites_name_array();
 	if (count($all_sites_name_array) == 1) {
 		// Si il y a qu'un site configuré, on affiche directement la page de modification du site numéro défini par $_SESSION['session_admin_multisite'], sinon le site 1
 		if(isset($_SESSION['session_admin_multisite'])) {
-			redirect_and_die(get_current_url(false) . "?mode=modif&id=" . $_SESSION['session_admin_multisite']);
+			redirect_and_die(get_current_url(false) . "?mode=modif&site_id=" . $_SESSION['session_admin_multisite']);
 		} else {
 			redirect_and_die(get_current_url(false) . "?mode=modif&id=1");
 		}
@@ -55,7 +56,17 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "modif" :
-		$output .= affiche_formulaire_modif_societe(intval($_GET['id']), $frm);
+		if (!empty($_GET['site_id'])) {
+			$query = query("SELECT id
+				FROM peel_societe 
+				WHERE site_id = " . intval($_GET['site_id']));
+			if($result = fetch_assoc($query)) {
+				$id = $result['id'];
+			}
+		} elseif(!empty($_GET['id'])) {
+			$id = $_GET['id'];
+		}
+		$output .= affiche_formulaire_modif_societe(intval($id), $frm);
 		break;
 
 	case "maj" :
@@ -71,6 +82,13 @@ switch (vb($_REQUEST['mode'])) {
 			}
 			$output .= affiche_formulaire_modif_societe(intval($frm['id']), $frm);
 		}
+		break;
+
+	case "suppr" :
+		$sql = "DELETE FROM peel_societe 
+			WHERE id = " . intval($_GET['id']);
+		query($sql);
+		$output .= liste_societe($frm);
 		break;
 
 	default :
@@ -145,14 +163,14 @@ function affiche_formulaire_modif_societe($id, &$frm)
 		/* Récupère les informations de la societe */
 		$qid = query("SELECT *
 			FROM peel_societe
-			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('societe', null, true) . "");
-		if (num_rows($qid) > 0) {
-			$frm = fetch_assoc($qid);
+			WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('societe', null, true) . "");
+		if ($frm = fetch_assoc($qid)) {
 			$frm['site_country'] = explode(',', vb($frm['site_country']));
 		} else {
 			$frm = array();
 		}
 	}
+
 	if (!empty($frm)) {
 		$frm['nouveau_mode'] = "maj";
 		$frm['titre_soumet'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
@@ -285,8 +303,8 @@ function maj_societe($frm)
 			, code_guichet = '" . nohtml_real_escape_string($frm['code_guichet']) . "'
 			, numero_compte = '" . nohtml_real_escape_string($frm['numero_compte']) . "'
 			, cle_rib = '" . nohtml_real_escape_string($frm['cle_rib']) . "'
-			, titulaire = '" . nohtml_real_escape_string(String::strtoupper($frm['titulaire'])) . "'
-			, domiciliation = '" . nohtml_real_escape_string(String::strtoupper($frm['domiciliation'])) . "'
+			, titulaire = '" . nohtml_real_escape_string(StringMb::strtoupper($frm['titulaire'])) . "'
+			, domiciliation = '" . nohtml_real_escape_string(StringMb::strtoupper($frm['domiciliation'])) . "'
 			, cnil = '" . nohtml_real_escape_string($frm['cnil']) . "'
 			, iban = '" . nohtml_real_escape_string($frm['iban']) . "'
 			, swift = '" . nohtml_real_escape_string($frm['swift']) . "'
@@ -325,7 +343,7 @@ function liste_societe($frm)
 	while ($r = fetch_object($query)) {
 		$site_country_array = array();
 		if (!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-			if(String::strlen($r->site_country)>0) {
+			if(StringMb::strlen($r->site_country)>0) {
 				foreach(explode(',', $r->site_country) as $this_id) {
 					$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
 				}

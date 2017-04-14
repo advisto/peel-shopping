@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an     |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: import_produits.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -40,7 +40,7 @@ $columns_skipped = array();
 switch ($action) {
 	case "import":
 		if (a_priv('demo')) {
-			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 			break;
 		}
 		echo $GLOBALS['tplEngine']->createTemplate('admin_import_produits_table.tpl')->fetch();
@@ -48,7 +48,7 @@ switch ($action) {
 			// Mise à jour de la table de préférence des champs
 			query("UPDATE peel_import_field SET etat='0'");
 			foreach($_POST['on_update'] as $this_id => $this_value) {
-				echo '<input type="hidden" name="on_update[' . $this_id . ']" value="' . String::str_form_value($this_value) . '" />';
+				echo '<input type="hidden" name="on_update[' . $this_id . ']" value="' . StringMb::str_form_value($this_value) . '" />';
 				query("UPDATE peel_import_field
 					SET etat='1'
 					WHERE champs='" . nohtml_real_escape_string($this_value) . "' AND " . get_filter_site_cond('import_field', null, true) . "");
@@ -83,10 +83,10 @@ switch ($action) {
 						$selected_product_field_names[] = $this_field_name;
 					}
 				}
-				$fp = String::fopen_utf8($GLOBALS['uploaddir'] . '/' . $fichier, "rb");
+				$fp = StringMb::fopen_utf8($GLOBALS['uploaddir'] . '/' . $fichier, "rb");
 				// Effacement des produits
 				$nbprod = 0;
-				$this_line = String::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
+				$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
 				if (empty($_POST['columns_separator'])) {
 					// détection automatique
 					if (strpos($this_line, "\t") !== false) {
@@ -139,16 +139,16 @@ switch ($action) {
 				$line_number = 0;
 
 				if (empty($skip_import)) {
-					while (!String::feof($fp)) {
+					while (!StringMb::feof($fp)) {
 						unset($product_id);
 						unset($set_sql_fields);
 						unset($field_values);
 						$last_treated_columns = 0;
 						$line_number++;
 						// Si une valeur de cas contient des sauts de ligne, alors on prend quand même la ligne suivante comme si c'était la continuité de cette ligne
-						while (!String::feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
+						while (!StringMb::feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
 							// Tant qu'on n'atteint pas fin de fichier
-							$this_line = String::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
+							$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
 							if (empty($this_line)) {
 								break;
 							}

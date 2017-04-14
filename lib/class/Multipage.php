@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: Multipage.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: Multipage.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -81,7 +81,7 @@ class Multipage {
 	/**
 	 * Constructeur
 	 */
-	function Multipage($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null, $no_pagination_displayed = false)
+	function __construct($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null, $no_pagination_displayed = false)
 	{
 		if (empty($template_name)) {
 			if(defined('IN_PEEL_ADMIN')) {
@@ -133,7 +133,7 @@ class Multipage {
 			} else {
 				$this->page = 1;
 			}
-			if (empty($_POST) && !defined('IN_PEEL_ADMIN') && String::strpos(get_current_url(true), 'start=' . $_GET['start']) !== false) {
+			if (empty($_POST) && !defined('IN_PEEL_ADMIN') && StringMb::strpos(get_current_url(true), 'start=' . $_GET['start']) !== false) {
 				// L'URL contient bien en GET start=... (sans qu'il ne soit dans une URL réécrite)
 				// On fait une redirection 301 pour éviter que cette URL reste indexée
 				redirect_and_die(get_current_url(true, false, array('start')), true);
@@ -157,7 +157,7 @@ class Multipage {
 				if(!empty($this->nombre_session_var_name)){
 					$_SESSION[$this->nombre_session_var_name] = $_GET['nombre'];
 				}
-				if (empty($_POST) && !defined('IN_PEEL_ADMIN') && String::strpos(get_current_url(true), 'nombre=' . urlencode($_GET['nombre'])) !== false && (empty($_GET['multipage']) || $_GET['multipage'] == $this->nombre_session_var_name)) {
+				if (empty($_POST) && !defined('IN_PEEL_ADMIN') && StringMb::strpos(get_current_url(true), 'nombre=' . urlencode($_GET['nombre'])) !== false && (empty($_GET['multipage']) || $_GET['multipage'] == $this->nombre_session_var_name)) {
 					// L'URL contient bien en GET nombre=... (sans qu'il ne soit dans une URL réécrite) et qui s'applique au multipage souhaité
 					// On fait une redirection 302 pour éviter que cette URL ne soit indexée
 					redirect_and_die(get_current_url(true, false, array('nombre', 'multipage')));
@@ -221,10 +221,10 @@ class Multipage {
 			$this->LimitSQL .= " LIMIT " . intval($lines_begin) . ", " . intval($lines_count);
 		}
 		$sql = $this->LimitSQL;
-		if(($this->sql_count === null || String::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (String::strpos(String::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (String::substr($sql, 0, 1) != '(' || String::strpos($sql, 'UNION') === false || String::substr_count($sql, 'SELECT')<2))) {
+		if(($this->sql_count === null || StringMb::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (StringMb::strpos(StringMb::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (StringMb::substr($sql, 0, 1) != '(' || StringMb::strpos($sql, 'UNION') === false || StringMb::substr_count($sql, 'SELECT')<2))) {
 			// Si nécessaire, on rajoute SQL_CALC_FOUND_ROWS
 			// On ne le fait pas pour une requête de type UNION - le test sur la parenthèse est une sécurité qui évite des hacks lors de recherche utilisateur
-			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', String::substr($sql, 0, 10)) . String::substr($sql, 10);
+			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', StringMb::substr($sql, 0, 10)) . StringMb::substr($sql, 10);
 		}
 		$query = query($sql);
 		if ($this->ResultPerPage != '*') {
@@ -307,13 +307,13 @@ class Multipage {
 	{
 		$link = get_current_generic_url();
 		if (strpos($link, '[PAGE]') !== false) {
-			$link = str_replace('[PAGE]', String::rawurlencode($page), $link);
+			$link = str_replace('[PAGE]', StringMb::rawurlencode($page), $link);
 		} elseif ($page > 1) {
 			$link .= (strstr($link, '?') ? '&' : '?') . 'page=' . urlencode($page);
 		}
 		if ($nombre !== null) {
 			if (strpos($link, '[NOMBRE]') !== false) {
-				$link = str_replace('[NOMBRE]', String::rawurlencode($nombre), $link);
+				$link = str_replace('[NOMBRE]', StringMb::rawurlencode($nombre), $link);
 			} else {
 				$link .= (strstr($link, '?') ? '&' : '?') . 'nombre=' . urlencode($nombre) . '&multipage=' . $this->nombre_session_var_name;
 			}
@@ -348,21 +348,21 @@ class Multipage {
 		$tpl->assign('total_page', $this->pages_count);
 		$tpl->assign('colspan', $this->pages_count + ($this->AddToColspan));
 		$tpl->assign('show_page_if_only_one', $show_page_if_only_one);
-		$tpl->assign('next_page', ($this->page < $this->pages_count ? '<a href="' . String::str_form_value($this->getPageURL($this->page + 1)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/next_page.png" alt="' . $GLOBALS['STR_NEXT_PAGE'] . '" /></a>' : ''));
-		$tpl->assign('previous_page', ($this->page > 1 ? '<a href="' . String::str_form_value($this->getPageURL(min($this->page - 1, $this->pages_count))) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/previous_page.png" alt="' . $GLOBALS['STR_PREVIOUS_PAGE'] . '" /></a>' : ''));
-		$tpl->assign('first_page', ($this->page != 1 ? '<a href="' . String::str_form_value($this->getPageURL(1)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/first_page.png" alt="' . $GLOBALS['STR_FIRST_PAGE'] . '" /></a>' : ''));
-		$tpl->assign('last_page', (!is_user_bot() && $this->page < $this->pages_count ? '<a href="' . String::str_form_value($this->getPageURL($this->pages_count)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/last_page.png" alt="' . $GLOBALS['STR_LAST_PAGE'] . '" /></a>' : ''));
+		$tpl->assign('next_page', ($this->page < $this->pages_count ? '<a href="' . StringMb::str_form_value($this->getPageURL($this->page + 1)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/next_page.png" alt="' . $GLOBALS['STR_NEXT_PAGE'] . '" /></a>' : ''));
+		$tpl->assign('previous_page', ($this->page > 1 ? '<a href="' . StringMb::str_form_value($this->getPageURL(min($this->page - 1, $this->pages_count))) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/previous_page.png" alt="' . $GLOBALS['STR_PREVIOUS_PAGE'] . '" /></a>' : ''));
+		$tpl->assign('first_page', ($this->page != 1 ? '<a href="' . StringMb::str_form_value($this->getPageURL(1)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/first_page.png" alt="' . $GLOBALS['STR_FIRST_PAGE'] . '" /></a>' : ''));
+		$tpl->assign('last_page', (!is_user_bot() && $this->page < $this->pages_count ? '<a href="' . StringMb::str_form_value($this->getPageURL($this->pages_count)) . '"><img src="' . $GLOBALS['wwwroot'] . '/images/last_page.png" alt="' . $GLOBALS['STR_LAST_PAGE'] . '" /></a>' : ''));
 		if (is_user_bot()) {
 			// Pour les moteurs de recherche on retire la possibilité de changer de nombre de résultats, puisque de toutes façons ça ne peut pas marcher pour eux qui ne gèrent pas les sessions
 			$links_per_page = null;
 		} else {
 			$links_per_page = $GLOBALS['STR_PER_PAGE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':  ' .
-			(($this->nb1 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb1)) . '" rel="nofollow">' . $this->nb1 . '</a>'):('<b>' . $this->nb1 . '</b>')) . ' ' .
-			(($this->nb2 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb2)) . '" rel="nofollow">' . $this->nb2 . '</a>'):('<b>' . $this->nb2 . '</b>')) . ' ' .
-			(($this->nb3 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb3)) . '" rel="nofollow">' . $this->nb3 . '</a>'):('<b>' . $this->nb3 . '</b>'));
+			(($this->nb1 != $this->ResultPerPage)?('<a href="' . StringMb::str_form_value($this->getPageURL(1, $this->nb1)) . '" rel="nofollow">' . $this->nb1 . '</a>'):('<b>' . $this->nb1 . '</b>')) . ' ' .
+			(($this->nb2 != $this->ResultPerPage)?('<a href="' . StringMb::str_form_value($this->getPageURL(1, $this->nb2)) . '" rel="nofollow">' . $this->nb2 . '</a>'):('<b>' . $this->nb2 . '</b>')) . ' ' .
+			(($this->nb3 != $this->ResultPerPage)?('<a href="' . StringMb::str_form_value($this->getPageURL(1, $this->nb3)) . '" rel="nofollow">' . $this->nb3 . '</a>'):('<b>' . $this->nb3 . '</b>'));
 			if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
 				// Activation du lien pour afficher tous les résultats
-				$links_per_page .= ' ' .(($this->nb4 != $this->ResultPerPage)?('<a href="' . String::str_form_value($this->getPageURL(1, $this->nb4)) . '" rel="nofollow">' . $GLOBALS['STR_ALL_RESULTS'] . '</a>'):('<b>' . $GLOBALS['STR_ALL_RESULTS'] . '</b>')) . ' ';
+				$links_per_page .= ' ' .(($this->nb4 != $this->ResultPerPage)?('<a href="' . StringMb::str_form_value($this->getPageURL(1, $this->nb4)) . '" rel="nofollow">' . $GLOBALS['STR_ALL_RESULTS'] . '</a>'):('<b>' . $GLOBALS['STR_ALL_RESULTS'] . '</b>')) . ' ';
 			}
 			$links_per_page .= (($this->nb1 != $this->ResultPerPage && $this->nb2 != $this->ResultPerPage && $this->nb3 != $this->ResultPerPage && (empty($GLOBALS['site_parameters']['multipage_show_all_result']) || $this->nb4 != $this->ResultPerPage))?(' (' . $this->ResultPerPage . ')'):'');
 		}
@@ -375,7 +375,7 @@ class Multipage {
 				if ($this_page == $this->page) {
 					$page .= '<span class="current_page_number">' . $this_page . '</span>';
 				} else {
-					$page .= '<a href="' . String::str_form_value($this->getPageURL($this_page)) . '">' . $this_page . '</a>';
+					$page .= '<a href="' . StringMb::str_form_value($this->getPageURL($this_page)) . '">' . $this_page . '</a>';
 				}
 				$liens[] = array('i' => $this_page, 'page' => $page);
 			}
@@ -433,7 +433,7 @@ class Multipage {
 			} else {
 				$colspan_text = '';
 			}
-			if ($this->allow_get_sort && !empty($_GET[$this->order_get_variable]) && $key === $_GET[$this->order_get_variable]) {
+			if ($this->allow_get_sort && !empty($_SESSION[$this->nombre_session_var_name.'_order']) && $key === $_SESSION[$this->nombre_session_var_name.'_order']) {
 				$output .= '
 		<th class="menu center multipage_selected_field"' . $colspan_text . '>';
 			} else {
@@ -443,7 +443,7 @@ class Multipage {
 			if (!is_numeric($key) && $this->allow_get_sort) {
 				$link_url = $_SERVER['REQUEST_URI'];
 				if (empty($_GET[$this->order_get_variable])) {
-					if (String::strpos($link_url, '?') === false) {
+					if (StringMb::strpos($link_url, '?') === false) {
 						$link_url .= '?';
 					} else {
 						$link_url .= '&amp;';
@@ -478,14 +478,17 @@ class Multipage {
 	 */
 	function getOrderBy()
 	{
-		if (!empty($_GET[$this->sort_get_variable]) && $this->allow_get_sort) {
-			$this_sort = String::substr(String::strtoupper(word_real_escape_string($_GET[$this->sort_get_variable])), 0, 4);
+		if(!empty($_GET[$this->sort_get_variable]) && !empty($this->nombre_session_var_name)){
+			$_SESSION[$this->nombre_session_var_name.'_sort'] = $_GET[$this->sort_get_variable];
+		}
+		if (!empty($_SESSION[$this->nombre_session_var_name.'_sort']) && $this->allow_get_sort) {
+			$this_sort = StringMb::substr(StringMb::strtoupper(word_real_escape_string($_SESSION[$this->nombre_session_var_name.'_sort'])), 0, 4);
 		} elseif (!empty($this->SortDefault)) {
-			$this_sort = String::substr(String::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
+			$this_sort = StringMb::substr(StringMb::strtoupper(word_real_escape_string($this->SortDefault)), 0, 4);
 		} else {
 			$this_sort = 'ASC';
 		}
-		if(!in_array(String::strtolower($this_sort), array('asc', 'desc'))) {
+		if(!in_array(StringMb::strtolower($this_sort), array('asc', 'desc'))) {
 			$this_sort = 'ASC';
 		}
 		if (!empty($this->forced_before_first_order_by_string)) {
@@ -495,12 +498,15 @@ class Multipage {
 			// Si $this->HeaderTitlesArray est défini avant appel à Query, ça permet de faire un test sur les colonnes de tri autorisées
 			// Sinon, on laisse essayer de faire le tri sur n'importe quelle colonne, ce qui est permet éventuellement un ORDER BY sur colonne qui n'existe pas et une erreur SQL
 			// => il vaut mieux toujours définir $this->HeaderTitlesArray juste après la création d'un objet Multipage
-			$columns = array_values(explode(',', str_replace(' ', '', ($this->allow_get_sort && !empty($_GET[$this->order_get_variable]) && (!isset($this->HeaderTitlesArray) || isset($this->HeaderTitlesArray[$_GET[$this->order_get_variable]]))?$_GET[$this->order_get_variable] . ',':'') . $this->OrderDefault)));
+			if(!empty($_GET[$this->order_get_variable]) && !empty($this->nombre_session_var_name)){
+				$_SESSION[$this->nombre_session_var_name.'_order'] = $_GET[$this->order_get_variable];
+			}
+			$columns = array_values(explode(',', str_replace(' ', '', ($this->allow_get_sort && !empty($_SESSION[$this->nombre_session_var_name.'_order']) && (!isset($this->HeaderTitlesArray) || isset($this->HeaderTitlesArray[$_SESSION[$this->nombre_session_var_name.'_order']]))?$_SESSION[$this->nombre_session_var_name.'_order'] . ',':'') . $this->OrderDefault)));
 			foreach($columns as $this_column) {
 				if (!empty($this_column)) {
 					// En cas d'ambiguïté, l'on peut avoir la forme : table.colonne
 					$this_order_by = '`' . str_replace('.', '`.`', word_real_escape_string($this_column)) . '`';
-					if(!empty($this->order_sql_prefix) && String::strpos($this_column, '.') === false) {
+					if(!empty($this->order_sql_prefix) && StringMb::strpos($this_column, '.') === false) {
 						$this_order_by = word_real_escape_string($this->order_sql_prefix) . '.' . $this_order_by;
 					}
 					$order_by[] = $this_order_by;
@@ -516,7 +522,7 @@ class Multipage {
 		}
 		if(!empty($order_by)) {
 			foreach($order_by as $this_key => $this_value) {
-				if(!empty($this_sort) && String::strpos($this_value, ' ') === false) {
+				if(!empty($this_sort) && StringMb::strpos($this_value, ' ') === false) {
 					// On rajoute l'ordre si pas spécifié
 					$order_by[$this_key] .= ' ' . $this_sort;
 				}

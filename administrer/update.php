@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 50575 2016-07-07 16:17:27Z sdelaporte $
+// $Id: update.php 53591 2017-04-13 15:46:58Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -97,7 +97,7 @@ if(!empty($_GET['version'])) {
 			$current_version = '7.0.4';
 		} elseif(empty($result_autocomplete_hide_images)) {
 			$current_version = '7.1.0';
-		} elseif(!in_array('site_id', $commandes_fields)) {
+		} elseif(!in_array('order_id', $commandes_fields)) {
 			$current_version = '7.1.4';
 		} elseif(in_array('reve_certif', $profil_fields)) {
 			$current_version = '7.2.0';
@@ -1211,6 +1211,8 @@ INSERT INTO `peel_profil` (`name`, `priv`, `description_document`) VALUES
 ('Administrateur Webmastering', 'admin_webmastering', ''),
 ('Administrateur Modération', 'admin_moderation', '');
 ";
+
+$sql_update_array['6.4.2'] = '';
 if($current_version<='6.4.2') {
 	$query = query("SELECT email_webmaster, email_client, nom_expediteur, email_paypal
 		FROM peel_sites");
@@ -1227,7 +1229,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 	}
 }
 if(file_exists($GLOBALS['dirroot'] . '/modules/attributs')) {
-	$sql_update_array['6.4.2'] = "
+	$sql_update_array['6.4.2'] .= "
 ALTER TABLE `peel_nom_attributs` ADD `type_affichage_attribut` tinyint(1) NOT NULL DEFAULT '0';";
 }
 $sql_update_array['6.4.2'] .= "
@@ -1420,7 +1422,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (159, 'general_read_all_reviews_image', 'core', 'string', '{\$GLOBALS[''repertoire_images'']}/tous_les_avis.png', '', NOW(), '', 1),
 (160, 'general_add_notepad_image', 'core', 'string', '{\$GLOBALS[''repertoire_images'']}/ajout_pense_bete.png', '', NOW(), '', 1),
 (161, 'check_allowed_types', 'auto', 'boolean', 'false', '', NOW(), 'Vous pouvez activer une vérification du type MIME des fichiers téléchargés. Cela pose de nombreux problèmes car cette information n''est pas fiable et des navigateurs envoient des types MIME parfois imprévus => cette vérification est désactivée par défaut', 1),
-(162, 'allowed_types', 'auto', 'array', '\"image/gif\" => \".gif\", \"image/pjpeg\" => \".jpg, .jpeg\", \"image/jpeg\" => \".jpg, .jpeg\", \"image/x-png\" => \".png\", \"image/png\" => \".png\", \"text/plain\" => \".html, .php, .txt, .inc, .csv\", \"text/comma-separated-values\" => \".csv\", \"application/comma-separated-values\" => \".csv\", \"text/csv\" => \".csv\", \"application/vnd.ms-excel\" => \".csv\", \"application/csv-tab-delimited-table\" => \".csv\", \"application/octet-stream\" => \"\", \"application/pdf\" => \".pdf\", \"application/force-download\" => \"\", \"application/x-shockwave-flash\" => \".swf\", \"application/x-download\" => \"', '', NOW(), 'Cette variable est utilisée si check_allowed_types = true', 1),
+(162, 'allowed_types', 'auto', 'array', '\"image/gif\" => \".gif\", \"image/pjpeg\" => \".jpg, .jpeg\", \"image/jpeg\" => \".jpg, .jpeg\", \"image/x-png\" => \".png\", \"image/png\" => \".png\", \"text/plain\" => \".html, .php, .txt, .inc, .csv\", \"text/comma-separated-values\" => \".csv\", \"application/comma-separated-values\" => \".csv\", \"text/csv\" => \".csv\", \"application/vnd.ms-excel\" => \".csv\", \"application/csv-tab-delimited-table\" => \".csv\", \"application/octet-stream\" => \"\", \"application/pdf\" => \".pdf\", \"application/force-download\" => \"\", \"application/x-shockwave-flash\" => \".swf\", \"application/x-download\" => \"\"', '', NOW(), 'Cette variable est utilisée si check_allowed_types = true', 1),
 (163, 'extensions_valides_any', 'auto', 'array', '\"jpg\", \"jpeg\", \"gif\", \"png\", \"csv\", \"txt\", \"pdf\", \"zip\"', '', NOW(), 'Vérification en fonction des extensions des fichiers téléchargés', 1),
 (164, 'extensions_valides_data', 'auto', 'array', '\"csv\", \"txt\"', '', NOW(), 'Vérification en fonction des extensions des fichiers téléchargés', 1),
 (165, 'extensions_valides_image_or_pdf', 'auto', 'array', '\"jpg\", \"jpeg\", \"gif\", \"png\", \"pdf\"', '', NOW(), 'Vérification en fonction des extensions des fichiers téléchargés', 1),
@@ -1747,7 +1749,7 @@ ALTER TABLE `peel_produits` ADD `recommanded_product_on_cart_page` tinyint(1) NO
 UPDATE  peel_configuration SET `string` = '\"jpg\", \"jpeg\", \"gif\", \"png\", \"ico\", \"swf\", \"csv\", \"txt\", \"pdf\", \"zip\"'  WHERE technical_code = 'extensions_valides_any';
 
 -- Ajout de champs obligatoires dans la variable de configuration user_mandatory_fields
-UPDATE peel_configuration SET string='\"prenom\" => \"STR_ERR_FIRSTNAME\", \"nom_famille\" => \"STR_ERR_NAME\", \"adresse\" => \"STR_ERR_ADDRESS\", \"code_postal\" => \"STR_ERR_ZIP\", \"ville\" => \"STR_ERR_TOWN\", \"pays\" => \"STR_ERR_COUNTRY\", \"telephone\" => \"STR_ERR_TEL\", \"email\" => \"STR_ERR_EMAIL\", \"pseudo\" => \"STR_ERR_PSEUDO\", \"token\" => \"STR_INVALID_TOKEN\", \"lang\" => \"STR_EMPTY_FIELD\", \"societe\" => \"STR_ERR_SOCIETY\", \"type\" => \"STR_ERR_YOU_ARE\", \"activity\" => \"STR_ERR_ACTIVITY\", \"code\" => \"STR_EMPTY_FIELD\"' WHERE technical_code='user_mandatory_fields';
+UPDATE peel_configuration SET string='\"prenom\" => \"STR_ERR_FIRSTNAME\", \"nom_famille\" => \"STR_ERR_NAME\", \"adresse\" => \"STR_ERR_ADDRESS\", \"code_postal\" => \"STR_ERR_ZIP\", \"ville\" => \"STR_ERR_TOWN\", \"pays\" => \"STR_ERR_COUNTRY\", \"telephone\" => \"STR_ERR_TEL\", \"email\" => \"STR_ERR_EMAIL\", \"pseudo\" => \"STR_ERR_PSEUDO\", \"token\" => \"STR_INVALID_TOKEN\"' WHERE technical_code='user_mandatory_fields';
 
 -- Ajout de configuration
 INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`) VALUES
@@ -2204,8 +2206,9 @@ UPDATE `peel_vignettes_carrousels` SET site_id = 1;
 $sql_update_array['7.1.4'] .= "
 
 -- Les administrateurs doivent avoir les droits nécesaire pour administrer les boutiques.
-UPDATE peel_utilisateurs SET site_id = 0 WHERE `priv` LIKE 'admin%';
+UPDATE peel_utilisateurs SET site_id = 0 WHERE `priv` LIKE 'admin%';";
 
+$sql_update_array['7.1.4'] .= "
 -- L'id du type de livraison et de la tva sont incrementés, il faut prévoir int(11)
 ALTER TABLE `peel_zones` CHANGE `tva` `tva` int(11) NOT NULL DEFAULT '0';
 ALTER TABLE `peel_tarifs` CHANGE `type` `type` int(11) NOT NULL DEFAULT '0';
@@ -2297,12 +2300,12 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('modules_lang_folders_array', 'modules', 'array', '[forum] => \"/modules/forum/lang/\", [agenda] => \"/modules/agenda/lang/\", [participants] => \"/modules/participants/lang/\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/lang/\", [photos_gallery] => \"/modules/photos_gallery/lang/\", [sign_in_twitter] => \"/modules/sign_in_twitter/lang/\", [references] => \"/modules/references/lang/\", [icirelais] => \"/modules/icirelais/lang/\", [exaprint] => \"/modules/exaprint/lang/\", [groups_advanced] => \"/modules/groups_advanced/lang/\", [annonces] => \"/modules/annonces/lang/\", [abonnement] => \"/modules/abonnement/lang/\", [vitrine] => \"/modules/vitrine/lang/\", [affiliation] => \"/modules/affiliation/lang/\", [listecadeau] => \"/modules/listecadeau/lang/\", [blog] => \"/modules/blog/lang/\", [payback] => \"/modules/payback/lang/\", [tnt] => \"/modules/tnt/lang/\", [vatlayer] => \"/modules/vatlayer/lang/\", [telechargement] => \"/modules/telechargement/lang/\", [devis] => \"/modules/devis/lang/\", [exaprint] => \"/modules/exaprint/lang/\", [kiala] => \"/modules/kiala/lang/\"', '', NOW(), '', 1, 0),
 ('modules_configuration_variable_array', 'modules', 'array', '[affiliation] => \"module_affilie\", [reseller] => \"module_retail\", [gift_check] => \"module_cadeau\", [tagcloud] => \"module_nuage\", [banner] => \"module_pub\", [devises] => \"module_devise\", [parrainage] => \"module_parrain\", [micro_entreprise] => \"module_entreprise\", [facebook_connect] => \"facebook_connect\", [googlefriendconnect] => \"googlefriendconnect\", [sign_in_twitter] => \"sign_in_twitter\"', '', NOW(), '', 1, 0),
 ('modules_fonctions_variable_array', 'modules', 'array', '[devises] => \"fonctionsdevises\", [sips] => \"fonctionsatos\", [profil] => \"fonctionsprofile\", [good_clients] => \"fonctionsgoodclients\", [facture_advanced] => \"fonctionsgenerepdf\", [statistiques] => \"fonctionsstats\", [welcome_ad] => \"fonctionswelcomead\", [reseller_map] => \"fonctionsresellermap\", [maps] => \"fonctionsmap\", [precedent_suivant] => \"fonctionsprecedentsuivant\", [url_rewriting] => \"rewritefile\", [banner] => \"fonctionsbanner\", [cart_popup] => \"fonctionscartpoup\", [advanced_search] => \"fonctionssearch\", [category_promotion] => \"fonctionscatpromotions\", [marques_promotion] => \"fonctionsmarquepromotions\", [groups_advanced] => \"fonctionsgroupsadvanced\", [parrainage] => \"fonctionsparrain\", [micro_entreprise] => \"fonctionsmicro\", [photos_gallery] => \"fonctionsphotosgallery\", [sign_in_twitter] => \"fonctionssignintwitter\", [phone_cti] => \"fonctionsphonecti\", [exaprint] => \"fonctionsadministrerexaprint\", [payment_by_product] => \"fonctionspaymentbyproduct\", [affiliation] => \"fonctionsaffiliate\", [listecadeau] => \"fonctionsgiftlist\", [gifts] => \"fonctionsgift\", [newsletter] => \"fonctionswanewsletter\", [facebook_connect] => \"fonctionfacebookconnect\", [ariane_panier] => \"fonctionsarianepanier\"', '', NOW(), '', 1, 0),
-('modules_no_library_load_array', 'modules', 'array', '\"sips\", \"cmcic\", \"bluepaid\", \"fianet\", \"fianet_sac\", \"ogone\", \"omnikassa\", \"paybox\", \"spplus\", \"systempay\", \"moneybookers\", \"paypal\", \"comparateur\", \"birthday\", \"good_clients\", \"facture_advanced\", \"statistiques\", \"expeditor\", \"chart\", \"kekoli\", \"reseller_map\", \"photodesk\"', '', NOW(), '', 1, 0),
+('modules_no_library_load_array', 'modules', 'array', '\"sips\", \"cmcic\", \"bluepaid\", \"fianet\", \"fianet_sac\", \"ogone\", \"omnikassa\", \"paybox\", \"spplus\", \"systempay\", \"moneybookers\", \"paypal\", \"birthday\", \"good_clients\", \"facture_advanced\", \"statistiques\", \"expeditor\", \"chart\", \"kekoli\", \"reseller_map\", \"photodesk\"', '', NOW(), '', 1, 0),
 ('modules_front_office_only_array', 'modules', 'array', '\"commerciale\"', '', NOW(), '', 1, 0),
 ('modules_back_office_only_array', 'modules', 'array', '\"exaprint\"', '', NOW(), '', 1, 0),
 ('modules_front_office_js_array', 'modules', 'array', '[forum] => \"/modules/forum/forum.js\"', '', NOW(), '', 1, 0),
 ('modules_no_optional_array', 'modules', 'array', '\"forum\", \"reseller\", \"thumbs\", \"attributs\", \"marques_promotion\", \"category_promotion\", \"devises\", \"ecotaxe\", \"url_rewriting\", \"annonces\", \"abonnement\", \"references\"', '', NOW(), '', 1, 0),
-('modules_admin_functions_array', 'modules', 'array', '[tagcloud] => \"/modules/tagcloud/administrer/fonctions.php\", [devises] => \"/modules/devises/administrer/fonctions.php\", [gift_check] => \"/modules/gift_check/administrer/fonctions.php\", [attributs] => \"/modules/attributs/administrer/fonctions.php\", [avis] => \"/modules/avis/administrer/fonctions.php\", [lot] => \"/modules/lot/administrer/fonctions.php\", [annonces] => \"/modules/annonces/administrer/fonctions.php\", [abonnement] => \"/modules/abonnement/administrer/fonctions.php\", [banner] => \"/modules/banner/administrer/fonctions.php\", [vitrine] => \"/modules/vitrine/administrer/fonctions.php\", [lexique] => \"/modules/lexique/administrer/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/administrer/fonctions.php\", [payment_by_product] => \"/modules/payment_by_product/administrer/fonctions.php\", [download] => \"/modules/download/administrer/fonctions.php\", [affiliation] => \"/modules/affiliation/administrer/fonctions.php\", [partenaires] => \"/modules/partenaires/administrer/fonctions.php\", [parrainage] => \"/modules/parrainage/administrer/fonctions.php\", [webmail] => \"/modules/webmail/administrer/fonctions.php\", [profil] => \"/modules/profil/administrer/fonctions.php\", [telechargement] => \"/modules/telechargement/administrer/fonctions.php\", [faq] => \"/modules/faq/administrer/fonctions.php\", [groups] => \"/modules/groups/administrer/fonctions.php\", [references] => \"/modules/references/administrer/fonctions.php\", [relance_avance] => \"/modules/relance_avance/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
+('modules_admin_functions_array', 'modules', 'array', '[tagcloud] => \"/modules/tagcloud/administrer/fonctions.php\", [devises] => \"/modules/devises/administrer/fonctions.php\", [gift_check] => \"/modules/gift_check/administrer/fonctions.php\", [attributs] => \"/modules/attributs/administrer/fonctions.php\", [avis] => \"/modules/avis/administrer/fonctions.php\", [lot] => \"/modules/lot/administrer/fonctions.php\", [annonces] => \"/modules/annonces/administrer/fonctions.php\", [abonnement] => \"/modules/abonnement/administrer/fonctions.php\", [banner] => \"/modules/banner/administrer/fonctions.php\", [vitrine] => \"/modules/vitrine/administrer/fonctions.php\", [lexique] => \"/modules/lexique/administrer/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/administrer/fonctions.php\", [payment_by_product] => \"/modules/payment_by_product/administrer/fonctions.php\", [download] => \"/modules/download/administrer/fonctions.php\", [affiliation] => \"/modules/affiliation/administrer/fonctions.php\", [partenaires] => \"/modules/partenaires/administrer/fonctions.php\", [parrainage] => \"/modules/parrainage/administrer/fonctions.php\", [webmail] => \"/modules/webmail/administrer/fonctions.php\", [profil] => \"/modules/profil/administrer/fonctions.php\", [telechargement] => \"/modules/telechargement/administrer/fonctions.php\", [faq] => \"/modules/faq/administrer/fonctions.php\", [groups] => \"/modules/groups/administrer/fonctions.php\", [references] => \"/modules/references/administrer/fonctions.php\", [relance_avance] => \"/modules/relance_avance/administrer/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
 ('modules_crons_functions_array', 'modules', 'array', '[annonces] => \"/modules/annonces/administrer/fonctions.php\"', '', NOW(), '', 1, 0),
 ('modules_front_office_functions_files_array', 'modules', 'array', '[url_rewriting] => \"/modules/url_rewriting/rewrite.php\", [devises] => \"/modules/devises/fonctions.php\", [reseller] => \"/modules/reseller/fonctions.php\", [menus] => \"/modules/menus/fonctions.php\", [best_seller] => \"/modules/best_seller/fonctions.php\", [last_views] => \"/modules/last_views/fonctions.php\", [gift_check] => \"/modules/gift_check/fonctions.php\", [relance_avance] => \"/modules/relance_avance\", [spam] => \"/modules/spam/fonctions.php\", [carrousel] => \"/modules/carrousel/fonctions.php\", [stock_advanced] => \"/modules/stock_advanced/fonctions.php\", [download] => \"/modules/download/fonctions.php\", [facebook] => \"/modules/facebook/fonctions.php\", [facebook_connect] => \"/modules/facebook_connect/fonctions.php\", [sign_in_twitter] => \"/modules/sign_in_twitter/fonctions.php\", [googlefriendconnect] => \"/modules/googlefriendconnect/fonctions.php\", [openid] => \"/modules/openid/fonctions.php\", [cmcic] => \"/modules/cmcic/cmcic.php\", [bluepaid] => \"/modules/bluepaid/fonctions.php\", [fianet_sac] => \"/modules/fianet_sac/fonctions.php\",  [omnikassa] => \"/modules/omnikassa/fonctions.php\", [paybox] => \"/modules/paybox/fonctions.php\", [spplus] => \"/modules/spplus/fonctions.php\", [systempay] => \"/modules/systempay/functions.php\", [moneybookers] => \"/modules/moneybookers/fonctions.php\", [paypal] => \"/modules/paypal/fonctions.php\", [faq] => \"/modules/faq/fonctions.php\", [lexique] => \"/modules/lexique/fonctions.php\", [avis] => \"/modules/avis/fonctions.php\", [comparateur] => \"/modules/comparateur/administrer/fonctions.php\", [profil] => \"/modules/profil/fonctions.php\", [lot] => \"/modules/lot/fonctions.php\", [birthday] => \"/modules/birthday/administrer/bons_anniversaires.php\", [good_clients] => \"/modules/good_clients\", [groups] => \"/modules/groups/fonctions.php\", [facture_advanced] => \"/modules/facture_advanced\", [statistiques] => \"/modules/statistiques\", [expeditor] => \"/modules/expeditor\", [duplicate] => \"/modules/duplicate/administrer/fonctions.php\", [welcome_ad] => \"/modules/welcome_ad/fonctions.php\", [chart] => \"/modules/chart/open-flash-chart.php\", [kekoli] => \"/modules/kekoli/administrer/fonctions.php\", [tnt] => \"/modules/tnt/fonctions.php,/modules/tnt/class/Tnt.php\", [reseller_map] => \"/modules/reseller_map/fonctions.php\", [clients] => \"/modules/clients/fonctions.php\", [photodesk] => \"/modules/photodesk/fonctions.php\", [conditionnement] => \"/modules/conditionnement/fonctions.php\", [commerciale] => \"/modules/commerciale/administrer/fonctions.php\", [webmail] => \"/modules/webmail/fonctions.php\", [agenda] => \"/modules/agenda/fonctions.php\", [sauvegarde_recherche] => \"/modules/sauvegarde_recherche/fonctions.php\", [exaprint] => \"/modules/exaprint/administrer/fonctions.php\", [annonces] => \"/modules/annonces/class/Annonce.php,/modules/annonces/fonctions.php,/modules/annonces/display_annonce.php\", [cart_popup] => \"/modules/cart_popup/fonctions.php\", [tagcloud] => \"/modules/tagcloud/fonctions.php\", [banner] => \"/modules/banner/fonctions.php\", [rss] => \"/modules/rss/fonctions.php\", [pensebete] => \"/modules/pensebete/fonctions.php\", [thumbs] => \"/modules/thumbs/fonctions.php\", [search] => \"/modules/search/fonctions.php\", [attributs] => \"/modules/attributs/fonctions.php\", [marques_promotion] => \"/modules/marques_promotion/fonctions.php\", [category_promotion] => \"/modules/category_promotion/fonctions.php\", [micro_entreprise] => \"/modules/micro_entreprise/fonctions.php\", [gifts] => \"/modules/gifts/fonctions.php\", [precedent_suivant] => \"/modules/precedent_suivant/fonctions.php\", [ariane_panier] => \"/modules/ariane_panier/fonctions.php\", [cart_preservation] => \"/modules/cart_preservation/fonctions.php\", [parrainage] => \"/modules/parrainage/fonctions.php\", [affiliation] => \"/modules/affiliation/fonctions.php\", [ecotaxe] => \"/modules/ecotaxe/fonctions.php\", [devis] => \"/modules/devis/fonctions.php\", [captcha] => \"/modules/captcha/fonctions.php\", [vacances] => \"/modules/vacances/fonctions.php\", [newsletter] => \"/modules/newsletter/peel/fonctions.php\", [direaunami] => \"/modules/direaunami\", [factures] => \"/modules/factures\", [export] => \"/modules/export\", [picking] => \"/modules/picking\", [marges] => \"/modules/marges\", [flash] => \"/modules/flash\", [iphone-ads] => \"/modules/iphone-ads\", [bounces] => \"/modules/bounces\", [vatlayer] => \"/modules/vatlayer/functions.php\", [faq] => \"/modules/faq/fonctions.php\"', '', NOW(), '', 1, 0);
 UPDATE `peel_configuration` SET `string`='peel7' WHERE technical_code = 'template_directory';
@@ -2362,6 +2365,11 @@ if(file_exists($GLOBALS['dirroot'] . '/modules/avis')) {
 ALTER TABLE `peel_avis` ADD `detail` VARCHAR( 255 ) NOT NULL DEFAULT '';
 ";
 }
+if(file_exists($GLOBALS['dirroot'] . '/modules/telechargement')) {
+	$sql_update_array['8.0.2'] .= "
+ALTER TABLE `peel_telechargement` ADD `priv_restriction` VARCHAR(255) NOT NULL DEFAULT '' AFTER `user_restriction`;
+";
+}
 $sql_update_array['8.0.3'] = "";
 if(file_exists($GLOBALS['dirroot'] . '/modules/annonces')) {
 	$sql_update_array['8.0.3'] .= "
@@ -2403,8 +2411,122 @@ CREATE TABLE IF NOT EXISTS `peel_partenaires_views` (
   KEY `partner_id` (`partner_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
 }
+if(file_exists($GLOBALS['dirroot'] . '/modules/crons')) {
+	$sql_update_array['8.0.3'] .= "
+ALTER TABLE `peel_crons` ADD `stopped_at_site_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `last_exec_result`;
+";
+}
+$sql_update_array['8.0.4'] = "
+ALTER TABLE `peel_ecotaxes` ADD `coefficient` float(15,5) NOT NULL DEFAULT '0.00000';
+";
+
+$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_categories` ADD `date_insere` datetime NOT NULL;
+ALTER TABLE `peel_categories` ADD `date_maj` datetime NOT NULL;
+ALTER TABLE `peel_categories` ADD `allow_show_all_sons_products` tinyint(1) NOT NULL DEFAULT '0';
+";
+
+$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_rubriques` ADD `date_insere` datetime NOT NULL;
+ALTER TABLE `peel_rubriques` ADD `date_maj` datetime NOT NULL;
+";
+
+if(file_exists($GLOBALS['dirroot'] . '/modules/lot')) {
+	$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_quantites`  ADD `zone_id` int(11) NOT NULL DEFAULT '0';
+";
+}
+
+if(file_exists($GLOBALS['dirroot'] . '/modules/avis')) {
+	$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_avis`  ADD `item_id` int(11) NOT NULL DEFAULT '0';
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/annonces')) {
+	$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_lot_vente` ADD `id_adresse` int(11) NOT NULL DEFAULT '0';
+";
+}
+$sql_update_array['8.0.4'] .= "
+CREATE TABLE `peel_transactions` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `reference` varchar(255) NOT NULL,
+  `report_id` int(11) UNSIGNED NOT NULL,
+  `orders_id` int(11) UNSIGNED NOT NULL,
+  `site_name` varchar(255) NOT NULL,
+  `reconciliation` enum('','auto','manual') NOT NULL,
+  `comment` varchar(255) NOT NULL,
+  `type` enum('','cc_report','cc_emitted','paypal_wire','checks','cash','wire','prelevement','reimbursement','fee','pret','sicav','salaire','check','transfer','cmcic','cmcic_by_3','atos','atos_by_3','cetelem','systempay','systempay_3x','spplus','paybox','bluepaid','bluepaid_abonnement','kwixo','kwixo_rnp','kwixo_credit','ogone','postfinance','worldpay','omnikassa','moneybookers','paypal') NOT NULL,
+  `datetime` datetime NOT NULL,
+  `DATE_COMPTA` varchar(255) NOT NULL,
+  `LIBELLE_OPERATION` varchar(255) NOT NULL,
+  `REF` varchar(255) NOT NULL,
+  `DATE_OPERATION` varchar(255) NOT NULL,
+  `DATE_VALEUR` varchar(255) NOT NULL,
+  `MONTANT_DEBIT` varchar(255) NOT NULL,
+  `MONTANT_CREDIT` varchar(255) NOT NULL,
+  `L_STATUS` varchar(255) NOT NULL,
+  `L_AMT` varchar(255) NOT NULL,
+  `L_FEEAMT` varchar(255) NOT NULL,
+  `ENTETE` varchar(255) NOT NULL,
+  `TRANSACTION_ID` varchar(255) NOT NULL,
+  `MERCHANT_ID` varchar(255) NOT NULL,
+  `PAYMENT_MEANS` varchar(255) NOT NULL,
+  `ORIGIN_AMOUNT` varchar(255) NOT NULL,
+  `AMOUNT` varchar(255) NOT NULL,
+  `CURRENCY_CODE` varchar(255) NOT NULL,
+  `PAYMENT_DATE` varchar(255) NOT NULL,
+  `PAYMENT_TIME` varchar(255) NOT NULL,
+  `CARD_VALIDITY` varchar(255) NOT NULL,
+  `CARD_TYPE` varchar(255) NOT NULL,
+  `CARD_NUMBER` varchar(255) NOT NULL,
+  `RESPONSE_CODE` varchar(255) NOT NULL,
+  `CVV_RESPONSE_CODE` varchar(255) NOT NULL,
+  `COMPLEMENTARY_CODE` varchar(255) NOT NULL,
+  `CERTIFICATE` varchar(255) NOT NULL,
+  `AUTHORIZATION_ID` varchar(255) NOT NULL,
+  `CAPTURE_DATE` varchar(255) NOT NULL,
+  `TRANSACTION_STATUS` varchar(255) NOT NULL,
+  `RETURN_CONTEXT` varchar(255) NOT NULL,
+  `AUTORESPONSE_STATUS` varchar(255) NOT NULL,
+  `ORDER_ID` varchar(255) NOT NULL,
+  `CUSTOMER_ID` varchar(255) NOT NULL,
+  `CUSTOMER_IP_ADDRESS` varchar(255) NOT NULL,
+  `ACCOUNT_SERIAL` varchar(255) NOT NULL,
+  `SESSION_ID` varchar(255) NOT NULL,
+  `TRANSACTION_CONDITION` varchar(255) NOT NULL,
+  `CAVV_UCAF` varchar(255) NOT NULL,
+  `COMPLEMENTARY_INFO` varchar(255) NOT NULL,
+  `BANK_RESPONSE_CODE` varchar(255) NOT NULL,
+  `MODE_REGLEMENT` varchar(255) NOT NULL,
+  `3D_LS` varchar(255) NOT NULL,
+  `bank` varchar(255) NOT NULL DEFAULT ''
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+--
+-- Index pour la table `peel_transactions`
+--
+ALTER TABLE `peel_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `TRANSACTION_STATUS` (`TRANSACTION_STATUS`),
+  ADD KEY `orders_id` (`orders_id`),
+  ADD KEY `PAYMENT_DATE` (`PAYMENT_DATE`),
+  ADD KEY `report_id` (`report_id`),
+  ADD KEY `site_name` (`site_name`);
+--
+-- AUTO_INCREMENT pour la table `peel_transactions`
+--
+ALTER TABLE `peel_transactions`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  
+ALTER TABLE `peel_produits_references` ADD `quantity` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `peel_webmail` ADD `update_datetime` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00';
+";
+if(file_exists($GLOBALS['dirroot'] . '/modules/annonces') || file_exists($GLOBALS['dirroot'] . '/modules/messaging')) {
+	$sql_update_array['8.0.4'] .= "
+ALTER TABLE `peel_user_contacts` CHANGE `status` `status` SET('TRUE','FALSE','FILTERED','NO_EMAIL','READ','SEND','TREATED','TRASH','DELETED') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'TRUE'; 
+";
+}
 // FIN du SQL par version
-	
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	
 }
@@ -2419,13 +2541,16 @@ if (!empty($current_version)) {
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK'))->fetch();
 	} elseif(!empty($_GET['do_update'])) {
 		foreach($sql_update_array as $this_version => $this_sql) {
-			if($this_version >= $current_version && $GLOBALS['site_parameters']['peel_database_version'] < PEEL_VERSION) {
-				if($this_version == '8.0.0') {
+			if($this_version >= $current_version && vn($GLOBALS['site_parameters']['peel_database_version']) < PEEL_VERSION) {
+				if($this_version == '7.1.4') {
+					// Nouveau : site_id dans peel_utilisateur => il faut MAJ pour l'administrateur loggué
+					$_SESSION['session_utilisateur']['site_id'] = 0;
+				} elseif($this_version == '8.0.0') {
 					// On active les modules pour lesquels aucune variable qui définit son activation n'est trouvée dans la BDD en créant la variable module_xxxx à 1
 					load_site_parameters();
 					preload_modules();
 					foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
-						if(!class_exists(String::ucfirst($this_module)) && !empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
+						if(!class_exists(StringMb::ucfirst($this_module)) && !empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 							// On gère uniquement les modules light préconfigurés - pour les autres il faudra aller dans l'administration gérer la configuration des modules dans sites.php
 							// En effet, par défaut plus tard on considèrera que si la variable de configuration module_xxxx pas trouvée, on considère que le module n'est pas activé.
 							set_configuration_variable(array('technical_code' => vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$this_module], 'module_' . $this_module), 'string' => 1, 'type' => 'integer', 'site_id' => 0, 'origin' => 'modules'), false);

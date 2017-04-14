@@ -1,20 +1,20 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_haut.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_haut.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ lang }}" dir="ltr">
 <head>
-	<meta charset="{{ GENERAL_ENCODING }}" />
+	{% if GENERAL_ENCODING %}<meta charset="{{ GENERAL_ENCODING }}" />{% endif %}
 	<meta name="generator" content="{{ generator|str_form_value }}" />
 	<meta name="robots" content="noindex,nofollow" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: order_step1.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}{% if (error_cvg) %}
 	<p>{{ error_cvg  }}</p>
 {% endif %}
@@ -47,22 +47,22 @@
 				</div>
 				<div>
 					<label for="adresse1">{{ STR_ADDRESS }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
-					<textarea class="form-control" cols="50" rows="3" name="adresse1" id="adresse1">{{ adresse1 }}</textarea>
+					<textarea {% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %} class="form-control" cols="50" rows="3" name="adresse1" id="adresse1">{{ adresse1 }}</textarea>
 					{{ adresse1_error }}
 				</div>
 				<div>
 					<label for="code_postal1">{{ STR_ZIP }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
-					<input class="form-control" type="text" name="code_postal1" id="code_postal1" size="32" value="{{ code_postal1|str_form_value }}" />
+					<input {% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %} class="form-control" type="text" name="code_postal1" id="code_postal1" size="32" value="{{ code_postal1|str_form_value }}" />
 					{{ code_postal1_error }}
 				</div>
 				<div>
 					<label for="ville1">{{ STR_TOWN }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
-					<input class="form-control" type="text" name="ville1" id="ville1" size="32" value="{{ ville1|str_form_value }}" />
+					<input {% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %} class="form-control" type="text" name="ville1" id="ville1" size="32" value="{{ ville1|str_form_value }}" />
 					{{ ville1_error }}
 				</div>
 				<div>
 					<label for="pays1">{{ STR_COUNTRY }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
-					<select class="form-control" name="pays1" id="pays1">
+					<select{% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %}  class="form-control" name="pays1" id="pays1">
 						{{ pays1_options }}
 					</select>
 					{{ pays1_error }}
@@ -136,9 +136,13 @@
 				<legend>{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}: </legend>
 				<div><textarea class="form-control" name="commentaires" cols="54" rows="5">{{ commentaires }}</textarea></div>
 			</fieldset>
+			{% if order_process_disable_cgv is empty %}
 			<p><input type="checkbox" name="cgv" value="1" /> {{ STR_CGV_OK }}</p>
+			{% endif %}
 			{% if register_during_order_process %}
 			<p><input type="checkbox" name="register_during_order_process" value="1" />{{ STR_CREATE_ACCOUNT_FUTURE_USE }}</p>
+			{% else %}
+			<br />
 			{% endif %}
 			<div class="center">
 				<input type="submit" value="{{ STR_ETAPE_SUIVANTE|str_form_value }}" class="btn btn-lg btn-primary" />

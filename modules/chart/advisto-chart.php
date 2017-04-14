@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: advisto-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: advisto-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -136,10 +136,10 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 			} elseif ($data_title == 'H') {
 				$color = '0000FF';
 			} else {
-				$r = base_convert(base_convert(String::substr(md5($data_title), 0, 4), 16, 10) % 15, 10, 16);
-				$g = base_convert(base_convert(String::substr(md5($data_title), 5, 4), 16, 10) % 15, 10, 16);
-				$b = base_convert(base_convert(String::substr(md5($data_title), 9, 4), 16, 10) % 15, 10, 16);
-				$color = String::strtoupper($r . '0' . $g . '0' . $b . '0');
+				$r = base_convert(base_convert(StringMb::substr(md5($data_title), 0, 4), 16, 10) % 15, 10, 16);
+				$g = base_convert(base_convert(StringMb::substr(md5($data_title), 5, 4), 16, 10) % 15, 10, 16);
+				$b = base_convert(base_convert(StringMb::substr(md5($data_title), 9, 4), 16, 10) % 15, 10, 16);
+				$color = StringMb::strtoupper($r . '0' . $g . '0' . $b . '0');
 			}
 			if (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'bar') {
 				if($chart_product == 'flot') {

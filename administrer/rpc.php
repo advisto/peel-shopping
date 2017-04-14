@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: rpc.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -43,7 +43,7 @@ if (!empty($_POST['maxRows'])) {
 if (empty($currency_rate)) {
 	$currency_rate = 1;
 }
-if (String::strlen($search)>0) {
+if (StringMb::strlen($search)>0) {
 	if($mode=="products"){
 		$queries_results_array = get_quick_search_results($search, $maxRows);
 		if(!empty($queries_results_array)) {
@@ -101,11 +101,11 @@ if (String::strlen($search)>0) {
 				$tva_options_html = get_vat_select_options($result->tva);
 				$results_array[] = array('id' => $result->id,
 					'reference' => $result->reference,
-					'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) && !empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(String::html_entity_decode($result->nom), $search, $GLOBALS['found_words_array']) . (String::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(String::html_entity_decode($result->reference), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</div><div class="clearfix" />',
+					'label' => (!empty($GLOBALS['site_parameters']['autocomplete_hide_images']) && !empty($product_picture)?'<div>':'<div class="autocomplete_image"><img src="'.$product_picture.'" /></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . highlight_found_text(StringMb::html_entity_decode($result->nom), $search, $GLOBALS['found_words_array']) . (StringMb::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(StringMb::html_entity_decode($result->reference), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</div><div class="clearfix" />',
 					'nom' => $result->nom,
 					'image' => $display_picture,
 					'image_thumbs' => $product_picture,
-					'prix' => fprix(String::str_form_value($result->prix)),
+					'prix' => fprix(StringMb::str_form_value($result->prix)),
 					'promotion' => null,
 					'size_options_html' => $size_options_html,
 					'color_options_html' => $color_options_html,
@@ -114,6 +114,7 @@ if (String::strlen($search)>0) {
 					'prix_cat_ht' => $prix_cat_ht,
 					'purchase_prix' => $purchase_prix,
 					'purchase_prix_ht' => $purchase_prix_ht,
+					'quantite' => (vn($result->quantity_min_order)>1?$result->quantity_min_order:1),
 					'purchase_prix_displayed' => $purchase_prix_displayed
 					);
 				unset($product_object);
@@ -165,4 +166,4 @@ if (!empty($_POST['return_json_array_with_raw_information'])) {
 	$output .= $tpl->fetch();
 }
 
-echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
+echo StringMb::convert_encoding($output, $page_encoding, GENERAL_ENCODING);

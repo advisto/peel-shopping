@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: eo.php 53557 2017-04-11 17:15:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -67,6 +67,7 @@ $GLOBALS["STR_BANK_ACCOUNT"] = "Banko-konto";
 $GLOBALS["STR_BARCODE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Iĝi partnero";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "Por rete pagi viajn mendojn, ĉi klaku";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "Agenteja kodo";
 $GLOBALS["STR_BRAND_LB"] = "Filtri laŭ: Marko";
@@ -163,7 +164,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "Antaŭplanita livero-tempo";
 $GLOBALS["STR_DELIVERY"] = "Livero";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "%s: vi ne povas efektivigi ĉi agon";
 $GLOBALS["STR_DESC"] = "malkreska";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Priskribo";
+$GLOBALS["STR_DESCRIPTION"] = "Priskribo";
 $GLOBALS["STR_DESIGNATION"] = "Indiknomo";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "Vi malaliĝis la novaĵ-bultenon";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "Malaliĝo de la novaĵ-bulteno";
@@ -374,6 +375,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Miaj uzitaj rabat-kodoj:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Miaj validaj rabat-kodoj:";
 $GLOBALS["STR_MESSAGE"] = "Mesaĝo";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Minimuma aĉet-valoro je";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "nepras la kampo %s";
 $GLOBALS["STR_MLLE"] = "F-ino";
 $GLOBALS["STR_MME"] = "S-ino";
@@ -503,7 +505,7 @@ $GLOBALS["STR_MORE_DETAILS"] = "pliajn detalojn";
 $GLOBALS["STR_MORE"] = "Aĉeti";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "La ŝanĝo de agordoj efektiviĝis.";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Por malfermi konton, ĉi klaku</a>.";
-$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Ensalutu por spezi tempon.";
+$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Ensalutu.";
 $GLOBALS["STR_MSG_THANKS"] = "Dankon pri via konfido, via mendo sukcese registriĝis.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Miaj donac-poentoj";
@@ -562,6 +564,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detaloj de la mendo";
 $GLOBALS["STR_ORDER_FORM"] = "Mendilo";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historio pri mendoj";
+$GLOBALS['STR_ORDER_MIN'] = "";
 $GLOBALS["STR_ORDER_NAME"] = "Mendo";
 $GLOBALS["STR_ORDER_NUMBER"] = "Mendo-numero";
 $GLOBALS["STR_ORDER_POINT"] = "Donac-poentoj";

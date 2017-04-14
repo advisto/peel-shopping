@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: format.php 53289 2017-03-24 09:21:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -38,7 +38,7 @@ function cleanDataDeep(&$value, $key = null)
 		}
 		if (!defined('DISABLE_INPUT_ENCODING_CONVERT') && (!defined('IN_PEEL_ADMIN') || !a_priv('admin*', false))) {
 			foreach($bad_strings as $bad_string) {
-				if (String::strpos($value, $bad_string) !== false) {
+				if (StringMb::strpos($value, $bad_string) !== false) {
 					// On interdit les bad_strings qui pourraient servir à des injections diverses
 					$value = '';
 				}
@@ -48,20 +48,20 @@ function cleanDataDeep(&$value, $key = null)
 				$key_parts=explode('_', str_replace('form_', '', $key));
 				if (!empty($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && (!in_array($key, $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && !in_array($key_parts[0], $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'])) && preg_match('|\</?([a-zA-Z]+[1-6]?)(\s[^>]*)?(\s?/)?\>|', $value)) {
 					// Un utilisateur sans droit administrateur ne peut jamais donner de HTML => protège de toute sorte de XSS
-					$value = String::strip_tags($value);
+					$value = StringMb::strip_tags($value);
 				}
 			}
 		}
 		// On convertit les données en UTF8 si on n'a pas vu de caractère spécifique UTF8
-		if(!defined('DISABLE_INPUT_ENCODING_CONVERT') && !String::detect_utf8_characters($value)){
+		if(!defined('DISABLE_INPUT_ENCODING_CONVERT') && !StringMb::detect_utf8_characters($value)){
 			// A défaut, on considère que l'encodage est en ISO ou CP1252. Si ce n'est pas le cas, ça ne marchera pas.
 			// Mais de toutes façons, il n'y a pas de raison de recevoir autre chose que de l'UTF8
 			// Donc cette conversion est sensée servir très occasionnellement : par exemple lors de la MAJ d'un ancien site, dont les URL étaient encodées en ISO8859
 			// La plupart du temps, ici on a à faire à de l'ASCII classique sans accent, donc aucun changement concret, mais on fait le remplacement au cas où
-			$value = String::utf8_encode($value);
+			$value = StringMb::utf8_encode($value);
 		}
-		if(strlen($value)>20 && String::strpos($value, 'myEventWatcherDiv')!==false) {
-			// On fait un test sur strlen (sans String::, c'est plus rapide) d'abord pour éviter de faire le test strpos lorsque ce n'est pas utile pour accélérer
+		if(strlen($value)>20 && StringMb::strpos($value, 'myEventWatcherDiv')!==false) {
+			// On fait un test sur strlen (sans StringMb::, c'est plus rapide) d'abord pour éviter de faire le test strpos lorsque ce n'est pas utile pour accélérer
 			// On nettoie ce qui est laissé par CKEditor
 			$value = str_replace(array('<div id="myEventWatcherDiv" style="display: none;">&nbsp;</div>', '<div style="display:none;" id="myEventWatcherDiv">&nbsp;</div>', '<div style="display: none;" id="myEventWatcherDiv">&nbsp;</div>'), '', $value);
 		}
@@ -121,7 +121,7 @@ function vn(&$var, $default = 0)
  */
 function getPregConditionCompatAccents($string, $delimiter = '/')
 {
-	$string = preg_quote(String::convert_accents($string), $delimiter);
+	$string = preg_quote(StringMb::convert_accents($string), $delimiter);
 	return str_replace(array("a", "c", "e", "i", "o", "u", "n", "y"),
 		array("[aáåâäàã]", "[cç]", "[eêéèë]", "[iíîïì]", "[oóôöòõ]", "[uûüùú]", "[nñ]", "[yÿý]"), $string);
 }
@@ -134,7 +134,7 @@ function getPregConditionCompatAccents($string, $delimiter = '/')
  */
 function url2Link($string)
 {
-	if(String::strpos($string, '<a ') === false && String::strpos($string, '<img ') === false) {
+	if(StringMb::strpos($string, '<a ') === false && StringMb::strpos($string, '<img ') === false) {
 		return preg_replace('/(http|mailto|news|ftp|https)\:\/\/(([-éa-z0-9\/\.\?_=#@:;,!~&%])*)/i', "<a href=\"$1://$2\" target=\"_blank\">$1://$2</a>", $string);
 	} else {
 		return $string;
@@ -150,21 +150,21 @@ function url2Link($string)
 function linkFormat($text)
 {
 	// A chaque imbrication correcte, on recommence
-	while (String::strpos($text, '[link="') !== false && String::strpos($text, '[/link]', String::strpos($text, '[link="')) !== false) {
+	while (StringMb::strpos($text, '[link="') !== false && StringMb::strpos($text, '[/link]', StringMb::strpos($text, '[link="')) !== false) {
 		// echo 'Iteration <br />';
 		// Traitement pour chaque quote
 		// Il y a au moins un bon quote à remplacer
 		$quote_begin = 0;
-		while (String::strpos($text, '[link="', $quote_begin + 1) !== false) {
+		while (StringMb::strpos($text, '[link="', $quote_begin + 1) !== false) {
 			// on se positionne sur la dernière imbrication
-			$quote_begin = String::strpos($text, '[link="', $quote_begin + 1);
+			$quote_begin = StringMb::strpos($text, '[link="', $quote_begin + 1);
 		}
-		if (String::strpos($text, '[/link]', $quote_begin) === false) {
+		if (StringMb::strpos($text, '[/link]', $quote_begin) === false) {
 			$text .= '[/link]';
 		}
 		$old_text = $text;
-		$quote_end = String::strpos($text, '[/link]', $quote_begin) + String::strlen('[/link]');
-		$quote_text = String::substr($old_text, $quote_begin + strlen('[link="'), $quote_end - $quote_begin - String::strlen('[link="') - String::strlen('[/link]'));
+		$quote_end = StringMb::strpos($text, '[/link]', $quote_begin) + StringMb::strlen('[/link]');
+		$quote_text = StringMb::substr($old_text, $quote_begin + strlen('[link="'), $quote_end - $quote_begin - StringMb::strlen('[link="') - StringMb::strlen('[/link]'));
 		// $quote_text = str_replace('&quot;]', ' a écrit :</b><br />', $quote_text);
 		$quote_text = '<a href="' . $quote_text;
 		$quote_text = str_replace("]", ">", $quote_text);
@@ -172,11 +172,11 @@ function linkFormat($text)
 		// echo $quote_text.'<br />';
 		$text = '';
 		if ($quote_begin > 0) {
-			$text .= String::substr($old_text, 0, $quote_begin);
+			$text .= StringMb::substr($old_text, 0, $quote_begin);
 		}
 		$text .= $quote_text;
-		if ($quote_end < String::strlen($old_text)) {
-			$text .= String::substr($old_text, $quote_end);
+		if ($quote_end < StringMb::strlen($old_text)) {
+			$text .= StringMb::substr($old_text, $quote_end);
 		}
 		unset($old_text);
 	}
@@ -264,7 +264,7 @@ function filtre_javascript($string, $addslashes = true, $allow_escape_single_quo
  */
 function filtre_pdf($string)
 {
-	return str_replace('<br />', "\r\n", String::html_entity_decode_if_needed(String::htmlspecialchars_decode($string, ENT_QUOTES)));
+	return str_replace('<br />', "\r\n", StringMb::html_entity_decode_if_needed(StringMb::htmlspecialchars_decode($string, ENT_QUOTES)));
 }
 
 /**
@@ -276,7 +276,7 @@ function filtre_pdf($string)
  */
 function filtre_csv($string, $separator = "\t")
 {
-	$string = str_replace(array($separator, "\r\n", "\n", "\r"), array(" ", " ", " ", " "), String::html_entity_decode(String::htmlspecialchars_decode($string, ENT_QUOTES)));
+	$string = str_replace(array($separator, "\r\n", "\n", "\r"), array(" ", " ", " ", " "), StringMb::html_entity_decode(StringMb::htmlspecialchars_decode($string, ENT_QUOTES)));
 	return $string;
 }
 
@@ -304,11 +304,11 @@ function fxsl($number_string, $separator = ',')
 function rewriting_urlencode($string, $convert_string_to_lower = true)
 {
 	if ($convert_string_to_lower == true) {
-		$string = String::strtolower($string);
+		$string = StringMb::strtolower($string);
 	}
-	$string = preg_replace('/[^a-zA-Z0-9_]/', "-", utf8_decode(String::strip_tags(String::convert_accents($string))));
+	$string = preg_replace('/[^a-zA-Z0-9_]/', "-", utf8_decode(StringMb::strip_tags(StringMb::convert_accents($string))));
 	$string = preg_replace('/[-]{2,}/', "-", $string);
-	$url_part = String::rawurlencode(String::str_shorten($string, 60, '', '', 30));
+	$url_part = StringMb::rawurlencode(StringMb::str_shorten($string, 60, '', '', 30));
 	return $url_part;
 }
 
@@ -329,7 +329,8 @@ function get_currency_international_numerical_code($currency_code)
 		'AUD' => '036',
 		'NOK' => '578',
 		'SEK' => '752',
-		'DKK' => '208'
+		'DKK' => '208',
+		'XPF' => '953'
 		);
 	if (!empty($currencies[$currency_code])) {
 		return $currencies[$currency_code];
@@ -359,7 +360,7 @@ function get_country_iso_2_letter_code($country_id_or_name, $guess_if_not_found 
 		return $result;
 	} elseif ($guess_if_not_found && !is_numeric($country_id_or_name)) {
 		// On renvoie les 2 premières lettres plutôt que rien du tout, on a des chances que ce soit bon
-		return String::substr(String::strtoupper($country_id_or_name), 0, 2);
+		return StringMb::substr(StringMb::strtoupper($country_id_or_name), 0, 2);
 	} else {
 		return false;
 	}
@@ -386,7 +387,7 @@ function get_country_iso_3_letter_code($country_id_or_name, $guess_if_not_found 
 		return $result;
 	} elseif ($guess_if_not_found && !is_numeric($country_id_or_name)) {
 		// On renvoie les 3 premières lettres plutôt que rien du tout, on a des chances que ce soit bon
-		return String::substr(String::strtoupper($country_id_or_name), 0, 3);
+		return StringMb::substr(StringMb::strtoupper($country_id_or_name), 0, 3);
 	} else {
 		return false;
 	}
@@ -413,6 +414,53 @@ function get_country_iso_num_code($country_id_or_name)
 	} else {
 		return false;
 	}
+}
+
+/**
+ * get_zip_cond()
+ *
+ * @param string $zip_or_dpt
+ * @param string $table_prefix
+ * @param boolean $get_department
+ * @return
+ */
+function get_zip_cond($zip_or_dpt, $table_prefix = null, $get_department = false)
+{
+	if(empty($zip_or_dpt)) {
+		// Pas de filtre
+		return 1;
+	}
+	if(!empty($table_prefix)) {
+		$fieldname = word_real_escape_string($table_prefix).'.code_postal';
+	} else {
+		$fieldname = 'code_postal';
+	}
+	$zip_or_dpt = trim($zip_or_dpt);
+	if($zip_or_dpt === '2A' || $zip_or_dpt === '2B') {
+		// Gestion de la Corse
+		$zip_or_dpt = '20';
+	}	
+	if(is_numeric($zip_or_dpt)) {
+		if($get_department) {
+			// On veut récupérer les résultats relatifs au département
+			if($zip_or_dpt>1000) {
+				$this_search = intval($zip_or_dpt)/1000;
+			} else {
+				$this_search = intval($zip_or_dpt);
+			}
+		} else {
+			$this_search = intval($zip_or_dpt);
+		}
+		$sql_cond = $fieldname . ' LIKE "' . nohtml_real_escape_string(str_pad($this_search, 2, 0, STR_PAD_LEFT)) . '%"';
+		if($this_search<10) {
+			// Le code postal commence ou non par un 0
+			$this_subcond_array[] =  '(' . $sql_cond . ' OR (' . $fieldname . ' LIKE "' . $this_search . '%" AND LENGTH(' . $fieldname . ')=4))';
+		}
+	} else {
+		// Pas en France - pas de notion de département
+		$sql_cond = $fieldname . ' LIKE "' . nohtml_real_escape_string(StringMb::substr($zip_or_dpt, 0, 2)) . '%"';
+	}
+	return $sql_cond;
 }
 
 /**
@@ -618,14 +666,14 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
 	}
-	if(String::strpos(str_replace('[]','', $text), '[') !== false && String::strpos(str_replace('[]','', $text), ']') !== false) {
+	if(StringMb::strpos(str_replace('[]','', $text), '[') !== false && StringMb::strpos(str_replace('[]','', $text), ']') !== false) {
 		$template_tags = array();
 		if(!$replace_only_custom_tags) {
 			// On rajoute les tags génériques au site
 			$template_tags['SITE'] = $GLOBALS['site'];
 			$template_tags['SITE_NAME'] = $GLOBALS['site'];
 			$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
-		$template_tags['REPERTOIRE_IMAGES'] = $GLOBALS['repertoire_images'];
+			$template_tags['REPERTOIRE_IMAGES'] = $GLOBALS['repertoire_images'];
 			if(!$avoid_load_urls) {
 				$template_tags['CATALOG_URL'] = get_product_category_url();
 			}
@@ -639,13 +687,21 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
 			foreach(array('CODE_PROMO_SOURCE' => false, 'FUNCTION' => true, 'HTML' => true, 'GLOBALS' => true, 'BEST_SELLER_CARROUSEL' => true, 'CONTENT_CARROUSEL' => true) as $this_function_tag => $arg_mandatory) {
 				$tag_begin = -1;
-				while (String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1) !== false && String::strpos($text, ']', String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1)) !== false) {
+				while (StringMb::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1) !== false && StringMb::strpos($text, ']', StringMb::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1)) !== false) {
 					// Traitement pour chaque tag
 					// Il y a au moins un bon quote à remplacer
 					// on se positionne sur la dernière imbrication
-					$tag_begin = String::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1);
-					$this_tag = String::substr($text, $tag_begin+1, String::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
-					$tag_name_array = explode('=', $this_tag, 2);
+					$tag_begin = StringMb::strpos($text, '[' . $this_function_tag . '=', $tag_begin + 1);
+					$this_tag = StringMb::substr($text, $tag_begin+1, StringMb::strpos($text, ']', $tag_begin+1)-$tag_begin-1);
+					// On sauvegarde la chaien de caracètre initial
+					$this_tag_treated = $this_tag;
+					if(strpos($this_tag_treated, '{') !== false) {
+						// Dans le tag, il y a des accolades. Les tags entre accolades doivent également être remplacés. On utilise des accolades pour que ces tags ne rentre pas en conflit avec a détéction de crochet quelques lignes plus haut.
+						// Ce code est utile pour pouvoir imbriquer des tags, par exemple pour les arguments de fonctions : [FUNCTION=my_function_name,arg_array_key1=>{TAG_1},arg_array_key2=>{TAG_2},...]
+						$this_tag_treated = str_replace(array('{', '}'), array('[', ']'), $this_tag_treated);
+						$this_tag_treated = template_tags_replace($this_tag_treated, $custom_template_tags, $replace_only_custom_tags, $format, $lang, $avoid_load_urls);
+					}
+					$tag_name_array = explode('=', $this_tag_treated, 2);
 					$this_arg = vb($tag_name_array[1]);
 					if(!$arg_mandatory || !empty($this_arg)) {
 						if($this_function_tag == 'CODE_PROMO_SOURCE') {
@@ -671,7 +727,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							$this_arg_array=explode(',', $this_arg, 2);
 							$this_arg = $this_arg_array[0];
 							$this_params_array = get_array_from_string(vb($this_arg_array[1]));
-							if(in_array($this_arg, $allowed_functions)) {
+							if(in_array($this_arg, $allowed_functions) || StringMb::strpos($this_arg, 'get_tag_function_') === 0) {
 								$function_name = $this_arg;
 							} else {
 								$function_name = 'get_tag_function_' . $this_arg;
@@ -703,13 +759,13 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							}
 						} elseif($this_function_tag == 'GLOBALS') {
 							// SECURITE : Liste des variables globales autorisées ci-dessous, sinon la variable appelée doit commencer par le préfixe 'tag_'
-							$allowed_functions = array('');
-							if(in_array($this_arg, $allowed_functions)) {
-								$function_name = $this_arg;
+							$allowed_variables = array('');
+							if(in_array($this_arg, $allowed_variables) || StringMb::strpos($this_arg, 'tag_') === 0) {
+								$variable_name = $this_arg;
 							} else {
-								$function_name = 'tag_' . $this_arg;
+								$variable_name = 'tag_' . $this_arg;
 							}
-							$template_tags[$this_tag] = vb($GLOBALS[$function_name]);
+							$template_tags[$this_tag] = vb($GLOBALS[$variable_name]);
 						} elseif($this_function_tag == 'RSS') {
 							// Pour chaque tag RSS, on remplace par le contenu du flux
 							$template_tags[$this_tag] = get_rss_feed_content($this_arg);
@@ -723,40 +779,40 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 					}
 				}
 			}
-			if(String::strpos($text, '[CONTACT_FORM]') !== false) {
+			if(StringMb::strpos($text, '[CONTACT_FORM]') !== false) {
 				// Affichage du formulaire de contact, avec gestion des erreurs 
 				$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
-			} elseif(String::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
+			} elseif(StringMb::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
 				$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
-			} elseif(String::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
+			} elseif(StringMb::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
 				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
-			} elseif(String::strpos($text, '[CLIENT_REFERENCES]') !== false) {
+			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES]') !== false) {
 				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 			}
-			if(String::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
-				$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div>';
+			if(StringMb::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
+				$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div></div>';
 				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
 					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div></div>';
 				} elseif(defined('IN_HOME')) {
 					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div>';
 				}
 			}
-			if(String::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
-				$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="middle_column container"><div class="middle_column_repeat row"><div class="col-md-12">';
+			if(StringMb::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
+				$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="container"><div class="row"><div class="middle_column col-sm-12"><div class="middle_column_repeat">';
 				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
 					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="rub_wrapper special_content"><div class="rub_content">';
 				} elseif(defined('IN_HOME')) {
 					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="page_home_content">';
 				}
 			}
-			if (empty($custom_template_tags['NEWSLETTER']) && String::strpos($text, '[NEWSLETTER]') !== false) {
+			if (empty($custom_template_tags['NEWSLETTER']) && StringMb::strpos($text, '[NEWSLETTER]') !== false) {
 				// On envoie un message qui contient un tag NEWSLETTER et dont on n'a pas spécifié explicitement le contenu => on récupère son contenu automatiqueemnt
 				// On prend la dernière newsletter rentrée en BDD - pas de possibilité de faire autrement, sinon il faut passer par le module de gestion de newsletter
 				$news_infos = get_last_newsletter(null, $lang);
 				if (!empty($news_infos)) {
 					// On remplace les tags à l'intérieur de la newsletter pour éviter problèmes et avoir besoin de passer le traitement en double sur l'intégralité du texte
 					// Par ailleurs on évite de se retrouver dans une boucle si le texte de la newsletter indiquait (de manière erronée !) un tag [NEWSLETTER]
-					$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $frm['lang']]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
+					$custom_template_tags['NEWSLETTER'] = template_tags_replace(str_replace('[NEWSLETTER]', '', $news_infos['message_' . $lang]), $custom_template_tags, $replace_only_custom_tags, $format, $lang);
 				}
 			}
 			// Appel aux fonctions propres à chaque module pour récupérer des listes de tags à remplacer
@@ -784,12 +840,12 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			// Remplacement de tous les tags en majuscules ou minuscules avant de traiter les dates et heures
 			// Si un tag est un mix avec majuscules et minuscules, le remplacement est fait quelques lignes plus loin
 			if($format == 'text') {
-				$this_tag_value = String::strip_tags($this_tag_value);
+				$this_tag_value = StringMb::strip_tags($this_tag_value);
 			} elseif($format == 'html') {
-				$this_tag_value = String::nl2br_if_needed($this_tag_value);
+				$this_tag_value = StringMb::nl2br_if_needed($this_tag_value);
 			}
 			// ATTENTION : A FAIRE AVANT la gestion des tags de dates à cause de différences entre minuscules et majuscules dans ces tags
-			$text = str_replace(array('[' . String::strtoupper($this_tag) . ']', '[' . String::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
+			$text = str_replace(array('[' . StringMb::strtoupper($this_tag) . ']', '[' . StringMb::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
 		}
 		if(!$replace_only_custom_tags) {
 			// On rajoute des tags de date qui sont en minuscules ou majuscules
@@ -805,9 +861,9 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 		// On gère tous les tags qui restent à remplacer sans modification de la casse
 		foreach($template_tags as $this_tag => $this_tag_value) {
 			if($format == 'text') {
-				$this_tag_value = String::strip_tags($this_tag_value);
+				$this_tag_value = StringMb::strip_tags($this_tag_value);
 			} elseif($format == 'html') {
-				$this_tag_value = String::nl2br_if_needed($this_tag_value);
+				$this_tag_value = StringMb::nl2br_if_needed($this_tag_value);
 			}
 			$text = str_replace('[' . $this_tag . ']', $this_tag_value, $text);
 		}
@@ -834,7 +890,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 function output_csv_http_export_header($filename, $type = 'excel', $page_encoding)
 {
 	if (a_priv('demo')) {
-		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
 		die();
 	}
 
@@ -860,7 +916,7 @@ function output_csv_http_export_header($filename, $type = 'excel', $page_encodin
 function output_xml_http_export_header($filename, $page_encoding, $content_type = 'application/svg+xml', $cache_duration_in_seconds = null)
 {
 	if (a_priv('demo')) {
-		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
+		output_light_html_page($GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch());
 		die();
 	}
 	header('Content-Type: '.$content_type.'; charset=' . $page_encoding);
@@ -1030,7 +1086,7 @@ function get_string_from_array($array, $disable_ad_quote=false)
 				}
 			}
 			$string = trim(str_replace(array('Array ', '    ', '  ', '  '), array('Array', ' ', ' ', ' '), str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', print_r($array, true)))));
-			$string = trim(String::substr($string, String::strlen('Array('), String::strlen($string) - String::strlen('Array(')-1));
+			$string = trim(StringMb::substr($string, StringMb::strlen('Array('), StringMb::strlen($string) - StringMb::strlen('Array(')-1));
 		}
 	} else {
 		$string = $array;
@@ -1047,8 +1103,8 @@ function get_string_from_array($array, $disable_ad_quote=false)
 function get_array_from_string($string)
 {
 	$string = str_replace('Array ', 'Array', trim(str_replace(array("\t", "\r\n", "\r", '\,'), array(' ', "\n", '', '¤#'), $string)));
-	if(String::substr($string, 0, String::strlen('Array')) == 'Array') {
-		$string = String::substr($string, String::strlen('Array('), String::strlen($string) - String::strlen('Array(')-1);
+	if(StringMb::substr($string, 0, StringMb::strlen('Array')) == 'Array') {
+		$string = StringMb::substr($string, StringMb::strlen('Array('), StringMb::strlen($string) - StringMb::strlen('Array(')-1);
 	}
 	$parts = explode(',', str_replace(array("\n", '=&gt;'), array(',', '=>'), $string));
 	$result = array();
@@ -1063,18 +1119,18 @@ function get_array_from_string($string)
 					$this_key = trim($line[0]);
 					$this_value = trim($line[1]);
 				}
-				if(in_array(String::substr($this_value, 0, 1), array('"', "'", '['))) {
+				if(in_array(StringMb::substr($this_value, 0, 1), array('"', "'", '['))) {
 					// On retire le séparateur de début
-					$this_value = String::substr($this_value, 1, String::strlen($this_value)-1);						
+					$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value)-1);						
 					$i=1;
-					while(!in_array(String::substr($this_value, -1), array('"', "'", ']')) && !empty($parts[$this_part_key+$i])) {
+					while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && !empty($parts[$this_part_key+$i])) {
 						// On rajoute la suite tant qu'on n'a pas de séparateur de fin : il y avait une ou des virgules dans le texte
 						$this_value .= ','.$parts[$this_part_key+$i];
 						$skip_part_key_array[] = $this_part_key+$i;
 						$i++;
 					}
 					// On retire le séparateur de fin
-					$this_value = String::substr($this_value, 0, String::strlen($this_value)-1);
+					$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value)-1);
 				}
 				if($this_value == 'true' || $this_value == 'TRUE'){
 					$this_value = true;
@@ -1086,8 +1142,8 @@ function get_array_from_string($string)
 				if(!isset($line[1])) {
 					$result[] = $this_value;
 				} else {
-					if(in_array(String::substr($this_key, 0, 1), array('"', "'", '['))) {
-						$this_key = String::substr($this_key, 1, String::strlen($this_key)-2);
+					if(in_array(StringMb::substr($this_key, 0, 1), array('"', "'", '['))) {
+						$this_key = StringMb::substr($this_key, 1, StringMb::strlen($this_key)-2);
 					}
 					$result[$this_key] = $this_value;
 				}
@@ -1117,12 +1173,12 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
 	}
 	$filter_stop_words_array = array_unique(explode(' ', str_replace(array("\t", "\r", "\n"), ' ', vb($GLOBALS['site_parameters']['filter_stop_words']))));
 	// On passe le texte en minuscules
-	$string = String::strip_tags(String::strtolower(' '.String::convert_accents(String::html_entity_decode($string))));
+	$string = StringMb::strip_tags(StringMb::strtolower(' '.StringMb::convert_accents(StringMb::html_entity_decode($string))));
 	// On retire les caractères de ponctuation divers
 	$string = str_replace(array(",", ".", "?", "!", ':', ';', "-", "+", '*', "d'", '/', '\\', '(', ')', '[', ']', '{', '}',  "'", '"', '<', '>', '«', '»', '´', '  ', "\r", "\n"), " ", $string);
 	// On récupère dans le texte les mots clés candidats
 	foreach(explode(' ', $string) as $this_word) {
-		if(String::strlen($this_word)>=$min_length && ($allow_numeric || !is_numeric($this_word))){
+		if(StringMb::strlen($this_word)>=$min_length && ($allow_numeric || !is_numeric($this_word))){
 			$keywords_array[] = $this_word;
 		}
 	}
@@ -1132,7 +1188,7 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
 		// On garde les mots les plus longs en priorité
 		$keywords_lengths = array();
 		foreach(array_unique($keywords_array) as $this_word) {
-			$keywords_lengths[$this_word] = String::strlen($this_word);
+			$keywords_lengths[$this_word] = StringMb::strlen($this_word);
 		}
 		arsort($keywords_lengths);
 		$keywords_array = array_keys($keywords_lengths);
@@ -1163,7 +1219,7 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 		$terms = array($terms);
 	}
 	foreach ($terms as $this_term) {
-		if((String::strlen($text)<80  && String::strlen($this_term)>0) || String::strlen($this_term)>=3) { 
+		if((StringMb::strlen($text)<80  && StringMb::strlen($this_term)>0) || StringMb::strlen($this_term)>=3) { 
 			$preg_condition = getPregConditionCompatAccents($this_term);
 			if (stripos($text, $this_term) !== false) {
 				$text = preg_replace('/' . $preg_condition . '/iu', $bbcode[0] . '$0' . $bbcode[1], $text, -1);
@@ -1184,7 +1240,7 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 function userAgeFormat ($date)
 {
 	if(!empty($date)) {
-		$date = str_replace("-", "", String::substr($date, 0, 10));
+		$date = str_replace("-", "", StringMb::substr($date, 0, 10));
 		$age = floor((date('Ymd') - $date) / 10000);
 		if($age > 0 && $age < 150) {
 			return $age . ' ' . $GLOBALS['strYears'];
@@ -1195,12 +1251,42 @@ function userAgeFormat ($date)
 /**
  * Supprime les caractères entre et autour des chiffres dans un numéro de téléphone.
  *
- * @param mixed $phone_number
+ * @param string $phone_number
+ * @param string $default_separator
+ * @param mixed $international_mode
  * @return
  */
-function get_formatted_phone_number($phone_number)
+function get_formatted_phone_number($phone_number, $default_separator = ' ', $international_mode = false)
 {
-	return str_replace(array(' ','/','.','-',')','(','_'), "", $phone_number);
+	$default_phone_number = $phone_number;
+	$phone_number = str_replace(array(' ', '/', '.', '-', ')', '(', '_', '+'), "", $phone_number);
+	if(is_numeric($phone_number) && StringMb::strlen($phone_number) == 13 && StringMb::substr($phone_number, 0, 2) == '00') {
+		$phone_number = StringMb::substr($phone_number, 2);
+	}
+	if(is_numeric($phone_number) && StringMb::strlen($phone_number) == 10 && StringMb::substr($phone_number, 0, 1) == '0') {
+		$phone_number = StringMb::substr($phone_number, 0, 2) . $default_separator . StringMb::substr($phone_number, 2, 2) . $default_separator . StringMb::substr($phone_number, 4, 2) . $default_separator . StringMb::substr($phone_number, 6, 2) . $default_separator . StringMb::substr($phone_number, 8, 2);
+	} elseif(is_numeric($phone_number) && StringMb::strlen($phone_number) == 11 && StringMb::substr($phone_number, 0, 1) != '0') {
+		// Format international classique pour bcp de pays dont la France. Mais si plus ou moins de chiffres, on ne prend pas le risque de formatter et on passe en format inconnu
+		$phone_number = '+' . StringMb::substr($phone_number, 0, 2) . $default_separator . StringMb::substr($phone_number, 2, 1) . $default_separator . StringMb::substr($phone_number, 3, 2) . $default_separator . StringMb::substr($phone_number, 5, 2) . $default_separator . StringMb::substr($phone_number, 7, 2) . $default_separator . StringMb::substr($phone_number, 9, 2);
+	} else {
+		// Format non reconnu
+		// On garde le téléphone initial en retirant des caractères spéciaux, mais en ne retirant pas les +
+		$phone_number = str_replace(array('.', '-', '_'), " ", $default_phone_number);
+	}
+	if($international_mode) {
+		$phone_number = str_replace(array('+'), "", $phone_number);
+		if(StringMb::substr($output, 0, 2) == '00') {
+			$phone_number = StringMb::substr($phone_number, 2);
+		}
+		if(StringMb::substr($output, 0, 1) == '0') {
+			// Ajout de l'identifiant international du pays
+			$phone_number = '33'.StringMb::substr($phone_number, 1);
+		}
+		if($international_mode === 'plus') {
+			$phone_number = '+'.$phone_number;
+		}
+	}
+	return $phone_number;
 }
 
 /**
@@ -1232,47 +1318,73 @@ function check_password_format($string) {
  * Détecte la présence d'un téléphone dans une chaine de caractères
  * 
  * @param array $string
+ * @param string $mode
  * @return
  */
-function PhoneIn ($string)
+function PhoneIn($string, $mode = 'boolean')
 {
-	$string = String::strtolower($string);
+	$string = StringMb::strtolower(StringMb::strip_tags($string));
+	// On retire les dates du texte. Sinon 2020 - 2021 par exemple serait détecté comme un téléphone ci-après, ou 19/12/2020 aussi
+	for($i=2000;$i<2040;$i++) {
+		$string = str_replace($i, '', $string);
+	}
 	$string = str_replace(array(')', '(', '.', '-', ' '), array(''), $string);
-	
-	return preg_match('/([0-9]{8})/', $string);
+	$result = preg_match('/([0-9]{8,11})/', $string, $matches);
+	if($mode == 'boolean') {
+		return $result;
+	} elseif(count($matches) && $mode == 'string') {
+		return current($matches);
+	} elseif($mode == 'string') {
+		return null;
+	} else {
+		return $matches;
+	}
 }
 
 /**
  * Détecte la présence d'un email dans une chaine de caractères
  * 
  * @param array $string
+ * @param string $mode
  * @return
  */
-function MailIn ($string)
+function MailIn ($string, $mode = 'boolean')
 {
-	$string_test = String::strtolower($string);
-	$adresse = array('hotmail', 'h0tmail', 'yahoo', 'yah00', 'yah0o', 'yaho0', 'gmail', 'caramail');
-	$at = array('@', '[at]', '(at)', '{at}');
+	$string_test = StringMb::strtolower($string);
+	if($mode == 'boolean') {
+		// Détection même des emails encodés par l'auteur du texte
+		$adresse = array('hotmail', 'h0tmail', 'yahoo', 'yah00', 'yah0o', 'yaho0', 'gmail', 'caramail');
+		$at = array('@', '[at]', '(at)', '{at}');
 
-	foreach($adresse as $value) {
-		if (String::strpos($string_test, $value) !== false) return true;
-	}
+		foreach($adresse as $value) {
+			if (StringMb::strpos($string_test, $value) !== false) return true;
+		}
 
-	foreach($at as $value) {
-		while (String::strpos($string_test, $value) !== false) {
-			$pos = String::strpos($string_test, $value);
-			$string_tmp = String::substr($string_test, $pos + 1, 15);
+		foreach($at as $value) {
+			while (StringMb::strpos($string_test, $value) !== false) {
+				$pos = StringMb::strpos($string_test, $value);
+				$string_tmp = StringMb::substr($string_test, $pos + 1, 15);
 
-			if (String::strpos($string_tmp, '+') === false && strpos($string_tmp, 'plus') === false) {
-				if (String::strpos($string_tmp, '.', 1) !== false) return true;
-				elseif (String::strpos($string_tmp, 'dot', 1) !== false) return true;
-				elseif (String::strpos($string_tmp, 'point', 1) !== false) return true;
-				elseif (String::strpos($string_tmp, 'pt', 1) !== false) return true;
+				if (StringMb::strpos($string_tmp, '+') === false && strpos($string_tmp, 'plus') === false) {
+					if (StringMb::strpos($string_tmp, '.', 1) !== false) return true;
+					elseif (StringMb::strpos($string_tmp, 'dot', 1) !== false) return true;
+					elseif (StringMb::strpos($string_tmp, 'point', 1) !== false) return true;
+					elseif (StringMb::strpos($string_tmp, 'pt', 1) !== false) return true;
+				}
+				$string_test = StringMb::substr($string_test, $pos + 1);
 			}
-			$string_test = String::substr($string_test, $pos + 1);
+		}
+		return false;
+	} else {
+		preg_match('/[[:alnum:]]*((\.|_|-)[[:alnum:]]+)*@[[:alnum:]]*((\.|-)[[:alnum:]]+)*(\.[[:alpha:]]{2,})/i', $string_test, $matches);
+		if(count($matches) && $mode == 'string') {
+			return current($matches);
+		} elseif($mode == 'string') {
+			return null;
+		} else {
+			return $matches;
 		}
 	}
-	return false;
 }
 
 /**
@@ -1283,7 +1395,7 @@ function MailIn ($string)
  */
 function urlIn ($string)
 {
-	$string_test = String::strtolower($string);
+	$string_test = StringMb::strtolower($string);
 	$array = array('http', 'www', '3w', '.com', '. com', '.fr', '. fr', '.net', '. net',
 		'.org', '. org', '.eu', '. eu', '.biz', '. biz', '.info', '. info', '.name',
 		'. name', '.be', '. be', '.cc', '. cc', '.ws', '. ws', '.mobi', '. mobi');
@@ -1346,4 +1458,51 @@ function array_merge_recursive_distinct() {
 		unset($key, $value);
     }
     return $merged;
+}
+
+/**
+ * Détecte la présence d'une URL dans une chaine de caractères
+ * 
+ * @param array $string
+ * @return
+ */
+function phoneOk ($phone_number, $international_phone_number = true) {
+	if ($international_phone_number) {
+		// Le numéro de téléphone commence par un +, et le reste du numéro est bien numérique.
+		$number_clean = get_formatted_phone_number(StringMb::substr($phone_number,1));
+		if (StringMb::strpos($number_clean, '33') === 0) {
+			// controle de la longueur du numéro de téléphone pour la france.
+			$length_control = 11;
+		}
+		return (StringMb::strpos($phone_number, '+') === 0 && is_numeric($number_clean) && StringMb::strlen($phone_number) >= 6 && (empty($length_control) || (!empty($length_control) && StringMb::strlen($number_clean) >= $length_control)));
+	} else {
+		return is_numeric(get_formatted_phone_number($phone_number));
+	}
+}
+
+/**
+ * permet de générer un fichier csv contenant une liste de résultat normalement affiché sous forme de tableau HTML.
+ *
+ * @param string $report
+ *
+ * @return 
+ *
+ */
+function get_csv_export_from_html_table($report) {
+	if (!empty($report)) {
+		header("Content-type: Binary/CSV");
+		header("Content-Disposition: attachment; filename=\"advisto-" . str_replace(array('----', '---', '--', '-.'), array('-', '-', '-', '.'), implode('-', $_GET) . ".csv") . "\"");
+		header("Content-Description: File Transfer");
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Length: " . StringMb::strlen($report));
+
+		$report = str_replace(array("\n", "\r", "\t", ';'), array('', '', '', ','), html_entity_decode(str_replace('>&nbsp;<', '><', $report)));
+		// On met des ; au lieu de \t car sinon Excel ne reconnaît pas forcément les données
+		$report = str_replace(array('</td>', '</th>', '</tr>'), array('</td>' . ";", '</th>' . ";", '</tr>' . "\r\n"), $report);
+		$report = strip_tags(StringMb::substr($report, 0, strpos($report, '</table>')));
+		echo $report;
+		die();
+	} else {
+		die('Aucune donnée générée');
+	}
 }

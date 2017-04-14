@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: display_user_forms.php 53585 2017-04-13 10:16:36Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,9 +22,10 @@ if (!function_exists('get_user_change_params_form')) {
 	 *
 	 * @param array $frm Array with all fields data
 	 * @param class $form_error_object
+	 * @param array $mandatory_fields
 	 * @return
 	 */
-	function get_user_change_params_form(&$frm, &$form_error_object)
+	function get_user_change_params_form(&$frm, &$form_error_object, $mandatory_fields)
 	{
 		$output = '';
 		$tpl = $GLOBALS['tplEngine']->createTemplate('user_change_params_form.tpl');
@@ -33,7 +34,8 @@ if (!function_exists('get_user_change_params_form')) {
 		}
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('content_rows_info', '');
-		if(String::substr(vb($frm['email_bounce']), 0, 2)=='5.' || empty($frm['email'])){
+		$tpl->assign('mandatory_fields', $mandatory_fields);
+		if (!EmailOK(vb($frm['email']), vb($frm['email_bounce']))) {
 			// Email vide ou ayant généré une erreur
 			$email_form='';
 			$domain=explode('@', vb($frm['email']));
@@ -50,7 +52,6 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('gender_error', $form_error_object->text('civilite'));
 		if (empty($GLOBALS['site_parameters']['pseudo_is_not_used'])) {
 			$tpl->assign('STR_PSEUDO', $GLOBALS['STR_PSEUDO']);
-			$tpl->assign('pseudo_is_optionnal', !empty($GLOBALS['site_parameters']['pseudo_is_optionnal']));
 			$tpl->assign('pseudo', (isset($frm['pseudo'])?vb($frm['pseudo']):$_SESSION['session_utilisateur']['pseudo']));
 			$tpl->assign('pseudo_error', $form_error_object->text('pseudo'));
 		}
@@ -70,6 +71,7 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('telephone', vb($frm['telephone']));
 		$tpl->assign('telephone_error', $form_error_object->text('telephone'));
 		$tpl->assign('portable', vb($frm['portable']));
+		$tpl->assign('portable_error', $form_error_object->text('portable'));
 		$tpl->assign('fax', vb($frm['fax'])); // La variable est renseignée mais par défaut dans le template Smarty, l'affichage du fax est désactivé car plus beaucoup utilisé de nos jours
 		$tpl->assign('url', vb($frm['url']));
 		$tpl->assign('type', vb($frm['type']));
@@ -102,9 +104,17 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('country_options', get_country_select_options(null, $_SESSION['session_utilisateur']['pays'], 'id'));
 		$tpl_origin_options = array();
 		$i = 1;
+		if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin']) && !is_array($frm['origin'])) {
+			$frm['origin'] = get_array_from_string($frm['origin']);
+		}
 		while (isset($GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i])) {
+			if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin'])) {
+				$issel = in_array($i, $frm['origin']);
+			} else {
+				$issel = (vb($frm['origin']) == $i);
+			}
 			$tpl_origin_options[] = array('value' => $i,
-				'issel' => vb($frm['origin']) == $i,
+				'issel' => $issel,
 				'name' => $GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i]
 				);
 			$i++;
@@ -114,7 +124,8 @@ if (!function_exists('get_user_change_params_form')) {
 			'origin_other_ids_for_javascript' => 'new Array('.implode(',', $GLOBALS['origin_other_ids']).')',
 			'origin_other' => vb($frm['origin_other']),
 			'error_text' => $form_error_object->text('origin'),
-			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
+			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE'],
+			'user_origin_multiple' => vb($GLOBALS['site_parameters']['user_origin_multiple'])
 			));
 
 		$tpl->assign('enable_display_only_user_specific_field', !empty($GLOBALS['site_parameters']['enable_display_only_user_specific_field']));
@@ -140,6 +151,7 @@ if (!function_exists('get_user_change_params_form')) {
 		}
 		if (!empty($GLOBALS['site_parameters']['user_front_office_logo_edit'])) {
 			$tpl->assign('STR_LOGO', $GLOBALS['STR_LOGO']);
+			$tpl->assign('STR_PHOTO', $GLOBALS['STR_PHOTO']);
 			if (!empty($frm["logo"])) {
 				$tpl->assign('logo', get_uploaded_file_infos("logo", $frm["logo"], get_current_url(false) . '?mode=supprfile&id=' . vb($_SESSION['session_utilisateur']['id_utilisateur']) . '&file=logo'));
 			}
@@ -152,7 +164,7 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('id_utilisateur', $_SESSION['session_utilisateur']['id_utilisateur']);
 		$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
 		$tpl->assign('add_b2b_form_inputs', !empty($GLOBALS['site_parameters']['add_b2b_form_inputs']));
-		$tpl->assign('cnil_txt', String::textEncode($GLOBALS['STR_CNIL']));
+		$tpl->assign('cnil_txt', StringMb::textEncode($GLOBALS['STR_CNIL']));
 		$tpl->assign('STR_CHANGE', $GLOBALS['STR_CHANGE']);
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 		$tpl->assign('STR_LEADER', $GLOBALS['STR_LEADER']);
@@ -175,6 +187,7 @@ if (!function_exists('get_user_change_params_form')) {
 		$tpl->assign('STR_INTRACOM_FORM', $GLOBALS['STR_INTRACOM_FORM']);
 		$tpl->assign('STR_TELEPHONE', $GLOBALS['STR_TELEPHONE']);
 		$tpl->assign('STR_PORTABLE', $GLOBALS['STR_PORTABLE']);
+		$tpl->assign('form_placeholder_portable', vb($GLOBALS['site_parameters']['form_placeholder_portable']));
 		$tpl->assign('STR_FAX', $GLOBALS['STR_FAX']);
 		$tpl->assign('STR_NAISSANCE', $GLOBALS['STR_NAISSANCE']);
 		$tpl->assign('STR_ERR_BIRTHDAY1', $GLOBALS['STR_ERR_BIRTHDAY1']);
@@ -261,6 +274,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('telephone_error', $form_error_object->text('telephone'));
 		$tpl->assign('fax', vb($frm['fax'])); // La variable est renseignée mais par défaut dans le template Smarty, l'affichage du fax est désactivé car plus beaucoup utilisé de nos jours
 		$tpl->assign('portable', vb($frm['portable']));
+		$tpl->assign('portable_error', $form_error_object->text('portable'));
 		$tpl->assign('adresse', vb($frm['adresse']));
 		$tpl->assign('adresse_error', $form_error_object->text('adresse'));
 		$tpl->assign('zip', vb($frm['code_postal']));
@@ -285,9 +299,17 @@ if (!function_exists('get_user_register_form')) {
 		}
 		$tpl_origin_options = array();
 		$i = 1;
+		if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin']) && !is_array($frm['origin'])) {
+			$frm['origin'] = get_array_from_string($frm['origin']);
+		}
 		while (isset($GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i])) {
+			if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin'])) {
+				$issel = in_array($i, $frm['origin']);
+			} else {
+				$issel = (vb($frm['origin']) == $i);
+			}
 			$tpl_origin_options[] = array('value' => $i,
-				'issel' => vb($frm['origin']) == $i,
+				'issel' => $issel,
 				'name' => $GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i]
 				);
 			$i++;
@@ -297,7 +319,8 @@ if (!function_exists('get_user_register_form')) {
 			'origin_other_ids_for_javascript' => 'new Array('.implode(',', $GLOBALS['origin_other_ids']).')',
 			'origin_other' => vb($frm['origin_other']),
 			'error_text' => $form_error_object->text('origin'),
-			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
+			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE'],
+			'user_origin_multiple' => vb($GLOBALS['site_parameters']['user_origin_multiple'])
 			));
 
 		$tpl->assign('enable_display_only_user_specific_field', !empty($GLOBALS['site_parameters']['enable_display_only_user_specific_field']));
@@ -331,6 +354,7 @@ if (!function_exists('get_user_register_form')) {
 		}
 		if (!empty($GLOBALS['site_parameters']['user_front_office_logo_edit'])) {
 			$tpl->assign('STR_LOGO', $GLOBALS['STR_LOGO']);
+			$tpl->assign('STR_PHOTO', $GLOBALS['STR_PHOTO']);
 			if (!empty($frm["logo"])) {
 				$tpl->assign('logo', get_uploaded_file_infos("logo", $frm["logo"], get_current_url(false) . '?mode=supprfile&id=' . vb($_SESSION['session_utilisateur']['id_utilisateur']) . '&file=logo'));
 			}
@@ -342,7 +366,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('newsletter_issel', (!isset($frm['newsletter']) || !empty($frm['newsletter'])));
 		$tpl->assign('newsletter_option_selected', vb($frm['newsletter_format']));
 		$tpl->assign('commercial_issel', (!$form_error_object->count() || !empty($frm['commercial'])));
-		$tpl->assign('cnil_txt', String::textEncode($GLOBALS['STR_CNIL']));
+		$tpl->assign('cnil_txt', StringMb::textEncode($GLOBALS['STR_CNIL']));
 		$tpl->assign('token', get_form_token_input('get_user_register_form', true));
 		$tpl->assign('js_password_control', js_password_control('mot_passe'));
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
@@ -378,6 +402,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
 		$tpl->assign('STR_TELEPHONE', $GLOBALS['STR_TELEPHONE']);
 		$tpl->assign('STR_PORTABLE', $GLOBALS['STR_PORTABLE']);
+		$tpl->assign('form_placeholder_portable', vb($GLOBALS['site_parameters']['form_placeholder_portable']));
 		$tpl->assign('STR_FAX', $GLOBALS['STR_FAX']);
 		$tpl->assign('STR_NAISSANCE', $GLOBALS['STR_NAISSANCE']);
 		$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
@@ -420,12 +445,13 @@ if (!function_exists('get_user_register_success')) {
 	function get_user_register_success(&$frm)
 	{
 		$output = '
-<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . String::html_entity_decode_if_needed($frm['prenom']) . '</h1>';
+<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . StringMb::html_entity_decode_if_needed($frm['prenom']) . '</h1>';
 		if ($frm['priv']=='stop') {
-			$output .= '<p>' . String::nl2br_if_needed($GLOBALS['STR_MODULE_PREMIUM_MSG_RETAILER']) . '</p>';
+			$output .= '<p>' . StringMb::nl2br_if_needed($GLOBALS['STR_MODULE_PREMIUM_MSG_RETAILER']) . '</p>';
 		} else  {
 			$output .= '
-<p>' . String::nl2br_if_needed(String::textEncode($GLOBALS['STR_LOGIN_OK'])) . '</p>';
+<p>' . StringMb::nl2br_if_needed(sprintf($GLOBALS['STR_LOGIN_OK'], get_url('account'), get_url('account'), get_url('catalog'), get_url('catalog'))) . '</p>';
+			$output .= affiche_contenu_html('register_success', true);
 		}
 		return $output;
 	}
@@ -535,7 +561,7 @@ if (!function_exists('get_access_account_form')) {
 	{
 		$output = '';
 		if(empty($forced_new_client_area_html)){
-			$forced_new_client_area_html = '' . String::nl2br_if_needed($GLOBALS['STR_MSG_NEW_CUSTOMER']) . '<br />';
+			$forced_new_client_area_html = '' . StringMb::nl2br_if_needed($GLOBALS['STR_MSG_NEW_CUSTOMER']) . '<br />';
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('access_account_form.tpl');
 		if(!$skip_title) {
@@ -549,7 +575,11 @@ if (!function_exists('get_access_account_form')) {
 		$tpl->assign('msg_still_customer', $GLOBALS['STR_MSG_STILL_CUSTOMER']);
 		$tpl->assign('pass_perdu_txt', $GLOBALS['STR_PASS_PERDU']);
 		$tpl->assign('pass_perdu_href', get_url('/utilisateurs/oubli_mot_passe.php'));
-		$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL_OR_PSEUDO'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		if (empty($GLOBALS['site_parameters']['pseudo_is_not_used'])) {
+			$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL_OR_PSEUDO'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		} else {
+			$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		}
 		$tpl->assign('email', vb($frm['email']));
 		$tpl->assign('email_error', $form_error_object->text('email'));
 		$tpl->assign('STR_PASSWORD', $GLOBALS['STR_PASSWORD'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -592,15 +622,23 @@ if (!function_exists('get_contact_form')) {
 			$tpl->assign('success_msg', $GLOBALS['STR_TICKET_OK']);
 		}
 		$tpl->assign('contact_info', affiche_contenu_html("contact_page", true) . (function_exists('get_details_societe')?get_details_societe():''));
-		$tpl->assign('action', get_current_url(false).(!empty($GLOBALS['main_div_id'])?'?ctx='.$GLOBALS['main_div_id']:''));
-		$tpl->assign('extra_field', get_contact_extra_field());
+		if (empty($frm['recipient'])) {
+			$tpl->assign('action', get_current_url(false).(!empty($GLOBALS['main_div_id'])?'?ctx='.$GLOBALS['main_div_id']:''));
+		} else {
+			$tpl->assign('action', get_current_url(true).(!empty($GLOBALS['main_div_id'])?'?ctx='.$GLOBALS['main_div_id']:''));
+		}
+		$tpl->assign('extra_field', get_contact_extra_field());		
 		$sujet_options = array(
 			'' => $GLOBALS['STR_CONTACT_LB']);
 		for($i=1; isset($GLOBALS['STR_CONTACT_SELECT'.$i]); $i++) {
 			if(!empty($GLOBALS['STR_CONTACT_SELECT'.$i])) {
 				$sujet_options[$GLOBALS['STR_CONTACT_SELECT'.$i]]=$GLOBALS['STR_CONTACT_SELECT'.$i];
+				if (!empty($_GET['subject']) && $_GET['subject'] == $i) {
+					$frm['sujet'] = $GLOBALS['STR_CONTACT_SELECT'.$i];
+				}
 			}
 		}
+		$tpl->assign('site_configured_selected', vb($_GET['site_id']));
 		$tpl->assign('sujet_options', $sujet_options);
 		$tpl->assign('sujet_options_selected', vb($frm['sujet']));
 		$tpl->assign('sujet_error', $form_error_object->text('sujet'));
@@ -626,7 +664,36 @@ if (!function_exists('get_contact_form')) {
 		$tpl->assign('texte_value', vb($frm['texte']));
 		$tpl->assign('texte_error', $form_error_object->text('texte'));
 		$tpl->assign('STR_DISPO', $GLOBALS['STR_DISPO']);
+		$tpl->assign('contact_page_map_display', vb($frm['contact_page_map_display']));
+		$tpl->assign('mail_title', vb($frm['mail_title']));
+		$tpl->assign('meta_title', vb($frm['meta_title']));
+		$tpl->assign('meta_description', vb($frm['meta_description']));
 		
+		//On vérifie si il y a des champs à mettre en hidden
+		if (!empty($frm['hidden_fields_list'])) {
+			$fields_list_array = explode(",", $frm['hidden_fields_list']);
+			foreach($fields_list_array as $field) {
+				$tpl->assign('hidden_'.trim($field), true);
+			}
+		}
+		
+		if (!empty($GLOBALS['site_parameters']['user_contact_file_upload'])) {
+			$GLOBALS['allow_fineuploader_on_page'] = true;
+			$uploaded_file_tpl = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
+			$file_infos = get_uploaded_file_infos('file', vb($frm['file']), 'javascript:reinit_upload_field("file", "[DIV_ID]");');
+			$uploaded_file_tpl->assign('f', $file_infos);
+			$uploaded_file_tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+			$uploaded_file_tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$this_upload_html = $uploaded_file_tpl->fetch();
+									
+			$tpl->assign('user_contact_file_upload', $GLOBALS['site_parameters']['user_contact_file_upload']);
+			$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
+			$tpl->assign('this_upload_html', $this_upload_html);
+		}
+		if (!empty($GLOBALS['site_parameters']['site_configured_array'])) {
+			$tpl->assign('site_configured_array', vb($GLOBALS['site_parameters']['site_configured_for_display_array'], $GLOBALS['site_parameters']['site_configured_array']));
+			$tpl->assign('STR_WEBSITE', $GLOBALS['STR_WEBSITE']);
+		}
 		if (check_if_module_active('captcha')) {
 			// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
 			$tpl->assign('captcha', array(
@@ -641,7 +708,7 @@ if (!function_exists('get_contact_form')) {
 		$tpl->assign('token', get_form_token_input('user_contact'));
 		$tpl->assign('href', get_current_url(false));
 		$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
-		$tpl->assign('cnil_txt', String::textEncode($GLOBALS['STR_CNIL']));
+		$tpl->assign('cnil_txt', StringMb::textEncode($GLOBALS['STR_CNIL']));
 		if(!empty($frm['product_info_id'])) {
 			$tpl->assign('STR_CONTACT', $GLOBALS['STR_CONTACT_INTRO_PRODUCT_INFO']);
 			$tpl->assign('STR_CONTACT_INTRO', '');
@@ -683,7 +750,7 @@ if (!function_exists('get_contact_success')) {
 		$output = '
 <h1 property="name" class="page_title">' . $GLOBALS['STR_CONTACT'] . '</h1>
 <div class="page_content">
-	<div class="alert alert-success">' . String::nl2br_if_needed($GLOBALS['STR_TICKET_OK']) . '</div>
+	<div class="alert alert-success">' . StringMb::nl2br_if_needed($GLOBALS['STR_TICKET_OK']) . '</div>
 </div>
 ' . vb($GLOBALS['site_parameters']['contact_form_success_tag']);
 		return $output;
@@ -750,8 +817,8 @@ if (!function_exists('get_address_form')) {
 		}
 		$output .= '
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="name_adresse">' .$GLOBALS['STR_NAME']  . ' ' . String::strtoupper($GLOBALS['STR_ADDRESS']) . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="name_adresse" name="name_adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom']))).'" required="required" /></span>
+					<span class="enregistrementgauche"><label for="nom">' .$GLOBALS['STR_NAME']  . ' ' . StringMb::strtoupper($GLOBALS['STR_ADDRESS']) . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="nom" name="nom" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['nom']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label>' . $GLOBALS['STR_TYPE']  .$GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
@@ -771,31 +838,31 @@ if (!function_exists('get_address_form')) {
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="nom_famille">' . $GLOBALS['STR_NAME'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['nom_famille']))).'" required="required" /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="nom_famille" name="nom_famille" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['nom_famille']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="prenom">' . $GLOBALS['STR_FIRST_NAME'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['prenom']))).'" required="required" /><span class="notice"></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="prenom" name="prenom" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['prenom']))).'" required="required" /><span class="notice"></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="email">' . $GLOBALS['STR_EMAIL'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['email']))).'" required="required" autocapitalize="none" /><span class="notice"></span>
+					<span class="enregistrementdroite"><input type="email" class="form-control" id="email" name="email" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['email']))).'" required="required" autocapitalize="none" /><span class="notice"></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="societe">' . $GLOBALS['STR_SOCIETE'] . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['societe']))).'"  /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="societe" name="societe" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['societe']))).'"  /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="adresse">' . $GLOBALS['STR_ADDRESS'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="adresse" name="adresse" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['adresse']))).'" required="required" /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="adresse" name="adresse" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['adresse']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="code_postal">' . $GLOBALS['STR_ZIP'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['code_postal']))).'" required="required" /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['code_postal']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="ville">' . $GLOBALS['STR_TOWN'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['ville']))).'" required="required" /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['ville']))).'" required="required" /></span>
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="pays">' . $GLOBALS['STR_COUNTRY'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
@@ -807,9 +874,9 @@ if (!function_exists('get_address_form')) {
 				</div>
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_TELEPHONE'] . ' <span class="etoile">*</span>' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.String::str_form_value(String::html_entity_decode_if_needed(vb($frm['portable']))).'" required="required" /></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['portable']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" required="required" /></span>
 				</div>
-				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg" type="submit" value="' . String::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
+				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
 			</fieldset>
 			<p><span class="form_mandatory">(*) ' . $GLOBALS['STR_MANDATORY'] . '</span></p>
 		</form>

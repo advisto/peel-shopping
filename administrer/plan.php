@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: plan.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: plan.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content');
+necessite_priv('admin_content,admin_communication');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PLAN_TITLE'];
 
@@ -133,7 +133,7 @@ function affiche_formulaire_contact(&$frm, &$form_error_object)
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
-			'text_te' => getTextEditor('text_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['text_' . $lng]))),
+			'text_te' => getTextEditor('text_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['text_' . $lng]))),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);

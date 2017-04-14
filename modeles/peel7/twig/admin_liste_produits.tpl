@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_produits.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_liste_produits.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}{% if is_empty %}
 	<p><a href="{{ href|escape('html') }}">{{ STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST }}</a></p>
 {% else %}
@@ -118,8 +118,6 @@
 		</td>
 		<td class="center">
 		<input type="text" onchange="update_reference(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')" style="width:100px" value="{{ li.reference }}" id="reference{{ li.id }}" name="reference_product" class="form-control">
-		
-		
 		</td>
 		<td class="center">
 			{% if not (li.cats) %}
@@ -157,7 +155,7 @@
 				<option value="null">{{ STR_ADMIN_SUPPLIER }}</option>
 				{% for so in supplier_options %} 
 					 <option value="{{ so.id_utilisateur }}" {% if li.societe and li.societe == so.societe %} selected="selected"{% endif %}>{{ so.prenom }} {{ so.nom_famille }}</option>
-				{%for%}
+				{% endfor %}
 			</select>
 		</td>
 		<td class="center">

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ventes.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -144,7 +144,8 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 			$tpl->assign('export_href_one_line_per_order', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=one_line_per_order&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('export_href_one_line_per_product', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=one_line_per_product&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
-
+			$tpl->assign('export_href_chronopost', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=chronopost&dateadded1=' . $dateAdded1 . '&dateadded2=' . $dateAdded2 . $extra_csv_param);
+			$tpl->assign('STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST', $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST"]);
 			if (!empty($_GET['statut'])) {
 				$tpl->assign('payment_status_name', get_payment_status_name($_GET['statut']));
 			}
@@ -155,7 +156,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 		$tpl->assign('STR_PDF_AVOIR', $GLOBALS['STR_PDF_AVOIR']);
-		$tpl->assign('STR_PDF_NET', $GLOBALS['STR_PDF_NET']);
+		$tpl->assign('STR_NET', $GLOBALS['STR_NET']);
 		$tpl->assign('STR_ADMIN_VENTES_FORM_EXPLAIN', $GLOBALS['STR_ADMIN_VENTES_FORM_EXPLAIN']);
 		$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
 		$tpl->assign('STR_ORDER_NAME', $GLOBALS['STR_ORDER_NAME']);

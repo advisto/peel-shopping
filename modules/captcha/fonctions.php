@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53407 2017-03-30 17:51:49Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -78,7 +78,7 @@ function securityCodeCreate($code, $fileName, $noise_level = null, $noise_max_si
 	$x = mt_rand(15, 20);
 	$y = mt_rand(0, 7);
 
-	for ($i = 0; $i < String::strlen($code); $i++) {
+	for ($i = 0; $i < StringMb::strlen($code); $i++) {
 		$x_rand = mt_rand(32, 37) * $i + 20;
 		$y_rand = mt_rand(35, 55);
 		$f_rand = mt_rand(-30, 30);
@@ -199,7 +199,7 @@ function clean_security_codes($older_than_hours = 4)
 	if ($handle = opendir($dir)) {
 		while (false !== ($file = readdir($handle))) {
 			// On supprime les anciens fichiers de plus de $older_than_hours heures qui ne sont pas des fichiers de typo (.ttf)
-			if ($file != '.' && $file != '..' && $file[0] != '.' && String::strpos($file, '.ttf') === false && filemtime($dir . $file) < time() - 3600 * $older_than_hours) {
+			if (!empty($file) && $file != '.' && $file != '..' && $file[0] != '.' && StringMb::strpos($file, '.ttf') === false && filemtime($dir . $file) < time() - 3600 * $older_than_hours) {
 				@unlink($dir . $file);
 				$i++;
 			}

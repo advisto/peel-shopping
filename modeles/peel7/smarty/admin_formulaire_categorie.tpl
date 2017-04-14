@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_categorie.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -25,7 +25,7 @@
 		<tr>
 			<td class="top">{$STR_ADMIN_CATEGORIES_PARENT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select class="form-control" name="parent_id" style="width:100%" size="10">
+				<select class="form-control" name="parent_id" style="width:100%" size="20">
 					<option value="0"{if $issel_parent_zero} selected="selected"{/if}>{$STR_ADMIN_AT_ROOT}</option>
 					{$categorie_options}
 				</select>

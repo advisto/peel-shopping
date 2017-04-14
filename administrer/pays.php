@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pays.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: pays.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -178,6 +178,13 @@ function affiche_formulaire_pays(&$frm)
 			'name' => $tab_zone['nom_' . $_SESSION['session_langue']]
 			);
 	}
+	if (check_if_module_active('departements')) {
+		// Si le module département est actif, les zones d'expédition sont gérées par département. Cette option permet d'associer les départements à un pays, pour permettre le bon fonctionement du process de commande.
+		$tpl_options[] = array('value' => '-1',
+			'issel' => vb($frm['zone']) == '-1',
+			'name' => $GLOBALS['STR_MODULE_DEPARTEMENT_USE_DEPARTEMENT_AS_ZONE_EXPEDITION']
+			);
+	}
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('options', $tpl_options);
 	$tpl->assign('position', $frm["position"]);
@@ -331,7 +338,7 @@ function affiche_liste_pays()
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($query)) {
-			$zone = String::html_entity_decode_if_needed($ligne['zone_name']);
+			$zone = StringMb::html_entity_decode_if_needed($ligne['zone_name']);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true, null, null, 'sortable_'.$ligne['id']),
 				'nom' => $ligne['pays_' . $_SESSION['session_langue']],
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],

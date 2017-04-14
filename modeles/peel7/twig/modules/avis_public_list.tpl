@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis_public_list.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: avis_public_list.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
 <h1 property="name">{% if mode == 'avis' %}{{ STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT }}{% else %}{{ STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT }}{% endif %}: {% if type == 'produit' %}{{ product_name }}{% elseif type == 'annonce' %}{{ annonce_titre }}{% endif %}</h1>
 {% if are_results %}
@@ -65,7 +65,7 @@
 	<a href="{{ urlannonce }}" class="btn btn-default">{{ STR_MODULE_ANNONCES_BACK_TO_AD|escape('html') }}</a>
 </p>
 {% endif %}
-{% if type == 'annonce' and is_owner % and mode == 'news'}
+{% if type == 'annonce' and is_owner and mode == 'news' %}
 <p style="margin-top: 20px;">
 	<a href="{{ wwwroot }}/modules/avis/avis.php?ref={{ id }}&amp;mode=news" class="btn btn-default">{{ LANG.STR_MODULE_AVIS_YOUR_NEWS_ADD|escape('html') }}</a>
 </p>

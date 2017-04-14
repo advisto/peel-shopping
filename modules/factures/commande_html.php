@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an		|
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an		|
 // | opensource GPL license: you are allowed to customize the code			|
 // | for your own needs, but must keep your changes under GPL				|
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html			|
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/		|
 // +----------------------------------------------------------------------+
-// $Id: commande_html.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: commande_html.php 53200 2017-03-20 11:19:46Z sdelaporte $
 include("../../configuration.inc.php");
 if(!empty($GLOBALS['site_parameters']['require_login_for_html_bill'])) {
 	necessite_identification();
@@ -42,6 +42,10 @@ if (!empty($_GET['code_facture'])) {
 $qid_commande = query($sql);
 
 if ($commande = fetch_object($qid_commande)) {
+	if (!empty($GLOBALS['site_parameters']['bill_redirect_html_to_pdf']) && !empty($commande->numero)) {
+		// On ne veut pas afficher la page pour les factures (commande avec un numéro de facture.). Donc on redirige vers la facture PDF
+		redirect_and_die(get_site_wwwroot($commande->site_id) . '/factures/commande_pdf.php?mode=facture&code_facture=' . $commande->code_facture);
+	}
 	$_SESSION['session_last_bill_viewed'] = $commande->id;
 	$output = '';
 	$GLOBALS['site_parameters']['css'] = 'html_bill.css';
@@ -57,7 +61,7 @@ if ($commande = fetch_object($qid_commande)) {
 		$displayed_date = get_formatted_date($commande->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 	} else {
 		// On veut une date de facture si possible et pas de commande
-		if(!empty($commande->f_datetime) && String::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
+		if(!empty($commande->f_datetime) && StringMb::substr($commande->f_datetime, 0, 10) != '0000-00-00') {
 			// Une date de facture est définie
 			$displayed_date = get_formatted_date($commande->f_datetime, 'short');
 		} else {
@@ -107,7 +111,7 @@ if ($commande = fetch_object($qid_commande)) {
 									<td class="bill_cell_title">' . $bill_address_title . '</td>
 								</tr>
 								<tr>
-									<td class="bill_cell">' . String::nl2br_if_needed($order_infos['client_infos_bill']) . '</td>
+									<td class="bill_cell">' . StringMb::nl2br_if_needed($order_infos['client_infos_bill']) . '</td>
 								</tr>
 							</table>
 						</td>
@@ -118,7 +122,7 @@ if ($commande = fetch_object($qid_commande)) {
 									<td class="bill_cell_title">' . $GLOBALS['STR_SHIP_ADDRESS'] . '</td>
 								</tr>
 								<tr>
-									<td class="bill_cell">' . String::nl2br_if_needed($order_infos['client_infos_ship']) . '</td>
+									<td class="bill_cell">' . StringMb::nl2br_if_needed($order_infos['client_infos_ship']) . '</td>
 								</tr>
 							</table>':'') . '
 						</td>
@@ -230,7 +234,7 @@ if ($commande = fetch_object($qid_commande)) {
 						<td colspan="2" class="titre" class="bill_cell_title"><b>' . $GLOBALS['STR_COMMENTS'] . '</b></td>
 					</tr>
 					<tr>
-						<td colspan="2">' . String::html_entity_decode_if_needed($commande->commentaires) . '</td>
+						<td colspan="2">' . StringMb::html_entity_decode_if_needed($commande->commentaires) . '</td>
 					</tr>
 	';
 	}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: ro.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ro.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -67,6 +67,7 @@ $GLOBALS["STR_BANK_ACCOUNT"] = "";
 $GLOBALS["STR_BARCODE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "";
 $GLOBALS["STR_BRAND_LB"] = "";
@@ -164,7 +165,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "";
 $GLOBALS["STR_DELIVERY"] = "";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "";
 $GLOBALS["STR_DESC"] = "";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "";
+$GLOBALS["STR_DESCRIPTION"] = "";
 $GLOBALS["STR_DESIGNATION"] = "";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "";
@@ -375,6 +376,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "";
 $GLOBALS["STR_MESSAGE"] = "Mesaj";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "";
 $GLOBALS["STR_MLLE"] = "";
 $GLOBALS["STR_MME"] = "";
@@ -563,6 +565,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "";
 $GLOBALS["STR_ORDER_HISTORY"] = "";
+$GLOBALS['STR_ORDER_MIN'] = "";
 $GLOBALS["STR_ORDER_NAME"] = "";
 $GLOBALS["STR_ORDER_NUMBER"] = "";
 $GLOBALS["STR_ORDER_POINT"] = "Puncte cadou";

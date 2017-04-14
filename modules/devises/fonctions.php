@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -84,7 +84,7 @@ function set_current_devise($currency_id_or_code, $reference_country_id = null)
 			LIMIT 1";
 		$resDevise = query($sql);
 		if ($Devise = fetch_object($resDevise)) {
-			$_SESSION['session_devise']['symbole'] = String::html_entity_decode(str_replace('&euro;', '€', $Devise->symbole));
+			$_SESSION['session_devise']['symbole'] = StringMb::html_entity_decode(str_replace('&euro;', '€', $Devise->symbole));
 			$_SESSION['session_devise']['symbole_place'] = $Devise->symbole_place;
 			$_SESSION['session_devise']['conversion'] = $Devise->conversion;
 			$_SESSION['session_devise']['code'] = $Devise->code;
@@ -111,7 +111,7 @@ function affiche_module_devise($return_mode = false)
 			WHERE etat='1' AND " . get_filter_site_cond('devises') . "
 			ORDER BY devise");
 		$url_part = str_replace(array('?devise=' . vb($_GET['devise']), '&devise=' . vb($_GET['devise'])), array('', ''), $_SERVER['REQUEST_URI']);
-		if (String::strpos($url_part, '?') === false) {
+		if (StringMb::strpos($url_part, '?') === false) {
 			$url_part .= '?devise=';
 		} else {
 			$url_part .= '&devise=';

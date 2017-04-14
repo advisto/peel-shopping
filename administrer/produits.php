@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: produits.php 53208 2017-03-20 14:35:34Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -286,9 +286,10 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 		$frm['image10'] = "";
 		$frm['youtube_code'] = "";
 		$frm['tva'] = "";
-		$frm['poids'] = "";
+		$frm['poids'] = "0.00";
 		$frm['on_perso'] = "";
-		$frm['promotion'] = "";
+		$frm['promotion'] = "0.00";
+		$frm['volume'] = "0.00";
 		$frm['etat'] = "";
 		$frm['points'] = 0;
 		$frm['site_id'] = '';
@@ -465,8 +466,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	// - soit chargés de la base de données et convertis en HT/TTC suivant la configuration adaptée
 	// - soit viennent du formulaire déjà validé mais qui avait des erreurs, et n'ont pas être remodifiés
 	$prix = fprix(get_float_from_user_input($frm['prix']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-	$prix_flash = fprix(get_float_from_user_input($frm['prix_flash']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-	$prix_revendeur = fprix(get_float_from_user_input($frm['prix_revendeur']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_flash = fprix(get_float_from_user_input(vb($frm['prix_flash'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_revendeur = fprix(get_float_from_user_input(vb($frm['prix_revendeur'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	$prix_achat = fprix(get_float_from_user_input($frm['prix_achat']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	// Si aucune référence n'est choisie on initialise le tableau des références.
 	if (!isset($frm['references'])) {
@@ -532,6 +533,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		}
 		$tpl->assign('position', vn($frm['position']));
 
+		$tpl->assign('module_departement_active', check_if_module_active('departements'));
 		$tpl->assign('is_module_gift_checks_active', check_if_module_active('gift_check'));
 		$tpl->assign('is_on_check', !empty($frm['on_check']));
 
@@ -549,7 +551,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_on_top', !empty($frm['on_top']));
 
 		$tpl->assign('is_conditionnement_module_active', check_if_module_active('conditionnement'));
-		if (check_if_module_active('product_references_by_options')) {
+		if (check_if_module_active('product_references_by_options')&&(empty($GLOBALS['site_parameters']['product_references_by_color_and_size_disabled']))) {
 			$tpl->assign('product_multiple_references_form', product_multiple_references_form($frm['id']));
 			$tpl->assign('STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM', $GLOBALS['STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM']);
 		}
@@ -574,7 +576,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				'nom_error' => $form_error_object->text('nom_' . $lng),
 				'modif_tab_href' => $GLOBALS['administrer_url'] . '/produits.php?mode=modif_tab&id=' . $frm['id'] . '&tab_lang=' . $lng,
 				'descriptif' => vb($frm['descriptif_' . $lng]),
-				'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+				'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 				'meta_titre' => vb($frm['meta_titre_' . $lng]),
 				'meta_key' => $frm['meta_key_' . $lng],
 				'meta_desc' => $frm['meta_desc_' . $lng]
@@ -583,6 +585,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('langs', $tpl_lang_names);
 		$tpl->assign('product_name_forced_lang', vb($GLOBALS['site_parameters']['product_name_forced_lang']));
 		$tpl->assign('product_description_forced_lang', vb($GLOBALS['site_parameters']['product_description_forced_lang']));
+		$tpl->assign('associated_product_multiple_add_to_cart', vb($GLOBALS['site_parameters']['associated_product_multiple_add_to_cart']));
 
 		$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 		$tpl->assign('ttc_ht', (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']));
@@ -598,7 +601,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_module_ecotaxe_active', check_if_module_active('ecotaxe'));
 		$tpl_ecotaxe_options = array();
 		if (check_if_module_active('ecotaxe')) {
-			$sql = "SELECT id, code, nom_" . $_SESSION['session_langue'] . " AS nom, prix_ttc
+			$sql = "SELECT id, code, nom_" . $_SESSION['session_langue'] . " AS nom, prix_ttc, coefficient
 				FROM peel_ecotaxes
 				WHERE " . get_filter_site_cond('ecotaxes') . "
 				ORDER BY code";
@@ -608,7 +611,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 					'issel' => $e['id'] == vb($frm['id_ecotaxe']),
 					'code' => $e['code'],
 					'nom' => $e['nom'],
-					'prix' => fprix($e['prix_ttc'], true, $GLOBALS['site_parameters']['code'], false)
+					'prix' => ($e['coefficient']>0?$e['coefficient']:fprix($e['prix_ttc'], true, $GLOBALS['site_parameters']['code'], false) . ' ' . $GLOBALS['STR_TTC']) 
 					);
 			}
 		}
@@ -636,10 +639,26 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_lot_module_active', check_if_module_active('lot'));
 		if (check_if_module_active('lot')) {
 			if (vb($frm['nouveau_mode']) == "maj") {
-				$tpl->assign('lot_explanation_table', get_lot_explanation_table($frm['id']));
-				$tpl->assign('lot_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']));
-				if (num_rows(query("SELECT 1 FROM peel_quantites WHERE produit_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites'))) > 0) {
-					$tpl->assign('lot_supprime_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']) . '&mode=supprime');
+				if (check_if_module_active('departements')) {
+					$query = query("SELECT * FROM peel_zones");
+					$lots = array();
+					while($zone = fetch_assoc($query)) {
+						$tmplot = array();
+						$tmplot['lot_explanation_table'] = get_lot_explanation_table($frm['id'], null, $zone['id']);
+						$tmplot['lot_href'] = $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']) . '&zone_id=' . $zone['id'];
+						$tmplot['zone_name'] = $zone['nom_' . $_SESSION['session_langue']];
+						if (num_rows(query("SELECT 1 FROM peel_quantites WHERE produit_id='" . intval($frm['id']) . "' AND zone_id='" . intval($zone['id']) . "' AND " . get_filter_site_cond('quantites'))) > 0) {
+							$tmplot['lot_supprime_href'] = $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']) . '&zone_id=' . $zone['id'].'&mode=supprime';
+						}
+						$lots[] = $tmplot;
+					}
+					$tpl->assign('lots', $lots);
+				} else {
+					$tpl->assign('lot_explanation_table', get_lot_explanation_table($frm['id']));
+					$tpl->assign('lot_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']));
+					if (num_rows(query("SELECT 1 FROM peel_quantites WHERE produit_id='" . intval($frm['id']) . "' AND " . get_filter_site_cond('quantites'))) > 0) {
+						$tpl->assign('lot_supprime_href', $GLOBALS['wwwroot_in_admin'] . '/modules/lot/administrer/lot.php?id=' . vb($frm['id']) . '&mode=supprime');
+					}
 				}
 			}
 		}
@@ -649,13 +668,13 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		$tpl_files = array();
 		for ($i = 1; $i <= 10; $i++) {
-			$tpl_files[$i] = get_uploaded_file_infos('image' . $i, $frm['image' . $i], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image' . $i);
+			$tpl_files[$i] = get_uploaded_file_infos('image' . $i, vb($frm['image' . $i]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image' . $i);
 		}
 		
 		if(!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
 			foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
 				if (strpos($this_key, 'image') === 0) {
-					$tpl_files[$i] = get_uploaded_file_infos($this_key, $frm[$this_key], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=' . $this_key);
+					$tpl_files[$i] = get_uploaded_file_infos($this_key, vb($frm[$this_key]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=' . $this_key);
 					$i++;
 				}
 			}
@@ -743,7 +762,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		}
 
 		$tpl_produits_options = array();
-		$select = query("SELECT pr.reference_id, p.reference, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name
+		$select = query("SELECT pr.reference_id, p.reference, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, pr.quantity
 			FROM peel_produits p
 			LEFT JOIN peel_produits_references pr ON pr.reference_id = p.id
 			WHERE produit_id = ".intval($frm['id'])." AND " . get_filter_site_cond('produits', 'p', true) . "
@@ -754,6 +773,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				'reference' => $nom['reference'],
 				'name' => $nom['name'],
 				'i' => $i,
+				'qt' => intval($nom['quantity']),
 			);
 			$i++;
 		}
@@ -1008,7 +1028,7 @@ function supprime_produit($id)
 	query("DELETE FROM peel_produits WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('produits', null, true));
 
 	if (affected_rows()) {
-		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_DELETED_OK'], String::html_entity_decode_if_needed($product_infos['name']))))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_DELETED_OK'], StringMb::html_entity_decode_if_needed($product_infos['name']))))->fetch();
 	}
 	return $output;
 }
@@ -1115,7 +1135,6 @@ function insere_produit($frm)
 		reference
 		, ean_code
 		, prix
-
 		, prix_promo
 		, prix_revendeur
 		, prix_achat
@@ -1234,11 +1253,11 @@ function insere_produit($frm)
 		, '" . nohtml_real_escape_string(vn($frm['poids'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'
-		, '" . nohtml_real_escape_string(String::substr(String::strtoupper($frm['nom_' . $_SESSION['session_langue']]), 0, 1)) . "'
+		, '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper($frm['nom_' . $_SESSION['session_langue']]), 0, 1)) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_stock'])) . "'
-		, '" . nohtml_real_escape_string(String::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
-		, '" . nohtml_real_escape_string(String::html_entity_decode_if_needed(vb($frm['affiche_stock']))) . "'
+		, '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
+		, '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vn($frm['affiche_stock']))) . "'
 		, '" . nohtml_real_escape_string(vn($frm['id_marque'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_rupture'])) . "'
 		, '" . intval(vn($frm['id_ecotaxe'])) . "'
@@ -1355,7 +1374,7 @@ function insere_produit($frm)
 		insert_payment_by_product($frm['paiment_allowed'], $product_id);
 	}
 	if (!empty($product_id)) {
-		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_CREATED_OK'], String::html_entity_decode_if_needed($frm['nom_' . $_SESSION['session_langue'] . '']))))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_CREATED_OK'], StringMb::html_entity_decode_if_needed($frm['nom_' . $_SESSION['session_langue'] . '']))))->fetch();
 	}
 	return $output;
 }
@@ -1439,10 +1458,10 @@ function maj_produit($id, $frm)
 		, on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'
 		, on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'
 		, on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'
-		, alpha = '" . nohtml_real_escape_string(String::substr(String::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'
+		, alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'
 		, on_stock = '" . intval(vn($frm['on_stock'])) . "'
 		, affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'
-		, delai_stock = '" . nohtml_real_escape_string(String::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
+		, delai_stock = '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
 		, etat_stock = '" . intval(vn($frm['etat_stock'])) . "'
 		, extra_link = '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
 		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
@@ -1553,8 +1572,8 @@ function maj_produit($id, $frm)
 			$result = fetch_assoc($query);
 			if (empty($result)) {
 				// Association de produit non présente.
-				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
-					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
+				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id, quantity)
+					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "', '" . intval(vn($frm['quantity_product_reference'][$i])) . "')");
 			}
 		}
 	}
@@ -1600,7 +1619,7 @@ function maj_produit($id, $frm)
 	} else {
 		$product_name = vb($frm['nom_' . $_SESSION['session_langue']]);
 	}
-	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_PRODUCT_UPDATE_OK'], String::html_entity_decode_if_needed($product_name))))->fetch();
+	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_PRODUCT_UPDATE_OK'], StringMb::html_entity_decode_if_needed($product_name))))->fetch();
 }
 
 /**
@@ -1788,17 +1807,17 @@ function affiche_formulaire_tab(&$frm, &$form_error_object, $product_name, $lng)
 	$tpl->assign('product_name', $product_name);
 	$tpl->assign('display_tab', vb($frm['display_tab']));
 	$tpl->assign('tab1_title', vb($frm['tab1_title_' . $lng]));
-	$tpl->assign('tab1_html_te', getTextEditor('tab1_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab1_html_' . $lng]))));
+	$tpl->assign('tab1_html_te', getTextEditor('tab1_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab1_html_' . $lng]))));
 	$tpl->assign('tab2_title', vb($frm['tab2_title_' . $lng]));
-	$tpl->assign('tab2_html_te', getTextEditor('tab2_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab2_html_' . $lng]))));
+	$tpl->assign('tab2_html_te', getTextEditor('tab2_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab2_html_' . $lng]))));
 	$tpl->assign('tab3_title', vb($frm['tab3_title_' . $lng]));
-	$tpl->assign('tab3_html_te', getTextEditor('tab3_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab3_html_' . $lng]))));
+	$tpl->assign('tab3_html_te', getTextEditor('tab3_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab3_html_' . $lng]))));
 	$tpl->assign('tab4_title', vb($frm['tab4_title_' . $lng]));
-	$tpl->assign('tab4_html_te', getTextEditor('tab4_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab4_html_' . $lng]))));
+	$tpl->assign('tab4_html_te', getTextEditor('tab4_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab4_html_' . $lng]))));
 	$tpl->assign('tab5_title', vb($frm['tab5_title_' . $lng]));
-	$tpl->assign('tab5_html_te', getTextEditor('tab5_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab5_html_' . $lng]))));
+	$tpl->assign('tab5_html_te', getTextEditor('tab5_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab5_html_' . $lng]))));
 	$tpl->assign('tab6_title', vb($frm['tab6_title_' . $lng]));
-	$tpl->assign('tab6_html_te', getTextEditor('tab6_html_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['tab6_html_' . $lng]))));
+	$tpl->assign('tab6_html_te', getTextEditor('tab6_html_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['tab6_html_' . $lng]))));
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT', $GLOBALS['STR_ADMIN_PRODUITS_UPDATE_TABS_CONTENT']);

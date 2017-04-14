@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: utilisateurs.php 53555 2017-04-11 16:30:55Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_users");
+necessite_priv("admin_users,admin_finance,admin_operations,admin_productsline");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_UTILISATEURS_TITLE'];
 /* Initialisation des variables */
@@ -47,6 +47,15 @@ if (!empty($_POST['print_all_bill'])) {
 }
 
 switch (vb($_REQUEST['mode'])) {
+	case "update_newsletter" :
+		if (isset($_GET['new_newsletter_value']) && !empty($_GET['user_id'])) {
+			query('UPDATE peel_utilisateurs
+				SET newsletter="' . intval($_GET['new_newsletter_value']) . '"
+				WHERE id_utilisateur="' . intval($_GET['user_id']) . '" AND ' . get_filter_site_cond('utilisateurs', null, true));
+		}
+		$output .= afficher_liste_utilisateurs($priv, $cle, $_GET);
+		break;
+
 	case "modif_etat" :
 		if (isset($_GET['etat']) && !empty($_GET['id'])) {
 			$user_infos = get_user_information($_GET['id']);
@@ -92,7 +101,7 @@ switch (vb($_REQUEST['mode'])) {
 					$annonce_active = true;
 				}
 			} else {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 			}
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
@@ -106,7 +115,7 @@ switch (vb($_REQUEST['mode'])) {
 		if (($comments = fetch_assoc($qcomments)) && !empty($_GET['priv'])) {
 			if(a_priv('admin*', false, false, $id_utilisateur) && !a_priv('admin', false, true)) {
 				// L'utilisateur qu'on veut modifier n'est pas un administrateur est un administrateur et, l'utilisateur loggé n'a pas le droit de le modifier car il n'est pas admin générale(par exemple admin_util qui n'est pas suffisant comme droit)
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 			} else {
 				// Envoi d'un email de refus du statut
 				$custom_template_tags['COMMENTS'] = $comments['comments']; 
@@ -128,6 +137,50 @@ switch (vb($_REQUEST['mode'])) {
 			redirect_and_die($GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur='.$id_utilisateur.'#comments');
 		}
 		break;
+
+	case "registration_validated" :
+		// validation de la candidature pour le profil, on envoie un email
+		if (!empty($_GET['priv'])) {
+			if(a_priv('admin*', false, false, $id_utilisateur) && !a_priv('admin', false, true)) {
+				// L'utilisateur qu'on veut modifier n'est pas un administrateur est un administrateur et, l'utilisateur loggé n'a pas le droit de le modifier car il n'est pas admin générale(par exemple admin_util qui n'est pas suffisant comme droit)
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			} else {
+				$user_infos = get_user_information($id_utilisateur);
+				// Envoi d'un email de validation du statut
+
+				if(!empty($product_reference_inscription)) {
+
+				} else {
+					if ($_GET['priv'] == 'stop_porteur') {
+						$profil_subscription = 'util_porteur';
+					} elseif ($_GET['priv'] == 'stop_contributeur') {
+						$profil_subscription = 'util_contributeur';
+					}elseif ($_GET['priv'] == 'stop_lender') {
+						$profil_subscription = 'util_lender';
+					}
+					$sql = "SELECT priv
+						FROM peel_utilisateurs
+						WHERE id_utilisateur = " . intval($_GET['id_utilisateur']);
+					$query = query($sql);
+					$result = fetch_assoc($query);
+					$new_priv[] = $profil_subscription;
+					$current_priv_array = explode('+', $result['priv']);
+					foreach($current_priv_array as $this_priv) {
+						// On garde les autres droits déjà existants
+						if(!in_array($this_priv, $new_priv) && $_GET['priv']!=$this_priv) {
+							$new_priv[] = $this_priv;
+						}
+					}
+					$priv_list = implode('+', $new_priv);
+					$sql = "UPDATE peel_utilisateurs
+						SET priv='" . real_escape_string($priv_list) . "'
+						WHERE id_utilisateur = '" . intval($_GET['id_utilisateur']) . "'";
+					query($sql);
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK']))->fetch();
+				}
+			}
+		}
+		break;
 		
 	case "ajout" :
 		$output .= afficher_formulaire_ajout_utilisateur();
@@ -138,7 +191,7 @@ switch (vb($_REQUEST['mode'])) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		} else {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		break;
 
@@ -156,7 +209,7 @@ switch (vb($_REQUEST['mode'])) {
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $user_infos['email'])))->fetch();
 			}
 		} else {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
@@ -167,7 +220,21 @@ switch (vb($_REQUEST['mode'])) {
 			$output .= supprime_logo($id_utilisateur);
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		} else {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+		}
+		break;
+
+	case "supprfile" :
+		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
+			$output .= delete_uploaded_file_and_thumbs($_GET['bic']);
+			$sql = "UPDATE peel_utilisateurs
+				SET bic=''
+				WHERE id_utilisateur = " . intval($id_utilisateur);
+			query($sql);
+			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		break;
 
@@ -256,6 +323,7 @@ switch (vb($_REQUEST['mode'])) {
 			} elseif ($user_infos['etat'] != $frm['etat'] && $frm['etat'] == 0) {
 				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_PROFIL', sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DEACTIVATED_OK'], $user_infos['email']));
 			}
+
 		}
 
 		if (!$form_error_object->count()) {
@@ -306,7 +374,7 @@ switch (vb($_REQUEST['mode'])) {
 				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_NEW_PASSWORD_SENT'], vb($user->email))))->fetch();
 			}
 		} else {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
 
@@ -437,25 +505,25 @@ switch (vb($_REQUEST['mode'])) {
 		// recupération des informations client du critère de recherche sous forme de tableau, afin de les envoyer en paramètre dans la fonction tracert.
 		$user_infos = array();
 		if (!empty($_GET['client_info'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_FIRST_NAME"]) . ' / ' . $GLOBALS["STR_LAST_NAME"] . ' : ' . $_GET['client_info'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_FIRST_NAME"]) . ' / ' . $GLOBALS["STR_LAST_NAME"] . ' : ' . $_GET['client_info'];
 		}
 		if (!empty($_GET['email'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_EMAIL"]) . ' : ' . $_GET['email'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_EMAIL"]) . ' : ' . $_GET['email'];
 		}
 		if (!empty($_GET['pays'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_COUNTRY"]) . ' : ' . $_GET['pays'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_COUNTRY"]) . ' : ' . $_GET['pays'];
 		}
 		if (!empty($_GET['societe'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_COMPANY"]) . ' : ' . $_GET['societe'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_COMPANY"]) . ' : ' . $_GET['societe'];
 		}
 		if (!empty($_GET['origin'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_ORIGIN"]) . ' : ' . $_GET['origin'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_ORIGIN"]) . ' : ' . $_GET['origin'];
 		}
 		if (!empty($_GET['tel'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_SHORT_TEL"]) . ' : ' . $_GET['tel'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_SHORT_TEL"]) . ' : ' . $_GET['tel'];
 		}
 		if (!empty($_GET['fax'])) {
-			$user_infos [] = String::ucfirst($GLOBALS["STR_SHORT_FAX"]) . ' : ' . $_GET['fax'];
+			$user_infos [] = StringMb::ucfirst($GLOBALS["STR_SHORT_FAX"]) . ' : ' . $_GET['fax'];
 		}
 		if (!empty($_GET['date_insert_to'])) {
 			$user_infos [] = 'Date inscription : ' . nohtml_real_escape_string(date('Y-m-d', strtotime(str_replace('/', '-', $_GET['date_insert_to']))));
@@ -516,7 +584,10 @@ switch (vb($_REQUEST['mode'])) {
 			}
 		}
 		break;
-		
+	case 'send_email_alert':
+		call_module_hook('user_send_email_alert_admin', array('id_utilisateur'=>$_GET['id_utilisateur']));
+		$output .= affiche_formulaire_modif_utilisateur($_GET['id_utilisateur']);
+		break;
 	default :
 		if (!empty($_GET['commercial_contact_id']) && check_if_module_active('commerciale')) {
 			$output .= afficher_liste_utilisateurs($priv, $cle, null, 'date_insert', $_GET['commercial_contact_id']);
@@ -530,7 +601,7 @@ switch (vb($_REQUEST['mode'])) {
 				}
 
 				if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
-					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite'], $_SESSION['session_langue']);
 				} else {
 					$this_wwwroot =  $GLOBALS['wwwroot'];
 				}
@@ -705,7 +776,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('email', (!a_priv('demo')?vb($frm['email']):'private [demo]'));
 	if(check_if_module_active('bounces')) {
 		include($GLOBALS['dirroot'] . '/modules/bounces/rfc1893.error.codes.php');
-		$temp = explode('.', $frm['email_bounce']);
+		$temp = explode('.', vb($frm['email_bounce']));
 		if(!empty($temp[0]) && !empty($status_code_classes[$temp[0]])) {
 			$email_infos_array[] = vb($status_code_classes[$temp[0]]['title']);
 		}
@@ -718,7 +789,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	} else {
 		$email_infos = vb($frm['email_bounce']);
 	}
-	if(String::substr(vb($frm['email_bounce']), 0, 1) === '5') {
+	if(!empty($frm['email']) && !EmailOK($frm['email'], vb($frm['email_bounce']))) {
 		$email_infos = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $email_infos))->fetch();
 	}
 	$tpl->assign('email_infos', $email_infos);
@@ -731,11 +802,29 @@ function afficher_formulaire_utilisateur(&$frm)
 		// Si on gère les profils spécifique, on affiche la page de profil spécifique pour l'administrateur.
 		$specific_profile_results = '';
 		foreach(explode('+', $frm['priv']) as $this_priv) {
-			if(String::substr($this_priv, 0, 5) == 'stop_') {
+			if(!isset($all_priv_infos[$this_priv]) || !in_array($this_priv, vb($GLOBALS['site_parameters']['specific_profil_array'], array()))) {
+				continue;
+			}
+			$specific_profile_results .= '<br />';
+			$specific_profile_results .= '<br />';
+			if(StringMb::substr($this_priv, 0, 5) == 'stop_') {
+				// Pour refuser l'inscription
 				$specific_profile_results .= '<p><a href="' . $GLOBALS['wwwroot'] . '/modules/dreamtakeoff/specific_profile.php?form_step=1&priv='.str_replace('stop_','util_', $this_priv).'&form_id=' . MDP(16) . '&id_utilisateur=' . vb($frm['id_utilisateur']) . '">' . sprintf($GLOBALS['STR_MODULE_DREAMTAKEOFF_SPECIFIC_PROFILE_IN_WAIT_LINK'], $all_priv_infos[$this_priv]['name']) . '</a></p>
 				<a class="btn btn-primary" href="'.get_current_url(false).'?mode=registration_refused&id_utilisateur=' . intval($frm['id_utilisateur']) . '&priv=' . $this_priv . '">'.$GLOBALS['STR_MODULE_DREAMTAKEOFF_CANCEL_SUBSCRIPTION'].' '.$all_priv_infos[$this_priv]['name'].'</a>';
-			} elseif(String::substr($this_priv, 0, 5) == 'util_') {
-				$specific_profile_results .= '<p><a href="' . $GLOBALS['wwwroot'] . '/modules/dreamtakeoff/specific_profile.php?form_step=1&priv='.str_replace('stop_','util_', $this_priv).'&form_id=' . MDP(16) . '&id_utilisateur=' . vb($frm['id_utilisateur']) . '">' . sprintf($GLOBALS['STR_MODULE_DREAMTAKEOFF_SPECIFIC_PROFILE_LINK'], $all_priv_infos[$this_priv]['name']) . '</a></p>';
+				// Pour valider l'inscription
+				if ($this_priv == 'stop_agent' || $this_priv == 'stop_expert') {
+					$specific_profile_results .= '<br />'.'<input type="checkbox" name="eligibility_'.StringMb::substr($this_priv, 5).'" ' . frmvalide(!empty($frm['eligibility_' . StringMb::substr($this_priv, 5)]), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_ELIGIBILITY_OK'] . ' ' . $all_priv_infos[$this_priv]['name'];
+					$specific_profile_results .= '<br />'.'<input type="checkbox" name="'.StringMb::substr($this_priv, 5).'_renewal" ' . frmvalide(!empty($frm[StringMb::substr($this_priv, 5).'_renewal']), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_PRIV_RENEWAL'] . ' ' . $all_priv_infos[$this_priv]['name'] . '';
+				} else {
+					$specific_profile_results .= '<br /><br />
+				<a class="btn btn-primary" href="'.get_current_url(false).'?mode=registration_validated&id_utilisateur=' . intval($frm['id_utilisateur']) . '&priv=' . $this_priv . '">' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_VALIDATE_SUBSCRIPTION'].' '.$all_priv_infos[$this_priv]['name'] . '</a>';
+				}
+			} elseif(StringMb::substr($this_priv, 0, 5) == 'util_') {
+				$specific_profile_results .= '<a href="' . $GLOBALS['wwwroot'] . '/modules/dreamtakeoff/specific_profile.php?form_step=1&priv='.str_replace('stop_','util_', $this_priv).'&form_id=' . MDP(16) . '&id_utilisateur=' . vb($frm['id_utilisateur']) . '">' . sprintf($GLOBALS['STR_MODULE_DREAMTAKEOFF_SPECIFIC_PROFILE_LINK'], $all_priv_infos[$this_priv]['name']) . '</a><br />';
+				if ($this_priv == 'util_agent' || $this_priv == 'util_expert') {
+					$specific_profile_results .= '<input type="checkbox" name="eligibility_'.StringMb::substr($this_priv, 5).'" ' . frmvalide(!empty($frm['eligibility_' . StringMb::substr($this_priv, 5)]), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_ELIGIBILITY_OK'] . ' ' . $all_priv_infos[$this_priv]['name'] . '<br />';
+					$specific_profile_results .= '<input type="checkbox" name="'.StringMb::substr($this_priv, 5).'_renewal" ' . frmvalide(!empty($frm[StringMb::substr($this_priv, 5).'_renewal']), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_PRIV_RENEWAL'] . ' ' . $all_priv_infos[$this_priv]['name'] . '';
+				}
 			}
 		}
 		$tpl->assign('specific_profile_results', vb($specific_profile_results));
@@ -816,9 +905,17 @@ function afficher_formulaire_utilisateur(&$frm)
 	}
 	$tpl_origin_options = array();
 	$i = 1;
+	if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin']) && !is_array($frm['origin'])) {
+		$frm['origin'] = get_array_from_string($frm['origin']);
+	}
 	while (isset($GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i])) {
+		if (!empty($GLOBALS['site_parameters']['user_origin_multiple']) && !empty($frm['origin'])) {
+			$issel = in_array($i, $frm['origin']);
+		} else {
+			$issel = (vb($frm['origin']) == $i);
+		}
 		$tpl_origin_options[] = array('value' => $i,
-			'issel' => vb($frm['origin']) == $i,
+			'issel' =>$issel,
 			'name' => $GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $i]
 			);
 		$i++;
@@ -828,7 +925,8 @@ function afficher_formulaire_utilisateur(&$frm)
 			'origin_other_ids_for_javascript' => 'new Array('.implode(',', $GLOBALS['origin_other_ids']).')',
 			'origin_other' => vb($frm['origin_other']),
 			'error_text' => '',
-			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
+			'STR_CHOOSE' => $GLOBALS['STR_CHOOSE'],
+			'user_origin_multiple' => vb($GLOBALS['site_parameters']['user_origin_multiple'])
 		));
 
 	$tpl->assign('STR_LANGUAGE_FOR_AUTOMATIC_EMAILS', $GLOBALS['STR_LANGUAGE_FOR_AUTOMATIC_EMAILS']);
@@ -916,7 +1014,7 @@ function afficher_formulaire_utilisateur(&$frm)
 
 	$tpl->assign('is_webmail_module_active', check_if_module_active('webmail'));
 	if (!empty($frm['id_utilisateur'])) {
-		$tpl->assign('list_user_mail', call_module_hook('list_user_mail', array('id_utilisateur' => $frm['id_utilisateur']), 'string'));
+		$tpl->assign('more_infos_html', call_module_hook('admin_user_edit_more_infos_html', array('id_utilisateur' => $frm['id_utilisateur']), 'string'));
 		if (!empty($GLOBALS['STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER'])) {
 			$tpl->assign('STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER', $GLOBALS['STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER']);
 			$tpl->assign('display_projects_with_related_user_link', $GLOBALS['wwwroot'] . '/modules/annonces/index.php?affiche=related_user_ad_list&show_all_related_project=true&related_user_id='.$frm['id_utilisateur']);
@@ -952,7 +1050,13 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('numero_compte', vb($frm['numero_compte']));
 	$tpl->assign('cle_rib', vb($frm['cle_rib']));
 	$tpl->assign('domiciliation', vb($frm['domiciliation']));
-	$tpl->assign('bic', vb($frm['bic']));
+	if (!empty($GLOBALS['site_parameters']['user_bic_is_file']) || is_file($GLOBALS['uploaddir'].'/'.$frm['bic'])) {
+		$tpl->assign('bic', get_uploaded_file_infos('bic', vb($frm['bic']), get_current_url(false) . '?id_utilisateur=' . vb($frm['id_utilisateur']) . '&mode=supprfile&bic='.$frm['bic']));
+		$tpl->assign('bic_file', true);
+	} else {
+		$tpl->assign('bic_file', false);
+		$tpl->assign('bic', vb($frm['bic']));
+	}
 	$tpl->assign('iban', vb($frm['iban']));
 	$tpl->assign('origin_other', vb($frm['origin_other']));
 	$tpl->assign('project_budget_ht', vb($frm['project_budget_ht']));
@@ -1011,7 +1115,7 @@ function afficher_formulaire_utilisateur(&$frm)
 			// Affichage des valeurs pour ce site 
 			foreach ($this_result_array as $this_technical_code=>$this_value) {
 				if (!empty($this_value)) {
-					$output_get_user_stat_by_site .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_' . String::strtoupper($this_technical_code)].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$this_value . '<br />';
+					$output_get_user_stat_by_site .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_' . StringMb::strtoupper($this_technical_code)].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$this_value . '<br />';
 				}
 			}
 		}
@@ -1075,6 +1179,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_TELEPHONE', $GLOBALS['STR_TELEPHONE']);
 	$tpl->assign('STR_FAX', $GLOBALS['STR_FAX']);
 	$tpl->assign('STR_PORTABLE', $GLOBALS['STR_PORTABLE']);
+	$tpl->assign('form_placeholder_portable', vb($GLOBALS['site_parameters']['form_placeholder_portable']));
 	$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 	$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
 	$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
@@ -1134,6 +1239,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_NONE', $GLOBALS['STR_NONE']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('hook_output', call_module_hook('user_admin_form_additional_part', array('frm' => $frm), 'string'));
 	$output = $tpl->fetch();
 
@@ -1173,7 +1279,7 @@ function afficher_formulaire_utilisateur(&$frm)
 			$total_ttc = $total_ht = 0;
 			$i = 0;
 			if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
-				$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+				$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite'], $_SESSION['session_langue']);
 			} else {
 				$this_wwwroot =  $GLOBALS['wwwroot'];
 			}
@@ -1196,7 +1302,7 @@ function afficher_formulaire_utilisateur(&$frm)
 					'payment_name' => get_payment_name($order_infos->paiement),
 					'payment_status_name' => get_payment_status_name($order_infos->id_statut_paiement),
 					'delivery_status_name' => get_delivery_status_name($order_infos->id_statut_livraison),
-					'ordered_products' => String::str_shorten($order_infos->ordered_products, 200)
+					'ordered_products' => StringMb::str_shorten($order_infos->ordered_products, 200)
 					);
 				$i++;
 			}

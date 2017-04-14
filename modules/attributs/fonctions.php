@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -75,10 +75,10 @@ function attributs_hook_ad_create_or_update_pre(&$params) {
 		$additional_line_price = 0;
 		$additional_line_attribut_id = 0;
 		$additional_line_size = 50;
-		if($max_description_length !== null && String::strlen($params['description_annonce_' . $_SESSION['session_langue']]) > $max_description_length) {
-			$additionnal_text = String::substr($params['description_annonce_' . $_SESSION['session_langue']], $max_description_length);
-			$params['description_annonce_' . $_SESSION['session_langue']] = String::substr($params['description_annonce_' . $_SESSION['session_langue']], 0, $max_description_length);
-			$additional_lines = ceil(String::strlen($additionnal_text)/$additional_line_size);
+		if($max_description_length !== null && StringMb::strlen($params['description_' . $_SESSION['session_langue']]) > $max_description_length) {
+			$additionnal_text = StringMb::substr($params['description_' . $_SESSION['session_langue']], $max_description_length);
+			$params['description_' . $_SESSION['session_langue']] = StringMb::substr($params['description_' . $_SESSION['session_langue']], 0, $max_description_length);
+			$additional_lines = ceil(StringMb::strlen($additionnal_text)/$additional_line_size);
 			$GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']['additionnal_text'] = $additional_line_price*$additional_lines;
 			$temp = explode('§',$params['attributs_list']);
 			$temp[] = $additional_line_attribut_id . '|0|'.$additionnal_text;
@@ -183,7 +183,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
-		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur
+		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'')."
 			".$sql_from_and_where."
 			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
@@ -192,7 +192,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 				// On prend la valeur générale du site
 				$result['type_affichage_attribut'] = $GLOBALS['site_parameters']['type_affichage_attribut'];
 			}
-			$result['descriptif'] = String::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
+			$result['descriptif'] = StringMb::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
 			$call_module_hook = call_module_hook('result_possible_attributs', array('result'=>$result, 'produit_id' =>$product_id), 'array');
 			if (!empty($call_module_hook['prix'])) {
 				$result['prix'] = $call_module_hook['prix'];
@@ -245,7 +245,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 				}
 				if(!empty($attribut_and_options_filter_array) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id]) && !empty($attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)])) {
 					$attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif'] = $attribut_and_options_filter_array[$this_nom_attribut_id][key($this_attribut_values_array)];
-					if(String::strpos($attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['technical_code'], 'date') === 0) {
+					if(StringMb::strpos($attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['technical_code'], 'date') === 0) {
 						$attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif'] = get_formatted_date($attributs_array[$this_nom_attribut_id][key($this_attribut_values_array)]['descriptif']);
 					}
 				}
@@ -431,13 +431,13 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 					$input_name = 'attribut' . $this_nom_attribut_id . '_texte_libre';
 					$input_type = 'text';
 					$input_value = $preselected_value;
-					if(String::strpos($this_attribut_infos['technical_code'], 'date') === 0) {
+					if(StringMb::strpos($this_attribut_infos['technical_code'], 'date') === 0) {
 						$input_class = 'datepicker';
 					}
 				} else {
 					if(!empty($this_attribut_infos['texte_libre'])) {
 						// Cas d'options fictives
-						$this_value = String::html_entity_decode_if_needed($this_attribut_infos['descriptif']);
+						$this_value = StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']);
 						$input_name = 'attribut' . $this_nom_attribut_id . '_texte_libre';
 					} else {
 						$this_value = $this_nom_attribut_id . '|' . $this_attribut_id;
@@ -451,7 +451,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$input_type = 'select';
 						$options[] = array(
 								'value' => $this_value,
-								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
+								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'issel' => in_array($this_value, $attributs_list_array)
 							);
 					} elseif ($type_affichage_attribut == 1) {
@@ -465,7 +465,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'name' => $input_name,
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
-								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
+								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
 					} elseif ($type_affichage_attribut == 2) {
@@ -476,7 +476,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'name' => 'attribut' . $this_nom_attribut_id . '-' . $j,
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
-								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
+								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
 							);
 					} elseif ($type_affichage_attribut == 4) {
@@ -485,10 +485,10 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$options[] = array(
 								'value' => $this_attribut_id,
 								'name' => 'custom_attribut[' . $this_nom_attribut_id . ']',
-								'text' => String::html_entity_decode_if_needed($this_attribut_infos['descriptif'])
+								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif'])
 							);
 					}
-					$max_label_length = max($max_label_length, String::strlen(String::html_entity_decode_if_needed(vb($this_attribut_infos['descriptif']))));
+					$max_label_length = max($max_label_length, StringMb::strlen(StringMb::html_entity_decode_if_needed(vb($this_attribut_infos['descriptif']))));
 				}
 				$j++;
 			}
@@ -496,7 +496,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				$attributes_text_array[] = array(
 						'text' => $attribut_text,
 						'technical_code' => $this_attribut_infos['technical_code'],
-						'name' => String::html_entity_decode_if_needed($this_attribut_infos['nom']).(!empty($this_attribut_infos['mandatory']) && $display_mode != 'selected_text'?' *':''),
+						'name' => StringMb::html_entity_decode_if_needed($this_attribut_infos['nom']).(!empty($this_attribut_infos['mandatory']) && $display_mode != 'selected_text'?' *':''),
 						'type_affichage_attribut' => $type_affichage_attribut,
 						'input_id' => $input_id,
 						'input_name' => $input_name,
@@ -505,7 +505,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'input_class' => $input_class,
 						'options' => $options,
 						'max_label_length' => $max_label_length,
-						'onchange' => $input_on_change . ' update_product_price' . $save_suffix_id . '();'
+						'onchange' => (empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
 					);
 			}
 		}
@@ -513,6 +513,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 	if(!empty($attributes_text_array)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributs_form_part.tpl');
 		$tpl->assign('STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS', $GLOBALS['STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS']);
+		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('attributes_text_array', $attributes_text_array);
 		$tpl->assign('display_mode', $display_mode);
@@ -522,6 +523,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 		$tpl->assign('input_on_change', $input_on_change);
 		$tpl->assign('technical_code', $product_object->technical_code);
 		$tpl->assign('display_name_attribut', $display_name_attribut);
+		$tpl->assign('attribut_first_select_option_is_empty', vb($GLOBALS['site_parameters']['attribut_first_select_option_is_empty']));
 		if(empty($GLOBALS['site_parameters']['attribut_display_formated_text'])) {
 			// Dans le cas où on veut le résultat en mode texte, il faut retirer les sauts de ligne et tabulations => on applique trim()
 			$output .= trim(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $tpl->fetch()));
@@ -550,8 +552,8 @@ function display_option_image($str_image, $set = false)
 		if (count($option_tab) > 1) {
 			// s'il ya au moins une image
 			foreach ($option_tab as $str_img) {
-				if (($end_str = String::strpos($str_img, "}}")) !== false) {
-					$str_img = String::substr($str_img, 0, $end_str);
+				if (($end_str = StringMb::strpos($str_img, "}}")) !== false) {
+					$str_img = StringMb::substr($str_img, 0, $end_str);
 					$small_option_image = thumbs($str_img, 0, 25, 'fit', null, null, true, true);
 					$str_img_new = $GLOBALS['tplEngine']->createTemplate('modules/attributs_option_image.tpl', array(
 							'set' => true,
@@ -702,7 +704,7 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 	// Par ailleurs, il est possible aussi que l'image soit data:image/xxx;base64,XXXXXXXX si générée via javascript
 	// => tout cela est géré par la fonction upload
 	foreach(array_merge(array_keys($frm), array_keys($_FILES)) as $this_key) {
-		if(String::strpos($this_key, 'attribut') === 0 && String::strpos($this_key, '_upload') !== false) {
+		if(StringMb::strpos($this_key, 'attribut') === 0 && StringMb::strpos($this_key, '_upload') !== false) {
 			$frm[$this_key] = upload($this_key, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_key]));
 			if(!empty($_FILES[$this_key]['name']) && $frm[$this_key] === false) {
 				// on signale que l'image n'a pas été chargée correctement
@@ -730,7 +732,8 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 	if(!empty($frm) && is_object($product_object)) {
 		// On charge les informations de base de données relative aux attributs choisis par l'utilisateur
 		// On va ainsi pouvoir vérifier que ces attributs sont bien possibles, et par ailleurs que ceux obligatoires sont bien remplis
-		$attributs_array = $product_object->get_possible_attributs('rough', false, 0, true, false, false, false, false, false, null);
+		// get_attributes_with_multiple_options_only => true, parce qu'on ne veut pas retrouver d'attribut unique dans le tableau error_attribut_mandatory, puisque ces attribut sont forcement absent du formulaire d'ajout au panier, il sont juste affiché dans la description du produit. Avec false comme valeur, on a error_attribut_mandatory qui contient des attribut unique, et ça invalide l'ajout au panier.
+		$attributs_array = $product_object->get_possible_attributs('rough', false, 0, true, false, false, false, true, false, null);
 		if (!empty($attributs_array)) {
 			// On affiche la liste des attributs
 			foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
@@ -771,13 +774,13 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 			}
 		}
 		foreach($frm as $this_key => $this_value) {
-			 if (String::strpos($this_key, 'attribut_list') !== false) {
+			 if (StringMb::strpos($this_key, 'attribut_list') !== false) {
 				// On transmet déjà la liste des attributs correctement formatés dans le formulaire
 				$combinaisons_array[] = $this_value;
-			} elseif (String::strpos($this_key, 'attribut') === 0) {
+			} elseif (StringMb::strpos($this_key, 'attribut') === 0) {
 				// On a un attribut
 				$temp = explode('_', $this_key);
-				$this_nom_attribut_id = intval(String::substr($temp[0], String::strlen('attribut')));
+				$this_nom_attribut_id = intval(StringMb::substr($temp[0], StringMb::strlen('attribut')));
 				if(empty($attributs_array[$this_nom_attribut_id])){
 					// Attribut invalide pour ce produit (erreur technique, ou bidouille utilisateur de ses données POST)
 					continue;
@@ -794,17 +797,17 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 				if(($keep_free_attributs_only && $costly) || ($keep_costly_attributs_only && !$costly)) {
 					continue;
 				}
-				if (String::strpos($this_key, '_texte_libre') !== false) {
+				if (StringMb::strpos($this_key, '_texte_libre') !== false) {
 					// attribut au texte libre
 					if (!empty($this_value)) {
 						// Si cet attribut est obligatoire : c'est OK, pas de problème
 						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}
-					if(!empty($this_value) && String::strpos($attributs_infos['technical_code'], 'date') === 0) {
+					if(!empty($this_value) && StringMb::strpos($attributs_infos['technical_code'], 'date') === 0) {
 						$this_value = get_mysql_date_from_user_input($this_value);
 					}
 					$combinaisons_array[] = $this_nom_attribut_id . '|0|' . $this_value;
-				} elseif (String::strpos($this_key, '_upload') !== false) {
+				} elseif (StringMb::strpos($this_key, '_upload') !== false) {
 					// attribut des champs file
 					if (!empty($_SESSION["session_display_popup"][$this_key])) { 
 						// si l'image a été déjà téléchargée

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: haut.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (empty($GLOBALS['page_columns_count'])) {
 	$GLOBALS['page_columns_count'] = vn($GLOBALS['site_parameters']['site_general_columns_count'], 3);
 }
 
-if(!empty($output) && (String::strpos($output, 'vimeo.') !== false || String::strpos($output, 'youtube.') !== false || String::strpos($output, 'youtube-nocookie.') !== false || String::strpos($output, 'kickstarter.') !== false)) {
+if(!empty($output) && (StringMb::strpos($output, 'vimeo.') !== false || StringMb::strpos($output, 'youtube.') !== false || StringMb::strpos($output, 'youtube-nocookie.') !== false || StringMb::strpos($output, 'kickstarter.') !== false)) {
 	// Gestion responsive des vidéos
 	$GLOBALS['js_files'][] = get_url('/lib/js/jquery.fitvid.js');
 	$GLOBALS['js_ready_content_array'][] = '
@@ -33,6 +33,7 @@ output_general_http_header(null, (est_identifie()?null:vb($GLOBALS['site_paramet
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('haut.tpl');
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
+$tpl->assign('disable_navbar_toggle', !empty($GLOBALS['site_parameters']['disable_navbar_toggle']));
 $tpl->assign('disable_header_login', !empty($GLOBALS['site_parameters']['disable_header_login']));
 // header-html est passé par référence à getHTMLHead pour être rempli
 $tpl->assign('lang', $_SESSION['session_langue']);
@@ -44,7 +45,7 @@ $tpl->assign('flags', affiche_flags(true, null, false, $GLOBALS['lang_codes'], f
 
 if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) && $GLOBALS['site_parameters']['on_logo'] == 1) {
 	$this_logo = $GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']];
-	if(String::strpos($this_logo, '//') === false && String::substr($this_logo, 0, 1) == '/') {
+	if(StringMb::strpos($this_logo, '//') === false && StringMb::substr($this_logo, 0, 1) == '/') {
 		// Chemin absolu
 		$this_logo = $GLOBALS['wwwroot'] . $this_logo;
 	}
@@ -59,6 +60,15 @@ if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) &
 		array('href' => $logo_href . '/',
 			'src' => $this_logo,
 			'alt' => $GLOBALS['site']));
+			
+	//Permet d'administrer plus que un logo
+	if(!empty($GLOBALS['site_parameters']['multi_logo_header'])){
+		foreach ($GLOBALS['site_parameters']['multi_logo_header'] as $multi_logo_header => $link_multi_logo_header){
+			$link = $GLOBALS['repertoire_images'] . '/' . $link_multi_logo_header;
+			$array_link_multi_logo_header[] = array('class' => $multi_logo_header, 'src' => $link, 'href' => $logo_href . '/', 'alt' => $GLOBALS['site'] );
+		}
+		$tpl->assign('multi_logo_header', $array_link_multi_logo_header);
+	}
 }
 
 $tpl->assign('repertoire_images', $GLOBALS['repertoire_images']);
@@ -118,7 +128,7 @@ if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'i
 $tpl->assign('est_identifie', est_identifie());
 $tpl->assign('show_open_account', est_identifie() && !empty($GLOBALS['site_parameters']['show_open_account']));
 if(!empty($_SESSION['session_utilisateur']['email'])) {
-	$tpl->assign('session_utilisateur_email', String::str_shorten($_SESSION['session_utilisateur']['email'], vb($GLOBALS['site_parameters']['login_in_header_length'], 20)));
+	$tpl->assign('session_utilisateur_email', StringMb::str_shorten($_SESSION['session_utilisateur']['email'], vb($GLOBALS['site_parameters']['login_in_header_length'], 20)));
 }
 if(!empty($_SESSION['session_utilisateur']['logo'])) {
 	$tpl->assign('user_logo_src', thumbs($_SESSION['session_utilisateur']['logo'], 40, 28, 'fit', null, null, true, true));
@@ -137,10 +147,7 @@ if (!empty($GLOBALS['allow_fineuploader_on_page']) && vb($GLOBALS['site_paramete
 }
 
 // *** LAISSER A LA FIN ***
-// A exécuter en dernier dans ce fichier car prend tous les javascripts
-// category_introduction_text est passé par référence à getHTMLHead pour être rempli
-$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['category_introduction_text']));
-$tpl->assign('category_introduction_text', $GLOBALS['category_introduction_text']);
+$tpl->assign('product_category_introduction_text_display_disable', !empty($GLOBALS['site_parameters']['product_category_introduction_text_display_disable']));
 $tpl->assign('header_custom_html', vb($GLOBALS['site_parameters']['header_custom_html']));
 $tpl->assign('header_custom_baseline_html', vb($GLOBALS['site_parameters']['header_custom_baseline_html']));
 
@@ -157,6 +164,10 @@ $hook_result = call_module_hook('header_template_data', array(), 'array');
 foreach($hook_result as $this_key => $this_value) {
 	$tpl->assign($this_key, $this_value);
 }
+// A exécuter en dernier dans ce fichier car prend tous les javascripts
+// category_introduction_text est passé par référence à getHTMLHead pour être rempli
+$tpl->assign('HTML_HEAD', getHTMLHead(vb($GLOBALS['page_name']), $GLOBALS['category_introduction_text']));
+$tpl->assign('category_introduction_text', $GLOBALS['category_introduction_text']);
 
 echo $tpl->fetch();
 

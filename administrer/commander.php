@@ -1,20 +1,24 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: commander.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_sales");
+if(!empty($_GET['mode']) && $_GET['mode']=='ajout') {
+	necessite_priv("admin_sales,admin_operations");
+} else {
+	necessite_priv("admin_sales,admin_finance,admin_operations");
+}
 
 if (check_if_module_active('fianet_sac')) {
 	require_once($GLOBALS['fonctionsfianet_sac']);
@@ -45,9 +49,9 @@ if (vb($frm['export_pdf'])) {
 			$invoice_pdf = new Invoice('P', 'mm', 'A4');
 			$is_pdf_generated = $invoice_pdf->FillDocument(null, null, null, null, null, null, null, 'facture', false, null, null, null, null, $ids_array);
 			unset($invoice_pdf);
-			if($is_pdf_generated){
+			if($is_pdf_generated) {
 				die();
-			}else{
+			} else {
 				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_SEARCH_NO_RESULT']))->fetch();
 			}
 		}
@@ -72,18 +76,32 @@ switch (vb($_REQUEST['mode'])) {
 			sendclient($_POST['bdc_id'], 'html', 'bdc', vb($_POST['bdc_partial']));
 			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
 		} elseif (!empty($_POST)) {
-			// Ajout d'une commande en db + affichage du détail de la commande
-			$order_id = save_commande_in_database($frm);
-			if (!empty($frm['commandeid'])) {
-				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (check_if_module_active('stock_advanced') ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
-				$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
-			} else {
-				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
+			$save_commande = true;
+			for ($i = 1; $i <= $frm['nb_produits']; $i++) {	
+				// On vérifie si la commande ne comporte pas de produit avec une quantité inférieure au minimum requis
+				$product_object = new Product($frm["id" . $i]);
+				if (vn($product_object->quantity_min_order) > 1 && $frm["q" . $i] < $product_object->quantity_min_order) {
+					$save_commande = false;
+				}
+				unset($product_object);
 			}
-			if (empty($frm['id'])) {
-				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
+			if ($save_commande) {
+				// Ajout d'une commande en db + affichage du détail de la commande
+				$order_id = save_commande_in_database($frm);
+				if (!empty($frm['commandeid'])) {
+					$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (check_if_module_active('stock_advanced') ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
+					$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
+				} else {
+					$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
+				}
+				if (empty($frm['id'])) {
+					tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
+				} else {
+					tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'].' : ' . intval(vn($frm['id'])));
+				}
 			} else {
-				tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'].' : ' . intval(vn($frm['id'])));
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ORDER_MIN'].$GLOBALS['STR_REQUIRED_VALIDATE_ORDER']))->fetch();
+				$output .= affiche_details_commande(null, 'ajout');
 			}
 		}
 		// Si il n'y a pas de POST, cela signifie que l'on veut uniquement afficher le détail de la commande à modifier.
@@ -132,6 +150,13 @@ switch (vb($_REQUEST['mode'])) {
 	case "send_download" :
 		// affichage des commandes avec des produits à télécharger
 		// géré via un hook, fonction download_hook_order_admin
+	break;
+	
+	case "export" :
+		if(function_exists('get_csv_export_from_html_table')) {
+			$export = affiche_liste_commandes_admin($_GET, 'html_array');
+			get_csv_export_from_html_table($export);
+		}
 	break;
 
 	case "recherche" :

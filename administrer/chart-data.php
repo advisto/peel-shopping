@@ -1,17 +1,18 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: chart-data.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: chart-data.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
+define('IN_CHART_DATA', true);
 include("../configuration.inc.php");
 necessite_identification();
 necessite_priv("admin*");
@@ -89,7 +90,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
         GROUP BY a.id_cat');
 	$total = 0;
 	while ($row = fetch_assoc($res)) {
-		$data[String::substr($row['nom'], 0, 20)] = $row['this_count'];
+		$data[StringMb::substr($row['nom'], 0, 20)] = $row['this_count'];
 		$total += $row['this_count'];
 	}
 	$all_graph_type = 'pie';
@@ -111,10 +112,10 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
         GROUP BY TO_DAYS(date_insert)');
 	// On déclare pour définir l'ordre d'affichage dans le flash
 	while ($row = fetch_assoc($res)) {
-		if (empty($data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)])) {
-			$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)] = 0;
+		if (empty($data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(StringMb::substr($row['date_inscription'], 0, 10), $date_format)])) {
+			$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(StringMb::substr($row['date_inscription'], 0, 10), $date_format)] = 0;
 		}
-		$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(String::substr($row['date_inscription'], 0, 10), $date_format)] += $row['this_count'];
+		$data[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]][get_formatted_date(StringMb::substr($row['date_inscription'], 0, 10), $date_format)] += $row['this_count'];
 	}
 	$colors[$GLOBALS["STR_ADMIN_INSCRIPTIONS"]] = '0000FF';
 	$title = (!empty($date1)?'' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($date1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($date2):'');
@@ -126,7 +127,7 @@ if ($type == 'users-by-age' && a_priv('admin_users', true)) {
 		WHERE ' . get_filter_site_cond('produits', 'p') . '
         GROUP BY c.id');
 	while ($row = fetch_assoc($res)) {
-		$data[String::substr($row['nom_categorie'], 0, 20)] = $row['this_count'];
+		$data[StringMb::substr($row['nom_categorie'], 0, 20)] = $row['this_count'];
 	}
 	$all_graph_type = 'pie';
 	$legend_font_size = 9;

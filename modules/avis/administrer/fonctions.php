@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53350 2017-03-28 18:38:31Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,8 +22,11 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function avis_hook_admin_menu_items($params) {
-	$result['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/avis/administrer/avis.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"];
-	return $result;
+	$results = array();
+	if (a_priv('admin_webmastering,admin_finance,admin_operations,admin_productsline', true)) {
+		$results['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/avis/administrer/avis.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"];
+	}
+	return $results;
 }
 
 /**
@@ -214,6 +217,7 @@ function formulaire_ajout_avis(&$frm, &$form_error_object, $type)
 	$tpl->assign('email', vb($_SESSION['session_utilisateur']['email']));
 	$tpl->assign('pseudo', vb($frm['pseudo']));
 	$tpl->assign('avis', vb($frm['avis']));
+	$tpl->assign('note', vb($frm['note']));
 	$tpl->assign('error_avis', $form_error_object->text('avis'));
 	$tpl->assign('error_note', $form_error_object->text('note'));
 	$tpl->assign('id_utilisateur', intval($_SESSION['session_utilisateur']['id_utilisateur']));

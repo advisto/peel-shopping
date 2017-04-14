@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: article_details.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 define('IN_RUBRIQUE_ARTICLE', true);
 if (defined('PEEL_PREFETCH')) {
@@ -40,11 +40,11 @@ $sql = "SELECT p.technical_code, p.on_reseller, p.id, p.titre_" . $_SESSION['ses
 $art_query = query($sql);
 ;
 if ($art = fetch_assoc($art_query)) {
-	if(!empty($art['technical_code']) && String::strpos($art['technical_code'], 'R=') === 0) {
+	if(!empty($art['technical_code']) && StringMb::strpos($art['technical_code'], 'R=') === 0) {
 		// redirection suivie que l'article soit actif ou non
-		$url_art = String::substr($art['technical_code'], 2);
+		$url_art = StringMb::substr($art['technical_code'], 2);
 		if(strpos($url_art, '://') === false) {
-			if(String::substr($url_art, 0, 1) != '/') {
+			if(StringMb::substr($url_art, 0, 1) != '/') {
 				$url_art = '/' . $url_art;
 			}
 			$url_art = $GLOBALS['wwwroot'] . $url_art;
@@ -57,7 +57,7 @@ if ($art = fetch_assoc($art_query)) {
 	// Si on passe ici et que $art['etat']=0 : on continue quand même, et on affichera dans get_article_details_html que l'article n'a pas été trouvé
 } else {
 	// Article n'existe pas
-	redirect_and_die(get_url('/'));
+	redirect_and_die(get_url('/'), true);
 }
 
 // ATTENTION : la signification de rubid est historiquement trompeuse
@@ -75,7 +75,7 @@ if ($art['technical_code'] == 'tradefair') {
 if (check_if_module_active('url_rewriting')) {
 	// Attention la redirection ne sera effectuée que si il y a un / dans le REQUEST_URI (hormis le premier caractère) 
 	// => les URL courtes ne sont pas redirigées ici (cela permet de créer des urls courtes par le htaccess sans rediriger par la suite, exemple /patrocinador-categoría.html ne sera pas redirigé ici)
-	if (get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]) != get_current_url(false) && String::strpos(substr($_SERVER['REQUEST_URI'], 1), '/') !== false) {
+	if (get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]) != get_current_url(false) && StringMb::strpos(substr($_SERVER['REQUEST_URI'], 1), '/') !== false) {
 		// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 		$theoretical_current_url = get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]);
 		redirect_and_die($theoretical_current_url, true);

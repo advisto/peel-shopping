@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50594 2016-07-08 17:05:08Z sdelaporte $
+// $Id: fonctions.php 53418 2017-03-31 17:03:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -145,15 +145,15 @@ function avis_hook_search_complementary($params) {
 			$urls_array[] = $url;
 			// on supprime le HTML du contenu
 			if(!empty($result['nom_produit'])) {
-				$nom = String::strip_tags(String::html_entity_decode_if_needed($result['nom_produit']));
+				$nom = StringMb::strip_tags(StringMb::html_entity_decode_if_needed($result['nom_produit']));
 			}
 			if(empty($nom)) {
 				continue;
 			}
-			$description = String::strip_tags(String::html_entity_decode_if_needed($result['avis']));
+			$description = StringMb::strip_tags(StringMb::html_entity_decode_if_needed($result['avis']));
 			// on coupe le texte si trop long
-			$nom = String::str_shorten($nom, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
-			$description = String::str_shorten($description, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
+			$nom = StringMb::str_shorten($nom, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
+			$description = StringMb::str_shorten($description, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
 			// on fait une recherche sur le texte sans accent avec les mots de l'utilisateur,
 			// si qqchose est trouvé, highlight_found_text l'ajoute dans le tableau  $GLOBALS['found_words_array'][]
 			$nom = highlight_found_text($nom, $params['terms'], $GLOBALS['found_words_array']);
@@ -184,7 +184,7 @@ function avis_hook_search_complementary($params) {
  * @param integer $opinion_id
  * @return
  */
-function formulaire_avis($reference_id, &$frm, &$form_error_object, $type, $mode = 'avis', $opinion_id = null)
+function formulaire_avis($reference_id, &$frm, &$form_error_object, $type, $mode = 'avis', $opinion_id = null, $campaign_id = null)
 {
 	if ($type == 'produit') {
 		$product_object = new Product($reference_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
@@ -195,6 +195,7 @@ function formulaire_avis($reference_id, &$frm, &$form_error_object, $type, $mode
 	$tpl->assign('action', get_current_url(true));
 	$tpl->assign('type', $type);
 	$tpl->assign('mode', $mode);
+	$tpl->assign('item_id', $campaign_id);
 	$tpl->assign('opinion_id', $opinion_id);
 	$tpl->assign('no_notation', vn($GLOBALS['site_parameters']['module_avis_no_notation']));
 	if (!empty($GLOBALS['site_parameters']['module_avis_use_html_editor'])) {
@@ -252,7 +253,7 @@ function formulaire_avis($reference_id, &$frm, &$form_error_object, $type, $mode
  */
 function ajout_avis($frm, $update_user_account = false)
 {
-	$frm['avis'] = String::getCleanHTML($frm['avis']);
+	$frm['avis'] = StringMb::getCleanHTML($frm['avis']);
 	if(vb($frm['mode'], 'avis') == 'news') {
 		// Une news est un avis avec une note de -99
 		$frm['note'] = -99;
@@ -270,7 +271,7 @@ function ajout_avis($frm, $update_user_account = false)
 		if ($frm['type'] == 'produit') {
 			$sql .= " id_produit,";
 			$template_technical_code = 'insere_' . $frm['mode'];
-		} elseif ($frm['type'] == 'expert' || $frm['type'] == 'agent_co' || $frm['type'] == 'comment_expert' ) {
+		} elseif ($frm['type'] == 'expert' || $frm['type'] == 'agent_co' || $frm['type'] == 'comment_expert' || $frm['type'] == 'contributor' ) {
 			$sql .= " evaluated_user_id,";
 			$template_technical_code = 'insere_' . $frm['mode'] . '_expert';
 		} elseif ($frm['type'] == 'annonce') {
@@ -281,12 +282,23 @@ function ajout_avis($frm, $update_user_account = false)
 			$template_technical_code = 'insere_' . $frm['mode'] . '_ad';
 			if($frm['mode'] == 'avis' && !empty($frm['reference_id']) && isset($frm['note'])) {
 				// On met à jour les statistiques générales des votes liés à cette annonce 
-				$voted_assoc = get_vote_infos(null, $frm['reference_id']);
+				$voted_assoc = get_vote_infos(null, $frm['reference_id'], vn($frm['campaign_id']));
 				$count_new = $voted_assoc['nb_votes'] + 1;
 				$new_rating = $voted_assoc['total_votes'] + vn($frm['note']);
-				query('UPDATE peel_ads_stats
-					SET nb_votes="' . intval($count_new) . '", total_votes="' . nohtml_real_escape_string($new_rating) . '"
-					WHERE id="' . intval($frm['reference_id']) . '"');
+				$sql_ads_stats = "SELECT *
+					FROM peel_ads_stats
+					WHERE id=".intval($frm['reference_id']);
+				$query_ads_stats = query($sql_ads_stats); 
+				if (num_rows($query_ads_stats)>0) {
+					// Enregistrement déjà présent, il faut mettre à jour.
+					query('UPDATE peel_ads_stats
+						SET nb_votes="' . intval($count_new) . '", total_votes="' . nohtml_real_escape_string($new_rating) . '"
+						WHERE id="' . intval($frm['reference_id']) . '"');
+				} else {
+					// Il faut créer l'enregistrement dans peel_ads_stats
+					query('INSERT INTO peel_ads_stats
+						SET nb_votes="' . intval($count_new) . '", total_votes="' . nohtml_real_escape_string($new_rating) . '", id="' . intval($frm['reference_id']) . '"');
+				}
 			}
 		}
 		$sql .= "
@@ -301,19 +313,21 @@ function ajout_avis($frm, $update_user_account = false)
 				, etat
 				, lang
 				, detail
+				, item_id
 			) VALUES (
 				'" . intval($frm['reference_id']) . "'
-				, '" . nohtml_real_escape_string($frm['titre']) . "'
+				, '" . nohtml_real_escape_string(vb($frm['titre'])) . "'
 				, '" . intval($frm['id_utilisateur']) . "'
 				, '" . nohtml_real_escape_string($frm['email']) . "'
-				, '" . nohtml_real_escape_string(String::strtolower(vb($frm['prenom']))) . "'
+				, '" . nohtml_real_escape_string(StringMb::strtolower(vb($frm['prenom']))) . "'
 				, '" . nohtml_real_escape_string(vb($frm['pseudo'])) . "'
-				, '" . nohtml_real_escape_string($frm['avis']) . "'
+				, '" . real_escape_string($frm['avis']) . "'
 				, '" . nohtml_real_escape_string(vn($frm['note'])) . "'
 				, '" . date('Y-m-d H:i:s', time()) . "'
 				, '" . intval(vb($frm['etat'], 1)) . "'
 				, '" . nohtml_real_escape_string($frm['langue']) . "'
 				, '" . real_escape_string(vb($frm['detail'])) . "'
+				, '" . real_escape_string(vb($frm['item_id'])) . "'
 			)";
 		$qid = query($sql);
 		if (!$qid) {
@@ -325,17 +339,23 @@ function ajout_avis($frm, $update_user_account = false)
 				SET ref=" . intval($frm['ref']) ."
 				WHERE id=" . intval(insert_id()));
 		}
-		if($update_user_account && !empty($frm['pseudo'])) {
+		if($update_user_account && !empty($frm['pseudo']) && !empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 			query("UPDATE peel_utilisateurs
 				SET pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'
 				WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 		}
 		$custom_template_tags['PRENOM'] = vb($_SESSION['session_utilisateur']['prenom']);
 		$custom_template_tags['NOM_FAMILLE'] = vb($_SESSION['session_utilisateur']['nom_famille']);
-		$custom_template_tags['NOM_PRODUIT'] = String::html_entity_decode_if_needed($frm['titre']);
+		$custom_template_tags['NOM_PRODUIT'] = StringMb::html_entity_decode_if_needed($frm['titre']);
 		$custom_template_tags['AVIS'] = $frm['avis'];
-		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support'], true, false, true, $frm['email'], null, null, array('id_utilisateur' => $_SESSION['session_utilisateur']['id_utilisateur']));
+		if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
+			$additional_infos_array = array('id_utilisateur' => $_SESSION['session_utilisateur']['id_utilisateur']);
+		} else {
+			$additional_infos_array = array();
+		}
+		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support'], true, false, true, $frm['email'], null, null, $additional_infos_array);
 	}
+	call_module_hook('ajout_avis', $frm);
 	return empty($filter);
 }
 
@@ -421,57 +441,15 @@ function insere_avis($frm)
  * @param string $title
  * @return
  */
-function render_avis_public_list($prodid, $type, $display_specific_note = null, $no_display_if_empty = false, $mode = 'avis', $title='h2')
+function render_avis_public_list($prodid, $type, $display_specific_note = null, $no_display_if_empty = false, $mode = 'avis', $title='h2', $campaign_id = null, $submit_value = null)
 {
 	$output = '';
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_public_list.tpl');
-	if ($type == 'produit') {
-		$sql_cond = '';
-		$product_object = new Product($prodid, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
-		$urlprod = $product_object->get_product_url();
-		$is_owner = ($product_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
-		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
-			// Affichage des avis que pour la langue de l'interface.
-			$sql_cond .= " AND a.lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
-		}
-		$sqlAvis = "SELECT a.*, u.civilite
-			FROM peel_avis a
-			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
-			WHERE a.id_produit='" . intval($prodid) . "' AND a.etat='1' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!='' ".$sql_cond."
-			ORDER BY a.datestamp DESC";
-		$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_OPINION_POSTED_BY']);
-	} elseif ($type == 'annonce') {
-		// Le mode news affiche des news qui sont publiées par le propriétaire de l'annonce
-		$sql_cond = '';
-		$annonce_object = new Annonce($prodid);
-		$urlannonce = $annonce_object->get_annonce_url();
-		$is_owner = ($annonce_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
-		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
-			// Affichage des avis que pour la langue de l'interface.
-			$sql_cond .= " AND lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
-		}
-		$sqlAvis = "SELECT *
-			FROM peel_avis
-			WHERE ref='" . intval($prodid) . "' AND etat='1' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!='' ".$sql_cond."
-			ORDER BY datestamp DESC, id ASC";
-		$tpl->assign('ad_admin_edit_option', !empty($annonce_object) && a_priv('admin*'));
-		if ($mode == 'avis') {
-			$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD']);
-			$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_OPINION_POSTED_BY']);
-		} else {
-			$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_NEWS_FOR_THIS_AD']);
-			$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_NEWS_POSTED_BY']);
-		}
-		$tpl->assign('STR_MODULE_ANNONCES_BACK_TO_AD', $GLOBALS['STR_MODULE_ANNONCES_BACK_TO_AD']);
-	} else {
-		return null;
-	}
 
-	$resAvis = query($sqlAvis);
+	$tpl->assign('campaign_id', $campaign_id);
 	$tpl->assign('mode', $mode);
 	$tpl->assign('title', $title);
 	$tpl->assign('type', $type);
-	$tpl->assign('is_owner', $is_owner);
 	$tpl->assign('star_src', get_url('/images/star1.gif'));
 	$tpl->assign('STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT', $GLOBALS['STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT']);
 	$tpl->assign('STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT', $GLOBALS['STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT']);
@@ -487,6 +465,68 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 	$tpl->assign('STR_POSTED_OPINION', $GLOBALS['STR_POSTED_OPINION']);
 	$tpl->assign('STR_POSTED_OPINIONS', $GLOBALS['STR_POSTED_OPINIONS']);
 
+	if (!empty($submit_value)) {
+		$tpl->assign('submit_value', $submit_value);
+	} else {
+		$tpl->assign('submit_value', $GLOBALS['STR_MODULE_AVIS_SEND_YOUR_OPINION']);
+	}
+	if ($type == 'produit') {
+		$sql_cond = '';
+		$product_object = new Product($prodid, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+		$urlprod = $product_object->get_product_url();
+		$is_owner = ($product_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
+		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
+			// Affichage des avis que pour la langue de l'interface.
+			$sql_cond .= " AND a.lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+		}
+		$sqlAvis = "SELECT a.*, u.civilite, u.pseudo
+			FROM peel_avis a
+			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
+			WHERE a.id_produit='" . intval($prodid) . "' AND a.etat='1' AND " . ($mode == 'avis'?"note>-99":"note=-99") . " AND avis!='' ".$sql_cond;
+		if (!empty($campaign_id)) {
+			$sqlAvis .= " AND item_id=".intval($campaign_id);
+		} else {
+			$sqlAvis .= " AND item_id=''";
+		}
+		$sqlAvis .= "
+			ORDER BY a.datestamp DESC";
+		$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_OPINION_POSTED_BY']);
+	} elseif ($type == 'annonce') {
+		// Le mode news affiche des news qui sont publiées par le propriétaire de l'annonce
+		$sql_cond = '';
+		$annonce_object = new Annonce($prodid);
+		$urlannonce = $annonce_object->get_annonce_url();
+		$is_owner = ($annonce_object->id_utilisateur == vn($_SESSION['session_utilisateur']['id_utilisateur']));
+		if (empty($GLOBALS['site_parameters']['avis_show_on_all_langages'])) {
+			// Affichage des avis que pour la langue de l'interface.
+			$sql_cond .= " AND a.lang='" . nohtml_real_escape_string($_SESSION['session_langue']) . "'";
+		}
+		$sqlAvis = "SELECT a.*, u.pseudo
+			FROM peel_avis a
+			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
+			WHERE a.ref='" . intval($prodid) . "' AND a.etat='1' AND " . ($mode == 'avis'?"a.note>-99":"a.note=-99") . " AND a.avis!='' ".$sql_cond;
+		if (!empty($campaign_id)) {
+			$sqlAvis .= " AND item_id=".intval($campaign_id);
+		} else {
+			$sqlAvis .= " AND item_id=''";
+		}
+		$sqlAvis .= "
+			ORDER BY datestamp DESC, id ASC";
+		$tpl->assign('ad_admin_edit_option', !empty($annonce_object) && a_priv('admin*'));
+		if ($mode == 'avis') {
+			$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD']);
+			$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_OPINION_POSTED_BY']);
+		} else {
+			$tpl->assign('STR_MODULE_ANNONCES_AVIS_NO_OPINION_FOR_THIS_AD', $GLOBALS['STR_MODULE_ANNONCES_AVIS_NO_NEWS_FOR_THIS_AD']);
+			$tpl->assign('STR_MODULE_AVIS_OPINION_POSTED_BY', $GLOBALS['STR_MODULE_AVIS_NEWS_POSTED_BY']);
+		}
+		$tpl->assign('STR_MODULE_ANNONCES_BACK_TO_AD', $GLOBALS['STR_MODULE_ANNONCES_BACK_TO_AD']);
+	} else {
+		return null;
+	}
+	$tpl->assign('is_owner', $is_owner);
+	
+	$resAvis = query($sqlAvis);
 	if (num_rows($resAvis) > 0) {
 		$are_results = true;
 		$tpl->assign('are_results', true);
@@ -523,9 +563,9 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 				continue;
 			}
 			if (!empty($Avis['pseudo'])) {
-				$pseudo = String::html_entity_decode_if_needed($Avis['pseudo']);
+				$pseudo = StringMb::html_entity_decode_if_needed($Avis['pseudo']);
 			} else {
-				$pseudo = String::html_entity_decode_if_needed($Avis['prenom']);
+				$pseudo = StringMb::html_entity_decode_if_needed($Avis['prenom']);
 			}
 			$tpl_results[] = array('i' => $i,
 				'pseudo' => $pseudo,

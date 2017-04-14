@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: types.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -175,8 +175,10 @@ function affiche_formulaire_type(&$frm)
 	}
 	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
 	$tpl->assign('is_tnt_module_active', check_if_module_active('tnt'));
+	$tpl->assign('is_ups_module_active', check_if_module_active('ups'));
 	$tpl->assign('tnt_threshold', vb($frm['tnt_threshold']));
 	$tpl->assign('is_tnt', vb($frm['is_tnt']));
+	$tpl->assign('is_ups', vb($frm['is_ups']));
 	$tpl->assign('fianet_type_transporteur', vb($frm['fianet_type_transporteur']));
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
@@ -204,6 +206,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_ADMIN_TYPES_KWIXO', $GLOBALS['STR_ADMIN_TYPES_KWIXO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_UPS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_UPS']);
 	return $tpl->fetch();
 }
 
@@ -240,6 +243,9 @@ function insere_type($frm)
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais";
 	}
+	if (check_if_module_active('ups')) {
+		$sql .= ", is_ups";
+	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur";
 	}
@@ -262,6 +268,9 @@ function insere_type($frm)
 	}
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", '" . intval($frm['is_icirelais']) . "'";
+	}
+	if (check_if_module_active('ups')) {
+		$sql .= ", '" . intval($frm['is_ups']) . "'";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . intval($frm['fianet_type_transporteur']) . "'";
@@ -302,6 +311,9 @@ function maj_type($id, $frm)
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur = '" . intval($frm['fianet_type_transporteur']) . "'";
+	}
+	if (check_if_module_active('ups')) {
+		$sql .= ", is_ups = '" . intval($frm['is_ups']) . "'";
 	}
 	if (check_if_module_active('kiala')) {
 		$sql .= ", is_kiala = '" . intval($frm['is_kiala']) . "'";

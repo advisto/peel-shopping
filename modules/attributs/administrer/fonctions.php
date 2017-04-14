@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -203,7 +203,7 @@ function supprime_nom_attribut($id)
 	$col = fetch_assoc($qid);
 	query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id  = '" . intval($id) . "'");
 	query("DELETE FROM peel_nom_attributs WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('nom_attributs', null, true));
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_MSG_DELETED_OK'], String::html_entity_decode_if_needed($col['nom_' . $_SESSION['session_langue']]))))->fetch();
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_MSG_DELETED_OK'], StringMb::html_entity_decode_if_needed($col['nom_' . $_SESSION['session_langue']]))))->fetch();
 }
 
 /**
@@ -404,7 +404,7 @@ function supprime_attribut()
 	if ($bd = fetch_assoc($qid)) {
 		query("DELETE FROM peel_attributs WHERE id='" . intval($id) . "'");
 		query("DELETE FROM peel_produits_attributs WHERE nom_attribut_id='" . intval($id) . "'");
-		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MSG_OPTION_DELETED_OK"], String::html_entity_decode_if_needed($bd['descriptif']))))->fetch();
+		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MSG_OPTION_DELETED_OK"], StringMb::html_entity_decode_if_needed($bd['descriptif']))))->fetch();
 		echo $message;
 	}
 }
@@ -555,7 +555,6 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_formulaire.tpl');
 		$tpl->assign('action', get_current_url(false) . '?attid=' . $_GET['attid']);
 		$tpl->assign('mode', $frm["nouveau_mode"]);
-		$tpl->assign('prix_revendeur', vn($prix_revendeur));
 		$tpl->assign('mandatory', vn($frm["mandatory"]));
 		$tpl->assign('id', vn($_GET['id']));
 		$tpl->assign('nom', $nom_att->nom);
@@ -700,12 +699,12 @@ function affiche_liste_attributs_by_id($id)
 					$montant_displayed = $montant / (1 + $product_object->tva / 100);
 				}
 				if (!empty($this_attribut_id) || $this_attribut_id === 0) {
-					if(trim(String::strip_tags($this_attribut_infos['descriptif']))=='') {
+					if(trim(StringMb::strip_tags($this_attribut_infos['descriptif']))=='') {
 						$this_attribut_infos['descriptif'] = '['.$this_attribut_id.'] ';
 					}
 					$tpl_sub_res[] = array('value' => intval($this_attribut_id),
 						'issel' => !empty($product_attributs_array[$this_nom_attribut_id]) && !empty($product_attributs_array[$this_nom_attribut_id][$this_attribut_id]),
-						'desc' => String::strip_tags($this_attribut_infos['descriptif']),
+						'desc' => StringMb::strip_tags($this_attribut_infos['descriptif']),
 						'prix' => fprix($montant_displayed, true, $GLOBALS['site_parameters']['code'], false)
 						);
 				}

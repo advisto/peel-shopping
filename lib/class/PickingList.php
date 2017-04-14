@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: PickingList.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: PickingList.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require_once($GLOBALS['dirroot'] . "/lib/class/pdf/tcpdf.php");
  * @package PEEL
  * @author oodorizzi
  * @copyright Copyright (c) 2010
- * @version $Id: PickingList.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: PickingList.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class PickingList extends TCPDF {
@@ -35,12 +35,17 @@ class PickingList extends TCPDF {
 	function Header()
 	{
 		global $dateAdded1, $dateAdded2;
-		// Police Helvetica gras 15
-		$this->SetFont('Helvetica', 'B', 15);
+		// Police freesans gras 15
+		$this->SetFont('freesans', 'B', 15);
 		$this->SetDrawColor(0, 80, 180);
-		$this->SetFillColor(230, 230, 0);
+		$this->SetFillColor(230, 210, 0);
 		$this->SetTextColor(220, 50, 50);
-		$this->Cell(0, 10, $GLOBALS["STR_ADMIN_PICKING_LIST"].' - ' . get_delivery_status_name($_GET['statut']) . ' ' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($dateAdded1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($dateAdded2) . '', 1, 0, 'C', 1);
+		$title = $GLOBALS["STR_ADMIN_PICKING_LIST"];
+		if(!empty($_GET['statut'])) {
+			$title .= ' - ' . get_delivery_status_name($_GET['statut']);
+		}
+		$this->SetY(5);
+		$this->Cell(0, 10, $title . ' ' . $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($dateAdded1) . ' ' . $GLOBALS['strTillDay'] . ' ' . get_formatted_date($dateAdded2) . '', 1, 0, 'C', 1);
 		// Saut de ligne
 		$this->Ln(20);
 	}
@@ -53,8 +58,8 @@ class PickingList extends TCPDF {
 	{
 		// Positionnement à 1,5 cm du bas
 		$this->SetY(-15);
-		// Police Helvetica italique 8
-		$this->SetFont('Helvetica', 'I', 8);
+		// Police freesans italique 8
+		$this->SetFont('helvetica', 'I', 8);
 		// Numéro de page
 		$this->Cell(0, 10, $GLOBALS['STR_PDF_BILL_PAGE'] . ' ' . $this->PageNo() . ' / ' . $this->getAliasNbPages(), 0, 0, 'C');
 	}
@@ -67,15 +72,15 @@ class PickingList extends TCPDF {
 	function AddPage()
 	{
 		TCPDF::AddPage();
-		$y1 = 7;
+		$y1 = 16;
 		$this->SetXY(0, $y1);
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 9);
 		foreach(explode("\n", $this->PickingList_title) as $this_title) {
 			$this->Cell(0, 4, $this_title, 0, 0, "C");
 			$y1 = $y1 + 6;
 			$this->SetXY(0, $y1);
 		}
-		$this->SetFont("Helvetica", "", 8);
+		$this->SetFont("freesans", "", 8);
 	}
 
 	/**
@@ -90,7 +95,7 @@ class PickingList extends TCPDF {
 	{
 		$this->PickingList_title = sprintf($GLOBALS["STR_ADMIN_PICKING_GENERATED_TITLE"], $GLOBALS['site_parameters']['nom_' . $_SESSION['session_langue']], get_formatted_date(time(), 'short', 'long'), get_formatted_date($dateAdded1), get_formatted_date($dateAdded2));
 		if (is_numeric($statut)) {
-			$this->PickingList_title .= " ".$GLOBALS["STR_ADMIN_PICKING_GENERATED_WITH_DELIVERY_STATUS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": " . String::strtoupper(get_delivery_status_name($statut));
+			$this->PickingList_title .= " ".$GLOBALS["STR_ADMIN_PICKING_GENERATED_WITH_DELIVERY_STATUS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": " . StringMb::strtoupper(get_delivery_status_name($statut));
 		}
 		$sql = "SELECT c.*, sp.technical_code AS statut_paiement
 			FROM peel_commandes c
@@ -99,7 +104,6 @@ class PickingList extends TCPDF {
 			ORDER BY c.o_timestamp";
 		$query = query($sql);
 
-		$this->AliasNbPages('{nb}');
 		$this->AddPage();
 
 		$k = 1;
@@ -145,20 +149,20 @@ class PickingList extends TCPDF {
 			$this->SetFillColor(255, 255, 255);
 			// $this->Rect($x1, $y1 + 9, $w, min($h-9, $y_max - ($y1 + 9)), 'DF');
 			$this->SetTextColor(0, 0, 0); #Noir*/
-			$this->SetFont("Helvetica", "B", 10);
+			$this->SetFont("freesans", "B", 10);
 			$this->SetXY($x1 + 2, $y1 + 1.5);
 			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER_NAME"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$commande['order_id']."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
 
 			$y1 = $y1 + 11;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("Helvetica", "B", 8);
+			$this->SetFont("freesans", "B", 8);
 			$this->Cell($w-2, 4, $GLOBALS["STR_SHIP_ADDRESS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":");
 
 			$y1 = $y1 + 5;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("Helvetica", "", 8);
+			$this->SetFont("freesans", "", 8);
 			foreach(explode("\n", $client) as $this_line) {
 				$this->Cell(0, 3, $this_line);
 				$y1 = $y1 + 3;
@@ -168,11 +172,11 @@ class PickingList extends TCPDF {
 			$y1 = $y1 + 2;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("Helvetica", "B", 8);
+			$this->SetFont("freesans", "B", 8);
 			$this->Cell($w-2, 4, $GLOBALS['STR_LIST_PRODUCT'] . " :");
 			$y1 = $y1 + 4;
 
-			$this->SetFont("Helvetica", "", 8);
+			$this->SetFont("freesans", "", 8);
 			if (!empty($product_infos_array)) {
 				$i = 1;
 				foreach ($product_infos_array as $this_ordered_product) {

@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: rubriques.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content');
+necessite_priv('admin_content,admin_communication,admin_finance');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_RUBRIQUES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -308,11 +308,19 @@ function supprime_rubrique($id)
 function insere_sous_rubrique($frm)
 {
 	// Remplit les contenus vides
-	$frm = fill_other_language_content($frm);
+	$frm = fill_other_language_content($frm, 'rubriques');
 	
 	$sql = 'INSERT INTO peel_rubriques (
 		parent_id
 		, image
+		, date_insere
+		, date_maj';
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+		, nom_insere
+		, nom_maj";
+		}
+		$sql .= '
 		, site_id
 		, etat
 		, technical_code
@@ -330,6 +338,14 @@ function insere_sous_rubrique($frm)
 	) VALUES (
 		" . intval($frm['parent_id']) . "
 		, '" . nohtml_real_escape_string($frm['image']) . "'
+		, '" . date('Y-m-d H:i:s', time()) . "'
+		, '" . date('Y-m-d H:i:s', time()) . "'";
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+		, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'
+		, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+		}
+		$sql .= "
 		,'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		,'" . intval($frm['etat']) . "'
 		,'" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
@@ -363,7 +379,7 @@ function maj_rubrique($id, $frm)
 	}
 	
 	// Remplit les contenus vides
-	$frm = fill_other_language_content($frm);
+	$frm = fill_other_language_content($frm, 'rubriques');
 	
 	$sql = "UPDATE peel_rubriques
 		SET parent_id = '" . intval($parent_id) . "'";
@@ -377,6 +393,12 @@ function maj_rubrique($id, $frm)
 	}
 
 	$sql .= ", image = '" . nohtml_real_escape_string($frm['image']) . "'
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+		, nom_maj = '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+	}
+	$sql .= "
 		, etat = '" . intval($frm['etat']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
@@ -462,7 +484,7 @@ function affiche_formulaire_rubrique(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => vb($frm['nom_' . $lng]),
-			'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+			'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_key' => vb($frm['meta_key_' . $lng]),
 			'meta_desc' => vb($frm['meta_desc_' . $lng]),
 			'meta_titre' => vb($frm['meta_titre_' . $lng]),

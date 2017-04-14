@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -103,7 +103,7 @@ function insere_pense($item_id = null, $type = null)
  */
 function display_product_in_reminder($return_mode = false)
 {
-	$sql = "SELECT pb.id as id_pense_bete, p.id, p.reference, p.nom_" . $_SESSION['session_langue'] . " AS name, p.image1, p.prix * (1-p.promotion/100) as prix, p.promotion, c.id as categorie_id, c.nom_" . $_SESSION['session_langue'] . " as categorie
+	$sql = "SELECT pb.id as id_pense_bete, p.id, p.reference, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS name, p.image1, p.prix * (1-p.promotion/100) as prix, p.promotion, c.id as categorie_id, c.nom_" . $_SESSION['session_langue'] . " as categorie
 		FROM peel_produits p
 		INNER JOIN peel_pensebete pb ON (pb.id_produit = p.id)
 		INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id

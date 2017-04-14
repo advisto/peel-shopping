@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: emails.php 53555 2017-04-11 16:30:55Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -136,11 +136,11 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	}
 	if ($format != "text") {
 		// On traite le modèle d'email avant de remplacer les tags car le modèle est peut-être en texte brut contrairement aux tags
-		// ATTENTION ne pas utiliser String::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessous
+		// ATTENTION ne pas utiliser StringMb::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessous
 		if (strip_tags($mail_content) != $mail_content) {
 			// On passe le contenu de l'email en HTML si ce n'est pas déjà le cas
 			// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne
-			$mail_content = String::nl2br_if_needed($mail_content);
+			$mail_content = StringMb::nl2br_if_needed($mail_content);
 		} else {
 			// Email de texte qu'on va envoyer en HTML, et pour avoir une source d'email lisible on garde le \n à la fin
 			// NB : il faut faire le replace en 2 fois pour éviter que le \n après le <br /> soit à nouveau remplacé !
@@ -165,10 +165,10 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	// Traitement des tags dans les templates. Même si $template_tags est vide il faut le faire pour gérer les tags génériques
 	// NB : Si on veut du HTML avec $format='html', le contenu de ces tags est converti par template_tags_replace en HTML
 	$mail_content = template_tags_replace($mail_content, $template_tags, false, $format, $lang);
-	$mail_subject = template_tags_replace(String::strip_tags($mail_subject), $template_tags, false, 'text', $lang);
+	$mail_subject = template_tags_replace(StringMb::strip_tags($mail_subject), $template_tags, false, 'text', $lang);
 	if ($format == "text") {
 		// On force le format en texte sans HTML
-		$mail_content = trim(String::html_entity_decode(String::strip_tags($mail_content)));
+		$mail_content = trim(StringMb::html_entity_decode(StringMb::strip_tags($mail_content)));
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
 			$mail_header .= "Content-Type: text/plain; charset=" . GENERAL_ENCODING . "" . $eol;
@@ -178,10 +178,10 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		// Dans tous les cas, si les & ne sont pas encodés, on les encode. 
 		// Sinon, problème avec certaines messageries qui croient que dans une URL, &currency est une entité pour laquelle il manque le point virgule
 		// Si les & sont déjà encodés en &amp; la fonction suivante va les garder 
-		$mail_content = String::htmlentities($mail_content, null, GENERAL_ENCODING, false, true, false);
+		$mail_content = StringMb::htmlentities($mail_content, null, GENERAL_ENCODING, false, true, false);
 		if ($html_correct_conformity) {
 			// On corrige le HTML si demandé
-			$mail_content = String::getCleanHTML($mail_content, null, true, true, true, null, $filter_html_to_be_safe);
+			$mail_content = StringMb::getCleanHTML($mail_content, null, true, true, true, null, $filter_html_to_be_safe);
 		}
 		if (empty($attached_files_infos_array)) {
 			// Pas de fichier attaché : on n'a pas besoin de déclarer des sections MIME
@@ -193,7 +193,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			// On rend cliquables les URL qui étaient bruts
 			$mail_content = url2Link($mail_content);
 		}
-		if (String::strpos(String::strtolower($mail_content), '<body') === false && String::strpos($mail_content, '<!DOCTYPE') === false) {
+		if (StringMb::strpos(StringMb::strtolower($mail_content), '<body') === false && StringMb::strpos($mail_content, '<!DOCTYPE') === false) {
 			$mail_body = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -222,7 +222,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$msg .= "--" . $mime_boundary_html_or_plain . "" . $eol;
 		$msg .= "Content-Type: text/plain; charset=" . GENERAL_ENCODING . "" . $eol;
 		$msg .= "Content-Transfer-Encoding: 8bit" . "" . $eol . $eol;
-		$msg .= trim(String::strip_tags($mail_body)) . $eol;
+		$msg .= trim(StringMb::strip_tags($mail_body)) . $eol;
 		if ($format == "html") {
 			// SI on envoie en HTML, on met en texte brut d'abord, et en HTML ensuite
 			$msg .= "--" . $mime_boundary_html_or_plain . "" . $eol;
@@ -272,7 +272,8 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		} else {
 			$params = array();
 		}
-		$params = array_merge($params, array('recipient_array' => array($this_email), 'from' => $from, 'mail_subject' => $mail_subject, 'mail_content' => $mail_content, 'technical_code' => $used_template_technical_code, 'document' => vb($main_document_attached)), $additional_infos_array);
+		// On ajoute vb($_POST)); dans ce tableau pour passer un maximum d'info aux hook. Notamment les valeurs des champs upload $_POST['upload_multiple'].
+		$params = array_merge($params, array('recipient_array' => array($this_email), 'from' => $from, 'mail_subject' => $mail_subject, 'mail_content' => $mail_content, 'technical_code' => $used_template_technical_code, 'document' => vb($main_document_attached)), $additional_infos_array, vb($_POST));
 		if(empty($params['id_expediteur']) && !empty($from)) {
 			if(!empty($params['id_utilisateur'])) {
 				$params['id_expediteur'] = $params['id_utilisateur'];
@@ -285,43 +286,50 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 				}
 			}
 		}
-		if(empty($GLOBALS['send_email_just_warn_new_message']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
+		unset($GLOBALS['send_email_just_warn_new_message']);
+		unset($GLOBALS['skip_send_this_email']);
+		if(!in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
 			call_module_hook('send_email', $params);
-			// Pendant le hook ci-dessus, $GLOBALS['send_email_just_warn_new_message'] peut être modifié
+			// Pendant le hook ci-dessus, peuvent être activés :
+			// - $GLOBALS['send_email_just_warn_new_message'] pour savoir si on va réellement envoyer l'email ou un email qui dit seulement qu'on a un nouveau message
+			// - $GLOBALS['skip_send_this_email'] pour savoir si on veut envoyer un email ou pas du tout
 		}
 		if(!empty($GLOBALS['skip_send_this_email'])) {
-			unset($GLOBALS['skip_send_this_email']);
 			continue;
 		}
 		// Envoi de l'email si adapté
 		if(empty($used_template_technical_code) || !in_array($used_template_technical_code, vb($GLOBALS['site_parameters']['send_email_technical_codes_no_email'], array()))) {
 			if (empty($this_email) || $i > 10) {
 				// Limitation à 10 destinataires en même temps par sécurité
+				trigger_error('Email "' . $this_email . '" vide ou boucle sur plus de 10 emails', E_USER_NOTICE);
 				continue;
 			}
-			if(!empty($GLOBALS['send_email_just_warn_new_message']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes)) {
+			if(!empty($GLOBALS['send_email_just_warn_new_message']) && !in_array($template_technical_code, $emails_force_delivery_technical_codes) && empty($GLOBALS['send_notification_disable'])) {
 				// Un message interne vient d'être créé en base de données et donc le contenu de l'email envoyé est à changer : on envoie par email le template 'new_message' au destinataire et non pas le texte prévu
+				// send_notification_disable : Dans certains cas, on va définir la global send_notification_disable plus haut dans le code pour ne pas envoyer de notification pour un email précis (qui n'a pas forcement de code technique). Ca sert pour les newsletter par exemple.
 				if(!empty($params['id_expediteur'])) {
 					$sender_infos = get_user_information($params['id_expediteur']);
 				} else {
 					$sender_infos = array();
 				}
 				$custom_template_tags_warn = array();
-				$custom_template_tags_warn['NOM_FAMILLE'] = vb($template_tags['NOM_FAMILLE'], vb($sender_infos['nom_famille']));
-				$custom_template_tags_warn['PRENOM'] = vb($template_tags['PRENOM'], vb($sender_infos['prenom']));
-				$custom_template_tags_warn['SOCIETE'] = vb($template_tags['SOCIETE'], vb($sender_infos['societe']));
-				$custom_template_tags_warn['ADRESSE'] = vb($template_tags['ADRESSE'], vb($sender_infos['adresse']));
-				$custom_template_tags_warn['TELEPHONE'] = vb($template_tags['TELEPHONE'], vb($sender_infos['telephone']));
+				// Dans l'email new_message, on remplit les tags avec les informations sur la personne qui est à l'origine de l'email(l'expéditeur).
+				// Donc on remplit les tags SENDER_ avec les données de l'expéditeur : $sender_infos
+				$custom_template_tags_warn['SENDER_PSEUDO'] = vb($sender_infos['pseudo']);
+				$custom_template_tags_warn['SENDER_NOM_FAMILLE'] = vb($sender_infos['nom_famille']);
+				$custom_template_tags_warn['SENDER_PRENOM'] = vb($sender_infos['prenom']);
+				$custom_template_tags_warn['SENDER_SOCIETE'] = vb($sender_infos['societe']);
+				$custom_template_tags_warn['SENDER_ADRESSE'] = vb($sender_infos['adresse']);
+				$custom_template_tags_warn['SENDER_TELEPHONE'] = vb($sender_infos['telephone']);
 				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
-					$custom_template_tags_warn['EMAIL'] = $GLOBALS['support'];
+					$custom_template_tags_warn['SENDER_EMAIL'] = $GLOBALS['support'];
 				} else {
-					$custom_template_tags_warn['EMAIL'] = vb($template_tags['EMAIL'], vb($from, vb($sender_infos['email'])));
+					$custom_template_tags_warn['SENDER_EMAIL'] = vb($from, vb($sender_infos['email']));
 				}
-				$custom_template_tags_warn['DISPO'] = vb($template_tags['DISPO'], vb($sender_infos['dispo']));
+				$custom_template_tags_warn['SENDER_DISPO'] = vb($sender_infos['dispo']);
 				$custom_template_tags_warn['SUJET'] = $mail_subject;
-				$custom_template_tags_warn['TEXTE'] = '<a href="'.get_url('/modules/messaging/messaging.php').'">'. String::str_shorten(trim(String::html_entity_decode(String::strip_tags($mail_content))), 50) . '</a>';
+				$custom_template_tags_warn['TEXTE'] = '<a href="'.get_url('/modules/messaging/messaging.php').'">'. StringMb::str_shorten(trim(StringMb::html_entity_decode(StringMb::strip_tags($mail_content))), 50) . '</a>';
 				// On désactive le paramètre d'envoi d'un nouveau message 
-				unset($GLOBALS['send_email_just_warn_new_message']);
 				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
 					$sender = $GLOBALS['support'];
 					$reply_to = $GLOBALS['support'];
@@ -331,8 +339,8 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			}
 			if (((strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false) || !empty($GLOBALS['site_parameters']['localhost_send_email_active'])) && !empty($GLOBALS['site_parameters']['send_email_active'])) {
 				if(EmailOK($this_email)){
-					if (String::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
-						$result = mail($this_email, '=?' . String::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_body, $mail_header);
+					if (StringMb::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
+						$result = mail($this_email, '=?' . StringMb::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_body, $mail_header);
 					} else {
 						$result = mail($this_email, $mail_subject, $mail_body, $mail_header);
 					}
@@ -357,11 +365,15 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 /**
  * Vérification du format d'adresse email trouvée sur http://www.phpinfo.net/?p=trucs&rub=astuces
  *
- * @param mixed $email
+ * @param string $email
+ * @param string $email_bounce
  * @return
  */
-function EmailOK($email)
+function EmailOK($email, $email_bounce = null)
 {
+	if(StringMb::substr($email_bounce, 0, 2) === '5.' || empty($email)) {
+		return false;
+	}
 	// return(preg('^[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+' . '@' . '[-!#$%&\'*+\\/0-9=?A-Z^_`a-z{|}~]+\.' . '[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+$', $email));
 	return(preg_match('/^[[:alnum:]]*((\.|_|-)[[:alnum:]]+)*@[[:alnum:]]*((\.|-)[[:alnum:]]+)*(\.[[:alpha:]]{2,})/i', $email));
 }
@@ -399,10 +411,10 @@ function getTextAndTitleFromEmailTemplateLang($template_technical_code, $templat
 			$generic_layout_infos = getTextAndTitleFromEmailTemplateLang('layout', $this_lang, null);
 			if(!empty($generic_layout_infos['text'])) {
 				// Lors de la fusion des templates, on passe en HTML les sauts de ligne si nécessaire pour chaque template
-				$this_template['text'] = str_replace('[TEMPLATE]', String::nl2br_if_needed($this_template['text']), String::nl2br_if_needed($generic_layout_infos['text']));
+				$this_template['text'] = str_replace('[TEMPLATE]', StringMb::nl2br_if_needed($this_template['text']), StringMb::nl2br_if_needed($generic_layout_infos['text']));
 			}
 		}
-		if (String::strpos($this_template['text'], '[NEWSLETTER]') !== false) {
+		if (StringMb::strpos($this_template['text'], '[NEWSLETTER]') !== false) {
 			// Le template contient une newsletter, on donne au template le sujet de la newsletter
 			$news_infos = get_last_newsletter(null, $this_lang);
 			if(!empty($news_infos['sujet_' . $this_lang])) {

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: compte.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: compte.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ compte }}</h1>
 <div class="page_content account_icons">
 {% if est_identifie %}
@@ -18,11 +18,17 @@
 		{* Si cette variable est active, on affiche qu'elle sur la page de compte. *}
 		{{ user_infos_resume_array }}
 	{% else %}
-		{% if admin %}
-		<a class="btn btn-warning pull-right" style="margin-right:10px; margin-left:10px" href="{{ admin.href|escape('html') }}">{{ admin.txt }}</a>
-		{% endif  %}	
-		<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{{ logout.href|escape('html') }}"><span class="glyphicon glyphicon-log-out"></span> {{ logout.txt }}</a>
-		<p>{{ msg_support }}</p>
+	<div class="row">
+		<div class="col-md-5 pull-right">
+			{% if admin %}
+			<a class="btn btn-warning pull-right" style="margin-right:10px; margin-left:10px" href="{{ admin.href|escape('html') }}">{{ admin.txt }}</a>
+			{% endif  %}	
+			<a class="btn btn-primary pull-right" style="margin-right:10px; margin-left:10px" href="{{ logout.href|escape('html') }}"><span class="glyphicon glyphicon-log-out"></span> {{ logout.txt }}</a>
+		</div>
+		<div class="col-md-7 pull-left">
+			<p>{{ msg_support }}</p>
+		</div>
+	</div>
 		<p>{{ compte }} {{ number }} <b>{{ code_client }}</b></p>
 		{% if user_account_completion_text %}<p>{{ user_account_completion_text }}</p>{% endif %}
 		{% if data is defined %}{{ data }}{% endif %}

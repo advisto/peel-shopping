@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: configuration.php 53591 2017-04-13 15:46:58Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -72,6 +72,7 @@ $modules_lang_folders_array = array('forum' => '/modules/forum/lang/',
 		'kiala' => '/modules/kiala/lang/', // Module de sélection de point relais Kiala
 		'call_back_form' => '/modules/call_back_form/lang/', // Module de demande de rappel téléphonique
 		'product_references_by_options' => '/modules/product_references_by_options/lang/', // Module de sélection de référence différentes par déclinaison de produit.
+		'ups' => '/modules/ups/lang/',
 		);
 set_configuration_variable(array('technical_code' => 'modules_lang_folders_array', 'string' => $modules_lang_folders_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_configuration_variable_array = array('affiliation' => 'module_affilie', 'reseller' => 'module_retail', 'gift_check' => 'module_cadeau', 'tagcloud' => 'module_nuage',
@@ -92,7 +93,7 @@ $modules_fonctions_variable_array = array('devises' => 'fonctionsdevises', 'sips
 		);
 set_configuration_variable(array('technical_code' => 'modules_fonctions_variable_array', 'string' => $modules_fonctions_variable_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_no_library_load_array = array('sips', 'cmcic', 'bluepaid', 'fianet', 'fianet_sac', 'ogone', 'omnikassa', 'paybox', 'spplus', 'systempay', 'moneybookers', 'paypal',
-		'comparateur', 'birthday', 'good_clients', 'facture_advanced', 'statistiques', 'expeditor', 
+		'birthday', 'good_clients', 'facture_advanced', 'statistiques', 'expeditor', 
 		'chart', 'reseller_map', 'photodesk');
 set_configuration_variable(array('technical_code' => 'modules_no_library_load_array', 'string' => $modules_no_library_load_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_front_office_only_array = array();
@@ -133,6 +134,7 @@ $modules_admin_functions_array = array('tagcloud' => '/modules/tagcloud/administ
 		'relance_avance' => '/modules/relance_avance/administrer/fonctions.php', 
 		'kekoli' => '/modules/kekoli/administrer/fonctions.php', // Module KEKOLI
 		'exaprint' => '/modules/exaprint/administrer/fonctions.php',
+		'maps' => '/modules/maps/administrer/fonctions.php',
 		);
 set_configuration_variable(array('technical_code' => 'modules_admin_functions_array', 'string' => $modules_admin_functions_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
 $modules_crons_functions_array = array('annonces' => '/modules/annonces/administrer/fonctions.php');
@@ -166,7 +168,6 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'faq' => '/modules/faq/fonctions.php', 
 		'lexique' => '/modules/lexique/fonctions.php',
 		'avis' => '/modules/avis/fonctions.php', // Module "donner son avis"
-		'comparateur' => '/modules/comparateur', // Modules comparateur de prix
 		'profil' => '/modules/profil/fonctions.php', // Module gestion des profils
 		'lot' => '/modules/lot/fonctions.php', // Module de gestion des lots
 		'birthday' => '/modules/birthday', // Module des bons anniversaires
@@ -178,7 +179,6 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'duplicate' => '/modules/duplicate', // Module de duplication de produit
 		'welcome_ad' => '/modules/welcome_ad/fonctions.php', // Module d'affichage d'interstitiel de publicité à l'arrivée d'un nouvel utilisateur sur le site
 		'chart' => '/modules/chart/open-flash-chart.php', // Module de graphiques flash 
-		'kekoli' => '/modules/kekoli', // Module KEKOLI
 		'tnt' => '/modules/tnt/fonctions.php,' . '/modules/tnt/class/Tnt.php',
 		'reseller_map' => '/modules/reseller_map/fonctions.php', // Module du google map des revendeurs
 		'clients' => '/modules/clients/fonctions.php', // Module Clients
@@ -234,9 +234,9 @@ if(!empty($error_msg)) {
 
 preload_modules();
 foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
-	if(class_exists(String::ucfirst($this_module))) {
+	if(class_exists(StringMb::ucfirst($this_module))) {
 		// Module complet avec classe permettant de gérer proprement l'installation
-		$class_name = String::ucfirst($this_module);
+		$class_name = StringMb::ucfirst($this_module);
 		// La syntaxe $class_name::check_install() n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
 		if(!call_user_func_array(array($class_name, 'check_install'), array())) {
 			if(!isset($GLOBALS[$class_name])) {
@@ -294,7 +294,7 @@ $fic = preg_replace("/votre_utilisateur_mysql/", $_SESSION['session_install_util
 $fic = preg_replace("/votre_motdepasse_mysql/", $_SESSION['session_install_motdepasse'], $fic);
 $fic = preg_replace("/bdd_mysql/", $_SESSION['session_install_choixbase'], $fic);
 
-$fp = String::fopen_utf8($GLOBALS['dirroot'] . "/lib/setup/info.inc.php", "wb");
+$fp = StringMb::fopen_utf8($GLOBALS['dirroot'] . "/lib/setup/info.inc.php", "wb");
 if($fp !== false) {
 	fputs($fp, $fic);
 	fclose($fp);

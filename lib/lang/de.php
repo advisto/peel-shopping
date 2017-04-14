@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: de.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: de.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -66,9 +66,10 @@ $GLOBALS["STR_BANK_ACCOUNT_NUMBER"] = "Kontonummer";
 $GLOBALS["STR_BANK_ACCOUNT_RIB_KEY"] = "RIB-Schlüssel";
 $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "RIB-Schlüssel";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Bankkonto";
-$GLOBALS["STR_BARCODE"] = "";
+$GLOBALS["STR_BARCODE"] = "Strichcode";
 $GLOBALS['STR_BECOME_PARTNER'] = "Werden Sie Partner";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "Um Ihre Bestellung online zu ändern, klicken Sie bitte hier";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "Schaltercode";
 $GLOBALS["STR_BRAND_LB"] = "Filtern nach: Marke";
@@ -116,9 +117,10 @@ $GLOBALS["STR_COMING_PRODUCT_FLASH"] = "Nächste Produkt flash";
 $GLOBALS["STR_COMMENTS"] = "Kommentar / Besondere Hinweise";
 $GLOBALS["STR_COMMERCIAL_AGENT"] = "Vertreter";
 $GLOBALS["STR_COMMERCIAL_YES"] = "Ich erkläre mich damit einverstanden, an meine E-Mail-Adresse Updates, Angebote von {$GLOBALS['site']} und Werbeangebote von Partnern von {$GLOBALS['site']} zu empfangen.";
+$GLOBALS["STR_COMPANY"] = "Gesellschaft";
 $GLOBALS["STR_COMPANY_IDENTIFICATION"] = "Registrierungsnummer Ihrer Firma";
 $GLOBALS["STR_COMPANY_NAME"] = "Firma";
-$GLOBALS["STR_COMPANY"] = "Gesellschaft";
+$GLOBALS["STR_COMPANY_TYPE"] = "Rechtsform";
 $GLOBALS["STR_COMPLETE_SEND"] = "Ihre E-Mail ist versandt.";
 $GLOBALS["STR_COMPTE"] = "Mein Konto";
 $GLOBALS["STR_CONDITION_AFFILI"] = "Mitgliedschaftsbedingungen ";
@@ -130,6 +132,7 @@ $GLOBALS["STR_CONFIRMATION"] = "Bestätigung";
 $GLOBALS["STR_CONFIRM_DISABLE_ACCOUNT"] = "Sind Sie sicher, dass Sie sich abmelden?";
 $GLOBALS["STR_CONTACT_INFO"] = "Kontaktangaben";
 $GLOBALS["STR_CONTACT_INTRO"] = "Informationen? Fragen? Sonderwünsche? Kontaktieren Sie uns!";
+$GLOBALS["STR_CONTACT_INTRO_PRODUCT_INFO"] = "Anwendungstechnisches Merkblatt";
 $GLOBALS["STR_CONTACT_LB"] = "Wählen Sie das Thema Ihrer Anfrage aus.";
 $GLOBALS["STR_CONTACT_SELECT1"] = "Informationen";
 $GLOBALS["STR_CONTACT_SELECT2"] = "Empfehlung";
@@ -175,7 +178,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "Voraussichtliche Verzögerung der Lieferzeit";
 $GLOBALS["STR_DELIVERY"] = "Lieferung";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "%s: Sie haben kein Recht, diese Aktion auszuführen.";
 $GLOBALS["STR_DESC"] = "Abnehmend";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Beschreibung";
+$GLOBALS["STR_DESCRIPTION"] = "Beschreibung";
 $GLOBALS["STR_DESIGNATION"] = "Bezeichnung";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "Sie haben den Rundbrief abbestellt.";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "Rundbrief kündigen";
@@ -285,6 +288,7 @@ $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Von Facebook abmelden.";
 $GLOBALS["STR_FILE_EMPTY"] = "Die Datei ist leer.";
 $GLOBALS["STR_FILE"] = "Datei";
+$GLOBALS["STR_FILTERED_SEND"] = "Ihre Nachricht wurde gefiltert und nicht gesendet";
 $GLOBALS["STR_FIRST_CHOICE"] = "1. Wahl";
 $GLOBALS["STR_FIRST_NAME"] = "Vorname";
 $GLOBALS["STR_FIRST_PAGE"] = "Erste Seite";
@@ -372,6 +376,7 @@ $GLOBALS["STR_LIST"] = "Liste";
 $GLOBALS["STR_LIST_PRODUCT"] = "Liste der Artikel";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Liste der Unterrubriken";
 $GLOBALS["STR_LISTE_CADEAU"] = "Meine Wunschliste";
+$GLOBALS["STR_LOCATION"] = "Lage";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Melden Sie sich an, um von dieser Ermäßigung zu profitieren";
 $GLOBALS["STR_LOGIN_OK"] = "Vielen Dank für Ihr Vertrauen.";
 $GLOBALS["STR_LOGIN"] = "Anmelden";
@@ -387,6 +392,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Meine verwendeten Rabattcodes:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Meine aktuellen Rabattcodes:";
 $GLOBALS["STR_MESSAGE"] = "Nachricht";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Eine Mindestbestellsumme von ";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = "Mindest Produkte sind erforderlich, um die Bestellung abzuschließen";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "Feld %s ist verpflichtet";
 $GLOBALS["STR_MLLE"] = "Frl.";
 $GLOBALS["STR_MME"] = "Frau";
@@ -405,9 +411,10 @@ $GLOBALS["STR_MODULE_AVIS_AVERAGE_RATING_GIVEN"] = "Durchschnittsnote:";
 $GLOBALS["STR_MODULE_AVIS_NO_OPINION_FOR_THIS_PRODUCT"] = "Noch keine Meinungen zu diesem Artikel";
 $GLOBALS["STR_MODULE_AVIS_NOTE"] = "Bemerkung";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED_BY"] = "Meinung von";
-$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "";
 $GLOBALS["STR_MODULE_AVIS_OPINION_POSTED"] = "Vielen Dank für Ihre Meinung zu diesem Artikel";
+$GLOBALS["STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT"] = "Die Nachrichten";
 $GLOBALS["STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT"] = "Die Meinungen der Kunden zu ";
+$GLOBALS["STR_MODULE_AVIS_POSTED_NEWS"] = "Nachrichten";
 $GLOBALS["STR_MODULE_AVIS_SEND_YOUR_OPINION"] = "Senden Sie Ihre Meinung";
 $GLOBALS["STR_MODULE_AVIS_WANT_COMMENT_PRODUCT"] = "Sie möchten Ihre Meinung zu einem Artikel äußern";
 $GLOBALS["STR_MODULE_AVIS_YOUR_COMMENT_ON_PRODUCT"] = "Ihr Kommentar zu dem Artikel";
@@ -510,6 +517,7 @@ $GLOBALS["STR_MODULE_TEMPLATE_EMAIL_TO_DELETE_YOUR_ACCOUNT"] = "Zum Abzumelden";
 $GLOBALS["STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE"] = "Die Abbildung kann nicht im Cache abgelegt werden. Prüfen Sie bitte Ihre Serverzugangsrechte.";
 $GLOBALS["STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE"] = "Unmöglich, das Bild zu öffnen";
 $GLOBALS["STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED"] = "Bildformat ist nicht unterstützt";
+$GLOBALS["STR_MODULE_USER_ALERTS_SAVE_SEARCH"] = "Erstellen Sie einen Alarm.";
 $GLOBALS["STR_MONTH"] = "Monat";
 $GLOBALS["STR_MONTHS"] = "Monate";
 $GLOBALS["STR_MORE_DETAILS"] = "Weitere Einzelheiten";
@@ -575,6 +583,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "Sortieren";
 $GLOBALS["STR_ORDER_DETAIL"] = "Details der Bestellung";
 $GLOBALS["STR_ORDER_FORM"] = "Bestellformular";
 $GLOBALS["STR_ORDER_HISTORY"] = "Bestellverlauf";
+$GLOBALS['STR_ORDER_MIN'] = "Mindestbestell";
 $GLOBALS["STR_ORDER_NAME"] = "Bestellung";
 $GLOBALS["STR_ORDER_NUMBER"] = "Nummer";
 $GLOBALS["STR_ORDER_POINT"] = "Treuepunkte";
@@ -658,7 +667,7 @@ $GLOBALS["STR_PRINT_PAGE"] = "Drucken Sie diese Seite";
 $GLOBALS["STR_PRINT_PROFORMA"] = "Bestellformular ausdrucken";
 $GLOBALS["STR_PRINT_YOUR_BILL"] = "Drucken Sie Ihre Rechnung aus";
 $GLOBALS["STR_PRINT"] = "Drucken";
-$GLOBALS["STR_PRODUCT_ADD_TO_EASY_LIST"] = "";
+$GLOBALS["STR_PRODUCT_ADD_TO_EASY_LIST"] = "In Einfache Liste";
 $GLOBALS["STR_PRODUCT_BUY"] = "Gekaufte Artikel";
 $GLOBALS["STR_PRODUCT_NAME"] = "Name des Produkts";
 $GLOBALS["STR_PRODUCT"] = "Produkt";
@@ -698,8 +707,8 @@ $GLOBALS["STR_REMISE"] = "Rabatt";
 $GLOBALS["STR_REQUEST_OK"] = "Ihre Nachfrage wurde in Behandlung genommen.";
 $GLOBALS["STR_REQUIRED_ORDER_NUMBER"] = "obligatorisch für eine Reklamation";
 $GLOBALS["STR_REQUIRED_VALIDATE_ORDER"] = "ist erforderlich, um Ihre Bestellung zu validieren.";
-$GLOBALS["STR_RESULTS"] = "";
 $GLOBALS["STR_RESULT_SEARCH"] = "Ergebnis Ihrer Suche";
+$GLOBALS["STR_RESULTS"] = "Ergebnis(se)";
 $GLOBALS["STR_RETAILER_SUBSCRIBE"] = "Registrierung Wiederverkäufer";
 $GLOBALS["STR_RETAILER"] = "Wiederverkäufer werden";
 $GLOBALS["STR_RETAILERS"] = "Einzelhändler";
@@ -756,7 +765,7 @@ $GLOBALS["STR_SOLD_PRICE"] = "Verkaufspreis";
 $GLOBALS["STR_SPECIAL"] = "Unsere Auswahl";
 $GLOBALS["STR_SQL_ERROR"] = "Verbindungsfehler zur Artikeldatenbank";
 $GLOBALS["STR_STATUS"] = "Land";
-$GLOBALS["STR_START_PRICE"] = "ab Preis Ohne MwSt.";
+$GLOBALS["STR_START_PRICE"] = "Ab Preis Ohne MwSt.";
 $GLOBALS["STR_STEP1"] = "Ihre Zahlungsart";
 $GLOBALS["STR_STEP2"] = "Übersicht Ihrer Bestellung";
 $GLOBALS["STR_STEP3"] = "Bestellbestätigung";
@@ -810,6 +819,7 @@ $GLOBALS["STR_UNAVAILABLE"] = "Nicht verfügbar";
 $GLOBALS["STR_UNIT_PRICE"] = "Preis pro Stück";
 $GLOBALS["STR_UPDATE_WEBSITE"] = "Die Website {$GLOBALS['site']} wird für einige Minuten gepflegt.";
 $GLOBALS["STR_UPDATE"] = "Warenkorb aktualisieren";
+$GLOBALS["STR_UPLOAD"] = "Download";
 $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"] = "Problem bei der Übertragung von Dateien - Try Again";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_IS_TOO_BIG"] = "Die hochgeladene Datei ist zu groß (Grenze: %s KB)";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"] = "Der Dateityp (%s), die Sie hochladen möchten, ist nicht erlaubt, können Sie Dateien wie heruntergeladen werden:";
@@ -817,6 +827,7 @@ $GLOBALS["STR_UPLOAD_ERROR_FILE_TYPE_NOT_VALID"] = "Der Typ der Datei nicht gül
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_HIGHER_THAN"] = "Ihr Bild sollte nicht mehr als %s Pixel betragen";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_LARGER_THAN"] = "Ihr Bild sollte nicht größer als %s Pixel betragen";
 $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"] = "Sie haben nicht hochgeladen.";
+$GLOBALS["STR_USER_ACCOUNT_COMPLETION"] = "Ihr Profil wird in %s abgeschlossen.";
 $GLOBALS["STR_USER_CANCEL"] = "Stornierung durch Nutzer.";
 $GLOBALS["STR_USER_ORIGIN"] = "Wie haben Sie diese Website gefunden?";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "Von einem Freund oder Familienmitglied";
@@ -826,6 +837,8 @@ $GLOBALS["STR_USER_ORIGIN_OPTIONS_4"] = "Von einer anderen Website";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_5"] = "Von einem unserer Vertreter";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_6"] = "Auf einer Messe";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_7"] = "Andere";
+$GLOBALS["STR_USER_TYPE_COMPANY"] = "Korporation";
+$GLOBALS["STR_USER_TYPE_PERSON"] = "Natürliche Person";
 $GLOBALS["STR_VALIDATE_ORDER"] = "Bestellung bestätigen";
 $GLOBALS["STR_VALIDATION_CODE_COPY"] = "Geben Sie diesen Code ein";
 $GLOBALS["STR_VALIDATION_CODE"] = "Verifizierungscode";
@@ -840,6 +853,7 @@ $GLOBALS["STR_VOIR_PENSE_BETE"] = "Erinnerungen ansehen";
 $GLOBALS["STR_VOTE"] = "Abstimmen";
 $GLOBALS["STR_WARNING"] = "Achtung";
 $GLOBALS["STR_WEBSITE"] = "Website";
+$GLOBALS["STR_WEBSITE_NONE"] = "Keine Website";
 $GLOBALS["STR_WEEK"] = "Woche/n";
 $GLOBALS["STR_WEIGHT"] = "Bestellgewicht";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "Was machen Sie mit dieser Liste zu tun?";

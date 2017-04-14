@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: meta.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: meta.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_content,admin_webmastering");
+necessite_priv("admin_content,admin_webmastering,admin_communication");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_META_PAGE_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -219,9 +219,9 @@ function affiche_liste_meta()
 		while ($ligne = fetch_assoc($query)) {
 			// On génère le lien vers les métas ici :
 			// - si le titre est vide, on se sert de la description, sinon des mots clés
-			$meta_titre = String::html_entity_decode_if_needed(trim($ligne['meta_titre_' . $_SESSION['session_langue']]));
-			$meta_desc = String::html_entity_decode_if_needed(trim($ligne['meta_desc_' . $_SESSION['session_langue']]));
-			$meta_key = String::html_entity_decode_if_needed(trim($ligne['meta_key_' . $_SESSION['session_langue']]));
+			$meta_titre = StringMb::html_entity_decode_if_needed(trim($ligne['meta_titre_' . $_SESSION['session_langue']]));
+			$meta_desc = StringMb::html_entity_decode_if_needed(trim($ligne['meta_desc_' . $_SESSION['session_langue']]));
+			$meta_key = StringMb::html_entity_decode_if_needed(trim($ligne['meta_key_' . $_SESSION['session_langue']]));
 			$anchor= '';
 			if (!empty($meta_titre)) {
 				$anchor = $meta_titre;

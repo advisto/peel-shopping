@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,9 +22,14 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function webmail_hook_admin_menu_items($params) {
-	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
-	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
-	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
+	$result = array();
+	if (a_priv('admin_users,admin_finance', true)) {
+		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
+		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
+	}
+	if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline', true)) {
+		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
+	}
 	return $result;
 }
 
@@ -34,9 +39,11 @@ function webmail_hook_admin_menu_items($params) {
  * @param array $params
  * @return
  */
-function webmail_hook_list_user_mail($params) {
+function webmail_hook_admin_user_edit_more_infos_html($params) {
+	// Emails venant de l'utilisateur et adressés au site à partir du formulaire de contact du site
 	$output = '';
-	// Requête d'emails à partir du site
+
+	// Emails venant de l'utilisateur et adressés au site à partir du formulaire de contact du site
 	$sql_formulaire = 'SELECT *
 		FROM peel_webmail
 		WHERE id_user="' . intval(vn($params['id_utilisateur'])) . '" AND ' . get_filter_site_cond('webmail', null, true) . '
@@ -66,6 +73,7 @@ function webmail_hook_list_user_mail($params) {
 								<td class="center">' . vb($formulaire['date']) . ' ' . vb($formulaire['heure']) . '</td>
 								<td class="center">' . vb($formulaire['ip']) . '</td>
 							</tr>';
+			$i++;
 		}
 	}
 	$output .= '
@@ -324,6 +332,7 @@ function send_mail_admin($frm)
 		// Utilisation de \r\n. Ce sera transformé si nécessaire en <br /> par la fonction send_email
 		$mail_content = vb($frm['message']) . "\r\n" . vb($frm['signature']);
 		$template_id = vn($frm['template']);
+		// ATTENTION : $frm['email_from'] n'est PAS un email, c'est un type d'email souhaité : email_webmaster, email_commande, email_client, ou my_email
 		if (!empty($frm['email_from']) && !empty($GLOBALS['site_parameters'][$frm['email_from']])) {
 			// On envoie à partir de l'email choisi parmi ceux configurés dans la gestion du site
 			$email_from = $GLOBALS['site_parameters'][$frm['email_from']];
@@ -376,7 +385,7 @@ function send_mail_admin($frm)
 						$frm['id_utilisateur'] = $user_infos['id_utilisateur'];
 					}
 				}
-				$mail_sended = send_email($this_destination_mail, $mail_subject, $mail_content, $template_id, array_merge($custom_template_tags, $user_template_tags) , null, $email_from, true, false, true, $_SESSION['session_utilisateur']['email'], null);
+				$mail_sended = send_email($this_destination_mail, $mail_subject, $mail_content, $template_id, array_merge($custom_template_tags, $user_template_tags), null, $email_from, true, false, true, null, null);
 				if ($mail_sended) {
 					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_WEBMAIL_ADMIN_MSG_SENT_OK'], $this_destination_mail)))->fetch();
 				} else {
@@ -433,7 +442,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 				<tr>
 					<th>'.$GLOBALS['STR_ADMIN_DATE'].'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
 					<td>
-						<input type="text" name="date" class="form-control datepicker" value="' . String::str_form_value(vb(($recherche['date']))) . '" style="width:110px" />
+						<input type="text" name="date" class="form-control datepicker" value="' . StringMb::str_form_value(vb(($recherche['date']))) . '" style="width:110px" />
 						<input type="hidden" name="mode" value="search" />
 					</td>
 				</tr>
@@ -502,7 +511,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 								<td class="center">';
 			// Si un template a été envoyé, alors on récupère le contenu de ce template
 			if (!empty($template_infos) && $result['remarque'] == $template_infos['text']) {
-				$email_sended_infos = '<b>Template</b> : <br />' . $multi_send_texte . $template_infos["name"] . ($template_infos['text'] != String::strip_tags($template_infos['text'])?' (HTML)':'');
+				$email_sended_infos = '<b>Template</b> : <br />' . $multi_send_texte . $template_infos["name"] . ($template_infos['text'] != StringMb::strip_tags($template_infos['text'])?' (HTML)':'');
 			} else {
 				$email_sended_infos = $multi_send_texte . $result['remarque'];
 			}
@@ -510,7 +519,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
 								</td>
 								<td class="center">';
 			if (!empty($template_infos)) {
-				$output .= $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_BASE_TEMPLATE_USED'] . ' ' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':<br />' . $template_infos['technical_code'] . ' - ' . String::strtoupper($template_infos['lang']);
+				$output .= $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_BASE_TEMPLATE_USED'] . ' ' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':<br />' . $template_infos['technical_code'] . ' - ' . StringMb::strtoupper($template_infos['lang']);
 			} else {
 				$output .= $result["data"];
 			}
@@ -559,7 +568,7 @@ function affiche_list_send_mail($recherche, $return_mode = false)
  * @param boolean $return_mode
  * @return
  */
-function affiche_list_received_mail($recherche, $return_mode = false)
+function affiche_list_received_mail($recherche, $return_mode = false, $return = 'full_html')
 {
 	$output = '';
 	$sql_cond = array();
@@ -576,13 +585,17 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 		if (!empty($recherche['email'])) {
 			$sql_cond[] = ' w.email= "' . nohtml_real_escape_string($recherche['email']) . '" ';
 		}
+		// Recherche par email
+		if (!empty($recherche['sujet'])) {
+			$sql_cond[] = ' w.titre= "' . nohtml_real_escape_string($recherche['sujet']) . '" ';
+		}
 	}
 	$sql = "SELECT w.*, u.pseudo AS login
 		FROM peel_webmail w
 		LEFT JOIN peel_utilisateurs u ON u.id_utilisateur = w.id_user AND " . get_filter_site_cond('utilisateurs', 'u') . "
 		WHERE " . get_filter_site_cond('webmail', 'w', true) . "  " . (!empty($sql_cond)?' AND ' . implode(' AND ', $sql_cond):'') . "";
 	$Links = new Multipage($sql, 'affiche_liste_send_email');
-	$HeaderTitlesArray = array(' ', 'titre' => $GLOBALS['STR_ADMIN_TITLE'], 'nom' => $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], 'message' => $GLOBALS['STR_MESSAGE'], 'ip' => 'IP', 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"]);
+	$HeaderTitlesArray = array(' ', 'titre' => $GLOBALS['STR_ADMIN_TITLE'], 'nom' => $GLOBALS['STR_LAST_NAME'].'/'.$GLOBALS['STR_FIRST_NAME'].'/'.$GLOBALS['STR_DATE'], 'message' => $GLOBALS['STR_MESSAGE'], 'ip' => 'IP', 'site_id' => $GLOBALS["STR_ADMIN_WEBSITE"], 'update_datetime' => $GLOBALS["STR_VALIDATION_DATE"], 'read' => $GLOBALS["STR_STATUS"]);
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
 	$Links->OrderDefault = "w.Date, w.Heure";
 	$Links->SortDefault = "DESC";
@@ -624,9 +637,9 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 	$i = 0;
 	if (!empty($messages_count)) {
 		foreach ($messages_count AS $this_date => $this_messages_count) {
-			$jour = String::substr($this_date, 8, 2);
-			$mois = String::substr($this_date, 5, 2);
-			$annee = String::substr($this_date, 0, 4);
+			$jour = StringMb::substr($this_date, 8, 2);
+			$mois = StringMb::substr($this_date, 5, 2);
+			$annee = StringMb::substr($this_date, 0, 4);
 			if ($messages_not_read[$this_date] > 0) {
 				$style = ' style="color:#FF0000"';
 			} else {
@@ -645,7 +658,7 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 
 				/* <option value="any_not_read"' . ((!empty($_GET['date'])) && ($_GET['date'] == 'any_not_read')?' selected="selected"':'') . '>'.$GLOBALS["STR_ALL"].'</option>'; */
 			}
-			$output .= '<option value="' . String::str_form_value(vb($this_date)) . '" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == $this_date , ' selected="selected"') . ' ' . $style . '>' . $jour . "/" . $mois . "/" . $annee . ' ' . $GLOBALS['day_of_week'][date('w', strtotime($this_date))];
+			$output .= '<option value="' . StringMb::str_form_value(vb($this_date)) . '" ' . frmvalide(!empty($recherche['date']) && $recherche['date'] == $this_date , ' selected="selected"') . ' ' . $style . '>' . $jour . "/" . $mois . "/" . $annee . ' ' . $GLOBALS['day_of_week'][date('w', strtotime($this_date))];
 			if ($this_date == date('Y-m-d')) {
 				$output .= ' ('.$GLOBALS['strToday'].')';
 			} elseif ($this_date == date('Y-m-d', time() - 24 * 3600)) {
@@ -674,11 +687,29 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 		</tr>
 		<tr>
 			<th>' . $GLOBALS['STR_ADMIN_NAME'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
-			<td><input class="form-control" type="text" name="nom" value="' . String::str_form_value(vb($recherche['nom'])) . '" /></td>
+			<td><input class="form-control" type="text" name="nom" value="' . StringMb::str_form_value(vb($recherche['nom'])) . '" /></td>
 		</tr>
 		<tr>
 			<th>' . $GLOBALS['STR_EMAIL'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
-			<td><input class="form-control" type="email" name="email" value="' . String::str_form_value(vb($recherche['email'])) . '" autocapitalize="none" /></td>
+			<td><input class="form-control" type="email" name="email" value="' . StringMb::str_form_value(vb($recherche['email'])) . '" autocapitalize="none" /></td>
+		</tr>
+		<tr>
+			<th>' . $GLOBALS['STR_CONTACT_SUBJECT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</th>
+			<td>
+				<select name="sujet" class="form-control">';
+		$sujet_options = array(
+			'' => $GLOBALS['STR_CONTACT_LB']);
+				$output .= '
+				<option value="">' . $GLOBALS['STR_CHOOSE'] . '</option>';
+		for($i=1; isset($GLOBALS['STR_CONTACT_SELECT'.$i]); $i++) {
+			if(!empty($GLOBALS['STR_CONTACT_SELECT'.$i])) {
+				$output .= '
+				<option '.(frmvalide($GLOBALS['STR_CONTACT_SELECT'.$i]==vb($_POST['sujet']), ' selected="selected"')).' value="' . StringMb::str_form_value($GLOBALS['STR_CONTACT_SELECT'.$i]) . '">' . $GLOBALS['STR_CONTACT_SELECT'.$i] . '</option>';
+			}
+		}
+	$output .= '
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
@@ -690,28 +721,29 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 </form>
 <form method="post" action=""' . get_current_url(false) . '"">
 	<div class="table-responsive" style="margin-top:10px">
-		<input type="hidden" name="mode" value="change_state_mail" />
+		<input type="hidden" name="mode" value="change_state_mail" />';
+$output_array = '
 		<table id="tablesForm" class="table">
 			' . $Links->getHeaderRow();
 	$i = 0;
 	if (empty($results_array)) {
-		$output .= '<tr><td colspan="6" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
+		$output_array .= '<tr><td colspan="6" class="center"><b>'.$GLOBALS['STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND'].'</b></td></tr>';
 	} else {
-		$read_title_array = array('NO' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER'], 'READ' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_READ'], 'SEND' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ANSWERED']);
+		$read_title_array = array('NO' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER'], 'READ' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_READ'], 'SEND' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_ANSWERED'], 'TREATED' => $GLOBALS['STR_MODULE_WEBMAIL_ADMIN_TREATED']);
 		
 		foreach($results_array as $message) {
-			$output .= tr_rollover($i, true) . '
+			$output_array .= tr_rollover($i, true) . '
 				<td class="center" style="width:5px;">
 					<input name="form_delete[]" type="checkbox" value="' . intval(vn($message['id'])) . '" id="cbx_' . intval(vn($message['id'])) . '" />
 				</td>
 				<td class="center" style="width:15%">
-					<b>' . String::strtoupper(vb($message['titre'])) . '</b><br /><span style="color:' . ($message['read'] == 'NO'?'Red':($message['read'] == 'SEND'?'Green':'Black')) . '">[' . $read_title_array[$message['read']] . ']</span><br /><br /><a style="' . ($message['read'] == 'NO'?'font-size:13px; color:Red':($message['read'] == 'SEND'?'color:Green':'color:Black')) . '" href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_webmail=' . intval(vn($message['id'])) . '">' . sprintf(($message['read'] == 'SEND'?$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"]:$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"]), $message['email']) . '</a>
+					<b>' . StringMb::strtoupper(vb($message['titre'])) . '</b><br /><span style="color:' . ($message['read'] == 'NO'?'Red':($message['read'] == 'SEND'?'Green':'Black')) . '">[' . $read_title_array[$message['read']] . ']</span><br /><br /><a style="' . ($message['read'] == 'NO'?'font-size:13px; color:Red':($message['read'] == 'SEND'?'color:Green':'color:Black')) . '" href="' . $GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php?id_webmail=' . intval(vn($message['id'])) . '">' . sprintf(($message['read'] == 'SEND'?$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_AGAIN"]:$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ANSWER_TO"]), $message['email']) . '</a>
 				</td>
 				<td class="center" style="width:15%">
 					'.$GLOBALS["STR_ADMIN_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['nom'])) . '</b><br />'.$GLOBALS["STR_FIRST_NAME"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . ucfirst(vb($message['prenom'])) . '</b><br />'.$GLOBALS["STR_TELEPHONE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['telephone']) . '</b><br />'.$GLOBALS["STR_DATE"].$GLOBALS['STR_BEFORE_TWO_POINTS'].': <b>' . vb($message['date']) . ' ' . vb($message['heure']) . '</b><br />' . (intval(vn($message['id_user'])) != 0? '<a href="' . $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . intval(vn($message['id_user'])) . '" style="color:Grey;">'.$GLOBALS["STR_CUSTOMER"].' # ' . intval(vn($message['id_user'])) . '<br />'.$GLOBALS["STR_ADMIN_LOGIN"].' : <b>' . vb($message['login']) . '</b>':'') . '
 				</td>
 				<td class="center" style="width:35%">
-					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . String::nl2br_if_needed(String::str_shorten_words(String::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="'. $GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1"> ' . sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"], vb($message['email'])) . '</a></p>':'') . '
+					<font color="' . (($message['read'] == 'NO')?'Red':'Black') . '">' . StringMb::nl2br_if_needed(StringMb::str_shorten_words(StringMb::strip_tags(trim($message['message'])), 60, ' ', true)) . '</font>' . ($message['id_user'] == 0 && $message['read'] == 'SEND'?'<p><a href="'. $GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=SEND_EMAIL&search=' . vb($message['email']) . '&type=1"> ' . sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"], vb($message['email'])) . '</a></p>':'') . '' . (!empty($message['file'])?'<a href="' . get_url_from_uploaded_filename($message['file']) . '" target="message_file"><img src="' . $GLOBALS['repertoire_upload'] . '/thumbs/' . thumbs($message['file'], 50, 50, 'fit') . '" /></a>':'') . '
 				</td>
 				<td class="center" style="width:15%">
 				' . vb($message['ip']) . '
@@ -719,18 +751,43 @@ function affiche_list_received_mail($recherche, $return_mode = false)
 				<td class="center" style="width:15%">
 				' . get_site_name($message['site_id']) . '
 				</td>
+				<td class="center" style="width:15%">
+				' . get_formatted_date($message['update_datetime'], 'short', 'long') . '
+				</td>
+				<td class="center" style="width:15%">';
+				if ($message['read'] == 'NO') {
+					// Le message n'est pas traité, on affiche un pastille blanche avec un lien pour changer en statut traité;
+					$output_array .= '
+					<a href="'.get_current_url(false).'?mode=change_state_mail&etat=TREATED&id=' . intval(vn($message['id'])) . '">
+						<img src="' . $GLOBALS['administrer_url'] . '/images/puce-orange.gif" />
+					</a>';
+				} else {
+					// Le message est traité.
+					$output_array .= '
+					<a href="'.get_current_url(false).'?mode=change_state_mail&etat=NO&id=' . intval(vn($message['id'])) . '">
+						<img src="' . $GLOBALS['administrer_url'] . '/images/puce-verte.gif" />
+					</a>';
+				}
+					$output_array .= '
+				</td>
 			</tr>';
 			$i++;
 		}
 	}
+	$output_array .= '
+		</table>';
+	if ($return == 'html_array') {
+		return $output_array;
+	}
+	$output .= $output_array;
 	$output .= '
-		</table>
 	</div>
 	<div class="center">
 		<input type="button" value="'.$GLOBALS["STR_ADMIN_CHECK_ALL"].'" onclick="if (markAllRows(\'tablesForm\')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
 		<input type="button" value="'.$GLOBALS["STR_ADMIN_UNCHECK_ALL"].'" onclick="if (unMarkAllRows(\'tablesForm\')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
 		<input type="submit" value="'.$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_READ"].'" class="btn btn-primary" name="mail_is_read" />
 		<input type="submit" value="'.$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_NOT_READ"].'" class="btn btn-primary" name="mail_is_not_read" />
+		<a href="'.get_current_url(false).'?mode=export&sujet='.vb($_POST['sujet']).'" class="btn btn-primary" >'.$GLOBALS["STR_ADMIN_EXPORT"].'</a>
 	</div>
 	<div class="center">' . $Links->GetMultipage() . '</div>
 </form>';
@@ -767,5 +824,9 @@ function update_state_mail($frm)
 				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_READ_OK"], intval(vn($this_value)))))->fetch();
 			}
 		}
+	} elseif(!empty($frm['etat']) && !empty($frm['id'])) {
+		query('UPDATE `peel_webmail`
+			SET `read`="'.nohtml_real_escape_string($frm['etat']).'", update_datetime = "' . nohtml_real_escape_string(date('Y-m-d H:i:s', time())) . '"
+			WHERE `id`="' . intval(vn($frm['id'])) . '" AND ' . get_filter_site_cond('webmail', null, true));
 	}
 }

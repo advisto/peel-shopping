@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: nl.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -67,6 +67,7 @@ $GLOBALS["STR_BANK_ACCOUNT"] = "Bankrekening";
 $GLOBALS["STR_BARCODE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Word partner";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "Om uw bestelling online aan te passen, klik hier";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "Loketcode";
 $GLOBALS["STR_BRAND_LB"] = "Filter op : Merk";
@@ -164,7 +165,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "Verwachte vertraging levering";
 $GLOBALS["STR_DELIVERY"] = "Levering";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "%s: U heeft geen toestemming om deze actie uit te voeren";
 $GLOBALS["STR_DESC"] = "Aflopend";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Beschrijving";
+$GLOBALS["STR_DESCRIPTION"] = "Beschrijving";
 $GLOBALS["STR_DESIGNATION"] = "Benaming";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "U bent uitgeschreven voor de nieuwsbrief";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "Uitschrijven voor de nieuwsbrief";
@@ -376,6 +377,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Mijn gebruikte promotie codes:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Mijn huidige promotie codes:";
 $GLOBALS["STR_MESSAGE"] = "Bericht";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Een minimum orderbedrag van";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "veld %s is verplicht";
 $GLOBALS["STR_MLLE"] = "Mej.";
 $GLOBALS["STR_MME"] = "Mevr.";
@@ -564,6 +566,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Details van de bestelling";
 $GLOBALS["STR_ORDER_FORM"] = "Bestelformulier";
 $GLOBALS["STR_ORDER_HISTORY"] = "Overzicht van de bestellingen";
+$GLOBALS['STR_ORDER_MIN'] = "";
 $GLOBALS["STR_ORDER_NAME"] = "Bestelling";
 $GLOBALS["STR_ORDER_NUMBER"] = "Nummer van de bestelling";
 $GLOBALS["STR_ORDER_POINT"] = "Geschenkpunten voor uw bestelling";

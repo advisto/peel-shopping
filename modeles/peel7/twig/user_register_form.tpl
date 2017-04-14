@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user_register_form.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: user_register_form.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<h1 property="name" class="page_title">{{ STR_FIRST_REGISTER_TITLE }}</h1>
 <div class="user_register_form {% if short_register_form %}short_register_form{% endif %}">
 {% if short_register_form is empty %}
@@ -29,7 +29,7 @@
 		</div>
 		{% if (STR_PSEUDO) %}
 		<div class="enregistrement">
-			<span class="enregistrementgauche"><label for="pseudo">{{ STR_PSEUDO }} {% if pseudo_is_optionnal is empty %}<span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:</label>{% endif %}</span>
+			<span class="enregistrementgauche"><label for="pseudo">{{ STR_PSEUDO }} {% if pseudo_is_optionnal is empty %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="text" class="form-control" id="pseudo" name="pseudo" value="{{ pseudo|html_entity_decode_if_needed|str_form_value }}" /></span>{{ pseudo_error }}<br />
 			<span class="enregistrementgauche">&nbsp;</span>
 			<span>{{ STR_STRONG_PSEUDO_NOTIFICATION }}</span>
@@ -77,11 +77,12 @@
 				<span class="enregistrementgauche"><label for="siret">{{ siret_txt }}{% if mandatory_fields.siret %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="siret" name="siret" value="{{ siret|html_entity_decode_if_needed|str_form_value }}" /></span> {{ siret_error }}
 			</div>
-			<div class="enregistrement">
-				<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-			<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" /></span>{{ intracom_form_error }}
-			</div>
-			
+			{% if STR_INTRACOM_FORM %}	
+				<div class="enregistrement">
+					<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+				<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" /></span>{{ intracom_form_error }}
+				</div>
+			{% endif %}
 	{% endif %}
 	{% for f in specific_fields %}
 		{% if f.field_position=='company' %}
@@ -92,11 +93,12 @@
 		{% endif %}
 	{% endfor %}
 		</div>
-	{% if add_b2b_form_inputs %}
+	{% if add_b2b_form_inputs or is_annonce_module_active %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="url">{{ STR_WEBSITE }}{% if mandatory_fields.url %}<span class="etoile">*</span> {% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="url" name="url" placeholder="http://" value="{{ url|html_entity_decode_if_needed|str_form_value }}" /></span>
 			</div>
+		{% if add_b2b_form_inputs %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="type">{{ STR_YOU_ARE }}{% if mandatory_fields.type %}<span class="etoile">*</span> {% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
@@ -123,6 +125,7 @@
 				</select>
 			</span>{{ activity_error }}
 			</div>
+		{% endif %}
 	{% endif %}
 	{% if (STR_FONCTION) %}
 				<div class="enregistrement">
@@ -148,7 +151,7 @@
 	{% if (STR_PORTABLE) %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="portable">{{ STR_PORTABLE }}{% if mandatory_fields.portable %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-				<span class="enregistrementdroite"><input type="tel" class="form-control" id="portable" name="portable" value="{{ portable|str_form_value }}" /></span>
+				<span class="enregistrementdroite"><input type="tel" class="form-control" id="portable" name="portable" placeholder="{{ form_placeholder_portable|str_form_value }}" value="{{ portable|str_form_value }}" /></span>
 			</div>
 	{% endif %}
 	{% if false %}

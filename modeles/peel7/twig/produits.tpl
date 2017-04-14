@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -67,7 +67,9 @@
 						</div>
 						<div class="col_product_description col-md-{% if (prod.check_critere_stock) %}6{% else %}8{% endif %}">
 							<div class="fc_titre_produit"><a property="url" href="{{ prod.href|escape('html') }}" title="{{ prod.name|str_form_value }}"><span property="name">{{ prod.name }}</span></a></div>
+							{% if product_description_catalogue_disabled is empty %}
 							<div><p><a href="{{ prod.href|escape('html') }}" class="col_description">{{ prod.description }}</a></p></div>
+							{% endif %}
 						</div>
 						<div class="col_zoom col-md-2">
 				{% if (prod.image.zoom) %}
@@ -84,10 +86,13 @@
 				{% endif %}
 						</div>
 						<div class="fc_add_to_cart col-md-2">
+			{% if prod.departements_get_bootbox_dialog is defined %}
+				{{ prod.departements_get_bootbox_dialog }}
+			{% else %}
 				{% if is_associated_product and associated_product_multiple_add_to_cart %}
 						<div>
 							<input min="{% if prod.quantity %}{{ prod.quantity }} {% endif %}" type="number" style="width: 100px" value="{% if prod.quantity %}{{ prod.quantity }}{% endif %}" name="qte[]" class="form-control" style="display:inline;">
-							<input type="hidden" name="produit_id[]" value="{% prod.id %}" />
+							<input type="hidden" name="produit_id[]" value="{{ prod.id }}" />
 						</div>
 				{% elseif prod.check_critere_stock is defined %}
 							<!-- Ajout au panier -->
@@ -95,6 +100,8 @@
 				{% else %}
 						{% if prod.check_critere_stock is empty %}<div class="fc_prix">{% if prod.on_estimate %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>{% endif %}
 				{% endif %}
+			{% endif %}
+				
 						</div>
 					</div>
 				{% if (prod.admin) %}
@@ -117,6 +124,9 @@
 					</tr>
 					<tr>
 						<td class="fc_image center middle" style="width:{{ small_width }}px; height:{{ small_height }}px;">
+							{% if prod.thumbnail_promotion %}
+							<div class="produit_thumbnail_promotion"><span>-{{ prod.promotion }}</span></div>
+							{% endif %}
 							<span class="image_zoom">
 							{% if  (prod.image) %}
 								<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if  prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if  prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>
@@ -133,7 +143,7 @@
 					</tr>
 					<tr>
 						<td>
-							{% if  (prod.description) %}
+							{% if  (prod.description) and product_description_catalogue_disabled is empty %}
 							<div class="description_text"><a href="{{ prod.href|escape('html') }}">{{ prod.description }}</a></div>
 							{% endif %}
 							{% if (prod.flash) %}
@@ -142,14 +152,23 @@
 							<div class="fc_prix">{% if  (prod.on_estimate) %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>
 						</td>
 					</tr>
-				{% if (prod.check_critere_stock) %}
+				{% if prod.departements_get_bootbox_dialog is defined %}
 					<tr>
 						<td class="fc_add_to_cart">
-							<!-- Ajout au panier -->
-							{{ prod.check_critere_stock }}
+							{{ prod.departements_get_bootbox_dialog }}
 						</td>
 					</tr>
+				{% else %}	
+					{% if (prod.check_critere_stock) %}
+						<tr>
+							<td class="fc_add_to_cart">
+								<!-- Ajout au panier -->
+								{{ prod.check_critere_stock }}
+							</td>
+						</tr>
+					{% endif %}
 				{% endif %}
+				
 				{% if prod.product_list_html_zone %}
 					<tr>
 						<td>

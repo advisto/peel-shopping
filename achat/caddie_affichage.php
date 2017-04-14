@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: caddie_affichage.php 53200 2017-03-20 11:19:46Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -22,6 +22,10 @@ if (isset($_POST['pays_zone'])) {
 } elseif (empty($_SESSION['session_caddie']->zoneId) && !empty($GLOBALS['site_parameters']['default_delivery_zone_id'])) {
 	// Force le zone au chargement du panier, si aucun choix n'a été fait avant.
 	$_SESSION['session_caddie']->set_zone($GLOBALS['site_parameters']['default_delivery_zone_id']);
+} elseif (!empty($_SESSION['session_utilisateur']['zoneId'])) {
+	// L'utilisateur vient d'arriver sur la page de caddie : on présélectionne la zone liée à l'adresse de son compte
+	$_SESSION['session_caddie']->set_zone($_SESSION['session_utilisateur']['zoneId']);
+	$_SESSION['session_caddie']->update();
 }
 if (isset($_POST['type'])) {
 	$typeId = intval($_POST['type']);
@@ -37,7 +41,7 @@ if (isset($_POST['type'])) {
 }
 if (!empty($_POST['code_promo'])) {
 	// L'utilisateur envoie son code promo pour qu'il soit pris en compte dans le panier. update_code_promo permet d'appliquer ou non le code promo.
-	$_POST['code_promo'] = String::strtoupper(trim($_POST['code_promo']));
+	$_POST['code_promo'] = StringMb::strtoupper(trim($_POST['code_promo']));
 	$_SESSION['session_caddie']->update_code_promo($_POST['code_promo']);
 	$_SESSION['session_caddie']->update();
 }
@@ -48,7 +52,7 @@ if (!empty($_GET['code_promo']) && $_GET['code_promo'] == 'delete') {
 }
 $form_error_object = new FormError();
 
-call_module_hook('show_caddie_pre', array('frm'=>$_POST, 'form_error_object'=>$form_error_object));
+call_module_hook('show_caddie_pre', array('user'=>vb($_SESSION['session_utilisateur']),'frm'=>$_POST, 'form_error_object'=>$form_error_object));
 
 if (isset($_POST['func'])) {
 	$mode = $_POST['func'];
@@ -64,9 +68,17 @@ if ($mode) {
 			redirect_and_die(get_current_url(false));
 
 		case "vide" :
+			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			}
 			$_SESSION['session_caddie']->init();
 			break;
-
+			
+		case "force_update" :
+			$_SESSION['session_caddie']->update();
+			break;
+			
 		case "recalc" :
 		case "commande" :
 		default :

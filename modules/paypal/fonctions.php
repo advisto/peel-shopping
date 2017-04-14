@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('PAYPAL_SANDBOX')) {
 	// Mettre à true pour faire des tests avec des comptes Sandbox
 	define('PAYPAL_SANDBOX', !empty($GLOBALS['site_parameters']['paypal_sandbox']));
@@ -80,18 +80,18 @@ function getPaypalForm($order_id, $lang, $amount, $currency_code, $user_email, $
 	$tpl->assign('amount', round($amount, 2));
 	$tpl->assign('first_name', str_replace(array("\n", "\r", "\r\n"), "", $prenom_ship));
 	$tpl->assign('last_name', str_replace(array("\n", "\r", "\r\n"), "", $nom_ship));
-	$tpl->assign('address1', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_ship), 0, 100));
-	$tpl->assign('address2', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_ship), 100, 100));
+	$tpl->assign('address1', StringMb::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_ship), 0, 100));
+	$tpl->assign('address2', StringMb::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_ship), 100, 100));
 	$tpl->assign('zip', str_replace(array("\n", "\r", "\r\n"), "", $zip_ship));
 	$tpl->assign('city', str_replace(array("\n", "\r", "\r\n"), "", $ville_ship));
-	$tpl->assign('country', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_ship)), 0, 2)));
+	$tpl->assign('country', StringMb::strtoupper(StringMb::substr(get_country_iso_2_letter_code(trim($pays_ship)), 0, 2)));
 	$tpl->assign('prenom_bill', str_replace(array("\n", "\r", "\r\n"), "", $prenom_bill));
 	$tpl->assign('nom_bill', str_replace(array("\n", "\r", "\r\n"), "", $nom_bill));
-	$tpl->assign('adresse1_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 0, 100));
-	$tpl->assign('adresse2_bill', String::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
+	$tpl->assign('adresse1_bill', StringMb::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 0, 100));
+	$tpl->assign('adresse2_bill', StringMb::substr(str_replace(array("\n", "\r", "\r\n"), "", $adresse_bill), 100, 100));
 	$tpl->assign('zip_bill', str_replace(array("\n", "\r", "\r\n"), "", $zip_bill));
 	$tpl->assign('ville_bill', str_replace(array("\n", "\r", "\r\n"), "", $ville_bill));
-	$tpl->assign('pays_bill', String::strtoupper(String::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
+	$tpl->assign('pays_bill', StringMb::strtoupper(StringMb::substr(get_country_iso_2_letter_code(trim($pays_bill)), 0, 2)));
 	$tpl->assign('return', $GLOBALS['wwwroot'] . '/modules/paypal/ok.php?id=' . $order_id);
 	$tpl->assign('cancel_return', $GLOBALS['wwwroot'] . '/modules/paypal/nok.php?id=' . $order_id);
 	$tpl->assign('notify_url', get_url('/modules/paypal/ipn.php'));

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clean_folders.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: clean_folders.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -71,7 +71,7 @@ if (isset($_POST['file_shortpath']) && isset($_POST['tx_qualite'])) {
 					if ($filename != '.' && $filename != '..' && is_file($chemin_final . '/' . $filename) && filesize($chemin_final . '/' . $filename) >= vn($_POST['size_ko']) * 1024) {
 						$array = explode('.', $filename);
 						$extension = $array[count($array) - 1];
-						if (in_array(String::strtolower($extension), $accepted_formats['form_image'])) {
+						if (in_array(StringMb::strtolower($extension), $accepted_formats['form_image'])) {
 							echo filesize($chemin_final . '/' . $filename) . ' - ' . $chemin_final . '/' . $filename;
 							image_resize($chemin_final . '/' . $filename, $chemin_final . '/' . $filename, $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], false, true, vn($_POST['size_ko']) * 1024, $_POST['tx_qualite'], (vb($_POST['enlighten']) == 'on'?1.6:1.0));
 							$i++;
@@ -107,12 +107,12 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 			while (false !== ($filename = readdir($dir_pointer))) {
 				if ($filename != '.' && $filename != '..' && is_file($folder_origin . '/' . $filename)) {
 					$filename_no_ext = pathinfo($filename, PATHINFO_FILENAME);
-					if(String::substr($filename_no_ext, -5, 1) != '-') {
+					if(StringMb::substr($filename_no_ext, -5, 1) != '-') {
 						echo '<b>' . $filename . ' NOK nom</b><br />';
 					} else {
 						if(!empty($_GET['create_thumbs_subfolders'])) {
-							$folder1 = String::substr($filename_no_ext, -4, 2);
-							$folder2 = ''; //String::substr($filename_no_ext, -2, 2);
+							$folder1 = StringMb::substr($filename_no_ext, -4, 2);
+							$folder2 = ''; //StringMb::substr($filename_no_ext, -2, 2);
 							if(!is_file($folder . '/' . $folder1 . '/' . (!empty($folder2) ? $folder2 . '/':'') . $filename)) {
 								if(!is_dir($folder . '/' . $folder1)) {
 									mkdir($folder . '/' . $folder1);
@@ -128,7 +128,7 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 								echo '' . $filename . ' already exists<br />';
 							}
 						}
-						if(!empty($_GET['delete_thumbs_not_in_subfolders'])) {
+						if(!empty($_GET['delete_thumbs_not_in_subfolders']) && !empty($filename)) {
 							if(empty($_GET['test'])) {
 								unlink($folder_origin . '/' . $filename);
 							}

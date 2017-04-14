@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ipn.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ipn.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 // Procédure pour envoyer un nouvel appel à IPN depuis le compte paypal :
 // - Se connecter au compte paypal
@@ -20,7 +20,7 @@
 // - Sur la page qui s'affiche, cliquer sur "Choisir mes paramètres IPN"
 // - Choisir "Recevoir les messages IPN (activé)", et mettre l'url du fichier IPN dans le champ "URL de notification".
 // - Cliquer sur "enregistrer mes paramètres"
-// - Sur la page qui s'affiche, cliquer sur le lien "Historique des notifications instantanées de paiement" dans le texte.
+// - Sur la page qui s'affiche, cliquer sur le lien "Historique des notifications instantanées de paiement" dans le texte (url https://www.paypal.com/fr/cgi-bin/webscr?cmd=_display-ipns-history)
 // La liste des appels à IPN s'affiche, il faut cocher une checkbox et cliquer sur le bouton "Renvoyer les éléments sélectionnés". Attention, le renvoi de l'appel n'est pas immédiat.
 
 
@@ -60,14 +60,14 @@ if ($r = fetch_assoc($q)) {
 		$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
 		$header .= "Host: " . $paypal_domain . ":443\r\n";
 		$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-		$header .= "Content-Length: " . String::strlen($req) . "\r\n";
+		$header .= "Content-Length: " . StringMb::strlen($req) . "\r\n";
 		$header .= "Connection: close\r\n\r\n";
 		$fp = fsockopen ('ssl://' . $paypal_domain, 443, $errno, $errstr, 30);
 		if (!$fp) {
 			$header = "POST /cgi-bin/webscr HTTP/1.1\r\n";
 			$header .= "Host: " . str_replace('ipnpb', 'www', $paypal_domain) . "\r\n";
 			$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-			$header .= "Content-Length: " . String::strlen($req) . "\r\n";
+			$header .= "Content-Length: " . StringMb::strlen($req) . "\r\n";
 			$header .= "Connection: close\r\n\r\n";
 			// On essaie sans SSL si l'hébergement ne le permet pas
 			$fp = fsockopen (str_replace('ipnpb', 'www', $paypal_domain), 80, $errno, $errstr, 30);
@@ -86,7 +86,7 @@ if ($r = fetch_assoc($q)) {
 			// $pending_reason = $_POST['pending_reason'];
 			// $txn_type = $_POST['txn_type'];
 			fputs ($fp, $header . $req);
-			while (!String::feof($fp)) {
+			while (!StringMb::feof($fp)) {
 				$res = fgets ($fp, 1024);
 				// $res vaut d'abord des entêtes HTTP, puis VERIFIED ou INVALID, puis d'autres entêtes HTTP pour fermer connexion
 				if (strcmp(trim(strip_tags($res)), "VERIFIED") == 0) {

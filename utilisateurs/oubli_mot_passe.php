@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: oubli_mot_passe.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: oubli_mot_passe.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_GET_PASSWORD', true);
 
 include("../configuration.inc.php");
@@ -52,7 +52,7 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 	}
 } elseif (!empty($_POST['email'])) {
 	if (a_priv('demo')) {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], String::strtoupper($_SESSION['session_utilisateur']['priv'])))))->fetch();
+		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv'])))))->fetch();
 		die();
 	}
 	$form_error_object->valide_form($frm, array('email' => $GLOBALS['STR_ERR_EMAIL']));
@@ -73,7 +73,7 @@ if (!empty($_GET['hash']) && !empty($_GET['time']) && !empty($_GET['email']) && 
 		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_PASSWORD_EMAIL']))->fetch();
 	}
 } elseif (!empty($_GET['email'])) {
-	if ((!empty($_POST['password_once']) && !empty($_POST['password_twice']) && String::strlen($_POST['password_once'])>=vb($GLOBALS['site_parameters']['password_length_required'], 8)) && !empty($_GET['email'])) {
+	if ((!empty($_POST['password_once']) && !empty($_POST['password_twice']) && StringMb::strlen($_POST['password_once'])>=vb($GLOBALS['site_parameters']['password_length_required'], 8)) && !empty($_GET['email'])) {
 		$password_once = trim($_POST['password_once']);
 		$password_twice = trim($_POST['password_twice']);
 		$email = trim($_GET['email']);

@@ -1,15 +1,15 @@
 <?php
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: check-integrity.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: check-integrity.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -123,7 +123,7 @@ foreach($dir_array as $type => $dir) {
 	if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == 'file_in_db') {
 		$output .= '<br /><b>Liens dans la BDD supprimés : ' . $not_found . ' liens</b><br /><br />';
 	} else {
-		$output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . String::str_form_value(rawurlencode($dir)) . '&type=file_in_db">Effacer de la BDD les liens vers les fichiers "ABSENTS DE LA BDD" (' . $not_found . ' liens)</a></b><br /><br />';
+		$output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . StringMb::str_form_value(rawurlencode($dir)) . '&type=file_in_db">Effacer de la BDD les liens vers les fichiers "ABSENTS DE LA BDD" (' . $not_found . ' liens)</a></b><br /><br />';
 	}
 	$output .= '<hr />';
     $output .= '<h2>Dossier : ' . $dir . '</h2>';
@@ -136,7 +136,7 @@ foreach($dir_array as $type => $dir) {
 	nettoyer_dir($GLOBALS['dirroot'] . '/' . $dir, null, null, true);
 	foreach($GLOBALS['files_found_in_folder'] as $this_file_relative_path_to_dir) {
 		$file = basename($this_file_relative_path_to_dir);
-		if (String::strlen($file) > 4 && in_array(String::substr($file, String::strlen($file)-4), array('.gif', '.jpg', 'jpeg', '.png', '.avi', 'mpeg', '.mpg', '.wmv', '.asf', '.bmp', '.JPG'))) {
+		if (StringMb::strlen($file) > 4 && in_array(StringMb::substr($file, StringMb::strlen($file)-4), array('.gif', '.jpg', 'jpeg', '.png', '.avi', 'mpeg', '.mpg', '.wmv', '.asf', '.bmp', '.JPG'))) {
 			if (!is_file($GLOBALS['dirroot'] . '/' . $dir . '/' . $this_file_relative_path_to_dir)) {
 				$file_bad[] = $dir . '/' . $this_file_relative_path_to_dir;
 			} elseif (filesize($GLOBALS['dirroot'] . '/' . $dir .  '/' . $this_file_relative_path_to_dir) < $min_file_size && !in_array(substr($file, 0, strlen($file)-4), $photos_to_keep_array)) {
@@ -162,7 +162,7 @@ foreach($dir_array as $type => $dir) {
 				$file_size_ko = (round((filesize($GLOBALS['dirroot'] . '/' . $file) / 1024) * 1000) / 1000);
 				$total_files_size_ko += $file_size_ko;
 				$not_found++;
-				if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == $this_file_problem) {
+				if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == $this_file_problem && !empty($file)) {
 					$output .= $file . ' supprimé' . $file_size_ko . ' ko)<br />';
 					unlink($GLOBALS['dirroot'] . '/' . $file);
 					$output .= 'UNLINK de ' . $file . '<br />';
@@ -171,11 +171,11 @@ foreach($dir_array as $type => $dir) {
 					continue;
 				}
 				if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
-					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+					$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite'], $_SESSION['session_langue']);
 				} else {
 					$this_wwwroot =  $GLOBALS['wwwroot'];
 				}
-				$output .= '<a href="' . $this_wwwroot . '/' . $file . '" target="_blank">' . $this_wwwroot . '/' . $file . '</a> (' . $file_size_ko . ' ko) &nbsp; &nbsp; <a href="check-integrity.php?delete=' . String::str_form_value(rawurlencode($file)) . '" style="color:#FF0000">Supprimer ' . $file . '</a><br />';
+				$output .= '<a href="' . $this_wwwroot . '/' . $file . '" target="_blank">' . $this_wwwroot . '/' . $file . '</a> (' . $file_size_ko . ' ko) &nbsp; &nbsp; <a href="check-integrity.php?delete=' . StringMb::str_form_value(rawurlencode($file)) . '" style="color:#FF0000">Supprimer ' . $file . '</a><br />';
 				// if(!empty($_GET['delete'])) {
 				// $output .= '<br /><b>Mode succint : affichage seulement des premiers fichiers trouvé - <a href="check-integrity.php">Afficher tout</a></b><br /><br />';
 				// break;
@@ -190,7 +190,7 @@ foreach($dir_array as $type => $dir) {
 			if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == $this_file_problem) {
 				$output .= '<br /><b>'.$this_file_problem_name.' supprimés : ' . $not_found . ' fichiers - ' . $total_files_size_ko . ' ko</b><br /><br />';
 			} else {
-				$output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . String::str_form_value(rawurlencode($dir)) . '&type='. String::str_form_value($this_file_problem) .'">Effacer automatiquement tous les fichiers "MAUVAIS" (' . $not_found . ' fichiers - ' . $total_files_size_ko . ' ko)</a></b><br /><br />';
+				$output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . StringMb::str_form_value(rawurlencode($dir)) . '&type='. StringMb::str_form_value($this_file_problem) .'">Effacer automatiquement tous les fichiers "MAUVAIS" (' . $not_found . ' fichiers - ' . $total_files_size_ko . ' ko)</a></b><br /><br />';
 			}
 		} else {
 			$output .= '<h2>Pas de '.$this_file_problem_name.'</h2>';
@@ -227,7 +227,7 @@ foreach($dir_array as $type => $dir) {
         if (!empty($_GET['force_delete_bad']) && $_GET['force_delete_bad'] == $dir && !empty($_GET['type']) && $_GET['type'] == 'file_in_db') {
             $output .= '<br /><b>Liens dans la BDD supprimé: ' . $not_found . ' liens</b><br /><br />';
         } else {
-            $output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . String::str_form_value(rawurlencode($dir)) . '&type=file_in_db">Effacer de la BDD les liens vers les fichiers "ABSENTS DE LA BDD" (' . $not_found . ' liens)</a></b><br /><br />';
+            $output .= '<br /><b>Option à manipuler avec précaution : <a href="check-integrity.php?force_delete_bad=' . StringMb::str_form_value(rawurlencode($dir)) . '&type=file_in_db">Effacer de la BDD les liens vers les fichiers "ABSENTS DE LA BDD" (' . $not_found . ' liens)</a></b><br /><br />';
         }
     } else {
         $output .= '<h2>Aucun fichier présent dans la bdd mais pas physiquement</h2>';

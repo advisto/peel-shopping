@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -61,6 +61,9 @@
 					{% endif %}
 				{% endfor %}
 				</ul>
+			{% endif %}
+			{% if departements_get_bootbox_dialog is defined %}
+				{{ departements_get_bootbox_dialog }}
 			{% endif %}
 			<br />
 			{% if display_share_tools_on_product_pages %}
@@ -150,7 +153,13 @@
 		{% if (check) %}
 			{{ check }}
 		{% elseif (critere_stock) %}
-			{{ critere_stock }}
+			{% if product_disable_ad_cart_if_user_not_logged is empty %}
+				{{ critere_stock }}
+			{% else %}
+			<div class="affiche_critere_stock well pull-right ">
+			{{ STR_MSG_NEW_CUSTOMER }}
+			</div>
+			{% endif %}
 		{% elseif (on_estimate) %}
 			<div class="on_estimate">
 				<div class="center">
@@ -162,7 +171,7 @@
 			</div>
 		{% endif %}
 		{% if (reference) %}
-			<h4 property="mpn">{{ reference.label }} {{ reference.txt }}</h4>
+			<h4 property="mpn"> <span id="reference_{{ product_id }}">{{ reference.label }} {{ reference.txt }}</span></h4>
 		{% endif %}
 		{% if (ean_code) %}
 			<h4 property="gtin8">{{ ean_code.label }}: {{ ean_code.txt }}</h4>

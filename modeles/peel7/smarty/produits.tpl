@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: produits.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}
 {if $is_associated_product}
 	{if $associated_product_multiple_add_to_cart && $prods_line_mode} 
@@ -68,7 +68,9 @@
 						</div>
 						<div class="col_product_description col-md-{if isset($prod.check_critere_stock)}6{else}8{/if}">
 							<div class="fc_titre_produit"><a property="url" href="{$prod.href|escape:'html'}" title="{$prod.name|str_form_value}"><span property="name">{$prod.name}</span></a></div>
+							{if empty($product_description_catalogue_disabled)}
 							<div><p><a href="{$prod.href|escape:'html'}" class="col_description">{$prod.description}</a></p></div>
+							{/if}
 						</div>
 						<div class="col_zoom col-md-2">
 				{if isset($prod.image.zoom)}
@@ -85,6 +87,9 @@
 				{/if}
 						</div>
 					<div class="fc_add_to_cart col-md-2">
+			{if isset($prod.departements_get_bootbox_dialog)}
+				{$prod.departements_get_bootbox_dialog}
+			{else}
 				{if $is_associated_product && $associated_product_multiple_add_to_cart}
 						<div>
 							<input min="{if !empty($prod.quantity)}{$prod.quantity}{/if}" type="number" style="width: 100px" value="{if !empty($prod.quantity)}{$prod.quantity}{/if}" name="qte[]" class="form-control" style="display:inline;">
@@ -94,8 +99,14 @@
 						<!-- Ajout au panier -->
 						{$prod.check_critere_stock}
 				{else}
-						<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+					{if isset($prod.check_critere_stock)}
+								<!-- Ajout au panier -->
+								{$prod.check_critere_stock}
+					{else}
+							<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+					{/if}
 				{/if}
+			{/if}
 					</div>
 				</div>
 				{if isset($prod.admin)}
@@ -118,6 +129,9 @@
 					</tr>
 					<tr>
 						<td class="fc_image center middle" style="width:{$small_width}px; height:{$small_height}px;">
+							{if !empty($prod.thumbnail_promotion)}
+							<div class="produit_thumbnail_promotion"><span>-{$prod.promotion}</span></div>
+							{/if}
 							<span class="image_zoom">
 							{if !empty($prod.image)}
 								<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>
@@ -134,7 +148,7 @@
 					</tr>
 					<tr>
 						<td>
-							{if !empty($prod.description)}
+							{if !empty($prod.description) && empty($product_description_catalogue_disabled)}
 							<div class="description_text"><a href="{$prod.href|escape:'html'}">{$prod.description}</a></div>
 							{/if}
 							{if isset($prod.flash)}
@@ -143,13 +157,21 @@
 							{if empty($prod.check_critere_stock)}<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>{/if}
 						</td>
 					</tr>
-				{if isset($prod.check_critere_stock)}
+				{if isset($prod.departements_get_bootbox_dialog)}
 					<tr>
 						<td class="fc_add_to_cart">
-							<!-- Ajout au panier -->
-							{$prod.check_critere_stock}
+							{$prod.departements_get_bootbox_dialog}
 						</td>
 					</tr>
+				{else}	
+					{if isset($prod.check_critere_stock)}
+						<tr>
+							<td class="fc_add_to_cart">
+								<!-- Ajout au panier -->
+								{$prod.check_critere_stock}
+							</td>
+						</tr>
+					{/if}
 				{/if}
 				{if !empty($prod.product_list_html_zone)}
 					<tr>

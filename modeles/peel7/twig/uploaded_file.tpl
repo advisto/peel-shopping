@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -16,6 +16,8 @@
 {% if (f.url) %}
 	{% if f.type != 'image' %}
 	<a href="{{ f.url|escape('html') }}" onclick="return(window.open(this.href)?false:true);"><img src="{{ f.file_logo_src|escape('html') }}" alt="" style="max-width: 100px; max-height: 100px" /></a>
+	{% elseif f.download_picture %}
+	<a href="{{ f.url|escape('html') }}" onclick="return(window.open(this.href)?false:true);"><img src="{{ f.url|escape('html') }}" alt=""{% if f.crop is empty %} style="max-height:100px"{% else %} style="max-width:300px"{% endif %}{% if f.class %} class="{{ f.class }}"{% endif %} /></a>
 	{% else %}
 	<img src="{{ f.url|escape('html') }}" alt="" style="max-height:100px" />
 	{% endif %}

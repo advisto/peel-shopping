@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -76,6 +76,7 @@
 						<fieldset>
 							<legend>{{ STR_DELIVERY }}</legend>
 							<div id="choix_zone">
+					{% if display_pays_zone_select %}
 								<p class="caddie_bold">{{ STR_SHIPPING_ZONE }}&nbsp;<span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: {{ zone_error }}
 									<select class="form-control" name="pays_zone" onchange="return frmsubmit('recalc')">
 										<option value="">{{ STR_SHIP_ZONE_CHOOSE }}</option>
@@ -84,23 +85,26 @@
 										{% endfor %}
 									</select>
 								</p>
-								{% if (zone) %}
+					{% else %}
+									<input type="hidden" value="{{ zoneId }}" name="pays_zone" />
+					{% endif %}
+					{% if (zone) %}
 								<p>{{ STR_SHIPPING_ZONE }}{{ STR_BEFORE_TWO_POINTS }}: {{ zone }}</p>
-								{% endif %}
+					{% endif %}
 								<p class="caddie_bold">
-									{% if is_zone %}
-										{% if (shipping_type_options) %}
+					{% if is_zone %}
+						{% if (shipping_type_options) %}
 											{{ STR_SHIPPING_TYPE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: {{ shipping_type_error }}
 											<select class="form-control" name="type" onchange="return frmsubmit('recalc')">
 												<option value="">{{ STR_SHIP_TYPE_CHOOSE }}</option>
-												{% for sto in shipping_type_options %}
+							{% for sto in shipping_type_options %}
 												<option value="{{ sto.value|str_form_value }}"{% if sto.issel %} selected="selected"{% endif %}>{{ sto.name|html_entity_decode_if_needed }}</option>
-												{% endfor %}
+							{% endfor %}
 											</select>
-										{% else %}
+						{% else %}
 											<span style="color:red;">{{ STR_ERREUR_TYPE }}</span><br />
-										{% endif %}
-									{% endif %}
+						{% endif %}
+					{% endif %}
 								</p>
 							</div>
 						</fieldset>
@@ -118,14 +122,22 @@
 								{% endif %}
 								{% if is_minimum_error %}
 									<p class="center">
-										{{ STR_MINIMUM_PURCHASE_OF }}{{ minimum_prix }}{{ STR_REQUIRED_VALIDATE_ORDER }}
+									{% if minimum_produit %}
+								<p class="center">
+									{{ minimum_produit }}{{ STR_MINIMUM_PRODUCT }}
+								</p>
+									{% else %}
+								<p class="center">
+									{{ STR_MINIMUM_PURCHASE_OF }}{{ minimum_prix }}{{ STR_REQUIRED_VALIDATE_ORDER }}
+								</p>
+									{% endif %}
 									</p>
 								{% else %}
 									<p class="center">
 										{% if recommanded_product_on_cart_page %}
 										{{ recommanded_product_on_cart_page }}
 										{% elseif (STR_ORDER) %}
-										<button type="submit" class="tooltip_link btn btn-lg btn-primary"{% if (shipping_text) %} data-toggle="tooltip" title="{{ shipping_text|str_form_value }}"{% endif %} onclick="return frmsubmit('commande')">{{ STR_ORDER }} <span class="glyphicon glyphicon-chevron-right"></span></button>
+									<button type="submit" class="tooltip_link btn btn-lg btn-primary"{% if (shipping_text) %} data-toggle="tooltip" title="{{ shipping_text|str_form_value }}"{% endif %} onclick="return frmsubmit('commande')">{{ STR_ORDER }} <span class="glyphicon glyphicon-chevron-right"></span></button>
 										{% endif %}
 									</p>
 								{% endif %}

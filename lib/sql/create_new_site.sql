@@ -1,15 +1,15 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 50572 2016-07-07 12:43:52Z sdelaporte $
+# $Id: create_new_site.sql 53200 2017-03-20 11:19:46Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -254,7 +254,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('skip_home_top_products', 'core', 'boolean', 'false', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_special_products', 'core', 'boolean', 'false', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_new_products', 'core', 'boolean', 'false', '', NOW(), '', 1, "[SITE_ID]"),
-('user_mandatory_fields', 'core', 'array', '"prenom" => "STR_ERR_FIRSTNAME", "nom_famille" => "STR_ERR_NAME", "adresse" => "STR_ERR_ADDRESS", "code_postal" => "STR_ERR_ZIP", "ville" => "STR_ERR_TOWN", "pays" => "STR_ERR_COUNTRY", "telephone" => "STR_ERR_TEL", "email" => "STR_ERR_EMAIL", "pseudo" => "STR_ERR_PSEUDO", "token" => "STR_INVALID_TOKEN", "code" => "STR_EMPTY_FIELD"', '', NOW(), '', 1, "[SITE_ID]"),
+('user_mandatory_fields', 'core', 'array', '"prenom" => "STR_ERR_FIRSTNAME", "nom_famille" => "STR_ERR_NAME", "adresse" => "STR_ERR_ADDRESS", "code_postal" => "STR_ERR_ZIP", "ville" => "STR_ERR_TOWN", "pays" => "STR_ERR_COUNTRY", "telephone" => "STR_ERR_TEL", "email" => "STR_ERR_EMAIL", "pseudo" => "STR_ERR_PSEUDO", "token" => "STR_INVALID_TOKEN"', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_ad_categories_presentation', 'core', 'boolean', 'false', '', NOW(), '', 1, "[SITE_ID]"),
 ('article_details_index_page_columns_count', 'core', 'integer', '3', '', NOW(), '', 1, "[SITE_ID]"),
 ('lire_index_page_columns_count', 'core', 'integer', '3', '', NOW(), '', 1, "[SITE_ID]"),
@@ -289,6 +289,8 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('show_special_on_content_category', 'core', 'boolean', 'true', '', NOW(), 'Permet d''afficher les articles sur la page d''accueil des rubriques.', '1', "[SITE_ID]"),
 ('insert_article_categories_in_menu', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('only_show_articles_with_picture_in_containers', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
+('main_menu_custom_titles', 'core', 'array', '', '', NOW(), '', 1, "[SITE_ID]"),
+('main_menu_custom_urls', 'core', 'array', '', '', NOW(), '', 1, "[SITE_ID]"),
 ('menu_custom_submenus', 'core', 'array', '', '', NOW(), 'Works with menu_custom_urls and menu_custom_titles - Example: "main_menu_technical_code1" => "submenu_technical_code1", "main_menu_technical_code2" => "submenu_technical_code2"', 1, "[SITE_ID]"),
 ('menu_custom_urls', 'core', 'array', '', '', NOW(), 'Works with menu_custom_titles and menu_custom_submenus - You can create one variable per language to have different URLs - Example: "technical_code_1" => "http://www.test.com/url1", "technical_code_2" => "http://www.test.com/url2"', 1, "[SITE_ID]"),
 ('menu_custom_titles', 'core', 'array', '', '', NOW(), 'Works with menu_custom_urls and menu_custom_submenus - Example: "technical_code_1" => "STR_MENU_CUSTOM_TEXT_1", "technical_code_2" => "STR_MENU_CUSTOM_TEXT_2"', 1, "[SITE_ID]"),

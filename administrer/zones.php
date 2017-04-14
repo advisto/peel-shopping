@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: zones.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: zones.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -103,6 +103,10 @@ function affiche_formulaire_ajout_zone(&$frm)
 		$frm['position'] = "";
 		$frm['site_id'] = "";
 		$frm['technical_code'] = "";
+		if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+			$frm['carboglace_ht'] = '';
+			$frm['carboglace_tva_percent'] = '';
+		}
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
@@ -168,6 +172,10 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('position', $frm['position']);
 	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
 	$tpl->assign('technical_code', $frm['technical_code']);
+	if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+		$tpl->assign('carboglace_ht', $frm['carboglace_ht']);
+		$tpl->assign('carboglace_tva_percent', $frm['carboglace_tva_percent']);
+	}
 	$tpl->assign('titre_bouton', $frm['titre_bouton']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
@@ -221,7 +229,14 @@ function insere_zone($frm)
 {
 	$sql = "INSERT INTO peel_zones (
 		tva
-		, site_id
+		, site_id";
+	
+	if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+		$sql .="
+		, carboglace_ht
+		, carboglace_tva_percent";
+	}
+	$sql .="
 		, position
 		, on_franco
 		, on_franco_amount
@@ -236,7 +251,13 @@ function insere_zone($frm)
 	$sql .= "
 	) VALUES (
 		'" . nohtml_real_escape_string(vn($frm['tva'])) . "'
-		, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+		, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+		$sql .= "
+		, '" . floatval(get_float_from_user_input($frm['carboglace_ht'])) . "'
+		, '" . floatval(get_float_from_user_input($frm['carboglace_tva_percent'])) . "'";
+	}
+	$sql .= "
 		, '" . intval($frm['position']) . "'
 		, '" . intval(vn($frm['on_franco'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_amount'])) . "'
@@ -263,8 +284,14 @@ function insere_zone($frm)
 function maj_zone($id, $frm)
 {
 	$sql = "UPDATE peel_zones
-		SET tva = '" . nohtml_real_escape_string(vn($frm['tva'])) . "'
-		";
+		SET tva = '" . nohtml_real_escape_string(vn($frm['tva'])) . "'";
+		
+	if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+		$sql .= "
+		, carboglace_ht = '" . floatval(get_float_from_user_input($frm['carboglace_ht'])) . "'
+		, carboglace_tva_percent = '" . floatval(get_float_from_user_input($frm['carboglace_tva_percent'])) . "'";
+	}
+
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -301,15 +328,19 @@ function affiche_liste_zone()
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($query)) {
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+			$tmp_array = array('tr_rollover' => tr_rollover($i, true),
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'tva' => $ligne['tva'],
 				'site_name' => get_site_name($ligne['site_id']),
 				'on_franco' => $ligne['on_franco'],
-				'position' => $ligne['position'],
-				);
+				'position' => $ligne['position']);
+			if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
+				$tmp_array['carboglace_ht'] = fprix($ligne['carboglace_ht'], true);
+				$tmp_array['carboglace_tva_percent'] = $ligne['carboglace_tva_percent'];
+			}
+			$tpl_results[] = $tmp_array;
 			$i++;
 		}
 		$tpl->assign('results', $tpl_results);

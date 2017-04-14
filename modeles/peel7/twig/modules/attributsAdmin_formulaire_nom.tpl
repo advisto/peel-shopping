@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributsAdmin_formulaire_nom.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: attributsAdmin_formulaire_nom.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
 	<input type="hidden" name="id" value="{{ id|str_form_value }}" />
@@ -41,7 +41,7 @@
 			</td>
 		</tr>
 		{% for lng in langs %}
-		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} - {{ lang_names[lng.code]|upper }}</h2></td></tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_NAME }} {{ lng.code|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="nom_{{ lng.code }}" value="{{ lng.value|str_form_value }}" /></td>

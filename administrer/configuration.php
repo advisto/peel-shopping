@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: configuration.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -218,7 +218,7 @@ function affiche_formulaire_configuration(&$frm)
 			'name' => $GLOBALS['lang_names'][$lng]
 			);
 	}
-	if(String::strpos(vb($frm['string']), "\r") !== false || String::strpos(vb($frm['string']), "\n") !== false || String::strpos(vb($frm['technical_code']), "tag_") !== false || String::strpos(vb($frm['technical_code']), "_tag") !== false) {
+	if(StringMb::strpos(vb($frm['string']), "\r") !== false || StringMb::strpos(vb($frm['string']), "\n") !== false || StringMb::strpos(vb($frm['technical_code']), "tag_") !== false || StringMb::strpos(vb($frm['technical_code']), "_tag") !== false) {
 		$tpl->assign('string_as_textarea', true);
 	}
 	$tpl->assign('langs', $tpl_langs);
@@ -287,11 +287,11 @@ function affiche_liste_configuration()
 			$string = $ligne['string'];
 			$comment = '';
 			$tpl->assign('HeaderRow', $Links->getHeaderRow());
-			if(String::substr($ligne['technical_code'], 0, 4) != 'STR_' && $string != vb($GLOBALS['site_parameters'][$ligne['technical_code']]) && get_string_from_array(get_array_from_string($string)) != get_string_from_array(vb($GLOBALS['site_parameters'][$ligne['technical_code']])) && (empty($_POST['technical_code']) || $_POST['technical_code'] != $ligne['technical_code']) && (!is_bool($GLOBALS['site_parameters'][$ligne['technical_code']]) || !in_array($string, array('false', 'true')))){
-				$comment .= '<br /><span class="text-danger">(Current : ' . str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', String::textEncode(print_r(vb($GLOBALS['site_parameters'][$ligne['technical_code']]), true)))).')</span>';
+			if(StringMb::substr($ligne['technical_code'], 0, 4) != 'STR_' && $string != vb($GLOBALS['site_parameters'][$ligne['technical_code']]) && get_string_from_array(get_array_from_string($string)) != get_string_from_array(vb($GLOBALS['site_parameters'][$ligne['technical_code']])) && (empty($_POST['technical_code']) || $_POST['technical_code'] != $ligne['technical_code']) && (!is_bool($GLOBALS['site_parameters'][$ligne['technical_code']]) || !in_array($string, array('false', 'true')))){
+				$comment .= '<br /><span class="text-danger">(Current : ' . str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', StringMb::textEncode(print_r(vb($GLOBALS['site_parameters'][$ligne['technical_code']]), true)))).')</span>';
 			}
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
-				'technical_code' => String::str_shorten_words($ligne['technical_code'], 50),
+				'technical_code' => StringMb::str_shorten_words($ligne['technical_code'], 50),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'lang' => $ligne['lang'],
@@ -299,8 +299,8 @@ function affiche_liste_configuration()
 				'origin' => $ligne['origin'],
 				'site_id' => $ligne['site_id'],
 				'type' => $ligne['type'],
-				'string' => String::str_shorten_words($string, 50),
-				'comment' => String::str_shorten_words($comment, 50),
+				'string' => StringMb::str_shorten_words($string, 50),
+				'comment' => StringMb::str_shorten_words($comment, 50),
 				'etat_onclick' => 'change_status("configuration", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif')
 				);

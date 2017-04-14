@@ -1,19 +1,19 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: attributs_form_part.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: attributs_form_part.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
 {# On renvoie le formulaire sous forme de table ou de HTML simple #}
-{% if display_mode=='table' %}
+{% if display_mode=='table' or display_mode=='table_part' %}
 <table class="attributs_form_part">
 {% endif %}
 {% for a in attributes_text_array %}
@@ -30,8 +30,15 @@
 		<td class="attribut-cell">
 		{% endif %}
 		{% if a.input_type!='radio' and a.input_type!='checkbox' %}<label for="{{ a.input_id }}">{% if a.name=='Auteur' %}<h3 class='auteur_page_produit'>{% endif %}{{ a.name }}{{ STR_BEFORE_TWO_POINTS }}:{% if a.name=='Auteur' %}</h3>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>{% else %}{{ a.name }}{% endif %}
+		{% if display_mode=='table_part' %}
+		</td>
+		<td class="attribut-cell">
+		{% endif %}
 		{% if a.input_type=='select' %}
 			<select class="form-control" id="{{ a.input_id }}" name="{{ a.input_name }}" onchange="{{ a.onchange }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %}>
+			{% if attribut_first_select_option_is_empty %}
+				<option value="">{{ LANG.STR_CHOOSE }}</option>
+			{% endif %}
 			{% for o in a.options %}	
 				<option value="{{ o.value }}" {% if o.issel %} selected="selected"{% endif %}>{{ o.text }}</option>
 			{% endfor %}
@@ -48,7 +55,7 @@
 			<input id="{{ a.input_id }}" type="{{ a.input_type }}" name="{{ a.input_name }}" value="{{ a.input_value }}"{% if a.input_class %} class="{{ a.input_class }}"{% endif %} />
 		{% endif %}
 		{{ a.text }}
-		{% if display_mode=='table' %}
+		{% if display_mode=='table' or display_mode=='table_part' %}
 		</td>
 	</tr>
 		{% endif %}

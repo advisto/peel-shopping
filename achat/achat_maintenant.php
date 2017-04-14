@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: achat_maintenant.php 53200 2017-03-20 11:19:46Z sdelaporte $
 include("../configuration.inc.php");
 
 $output = '';
@@ -29,6 +29,8 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 	$_SESSION['session_caddie']->update();
 } elseif (!empty($_GET['shortkpid'])){
 	put_session_commande_from_kiala_page($_GET);
+}  elseif (!empty($_GET['appuId'])){
+	put_session_commande_from_ups_page($_GET);
 } elseif (!empty($_POST)) {
 	put_session_commande($_POST);
 	if(empty($GLOBALS['site_parameters']['user_multiple_addresses_disable'])) {
@@ -54,8 +56,10 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			'email1' => $GLOBALS['STR_ERR_EMAIL'],
 			'adresse1' => $GLOBALS['STR_ERR_ADDRESS'],
 			'code_postal1' => $GLOBALS['STR_ERR_ZIP'],
-			'ville1' => $GLOBALS['STR_ERR_TOWN'],
-			'cgv' => $GLOBALS['STR_ERR_CGV']);
+			'ville1' => $GLOBALS['STR_ERR_TOWN']);
+		if (empty($GLOBALS['site_parameters']['order_process_disable_cgv'])) {
+			$check_fields['cgv'] = $GLOBALS['STR_ERR_CGV'];
+		}
 		// Le moyen de paiement n'est pas sélectionnable si la commande est égale à 0
 		if ($_SESSION['session_caddie']->total > 0) {
 			$check_fields['payment_technical_code'] = $GLOBALS['STR_ERR_PAYMENT'];
@@ -73,7 +77,8 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 				FROM peel_pays
 				WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '" AND ' . get_filter_site_cond('pays'));
 			if ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
-				if ($r_check_country_to_zone['zone'] != $_SESSION['session_caddie']->zoneId) {
+				if ($r_check_country_to_zone['zone'] != '-1' && $r_check_country_to_zone['zone'] != $_SESSION['session_caddie']->zoneId) {
+					// $r_check_country_to_zone['zone'] est égal à -1 lorsque le pays est associé à une zone spécifique, non prévu par le code par défaut (dans le cadre du module départements par exemple.)
 					$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
 				}
 			}
@@ -104,9 +109,9 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 				$frm['email'] = vb($_SESSION['session_commande']['email1']);
 				if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 					foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
-						if ((String::substr($this_field, -5) == '_bill') && !empty($_SESSION['session_commande'][$this_field]) && in_array($this_field, $order_table_fields_names)) {
+						if ((StringMb::substr($this_field, -5) == '_bill') && !empty($_SESSION['session_commande'][$this_field]) && in_array($this_field, $order_table_fields_names)) {
 							// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
-							$frm[String::substr($this_field, 0, -5).'1'] = vb($_SESSION['session_commande'][$this_field]);
+							$frm[StringMb::substr($this_field, 0, -5).'1'] = vb($_SESSION['session_commande'][$this_field]);
 							// Il faut définir $frm[$this_field] aussi, pour permettre la récupération de la valeur par get_specific_field_infos
 							$frm[$this_field] = vb($_SESSION['session_commande'][$this_field]);
 						}
@@ -198,9 +203,9 @@ $frm['pays1'] = vb($_SESSION['session_commande']['pays1']);
 $frm['email1'] = vb($_SESSION['session_commande']['email1']);
 if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 	foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
-		if ((String::substr($this_field, -5) == '_bill') && !empty($_SESSION['session_commande'][$this_field]) && in_array($this_field, $order_table_fields_names)) {
+		if ((StringMb::substr($this_field, -5) == '_bill') && !empty($_SESSION['session_commande'][$this_field]) && in_array($this_field, $order_table_fields_names)) {
 			// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
-			$frm[String::substr($this_field, 0, -5).'1'] = vb($_SESSION['session_commande'][$this_field]);
+			$frm[StringMb::substr($this_field, 0, -5).'1'] = vb($_SESSION['session_commande'][$this_field]);
 			// Il faut définir $frm[$this_field] aussi, pour permettre la récupération de la valeur par get_specific_field_infos
 			$frm[$this_field] = vb($_SESSION['session_commande'][$this_field]);
 		} else {
@@ -226,9 +231,9 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address
 
 	if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
-			if ((String::substr($this_field, -5) == '_ship') && !empty($_SESSION['session_commande'][String::substr($this_field, 0, -5).'2']) && in_array($this_field, $order_table_fields_names)) {
+			if ((StringMb::substr($this_field, -5) == '_ship') && !empty($_SESSION['session_commande'][StringMb::substr($this_field, 0, -5).'2']) && in_array($this_field, $order_table_fields_names)) {
 				// la session commande contient un champ qui concerne l'adresse de livraison => Il faut préremplir les champs du formulaire d'adresse de livraison avec ces infos.
-				$frm[String::substr($this_field, 0, -5).'2'] = vb($_SESSION['session_commande'][String::substr($this_field, 0, -5).'2']);
+				$frm[StringMb::substr($this_field, 0, -5).'2'] = vb($_SESSION['session_commande'][StringMb::substr($this_field, 0, -5).'2']);
 				// Il faut définir $frm[$this_field] aussi, pour permettre la récupération de la valeur par get_specific_field_infos
 				$frm[$this_field] = vb($_SESSION['session_commande'][$this_field]);
 			}
@@ -263,9 +268,9 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			// on prend les informations préremplies automatiquement ci-dessus dans $frm pour mettre dans $_SESSION['session_commande'] sans être passé par POST
 			if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
 				foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
-					if ((String::substr($this_field, -5) == '_bill') && !empty($utilisateur[$this_field]) && in_array($this_field, $user_table_fields_names)) {
+					if ((StringMb::substr($this_field, -5) == '_bill') && !empty($utilisateur[$this_field]) && in_array($this_field, $user_table_fields_names)) {
 						// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de livraison => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
-						$frm[String::substr($this_field, 0, -5).'1'] = vb($utilisateur[$this_field]);
+						$frm[StringMb::substr($this_field, 0, -5).'1'] = vb($utilisateur[$this_field]);
 						// Il faut définir $frm[$this_field] aussi, pour permettre la récupération de la valeur par get_specific_field_infos
 						$frm[$this_field] = vb($utilisateur[$this_field]);
 					}
@@ -292,6 +297,8 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			$output .= '<iframe id="SOLivraison" name="SOLivraison" width="100%" height="800" src="' . $GLOBALS['wwwroot'] . '/modules/socolissimo/iframe.php"></iframe>';
 		} elseif (check_if_module_active('kiala') && is_type_linked_to_kiala($_SESSION['session_caddie']->typeId) && empty($_SESSION['session_commande']['client2']) && empty($_SESSION['session_commande']['is_kiala_order'])) {
 			$output .= getKialaForm($_SESSION['session_utilisateur'], $_SESSION['session_caddie']);
+		}  elseif (check_if_module_active('ups') && is_type_linked_to_ups($_SESSION['session_caddie']->typeId) && empty($_SESSION['session_commande']['client2']) && empty($_SESSION['session_commande']['is_ups_order'])) {
+			$output .= getUpsForm($_SESSION['session_utilisateur'], $_SESSION['session_caddie']);
 		} else {
 			if (!isset($form_error_object)) {
 				$form_error_object = new FormError();

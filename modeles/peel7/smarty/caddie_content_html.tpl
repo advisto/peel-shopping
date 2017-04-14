@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: caddie_content_html.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -76,6 +76,7 @@
 						<fieldset>
 							<legend>{$STR_DELIVERY}</legend>
 							<div id="choix_zone">
+								{if $display_pays_zone_select}
 								<p class="caddie_bold">{$STR_SHIPPING_ZONE}&nbsp;<span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: {$zone_error}
 									<select class="form-control" name="pays_zone" onchange="return frmsubmit('recalc')">
 										<option value="">{$STR_SHIP_ZONE_CHOOSE}</option>
@@ -84,6 +85,9 @@
 										{/foreach}
 									</select>
 								</p>
+								{else}
+									<input type="hidden" value="{$zoneId}" name="pays_zone" />
+								{/if}
 								{if !empty($zone)}
 								<p>{$STR_SHIPPING_ZONE}{$STR_BEFORE_TWO_POINTS}: {$zone}</p>
 								{/if}
@@ -117,17 +121,23 @@
 								<div class="center"><p>{$STR_SUGGEST}</p></div>
 								{/if}
 								{if $is_minimum_error}
-									<p class="center">
-										{$STR_MINIMUM_PURCHASE_OF}{$minimum_prix}{$STR_REQUIRED_VALIDATE_ORDER}
-									</p>
+									{if !empty($minimum_produit)}
+								<p class="center">
+									{$minimum_produit}{$STR_MINIMUM_PRODUCT}
+								</p>
+									{else}
+								<p class="center">
+									{$STR_MINIMUM_PURCHASE_OF}{$minimum_prix}{$STR_REQUIRED_VALIDATE_ORDER}
+								</p>
+									{/if}
 								{else}
-									<p class="center">
+								<p class="center">
 									{if !empty($recommanded_product_on_cart_page)}
 										{$recommanded_product_on_cart_page}
 									{elseif (!empty($STR_ORDER))}
-										<button type="submit" class="tooltip_link btn btn-lg btn-primary"{if !empty($shipping_text)} data-toggle="tooltip" title="{$shipping_text|str_form_value}"{/if} onclick="return frmsubmit('commande')">{$STR_ORDER} <span class="glyphicon glyphicon-chevron-right"></span></button>
+									<button type="submit" class="tooltip_link btn btn-lg btn-primary"{if !empty($shipping_text)} data-toggle="tooltip" title="{$shipping_text|str_form_value}"{/if} onclick="return frmsubmit('commande')">{$STR_ORDER} <span class="glyphicon glyphicon-chevron-right"></span></button>
 									{/if}
-									</p>
+								</p>
 								{/if}
 							</td>
 						</tr>

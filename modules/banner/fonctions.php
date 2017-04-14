@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -122,9 +122,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 		// Alternance de bannière pair/impair sur le dernier chiffre de l'id de l'annonce ou de la page d'annonce pour une catégorie. Le choix du type de page est fait précédemment dans la requête.
 		if ((defined('IN_CATALOGUE_ANNONCE') || defined('IN_IPHONE_ADS_MODULE')) && !empty($page)) {
 			// pour une catégorie
-			$tested_number = String::substr($page, -1);
+			$tested_number = StringMb::substr($page, -1);
 		} elseif ((defined('IN_CATALOGUE_ANNONCE_DETAILS') || defined('IN_IPHONE_ADS_MODULE')) && !empty($ad_id)) {
-			$tested_number = String::substr($ad_id, -1);
+			$tested_number = StringMb::substr($ad_id, -1);
 			// pour une annonce
 		}
 		if(isset($tested_number)){
@@ -160,7 +160,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 				" . $sql_where . " AND date_fin>='" . date('Y-m-d') . "' AND " . get_filter_site_cond('banniere') . "
 				ORDER BY rang ASC, id_categorie DESC, RAND() ASC");
 			while ($banner = fetch_assoc($queryBanner)) {
-				if(check_if_module_active('annonces') && defined('IN_CATALOGUE_ANNONCE_DETAILS') && !empty($banner['list_id']) && !empty($ad_id) && (String::strpos($banner['list_id'], String::substr($ad_id, -1)) === false)) {
+				if(check_if_module_active('annonces') && defined('IN_CATALOGUE_ANNONCE_DETAILS') && !empty($banner['list_id']) && !empty($ad_id) && (StringMb::strpos($banner['list_id'], StringMb::substr($ad_id, -1)) === false)) {
 					// Sélection d'annonce en fonction du dernier chiffre de l'id d'une annonce. Si une liste d'id est définie, et que l'id courante n'est pas trouvée dans la liste, on passe
 					continue;
 				}
@@ -176,9 +176,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						if($result = fetch_assoc($q)) {
 							$banner_location = $result['location'];
 							// Traitement des positions des bannières. Si la bannière est associée à un module prévu pour se placer en haut d'une page, il contient top dans son nom par convention de nommage. La règle est la même pour les modules en bas de page. Il est donc possible de spécifier les seules positions gérées par l'application
-							if (String::strpos($banner_location, 'top') !== false) {
+							if (StringMb::strpos($banner_location, 'top') !== false) {
 								$banner_position = 'top'; 
-							} elseif(String::strpos($banner_location, 'bottom') !== false) {
+							} elseif(StringMb::strpos($banner_location, 'bottom') !== false) {
 								$banner_position = 'bottom'; 
 							}
 						}
@@ -209,10 +209,10 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						google_set_via_and_accept();
 						$google_ad_handle = @fopen(google_get_ad_url(), 'r');
 						if ($google_ad_handle) {
-							while (!String::feof($google_ad_handle)) {
+							while (!StringMb::feof($google_ad_handle)) {
 								$banner['tag_html'] .= fread($google_ad_handle, 8192);
 							}
-							//trigger_error(String::convert_accents(print_r($banner['tag_html'], true).print_r(google_get_ad_url(), true)), E_USER_NOTICE);
+							//trigger_error(StringMb::convert_accents(print_r($banner['tag_html'], true).print_r(google_get_ad_url(), true)), E_USER_NOTICE);
 							fclose($google_ad_handle);
 						}
 					}
@@ -268,12 +268,12 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 							}
 							$banner_html = '<img src="' . get_url_from_uploaded_filename($banner['image']) . '" alt="' . vb($banner['alt'], (!empty($banner['lien']) ? get_site_domain(true, $banner['lien'], true) : '')) . '" ' . $style_banner . ' />';
 							if (!empty($banner['lien'])) {
-								$banner_html = '<a href="' . $GLOBALS['wwwroot'] . '/modules/banner/bannerHit.php?id=' . $banner['id'] . '" ' . $banner['extra_javascript'] . ' ' . (!empty($banner['target']) && $banner['target'] != '_self' ? ($banner['target'] == '_blank' && String::strpos($banner['extra_javascript'], 'onclick=') === false?'onclick="return(window.open(this.href)?false:true);"':'target="' . $banner['target'] . '"'):'') . '>' . $banner_html . '</a>';
+								$banner_html = '<a href="' . $GLOBALS['wwwroot'] . '/modules/banner/bannerHit.php?id=' . $banner['id'] . '" ' . $banner['extra_javascript'] . ' ' . (!empty($banner['target']) && $banner['target'] != '_self' ? ($banner['target'] == '_blank' && StringMb::strpos($banner['extra_javascript'], 'onclick=') === false?'onclick="return(window.open(this.href)?false:true);"':'target="' . $banner['target'] . '"'):'') . '>' . $banner_html . '</a>';
 							}
 						}
 					} else {
 						// On préserve le HTML mais on corrige les & isolés
-						$banner_html = String::htmlentities($banner['tag_html'], ENT_COMPAT, GENERAL_ENCODING, false, true);
+						$banner_html = StringMb::htmlentities($banner['tag_html'], ENT_COMPAT, GENERAL_ENCODING, false, true);
 					}
 					$output .= '<div class="ba_pu" style="margin-top:3px;">' . $banner_html . '</div>';
 					$last_rang = $banner['rang'];
@@ -294,7 +294,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 			unset($this_cache_object);
 		}
 		if (!$return_array_with_raw_information) {
-			if(String::strpos($output, '.swf')!==false && !empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
+			if(StringMb::strpos($output, '.swf')!==false && !empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 				// On a au moins une bannière flash alors qu'on est sur iOS
 				if(!$disable_cache) {
 					// $these_banners_id_array est vide => on a chargé le contenu à partir du cache
@@ -306,9 +306,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 					$output = '';
 				}
 			}
-			if(String::strpos($output, 'googlesyndication')!==false && (String::strpos($output, 'x90')===false && String::strpos($output, 'x15')===false)) {
+			if(StringMb::strpos($output, 'googlesyndication')!==false && (StringMb::strpos($output, 'x90')===false && StringMb::strpos($output, 'x15')===false)) {
 				// Cette bannière n'est pas un x90 ou x15 et est donc susceptible de compter dans la limite de 3 bannière Google maximum
-				if(String::strpos(String::strtolower($output), 'correspond')===false) {
+				if(StringMb::strpos(StringMb::strtolower($output), 'correspond')===false) {
 					// Cette bannière n'est pas identifiée comme un contenu correspondant => elle compte dans la limite de 3 bannière Google maximum
 					if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
 						// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
@@ -317,7 +317,7 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						$GLOBALS['google_pub_count']++;
 					}
 				}
-			} elseif(String::strpos($output, 'googlesyndication')!==false && !empty($GLOBALS['disable_google_ads'])) {
+			} elseif(StringMb::strpos($output, 'googlesyndication')!==false && !empty($GLOBALS['disable_google_ads'])) {
 				// On ne doit pas afficher de bannière adsense x90 ou x15 si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure définis par la fonction is_adsense_compliant
 				$output='';
 			}

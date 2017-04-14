@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin_commande.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fin_commande.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 include("../configuration.inc.php");
 if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
@@ -37,8 +37,9 @@ $output .= call_module_hook('cart_order_step3_before_save', array('user_id' => $
 // La commande est créée en BDD pour que la confirmation du paiement de serveur à serveur
 // puisse bien trouver la commande, ou pour les modes de paiements intervenant plus tard
 $commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
+$GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['fin_commande_page_columns_count'];
 
-$output .= call_module_hook('cart_order_step3_after_save', array('order_id' => $commandeid, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur']), 'string');
+$output .= call_module_hook('cart_order_step3_after_save', array('order_id' => $commandeid, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'frm' => vb($_POST)), 'string');
 
 $result = query("SELECT *
 	FROM peel_commandes

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 53432 2017-04-03 15:08:05Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -30,6 +30,7 @@
 		<tr>
 			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_VARIOUS_INFORMATION_HEADER}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
+{if empty($categories_suggest_mode)}
 		<tr>
 			<td class="title_label top">{$STR_CATEGORY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -39,6 +40,33 @@
 				{$categorie_error}
 			</td>
 		</tr>
+{else}
+		<tr>
+			<td colspan="2" class="bloc">{$STR_CATEGORY}{$STR_BEFORE_TWO_POINTS}:</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<script><!--//--><![CDATA[//><!--
+					 var new_category_line_html = '<tr class="top" id="categories_line[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}delete_categories_list_line([i]);{rdelim} {rdelim} ))return false;" title="{$STR_DELETE}" style="cursor:pointer" /> <input type="hidden" name="categories[]" value="[id]"></td><td>[nom]</td></tr>';
+				//--><!]]></script>
+				<div class="full-width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
+					<table class="table admin_commande_details">
+						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
+						<tbody id="dynamic_categories_lines">{foreach $categorie_options as $o}<tr class="top" id="categories_line{$o.i}">
+									<td>
+										<img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm('{$STR_DELETE_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}delete_categories_list_line({$o.i});{rdelim} {rdelim} ))return false;" title="{$STR_DELETE}" style="cursor:pointer" />
+										<input type="hidden" name="categories[]" value="{$o.value|str_form_value}">
+			</td>
+									<td>{$o.name}</td>
+								</tr>{/foreach}</tbody>
+					</table>
+					<p style="margin-top:0px;">{$STR_DELETE} {$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" class="form-control" id="categories_suggestions_input" name="categories_suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '', '', '', '', '', '#categories_suggestions', 'categories');" onclick="lookup(this.value, '', '', '', '', '', '#categories_suggestions', 'categories');" /></p>
+					<div class="suggestions" id="categories_suggestions"></div>
+					<input id="nb_categories" type="hidden" name="nb_categories" value="{$nb_categories|str_form_value}" />
+				</div>
+			</td>
+		</tr>
+{/if}
 		<tr>
 			<td colspan="2"><div class="alert alert-info">{$STR_ADMIN_PRODUITS_POSITION_EXPLAIN}</div></td>
 		</tr>
@@ -191,7 +219,7 @@
 					<option value="">{$STR_CHOOSE}...</option>
 					<option value="">{$STR_ADMIN_NOT_APPLICABLE}</option>
 					{foreach $ecotaxe_options as $o}
-					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.code} {$o.nom|str_shorten:50:'':'...'}{$STR_BEFORE_TWO_POINTS}: {$o.prix} {$STR_TTC}</option>
+					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.code} {$o.nom|str_shorten:50:'':'...'}{$STR_BEFORE_TWO_POINTS}: {$o.prix}</option>
 					{/foreach}
 				</select>
 			</td>
@@ -231,6 +259,21 @@
 			<td colspan="2" class="bloc"><h2>{$STR_ADMIN_PRODUITS_LOT_PRICE}{$STR_BEFORE_TWO_POINTS}:</h2></td>
 		</tr>
 		{if $mode == "maj"}
+		{if !empty($module_departement_active)}
+			{foreach $lots as $lot}
+				<tr>
+					<td class="title_label">{$lot.lot_explanation_table}</td>
+				</tr>
+				<tr>
+					<td class="title_label">
+						<a href="{$lot.lot_href|escape:'html'}">{$STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE} {$lot.zone_name}</a>
+						{if isset($lot.lot_supprime_href)}
+						/ <a href="{$lot.lot_supprime_href|escape:'html'}" data-confirm="{$STR_ADMIN_DELETE_WARNING|str_form_value}">{$STR_DELETE}</a>
+						{/if}
+					</td>
+				</tr>
+			{/foreach}
+		{else}
 		<tr>
 			<td class="title_label">{$lot_explanation_table}</td>
 		</tr>
@@ -242,6 +285,7 @@
 				{/if}
 			</td>
 		</tr>
+		{/if}
 		{else}
 		<tr>
 			<td class="title_label" colspan="2">{$STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN}</td>
@@ -289,7 +333,7 @@
 					<table class="table admin_commande_details">
 						<thead>
 							<tr style="background-color:#EEEEEE">
-								<td colspan="2" class="title_label center" style="width:65px">{$STR_REFERENCE} - {$STR_ADMIN_NAME}</td>
+								<td colspan="{if $associated_product_multiple_add_to_cart}3{else}2{/if}" class="title_label center" style="width:65px">{$STR_REFERENCE} - {$STR_ADMIN_NAME}</td>
 							</tr>
 						</thead>
 						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
@@ -299,6 +343,7 @@
 										<input type="hidden" name="references[]" value="{$o.value|str_form_value}">
 									</td>
 									<td>{$o.reference} {$o.name}</td>
+									{if $associated_product_multiple_add_to_cart}<td><input type="text" name="quantity_product_reference[]" value="{$o.qt}" /></td>{/if}
 								</tr>{/foreach}</tbody>
 					</table>
 					<p style="margin-top:0px;">{$STR_DELETE} {$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" onclick="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" /></p>
@@ -475,7 +520,7 @@
 		{/foreach}
 		{else}
 		<tr>
-			<td class="title_label" id="td_{$c.id}" colspan="2"><a href="" onclick="addImagesFields('{$c.id|filtre_javascript}','{$upload_images_per_color|filtre_javascript}');return false">{$STR_ADMIN_PRODUITS_ADD_INPUT_FOR_THIS_COLOR}</a></td>
+			<td class="title_label" id="td_{$c.id}" colspan="2"><a href="#" onclick="addImagesFields('{$c.id|filtre_javascript}','{$upload_images_per_color|filtre_javascript}');return false">{$STR_ADMIN_PRODUITS_ADD_INPUT_FOR_THIS_COLOR}</a></td>
 		</tr>
 		{/if}
 	{/foreach}

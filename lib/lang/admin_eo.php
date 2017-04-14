@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_eo.php 53255 2017-03-22 14:45:27Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,6 +20,7 @@ $GLOBALS["STR_ADMIN_ACTIVATE"] = "Aktivigi";
 $GLOBALS["STR_ADMIN_ACTIVATED"] = "Aktiva";
 $GLOBALS["STR_ADMIN_ADD_EMPTY_LINE"] = "Aldoni vakuan linion";
 $GLOBALS["STR_ADMIN_ADD"] = "Aldoni";
+$GLOBALS["STR_ADMIN_ADD_USER_TO_OFFER"] = "";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_ACTIONS"] = "Agoj";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_ALL_LIST"] = "Listo de kunvenejestraj agoj";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_CALLS_EXPLAIN"] = "Mastrumado de telefonaj al- aŭ el-vokoj agordeblas pere de la uzanta konto";
@@ -321,6 +322,7 @@ $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_UPDATED"] = "Bone enkalkuliĝis la ŝan�
 $GLOBALS["STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND"] = "Neniu medi-imposto ekzistas en la datumbazo.";
 $GLOBALS["STR_ADMIN_ECOTAXES_TITLE"] = "Administrado de la medi-impostaj partoprenaj baremoj";
 $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "";
+$GLOBALS["STR_ADMIN_EXPORT_CSV"] = "CSV Eksporto";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "Ŝablono de retmesaĝo";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE"] = "ŜABLONAJ ETIKEDOJ";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE"] = "Enmeti retmesaĝan ŝablonon";
@@ -351,6 +353,7 @@ $GLOBALS["STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER"] = "Neniu retmesaĝo rilatas a
 $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "";
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "";
+$GLOBALS["STR_ADMIN_ERR_SITE_ID_MANDATORY"] = "";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Rilataj varoj";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Marko";
@@ -709,7 +712,7 @@ $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE_INFO"] = "";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Aldoni novaĵ-bultenon";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "Konfirmu sendon de ĉi novaĵ-bulteno";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "Notu: La \"cron\"-taskplanila modulo aktivas, tial ĉi sistemo ne limigas la nombron da uzantoj al kiu eblas sendi la novaĵ-bulteno, tamen via retgastiga servo ja povas.";
-$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Notu: Sendado per ĉi modulo limiĝas je 250 ricevontoj kaj estas trakti unu fojon, tial povas okazi problemojn lige la tempon por plenumi la takson ĉe kelkaj serviloj. Por amas-sendi mesaĝojn, aktivigu la \"cron\"-taskplanilan modulon aŭ la specifan interkonektan \"Wanewsletter\"-modulon.";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Notu: Sendado per ĉi modulo limiĝas je 250 ricevontoj kaj estas trakti unu fojon, tial povas okazi problemojn lige la tempon por plenumi la takson ĉe kelkaj serviloj. Por amas-sendi mesaĝojn, aktivigu la \"cron\"-taskplanilan modulon.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Aldoni aŭ modifi novaĵ-bultenon";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_LAST_SENDING"] = "Dato de la plej freŝdata sendo";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_MSG_NEWSLETTER_DELETED"] = "La novaĵ-bulteno <b>%s</b> estis forigita.";
@@ -818,6 +821,7 @@ $GLOBALS["STR_ADMIN_PRIX_PURCHASE_PRICE"] = "Aĉet-prezo";
 $GLOBALS["STR_ADMIN_PRIX_TITLE"] = "Administrado de varaj prezoj laŭ kategorio";
 $GLOBALS["STR_ADMIN_PRIX_UPDATE"] = "Modifi la prezojn";
 $GLOBALS["STR_ADMIN_PRODUCT_NAME"] = "Nomo de la varo";
+$GLOBALS["STR_ADMIN_PRODUCT_REFERENCE"] = "";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"] = "";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] = "";
 $GLOBALS["STR_ADMIN_PRODUCTS_CATEGORY"] = "Kategorioj de viaj varoj";
@@ -968,6 +972,7 @@ $GLOBALS["STR_ADMIN_SEARCH_IN_ARTICLE"] = "Artikola korpusa teksto";
 $GLOBALS["STR_ADMIN_SEARCH_IN_TITLE"] = "Titola teksto";
 $GLOBALS["STR_ADMIN_SEE_RESULT_IN_REAL"] = "Vidu ĉe reto";
 $GLOBALS["STR_ADMIN_SEE"] = "Vidi";
+$GLOBALS["STR_ADMIN_SELECT_CATEGORIES_TO_EXPORT"] = "";
 $GLOBALS["STR_ADMIN_SEND_BY"] = "";
 $GLOBALS["STR_ADMIN_SEND_NOW"] = "Tuj sendi";
 $GLOBALS["STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL"] = "Sendi retmesaĝe al la kliento";
@@ -1342,6 +1347,7 @@ $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Administro de liveraj kostoj laŭ liverman
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "";
 $GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "";
+$GLOBALS["STR_ADMIN_TEXT_FOR_PDF_EXPORT"] = "";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "";
 $GLOBALS["STR_ADMIN_TITLE"] = "Titolo";
 $GLOBALS["STR_ADMIN_TO_DO"] = "";
@@ -1536,6 +1542,7 @@ $GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST"] = "";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Notu: la aprioraj prezoj aperas je la kambio uzita en la mendo.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "Neniu mendo dum ĉi periodo respondas la petitan staton.";
@@ -1961,6 +1968,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_TECHNICAL"] = "";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE"] = "";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Subskribo";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TREATED"] = "";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Aldoni liveran manieron";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Eblas ĉi paĝe difini la nomojn de liveraj manieroj. Tiuj liveraj manieroj estu poste ligitaj al <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">liveraj kostoj</a>. Por ŝanĝi la aperontan ordon, oni movu la vicon rilata al livera maniero ĝis la dezirata loko.";

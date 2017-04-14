@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: categories.php 53285 2017-03-23 18:12:26Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_products');
+necessite_priv('admin_products,admin_finance');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CATEGORIES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -180,6 +180,7 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		$tpl->assign('indent', $indent);
 		$tpl->assign('modif_href', get_current_url(false) . "?mode=modif&id=" . $cat['id']);
 		$tpl->assign('cat_nom', (!empty($cat['nom_' . $_SESSION['session_langue']])?$cat['nom_' . $_SESSION['session_langue']]:'['.$cat['id'].']'));
+		$tpl->assign('nb', $cat['nb']);
 		$tpl->assign('site_name', get_site_name($cat['site_id']));
 		if (check_if_module_active('category_promotion')) {
 			$tpl->assign('promotion', array('percent' => number_format($cat['promotion_percent'], 2),
@@ -208,7 +209,13 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		$tpl->assign('STR_ADMIN_CATEGORIES_ADD_PRODUCT', $GLOBALS['STR_ADMIN_CATEGORIES_ADD_PRODUCT']);
 		$tpl->assign('STR_ADMIN_CATEGORIES_DELETE_CATEGORY', $GLOBALS['STR_ADMIN_CATEGORIES_DELETE_CATEGORY']);
 		$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
-		$sortie .= $tpl->fetch();
+		if(isset($_GET['nb'])){
+			if(intval($cat['nb']) == intval($_GET['nb'])) {
+				$sortie .= $tpl->fetch();
+			}
+		} else {
+			$sortie .= $tpl->fetch();
+		}
 		$first_line++;
 		if ($cat['id'] != $parent_id) {
 			$first_line = affiche_arbo_categorie($sortie, $selectionne, $cat['id'], $indent . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $first_line, $depth + 1);
@@ -242,6 +249,7 @@ function affiche_formulaire_ajout_produits_categorie($id, &$frm)
 		$frm['on_special'] = "";
 		$frm['technical_code'] = "";
 		$frm['on_carrousel'] = "";
+		$frm['allow_show_all_sons_products'] = "";
 		$frm['background_menu'] = $frm['background_color'] = "#";
 		$frm['type_affichage'] = 0;
 		if (check_if_module_active('category_promotion')) {
@@ -306,7 +314,7 @@ function supprime_produits_categorie($id)
 		query("UPDATE peel_categories
 			SET parent_id = '" . $cat["parent_id"] . "'
 			WHERE parent_id = '" . intval($id) . "' AND " . get_filter_site_cond('categories', null, true) . "");
-		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CATEGORIES_MSG_DELETED'], String::html_entity_decode_if_needed($cat['category_name']), String::html_entity_decode_if_needed($cat["parent_category_name"]))))->fetch();
+		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CATEGORIES_MSG_DELETED'], StringMb::html_entity_decode_if_needed($cat['category_name']), StringMb::html_entity_decode_if_needed($cat["parent_category_name"]))))->fetch();
 	} else {
 		$message = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_CATEGORIES_ERR_NOT_FOUND'], $id)))->fetch();
 	}
@@ -328,13 +336,22 @@ function insere_categorie(&$frm)
 		}
 		
 		// Remplit les contenus vides
-		$frm = fill_other_language_content($frm);
+		$frm = fill_other_language_content($frm, 'categories');
 	
 		$sql = 'INSERT INTO peel_categories (parent_id
 			, etat
 			, on_special
 			, technical_code
+			, date_insere
+			, date_maj';
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+			, nom_insere
+			, nom_maj";
+		}
+		$sql .= '
 			, on_carrousel
+			, allow_show_all_sons_products
 			, position
 			, type_affichage
 			, background_menu
@@ -365,7 +382,16 @@ function insere_categorie(&$frm)
 			, '" . intval($frm['etat']) . "'
 			, '" . intval(vn($frm['on_special'])) . "'
 			, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
+			, '" . date('Y-m-d H:i:s', time()) . "'
+			, '" . date('Y-m-d H:i:s', time()) . "'";
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+			, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'
+			, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+		}
+		$sql .= "
 			, '" . intval(vn($frm['on_carrousel'])) . "'
+			, '" . intval(vn($frm['allow_show_all_sons_products'])) . "'
 			, '" . intval($frm['position']) . "'
 			, '" . intval($frm['type_affichage']) . "'
 			, '" . nohtml_real_escape_string($frm['background_menu']) . "'
@@ -382,7 +408,7 @@ function insere_categorie(&$frm)
 		}
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$sql .= "
-			, '" . nohtml_real_escape_string(String::substr(String::strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
+			, '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 			, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
 			, '" . real_escape_string($frm['description_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
@@ -424,7 +450,7 @@ function maj_produits_categorie($id, $frm)
 	}
 	
 	// Remplit les contenus vides
-	$frm = fill_other_language_content($frm);
+	$frm = fill_other_language_content($frm, 'categories');
 	
 	$sql = "UPDATE peel_categories
 		SET parent_id = '" . intval($frm['parent_id']) . "'
@@ -432,7 +458,14 @@ function maj_produits_categorie($id, $frm)
 		, position = '" . intval($frm['position']) . "'
 		, on_special = '" . intval(vn($frm['on_special'])) . "'
 		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+		, nom_maj = '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+		}
+		$sql .= "
 		, on_carrousel = '" . intval(vn($frm['on_carrousel'])) . "'
+		, allow_show_all_sons_products = '" . intval(vn($frm['allow_show_all_sons_products'])) . "'
 		, type_affichage = '" . intval($frm['type_affichage']) . "'
 		, background_menu = '" . nohtml_real_escape_string($frm['background_menu']) . "'
 		, background_color = '" . nohtml_real_escape_string($frm['background_color']) . "'
@@ -449,7 +482,7 @@ function maj_produits_categorie($id, $frm)
 	}
 
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(String::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
+		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(StringMb::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 		, nom_" . $lng . "='" . real_escape_string($frm['nom_' . $lng]) . "'
 		, image_" . $lng . "='" . real_escape_string($frm['image_' . $lng]) . "'
 		, description_" . $lng . "='" . real_escape_string($frm['description_' . $lng]) . "'
@@ -538,6 +571,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('technical_code', vb($frm["technical_code"]));
 	$tpl->assign('is_carrousel_module_active', check_if_module_active('carrousel'));
 	$tpl->assign('is_on_carrousel', !empty($frm['on_carrousel']));
+	$tpl->assign('allow_show_all_sons_products', !empty($frm['allow_show_all_sons_products']));
 	$tpl->assign('position', $frm['position']);
 	$tpl->assign('etat', $frm['etat']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
@@ -563,13 +597,13 @@ function affiche_formulaire_produits_categorie(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng],
-			'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+			'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_titre' => $frm['meta_titre_' . $lng],
 			'meta_key' => $frm['meta_key_' . $lng],
 			'meta_desc' => $frm['meta_desc_' . $lng],
 			'header_html' => vb($frm['header_html_' . $lng]),
 			'sentence_displayed_on_product' => vb($frm['sentence_displayed_on_product_' . $lng]),
-			'image' => get_uploaded_file_infos('image_' . $lng, $frm['image_' . $lng], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&lang=' . $lng),
+			'image' => get_uploaded_file_infos('image_' . $lng, vb($frm['image_' . $lng]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&lang=' . $lng),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);

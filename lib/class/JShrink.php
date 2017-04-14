@@ -153,6 +153,7 @@ class Minifier
     {
         $this->options = array_merge(static::$defaultOptions, $options);
         $js = str_replace("\r\n", "\n", $js);
+        $js = str_replace('/**/', '', $js);
         $this->input = str_replace("\r", "\n", $js);
 
         // We add a newline to the end of the script to make it easier to deal
@@ -219,7 +220,7 @@ class Minifier
 
                         default:
                             // check for some regex that breaks stuff
-                            if ($this->a == '/' && ($this->b == '\'' || $this->b == '"')) {
+                            if ($this->a === '/' && ($this->b === '\'' || $this->b === '"')) {
                                 $this->saveRegex();
                                 continue;
                             }
@@ -308,10 +309,10 @@ class Minifier
 
         $this->c = $this->getChar();
 
-        if ($this->c == '/') {
+        if ($this->c === '/') {
             return $this->processOneLineComments($startIndex);
 
-        } elseif ($this->c == '*') {
+        } elseif ($this->c === '*') {
             return $this->processMultiLineComments($startIndex);
         }
 
@@ -333,7 +334,7 @@ class Minifier
         $this->getNext("\n");
 
         if ($thirdCommentString == '@') {
-            $endPoint = ($this->index) - $startIndex;
+            $endPoint = $this->index - $startIndex;
             unset($this->c);
             $char = "\n" . substr($this->input, $startIndex, $endPoint);
         } else {
@@ -366,8 +367,8 @@ class Minifier
             $char = $this->getChar(); // get next real character
 
             // Now we reinsert conditional comments and YUI-style licensing comments
-            if (($this->options['flaggedComments'] && $thirdCommentString == '!')
-                || ($thirdCommentString == '@') ) {
+            if (($this->options['flaggedComments'] && $thirdCommentString === '!')
+                || ($thirdCommentString === '@') ) {
 
                 // If conditional comments or flagged comments are not the first thing in the script
                 // we need to echo a and fill it with a space before moving on.
@@ -376,7 +377,7 @@ class Minifier
                     $this->a = " ";
 
                     // If the comment started on a new line we let it stay on the new line
-                    if ($this->input[($startIndex - 1)] == "\n") {
+                    if ($this->input[($startIndex - 1)] === "\n") {
                         echo "\n";
                     }
                 }
@@ -441,7 +442,7 @@ class Minifier
         $this->a = $this->b;
 
         // If this isn't a string we don't need to do anything.
-        if ($this->a != "'" && $this->a != '"') {
+        if ($this->a !== "'" && $this->a !== '"') {
             return;
         }
 
@@ -452,7 +453,7 @@ class Minifier
         echo $this->a;
 
         // Loop until the string is done
-        while (1) {
+        while (true) {
 
             // Grab the very next character and load it into a
             $this->a = $this->getChar();
@@ -482,7 +483,7 @@ class Minifier
                     $this->b = $this->getChar();
 
                     // If b is a new line we discard a and b and restart the loop.
-                    if ($this->b == "\n") {
+                    if ($this->b === "\n") {
                         break;
                     }
 
@@ -510,15 +511,15 @@ class Minifier
         echo $this->a . $this->b;
 
         while (($this->a = $this->getChar()) !== false) {
-            if($this->a == '/')
+            if($this->a === '/')
                 break;
 
-            if ($this->a == '\\') {
+            if ($this->a === '\\') {
                 echo $this->a;
                 $this->a = $this->getChar();
             }
 
-            if($this->a == "\n")
+            if($this->a === "\n")
                 throw new \RuntimeException('Unclosed regex pattern at position: ' . $this->index);
 
             echo $this->a;
@@ -534,7 +535,7 @@ class Minifier
      */
     protected static function isAlphaNumeric($char)
     {
-        return preg_match('/^[\w\$]$/', $char) === 1 || $char == '/';
+        return preg_match('/^[\w\$\pL]$/', $char) === 1 || $char == '/';
     }
 
     /**
@@ -549,14 +550,14 @@ class Minifier
         $lock = '"LOCK---' . crc32(time()) . '"';
 
         $matches = array();
-        preg_match('/([+-])(\s+)([+-])/', $js, $matches);
+        preg_match('/([+-])(\s+)([+-])/S', $js, $matches);
         if (empty($matches)) {
             return $js;
         }
 
         $this->locks[$lock] = $matches[2];
 
-        $js = preg_replace('/([+-])\s+([+-])/', "$1{$lock}$2", $js);
+        $js = preg_replace('/([+-])\s+([+-])/S', "$1{$lock}$2", $js);
         /* -- */
 
         return $js;
@@ -570,7 +571,7 @@ class Minifier
      */
     protected function unlock($js)
     {
-        if (!count($this->locks)) {
+        if (empty($this->locks)) {
             return $js;
         }
 

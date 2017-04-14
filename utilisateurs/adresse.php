@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples : éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4,  which is subject to an    |
+// | This file is part of PEEL Shopping 8.0.5,  which is subject to an    |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: adresse.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: adresse.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 include("../configuration.inc.php");
 necessite_identification();
@@ -31,6 +31,11 @@ foreach($address_types_array as $address_change_type) {
 			WHERE id_utilisateur='" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'";
 		query($sql);
 		$_SESSION['session_utilisateur']["address_" . $address_change_type . "_default"] = $_POST['personal_address_'.$address_change_type];
+	}
+}
+if(!empty($_POST['personal_address_ship'])) {
+	if ($_SESSION['session_caddie']->count_products() > 0) {
+		redirect_and_die(get_url('achat/caddie_affichage.php', array('func'=>'force_update')));
 	}
 }
 

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_ventes.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: export_ventes.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -39,7 +39,7 @@ if (!empty($_GET['mode']) && $_GET['mode']=="affiche_liste_clients_par_produit" 
 	if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
 		$filename = "export_ventes_" . str_replace('/', '-', date($GLOBALS['date_basic_format_short'])) . ".csv";
 	} else {
-		$cegid_date = string::strtolower(String::substr(date('F', strtotime($_GET["dateadded1"])),0,4)).date('y', time());
+		$cegid_date = StringMB::strtolower(StringMb::substr(date('F', strtotime($_GET["dateadded1"])),0,4)).date('y', time());
 		$filename = "jdv_" . $cegid_date . ".csv";
 	}
 	output_csv_http_export_header($filename, 'csv', $page_encoding);
@@ -83,11 +83,11 @@ $sqlC = "SELECT *
 	$ligne_cout_transport_ht = $ligne_tva_cout_transport = $ligne_cout_transport = 0;
 	$ligne_tarif_paiement_ht = $ligne_tva_tarif_paiement = $ligne_tarif_paiement = 0;
 	if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
-		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
+		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
 			$output .= "Numéro commande\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tArticle\tQuantité\tPrix unitaire HT\tTotal HT\tTaux TVA\tTVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\r\n";
 		} elseif($mode == 'one_line_per_product') {
 			$output .= "Produit\tQuantite\r\n";
-		} else {
+		} elseif($mode != 'chronopost') {
 			if (!empty($GLOBALS['site_parameters']['export_order_custom_field']) && is_array($GLOBALS['site_parameters']['export_order_custom_field'])) {
 				// $GLOBALS['site_parameters']['export_order_custom_field'] : array('nom_de_la_variable'=>'Nom du champ')
 				$output .= implode("\t", $GLOBALS['site_parameters']['export_order_custom_field']) . "\r\n";
@@ -113,11 +113,11 @@ $sqlC = "SELECT *
 
 		$date_vente = get_formatted_date($commande['o_timestamp'], 'short', 'long');
 		$date_achat = get_formatted_date($commande['a_timestamp'], 'short', 'long');
-		$nom_acheteur = String::htmlspecialchars_decode($commande['nom_bill'], ENT_QUOTES);
-		$adresse = String::htmlspecialchars_decode($commande['adresse_bill'], ENT_QUOTES);
-		$ville = String::htmlspecialchars_decode($commande['ville_bill'], ENT_QUOTES);
+		$nom_acheteur = StringMb::htmlspecialchars_decode($commande['nom_bill'], ENT_QUOTES);
+		$adresse = StringMb::htmlspecialchars_decode($commande['adresse_bill'], ENT_QUOTES);
+		$ville = StringMb::htmlspecialchars_decode($commande['ville_bill'], ENT_QUOTES);
 		$code_postal = $commande['zip_bill'];
-		$pays = String::htmlspecialchars_decode($commande['pays_bill'], ENT_QUOTES);
+		$pays = StringMb::htmlspecialchars_decode($commande['pays_bill'], ENT_QUOTES);
 
 		$total_transport += $commande['cout_transport'];
 		$total_transport_ht += $commande['cout_transport_ht'];
@@ -127,7 +127,7 @@ $sqlC = "SELECT *
 		$netapayer += $commande['montant'];
 
 		$vat_arrays[] = get_vat_array($commande['code_facture']);
-		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
+		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
 			$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
 			foreach ($product_infos_array as $this_ordered_product) {
 				if ($this_ordered_product['quantite'] != 0) {
@@ -157,12 +157,14 @@ $sqlC = "SELECT *
 						$output .= "\t" . filtre_csv($commande['paiement']);
 						$output .= "\r\n";
 					} else {
-						$first_reference_caractere = String::substr($this_ordered_product['reference'],0,1);
+						$first_reference_caractere = StringMb::substr($this_ordered_product['reference'],0,1);
 						$general = ($first_reference_caractere == 0)?'706100':'70710'.$first_reference_caractere;
 						$output .= "VEN;".get_formatted_date($commande['f_datetime'], 'short').";".filtre_csv($general).";;".intval($numero_facture).";".filtre_csv($commande['nom_bill']).";".fxsl($this_ordered_product['total_prix_ht']+$this_ordered_product['total_prix_attribut_ht']).";\r\n";
 					}
 				}
 			}
+		} elseif($mode=="chronopost") {
+			$output .=';'.filtre_csv($commande['societe_ship'], ';').';'.filtre_csv($commande['nom_ship'], ';').';'.filtre_csv($commande['prenom_ship'], ';').';'.filtre_csv($commande['adresse_ship'], ';').';;;'.filtre_csv($commande['zip_ship'], ';').';'. filtre_csv($commande['ville_ship'], ';').';'.filtre_csv(get_country_iso_2_letter_code($commande['pays_ship']), ';').';'.filtre_csv($commande['telephone_ship'], ';').';'.filtre_csv($commande['email_ship'], ';').';'.filtre_csv($commande['id'], ';').';;'.filtre_csv(vn($GLOBALS['site_parameters']['order_chronopost_export_default_product']), ';').';'.filtre_csv(vn($GLOBALS['site_parameters']['chronopost_contract_number']), ';').';'.filtre_csv(vn($GLOBALS['site_parameters']['chronopost_sub_account_contract_number']), ';').';;;M;;;;'.filtre_csv($commande['total_poids'], ';').';;;;;;'. filtre_csv(date('d-m-Y', strtotime($commande['o_timestamp']) + 3600*24*vn($GLOBALS['site_parameters']['order_date_delivery_delay'],2)), ';').';;;;;;;;'."\r\n";;
 		} elseif($mode == 'one_line_per_product') {
 			$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
 			foreach ($product_infos_array as $this_ordered_product) {
@@ -196,7 +198,7 @@ $sqlC = "SELECT *
 			}
 		}
 	}
-	if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
+	if (empty($GLOBALS['site_parameters']['cegid_order_export']) && $mode!="chronopost") {
 		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
 			$output .= "\r\n\t\t\t\t\t\t\t\t\tTOTAUX :\t" . fxsl($ligne_total_produit_ht) . "\t\t" . fxsl($ligne_total_produit_ttc - $ligne_total_produit_ht) . "\t" . fxsl($ligne_total_produit_ttc) . "\t" . fxsl($ligne_cout_transport_ht) . "\t" . fxsl($ligne_tva_cout_transport) . "\t" . fxsl($ligne_cout_transport) . "\t" . fxsl($ligne_tarif_paiement_ht) . "\t" . fxsl($ligne_tva_tarif_paiement) . "\t" . fxsl($ligne_tarif_paiement) . "\r\n\r\n";
 
@@ -210,4 +212,4 @@ $sqlC = "SELECT *
 		}
 	}
 }
-echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
+echo StringMb::convert_encoding($output, $page_encoding, GENERAL_ENCODING);

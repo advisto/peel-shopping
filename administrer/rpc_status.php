@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: rpc_status.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 include("../configuration.inc.php");
@@ -20,6 +20,7 @@ if (!empty($_GET['encoding'])) {
 } else {
 	$page_encoding = 'utf-8';
 }
+output_general_http_header($page_encoding);
 $output = '';
 
 if (!est_identifie() || empty($_POST)) {
@@ -31,14 +32,14 @@ if (!est_identifie() || empty($_POST)) {
 	$output .=  $GLOBALS['administrer_url'] . '/images/' . $GLOBALS['site_parameters']['statut_livraison_picto'][$_POST['new_status']];
 } else {
 	$mode = vb($_POST['mode']);
-	output_general_http_header($page_encoding);
 	// On fait les tests de droits une bonne fois pour toutes
-	if($mode == 'langues') {
-		$new_status = ($_POST['current_status']+2)%3-1;
-	} else {
-		$new_status = 1-$_POST['current_status'];
-	}
-	$new_status_sql_value = $new_status;
+	$new_status_sql_value = '';
+		if($mode == 'langues') {
+			$new_status = (vn($_POST['current_status'])+2)%3-1;
+		} else {
+			$new_status = 1-vn($_POST['current_status']);
+		}
+		$new_status_sql_value = $new_status;
 	if($mode == 'countries' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_pays
 			SET etat='%s'
@@ -153,10 +154,10 @@ if (!est_identifie() || empty($_POST)) {
 		// On met à jour les positions en fonction de la liste reçue en POST
 		query(sprintf($sql, $new_status_sql_value, intval($_POST['id'])));
 	}
-	call_module_hook('rpc_status', array('new_status' => $new_status, 'current_status' => $_POST['current_status'], 'id' => intval($_POST['id']), 'mode' => $mode));
+	call_module_hook('rpc_status', array('new_status' => $new_status, 'current_status' => vb($_POST['current_status']), 'id' => intval($_POST['id']), 'mode' => $mode));
 	if(isset($new_status)) {
 		$output .= $new_status;
 	}
 }
-echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
+echo StringMb::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 

@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 50572 2016-07-07 12:43:52Z sdelaporte $
+# $Id: peel.sql 53584 2017-04-13 10:08:26Z sdelaporte $
 #
 
 --
@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS `peel_avis` (
   `email` varchar(255) NOT NULL DEFAULT '',
   `lang` char(2) NOT NULL DEFAULT '',
   `detail` varchar(255) NOT NULL DEFAULT '',
+  `item_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -264,6 +265,9 @@ CREATE TABLE IF NOT EXISTS `peel_categories` (
   `promotion_devises` float(15,5) NOT NULL DEFAULT '0.00000',
   `promotion_percent` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_carrousel` tinyint(1) NOT NULL DEFAULT '0',
+  `allow_show_all_sons_products` tinyint(1) NOT NULL DEFAULT '0',
+  `date_insere` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_maj` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `parent_id` (`parent_id`),
@@ -620,6 +624,7 @@ CREATE TABLE IF NOT EXISTS `peel_ecotaxes` (
   `code` varchar(5) NOT NULL DEFAULT '',
   `prix_ht` float(15,5) NOT NULL DEFAULT '0.00000',
   `prix_ttc` float(15,5) NOT NULL DEFAULT '0.00000',
+  `coefficient` float(15,5) NOT NULL DEFAULT '0.00000',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)
@@ -1120,6 +1125,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits_couleurs` (
 CREATE TABLE IF NOT EXISTS `peel_produits_references` (
   `produit_id` int(11) NOT NULL DEFAULT '0',
   `reference_id` int(11) NOT NULL DEFAULT '0',
+  `quantity` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`produit_id`,`reference_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1179,6 +1185,8 @@ CREATE TABLE IF NOT EXISTS `peel_rubriques` (
   `position` int(11) NOT NULL DEFAULT '0',
   `articles_review` tinyint(1) NOT NULL DEFAULT '1',
   `technical_code` varchar(255) NOT NULL DEFAULT '',
+  `date_insere` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_maj` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `parent_id` (`parent_id`),
@@ -1572,6 +1580,7 @@ CREATE TABLE IF NOT EXISTS `peel_webmail` (
   `commande_id` int(11) NOT NULL DEFAULT '0',
   `dispo` varchar(50) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
+  `update_datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `site_id` (`site_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -1597,7 +1606,76 @@ CREATE TABLE IF NOT EXISTS `peel_zones` (
 --
 -- Contenu de la table `peel_zones`
 --
-
 -- Le contenu est créé automatiquement lors de la création du site et l'exécution du fichier create_new_site.sql
 
--- --------------------------------------------------------
+CREATE TABLE `peel_transactions` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `reference` varchar(255) NOT NULL,
+  `report_id` int(11) UNSIGNED NOT NULL,
+  `orders_id` int(11) UNSIGNED NOT NULL,
+  `site_name` varchar(255) NOT NULL,
+  `reconciliation` enum('','auto','manual') NOT NULL,
+  `comment` varchar(255) NOT NULL,
+  `type` enum('','cc_report','cc_emitted','paypal_wire','checks','cash','wire','prelevement','reimbursement','fee','pret','sicav','salaire','atos','check','transfer','cmcic','cmcic_by_3','atos_by_3','cetelem','systempay','systempay_3x','spplus','paybox','bluepaid','bluepaid_abonnement','kwixo','kwixo_rnp','kwixo_credit','ogone','postfinance','worldpay','omnikassa','moneybookers','paypal') NOT NULL,
+  `datetime` datetime NOT NULL,
+  `DATE_COMPTA` varchar(255) NOT NULL,
+  `LIBELLE_OPERATION` varchar(255) NOT NULL,
+  `REF` varchar(255) NOT NULL,
+  `DATE_OPERATION` varchar(255) NOT NULL,
+  `DATE_VALEUR` varchar(255) NOT NULL,
+  `MONTANT_DEBIT` varchar(255) NOT NULL,
+  `MONTANT_CREDIT` varchar(255) NOT NULL,
+  `L_STATUS` varchar(255) NOT NULL,
+  `L_AMT` varchar(255) NOT NULL,
+  `L_FEEAMT` varchar(255) NOT NULL,
+  `ENTETE` varchar(255) NOT NULL,
+  `TRANSACTION_ID` varchar(255) NOT NULL,
+  `MERCHANT_ID` varchar(255) NOT NULL,
+  `PAYMENT_MEANS` varchar(255) NOT NULL,
+  `ORIGIN_AMOUNT` varchar(255) NOT NULL,
+  `AMOUNT` varchar(255) NOT NULL,
+  `CURRENCY_CODE` varchar(255) NOT NULL,
+  `PAYMENT_DATE` varchar(255) NOT NULL,
+  `PAYMENT_TIME` varchar(255) NOT NULL,
+  `CARD_VALIDITY` varchar(255) NOT NULL,
+  `CARD_TYPE` varchar(255) NOT NULL,
+  `CARD_NUMBER` varchar(255) NOT NULL,
+  `RESPONSE_CODE` varchar(255) NOT NULL,
+  `CVV_RESPONSE_CODE` varchar(255) NOT NULL,
+  `COMPLEMENTARY_CODE` varchar(255) NOT NULL,
+  `CERTIFICATE` varchar(255) NOT NULL,
+  `AUTHORIZATION_ID` varchar(255) NOT NULL,
+  `CAPTURE_DATE` varchar(255) NOT NULL,
+  `TRANSACTION_STATUS` varchar(255) NOT NULL,
+  `RETURN_CONTEXT` varchar(255) NOT NULL,
+  `AUTORESPONSE_STATUS` varchar(255) NOT NULL,
+  `ORDER_ID` varchar(255) NOT NULL,
+  `CUSTOMER_ID` varchar(255) NOT NULL,
+  `CUSTOMER_IP_ADDRESS` varchar(255) NOT NULL,
+  `ACCOUNT_SERIAL` varchar(255) NOT NULL,
+  `SESSION_ID` varchar(255) NOT NULL,
+  `TRANSACTION_CONDITION` varchar(255) NOT NULL,
+  `CAVV_UCAF` varchar(255) NOT NULL,
+  `COMPLEMENTARY_INFO` varchar(255) NOT NULL,
+  `BANK_RESPONSE_CODE` varchar(255) NOT NULL,
+  `MODE_REGLEMENT` varchar(255) NOT NULL,
+  `3D_LS` varchar(255) NOT NULL,
+  `bank` varchar(255) NOT NULL DEFAULT ''
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Index pour la table `peel_transactions`
+--
+ALTER TABLE `peel_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `TRANSACTION_STATUS` (`TRANSACTION_STATUS`),
+  ADD KEY `orders_id` (`orders_id`),
+  ADD KEY `PAYMENT_DATE` (`PAYMENT_DATE`),
+  ADD KEY `report_id` (`report_id`),
+  ADD KEY `site_name` (`site_name`);
+
+--
+-- AUTO_INCREMENT pour la table `peel_transactions`
+--
+ALTER TABLE `peel_transactions`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;

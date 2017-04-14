@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fine_uploader.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fine_uploader.php 53259 2017-03-22 15:29:52Z sdelaporte $
 
 define('IN_FINE_UPLOADER', true);
 include("configuration.inc.php");
@@ -25,7 +25,10 @@ require($GLOBALS['dirroot'].'/lib/class/FineUploader.php');
 $uploader = new FineUploader();
 
 $file_kind = 'any';
-if (!empty($GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
+$input_name = array_keys($_FILES);
+if (!empty($GLOBALS['site_parameters']['extensions_valides_'.vb($input_name[0])])) {
+	$uploader->allowedExtensions = $GLOBALS['site_parameters']['extensions_valides_'.$input_name[0]];
+} elseif (!empty($GLOBALS['site_parameters']['extensions_valides_'.$file_kind])) {
 	// Specify the list of valid extensions, ex. array("jpeg", "xml", "bmp")
 	$uploader->allowedExtensions = $GLOBALS['site_parameters']['extensions_valides_'.$file_kind];
 }
@@ -41,8 +44,13 @@ $uploader->chunksFolder = $GLOBALS['dirroot'].'/'.$GLOBALS['site_parameters']['c
 
 $save_path = '/'.$GLOBALS['site_parameters']['cache_folder'];
 $save_full_path = $GLOBALS['dirroot'].$save_path;
-$rename_file = false; // Si false : on ne fait que retraiter le nom de base
-$extension = String::strtolower(pathinfo($uploader->getName(), PATHINFO_EXTENSION));
+if(StringMb::strlen($uploader->getName())>=3) {
+	$rename_file = false; // Si false : on ne fait que retraiter le nom de base
+} else {
+	// On renomme le fichier pour ne pas avoir nom vide, et éviter que $the_new_file_name ne vale '.' au final
+	$rename_file = true;
+}
+$extension = StringMb::strtolower(pathinfo($uploader->getName(), PATHINFO_EXTENSION));
 if (empty($new_file_name_without_extension)) {
 	// Si aucun nom forcé, on en crée un
 	$new_file_name_without_extension = format_filename_base($uploader->getName(), $rename_file);
@@ -79,7 +87,7 @@ if($load) {
 	// On renvoie le HTML qu'on veut afficher à la place du bouton upload
 	unset($GLOBALS['js_ready_content_array']);
 	$tpl = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
-	if(String::strpos($uploader->inputName, 'upload_multiple') !== false) {
+	if(StringMb::strpos($uploader->inputName, 'upload_multiple') !== false) {
 		$uploader->inputName .= '[]';
 	}
 	$file_infos = get_uploaded_file_infos($uploader->inputName, $save_path.'/'.$result['uploadName'], 'javascript:reinit_upload_field("'.$uploader->inputName.'", "[DIV_ID]");');
@@ -87,13 +95,12 @@ if($load) {
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$result['html'] = $tpl->fetch();
-	if(String::strpos($uploader->inputName, 'upload_multiple') !== false) {
-		// Ajout de champ vide
-		// Name vaudra upload_multiple[], mais l'id de la div généré va être upload_multiple_openarray__closearray_
-		$file_infos = get_uploaded_file_infos('upload_multiple[]', null, 'javascript:reinit_upload_field("upload_multiple[]");');
+	if(StringMb::strpos($uploader->inputName, 'upload_multiple') !== false) {
+		// Ajout de champ vide avec même nom que le champs existant
+		// Name vaudra upload_multipleXXXX[], mais l'id de la div généré va être upload_multipleXXX_......
+		$file_infos = get_uploaded_file_infos($uploader->inputName, null, 'javascript:reinit_upload_field("'.$uploader->inputName.'", "[DIV_ID]");', 100, 100, false, true);
 		$tpl->assign('f', $file_infos);
 		$result['html'] .= $tpl->fetch();
-		$GLOBALS['js_ready_content_array'][] = 'init_fineuploader($("#upload_multiple_openarray__closearray_"));';
 	}
 	if(!empty($GLOBALS['js_ready_content_array'])) {
 		$result['html'] .= '

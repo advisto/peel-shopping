@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53555 2017-04-11 16:30:55Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -62,12 +62,12 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	// Recherche du logo du site
 	if (!empty($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']]) && $GLOBALS['site_parameters']['on_logo'] == 1) {
 		$image_thumb = thumbs($GLOBALS['site_parameters']['logo_' . $_SESSION['session_langue']], 144, 144, 'fit');
-		$size_array = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($image_thumb));
+		$size_array = @getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . StringMb::rawurldecode($image_thumb));
 		$image_xml .= '
 		<image>
-			<url>' . String::htmlentities($GLOBALS['repertoire_upload'] . '/thumbs/' . $image_thumb, ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</url>
-			<title>' . String::htmlentities($GLOBALS['meta_title'], ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</title>
-			<link>' . String::htmlentities($GLOBALS['wwwroot'], ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</link>
+			<url>' . StringMb::htmlentities($GLOBALS['repertoire_upload'] . '/thumbs/' . $image_thumb, ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</url>
+			<title>' . StringMb::htmlentities($GLOBALS['meta_title'], ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</title>
+			<link>' . StringMb::htmlentities($GLOBALS['wwwroot'], ENT_COMPAT, GENERAL_ENCODING, false, true, true) . '</link>
 			<width>' . vn($size_array[0]) . '</width>
 			<height>' . vn($size_array[1]) . '</height>
 			<description>' . $GLOBALS['meta_description'] .'</description>
@@ -75,14 +75,14 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/rss.tpl');
 	$tpl->assign('page_encoding', $page_encoding);
-	$tpl->assign('wwwroot', String::htmlentities($GLOBALS['wwwroot'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('link', String::htmlentities(get_current_url(true), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('image_xml', String::htmlentities($image_xml, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('STR_RSS_TITLE', String::htmlentities($GLOBALS['meta_title'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('STR_MODULE_RSS_DESCRIPTION', String::htmlentities($GLOBALS['meta_description'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('language', String::htmlentities($_SESSION['session_langue'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('pubDate', String::htmlentities(gmdate("r"), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
-	$tpl->assign('generator', String::htmlentities('Advisto RSS Generator 2.1', ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('wwwroot', StringMb::htmlentities($GLOBALS['wwwroot'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('link', StringMb::htmlentities(get_current_url(true), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('image_xml', StringMb::htmlentities($image_xml, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('STR_RSS_TITLE', StringMb::htmlentities($GLOBALS['meta_title'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('STR_MODULE_RSS_DESCRIPTION', StringMb::htmlentities($GLOBALS['meta_description'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('language', StringMb::htmlentities($_SESSION['session_langue'], ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('pubDate', StringMb::htmlentities(gmdate("r"), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+	$tpl->assign('generator', StringMb::htmlentities('Advisto RSS Generator 2.1', ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 	$tpl_items = array();
 	if (!check_if_module_active('annonces')) {
 		// Récupération et affichage des données
@@ -111,7 +111,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 				load_site_parameters(null, false, $GLOBALS['site_id']);
 			}
 			$product_object = new Product($prod['id'], $prod, false, null, true, !check_if_module_active('micro_entreprise'));
-			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($product_object->description, ENT_QUOTES)))));
+			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), strip_tags(StringMb::html_entity_decode_if_needed(StringMb::htmlspecialchars_decode($product_object->description, ENT_QUOTES)))));
 			$promotion_rss = $product_object->get_all_promotions_percentage(false, 0, true);
 			$dateRFC = gmdate("r", strtotime($product_object->date_maj));
 			if ($product_object->on_estimate) {
@@ -121,16 +121,16 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			} else {
 				$product_affiche_prix = $product_object->get_final_price(0, display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true);
 			}
-			$this_item = array('title' => String::htmlentities($product_object->name . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $product_affiche_prix, ENT_COMPAT, GENERAL_ENCODING, false, true, true),				'promotion_rss' => String::htmlentities($promotion_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'guid' => String::htmlentities($product_object->get_product_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'pubDate' => String::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'description' => String::htmlentities($desc_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+			$this_item = array('title' => StringMb::htmlentities($product_object->name . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $product_affiche_prix, ENT_COMPAT, GENERAL_ENCODING, false, true, true),				'promotion_rss' => StringMb::htmlentities($promotion_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+				'guid' => StringMb::htmlentities($product_object->get_product_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+				'pubDate' => StringMb::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+				'description' => StringMb::htmlentities($desc_rss, ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 			$imagename = $product_object->get_product_main_picture();
 			if(!empty($imagename)) {
 				$this_thumb = thumbs($imagename, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
 				if (!empty($this_thumb)) {
-					$image_infos = getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($this_thumb));
-					$this_item['image']['length'] = filesize($GLOBALS['uploaddir'] . '/thumbs/' . String::rawurldecode($this_thumb));
+					$image_infos = getimagesize($GLOBALS['uploaddir'] . '/thumbs/' . StringMb::rawurldecode($this_thumb));
+					$this_item['image']['length'] = filesize($GLOBALS['uploaddir'] . '/thumbs/' . StringMb::rawurldecode($this_thumb));
 					$this_item['image']['url'] = $GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb;
 					$this_item['image']['mime'] = $image_infos['mime'];
 				}
@@ -142,7 +142,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	} else {
 		// Définit les limites des annonces à afficher
 		// date_insertion NOT LIKE '0000%' : la date d'insertion est vide si l'affichage de l'annonce a été désactivé par le propriétaire de l'annonce
-		$sql_cond = "enligne='OK' " . (!empty($GLOBALS['site_parameters']['extra_ad_database_fields_array']) && in_array('date_end', $GLOBALS['site_parameters']['extra_ad_database_fields_array']) ?" AND (date_end LIKE '0000%' OR date_end>'" . date('Y-m-d H:i:00', time()) . "')":'') . " AND (date_insertion NOT LIKE '0000%' AND date_insertion<'" . date('Y-m-d H:i:00', time() + 60) . "')";
+		$sql_cond = "enligne='OK' " . (!empty($GLOBALS['site_parameters']['extra_ad_database_fields_array']) && in_array('date_end', $GLOBALS['site_parameters']['extra_ad_database_fields_array']) ?" AND (date_end LIKE '0000%' OR date_end>='" . date('Y-m-d 00:00:00', time()) . "')":'') . " AND (date_insertion NOT LIKE '0000%' AND date_insertion<'" . date('Y-m-d H:i:00', time() + 60) . "')";
 		if (!empty($category_id)) {
 			$sql_cond .= " AND id_categorie=" . intval($category_id);
 		}
@@ -173,17 +173,18 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			}
 			$dateRFC = gmdate("r", strtotime($row_rs['date_insertion']));
 			$annonce_object = new Annonce($row_rs['ref'], null, false, true);
-			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), String::strip_tags(String::html_entity_decode_if_needed(String::htmlspecialchars_decode($annonce_object->get_description(), ENT_QUOTES)))));
+			$desc_rss = trim(str_replace(array("    ", "   ", "  ", " \r", " \n", "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n", "\r\n\r\n\r\n", "\r\n\r\n", "\n\n\n\n\n\n", "\n\n\n", "\n\n"), array(" ", " ", " ", "\r", "\n", "\r\n", "\r\n", "\r\n", "\n", "\n", "\n"), StringMb::strip_tags(StringMb::html_entity_decode_if_needed(StringMb::htmlspecialchars_decode($annonce_object->get_description(), ENT_QUOTES)))));
 			$promotion_rss = '';
-			$this_item = array('title' => String::htmlentities(vb($category_text) . String::str_shorten_words(String::str_shorten(String::ucfirst($annonce_object->get_titre()), 120, '', '...', 100), 40), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+			$this_item = array('title' => StringMb::htmlentities(vb($category_text) . StringMb::str_shorten_words(StringMb::str_shorten(StringMb::ucfirst($annonce_object->get_titre()), 120, '', '...', 100), 40), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
 				'promotion_rss' => $promotion_rss,
-				'guid' => String::htmlentities($annonce_object->get_annonce_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'pubDate' => String::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
-				'description' => String::htmlentities(String::str_shorten(String::strip_tags(trim($desc_rss)), 250), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
+				'guid' => StringMb::htmlentities($annonce_object->get_annonce_url(), ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+				'pubDate' => StringMb::htmlentities($dateRFC, ENT_COMPAT, GENERAL_ENCODING, false, true, true),
+				'description' => StringMb::htmlentities(StringMb::str_shorten(StringMb::strip_tags(trim($desc_rss)), 250), ENT_COMPAT, GENERAL_ENCODING, false, true, true));
 			$image_url = $annonce_object->get_annonce_picture(true, $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height']);
 			if(!empty($image_url)) {
-				$image_infos = getimagesize(String::rawurldecode(str_replace($GLOBALS['repertoire_upload'], $GLOBALS['uploaddir'], $image_url)));
-				$this_item['image']['length'] = filesize(String::rawurldecode(str_replace($GLOBALS['repertoire_upload'], $GLOBALS['uploaddir'], $image_url)));
+				$image_file = $annonce_object->get_annonce_picture(true, $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], true);
+				$image_infos = getimagesize($image_file);
+				$this_item['image']['length'] = filesize($image_file);
 				$this_item['image']['url'] = $image_url;
 				$this_item['image']['mime'] = $image_infos['mime'];
 			}
@@ -197,7 +198,7 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 	$output .= $tpl->fetch();
 
 	$output = str_replace(array('&euro;'), array('&#8364;'), $output);
-	echo String::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
+	echo StringMb::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
 
 	// Si on veut activer tracking Analytics de cette page : 
 	// il faut renseigner $GLOBALS['site_parameters']['google_analytics_site_code_for_nohtml_pages'] via la page de configuration de variables de l'administration

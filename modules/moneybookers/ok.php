@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ok.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ok.php 53200 2017-03-20 11:19:46Z sdelaporte $
 //
 
 include("../../configuration.inc.php");
@@ -31,6 +31,10 @@ if(!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 // Cette page est purement informative pour le client, et n'a qu'un titre indicatif.
 // Ce n'est pas ici que se trouve la validation du paiement, mais dans le script qui est appelé directement par la banque et dans lequel le traitement est sécurisé
 
+if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+	// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+	unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+}
 // Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 $_SESSION['session_caddie']->init();
 

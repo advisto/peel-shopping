@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: database.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,7 +168,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		// L'utilisateur ayant le profil "demo" ne peut pas faire de modification des données
 		return false;
 	}
-	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false) || strpos(strtolower($query), 'benchmark(') !== false) {
+	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false || strpos(strtolower($query), 'union select') !== false) || strpos(strtolower($query), 'benchmark(') !== false) {
 		// On empêche l'exécution de requêtes contenant certains mots clé
 		return false;
 	}
@@ -179,7 +179,8 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		$start_time = microtime_float();
 	}
 	$i = 0;
-	while (empty($query_values)) {
+	unset($GLOBALS['last_query_result']);
+	while (empty($GLOBALS['last_query_result'])) {
 		if ($i > 0) {
 			// Si on veut réessayer la requête, on regarde si c'est adapté de réinitialiser la connexion
 			if (empty($error_number) || in_array($error_number, array(111, 126, 127, 141, 144, 145, 1034, 1053, 1137, 1152, 1154, 1156, 1184, 1205, 1317, 2003, 2006, 2013))) {
@@ -192,7 +193,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 				}
 				// On force une reconnexion
 				db_connect($database_object);
-			} elseif($error_number == 1364 && String::strpos($query, 'sql_mode') === false) {
+			} elseif($error_number == 1364 && StringMb::strpos($query, 'sql_mode') === false) {
 				// Si problème "Field doesn't have a default values" on passe en mode compatibilité définitivement pour les prochaines pages vues
 				set_configuration_variable(array('technical_code' => 'mysql_sql_mode_force', 'string' => 'MYSQL40', 'site_id' => 0, 'origin' => 'auto'), true);
 				// Pour le reste de la génération de page, on passe en mode compatibilité
@@ -208,19 +209,19 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		if(!empty($database_object)) {
 			if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 				if ($silent_if_error) {
-					$query_values = @$database_object->query($query);
+					$GLOBALS['last_query_result'] = @$database_object->query($query);
 				} else {
-					$query_values = $database_object->query($query);
+					$GLOBALS['last_query_result'] = $database_object->query($query);
 				}
 			} else {
 				if ($silent_if_error) {
-					$query_values = @mysql_query($query, $database_object);
+					$GLOBALS['last_query_result'] = @mysql_query($query, $database_object);
 				} else {
-					$query_values = mysql_query($query, $database_object);
+					$GLOBALS['last_query_result'] = mysql_query($query, $database_object);
 				}
 			}
 		}
-		if (empty($query_values) && !empty($database_object)) {
+		if (empty($GLOBALS['last_query_result']) && !empty($database_object)) {
 			// Si problème dans la requête, on récupère les codes d'erreur
 			if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 				$error_number = $database_object->errno;
@@ -239,8 +240,8 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		$end_time = microtime_float();
 		$GLOBALS['peel_debug'][] = array('sql' => $query, 'duration' => $end_time - $start_time, 'start' => $start_time - $GLOBALS['script_start_time']);
 	}
-	if (!empty($query_values)) {
-		return $query_values;
+	if (!empty($GLOBALS['last_query_result'])) {
+		return $GLOBALS['last_query_result'];
 	} else {
 		if (!$silent_if_error || in_array($error_number, array(1118))) {
 			// Si l'erreur est 1118 (Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535.) qui peut arriver lors d'un ALTER TABLE ADD alors on affiche quand même l'erreur pour meilleure gestion par l'administrateur
@@ -263,15 +264,27 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
  * fetch_row()
  *
  * @param mixed $query_result
+ * @param mixed $fetch_array
  * @return
  */
-function fetch_row($query_result)
+function fetch_row($query_result = null, $fetch_array = false)
 {
+	if($query_result === null && isset($GLOBALS['last_query_result'])) {
+		$query_result = &$GLOBALS['last_query_result'];
+	}
 	if (!empty($query_result)) {
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
-			return $query_result->fetch_row();
+			if(!$fetch_array) {
+				return $query_result->fetch_row();
+			} else {
+				return $query_result->fetch_array();
+			}
 		} else {
-			return mysql_fetch_row($query_result);
+			if(!$fetch_array) {
+				return mysql_fetch_row($query_result);
+			} else {
+				return mysql_fetch_array($query_result);
+			}
 		}
 	} else {
 		return null;
@@ -284,8 +297,11 @@ function fetch_row($query_result)
  * @param mixed $query_result
  * @return
  */
-function fetch_assoc($query_result)
+function fetch_assoc($query_result = null)
 {
+	if($query_result === null && isset($GLOBALS['last_query_result'])) {
+		$query_result = &$GLOBALS['last_query_result'];
+	}
 	if (!empty($query_result)) {
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 			return $query_result->fetch_assoc();
@@ -303,8 +319,11 @@ function fetch_assoc($query_result)
  * @param mixed $query_result
  * @return
  */
-function fetch_object($query_result)
+function fetch_object($query_result = null)
 {
+	if($query_result === null && isset($GLOBALS['last_query_result'])) {
+		$query_result = &$GLOBALS['last_query_result'];
+	}
 	if (!empty($query_result)) {
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 			return $query_result->fetch_object();
@@ -322,8 +341,11 @@ function fetch_object($query_result)
  * @param mixed $query_result
  * @return
  */
-function num_rows($query_result)
+function num_rows($query_result = null)
 {
+	if($query_result === null && isset($GLOBALS['last_query_result'])) {
+		$query_result = &$GLOBALS['last_query_result'];
+	}
 	if (!empty($query_result)) {
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 			return $query_result->num_rows;
@@ -409,9 +431,9 @@ function nohtml_real_escape_string($value, $allowed_tags = null)
 		}
 	} elseif(!empty($GLOBALS['database_object'])) {
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
-			$value = $GLOBALS['database_object']->real_escape_string(@String::strip_tags($value, $allowed_tags));
+			$value = $GLOBALS['database_object']->real_escape_string(@StringMb::strip_tags($value, $allowed_tags));
 		} else {
-			$value = mysql_real_escape_string(@String::strip_tags($value, $allowed_tags));
+			$value = mysql_real_escape_string(@StringMb::strip_tags($value, $allowed_tags));
 		}
 	} else {
 		$value = null;
@@ -432,7 +454,7 @@ function word_real_escape_string($value)
 			$value[$this_key] = word_real_escape_string($this_value);
 		}
 	} elseif(!empty($GLOBALS['database_object'])) {
-		$value = String::substr($value, 0, min(String::strpos(str_replace(array('+', ',', ';', '(', ')', '!', '=', '`', '|', '&'), ' ', $value) . ' ', ' '), 60));
+		$value = StringMb::substr($value, 0, min(StringMb::strpos(str_replace(array('+', ',', ';', '(', ')', '!', '=', '`', '|', '&'), ' ', $value) . ' ', ' '), 60));
 		if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli') {
 			$value = $GLOBALS['database_object']->real_escape_string($value);
 		} else {
@@ -576,7 +598,7 @@ function &listTables($name_part = null)
 		$sql = "SHOW TABLES FROM `".word_real_escape_string($GLOBALS['nom_de_la_base']) . "`";
 		$result = query($sql);
 		while ($table_name = fetch_row($result)) {
-			if (empty($name_part) || String::strpos($table_name[0], $name_part) !== false) {
+			if (empty($name_part) || StringMb::strpos($table_name[0], $name_part) !== false) {
 				$tables_list[$name_part][$table_name[0]] = $table_name[0];
 			}
 		}
@@ -599,7 +621,7 @@ function &list_dbs($name_part = null)
 		$sql = "SHOW DATABASES";
 		$result = query($sql);
 		while ($table_name = fetch_row($result)) {
-			if ((empty($name_part) || String::strpos($table_name[0], $name_part) !== false) && $table_name[0] != "information_schema" && $table_name[0] != "mysql") {
+			if ((empty($name_part) || StringMb::strpos($table_name[0], $name_part) !== false) && $table_name[0] != "information_schema" && $table_name[0] != "mysql") {
 				$databases_list[$name_part][$table_name[0]] = $table_name[0];
 			}
 		}

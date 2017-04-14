@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: enregistrement.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
@@ -44,6 +44,12 @@ $mandatory_fields = array();
 if(isset($GLOBALS['site_parameters']['user_mandatory_fields'])) {
 	$mandatory_fields = $GLOBALS['site_parameters']['user_mandatory_fields'];
 }
+if (!empty($_POST['user_type'])) {
+	// Chargement des champs obligatoires pour un profil d'utilisateur
+	foreach(vb($GLOBALS['site_parameters']['user_'.$_POST['user_type'].'_mandatory_fields'], array()) as $key => $value) {
+		$mandatory_fields[$key] = $value;
+	}
+}
 // Dans un second temps on ajoute à cette variable les champs obligatoires qui doivent être vérifiés dans tous les cas, ou si des modules ou variables de configurations sont présents.
 $mandatory_fields['mot_passe'] = sprintf($GLOBALS['STR_ERR_PASSWORD'], vn($GLOBALS['site_parameters']['password_length_required'], 8));
 $mandatory_fields['email'] = 'STR_ERR_EMAIL';
@@ -55,6 +61,7 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 }
 if(!empty($frm['user_type']) && $frm['user_type'] == 'company') {
 	$mandatory_fields['societe'] = 'STR_ERR_SOCIETY';
+	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
 }
 if(check_if_module_active('annonces')) {
 	if(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
@@ -84,8 +91,8 @@ if (check_if_module_active('socolissimo')) {
 }
 if (!empty($frm)) {
 	// D'abord on génère une erreur pour tous les champs obligatoires qui sont vides
-	$form_error_object->valide_form($frm, $mandatory_fields, array('mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('mot_passe' => 'check_password_format'));
-	
+	$form_error_object->valide_form($frm, $mandatory_fields, array('mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('mot_passe' => 'check_password_format', 'portable' => 'phoneOk'));
+
 	// On traite ensuite les champs avec des règles plus compliquées
 	if (!empty($frm['siret']) && vb($frm['pays']) == 1 && !preg_match("#([0-9]){9,14}#", str_replace(array(' ', '.'), '', $frm['siret']))) {
 		// Si nous sommes en France, nous avons renseigné le numéro $GLOBALS['STR_SIREN'], cela nécessite un contrôle de la valeur rentrée par l'utilisateur
@@ -95,7 +102,7 @@ if (!empty($frm)) {
 		$form_error_object->add('mot_passe_confirm', $GLOBALS['STR_ERR_PASS_CONFIRM']);
 	}
 	if(!empty($mandatory_fields['pseudo']) && !empty($frm['pseudo'])) {
-		$add_pseudo_error = (String::strpos($frm['pseudo'], '@') !== false);
+		$add_pseudo_error = (StringMb::strpos($frm['pseudo'], '@') !== false);
 		if (function_exists('searchKeywordFiltersInLogin')) {
 			$add_pseudo_error = ($add_pseudo_error || searchKeywordFiltersInLogin($frm['pseudo'])) ;
 		}

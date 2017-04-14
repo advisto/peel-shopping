@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an  	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53577 2017-04-13 08:16:48Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -60,15 +60,15 @@ function MDP($chrs = 8, $data_user_info_array = array())
 		// o jour sous format jj
 		// o heure de création sous format hh
 		if(!empty($data_user_info_array['prenom'])) {
-			$pwd .= String::substr($data_user_info_array['prenom'], 0 ,1).String::substr($data_user_info_array['prenom'], -1, 1);
+			$pwd .= StringMb::substr($data_user_info_array['prenom'], 0 ,1).StringMb::substr($data_user_info_array['prenom'], -1, 1);
 		}
 		if(!empty($data_user_info_array['nom_famille'])) {
-			$pwd .= String::substr($data_user_info_array['nom_famille'], 0 ,1).String::substr($data_user_info_array['nom_famille'], -1, 1);
+			$pwd .= StringMb::substr($data_user_info_array['nom_famille'], 0 ,1).StringMb::substr($data_user_info_array['nom_famille'], -1, 1);
 		}
 		$pwd .= date('y').date('m').date('d').date('H');
 	} else {
 		mt_srand(microtime_float() * 1000000);
-		while (String::strlen($pwd) < $chrs) {
+		while (StringMb::strlen($pwd) < $chrs) {
 			$chr = chr(mt_rand(0, 255));
 			// on évite les 1, i, I, o, O et 0
 			if (preg_match("/^[a-hj-km-np-zA-HJ-KM-NP-Z2-9]$/i", $chr)) {
@@ -114,7 +114,7 @@ function get_form_token_input($name = 'general', $use_existing_token = true, $re
 {
 	$token = generate_token($name, $use_existing_token);
 	if ($return_as_input_form) {
-		return '<input type="hidden" name="token" value="' . String::str_form_value($token) . '" />';
+		return '<input type="hidden" name="token" value="' . StringMb::str_form_value($token) . '" />';
 	} else {
 		return $token;
 	}
@@ -162,9 +162,10 @@ function verify_token($name = 'general', $delay_in_minutes = 60, $check_referer_
  * @param mixed $all_parents_with_ordered_direct_sons_array
  * @param integer $catid
  * @param array $ids_array Liste à compléter
+ * @param boolean $get_parents_instead_of_sons
  * @return $ids_array Liste complétée
  */
-function get_sons_cat($all_parents_with_ordered_direct_sons_array, $catid, $ids_array = array())
+function get_sons_cat($all_parents_with_ordered_direct_sons_array, $catid, $ids_array = array(), $get_parents_instead_of_sons = false)
 {
 	// On met une protection au cas où une catégorie parente ait un enfant direct ou indirect qui est son propre parent
 	static $studied_cats_array;
@@ -175,10 +176,23 @@ function get_sons_cat($all_parents_with_ordered_direct_sons_array, $catid, $ids_
 	}
 	if(empty($studied_cats_array[$hash][$catid])) {
 		$studied_cats_array[$hash][$catid] = true;
-		foreach ($all_parents_with_ordered_direct_sons_array[$catid] as $son_catid) {
-			$ids_array[] = $son_catid;
-			if (!empty($all_parents_with_ordered_direct_sons_array[$son_catid])) {
-				$ids_array = get_sons_cat($all_parents_with_ordered_direct_sons_array, $son_catid, $ids_array);
+		if(!$get_parents_instead_of_sons) {
+			if(!empty($all_parents_with_ordered_direct_sons_array[$catid])) {
+				foreach ($all_parents_with_ordered_direct_sons_array[$catid] as $son_catid) {
+					$ids_array[] = $son_catid;
+					if (!empty($all_parents_with_ordered_direct_sons_array[$son_catid])) {
+						$ids_array = get_sons_cat($all_parents_with_ordered_direct_sons_array, $son_catid, $ids_array);
+					}
+				}
+			}
+		} else {
+			foreach ($all_parents_with_ordered_direct_sons_array as $this_parent_studied_id) {
+				if ($this_parent_studied_id != $catid && in_array($catid, $all_parents_with_ordered_direct_sons_array[$this_parent_studied_id])) {
+					// On a trouvé un parent
+					$ids_array[] = $this_parent_studied_id;
+					$ids_array = get_sons_cat($all_parents_with_ordered_direct_sons_array, $this_parent_studied_id, $ids_array, true);
+				}
+					
 			}
 		}
 	}
@@ -203,7 +217,8 @@ function calcul_nbprod_parcat($catid, $all_parents_with_ordered_direct_sons_arra
 		$results_count = $this_cache_object->get();
 	} else {
 		if ($GLOBALS['site_parameters']['category_count_method'] == 'global' && !empty($all_parents_with_ordered_direct_sons_array) && !empty($all_parents_with_ordered_direct_sons_array[$catid])) {
-			// En mode global, on compte le nombre d'annonce des catégories et sous-catégories
+			// En mode global, on compte le nombre d'annonces des catégories et sous-catégories
+			$ids_array[] = $catid;
 			$ids_array = get_sons_cat($all_parents_with_ordered_direct_sons_array, $catid);
 		}
 		if(empty($ids_array)) {
@@ -276,7 +291,7 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 		}
 		if (!empty($currency_infos_by_code[$currency_code_or_default])) {
 			$currency_code = $currency_infos_by_code[$currency_code_or_default]['code'];
-			$currency_symbole = String::html_entity_decode(str_replace('&euro;', '€', $currency_infos_by_code[$currency_code_or_default]['symbole']));
+			$currency_symbole = StringMb::html_entity_decode(str_replace('&euro;', '€', $currency_infos_by_code[$currency_code_or_default]['symbole']));
 			$currency_rate_item = $currency_infos_by_code[$currency_code_or_default]['conversion'];
 			$symbole_place = $currency_infos_by_code[$currency_code_or_default]['symbole_place'];
 		}
@@ -435,15 +450,19 @@ function charge_article($id, $show_all_etat_if_admin = true)
  * @param float $remise_valeur
  * @param float $remise_percent
  * @param boolean $is_remise_valeur_including_taxe
+ * @param string $devise
  * @return
  */
-function get_discount_text($remise_valeur, $remise_percent, $is_remise_valeur_including_taxe)
+function get_discount_text($remise_valeur, $remise_percent, $is_remise_valeur_including_taxe, $devise = null)
 {
+	if (empty($devise)) {
+		$devise = $GLOBALS['site_parameters']['code'];
+	}
 	$remise_displayed = array();
 	$remise_valeur = floatval($remise_valeur);
 	$remise_percent = floatval($remise_percent);
 	if (!empty($remise_valeur)) {
-		$remise_displayed[] = fprix($remise_valeur, true, $GLOBALS['site_parameters']['code'], false);
+		$remise_displayed[] = fprix($remise_valeur, true, $devise);
 	}
 	if (!empty($remise_percent)) {
 		$remise_displayed[] = sprintf("%0.2f", $remise_percent) . '% ' . ($is_remise_valeur_including_taxe ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']);
@@ -586,17 +605,22 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			$cache_id = $this_module['technical_code'] . '_' . $_SESSION['session_langue'] . '_' . vn($criterias['catid']) . '_' . vn($criterias['rubid']) . '_' . $GLOBALS['site_id'] . '_' . vn($_SESSION['session_admin_multisite']);
 			if($this_module['technical_code'] == 'menu' && !empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 				// Le menu n'est pas généré de la même façon tout le temps, il faut préciser le contexte
-				if((String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'android') !== false || (String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'windows') !== false && String::strpos(String::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'mobile') !== false))) {
+				if((StringMb::strpos(StringMb::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'android') !== false || (StringMb::strpos(StringMb::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'windows') !== false && StringMb::strpos(StringMb::strtolower(vb($_SERVER['HTTP_USER_AGENT'])),'mobile') !== false))) {
 					$cache_id .= '_avoidlinkswhenhover';
 				}
 				if(!empty($_POST)) {
 					$cache_id .= '_withpost';
 				}
 			}
-			$this_module_output_cache_object = new Cache($cache_id, array('group' => 'html_block'));
-			if ($this_module_output_cache_object->testTime($modules_cache_allowed_technical_codes[$this_module['technical_code']], true)) {
-				$this_module_output = $this_module_output_cache_object->get();
-				$load_module = false;
+			if($this_module['technical_code'] == 'menu' && empty($criterias['catid']) && empty($criterias['rubid'])) {
+				// Si la page en cours n'est pas une catégorie ou rubrique, alors on ne peut pas utiliser le cache car le hightlight du menu serait erroné
+				unset($cache_id);
+			} else {
+				$this_module_output_cache_object = new Cache($cache_id, array('group' => 'html_block'));
+				if ($this_module_output_cache_object->testTime($modules_cache_allowed_technical_codes[$this_module['technical_code']], true)) {
+					$this_module_output = $this_module_output_cache_object->get();
+					$load_module = false;
+				}
 			}
 		}
 		if ($load_module) {
@@ -633,7 +657,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'best_seller') {
 				if (check_if_module_active('best_seller')) {
 					$this_module_output = affiche_best_seller_produit_colonne(true, $this_module['location']);
-					$width_class = '';
+					$width_class = ' col-md-12';
 				}
 			} elseif ($this_module['technical_code'] == 'brand') {
 				// affiche du block marque
@@ -659,7 +683,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 						$this_module_output = affiche_menu_deroulant_2('scrollerdiv_' . $this_module['technical_code'], $items_html_array);
 					}
 				}
-			} elseif (String::substr($this_module['technical_code'], 0, String::strlen('advertising')) == 'advertising' && check_if_module_active('banner')) {
+			} elseif (StringMb::substr($this_module['technical_code'], 0, StringMb::strlen('advertising')) == 'advertising' && check_if_module_active('banner')) {
 				/* Explication du fonctionnement des bannières publicitaires */
 				
 				// A NE PAS CONFONDRE
@@ -701,7 +725,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				} else {
 					$page_type = 'other_page';
 				}
-				$this_module_output = affiche_banner(String::substr($this_module['technical_code'], strlen('advertising')), true, (isset($criterias['page'])?$criterias['page']:null), $id_categorie, $this_annonce_number, $page_type, (isset($criterias['search'])?explode(' ', $criterias['search']):null), $_SESSION['session_langue'], $return_array_with_raw_information, (isset($criterias['ref'])?$criterias['ref']:null), vn($GLOBALS['page_related_to_user_id']));
+				$this_module_output = affiche_banner(StringMb::substr($this_module['technical_code'], strlen('advertising')), true, (isset($criterias['page'])?$criterias['page']:null), $id_categorie, $this_annonce_number, $page_type, (isset($criterias['search'])?explode(' ', $criterias['search']):null), $_SESSION['session_langue'], $return_array_with_raw_information, (isset($criterias['ref'])?$criterias['ref']:null), vn($GLOBALS['page_related_to_user_id']));
 			} elseif ($this_module['technical_code'] == 'menu') {
 				$this_block_style = ' ';
 				foreach ($modules_array as $this_module2) {
@@ -783,7 +807,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					$block_class .= '';
 				} elseif(isset($width_class)) {
 					$block_class .= ' ' . $width_class;
-				} elseif($this_module['location'] != 'header' && String::substr($this_module['technical_code'], 0, String::strlen('advertising')) != 'advertising') {
+				} elseif($this_module['location'] != 'header' && (($this_module['location'] == 'center_middle_home' || $this_module['location'] == 'below_middle') || ($this_module['location'] != 'center_middle_home' && $this_module['location'] != 'below_middle' && StringMb::substr($this_module['technical_code'], 0, StringMb::strlen('advertising')) != 'advertising'))) {
 					$block_class .= ' col-md-4';
 				}
 				if ($this_module['display_mode'] == 'sideblocktitle' && $this_module['location'] != 'header' && $this_module['location'] != 'footer' && $this_module['location'] != 'middle') {
@@ -800,12 +824,15 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 						} else {
 							$extra_class = false;
 						}
+						if($this_module['technical_code'] == 'best_seller') {
+							$block_class .= ' ' . 'col-md-12';
+						}
 						$output .= affiche_block($this_module['display_mode'], $this_module['location'], $this_module['technical_code'], vb($this_module['title_' . $_SESSION['session_langue']]), $this_module_output, $block_class, $this_block_style, true, true, true, vb($extra_class));
 					}
 				}
 			}
 		}
-		if ($location == 'center_middle_home') {
+		if ($location == 'center_middle_home' && StringMb::substr($this_module['technical_code'], 0, StringMb::strlen('advertising')) != 'advertising') {
 			if($i % 2 == 0) {
 				$output .= '<div class="clearfix"></div>';
 			}
@@ -836,17 +863,29 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
  */
 function insere_ticket(&$frm)
 {
+	$frm['file'] = upload('file', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
 	if (check_if_module_active('webmail')) {
 		save_mail_db($frm);
 	}
-	if ((String::strpos(vb($frm['sujet']), '/24') !== false || String::strpos(vb($frm['sujet']), '24/') !== false) && !empty($GLOBALS['site_parameters']['email_emergency'])) {
+	if ((StringMb::strpos(vb($frm['sujet']), '/24') !== false || StringMb::strpos(vb($frm['sujet']), '24/') !== false) && !empty($GLOBALS['site_parameters']['email_emergency'])) {
 		$recipient_email = $GLOBALS['site_parameters']['email_emergency'];
+	} elseif (!empty($GLOBALS['site_parameters']['contact_email_by_site']) && in_array(vb($frm['site_id']), array_keys($GLOBALS['site_parameters']['contact_email_by_site']))) {
+		// Un destinataire différent par site indiqué du formulaire de contact si multisite et $GLOBALS['site_parameters']['site_configured_array'] défini
+		$recipient_email = $GLOBALS['site_parameters']['contact_email_by_site'][vb($frm['site_id'])];
+	} elseif (!empty($GLOBALS['site_parameters']['contact_email_by_subject']) && in_array(vb($frm['sujet']), $GLOBALS['site_parameters']['contact_email_by_subject'])) {
+		// Un destinataire différent par sujet du formulaire de contact
+		$recipient_email = $GLOBALS['site_parameters']['contact_email_by_subject'][vb($frm['sujet'])];
 	} else {
 		$recipient_email = $GLOBALS['support_sav_client'];
 	}
 	if (!empty($recipient_email)) {
 		unset($custom_template_tags);
 		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
+		if(!empty($GLOBALS['site_parameters']['site_configured_array']) && !empty($frm['site_id'])) {
+			$custom_template_tags['SITE_SELECTED'] = vb($GLOBALS['site_parameters']['site_configured_array'][$frm['site_id']]);
+		} else {
+			$custom_template_tags['SITE_SELECTED'] = '';
+		}
 		$custom_template_tags['NOM_FAMILLE'] = vb($frm['nom']);
 		$custom_template_tags['SOCIETE'] = vb($frm['societe']);
 		$custom_template_tags['TELEPHONE'] = vb($frm['telephone']);
@@ -856,7 +895,24 @@ function insere_ticket(&$frm)
 		$custom_template_tags['TEXTE'] = vb($frm['texte']);
 		$custom_template_tags['SUJET'] = ((!empty($frm['commande_id'])) ? "[" . $GLOBALS['STR_ORDER_NAME'] . " " . $frm['commande_id'] . "] " : "") . vb($frm['sujet']);
 		$custom_template_tags['PRENOM'] = vb($frm['prenom']);
-		send_email($recipient_email, '', '', 'insere_ticket', $custom_template_tags, null, $GLOBALS['support'], true, false, false, vb($frm['email']));
+		if (empty($_SESSION['session_form_insere_ticket_sent'])) {
+			$_SESSION['session_form_insere_ticket_sent'] = 0;
+		}
+		if ($frm['sujet'] == vb($GLOBALS['STR_CONTACT_SELECT10']) && file_exists($GLOBALS['dirroot'].'/modules/funding/administrer/wallet_money_out.php')) {
+			// Si $GLOBALS['STR_CONTACT_SELECT10'] on ajoute le lien vers modules/funding/wallet_money_out.php, et des informations complémentaires.
+			$custom_template_tags['TEXTE'] .= '
+			<br />
+			<br />
+			'.$GLOBALS['STR_USER_ID'].$GLOBALS['STR_BEFORE_TWO_POINTS'] .': ' . vn($_SESSION['session_utilisateur']['id_utilisateur']).'<br />
+			'.$GLOBALS["STR_PSEUDO"].$GLOBALS['STR_BEFORE_TWO_POINTS'] .': ' . vb($_SESSION['session_utilisateur']['pseudo']) . '<br />
+			<br />
+			<a href="'.get_url('modules/funding/administrer/wallet_money_out.php').'">'.get_url('modules/funding/administrer/wallet_money_out.php').'</a>';
+		}
+		if ($_SESSION['session_form_insere_ticket_sent'] < 10) {
+			// Limitation pour éviter spam : Un utilisateur peut envoyer 10 fois un email de contact par session
+			send_email($frm['recipient'], '', '', 'insere_ticket', $custom_template_tags, 'html', $GLOBALS['support'], true, false, false, vb($frm['email']));
+			$_SESSION['session_form_insere_ticket_sent']++;
+		}
 	}
 }
 
@@ -896,8 +952,9 @@ function get_country_name($id)
 	} elseif($id === null || $id === '') {
 		return null;
 	}
-	$id = intval($id);
-	if($id == 0) {
+	if(!is_numeric($id)) {
+		return $id;
+	} elseif($id == 0) {
 		return $GLOBALS['STR_WORLD'];
 	} else {
 		$sql = 'SELECT pays_' . $_SESSION['session_langue'] . '
@@ -905,7 +962,7 @@ function get_country_name($id)
 			WHERE id="' . intval($id) . '"';
 		$q = query($sql);
 		if ($result = fetch_assoc($q)) {
-			return String::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
+			return StringMb::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
 		} else {
 			return false;
 		}
@@ -951,7 +1008,7 @@ function get_category_name($id, $show_parent_level = 0)
 		WHERE id="' . intval($id) . '" AND ' . get_filter_site_cond('categories', 'c', defined('IN_PEEL_ADMIN')) . '';
 	$q = query($sql);
 	if ($result = fetch_assoc($q)) {
-		$name = String::html_entity_decode_if_needed($result['name']);
+		$name = StringMb::html_entity_decode_if_needed($result['name']);
 		if($show_parent_level && !empty($result['parent_id'])) {
 			$name = get_category_name($result['parent_id'], $show_parent_level-1) . ' > ' . $name;
 		}
@@ -978,7 +1035,7 @@ function get_category_tree_and_itself($id_or_ids_array, $mode = 'sons', $table_t
 			$select_field = 'id';
 			$condition_field = 'parent_id';
 		} elseif ($mode == 'parents') {
-			$select_field = 'parent_id AS id';
+			$select_field = 'parent_id';
 			$condition_field = 'id';
 		} else {
 			// erreur de paramétrage
@@ -1062,7 +1119,13 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 		$sql_condition .= ' AND etat = "1"';
 	}
 	if (!empty($allowed_zone_id)) {
-		$sql_condition .= ' AND zone = "' . intval($allowed_zone_id) . '"';
+		if (check_if_module_active('departements')) {
+			// Si le module département est actif, les zones sont gérées en fonction du département, et pas du pays. 
+			// Pour déterminer à quel pays correspond les départements, la zone de ce pays a pour valeur -1.
+			$sql_condition .= ' AND zone = "-1"';
+		} else {
+			$sql_condition .= ' AND zone = "' . intval($allowed_zone_id) . '"';
+		}
 	}
 	if (!empty($allowed_ids)) {
 		$sql_condition .= ' AND id IN ("' . implode('","', real_escape_string($allowed_ids)) . '")';
@@ -1084,7 +1147,7 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 		$tpl_options[] = array(
 			'value' => $value,
 			'name' => $tab_pays['pays_' . $_SESSION['session_langue']],
-			'issel' => (vb($selected_country_name) == $tab_pays['pays_' . $selected_country_lang] || vb($selected_country_id) == $tab_pays['id'])
+			'issel' => (StringMb::strtolower(vb($selected_country_name)) == StringMb::strtolower($tab_pays['pays_' . $selected_country_lang]) || vb($selected_country_id) == $tab_pays['id'])
 		);
 	}
 	$tpl->assign('options', $tpl_options);
@@ -1199,9 +1262,9 @@ function is_delivery_address_necessary_for_delivery_type($selected_delivery_type
 function set_paiement(&$frm)
 {
 	if (!empty($frm['payment_technical_code'])) {
-		$sql = "SELECT nom_" . $_SESSION['session_langue'] . " as paiement, tarif, tarif_percent, tva
+		$sql = "SELECT nom_" . $_SESSION['session_langue'] . " AS paiement, tarif, tarif_percent, tva
 			FROM peel_paiement
-			WHERE technical_code = '" . nohtml_real_escape_string($frm['payment_technical_code']) . "' AND " .  get_filter_site_cond('paiement') . "";
+			WHERE technical_code='" . nohtml_real_escape_string($frm['payment_technical_code']) . "' AND " .  get_filter_site_cond('paiement') . "";
 		$query = query($sql);
 		if ($obj = fetch_object($query)) {
 			$frm['tarif_paiement_ht'] = $frm['sub_total_ht'] * ($obj->tarif_percent / 100) + $obj->tarif;
@@ -1230,6 +1293,17 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 	$output = '';
 	$sql_cond = '';
 	$excluded_payment_array = call_module_hook('payment_select_excluded_ids', array(), 'array');
+	// On gère des listes sur le modèle codetechnique1,!codetechnique2,... avec le ! qui permet d'exclure un type de paiement
+	if(!is_array($selected_payment_technical_code)) {
+		$selected_payment_technical_code = explode(',', $selected_payment_technical_code);
+	}
+	foreach($selected_payment_technical_code as $this_type) {
+		if(StringMb::substr($this_type, 0, 1) == '!') {
+			$types_excluded_array[] = StringMb::substr($this_type, 1);
+		} else {
+			$types_allowed_array[] = $this_type;
+		}
+	}
 	if (!empty($excluded_payment_array))  {
 		$sql_cond .= " AND p.id NOT IN(".implode(',',real_escape_string($excluded_payment_array)).")";
 	}
@@ -1240,8 +1314,8 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 		ORDER BY p.position';
 	$res_paiement = query($sql_paiement);
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
-		if((empty($tab_paiement['etat']) || empty($tab_paiement['nom_' . $_SESSION['session_langue']])) && (!$show_selected_even_if_not_available || $tab_paiement['technical_code'] != $selected_payment_technical_code)){
-			// On ne prend que les moyens de paiement actifs, ou ceux qui ont pour code technique $selected_payment_technical_code si $show_selected_even_if_not_available = true
+		if((empty($tab_paiement['etat']) || empty($tab_paiement['nom_' . $_SESSION['session_langue']])) && (!$show_selected_even_if_not_available || !in_array($tab_paiement['technical_code'], $types_allowed_array) || in_array($tab_paiement['technical_code'], $types_excluded_array))){
+			// On ne prend que les moyens de paiement actifs, ou ceux qui ont un code technique autorisé par $selected_payment_technical_code si $show_selected_even_if_not_available = true
 			// Dans les autres cas, on passe au suivant
 			continue;
 		}
@@ -1261,7 +1335,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 	}
 	foreach($results_array as $tab_paiement) {
 		$payment_complement_informations = '';
-		if (String::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
+		if (StringMb::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
 			if ($tab_paiement['technical_code'] == 'kwixo_credit') {
 				// Popup popuprnp3x et popuprnp1xrnp défini dans ' . $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js
 				$payment_complement_informations .= '<a onclick="popuprnp3x();return false;" href="#" title="kwixo3x">';
@@ -1270,7 +1344,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			}
 			if(file_exists($GLOBALS['dirroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png')) {
 				$payment_complement_informations .= '
-		<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.String::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
+		<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.StringMb::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
 ';
 			}
 			$payment_complement_informations .= $GLOBALS['STR_MORE_DETAILS'] . '</a></td>';
@@ -1278,7 +1352,7 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 		$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
 		$tpl->assign('technical_code', $tab_paiement['technical_code']);
 		$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
-		$tpl->assign('issel', (vb($selected_payment_technical_code) == $tab_paiement['technical_code'] || count($results_array) == 1));
+		$tpl->assign('issel', (in_array($tab_paiement['technical_code'], $selected_payment_technical_code) || count($results_array) == 1));
 		if ($tab_paiement['tarif'] != 0) {
 			$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
 		}
@@ -1345,11 +1419,11 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 	foreach($js_filenames_array as $this_js_array_name) {
 		if(!empty($GLOBALS[$this_js_array_name])) {
 			ksort($GLOBALS[$this_js_array_name]);
-			if(count($GLOBALS[$this_js_array_name])>1 && $minify && String::strpos($this_js_array_name, 'nominify') === false) {
+			if(count($GLOBALS[$this_js_array_name])>1 && $minify && StringMb::strpos($this_js_array_name, 'nominify') === false) {
 				$GLOBALS[$this_js_array_name] = get_minified_src($GLOBALS[$this_js_array_name], 'js', 10800);
 			}elseif(!empty($_GET['update']) && $_GET['update'] == 1) {
 				foreach($GLOBALS[$this_js_array_name] as $this_key => $this_js_file) {
-					$GLOBALS[$this_js_array_name][$this_key] = $this_js_file . (String::strpos($this_js_file, '?')!==false?'&':'?') . time();
+					$GLOBALS[$this_js_array_name][$this_key] = $this_js_file . (StringMb::strpos($this_js_file, '?')!==false?'&':'?') . time();
 				}
 			}
 		}
@@ -1379,7 +1453,7 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 		$noasync_js_filenames_array = $js_filenames_array;
 	} else {
 		foreach($js_filenames_array as $this_key => $this_js_array_name) {
-			if(!empty($GLOBALS[$this_js_array_name]) && String::strpos($this_js_array_name, 'noasync') !== false) {
+			if(!empty($GLOBALS[$this_js_array_name]) && StringMb::strpos($this_js_array_name, 'noasync') !== false) {
 				$noasync_js_filenames_array[] = $this_js_array_name;
 				unset($js_filenames_array[$this_key]);
 			}
@@ -1390,7 +1464,7 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 			if(!empty($GLOBALS[$this_js_array_name])) {
 				ksort($GLOBALS[$this_js_array_name]);
 				foreach($GLOBALS[$this_js_array_name] as $js_href) {
-					$output .= '<script src="' . String::str_form_value($js_href) . '"></script>
+					$output .= '<script src="' . StringMb::str_form_value($js_href) . '"></script>
 ';
 				}
 			}
@@ -1411,7 +1485,7 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 				krsort($GLOBALS[$this_js_array_name]);
 				foreach($GLOBALS[$this_js_array_name] as $this_filename) {
 					// On appelle le javascript de manière récursive, si plusieurs fichiers doivent être chargés avant l'exécution du script en ligne
-					if(String::substr($this_filename, 0, 2) == '//') {
+					if(StringMb::substr($this_filename, 0, 2) == '//') {
 						// Gestion des chemins de fichiers http/https automatiques
 						if(strpos($GLOBALS['wwwroot'], 'https') === 0) {
 							$this_filename = 'https:'.$this_filename;
@@ -1420,7 +1494,7 @@ function get_javascript_output($async = false, $minify = false, $output_only_scr
 						}
 					}
 					$js_content = '
-		loadScript("'.String::html_entity_decode($this_filename).'", function(){
+		loadScript("'.StringMb::html_entity_decode($this_filename).'", function(){
 				'.$js_content.'
 			});
 ';
@@ -1506,7 +1580,7 @@ function get_datepicker_javascript()
 				}, 0);
 			}
 		});
-		$(".datepicker").attr("placeholder","'.str_replace(array('d', 'm', 'y'), array(String::substr(String::strtolower($GLOBALS['strDays']), 0, 1), String::substr(String::strtolower($GLOBALS['strMonths']), 0, 1), String::substr(String::strtolower($GLOBALS['strYears']), 0, 1)), str_replace('y', 'yy', $datepicker_format)).'");
+		$(".datepicker").attr("placeholder","'.str_replace(array('d', 'm', 'y'), array(StringMb::substr(StringMb::strtolower($GLOBALS['strDays']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strMonths']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strYears']), 0, 1)), str_replace('y', 'yy', $datepicker_format)).'");
 	';
 		if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 			// Quand on rentre la date on ne veut pas avoir le clavier qui s'affiche car on se sert du datepicker
@@ -1533,7 +1607,7 @@ function get_datepicker_javascript()
 					timeFormat: "'.$datepicker_time_format.'",
 					yearRange: "2012:2070"
 				});
-				$(".datetimepicker").attr("placeholder","'.str_replace(array('HH', 'MM', 'ss', 'd', 'm', 'y', "'"), array('00', '00', '00', String::substr(String::strtolower($GLOBALS['strDays']), 0, 1), String::substr(String::strtolower($GLOBALS['strMonths']), 0, 1), String::substr(String::strtolower($GLOBALS['strYears']), 0, 1), ""), str_replace('y', 'yy', $datepicker_format . ' ' . str_replace('mm', 'MM', $datepicker_time_format))).'");
+				$(".datetimepicker").attr("placeholder","'.str_replace(array('HH', 'MM', 'ss', 'd', 'm', 'y', "'"), array('00', '00', '00', StringMb::substr(StringMb::strtolower($GLOBALS['strDays']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strMonths']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strYears']), 0, 1), ""), str_replace('y', 'yy', $datepicker_format . ' ' . str_replace('mm', 'MM', $datepicker_time_format))).'");
 	';
 			if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 				// Quand on rentre la date on ne veut pas avoir le clavier qui s'affiche car on se sert du datepicker
@@ -1562,7 +1636,7 @@ function get_css_files_to_load($minify = false)
 		ksort($GLOBALS['css_files']);
 	} elseif(!empty($_GET['update']) && $_GET['update'] == 1) {
 		foreach($GLOBALS['css_files'] as $this_key => $this_css_file) {
-			$GLOBALS['css_files'][$this_key] = $this_css_file . (String::strpos($this_css_file, '?')!==false?'&':'?') . time();
+			$GLOBALS['css_files'][$this_key] = $this_css_file . (StringMb::strpos($this_css_file, '?')!==false?'&':'?') . time();
 		}
 	}
 	$temp = $GLOBALS['css_files'];
@@ -1607,7 +1681,7 @@ function redirect_and_die($url, $permanent_redirection = false, $avoid_loop = fa
 	}
 	header("Location: " . $url);
 	if ($permanent_redirection) {
-		header(String::substr(vb($_SERVER['SERVER_PROTOCOL'], 'HTTP/1.0'), 0 , 10) . " 301 Moved Permanently");
+		header(StringMb::substr(vb($_SERVER['SERVER_PROTOCOL'], 'HTTP/1.0'), 0 , 10) . " 301 Moved Permanently");
 	}
 	header('Connection: close');
 	die();
@@ -1627,10 +1701,10 @@ function redirect_and_die($url, $permanent_redirection = false, $avoid_loop = fa
 function necessite_priv($priv, $demo_allowed = true, $configuration_modification = false)
 {
 	if (!a_priv($priv, $demo_allowed, $configuration_modification)) {
-		if(String::strpos(get_current_url(true),'chart-data.php')===false){
+		if(StringMb::strpos(get_current_url(true),'chart-data.php')===false){
 			$_SESSION['session_redirect_after_login'] = get_current_url(true);
 		}
-		if(String::strpos($priv, 'admin') === 0 && a_priv("admin*")) {
+		if(StringMb::strpos($priv, 'admin') === 0 && a_priv("admin*")) {
 			redirect_and_die($GLOBALS['administrer_url'] . '/?error=admin_rights');
 		} elseif (est_identifie()) {
 			redirect_and_die($GLOBALS['wwwroot'] . '/compte.php?error=admin_rights');
@@ -1663,8 +1737,8 @@ function necessite_identification()
  */
 function get_identified_lang($langs_array = array())
 {
-	if (!empty($_GET['langue']) && String::strlen($_GET['langue']) == 2) {
-		$return_lang = String::strtolower(trim($_GET['langue']));
+	if (!empty($_GET['langue']) && StringMb::strlen($_GET['langue']) == 2) {
+		$return_lang = StringMb::strtolower(trim($_GET['langue']));
 	} elseif (empty($_SESSION['session_langue']) || empty($GLOBALS['get_lang_rewrited_wwwroot'][$_SESSION['session_langue']]) || $GLOBALS['get_lang_rewrited_wwwroot'][$_SESSION['session_langue']] != $GLOBALS['detected_wwwroot']) {
 		// Au cas où on doit définir la langue à partir de l'URL, donc si on n'est pas dans une logique de langue par repértoire
 		// mais de langue par domaine ou sous-domaine, on prend la première trouvée (celle qui a la variable "position" la plus faible)
@@ -1683,7 +1757,7 @@ function get_identified_lang($langs_array = array())
 	} elseif (empty($return_lang) && !empty($langs_array)) {
 		// Par défaut on prend la langue du navigateur
 		$temp = explode(',', vb($_SERVER['HTTP_ACCEPT_LANGUAGE']));
-		$return_lang = String::strtolower(String::substr(trim($temp[0]), 0, 2));
+		$return_lang = StringMb::strtolower(StringMb::substr(trim($temp[0]), 0, 2));
 		if(!in_array($return_lang, $langs_array)) {
 			// A défaut on prend l'anglais
 			$return_lang = 'en';
@@ -1697,7 +1771,7 @@ function get_identified_lang($langs_array = array())
 		$return_lang = 'en';
 	}
 	$return_lang = check_language($return_lang, $langs_array);
-	return String::substr($return_lang, 0, 2);
+	return StringMb::substr($return_lang, 0, 2);
 }
 
 /**
@@ -1747,7 +1821,7 @@ function get_current_url_in_other_language($this_lang)
 	if (!check_if_module_active('url_rewriting') || (!empty($GLOBALS['get_lang_rewrited_wwwroot'][$this_lang]) && !empty($GLOBALS['langs_array_by_wwwroot'][$GLOBALS['get_lang_rewrited_wwwroot'][$this_lang]]) && count($GLOBALS['langs_array_by_wwwroot'][$GLOBALS['get_lang_rewrited_wwwroot'][$this_lang]]) > 1)) {
 		// Comme le chemin pour une page dans cette langue n'est pas spécifique, alors on doit préciser la langue quand on veut changer de page
 		// Il ne faut pas compter les GET pour savoir si on rajoute ? ou &, car les GET peuvent venir du décodage de l'URL Rewriting => il faut regarder uniquement REQUEST_URI
-		if (String::strpos($this_url_lang, '?') === false) {
+		if (StringMb::strpos($this_url_lang, '?') === false) {
 			$this_url_lang .= '?';
 		} else {
 			$this_url_lang .= '&';
@@ -1769,6 +1843,7 @@ function get_current_url_in_other_language($this_lang)
 	} else {
 		$this_url_lang = str_replace($GLOBALS['wwwroot_main'] . '/' . $original_lang, $GLOBALS['wwwroot_main'], $this_url_lang);
 	}
+	$subdomain_separator = '.';
 	if (defined('USER_SUBDOMAIN') && $GLOBALS['detected_wwwroot'] != $GLOBALS['wwwroot']) {
 		// URL du type http://xxxx.domain.com/x.html  => on veut retiter les xxx et les remettre après
 		$subdomain_array = explode('.', $_SERVER['HTTP_HOST']);
@@ -1779,8 +1854,11 @@ function get_current_url_in_other_language($this_lang)
 		$this_url_lang = str_replace($GLOBALS['wwwroot_main'], $GLOBALS['get_lang_rewrited_wwwroot'][$this_lang], $this_url_lang);
 	}
 	if (!empty($subdomain) && $subdomain != 'www' && $subdomain != $original_lang) {
+		if(strpos($this_url_lang, $this_lang . '.') !== false) {
+			$subdomain_separator = '--';
+		}
 		// On remet le sous-domaine si nécessaire
-		$this_url_lang = str_replace(array('://', 'www.'), array('://' . $subdomain . '.', ''), $this_url_lang);
+		$this_url_lang = str_replace(array('://', 'www.'), array('://' . $subdomain . $subdomain_separator, ''), $this_url_lang);
 	}
 	return $this_url_lang;
 }
@@ -1809,8 +1887,8 @@ function get_current_url($with_get = true, $get_short_url = false, $take_away_ge
 		$url .= $_SERVER['HTTP_HOST'];
 	}
 	$url .= $_SERVER['REQUEST_URI'];
-	if (!$with_get && String::strpos($url, '?') !== false) {
-		$url = String::substr($url, 0, String::strpos($url, '?'));
+	if (!$with_get && StringMb::strpos($url, '?') !== false) {
+		$url = StringMb::substr($url, 0, StringMb::strpos($url, '?'));
 	} elseif(!empty($take_away_get_args_array)) {
 		// On évite par exemple  les problèmes de parenthèses encodées par PHP mais pas par apache
 		$entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D');
@@ -1825,8 +1903,8 @@ function get_current_url($with_get = true, $get_short_url = false, $take_away_ge
 				$url = str_replace(array('?&', '&&'), array('?','&'), $url);
 			}
 		}
-		if (String::substr($url, - 1) == '?' || String::substr($url, - 1) == '&') {
-			$url = String::substr($url, 0, String::strlen($url) - 1);
+		if (StringMb::substr($url, - 1) == '?' || StringMb::substr($url, - 1) == '&') {
+			$url = StringMb::substr($url, 0, StringMb::strlen($url) - 1);
 		}
 	}
 	return $url;
@@ -1872,45 +1950,45 @@ function get_current_generic_url()
 			if (check_if_module_active('annonces') && !empty($_GET['catid']) && defined('IN_CATALOGUE_ANNONCE')) {
 				// Page de catégorie d'annonces
 				$excluded_get[] = 'catid';
-				$uri = str_replace('-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vn($_GET['catid'])) . '.html', '-[PAGE]-' . String::rawurlencode(vn($_GET['catid'])) . '.html', $uri);
+				$uri = str_replace('-' . StringMb::rawurlencode(vn($_GET['page'])) . '-' . StringMb::rawurlencode(vn($_GET['catid'])) . '.html', '-[PAGE]-' . StringMb::rawurlencode(vn($_GET['catid'])) . '.html', $uri);
 			} elseif (check_if_module_active('vitrine') && get_current_url(false, true) == '/' . vn($_GET['page']) . '.html') {
 				// Page de boutique
-				$uri = str_replace('/' . String::rawurlencode(vn($_GET['page'])) . '.html', '/[PAGE]' . '.html', $uri);
+				$uri = str_replace('/' . StringMb::rawurlencode(vn($_GET['page'])) . '.html', '/[PAGE]' . '.html', $uri);
 			} elseif (check_if_module_active('vitrine') && get_current_url(false, true) == '/') {
 				// Page de boutique : accueil
 				$uri .= '[PAGE].html';
-			} elseif (check_if_module_active('vitrine') && String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/' . $GLOBALS['STR_MODULE_ANNONCES_URL_LIST_SHOWCASE'] . '-' . String::rawurlencode(vn($_GET['page'])) . '.html')) {
+			} elseif (check_if_module_active('vitrine') && StringMb::rawurldecode(get_current_url(false, true)) == StringMb::rawurldecode('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/' . $GLOBALS['STR_MODULE_ANNONCES_URL_LIST_SHOWCASE'] . '-' . StringMb::rawurlencode(vn($_GET['page'])) . '.html')) {
 				// Page de liste des vitrines
-				$uri = str_replace('-' . String::rawurlencode(vn($_GET['page'])) . '.html', '-[PAGE].html', $uri);
+				$uri = str_replace('-' . StringMb::rawurlencode(vn($_GET['page'])) . '.html', '-[PAGE].html', $uri);
 			} elseif (check_if_module_active('vitrine') && strpos(get_current_url(false, true), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-')===0) {
 				// Page de boutique non verified
 				$excluded_get[] = 'bt';
-				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.String::rawurlencode(vn($_GET['page'])), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'', $uri);
+				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.StringMb::rawurlencode(vn($_GET['page'])), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'', $uri);
 				// On fait le remplacement en deux étapes pour bien capter les URL STR_MODULE_ANNONCES_URL_VITRINE-... et STR_MODULE_ANNONCES_URL_VITRINE tout court
 				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'], '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-[PAGE]', $uri);
-			} elseif (check_if_module_active('vitrine') && strpos(get_current_url(false, true), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.String::rawurlencode(vn($_GET['page'])) . '-')===0) {
+			} elseif (check_if_module_active('vitrine') && strpos(get_current_url(false, true), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.StringMb::rawurlencode(vn($_GET['page'])) . '-')===0) {
 				// Page de boutique non verified
 				$excluded_get[] = 'bt';
-				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.String::rawurlencode(vn($_GET['page'])), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-[PAGE]', $uri);
-			} elseif (String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/produits/' . String::rawurlencode(vb($_GET['search'])) . '.html')) {
+				$uri = str_replace('/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-'.StringMb::rawurlencode(vn($_GET['page'])), '/'.$GLOBALS['STR_MODULE_ANNONCES_URL_VITRINE'].'-[PAGE]', $uri);
+			} elseif (StringMb::rawurldecode(get_current_url(false, true)) == StringMb::rawurldecode('/produits/' . StringMb::rawurlencode(vb($_GET['search'])) . '.html')) {
 				$excluded_get[] = 'search';
 				$uri = str_replace('.html', '-[PAGE].html', $uri);
-			} elseif (String::rawurldecode(get_current_url(false, true)) == String::rawurldecode('/produits/' . String::rawurlencode(vb($_GET['search'])) . '-' . String::rawurlencode(vn($_GET['page'])) . '.html')) {
+			} elseif (StringMb::rawurldecode(get_current_url(false, true)) == StringMb::rawurldecode('/produits/' . StringMb::rawurlencode(vb($_GET['search'])) . '-' . StringMb::rawurlencode(vn($_GET['page'])) . '.html')) {
 				$excluded_get[] = 'search';
-				$uri = str_replace('-' . String::rawurlencode(vn($_GET['page'])) . '.html', '-[PAGE].html', $uri);
-			} elseif (check_if_module_active('annonces') && !empty($_GET['country']) && strpos(get_current_url(false, true),'-' . String::rawurlencode(vb($_GET['country'])) . '.html') !== false) {
+				$uri = str_replace('-' . StringMb::rawurlencode(vn($_GET['page'])) . '.html', '-[PAGE].html', $uri);
+			} elseif (check_if_module_active('annonces') && !empty($_GET['country']) && strpos(get_current_url(false, true),'-' . StringMb::rawurlencode(vb($_GET['country'])) . '.html') !== false) {
 				// Page de liste des vitrines
 				$excluded_get[] = 'country';
 			}
 			if (check_if_module_active('annonces')) {
 				foreach(array('/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', '/kopen/supplier-research-', '/kaufen/supplier-research-', '/buy/supplier-research-', '/buy/supplier-research-', '/acheter/recherche-fournisseur-', '/comprar/busqueda-proveedor-') as $this_url_rewriting_main_expression) {
-					if(    String::rawurldecode(get_current_url(false, true)) == String::rawurldecode($this_url_rewriting_main_expression . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html')
-						|| String::rawurldecode(get_current_url(false, true)) == String::rawurldecode($this_url_rewriting_main_expression . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(urlencode(vb($_GET['search']))) . '.html')) {
+					if(    StringMb::rawurldecode(get_current_url(false, true)) == StringMb::rawurldecode($this_url_rewriting_main_expression . StringMb::rawurlencode(vn($_GET['page'])) . '-' . StringMb::rawurlencode(vb($_GET['search'])) . '.html')
+						|| StringMb::rawurldecode(get_current_url(false, true)) == StringMb::rawurldecode($this_url_rewriting_main_expression . StringMb::rawurlencode(vn($_GET['page'])) . '-' . StringMb::rawurlencode(urlencode(vb($_GET['search']))) . '.html')) {
 						$excluded_get[] = 'search';
 						// Si l'URL contient un +, pas encodé ou encodé en %2B, il faut le gérer quoiqu'il arrive => on a deux possibilités dans le str_replace
 						// La troisième est là pour couvrir des URL du type : /acheter/recherche-fournisseur-54-pc+.html?search=pc+
-						// Rappel : dans une URL réécrite, la partie en dehors du GET est gérée du type String::rawurlencode (et + vaut normalement %2B), et la partie GET est gérée par urlencode (et espace vaut +)
-						$uri = str_replace($this_url_rewriting_main_expression, '/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', str_replace(array('-' . String::rawurlencode(vn($_GET['page'])) . '-' . String::rawurlencode(vb($_GET['search'])) . '.html', '-' . vn($_GET['page']) . '-' . vb($_GET['search']) . '.html', '-' . vn($_GET['page']) . '-' . urlencode(vb($_GET['search'])) . '.html'), '-[PAGE]-' . String::rawurlencode(vb($_GET['search'])) . '.html', $uri));
+						// Rappel : dans une URL réécrite, la partie en dehors du GET est gérée du type StringMb::rawurlencode (et + vaut normalement %2B), et la partie GET est gérée par urlencode (et espace vaut +)
+						$uri = str_replace($this_url_rewriting_main_expression, '/' . $GLOBALS['STR_MODULE_ANNONCES_URL_BUY'] . '/'.$GLOBALS['STR_MODULE_PREMIUM_URL_ADS_BY_KEYWORD'].'-', str_replace(array('-' . StringMb::rawurlencode(vn($_GET['page'])) . '-' . StringMb::rawurlencode(vb($_GET['search'])) . '.html', '-' . vn($_GET['page']) . '-' . vb($_GET['search']) . '.html', '-' . vn($_GET['page']) . '-' . urlencode(vb($_GET['search'])) . '.html'), '-[PAGE]-' . StringMb::rawurlencode(vb($_GET['search'])) . '.html', $uri));
 						break;
 					}
 				}
@@ -2024,7 +2102,7 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 		$main_langs = array('en' => 'en_US', 'fr' => 'fr_FR', 'de' => 'de_DE', 'es' => 'es_ES', 'it' => 'it_IT', 'pt' => 'pt_PT', 'ar' => 'ar_SA', 'el' => 'el', 'fi' => 'fi',
 			'hu' => 'hu', 'bg' => 'bg', 'zh' => 'zh_cn', 'no' => 'no_no');
 		if (empty($main_langs[$lang])) {
-			$main_langs[$lang] = String::strtolower($lang) . '_' . String::strtoupper($lang);
+			$main_langs[$lang] = StringMb::strtolower($lang) . '_' . StringMb::strtoupper($lang);
 		}
 		// Gestion de setlocale sous windows : pour gérer les langues sous windows il faut mettre la langue sous format 3 lettres ou l'écrire en anglais
 		// Voir http://www.w3schools.com/vbscript/func_setlocale.asp
@@ -2035,7 +2113,7 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 		$variations_langs = array('en' => 'english', 'fr' => 'french', 'de' => 'german', 'es' => 'spanish', 'pt' => 'portuguese', 'it' => 'italian', 'zh' => 'chinese-simplified',
 			'ja' => 'japanese', 'ru' => 'russian', 'nl' => 'dutch');
 		$variations_langs2 = array('zh' => 'chi');
-		setlocale(LC_TIME, $main_langs[$lang] . '.UTF8', String::strtolower($lang) . '.UTF8', vb($variations_langs[$lang], String::strtolower($lang)) . '.utf8', vb($variations_langs2[$lang], String::strtolower($lang)) . '.utf8', $main_langs[$lang], String::strtolower($lang), vb($variations_langs[$lang], String::strtolower($lang)), vb($variations_langs2[$lang], String::strtolower($lang)));
+		setlocale(LC_TIME, $main_langs[$lang] . '.UTF8', StringMb::strtolower($lang) . '.UTF8', vb($variations_langs[$lang], StringMb::strtolower($lang)) . '.utf8', vb($variations_langs2[$lang], StringMb::strtolower($lang)) . '.utf8', $main_langs[$lang], StringMb::strtolower($lang), vb($variations_langs[$lang], StringMb::strtolower($lang)), vb($variations_langs2[$lang], StringMb::strtolower($lang)));
 		// Déclaration du nom de la boutique
 		$GLOBALS['site'] = vb($GLOBALS['site_parameters']['nom_' . $lang]);
 		if (empty($GLOBALS['site'])) {
@@ -2082,7 +2160,7 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 				$default_lang_if_file_not_found = 'en';
 				ksort($GLOBALS['modules_lang_folders_to_load_array']);
 				foreach($GLOBALS['modules_lang_folders_to_load_array'] as $this_directory) {
-					if(String::strpos($this_directory, $GLOBALS['dirroot']) === false) {
+					if(StringMb::strpos($this_directory, $GLOBALS['dirroot']) === false) {
 						$this_directory = $GLOBALS['dirroot'] . $this_directory;
 					}
 					if(file_exists($this_directory . $this_lang . ".php")) {
@@ -2164,7 +2242,9 @@ function set_lang_configuration_and_texts($lang, $load_default_lang_files_before
 				} elseif (vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'select') {
 					$GLOBALS['site_parameters']['user_mandatory_fields']['id_cat_1']  = 'STR_ERR_FIRST_CHOICE';
 				}
-				$GLOBALS['site_parameters']['user_mandatory_fields']['cgv_confirm'] = 'STR_ERR_CGV';
+				if (defined('IN_REGISTER')) {
+					$GLOBALS['site_parameters']['user_mandatory_fields']['cgv_confirm'] = 'STR_ERR_CGV';
+				}
 				$GLOBALS['site_parameters']['user_mandatory_fields']['mot_passe_confirm'] = 'STR_ERR_PASS_CONFIRM';
 			}
 			if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
@@ -2432,7 +2512,9 @@ function handle_php_default_setup() {
 		// Supprimer les warnings dans certains cas de configuration serveur en version PHP >= 5.3
 		@date_default_timezone_set(@date_default_timezone_get());
 	}
-	@set_magic_quotes_runtime(0);
+	if (function_exists('set_magic_quotes_runtime')) {
+		@set_magic_quotes_runtime(0);
+	}
 }
 
 /**
@@ -2511,8 +2593,9 @@ function handle_site_suspended() {
 				}
 			}
 		}
-		if(a_priv('admin*', true) || (!empty($GLOBALS['site_parameters']['site_suspended_allow_user_not_admin']) && est_identifie())) {
+		if(a_priv('admin*', true) || a_priv('util_maintenance', true) || (!empty($GLOBALS['site_parameters']['site_suspended_allow_user_not_admin']) && est_identifie())) {
 			// Utilisateur loggué en tant qu'admin, ou utilisateur simple et site l'autorisant
+			// Ou utilisateur avec le statut spécifique "Utilisateur maintenance".
 			// NB : par défaut on n'autorise pas la création de compte, juste le login sur /membre.php
 			$allow_access_if_suspended = true;
 		}
@@ -2521,11 +2604,23 @@ function handle_site_suspended() {
 			$allow_access_if_suspended = true;
 		}
 		if (!IN_INSTALLATION && !defined('IN_QRCODE') && !defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_CRON') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && !defined('IN_FINE_UPLOADER') && !a_priv('admin*', true) && empty($allow_access_if_suspended)) {
-			header(String::substr(vb($_SERVER['SERVER_PROTOCOL'], 'HTTP/1.0'), 0 , 10) . " 503 Service Unavailable", true, 503);
-			header('Status: 503 Service Unavailable');
-			header('Retry-After: 7200');
-			echo '<div style="text-align:center; font-size:20px; font-family: Arial,Helvetica Neue,Helvetica,sans-serif; "><br /><br /><b>' . $GLOBALS['STR_UPDATE_WEBSITE'] . '</b><br /><br /><img src="' . $GLOBALS['wwwroot'] . '/modeles/' . $GLOBALS['site_parameters']['template_directory'] . '/images/site_under_work.jpg" style="max-width:100%" /><br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
-			die();
+			if (!empty($GLOBALS['site_parameters']['site_suspended_with_redirection_to_home'])) {
+				if (!defined('IN_REGISTER') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_NEWSLETTER')) {
+					// Redirection vers la home, sauf si on est sur l'une de ces 4 pages : Home (pour éviter un redirection en boucle), enregistrement (pour permettre de créer un compte), membre (pour permettre aux admins de se connecter) et newsletter (pour permettre l'inscription à la newsletter)
+					// On fait une redirection temporaire, le mode maintenance n'est pas définitif. Le deuxième paramètre de redirect_and_die $permanent_redirection a pour valeur par défaut false.
+					if ($GLOBALS['wwwroot'] != $GLOBALS['site_parameters']['site_suspended_with_redirection_to_home']) {
+						redirect_and_die($GLOBALS['site_parameters']['site_suspended_with_redirection_to_home']);
+					} elseif(!defined('IN_HOME')) {
+						redirect_and_die(get_url('/'));
+					}
+				}
+			} else {
+				header(StringMb::substr(vb($_SERVER['SERVER_PROTOCOL'], 'HTTP/1.0'), 0 , 10) . " 503 Service Unavailable", true, 503);
+				header('Status: 503 Service Unavailable');
+				header('Retry-After: 7200');
+				echo '<div style="text-align:center; font-size:20px; font-family: Arial,Helvetica Neue,Helvetica,sans-serif; "><br /><br /><b>' . $GLOBALS['STR_UPDATE_WEBSITE'] . '</b><br /><br /><img src="' . $GLOBALS['wwwroot'] . '/modeles/' . $GLOBALS['site_parameters']['template_directory'] . '/images/site_under_work.jpg" style="max-width:100%" /><br /><br />' . $GLOBALS['STR_THANKS_UNDERSTANDING'] . '</div>';
+				die();
+			}
 		}
 	}
 	return null;
@@ -2538,19 +2633,28 @@ function handle_site_suspended() {
  */
 function handle_setup_redirections($url, $mode = 'redirect') {
 	// Redirections définies par variables de configuration
-	static $tags_handled;
 	if (!empty($GLOBALS['site_parameters']['redirections'])) {
-		if(empty($tags_handled)) {
+		// Si on veut en multisite alerter des chargements pour tel ou tel site_id et qu'on recharge $GLOBALS['site_parameters'] ça pose des problèmes si on utilise une variable static pour savoir si on est passé ou non dans le traitement de template_tags_replace. Donc on regarde systématiquement si on a besoin ou non de remplacer des tags
+		if(strpos(serialize($GLOBALS['site_parameters']['redirections']), '[')!==false) {
 			$GLOBALS['site_parameters']['redirections'] = template_tags_replace($GLOBALS['site_parameters']['redirections'], array(), defined('SKIP_SET_LANG'), null, null, true);
-			$tags_handled = true;
 		}
 		// Format : URL_from => URL_to  OU  URL_from => URL_to,301  
 		// Si pas de slash à la fin d'un domaine, alors ça concerne tout le domaine - sinon juste une page
 		foreach($GLOBALS['site_parameters']['redirections'] as $url_from => $url_to) {
 			$temp = explode(',', $url_to, 2);
+			if(StringMb::substr($url_from, -1) == '*') {
+				$url_from = StringMb::substr($url_from, 0, StringMb::strlen($url_from)-1);
+				$redirect_all_sub = true;
+			} else {
+				$redirect_all_sub = false;
+			}
 			if(!empty($temp[0]) && !empty($url_from) && $temp[0] != $url_from) {
-				if (String::strpos($url, $url_from) === 0) {
-					$new_url = str_replace($url_from, $temp[0], $url);
+				if (StringMb::strpos($url, $url_from) === 0) {
+					if($redirect_all_sub) {
+						$new_url = $temp[0];
+					} else {
+						$new_url = str_replace($url_from, $temp[0], $url);
+					}
 					if($new_url != $url) {
 						if($mode == 'redirect') {
 							redirect_and_die($new_url, intval(vb($temp[1], 301)) == 301);
@@ -2652,7 +2756,16 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 				LEFT JOIN peel_langues l ON l.etat = '1' AND l.url_rewriting LIKE '%.%' AND " . get_filter_site_cond('langues', 'l', false, $forced_site_id) . "
 				WHERE c.technical_code='wwwroot' AND ";
 			if ($forced_site_id === null) {
-				$sql .= "(c.string='".real_escape_string($GLOBALS['wwwroot'])."' OR REPLACE(c.string,'www.','')='".real_escape_string($GLOBALS['wwwroot'])."' OR (l.url_rewriting LIKE '%.%' AND (REPLACE(c.string,'www.',l.url_rewriting)='".real_escape_string($GLOBALS['wwwroot'])."' OR l.url_rewriting='".real_escape_string($GLOBALS['wwwroot'])."')))";
+				if(empty($GLOBALS['site_parameters']['multisite_http_https_different_site_id_allow'])) {
+					$this_wwwroot_array[] = str_replace('http://', 'https://', $GLOBALS['wwwroot']);
+					$this_wwwroot_array[] = str_replace('https://', 'http://', $GLOBALS['wwwroot']);
+				} else {
+					$this_wwwroot_array[] = $GLOBALS['wwwroot'];
+				}
+				foreach($this_wwwroot_array as $this_wwwroot) {
+					$sql_cond_array[] = "c.string='".real_escape_string($this_wwwroot)."' OR REPLACE(c.string,'www.','')='".real_escape_string($this_wwwroot)."' OR (l.url_rewriting LIKE '%.%' AND (REPLACE(c.string,'www.',l.url_rewriting)='".real_escape_string($this_wwwroot)."' OR l.url_rewriting='".real_escape_string($this_wwwroot)."'))";
+				}
+				$sql .= "(" . implode(' OR ', $sql_cond_array) . ")";
 			} else {
 				$sql .= get_filter_site_cond('configuration', 'c', false, $forced_site_id);
 			}
@@ -2688,10 +2801,11 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 					$GLOBALS['site_id'] = 1;
 				} elseif ($this_count_wwwroot > 1) {
 					// plusieurs wwwroot défini dans la BDD, il faut choisir le site_id par défaut dans ce cas.
-					// On met une condition sur site_id=0 pour éviter qu'un site ne s'arroge ce droit indûment
+					// On met une condition sur site_id='0' pour éviter qu'un site ne s'arroge ce droit indûment
+					// Attention si site_id est un SET, il faut obligatoirement les guillemets pour que ça marche
 					$sql = "SELECT string
 						FROM peel_configuration c
-						WHERE c.technical_code='site_id_showed_by_default_if_domain_not_found' AND site_id=0";
+						WHERE c.technical_code='site_id_showed_by_default_if_domain_not_found' AND site_id='0'";
 					$query = query($sql);
 					if($result = fetch_assoc($query)) {
 						$GLOBALS['site_id'] = $result['string'];
@@ -2721,7 +2835,7 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 				}
 			}
 			if (!defined('IN_PEEL_ADMIN') && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
-				// En front office, les pages sont appelées en https => on force https dans wwwroot_main pour que toutes les ressources chargées par le site soient en https, sinon le contenu est bloqué par certain navigateur.
+				// En front office, les pages sont appelées en https => on force https dans wwwroot_main pour que toutes les ressources chargées par le site soient en https, sinon le contenu est bloqué par certains navigateurs.
 				$GLOBALS['wwwroot_main'] = str_replace('http://', 'https://', $GLOBALS['wwwroot_main']);
 			}
 		}
@@ -2765,9 +2879,9 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 				}
 			}
 			if($result['type'] == 'boolean'){
-				if(in_array(String::strtolower($result['string']), array('true', 'yes', '1'))){
+				if(in_array(StringMb::strtolower($result['string']), array('true', 'yes', '1'))){
 					$result['string'] = true;
-				} elseif(in_array(String::strtolower($result['string']), array('false', 'no', '0'))){
+				} elseif(in_array(StringMb::strtolower($result['string']), array('false', 'no', '0'))){
 					$result['string'] = false;
 				}
 			} elseif($result['type'] == 'array'){
@@ -2779,17 +2893,17 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 				$result['string'] = floatval($result['string']);
 			} elseif($result['type'] == 'octal') {
 				$result['string'] = octdec(intval($result['string']));
-			} elseif($result['type'] == 'string' || (empty($result['type']) && String::strpos($result['string'], ':')===false)){
+			} elseif($result['type'] == 'string' || (empty($result['type']) && StringMb::strpos($result['string'], ':')===false)){
 				$result['string'] = str_replace(array('{$GLOBALS[\'repertoire_images\']}', '{$GLOBALS[\'wwwroot\']}', '{$GLOBALS[\'dirroot\']}', ), array(vb($GLOBALS['repertoire_images']), vb($GLOBALS['wwwroot']), $GLOBALS['dirroot']), $result['string']);
 			} elseif(!empty($result['string'])) {
 				$result['string'] = @unserialize($result['string']);
 			}
 
-			if(String::substr($result['technical_code'], 0, 4)== 'STR_') {
+			if(StringMb::substr($result['technical_code'], 0, 4)== 'STR_') {
 				// Variable de langue
 				$GLOBALS[$result['technical_code']] = $result['string'];
 			} else {
-				if(String::strlen($result['technical_code'])== 7 && String::substr($result['technical_code'], 0, 5) == 'logo_' && strpos($result['string'], '//') === false && !empty($result['string'])) {
+				if(StringMb::strlen($result['technical_code'])== 7 && StringMb::substr($result['technical_code'], 0, 5) == 'logo_' && strpos($result['string'], '//') === false && !empty($result['string'])) {
 					// Ajout de wwwroot si nécessaire
 					if(substr($result['string'], 0, 1) != '/') {
 						$result['string'] = $GLOBALS['wwwroot'] . '/' . $result['string'];
@@ -2857,6 +2971,19 @@ function microtime_float()
 }
 
 /**
+ * Ajoute les erreurs dans le tableau key -> Nom du champ, valeur -> Texte de l'erreur (optionnel)
+ *
+ * @param mixed $tab
+ * @param mixed $name
+ * @param integer $text
+ * @return
+ */
+function FormErrorPush(&$tab, $name, $text = 0)
+{
+	$tab[$name] = ($text) ? $text : '';
+}
+
+/**
  * params_affiche_produits()
  *
  * @param mixed $condition_value1
@@ -2892,12 +3019,11 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	}
 	$params_list['cartridge_product_css_class'] = 'item-column product_per_line_' . $nb_colonnes;
 	$display_multipage_template_name = null;
-	// Par défaut, products_list_sql_join_categories_default n'est pas défini et on fait systématiquement une jointure avec la table de catégories.
-	// Cela permet de faire une seule requête SQL et ensuite aucune lors de l'affichage, alors que sinon on doit aller chercher la catégorie pour chaque produit (fait automatiquement par $product_object->get_product_url() )
-	// Néanmoins, si la base de données est très grosse, la jointure avec les catégories lors de la recherche n'est pas souhaitable, dans ce cas mettez la variable de configuration products_list_sql_join_categories_default à false
-	// Par ailleurs, si on n'autorise pas les produits sans catégories, on force la jointure avec la table de catégories lors de la recherche
-	$join_categories = vb($GLOBALS['site_parameters']['products_list_sql_join_categories_default'], true) || empty($GLOBALS['site_parameters']['allow_products_without_category']);
-	if ($type == 'catalogue') {
+	// On veut éviter de faire une jointure avec la table catégories si ce n'est pas nécessaire dans des cas particuliers.
+	// Si on n'autorise pas les produits sans catégorie, on force la jointure avec la table de catégories lors de la recherche
+	// On la force aussi si on veut plusieurs résultats quand il y a plusieurs catégories pour un produit
+	$join_categories = (empty($GLOBALS['site_parameters']['allow_products_without_category']) || !empty($GLOBALS['site_parameters']['allow_products_multiple_results_if_multiple_categories']));
+	if ($type == 'catalogue' || $type == 'brand') {
 		$sql_cond_array[] = "p.id_marque='" . intval($condition_value1) . "'";
 	} elseif ($type == 'nouveaute') {
 		$sql_cond_array[] = "p.on_new='1'";
@@ -2938,6 +3064,22 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$titre = $GLOBALS['STR_TOP'];
 	} elseif ($type == 'category') {
 		$params_list['affiche_filtre'] = affiche_filtre($condition_value1, true);
+		if(!is_user_bot()) {
+			$ids_array = get_category_tree_and_itself($condition_value1, 'parents', 'categories');
+			// On regarde si on autorise l'affichage des produits des catégories filles pour cette catégorie
+			$sql = 'SELECT allow_show_all_sons_products
+				FROM peel_categories
+				WHERE id IN ("'.implode('","', real_escape_string($ids_array)).'")';
+			$qid = query($sql);
+			if ($cat = fetch_assoc($qid)) {
+				if($cat['allow_show_all_sons_products']) {
+					$GLOBALS['allow_show_all_sons_products'] = true;
+					if(!empty($_GET['sons'])) {
+						$GLOBALS['site_parameters']['category_count_method'] = 'global';
+					}
+				}
+			}
+		}
 		if (vb($GLOBALS['site_parameters']['category_count_method']) == 'global') {
 			$catid_array = get_category_tree_and_itself($condition_value1, 'sons');
 		} else {
@@ -2963,6 +3105,8 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$titre = $GLOBALS['STR_COMING_PRODUCT_FLASH'];
 	} elseif ($type == 'check') {
 		$sql_cond_array[] = "p.on_check='1'";
+		// Les chèques cadeaux ne sont pas associés à une catégorie.
+		$join_categories = false;
 		$titre = $GLOBALS['STR_CHEQUE_CADEAU'];
 	} elseif ($type == 'associated_product') {
 		$nb_par_page = '*';
@@ -3025,10 +3169,16 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		// On ajoute les jointures supplémentaires
 		$sql_inner .= $additional_sql_inner;
 	}
-	// Les chèques cadeaux ne sont pas associé à une catégorie.
-	$join_categories = ($type != 'check');
-	$join_categories_for_count = ($join_categories && (empty($GLOBALS['site_parameters']['allow_products_without_category']) || String::strpos(implode('', $sql_cond_array), 'c.') !== false));
-
+	if(StringMb::strpos(implode('', $sql_cond_array), 'c.') !== false) {
+		// Sécurité si une condition SQL a été faite sur la table catégories
+		$join_categories = true;
+	}
+	$join_categories_for_count = $join_categories;
+	// Par défaut, products_list_sql_join_categories_default n'est pas défini et on force alors systématiquement une jointure avec la table de catégories.
+	// Cela permet de faire une seule requête SQL et ensuite aucune lors de l'affichage, alors que sinon on doit aller chercher la catégorie pour chaque produit (fait automatiquement par $product_object->get_product_url() )
+	// Néanmoins, si la base de données est très grosse, la jointure avec les catégories lors de la recherche n'est pas souhaitable, dans ce cas mettez la variable de configuration products_list_sql_join_categories_default à false, et on évitera la jointure quand elle n'est pas nécessaire à la recherche
+	$join_categories = (vb($GLOBALS['site_parameters']['products_list_sql_join_categories_default'], $type!="check") || $join_categories);
+	
 	$sql = "SELECT p.*, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name " . ($join_categories?', IF(c.id IS NOT NULL, c.id, 0) AS categorie_id, IF(c.nom_' . $_SESSION['session_langue'] . ' IS NOT NULL, c.nom_' . $_SESSION['session_langue'] . ', 0) AS categorie':'');
 	if (($type == 'save_cart')) {
 		$sql .= ', sc.id as save_cart_id, sc.couleur_id as saved_couleur_id, sc.taille_id as saved_taille_id, sc.id_attribut as saved_attributs_list, sc.quantite as saved_quantity ';
@@ -3081,7 +3231,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	}
 	$Links->order_get_variable = vb($GLOBALS['order_get_variable'], 'tri');
 	$Links->sort_get_variable = 'sort';
-	$Links->OrderDefault = 'position';
+	$Links->OrderDefault = vb($GLOBALS['site_parameters']['product_list_order_default'], 'position');
 	$Links->SortDefault = 'ASC';
 	
 	//$Links->forced_second_order_by_string = 'p.id DESC';
@@ -3180,10 +3330,10 @@ function is_user_bot($ip = null, $user_agent = null)
 	if(!isset($result)){
 		// Premier test rapide sur user_agent
 		$result = false;
-		$lower_user_agent = String::strtolower($user_agent);
+		$lower_user_agent = StringMb::strtolower($user_agent);
 		if(!empty($user_agent)) {
 			foreach(array('mediapartners-google', 'googlebot', 'google page speed', 'feedfetcher', 'slurp', 'bingbot', 'msnbot', 'voilabot', 'baiduspider', 'genieo', 'sindup', 'ahrefsbot', 'yandex', 'spider', 'robot', '/bot', 'crawler', 'netvibes') as $this_name) {
-				$result = $result || String::strpos($lower_user_agent, $this_name) !== false;
+				$result = $result || StringMb::strpos($lower_user_agent, $this_name) !== false;
 			}
 		}
 		if(!$result) {
@@ -3243,7 +3393,7 @@ function get_xml_value($filename, $filter_string, $items_count_max = 8, $line_le
 	$forum_output = '';
 	$valid_titre = array();
 
-	$data = String::file_get_contents_utf8($filename);
+	$data = StringMb::file_get_contents_utf8($filename);
 	$parser = xml_parser_create();
 	xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
 	xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
@@ -3313,7 +3463,7 @@ function get_xml_value($filename, $filter_string, $items_count_max = 8, $line_le
  */
 function clean_str($string)
 {
-	$string = preg_replace('/[^a-z0-9]/', "-", utf8_decode(String::convert_accents(String::strtolower($string))));
+	$string = preg_replace('/[^a-z0-9]/', "-", utf8_decode(StringMb::convert_accents(StringMb::strtolower($string))));
 	$string = preg_replace('/[-]{2,}/', "-", $string);
 	$output = urlencode($string);
 	return $output;
@@ -3332,7 +3482,7 @@ function get_upload_errors_text($file_infos, $file_kind = 'image')
 	if (empty($file_kind)) {
 		$file_kind = 'any';
 	}
-	$extension = String::strtolower(pathinfo($file_infos['name'], PATHINFO_EXTENSION));
+	$extension = StringMb::strtolower(pathinfo($file_infos['name'], PATHINFO_EXTENSION));
 	if ($file_infos == "none") {
 		$error = $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"];
 	} elseif (!empty($file_infos['error'])) {
@@ -3413,7 +3563,9 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 			$file_infos['base64'] = true;
 		} else {
 			// Le fichier est à sa place, on renvoie simplement le nom déjà existant
-			return $_REQUEST[$field_name];
+			$file_existing = $_REQUEST[$field_name];
+			$GLOBALS['uploaded_file_already_existing'][$file_existing] = $file_existing;
+			return $file_existing;
 		}
 	} elseif (empty($_FILES[$field_name]['name'])) {
 		// Rien à télécharger, ni de fichier existant
@@ -3425,9 +3577,9 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 		$error = get_upload_errors_text($_FILES[$field_name], $file_kind); 
 	}
 	if (empty($error) && !empty($file_infos['name'])) {
-		// Upload OK
+		// Dans les cas ci-dessous, le fichier va être manipulé pour être mis à son emplacement officiel
 		// Extension du fichier téléchargé
-		$extension = String::strtolower(pathinfo($file_infos['name'], PATHINFO_EXTENSION));
+		$extension = StringMb::strtolower(pathinfo($file_infos['name'], PATHINFO_EXTENSION));
 		if (empty($new_file_name_without_extension)) {
 			if(!empty($format_filename_base_disabled)) {
 				$the_new_file_name = $file_infos['name'];
@@ -3435,54 +3587,62 @@ function upload($field_name, $rename_file = true, $file_kind = null, $image_max_
 				// Si aucun nom forcé, on en crée un
 				$the_new_file_name = format_filename_base(vb($file_infos['name']), $rename_file). '.' . $extension;
 			}
+			$new_file_name_without_extension = StringMb::strtolower(pathinfo($the_new_file_name, PATHINFO_FILENAME));
 		} else {
 			$the_new_file_name = $new_file_name_without_extension . '.' . $extension;
 		}
-		if (!empty($file_infos['base64'])) {
-			// Décodage d'une image envoyée en base64
-			$fp = fopen($path . $the_new_file_name, "wb"); 
-			$data = explode(',', $_REQUEST[$field_name]);
-			fwrite($fp, base64_decode($data[1])); 
-			fclose($fp); 
-			if(!empty($GLOBALS['site_parameters']['chmod_new_files'])) {
-				@chmod ($path . $the_new_file_name, $GLOBALS['site_parameters']['chmod_new_files']);
-			}
-			return $the_new_file_name; 
-		} elseif(!isset($file_infos['tmp_name'])) {
-			// Fichier temporaire stocké dans le cache, on va le déplacer dans le répertoire $path avec le bon nom
-			// Si il est déjà déplacé (car on revalide une seconde fois le formulaire), on s'arrange pour que ça marche aussi - dans ce cas on ne passe pas dans le test qui suit
-			if($GLOBALS['dirroot'] . $_REQUEST[$field_name] != $path . $the_new_file_name && file_exists($GLOBALS['dirroot'] . $_REQUEST[$field_name])) {
-				rename($GLOBALS['dirroot'] . $_REQUEST[$field_name], $path . $the_new_file_name);
-			}
-			if(!file_exists($path . $the_new_file_name)) {
-				// Fichier inexistant ou échec du déplacement => on annule le souvenir de ce fichier
-				return $default_return_value;
-			}
-			return $the_new_file_name;
-		} elseif (move_uploaded_file($file_infos['tmp_name'], $path . $the_new_file_name)) {
-			// Le fichier est maintenant dans le répertoire des téléchargements
-			if(!empty($GLOBALS['site_parameters']['chmod_new_files'])) {
-				@chmod ($path . $the_new_file_name, $GLOBALS['site_parameters']['chmod_new_files']);
-			}
-			if (!empty($GLOBALS['site_parameters']['extensions_valides_image']) && in_array($extension, $GLOBALS['site_parameters']['extensions_valides_image']) && !empty($image_max_width) && !empty($image_max_height)) {
-				// Les fichiers image sont convertis en jpg uniquement si nécessaire - sinon on garde le fichier d'origine
-				$the_new_jpg_name = $new_file_name_without_extension . '.jpg';
-				// On charge l'image, et si sa taille est supérieure à $destinationW ou $destinationH, ou si elle fait plus de $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'] octets, on doit la régénèrer (sinon on la garde telle qu'elle était)
-				// Si on est dans le cas où on la regénère, on la convertit en JPEG à qualité $GLOBALS['site_parameters']['jpeg_quality'] % (par défaut dans PHP c'est 75%, et dans PEEL on utilise 88% par défaut) et on la sauvegarde sous son nouveau nom
-				$result = image_resize($path . $the_new_file_name, $path . $the_new_jpg_name, $image_max_width, $image_max_height, false, true, $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'], $GLOBALS['site_parameters']['jpeg_quality']);
-				if (!empty($result)) {
-					return basename($result);
+		if(StringMb::strlen($the_new_file_name)>=3) {
+			if (!empty($file_infos['base64'])) {
+				// Décodage d'une image envoyée en base64
+				$fp = fopen($path . $the_new_file_name, "wb"); 
+				$data = explode(',', $_REQUEST[$field_name]);
+				fwrite($fp, base64_decode($data[1])); 
+				fclose($fp); 
+				if(!empty($GLOBALS['site_parameters']['chmod_new_files'])) {
+					@chmod ($path . $the_new_file_name, $GLOBALS['site_parameters']['chmod_new_files']);
+				}
+				return $the_new_file_name; 
+			} elseif(!isset($file_infos['tmp_name'])) {
+				// Fichier temporaire stocké dans le cache, on va le déplacer dans le répertoire $path avec le bon nom
+				// Si il est déjà déplacé (car on revalide une seconde fois le formulaire), on s'arrange pour que ça marche aussi - dans ce cas on ne passe pas dans le test qui suit
+				if($GLOBALS['dirroot'] . $_REQUEST[$field_name] != $path . $the_new_file_name && file_exists($GLOBALS['dirroot'] . $_REQUEST[$field_name])) {
+					rename($GLOBALS['dirroot'] . $_REQUEST[$field_name], $path . $the_new_file_name);
+				}
+				if(!file_exists($path . $the_new_file_name)) {
+					// Fichier inexistant ou échec du déplacement => on annule le souvenir de ce fichier
+					return $default_return_value;
+				}
+				return $the_new_file_name;
+			} elseif (move_uploaded_file($file_infos['tmp_name'], $path . $the_new_file_name)) {
+				// Le fichier est maintenant dans le répertoire des téléchargements
+				if(!empty($GLOBALS['site_parameters']['chmod_new_files'])) {
+					@chmod ($path . $the_new_file_name, $GLOBALS['site_parameters']['chmod_new_files']);
+				}
+				if (!empty($GLOBALS['site_parameters']['extensions_valides_image']) && in_array($extension, $GLOBALS['site_parameters']['extensions_valides_image']) && !empty($image_max_width) && !empty($image_max_height)) {
+					// Les fichiers image sont convertis en jpg uniquement si nécessaire - sinon on garde le fichier d'origine
+					$the_new_jpg_name = $new_file_name_without_extension . '.jpg';
+					// On charge l'image, et si sa taille est supérieure à $destinationW ou $destinationH, ou si elle fait plus de $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'] octets, on doit la régénèrer (sinon on la garde telle qu'elle était)
+					// Si on est dans le cas où on la regénère, on la convertit en JPEG à qualité $GLOBALS['site_parameters']['jpeg_quality'] % (par défaut dans PHP c'est 75%, et dans PEEL on utilise 88% par défaut) et on la sauvegarde sous son nouveau nom
+					$result = image_resize($path . $the_new_file_name, $path . $the_new_jpg_name, $image_max_width, $image_max_height, false, true, $GLOBALS['site_parameters']['filesize_limit_keep_origin_file'], $GLOBALS['site_parameters']['jpeg_quality']);
+					if (!empty($result)) {
+						return basename($result);
+					} else {
+						$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
+						$tpl->assign('message', $GLOBALS['STR_ERROR_DECOD_PICTURE']);
+						$error = $tpl->fetch();
+					}
 				} else {
-					$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
-					$tpl->assign('message', $GLOBALS['STR_ERROR_DECOD_PICTURE']);
-					$error = $tpl->fetch();
+					return $the_new_file_name;
 				}
 			} else {
-				return $the_new_file_name;
+				$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
+				$tpl->assign('message', $GLOBALS['STR_ERROR_SOMETHING_PICTURE'] . ' ' .$path);
+				$error = $tpl->fetch();
 			}
 		} else {
+			unset($GLOBALS['uploaded_file_new'][$the_new_file_name]);
 			$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
-			$tpl->assign('message', $GLOBALS['STR_ERROR_SOMETHING_PICTURE'] . ' ' .$path);
+			$tpl->assign('message', 'Bad path: ' .$path);
 			$error = $tpl->fetch();
 		}
 	}
@@ -3503,9 +3663,9 @@ function format_filename_base($original_name, $rename_file = true) {
 	if ($rename_file || (function_exists('is_filtered') && is_filtered($original_name))) {
 		$new_file_name_without_extension = strftime("%d%m%y_%H%M%S") . "_PEEL_" . MDP(4);
 	} else {
-		$extension = String::strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
-		$modified_old_name_without_extension = preg_replace('/([^.a-z0-9]+)/i', '-', String::convert_accents(str_replace(array('%2520', '%20', ';', ',', ' ', '^', '$', '#', '<', '>', '[', ']', '{', '}', '(', ')', "'", '"'), array('-', '-', '-', '-', '-', '-', '-', '', '', '', '', '', '', '', '', '', '', ''), basename(String::strtolower($original_name), '.' . $extension))));
-		$new_file_name_without_extension = String::strtolower(String::substr(str_replace(array('-----', '----', '---', '--'), array('-', '-', '-', '-'), $modified_old_name_without_extension), 0, 33) . '-' . MDP(6));
+		$extension = StringMb::strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+		$modified_old_name_without_extension = preg_replace('/([^.a-z0-9]+)/i', '-', StringMb::convert_accents(str_replace(array('%2520', '%20', ';', ',', ' ', '^', '$', '#', '<', '>', '[', ']', '{', '}', '(', ')', "'", '"'), array('-', '-', '-', '-', '-', '-', '-', '', '', '', '', '', '', '', '', '', '', ''), basename(StringMb::strtolower($original_name), '.' . $extension))));
+		$new_file_name_without_extension = StringMb::strtolower(StringMb::substr(str_replace(array('-----', '----', '---', '--'), array('-', '-', '-', '-'), $modified_old_name_without_extension), 0, 33) . '-' . MDP(6));
 	}
 	return $new_file_name_without_extension;
 }
@@ -3514,24 +3674,40 @@ function format_filename_base($original_name, $rename_file = true) {
  * delete_uploaded_file_and_thumbs()
  *
  * @param string $filename
+ * @param boolean $return_message
  * @return
  */
-function delete_uploaded_file_and_thumbs($filename)
+function delete_uploaded_file_and_thumbs($filename, $return_message = false)
 {
-	if (a_priv('demo')) {
+	if (a_priv('demo') || empty($filename)) {
 		return false;
 	}
-	// Protection : ne pas prendre autre chose qu'un nom de fichier
-	$filename = str_replace(array('/', '.htaccess'), '', $filename);
-	$extension = @pathinfo($filename , PATHINFO_EXTENSION);
-	$nom = @basename($filename, '.' . $extension);
-	$thumbs_array = @glob($GLOBALS['uploaddir'] . '/thumbs/' . $nom . "-????.jpg");
-	if (!empty($thumbs_array)) {
-		foreach ($thumbs_array as $this_thumb) {
-			unlink($this_thumb);
+	if(!empty($filename)) {
+		// Protection : ne pas prendre autre chose qu'un nom de fichier
+		$filename = str_replace(array('/', '.htaccess'), '', $filename);
+		$extension = @pathinfo($filename , PATHINFO_EXTENSION);
+		$nom = @basename($filename, '.' . $extension);
+		$thumbs_array = @glob($GLOBALS['uploaddir'] . '/thumbs/' . $nom . "-????.jpg");
+		if (!empty($thumbs_array)) {
+			foreach ($thumbs_array as $this_thumb) {
+				unlink($this_thumb);
+			}
 		}
+		return @unlink($GLOBALS['uploaddir'] . '/' . $filename);
+	} else {
+		return null;
 	}
-	return @unlink($GLOBALS['uploaddir'] . '/' . $filename);
+	$result = @unlink($GLOBALS['uploaddir'] . '/' . $filename);
+	if($return_message) {
+		if ($result) {
+			$output = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $filename . ' ' . $GLOBALS["STR_HAS_BEEN_DELETED"]))->fetch();
+		} else {
+			$output = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $filename . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $GLOBALS["STR_FOPEN_FAILED"]))->fetch();
+		}
+		return $output;
+	} else {
+		return $result;
+	}
 }
 
 /**
@@ -3662,7 +3838,7 @@ function get_url_from_uploaded_filename($filename)
 	} elseif(strpos($filename, '/'.$GLOBALS['site_parameters']['cache_folder']) === 0) {
 		$this_url = $GLOBALS['wwwroot'] . $filename;
 	} elseif(!empty($filename)) {
-		$this_url = $GLOBALS['repertoire_upload'] . '/' . String::rawurlencode($filename);
+		$this_url = $GLOBALS['repertoire_upload'] . '/' . StringMb::rawurlencode($filename);
 	} else {
 		$this_url = null;
 	}
@@ -3677,15 +3853,20 @@ function get_url_from_uploaded_filename($filename)
  */
 function get_file_type($filename)
 {
-	$ext = String::strtolower(String::substr($filename, strrpos($filename, ".") + 1));
+	// Spécifiquement ici, il faut utiliser substr et non pas StringMb::substr à cause de strrpos qui n'est pas multibyte
+	$ext = StringMb::strtolower(substr($filename, strrpos($filename, ".") + 1));
+	$tmp = explode('?', $ext);
+	$ext = $tmp[0];
 	if(in_array($ext, array('gif', 'jpg', 'jpeg', 'png'))) {
 		$ext = 'image';
-	} elseif((empty($ext) || String::strlen($ext)>4) && strpos($filename, '//') !== false && strpos($filename, $GLOBALS['wwwroot']) === false) {
+	} elseif((empty($ext) || StringMb::strlen($ext)>4) && strpos($filename, '//') !== false && strpos($filename, $GLOBALS['wwwroot']) === false) {
 		// Image accessible en HTTP via une URL qui ne contient pas d'extension ou alors une extension suivi de GET (et donc par exemple *.php?image=52242)
-		$a = getimagesize($filename);
-		$image_type = $a[2];
-		if(in_array($image_type , array(IMAGETYPE_GIF , IMAGETYPE_JPEG ,IMAGETYPE_PNG , IMAGETYPE_BMP))) {
-			$ext = 'image';
+		$a = @getimagesize($filename);
+		if (!empty($a)) {
+			$image_type = $a[2];
+			if(in_array($image_type , array(IMAGETYPE_GIF , IMAGETYPE_JPEG ,IMAGETYPE_PNG , IMAGETYPE_BMP))) {
+				$ext = 'image';
+			}
 		}
 	}
 	return $ext;
@@ -3712,7 +3893,7 @@ function get_document_image_html($filename, $width = 100, $height = 100)
  * @param string $file Nom de fichier, avec ou sans chemin
  * @return
  */
-function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 100, $logo_height = 100, $read_only = false)
+function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 100, $logo_height = 100, $read_only = false, $init_javascript = false)
 {
 	if(empty($field_name)) {
 		return array();
@@ -3734,7 +3915,8 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 		'crop' => !empty($_SESSION['apply_crop_after_upload'][$field_name]),
 		'class' => $class,
 		'STR_DELETE_THIS_FILE' => $GLOBALS['STR_DELETE_THIS_FILE'],
-		'read_only' => $read_only
+		'read_only' => $read_only,
+		'download_picture' => vb($GLOBALS['site_parameters']['fineuploader_download_picture'])
 		);
 	if($file_type != 'image') {
 		$result['file_logo_src'] = thumbs($file, $logo_width, $logo_height, 'fit', null, null, true, true);
@@ -3761,6 +3943,9 @@ function get_uploaded_file_infos($field_name, $file, $delete_url, $logo_width = 
 		}
 	}
 	$GLOBALS['uploaded_file_div_id_last'] = $div_id;
+	if($init_javascript) {
+		$GLOBALS['js_ready_content_array'][] = 'init_fineuploader($("#'.$div_id.'"));';
+	}
 	return $result;
 }
 
@@ -3868,9 +4053,9 @@ function build_terms_clause($terms, $fields, $match_method)
 	$conditions_array = array();
 	foreach ($terms as $term) {
 		// si on a un - devant, alors on ne veut pas du mot
-		if (String::substr($term, 0, 1) == '-') {
+		if (StringMb::substr($term, 0, 1) == '-') {
 			// on enleve le '-' qu'on convertir en NOT
-			$term = String::substr($term, 1);
+			$term = StringMb::substr($term, 1);
 			$notmod = 'NOT';
 		} else {
 			$notmod = '';
@@ -4063,7 +4248,7 @@ function clean_Cache($days_max = 15, $filename_beginning = null)
 {
 	$files_deleted = nettoyer_dir($GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['cache_folder'], 3600 * 24 * $days_max, $filename_beginning);
 	if(!empty($GLOBALS['contentMail'])) {
-		$GLOBALS['contentMail'] .= 'Suppression des fichiers de plus de ' . $days_max . ' jours dans le dossier ' . $dir . '/ : ';
+		$GLOBALS['contentMail'] .= 'Suppression des fichiers de plus de ' . $days_max . ' jours dans le dossier ' . $GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['cache_folder'] . '/ : ';
 		$GLOBALS['contentMail'] .= 'Ok - ' . $files_deleted . ' fichiers supprimés' . "\r\n\r\n";
 	}
 }
@@ -4082,22 +4267,24 @@ function nettoyer_dir($dir, $older_than_seconds = 3, $filename_beginning = null,
 		return false;
 	}
 	$files_deleted = 0;
-	if(String::substr($dir, -1) == '/') {
-		$dir = String::substr($dir, 0, String::strlen($dir) - 1);
+	if(StringMb::substr($dir, -1) == '/') {
+		$dir = StringMb::substr($dir, 0, StringMb::strlen($dir) - 1);
 	}
 	if ($dir != $GLOBALS['dirroot'] && is_dir($dir) && ($dossier = opendir($dir))) {
 		while (false !== ($file = readdir($dossier))) {
-			if ($file != '.' && $file != '..' && $file[0] != '.' && filemtime($dir . '/' . $file) < time() - $older_than_seconds && is_file($dir . '/' . $file) && (empty($filename_beginning) || strpos($file, $filename_beginning) === 0)) {
-				// On efface les fichiers vieux de plus de $older_than_seconds secondes et qui ne sont pas des .htaccess
-				if($create_files_array_found_instead_of_delete) {
-					$GLOBALS['files_found_in_folder'][] = $file;
-				} else {
-					unlink($dir . '/' . $file);
+			if(!empty($file)) {
+				if ($file != '.' && $file != '..' && $file[0] != '.' && filemtime($dir . '/' . $file) < time() - $older_than_seconds && is_file($dir . '/' . $file) && (empty($filename_beginning) || strpos($file, $filename_beginning) === 0)) {
+					// On efface les fichiers vieux de plus de $older_than_seconds secondes et qui ne sont pas des .htaccess
+					if($create_files_array_found_instead_of_delete) {
+						$GLOBALS['files_found_in_folder'][] = $file;
+					} else {
+						unlink($dir . '/' . $file);
+					}
+					$files_deleted++;
+				} elseif ($file != '.' && $file != '..' && is_dir($dir . '/' . $file)) {
+					// On efface récursivement le contenu des sous-dossiers
+					$files_deleted += nettoyer_dir($dir . '/' . $file, $older_than_seconds, $filename_beginning);
 				}
-				$files_deleted++;
-			} elseif ($file != '.' && $file != '..' && is_dir($dir . '/' . $file)) {
-				// On efface récursivement le contenu des sous-dossiers
-				$files_deleted += nettoyer_dir($dir . '/' . $file, $older_than_seconds, $filename_beginning);
 			}
 		}
 	}
@@ -4179,7 +4366,7 @@ function formSelect ($name, $tab, $preselected_value = null, $addOne = 0, $get =
 		} else {
 			$s = (isset($_GET[$name]) && urldecode($_GET['' . $name . '']) == $k) ? ' selected="selected"' : '';
 		}
-		$o .= '<option value="' . String::str_form_value($k) . '" ' . $s . '>' . $v . '</option>' . "\n";
+		$o .= '<option value="' . StringMb::str_form_value($k) . '" ' . $s . '>' . $v . '</option>' . "\n";
 	}
 	return $o;
 }
@@ -4234,18 +4421,18 @@ function getTextEditor($instance_name, $width, $height, $default_text, $default_
 		}
 		$GLOBALS['js_ready_content_array'][] = '
 bkLib.onDomLoaded(function() {
-	new nicEditor({iconsPath : \'' . $GLOBALS['wwwroot'] . '/lib/nicEditor/nicEditorIcons.gif\',fullPanel : true}).panelInstance(\'' . $instance_name . '\');
+	new nicEditor({iconsPath : \'' . $GLOBALS['wwwroot'] . '/lib/nicEditor/nicEditorIcons.gif\',fullPanel : true, maxHeight:' . $height . ', externalCSS: \''.current($css_files).'\'}).panelInstance(\'' . $instance_name . '\');
 });
 ';
 		$output .= '
 <div style="width:' . $width_css . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:200px">
-		<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+		<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . StringMb::htmlentities($default_text) . '</textarea>
 	</div>
 </div>
 ';
 	} elseif ($this_html_editor == '0') {
-		$default_text = String::nl2br_if_needed($default_text);
+		$default_text = StringMb::nl2br_if_needed($default_text);
 		// Editeur FCKeditor
 		include_once($GLOBALS['dirroot'] . "/lib/FCKeditor/fckeditor.php");
 		$oFCKeditor = new FCKeditor($instance_name);
@@ -4253,7 +4440,7 @@ bkLib.onDomLoaded(function() {
 			$default_path = get_url('/');
 		}
 		$oFCKeditor->BasePath = $default_path . 'lib/FCKeditor/';
-		$oFCKeditor->Value = String::htmlspecialchars_decode($default_text, ENT_QUOTES);
+		$oFCKeditor->Value = StringMb::htmlspecialchars_decode($default_text, ENT_QUOTES);
 		$oFCKeditor->Height = $height;
 		$oFCKeditor->Width = $width;
 		$oFCKeditor->Config = array('EditorAreaCSS' => implode(',', $css_files));
@@ -4265,22 +4452,47 @@ bkLib.onDomLoaded(function() {
 </div>
 ';
 	} elseif ($this_html_editor == '3') {
-		$default_text = String::nl2br_if_needed($default_text);
+		$default_text = StringMb::nl2br_if_needed($default_text);
 		// Editeur CKeditor
 		// La hauteur demandée sera celle de la zone éditable - donc la hauteur totale sera bien supérieure
-		include_once($GLOBALS['dirroot'] . "/lib/ckeditor/ckeditor.php");
-		$config = array('width' => $width, 'height' => $height, 'contentsCss' => $css_files);
-		$CKEditor = new CKEditor($GLOBALS['wwwroot'] . '/lib/ckeditor/');
-		$CKEditor->returnOutput = true;
+		if(empty($GLOBALS['html_editor_loaded'])) {
+			$GLOBALS['js_files_pageonly'][] = get_url('/lib/ckeditor/ckeditor.js');
+			$GLOBALS['html_editor_loaded'] = true;
+			$GLOBALS['js_ready_content_array'][] = "
+			CKEDITOR.plugins.add( 'imageuploader', {
+				init: function( editor ) {
+					editor.config.filebrowserBrowseUrl='" . get_url('/lib/ckeditor/plugins/imageuploader/imgbrowser.php') . "';
+					editor.config.filebrowserUploadUrl='" . get_url('/lib/ckeditor/plugins/imageuploader/imgupload.php') . "';
+				}
+			});";
+			
+			// Configuration entities pour éviter la conversion des accents en entités HTML
+			// Format pour CSS : config.contentsCss = [ '/css/mysitestyles.css', '/css/anotherfile.css' ];
+			$ckeditor_config_js = '
+				config.entities=false;
+				config.entities_latin=false;
+				config.contentsCss=["'.implode('", "', $css_files).'"];
+			';
+			if (!defined('IN_PEEL_ADMIN')) {
+				// Pas d'upload en front-office via CKEditor
+				$ckeditor_config_js .= "
+				config.removeButtons = 'Image';";
+			}
+			$GLOBALS['js_ready_content_array'][] = "
+			CKEDITOR.editorConfig = function( config ) {
+				" . $ckeditor_config_js . "
+			};";
+			
+		}
+
+		$GLOBALS['js_ready_content_array'][] = '
+		CKEDITOR.replace( "' . $instance_name . '" );';
 		$output .= '
-<div style="width:' . (is_numeric($width)?($width+10).'px':$width_css) . '; max-width: 100%; min-height:' . ($height+143) . 'px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-	<div style="min-width:250px">
-		'.$CKEditor->editor($instance_name, String::htmlspecialchars_decode($default_text, ENT_QUOTES), $config).'
-	</div>
-</div>
+		<textarea class="ckeditor" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . StringMb::htmlentities($default_text) . '</textarea>	
+
 ';
 	} elseif ($this_html_editor == '4') {
-		$default_text = String::nl2br_if_needed($default_text);
+		$default_text = StringMb::nl2br_if_needed($default_text);
 		// Editeur TinyMCE
 		if(empty($GLOBALS['html_editor_loaded'])) {
 			$GLOBALS['html_editor_loaded'] = true;
@@ -4315,23 +4527,46 @@ bkLib.onDomLoaded(function() {
 		$output .= '
 <div style="width:' . (is_numeric($width)?$width.'px':$width_css) . '; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
 	<div style="min-width:600px">
-		<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+		<textarea class="tinymce" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . StringMb::htmlentities($default_text) . '</textarea>
 	</div>
 </div>
 ';
 	} elseif($this_html_editor == '5') {
 		// Champ textarea de base + Compteur de caractères
 		$output .= '
-			<textarea class="form-control" placeholder="'. $placeholder.'" name="' . $instance_name . '" cols="' . $cols . '" rows="' . ($height / 12) . '" onfocus="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onkeypress="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onkeyup="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onblur="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)">' . String::htmlentities($default_text) . '</textarea><br />
+			<textarea class="form-control" placeholder="'. $placeholder.'" name="' . $instance_name . '" cols="' . $cols . '" rows="' . ($height / 12) . '" onfocus="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onkeypress="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onkeyup="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)" onblur="Compter(this,'.$compter_char_max_if_enabled.',compteur, true)">' . StringMb::htmlentities($default_text) . '</textarea><br />
 			<div class="compteur_contener"><span style="margin:5px;">'.$GLOBALS['STR_REMINDING_CHAR'].'</span><input class="form-control compteur" type="number" name="compteur" size="4" onfocus="blur()" value="0" /></div>
 ';
 	} else {
 		// Champ textarea de base
 		$output .= '
-			<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . String::htmlentities($default_text) . '</textarea>
+			<textarea name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . StringMb::htmlentities($default_text) . '</textarea>
 ';
 	}
 	return $output;
+}
+
+/**
+ * Récupère une valeur dans la table peel_configuration dans le cas où on veut une information potentiellement indépendante du site sur lequel on est
+ *
+ * @param string $technical_code
+ * @param integer $site_id
+ * @param string $lang
+ * @return
+ */
+function get_configuration_variable($technical_code, $site_id, $lang)
+{
+	// On récupère la ligne si elle existe pour ce site_id et pas un autre
+	$sql = "SELECT string
+		FROM peel_configuration
+		WHERE technical_code='" . real_escape_string($technical_code) . "' AND (lang='" . real_escape_string($lang) . "' OR lang='') AND " . get_filter_site_cond('configuration', null, false, vb($site_id));
+	$qid = query($sql); 
+	if ($select = fetch_assoc($qid)) {
+		// Elément déjà existant, qu'on met à jour
+		return $select['string'];
+	} else {
+		return null;
+	}
 }
 
 /**
@@ -4488,20 +4723,24 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 	}
 	$original_files_array = $files_array;
 	foreach($files_array as $this_key => $this_file) {
-		if(String::substr($this_file, 0, 2) == '//') {
+		if(StringMb::substr($this_file, 0, 2) == '//') {
 			// Gestion des chemins de fichiers http/https automatiques
 			$this_file = 'http:' . $this_file;
-		} elseif(String::strpos($this_file, '//') === false && String::substr($this_file, 0, 1) == '/') {
+		} elseif(StringMb::strpos($this_file, '//') === false && StringMb::substr($this_file, 0, 1) == '/') {
 			// Chemin absolu
 			$this_file = $this_wwwroot . $this_file;
-		} elseif(String::strpos($this_file, '//') === false) {
+		} elseif(StringMb::strpos($this_file, '//') === false) {
 			// Chemin relatif car le nom du fichier ne commence pas par / => par défaut on considère qu'il est dans le répertoire CSS dans modeles/
 			$this_file = $GLOBALS['repertoire_css'] . '/' . $this_file;
 		} 
+		if($GLOBALS['wwwroot_in_admin'] != $GLOBALS['wwwroot']) {
+			// Nécessaire si appel en https de l'administration d'un site configuré en http
+			$this_file = str_replace($GLOBALS['wwwroot_in_admin'], $GLOBALS['wwwroot'], $this_file);
+		}
 		if($GLOBALS['wwwroot'] != $this_wwwroot) {
 			$this_file = str_replace($GLOBALS['wwwroot'], $this_wwwroot, $this_file);
 		}
-		$files_array[$this_key] = $this_file = String::html_entity_decode($this_file);
+		$files_array[$this_key] = $this_file = StringMb::html_entity_decode($this_file);
 		unset($skip);
 		if(!empty($excluded_files)) {
 			foreach($excluded_files as $this_excluded_file) {
@@ -4531,7 +4770,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 		$GLOBALS['already_updated_minify_id_increment'] = true;
 	}
 	$cache_id = md5(implode(',', $files_to_minify_array) . ','. vb($GLOBALS['site_parameters']['minify_id_increment']));
-	$file_name = $files_type . '_minified_' . substr($cache_id, 0, 8).'.'.$files_type;
+	$file_name = $files_type . '_minified_' . substr($cache_id, 0, 16).'.'.$files_type;
 	$minified_doc_root = $GLOBALS['dirroot'] . '/'.$GLOBALS['site_parameters']['cache_folder'].'/';
 	$file_path = $minified_doc_root . $file_name;
 	if (file_exists($file_path) === false || (($filemtime = @filemtime($file_path)) < time() - $lifetime) || (!empty($_GET['update']) && $_GET['update'] == 1)) {
@@ -4585,20 +4824,20 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				if($files_type == 'css') {
 					$symlinks = array();
 					$docroot = $GLOBALS['dirroot'];
-					if(String::strlen($GLOBALS['apparent_folder'])>1 && String::strpos($this_wwwroot, String::substr($GLOBALS['apparent_folder'], 0, String::strlen($GLOBALS['apparent_folder']) - 1)) !== false) {
-						$this_http_main_path = String::substr($this_wwwroot, 0, String::strlen($this_wwwroot) - String::strlen($GLOBALS['apparent_folder']) + 1);
+					if(StringMb::strlen($GLOBALS['apparent_folder'])>1 && StringMb::strpos($this_wwwroot, StringMb::substr($GLOBALS['apparent_folder'], 0, StringMb::strlen($GLOBALS['apparent_folder']) - 1)) !== false) {
+						$this_http_main_path = StringMb::substr($this_wwwroot, 0, StringMb::strlen($this_wwwroot) - StringMb::strlen($GLOBALS['apparent_folder']) + 1);
 						if(empty($GLOBALS['site_parameters']['avoid_lang_folders_in_minified_css']) && !empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '//') === false && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '.') === false) {
 							// On n'a pas choisi d'activer l'option pour avoir des liens vers les fichiers sans les dossiers de langue
 							// Donc il faut corriger le chemin qu'on vient de retravailler
-							$this_http_main_path = String::substr($this_http_main_path, 0, String::strlen($this_http_main_path) - String::strlen($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]));
+							$this_http_main_path = StringMb::substr($this_http_main_path, 0, StringMb::strlen($this_http_main_path) - StringMb::strlen($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]));
 						}
 					} else {
 						$this_http_main_path = $this_wwwroot;
 					}
 					$options = array('currentDir' => str_replace($this_http_main_path, $GLOBALS['dirroot'], dirname($this_file)), 'docRoot' => $docroot, 'symlinks' => $symlinks);
-					$css_content = String::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+					$css_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					if(!empty($css_content) && strlen(trim($css_content))>5) {
-						if(String::strpos(str_replace('@import url(http://fonts.googleapis.com', '', $css_content), '@import')!==false) {
+						if(StringMb::strpos(str_replace('@import url(http://fonts.googleapis.com', '', $css_content), '@import')!==false) {
 							// On rajoute à la liste des exclusions le fichier concerné si il y a @import dedans pour éviter les dysfonctionnements, sauf si c'est l'import d'une font externe
 							$GLOBALS['site_parameters']['minify_css_exclude_array'][] = $this_file;
 							set_configuration_variable(array('technical_code' => 'minify_css_exclude_array', 'string' => get_string_from_array($GLOBALS['site_parameters']['minify_css_exclude_array']), 'type' => 'array', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
@@ -4626,25 +4865,29 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 						}
 					}
 				} elseif($files_type == 'js') {
-					$js_content = String::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+					$js_content = StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 					if(!empty($js_content) && strlen(trim($js_content))>5) {
 						// Le fichier n'est pas vide, on le prend
 						if(strlen($js_content)/max(1,substr_count($js_content, "\n"))>50 || version_compare(PHP_VERSION, '5.3.0', '<')) {
 							// NB : Si le fichier semble déjà être minified, on ne cherche pas à compresser davantage => gain de temps et limite les risques d'altération du fichier
-							$output .= "\n\n\n" . $js_content;
 						}else {
-							$output .= "\n\n\n" . Minifier::minify($js_content);
+							$js_minified = Minifier::minify($js_content);
+							if(!empty($js_minified) && strlen(trim($js_minified))>5) {
+								// Protection au cas où Minifier::minify renvoie un contenu vide (peut arriver exceptionnellement)
+								$js_content = $js_minified;
+							}
 						}
+						$output .= "\n\n\n" . $js_content;
 					}
 				} else {
-					$output .= "\n\n\n".String::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
+					$output .= "\n\n\n".StringMb::file_get_contents_utf8(str_replace($this_wwwroot, $GLOBALS['dirroot'], $this_file));
 				}
 			}
 			if(!empty($output)) {
 				$output = trim($output);
-				$fp = String::fopen_utf8($file_path, 'wb');
+				$fp = StringMb::fopen_utf8($file_path, 'wb');
 				@flock($fp, LOCK_EX);
-				// On utilise strlen et non pas String::strlen car on veut le nombre d'octets et non pas de caractères
+				// On utilise strlen et non pas StringMb::strlen car on veut le nombre d'octets et non pas de caractères
 				$write_result = fwrite($fp, $output, strlen($output));
 				@flock($fp, LOCK_UN);
 				fclose($fp);
@@ -4740,7 +4983,7 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 				ORDER BY p." . word_real_escape_string($name_field) . " ASC";
 		}
 		foreach($queries_sql_array as $this_query_sql) {
-			if(String::strpos($this_query_sql, 'LIMIT') === false) {
+			if(StringMb::strpos($this_query_sql, 'LIMIT') === false) {
 				$this_query_sql .= ' LIMIT '.intval($maxRows);
 			}
 			$query = query($this_query_sql);
@@ -4808,14 +5051,14 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_s
 	if(is_array($specific_site_id)) {
 		$specific_site_id = current($specific_site_id);
 	}
-	if(in_array($table_technical_code, array('continents', 'partenaires', 'partenaires_views', 'partenaires_clicks'))) {
+	if(in_array($table_technical_code, array('continents', 'partenaires', 'partenaires_views', 'partenaires_clicks', 'adresses'))) {
 		// Cette table n'est pas multisite.
 		return 1;
 	}
-	if(!empty($GLOBALS['site_parameters']['multisite_disable']) || !empty($GLOBALS['site_parameters']['multisite_disable_' . $table_technical_code])) {
-		// Désactivation du multisite pour accélérer les requêtes sur un site isolé
+	if(empty($specific_site_id) && (!empty($GLOBALS['site_parameters']['multisite_disable']) || !empty($GLOBALS['site_parameters']['multisite_disable_' . $table_technical_code]))) {
+		// Désactivation du multisite pour accélérer les requêtes sur un site isolé. On vérifie si specific_site_id est bien vide, dans le cas contraire si specific_site_id est précisé, c'est que l'on veut récupérer les informations d'un site en particulier, et cela indépendamment de la configuration générale.
 		return 1;
-	} elseif(defined('IN_IPN') && !empty($GLOBALS['site_parameters']['multisite_disable_in_ipn'])) {
+	} elseif(defined('IN_IPN') && !empty($GLOBALS['site_parameters']['multisite_disable_in_ipn']) && $table_technical_code!='configuration') {
 		// Désactivation du multisite pour accélérer les requêtes sur un site isolé
 		return 1;
 	} 
@@ -4849,7 +5092,7 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_s
 			if($admin_force_multisite_if_allowed) {
 				// Lorsque l'ensemble des sites est concerné par la requête et pas seulement un site, ou que la configuration générale l'impose, aucun filtre sur site_id ne doit être ajouté.
 				return 1;
-			} elseif(isset($_SESSION['session_admin_multisite']) && $specific_site_id === null) {
+			} elseif(isset($_SESSION['session_admin_multisite']) && empty($GLOBALS['admin_multisite_disable']) && $specific_site_id === null) {
 				if(intval($_SESSION['session_admin_multisite'])==0) {
 					// on administre tous les sites en même temps
 					return 1;
@@ -4874,23 +5117,23 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_s
 	} elseif(!empty($site_id) && !empty($_SESSION['session_utilisateur']['site_id']) && $site_id != $_SESSION['session_utilisateur']['site_id'] && $site_id != vn($GLOBALS['site_id']) && empty($GLOBALS['site_parameters']['multisite_disable_utilisateurs'])) {
 		// Protection sur les site_id autorisés : sécurité, on empêche l'utilisateur d'agir sur un site qui ne le concerne pas
 		return 0;
-	} elseif(isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array($table_technical_code, array('articles', 'categories', 'cgv', 'marques', 'html', 'offres', 'produits', 'societe', 'vignettes_carrousels'))) {
+	} elseif(isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array($table_technical_code, array('articles', 'categories', 'cgv', 'marques', 'html', 'offres', 'produits', 'societe', 'vignettes_carrousels')) && ($table_technical_code!='categories' || empty($GLOBALS['site_parameters']['categories_disabled_show_to_admin_in_front']) || !a_priv("admin_products", false))) {
 		// Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
 		// Si pas dans un contexte d'administration de la donnée : ajout de la condition de le pays du visiteur 
 		$cond_array[] = "FIND_IN_SET('" . real_escape_string($_SESSION['session_site_country']) . "', " . $prefix . "site_country)";
 	}
-
+	$use_set = (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_' . $table_technical_code])));
 	if($exclude_public_items) {
 		// La requête concerne un seul site, sans tenir compte de la configuration globale.
-		if(empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])) {
+		if(!$use_set) {
 			$cond_array[] = $prefix.word_real_escape_string($field)."='".intval($site_id)."'";	
 		} else {
 			$cond_array[] = "FIND_IN_SET('" . intval($site_id) . "', " . $prefix.word_real_escape_string($field) . ")";
 		}
 	} else {
-		if(empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])) {
+		if(!$use_set) {
 			// Concerne un site, ou tous les sites
-			$cond_array[] = $prefix.word_real_escape_string($field)." IN (0,'" . intval($site_id) . "')";
+			$cond_array[] = $prefix.word_real_escape_string($field)." IN ('0','" . intval($site_id) . "')";
 		} else {
 			$cond_array[] = "(FIND_IN_SET('0', " . $prefix.word_real_escape_string($field) . ") OR FIND_IN_SET('" . intval($site_id) . "', " . $prefix.word_real_escape_string($field) . "))";
 		}
@@ -4962,10 +5205,11 @@ function get_all_sites_name_array($admin_force_multisite_if_allowed = false, $al
 		$query = query($sql);
 		while($result = fetch_assoc($query)) {
 			// Sélection du nom du site.
-			$query_name = query('SELECT string
+			$sql_name = 'SELECT string
 				FROM peel_configuration
 				WHERE site_id="' . nohtml_real_escape_string(get_site_id_sql_set_value($result['site_id'])).'" AND technical_code="nom_' . $_SESSION['session_langue'] . '"
-				LIMIT 1');
+				LIMIT 1';
+			$query_name = query($sql_name);
 			$result_name = fetch_assoc($query_name);
 			if (!empty($result_name['string'])) {
 				$all_sites_name_array_by_sql[md5($sql)][$result['site_id']] = $result_name['string'];
@@ -4975,8 +5219,10 @@ function get_all_sites_name_array($admin_force_multisite_if_allowed = false, $al
 					FROM peel_configuration
 					WHERE site_id="' . nohtml_real_escape_string(get_site_id_sql_set_value($result['site_id'])).'" AND technical_code="wwwroot"
 					LIMIT 1');
-				$result_wwwroot = fetch_assoc($query_wwwroot);
-				$all_sites_name_array_by_sql[md5($sql)][$result['site_id']] = str_replace(array('http://' ,'https://'), '', $result_wwwroot['string']);
+				if($result_wwwroot = fetch_assoc($query_wwwroot)) {
+					// Si il y a un résultat. Dans le cas contraire, le site_id trouvé par la requête au début de la fonction n'est pas associé à un site. Cela peut être dû à plusieurs id ensemble (ex : 1,2,3) dans le cas où le site est configuré pour avoir les champs site_id en SET.
+					$all_sites_name_array_by_sql[md5($sql)][$result['site_id']] = str_replace(array('http://' ,'https://'), '', $result_wwwroot['string']);
+				}
 			}
 		}
 	}
@@ -4998,11 +5244,11 @@ function get_user_job_options($selected_fonction_name = null)
 			$user_job_array[$selected_fonction_name] = $selected_fonction_name;
 		}
 		foreach($user_job_array as $this_job_code=>$this_job) {
-			if(String::substr($this_job, 0, 4)== 'STR_' && !empty($GLOBALS[$this_job])) {
+			if(StringMb::substr($this_job, 0, 4)== 'STR_' && !empty($GLOBALS[$this_job])) {
 				// Si le nom est une variable de langue, il faut utiliser cette variable.
 				$this_job = $GLOBALS[$this_job];
 			}
-			$output .= '<option value="'.String::str_form_value($this_job_code).'" ' . frmvalide($selected_fonction_name == $this_job_code, ' selected="selected"') . '>'.$this_job.'</option>';
+			$output .= '<option value="'.StringMb::str_form_value($this_job_code).'" ' . frmvalide($selected_fonction_name == $this_job_code, ' selected="selected"') . '>'.$this_job.'</option>';
 		}
 	}
 	return $output;
@@ -5020,7 +5266,7 @@ function get_generic_options($values_array, $selected_values = null)
 	$tpl_options = array();
 	foreach ($values_array as $key => $value) {
 		$tpl_options[] = array(
-			'value' => String::str_form_value($key),
+			'value' => StringMb::str_form_value($key),
 			'name' => $value,
 			'issel' => ($key == $selected_values)
 		);
@@ -5040,7 +5286,13 @@ function get_generic_options($values_array, $selected_values = null)
 function get_site_wwwroot($site_id, $lang = null)
 {
 	static $output;
-	if(empty($output[$site_id.'_'.$lang])) {
+	if (is_array($site_id)) {
+		// Si site_id est un tableau, on veut le convertir en chaine de caractère pour générer l'id de cache qui servira à ne pas exécuter à nouveau la requête. Par contre il faut laisser $site_id tel quel,get_filter_site_cond gère si site_id est un tableau 
+		$site_id_cache_id = get_string_from_array($site_id);
+	} else {
+		$site_id_cache_id = $site_id;
+	}
+	if(empty($output[$site_id_cache_id.'_'.$lang])) {
 		if(!empty($site_id)) {
 			$sql = "SELECT c.string, l.url_rewriting
 				FROM peel_configuration c
@@ -5051,12 +5303,12 @@ function get_site_wwwroot($site_id, $lang = null)
 			$result = fetch_assoc($query);
 		}
 		if(!empty($result)) {
-			$output[$site_id.'_'.$lang] = get_lang_rewrited_wwwroot($lang, $result['string'], $result['url_rewriting']);
+			$output[$site_id_cache_id.'_'.$lang] = get_lang_rewrited_wwwroot($lang, $result['string'], $result['url_rewriting']);
 		} else {
-			$output[$site_id.'_'.$lang] = get_lang_rewrited_wwwroot($lang);
+			$output[$site_id_cache_id.'_'.$lang] = get_lang_rewrited_wwwroot($lang);
 		}
 	}
-	return $output[$site_id.'_'.$lang];
+	return $output[$site_id_cache_id.'_'.$lang];
 }
 
 /**
@@ -5073,10 +5325,10 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 	}
 	$output = '';
 	$form_error_object = new FormError();
-
 	if (!empty($frm) && empty($_GET['prodid'])) {
+		$frm['recipient'] = $GLOBALS['support_sav_client'];
 		if (!empty($frm['phone'])) {
-			// Formulaire de demande de rappel par téléphone
+			// Si $frm['phone'] est défini (attention : phone, et non pas telephone), c'est qu'on arrive du formulaire de demande de rappel par téléphone (call_back_form)
 			// Non implémenté par défaut
 			$frm['nom'] = $frm['phone'];
 			$frm['telephone'] = $frm['phone'];
@@ -5090,13 +5342,16 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 						'texte' => $GLOBALS['STR_ERR_MESSAGE'],
 						'token' => ''));
 			} else {
-				$form_error_object->valide_form($frm,
-					array('nom' => $GLOBALS['STR_ERR_NAME'],
+				$mandatory_fields = array('nom' => $GLOBALS['STR_ERR_NAME'],
 						'telephone' => $GLOBALS['STR_ERR_TEL'],
 						'email' => $GLOBALS['STR_ERR_EMAIL'],
 						'texte' => $GLOBALS['STR_ERR_MESSAGE'],
-						'sujet' => $GLOBALS['STR_ERR_SUBJECT'],
-						'token' => ''));
+						'token' => '');
+				if (!empty($GLOBALS['STR_CONTACT_SUBJECT'])) {
+					$mandatory_fields['sujet'] = $GLOBALS['STR_ERR_SUBJECT'];
+				}
+				$form_error_object->valide_form($frm,
+					$mandatory_fields);
 			}
 			if (!$form_error_object->has_error('email')) {
 				$frm['email'] = trim($frm['email']);
@@ -5127,9 +5382,15 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 			// Ce délai ne doit pas être trop long pour un utilisateur qui revalide son formulaire déjà tout rempli suite à premier envoi incomplet
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
 		}
+		// Si on arrive du formulaire de demande de rappel par téléphone (call_back_form), $frm['phone'] est défini, et on ne fait pas de tests sur form_error_object
 		if (!$form_error_object->count() || !empty($frm['phone'])) {
-			// Si $frm['phone'] est défini, on ne fait pas de tests sur form_error_object
 			if(empty($frm['phone'])){
+				foreach ($_GET as $this_item => $this_value) {
+					// On récupère uniquement l'information "recipient" de la variable de configuration "contact_page_prefill_XXXXX" car le formulaire prérempli a été soumis et on ne veut pas modifier les éventuelles modifications des champs
+					if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'])) {
+						$frm['recipient'] = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'];
+					}
+				}
 				if (check_if_module_active('captcha')) {
 					// Code OK on peut effacer le code
 					delete_captcha(vb($frm['code_id']));
@@ -5202,6 +5463,41 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 		if (!empty($noticemsg)) {
 			$output .= $noticemsg;
 		}
+		// Par sécurité, on force par défaut ici le destinataire du message de contact. On pourra toujours le changer après si on veut
+		if (!empty($_GET)) {
+			foreach ($_GET as $this_item => $this_value) {
+				if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item])) {
+					if (!empty($_POST)) {
+						// On récupère uniquement l'information "recipient" de la variable de configuration "contact_page_prefill_XXXXX" car le formulaire prérempli a été soumis et on ne veut pas modifier les éventuelles modifications des champs
+						if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'])) {
+							$frm['recipient'] = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'];
+						}
+					} else {
+						// Préremplissage des champs du formulaire
+						foreach ($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item] as $field_name => $field_value) {	
+							if ($field_name == 'meta_title') {
+								$GLOBALS['meta_title'] = $field_value;
+							} elseif ($field_name == 'meta_description') {
+								$GLOBALS['meta_description'] = $field_value;
+							}
+							// On renseigne les informations de session utilisateur si la valeur du champs est vide
+							if (empty($field_value)) {
+								// Dans le cas pour le nom de la famille, le champs différent on fait donc un test et on concatène avec '_famille'
+								if ($field_name == 'nom') {
+									$frm[$field_name] = vb($_SESSION['session_utilisateur'][$field_name.'_famille']);
+								} else {
+									$frm[$field_name] = vb($_SESSION['session_utilisateur'][$field_name]);
+								}
+							} else {
+								$frm[$field_name] = $field_value;
+							}
+						}
+						$frm['contact_page_map_display'] = true;
+					}
+				}
+			}
+		}
+
 		if(empty($frm) && est_identifie()) {
 			$frm['email'] = vb($_SESSION['session_utilisateur']['email']);
 			$frm['telephone'] = vb($_SESSION['session_utilisateur']['telephone']);
@@ -5230,7 +5526,7 @@ function insere_code_promo($frm)
 {
 	$qid = query("SELECT *
 		FROM peel_codes_promos
-		WHERE nom = '" . nohtml_real_escape_string(String::strtoupper($frm['nom'])) . "' AND " . get_filter_site_cond('codes_promos') . "");
+		WHERE nom = '" . nohtml_real_escape_string(StringMb::strtoupper($frm['nom'])) . "' AND " . get_filter_site_cond('codes_promos') . "");
 	if ($result = fetch_assoc($qid)) {
 		return false;
 	}
@@ -5279,7 +5575,7 @@ function insere_code_promo($frm)
 		, product_filter
 		, cat_not_apply_code_promo
 	) VALUES (
-		'" . nohtml_real_escape_string(String::strtoupper(vb($frm['nom']))) . "'
+		'" . nohtml_real_escape_string(StringMb::strtoupper(vb($frm['nom']))) . "'
 		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm["date_debut"])) . "'
 		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm["date_fin"])) . "'
 		, '" . (vb($frm['on_type']) == 1 ? floatval(get_float_from_user_input(vn($frm['remise_percent']))) : '0') . "'
@@ -5337,7 +5633,7 @@ function get_default_vat()
  * @return Renvoie un tableau dans l'ordre de présence dans specific_field_titles. Si des champs manquent dans $specific_field_titles mais sont présents dans specific_field_types, ils sont ajoutés à la fin du tableau
  *
  */
-function get_specific_field_infos($frm, $form_error_object = null, $form_usage = "user", $step = null, $fill_with_user_session = false, $get_search_fields_only = false, $get_edit_fields_only = false, $text_editor_avoid_loading = false, $fill_with_user_id = null) {
+function get_specific_field_infos($frm, $form_error_object = null, $form_usage = "user", $step = null, $fill_with_user_session = false, $get_search_fields_only = false, $get_edit_fields_only = false, $text_editor_avoid_loading = false, $fill_with_user_id = null, $custom_template_tags = array()) {
 	// Etape 1 : Récupération des configurations
 	$specific_fields = array();
 	$field_types_with_single_value_array = array('datepicker', 'hidden', 'password', 'separator', 'text', 'textarea', 'html', 'upload');
@@ -5348,18 +5644,33 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 	} else {
 		$mandatory_field_prefix = $specific_field_prefix;
 	}
-	$mandatory_fields = vb($GLOBALS['site_parameters'][$mandatory_field_prefix . '_mandatory_fields'], array());
-	$specific_field_titles = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_titles'], array()));
-	$specific_field_types = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_types'], array());
-	$specific_field_names = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_names']);
-	$specific_field_values = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_values']);
-	$specific_field_positions = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_positions'], array());
-	$specific_field_steps = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_steps'], array());
-	$specific_field_search = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_search']);
-	$specific_field_search_types = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_search_types']);
-	$specific_field_exclude = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_'.(!defined('IN_PEEL_ADMIN')?'front':'back').'_exclude'], array());
-	$specific_field_include = vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_'.(!defined('IN_PEEL_ADMIN')?'front':'back').'_include']);
-	$specific_field_javascript = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_javascript'], array()));
+	$mandatory_fields = template_tags_replace(vb($GLOBALS['site_parameters'][$mandatory_field_prefix . '_mandatory_fields'], array()), $custom_template_tags);
+	foreach(array('readonly', 'style', 'titles', 'types', 'names', 'class', 'id', 'values', 'positions', 'steps', 'search', 'types', 'javascript', 'placeholder', 'multiple') as $this_info_name) {
+		$this_var_name = 'specific_field_' . $this_info_name;
+
+		if(!empty($fill_with_user_id)) {
+			// On veut compléter $frm avec les informations d'un utilisateur en base de données
+			$user_infos = get_user_information($fill_with_user_id);
+		} elseif($fill_with_user_session && est_identifie()) {
+			// On veut compléter $frm avec les informations de session d'un utilisateur
+			$user_infos = $_SESSION['session_utilisateur'];
+		}
+		if(vb($user_infos['user_type']) == 'company') {
+			// Si l'utilisateur est une personne moral
+			$specific_field_user_type_prefix = $specific_field_prefix . '_company';
+		} else {
+			// Sinon c'est une personne physique
+			$specific_field_user_type_prefix = $specific_field_prefix . '_person';
+		}
+		if (!empty($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name])) {
+			// On test si il existe une variable qui utilise le type d'utilisateur dans le nom; Si oui on prend le contenu de cette variable.
+			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
+		} else {
+			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
+		}
+	}
+	$specific_field_exclude = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_'.(!defined('IN_PEEL_ADMIN')?'front':'back').'_exclude'], array()), $custom_template_tags);
+	$specific_field_include = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_'.(!defined('IN_PEEL_ADMIN')?'front':'back').'_include']), $custom_template_tags);
 	if($get_edit_fields_only) {
 		$specific_field_exclude = array_merge($specific_field_exclude, vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_'.(!defined('IN_PEEL_ADMIN')?'front':'back').'_edit_exclude'], array()));
 	}
@@ -5369,20 +5680,13 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 	} else {
 		$default_values = vb($GLOBALS['site_parameters']['specific_field_default_values'], array());
 	}
-	if(!empty($fill_with_user_id)) {
-		// On veut compléter $frm avec les informations d'un utilisateur en base de données
-		$user_infos = get_user_information($fill_with_user_id);
-	} elseif($fill_with_user_session && est_identifie()) {
-		// On veut compléter $frm avec les informations de session d'un utilisateur
-		$user_infos = $_SESSION['session_utilisateur'];
-	}
 	if(!empty($specific_field_steps)){
 		$specific_field_merged_list = array();
 		// L'ordre des champs est de préférence celui donné par steps si il est défini.
 		foreach($specific_field_steps as $this_fields_list) {
 			$this_fields_array = get_array_from_string($this_fields_list);
 			foreach($this_fields_array as $this_key => $this_field) {
-				if(empty($specific_field_types[$this_field]) || (empty($specific_field_titles[$this_field]) && String::substr($this_field, -3, 1) == '_' && String::substr($this_field, -2) != $_SESSION['session_langue'])) {
+				if(empty($specific_field_types[$this_field]) || (empty($specific_field_titles[$this_field]) && StringMb::substr($this_field, -3, 1) == '_' && StringMb::substr($this_field, -2) != $_SESSION['session_langue'])) {
 					// Champ sans type défini, ou sans titre et pour une autre langue
 					// => ne doit pas être ajouté automatiquement si pas dans titles
 					unset($this_fields_array[$this_key]);
@@ -5395,27 +5699,58 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 		$specific_field_merged_list = array_keys($specific_field_titles);
 	}
 	$specific_field_merged_list = array_unique($specific_field_merged_list);
-	
+
 	if(!empty($specific_field_merged_list)) {
 		foreach($specific_field_merged_list as $this_field) {
 			// Etape 2 : Récupération d'éventuelle valeur préremplie stockée dans $frm, venant de BDD ou d'un formulaire
 			// (on doit le faire avant d'étudier upload_multiple)
 			if (!isset($frm[$this_field])) {
-				// La valeur est vide, on regarde si une valeur par défaut est remplie.
-				if(isset($default_values[$this_field])) {
+				if (StringMb::strpos($this_field,'[') !==false && !empty($frm[StringMb::substr($this_field, 0, strpos($this_field,'['))])) {
+					// La valeur de ce champ est configuré comme un tableau dans la base de donnée, donc on récupère la valeur du champ du formulaire à partir du nom du champ de la BDD, auquel on enlève [] ou [X]
+					$this_value = '';
+					if (is_array($frm[StringMb::substr($this_field, 0, strpos($this_field,'['))])) {
+						$this_value .= $frm[StringMb::substr($this_field, 0, strpos($this_field,'['))][0];
+					} else {
+						$this_value = $frm[StringMb::substr($this_field, 0, strpos($this_field,'['))];
+					}
+					$frm[$this_field] = $this_value;
+				} elseif(isset($default_values[$this_field])) {
+					// La valeur est vide, on regarde si une valeur par défaut est remplie.
 					$frm[$this_field] = $default_values[$this_field];
 				} elseif(!empty($user_infos) && isset($user_infos[$this_field])) {
 					// Remplissage complémentaire des informations avec des données utilisateur
 					$frm[$this_field] = $user_infos[$this_field];
 				}
 			}
+			if(!empty($specific_field_multiple[$this_field])) {
+				// Plusieurs champs sont à générer en fonction d'un modèle
+				// $this_field n'a pas de suffixe numérique, on l'ajoute en l'incrémentant tant qu'on trouve des informations dans $frm
+				// Au minimum on génère un champ avec suffixe 1, qui remplace la configuration par défaut du champ
+				$new_field_name = $this_field;
+				for($i = 1;isset($frm[$this_field . $i]) || $i==1; $i++) {
+					$new_field_name = $this_field . $i;
+					$new_specific_field_merged_list[] = $new_field_name;
+					$specific_field_values[$new_field_name] = $frm[$new_field_name];
+					$specific_field_types[$new_field_name] =  vb($specific_field_types[$this_field]);
+					$specific_field_positions[$new_field_name] = vb($specific_field_positions[$this_field]);
+					$specific_field_titles[$new_field_name] = vb($specific_field_titles[$this_field]);
+					$specific_field_javascript[$new_field_name] = vb($specific_field_javascript[$this_field]);
+					$mandatory_fields[$new_field_name] = vb($mandatory_fields[$this_field]);
+					if (!$get_search_fields_only && is_numeric($step) && !empty($specific_field_steps[$step]) && in_array($this_field, get_array_from_string($specific_field_steps[$step]))) {
+						$specific_field_steps[$step] .= ','.$new_field_name;
+					}
+				}
+				unset($specific_field_types[$this_field]);
+			}
 			if(vb($specific_field_types[$this_field]) == 'upload_multiple') {
 				// Gestion de N champs upload stockés dans peel_telechargement
 				// On va décliner 1 champ multiple configuré en N champs réels
-				if(!empty($frm[$this_field])) {
-					$upload_multiple_values = $frm[$this_field];
+				if(!empty($specific_field_names[$this_field])) {
+					$upload_multiple_values = vb($frm[$specific_field_names[$this_field]]);
+					$new_generic_field_name = $specific_field_names[$this_field];
 				} else {
-					$upload_multiple_values = vb($frm['upload_multiple']);
+					$upload_multiple_values = vb($frm[$this_field]);
+					$new_generic_field_name = $this_field;
 				}
 				if(!is_array($upload_multiple_values)) {
 					$upload_multiple_values = array($upload_multiple_values);
@@ -5426,16 +5761,25 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 				if(!empty($upload_multiple_values)) {
 					$i = 1;
 					foreach($upload_multiple_values as $this_value) {
-						$new_field_name = 'upload_multiple_openarray_'.$i.'_closearray_';
+						// Ce nom doit contenir la chaine "upload_multiple" pour que le fichier fineuploader reconnaisse que c'est un upload_multiple qui est demandé
+						$new_field_name = $new_generic_field_name . '_openarray_'.$i.'_closearray_';
 						$new_specific_field_merged_list[] = $new_field_name;
 						$specific_field_values[$new_field_name] = $this_value;
 						$specific_field_types[$new_field_name] = 'upload';
 						$specific_field_positions[$new_field_name] = vb($specific_field_positions[$this_field]);
 						$specific_field_titles[$new_field_name] = vb($specific_field_titles[$this_field]);
 						$specific_field_javascript[$new_field_name] = vb($specific_field_javascript[$this_field]);
+						$mandatory_fields[$new_field_name] = vb($mandatory_fields[$this_field]);
 						if (!$get_search_fields_only && is_numeric($step) && !empty($specific_field_steps[$step]) && in_array($this_field, get_array_from_string($specific_field_steps[$step]))) {
 							$specific_field_steps[$step] .= ','.$new_field_name;
 						}
+						
+						// gestion des messages d'erreurs pour l'upload multiples
+						if (is_object($form_error_object) && $form_error_object->has_error($new_generic_field_name)) {
+							// Si le champ a une erreur, on va créer l'affichage de l'erreur avec le nouveau nom du champ
+							$form_error_object->add($new_field_name, $form_error_object->text($new_generic_field_name, true));
+						}
+
 						$i++;
 					}
 				}
@@ -5448,13 +5792,14 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			// Etape 3 : Initialisation
 			unset($tpl_options);
 			unset($this_value);
+			$readonly = false;
 			$frm_this_field_values_array = array();
 			$this_title = vb($specific_field_titles[$this_field]);
-			if(String::substr($this_title, 0, 4)== 'STR_') {
+			if(StringMb::substr($this_title, 0, 4)== 'STR_') {
 				// Le titre est une variable de langue
 				$this_title = $GLOBALS[$this_title];
 			}
-			$this_position = vb($specific_field_positions[$this_field]);
+			$this_id = vb($specific_field_id[$this_field]);
 			if($get_search_fields_only && !empty($specific_field_search_types[$this_field])) {
 				// Pour la recherche on veut par exemple un select alors qu'on veut une checkbox pour rentrer l'information
 				$specific_field_types[$this_field] = $specific_field_search_types[$this_field];
@@ -5463,7 +5808,13 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			$field_type = $temp[0];
 			$field_maxlength = vb($temp[1]);
 			$field_javascript = vb($specific_field_javascript[$this_field]);
-			
+			if (in_array($this_field, $specific_field_readonly)) {
+				// La valeur du champ ne doit pas être modifié. On va utiliser l'attribut HTML readonly pour empêcher l'utilisateur de modifier la valeur du champ. Avec readonly la valeur affichée est envoyée en POST, à l'inverse de disabled qui n'envoi pas la valeur dans le formulaire.
+				$readonly = true;
+			}
+			if (in_array($this_field, $specific_field_multiple)) {
+				$multiple = true;
+			}
 			// Etape 4 : Gestion de l'exclusion de certains champs de la boucle
 			// Les noms des différents champs dans l'étape sont séparés par des virgules
 			if (!$get_search_fields_only && is_numeric($step) && !empty($specific_field_steps[$step]) && !in_array($this_field, get_array_from_string($specific_field_steps[$step]))) {
@@ -5490,8 +5841,9 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 				if (is_array($frm[$this_field])) {
 					// Si $frm vient directement du formulaire, les valeurs pour les checkbox sont déjà sous forme de tableau.
 					$frm_this_field_values_array = vb($frm[$this_field]);
-				} elseif ($field_type == 'checkbox') {
+				} elseif ($field_type == 'checkbox' || $field_type == 'select' ) {
 					// pour les checkbox, $frm[$this_field] peut contenir plusieurs valeurs séparées par des virgules si les données viennent de la BDD
+					// pour les select aussi, dans le cas de select multiple.
 					$frm_this_field_values_array = get_array_from_string($frm[$this_field]);
 				} else {
 					$frm_this_field_values_array = array($frm[$this_field]);
@@ -5500,17 +5852,24 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			
 			// Etape 6 : Génération du tableau de propriétés relatives au champ
 			$this_field_infos = array('field_type' => $field_type,
+					'field_id' => (!empty($this_id)?$this_id:$this_field),
+					'field_class' => vb($specific_field_class[$this_field]),
 					'field_name' => $this_field,
 					'field_title' => $this_title,
-					'field_position' => $this_position,
+					'field_position' => vb($specific_field_positions[$this_field]),
 					'field_maxlength' => $field_maxlength,
+					'field_style' => vb($specific_field_style[$this_field]),
+					'field_placeholder' => vb($specific_field_placeholder[$this_field]),
 					'javascript' => $field_javascript,
+					'readonly' => !empty($readonly),
+					'multiple' => !empty($multiple),
 					'mandatory' => (!empty($mandatory_fields[$this_field])),
 					'error_text' => (is_object($form_error_object)?$form_error_object->text($this_field):''),
 					'STR_CHOOSE' => $GLOBALS['STR_CHOOSE']
 				);
+				
 			if (in_array($field_type, $field_types_with_single_value_array) || empty($field_type) || empty($specific_field_names[$this_field])) {
-				if (!empty($frm_this_field_values_array[0])) {
+				if (!empty($frm_this_field_values_array[0]) && !in_array($this_field, vb($GLOBALS['site_parameters']['specific_field_form_display_default_values'], array()))) {
 					// Pour récupérer la valeur d'un champ text, la valeur du formulaire $frm_this_field_values_array a priorité sur la valeur prédéfinie dans $specific_field_values
 					$this_value = $frm_this_field_values_array[0];
 				} else {
@@ -5530,6 +5889,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 					}
 					$this_field_infos['field_value'] = $this_value;
 				}
+
 			} else {
 				// Champ de type checkbox, radio ou select
 				$text_field_values_array = array();
@@ -5537,7 +5897,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 				// Préparation du tableau de valeurs
 				$this_field_values = get_array_from_string(template_tags_replace($specific_field_values[$this_field]));
 				foreach($this_field_values as $this_key => $this_value) {
-					if(String::substr($this_value, 0, 4)== 'STR_') {
+					if(StringMb::substr($this_value, 0, 4)== 'STR_') {
 						// Variable de langue
 						$this_field_values[$this_key] = $GLOBALS[$this_value];
 					} elseif($this_field=="date_end" && $field_type == 'select') {
@@ -5546,6 +5906,9 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 					}
 				}
 				foreach($this_field_values as $this_key => $this_value) {
+					if ($this_field=="funding_eligibility" && vn($frm_this_field_values_array[0]) == 1) {
+						$this_field_infos['field_style'] = "color:#FF0000;font-weight:bold;";
+					}
 					if ($this_field=="ad_closed") {
 						// Pour clôturer une annonce on passe la date d'insertion à 0. Cet état est différent de enligne.
 						$issel = (vb($frm['date_insertion']) == "0000-00-00 00:00:00");
@@ -5554,12 +5917,12 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 					}
 					if($issel) {
 						// Nom de chaque option sélectionnée
-						$text_field_values_array[] = trim(String::strip_tags($this_field_names[$this_key]));
+						$text_field_values_array[] = trim(StringMb::strip_tags($this_field_names[$this_key]));
 					}
 					$this_field_infos['options'][trim($this_value)] = array('value' => trim($this_value),
 							'issel' => $issel,
 							'name' => trim($this_field_names[$this_key]),
-							'br' => (String::substr($this_field_names[$this_key], -6) == '<br />')
+							'br' => (StringMb::substr($this_field_names[$this_key], -6) == '<br />')
 						);
 				}
 				$this_field_infos['field_values'] = $text_field_values_array;
@@ -5579,7 +5942,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
  * @return
  */
 function handle_specific_fields(&$frm, $form_usage = 'user') {
-	$table_correspondance = array('user_util_client_person' => 'utilisateurs','user_util_client_company' => 'utilisateurs','user_util_agent_person' => 'utilisateurs','user_util_agent_company' => 'utilisateurs','user_util_contributeur_person' => 'utilisateurs','user_util_contributeur_company' => 'utilisateurs','user_util_expert_person' => 'utilisateurs','user_util_expert_company' => 'utilisateurs','user_util_porteur_person' => 'utilisateurs', 'user_util_porteur_company' => 'utilisateurs', 'user' => 'utilisateurs', 'order' => 'commandes', 'ad' => 'lot_vente', 'ad_admin' => 'lot_vente', 'partner' => 'partenaires');
+	$table_correspondance = array('user_util_client_person' => 'utilisateurs','user_util_client_company' => 'utilisateurs','user_util_agent_person' => 'utilisateurs','user_util_agent_company' => 'utilisateurs','user_util_contributeur_person' => 'utilisateurs','user_util_contributeur_company' => 'utilisateurs','user_util_expert_person' => 'utilisateurs','user_util_expert_company' => 'utilisateurs','user_util_porteur_person' => 'utilisateurs', 'user_util_porteur_company' => 'utilisateurs', 'user' => 'utilisateurs', 'order' => 'commandes', 'ad' => 'lot_vente', 'ad_admin' => 'lot_vente', 'partner' => 'partenaires', 'user_util_lender_person' => 'utilisateurs');
 	$addresses_potential_fields_array = array('societe', 'prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
 	if(empty($table_correspondance[$form_usage])) {
 		return null;
@@ -5587,7 +5950,14 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 	$specific_field_titles = vb($GLOBALS['site_parameters'][$form_usage . '_specific_field_titles'], array());
 	$specific_field_types = vb($GLOBALS['site_parameters'][$form_usage . '_specific_field_types'], array());
 	$specific_field_steps = vb($GLOBALS['site_parameters'][$form_usage . '_specific_field_steps'], array());
-	
+
+	if ($form_usage == 'ad_admin' && empty($specific_field_titles)) {
+		// Il n'y a pas de champ spécifique pour les formulaires d'annonces en back office.
+		// Donc on reprend la configuration du formulaire du front.
+		$specific_field_titles = vb($GLOBALS['site_parameters']['ad_specific_field_titles'], array());
+		$specific_field_types = vb($GLOBALS['site_parameters']['ad_specific_field_types'], array());
+		$specific_field_steps = vb($GLOBALS['site_parameters']['ad_specific_field_steps'], array());
+	}
 	// Récupération des champs de la BDD, pour éviter les erreurs de mise à jour du à une erreur d'administration de user_specific_field_titles, et ne pas mettre les champs type separator dans la requête SQL, et tout autre intru qui ferais échoué la requete.
 	$this_table_field_types = get_table_field_types('peel_' . $table_correspondance[$form_usage]);
 	$this_table_field_names = get_table_field_names('peel_' . $table_correspondance[$form_usage]);
@@ -5598,7 +5968,7 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 		foreach($specific_field_steps as $this_fields_list) {
 			$this_fields_array = get_array_from_string($this_fields_list);
 			foreach($this_fields_array as $this_key => $this_field) {
-				if(empty($specific_field_types[$this_field]) || (empty($specific_field_titles[$this_field]) && String::substr($this_field, -3, 1) == '_' && String::substr($this_field, -2) != $_SESSION['session_langue'])) {
+				if(empty($specific_field_types[$this_field]) || (empty($specific_field_titles[$this_field]) && StringMb::substr($this_field, -3, 1) == '_' && StringMb::substr($this_field, -2) != $_SESSION['session_langue'])) {
 					// Champ sans type défini, ou sans titre et pour une autre langue
 					// => ne doit pas être ajouté automatiquement si pas dans titles
 					unset($this_fields_array[$this_key]);
@@ -5621,9 +5991,9 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 		if(in_array($this_field, $addresses_potential_fields_array)) {
 			// Contenu tel que celui de la table utilisateurs, ou autre table avec noms de champs sans suffixe
 			$frm['adresses_fields_array'][$this_field] = $this_field;
-		} elseif ((String::substr($this_field,-5) == '_ship' ||  String::substr($this_field,-5) == '_bill')) {
+		} elseif ((StringMb::substr($this_field,-5) == '_ship' ||  StringMb::substr($this_field,-5) == '_bill')) {
 			// contenu de la table de commande
-			$frm['adresses_fields_array'][String::substr($this_field, 0, -5)] = String::substr($this_field, 0, -5);
+			$frm['adresses_fields_array'][StringMb::substr($this_field, 0, -5)] = StringMb::substr($this_field, 0, -5);
 		}
 		// On traite ci-dessous tous les champs spécifiques
 		if ($form_usage == 'user' && (defined('IN_REGISTER') || defined('IN_RETAILER')) && !empty($GLOBALS['site_parameters']['disable_user_specific_field_on_register_page']) && in_array($this_field, $GLOBALS['site_parameters']['disable_user_specific_field_on_register_page'])) {
@@ -5648,10 +6018,9 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 			}
 		
 			$frm['specific_field_values'][$this_field] = $frm[$this_field];
-			if(strpos($this_field, 'tag') !== false || strpos($this_field, 'html') !== false) {
+			if(strpos($this_field, 'tag') !== false || strpos($this_field, 'html') !== false || strpos($this_field, 'description') !== false) {
 				// HTML autorisé qu'on corrige et on filtre
-				$frm[$this_field] = String::getCleanHTML($frm[$this_field], null, true, true, true, null, true);
-
+				$frm[$this_field] = StringMb::getCleanHTML($frm[$this_field], null, true, true, true, null, vb($GLOBALS['site_parameters']['handle_specific_field_clean_html_safe_mode'], false));
 				$frm['specific_field_sql_set'][$this_field] = word_real_escape_string($this_field) . '="' . real_escape_string($frm[$this_field]) . '"';
 			} else {
 				$frm['specific_field_sql_set'][$this_field] = word_real_escape_string($this_field) . '="' . nohtml_real_escape_string($frm[$this_field]) . '"';
@@ -5717,37 +6086,37 @@ function get_specific_fields_search_cond(&$frm, $form_usage = 'user', $prefix = 
  *
  * @param array $specific_field_infos_array Array with all fields data from get_specific_field_infos
  * @param string $display_mode
- * @param boolean $read_only
+ * @param boolean $disabled
  * @param boolean $text_only
  * @return
  */
-function display_specific_field_form($specific_field_infos_array, $display_mode = 'table', $read_only = false, $text_only = false) {
+function display_specific_field_form($specific_field_infos_array, $display_mode = 'table', $disabled = false, $text_only = false) {
 	$output='';
 	$tpl = $GLOBALS['tplEngine']->createTemplate('specific_field.tpl');
 	foreach($specific_field_infos_array as $specific_fields) {
 		if(!empty($specific_fields['upload_infos'])) {
 			// Pour les uploads d'images, on force le mode $read_only si on veut les champs disabled ou si on veut juste un output texte sans input
-			$specific_fields['upload_infos']['read_only'] = ($read_only || $text_only);
+			$specific_fields['upload_infos']['read_only'] = ($disabled || $text_only);
 		}
 		if(!empty($specific_fields['error_text'])) {
 			$error_on_page = true;
 		}
-		$tpl->assign('read_only', $read_only);
+		$tpl->assign('disabled', $disabled);
 		$tpl->assign('text_only', $text_only);
 		$tpl->assign('f', $specific_fields);
 		$mandatory_text = (!empty($specific_fields['mandatory']) ? ' <span class="etoile">*</span>':'');
 		if(!empty($specific_fields['field_title']) || !in_array($specific_fields['field_type'], array('hidden', 'separator', 'textarea', 'html'))) {
 			if($display_mode == 'div') {
 				$output .= '
-<div class="row" style="margin-bottom:10px">
-	<div class="col-sm-6 col-md-5 col-lg-4">'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS'] .':':'') .'</div>
-	<div class="col-sm-6 col-md-7 col-lg-8">' . $tpl->fetch() . vb($specific_fields['error_text']) . '</div>
+<div class="row '.(!empty($specific_fields['field_class'])?$specific_fields['field_class']:'').'" style="margin-bottom:10px '.(!empty($specific_fields['field_style'])?';'.$specific_fields['field_style']:'').'">
+	<div class="col-sm-4 col-md-5 col-lg-4">'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS_HTML'] .':':'') .'</div>
+	<div class="col-sm-8 col-md-7 col-lg-8">' . $tpl->fetch() . vb($specific_fields['error_text']) . '</div>
 </div>
 ';
 			} else {
 				$output .= '
 			<tr>
-				<td>'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':':'') . '</td>
+				<td>'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS_HTML'] . ':':'') . '</td>
 				<td>' . $tpl->fetch() . vb($specific_fields['error_text']) . '</td>
 			</tr>';
 			}
@@ -5777,27 +6146,53 @@ function display_specific_field_form($specific_field_infos_array, $display_mode 
  * 
  * @param array $frm
  * @param string $source
+ * @param string $upload_multiple_fieldname
  * @return
  */
-function handle_upload_use_specific_table($frm, $source = '')
+function handle_upload_use_specific_table($frm, $source = '', $upload_multiple_fieldname = 'upload_multiple')
 {
-	// On supprime tous les fichiers de peel_telechargement, pour remplir à nouveau la table ensuite.
-	$sql = "DELETE FROM peel_telechargement
-		WHERE ad_id='" . intval($frm['ref']) . "' AND source='" . real_escape_string($source) . "'";
-	query($sql);
-	if(!empty($frm['upload_multiple'])) {
+	if(!empty($frm[$upload_multiple_fieldname])) {
+		$GLOBALS['uploaded_file_already_existing'] = array();
+		$GLOBALS['uploaded_file_new'] = array();
+		if (!empty($frm['ref'])) {
+			$annonce_object = new Annonce($frm['ref']);
+		}
 		$i = 1;
-		foreach($frm['upload_multiple'] as $this_cache_file) {
-			$_REQUEST['upload_multiple_'.$i] = $this_cache_file;
-			$this_uploaded_file = upload('upload_multiple_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+		foreach($frm[$upload_multiple_fieldname] as $this_cache_file) {
+			$_REQUEST[$upload_multiple_fieldname.'_'.$i] = $this_cache_file;
+			$uploaded_files[] = upload($upload_multiple_fieldname.'_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+			$i++;
+		}
+		if (!empty($frm['ref'])) {
+			// On supprime tous les fichiers de peel_telechargement liés à $source et qui ne sont plus dans ce qui a été géré par la boucle sur upload ci-dessus
+			$annonce_object->delete_pictures(false, $source, $GLOBALS['uploaded_file_already_existing']);
+		} else {
+			$sql = "SELECT *
+				FROM peel_telechargement
+				WHERE source='" . real_escape_string($source) . "'";
+			$query = query($sql);
+			while ($result = fetch_assoc($query)) {
+				if (!in_array($result['url'], $GLOBALS['uploaded_file_already_existing'])) {
+					// Suppression du fichier sur le disque
+					delete_uploaded_file_and_thumbs($result['url']);
+					$sql = "DELETE FROM peel_telechargement
+						WHERE id='". intval($result['id']) . "'";
+					query($sql);
+				}
+			}
+		}
+		// On insère uniquement les nouveaux fichiers réellement nouvellement uploadés gérés par a boucle sur upload ci-dessus
+		foreach($GLOBALS['uploaded_file_new'] as $this_uploaded_file) {
 			$sql = "INSERT INTO peel_telechargement
 				SET url='" . nohtml_real_escape_string($this_uploaded_file) . "',
 					date='" . date('Y-m-d H:i:s', time()) . "',
-					ad_id='" . intval($frm['ref']) . "',
+					ad_id='" . intval(vn($frm['ref'])) . "',
 					source='" . real_escape_string($source) . "'
 				ON DUPLICATE KEY UPDATE date=GREATEST(date,'" . date('Y-m-d H:i:s', time()) . "')";
 			query($sql);
-			$i++;
+		}
+		if (!empty($frm['ref'])) {
+			unset($annonce_object);
 		}
 	}
 }
@@ -5817,21 +6212,25 @@ function handle_upload_use_specific_table($frm, $source = '')
 	$GLOBALS['css_files'][] = $wwwroot . '/lib/css/fineuploader.css';
 	$GLOBALS['js_content_array'][] = '
 window.init_fineuploader = function(object) {
+	data_name = object.data("name");
+	if(data_name) {
+		data_name = data_name.replace(/_openarray_/g, "[").replace(/_closearray_/g, "]");
+	}
 	object.fineUploader({
 		multiple: false,
 		request: {
 				endpoint: "' . $wwwroot . '/fine_uploader.php?origin=' . urlencode($_SERVER['SCRIPT_FILENAME']) . '",
-				inputName: object.data("name").replace(/_openarray_/g, "[").replace(/_closearray_/g, "]")
+				inputName: data_name
 			},
 		failedUploadTextDisplay: {
 				mode: "custom",
 				maxChars: 100
 			},
 		text: {
-			uploadButton: "' . String::str_form_value($GLOBALS["STR_UPLOAD"]) . '",
-			cancelButton: "' . String::str_form_value($GLOBALS["STR_CANCEL"]) . '",
-			failUpload: "' . String::str_form_value($GLOBALS["STR_FTP_GET_FAILED"]) . '",
-			formatProgress: "{percent}% ' . String::str_form_value($GLOBALS["STR_OUT_OF"]) . ' {total_size}"
+			uploadButton: "' . StringMb::str_form_value($GLOBALS["STR_UPLOAD"]) . '",
+			cancelButton: "' . StringMb::str_form_value($GLOBALS["STR_CANCEL"]) . '",
+			failUpload: "' . StringMb::str_form_value($GLOBALS["STR_FTP_GET_FAILED"]) . '",
+			formatProgress: "{percent}% ' . StringMb::str_form_value($GLOBALS["STR_OUT_OF"]) . ' {total_size}"
 		}
 	}).on("complete", function(event, id, fileName, responseJSON) {
 		if (responseJSON.success) {
@@ -5872,10 +6271,11 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 	if(!isset($GLOBALS['nbprod_update'])) {
 		$GLOBALS['nbprod_update'] = 0;
 		$GLOBALS['nbprod_update_null'] = 0;
-		$GLOBALS['nbprod_insert'] = 0;
 		$GLOBALS['nbprod_categorie_insert'] = 0;
 	}
-
+	if (!isset($GLOBALS['nbprod_insert'])) {
+		$GLOBALS['nbprod_insert'] = 0;
+	}
 	if (isset($field_values['site_id'])) {
 		$site_id = $field_values['site_id'];
 	} else {
@@ -5888,7 +6288,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 		}
 		$this_brand_id_array = array();
 		foreach($field_values['id_marque'] as $this_key => $this_field_value) {
-			if(String::strlen($this_field_value)>0) {
+			if(StringMb::strlen($this_field_value)>0) {
 				// La marque n'est pas vide - il faut que l'import soit compatible avec des noms de marque pouvant être des nombres
 				// Par défaut on considère qu'une marque donnée est une id de marque, sinon on gère comme si c'était un nom si pas trouvée et non numérique
 				$q = query('SELECT id
@@ -5926,11 +6326,11 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			// On ne souhaite pas inclure les champs spécifiques ou non reconnus dans la requête SQL des produits. Mais il ne faut pas supprimer les champs specifiques de $field_values puisque l'on s'en sert après
 			if((empty($product_field_names) || in_array($this_field_name, $product_field_names)) && !in_array($this_field_name, array('id', 'Categorie', 'categorie_id')) && in_array($this_field_name, $product_table_field_names)) {
 				// On ne tient compte que des colonnes présentes dans la table produits pour sql_fields, les autres champs sont traités séparément
-				if(String::strpos($this_field_name, 'nom_') === 0 && String::strlen($this_field_name) == 6 && !empty($GLOBALS['site_parameters']['product_name_forced_lang']) && $this_field_name != 'nom_' . $GLOBALS['site_parameters']['product_name_forced_lang']) {
+				if(StringMb::strpos($this_field_name, 'nom_') === 0 && StringMb::strlen($this_field_name) == 6 && !empty($GLOBALS['site_parameters']['product_name_forced_lang']) && $this_field_name != 'nom_' . $GLOBALS['site_parameters']['product_name_forced_lang']) {
 					// Colonne nom_XX n'existant pas sur ce site, on ne traite pas le champ
 					continue;
 				}
-				if(String::strpos($this_field_name, 'description_') === 0 && String::strlen($this_field_name) == 14 && !empty($GLOBALS['site_parameters']['product_description_forced_lang']) && $this_field_name != 'description_' . $GLOBALS['site_parameters']['product_description_forced_lang']) {
+				if(StringMb::strpos($this_field_name, 'description_') === 0 && StringMb::strlen($this_field_name) == 14 && !empty($GLOBALS['site_parameters']['product_description_forced_lang']) && $this_field_name != 'description_' . $GLOBALS['site_parameters']['product_description_forced_lang']) {
 					// Colonne description_XX n'existant pas sur ce site, on ne traite pas le champ
 					continue;
 				}
@@ -5941,7 +6341,6 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			unset($field_values[$this_field_name]);
 		}
 	}
-		
 	if (!empty($field_values['id'])) {
 		// On a spécifié une id Produit, donc on essaie de faire un UPDATE
 		if (!empty($set_sql_fields)) {
@@ -6000,7 +6399,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 				WHERE produit_id="' . intval($product_id) . '"');
 			$this_list_color = explode(",", $this_field_value);
 			foreach($this_list_color as $this_value){
-				if(String::strlen($this_value)>0) {
+				if(StringMb::strlen($this_value)>0) {
 					if(!is_numeric($this_value)) {
 						$sql_select_color = 'SELECT * 
 							FROM peel_couleurs
@@ -6034,7 +6433,7 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 			foreach($this_list_size as $this_value){
 				$this_list_size_and_price = explode("§", $this_value);
 				$size_name = $this_list_size_and_price[0];
-				if(String::strlen($size_name)>0) {
+				if(StringMb::strlen($size_name)>0) {
 					$size_price = vn($this_list_size_and_price[1]);
 					$size_price_reseller = vn($this_list_size_and_price[2]);
 					// On ne fait pas de test is_numeric ou pas sur les tailles pour savoir si on parle d'id ou de nom, car une taille peut être un nombre !
@@ -6270,6 +6669,25 @@ function data_position_sort($arg1, $arg2) {
 }
 
 
+/**
+ * Récupère la quantité de produit pour ajouter au panier un produit complémentaire
+ *
+ * @param intval $reference_id
+ * @param intval $produit_id
+ * @return
+ */
+function get_quantity_product_reference($reference_id, $produit_id)
+{
+	$output = '';
+	$sql = "SELECT p.quantity
+		FROM peel_produits_references p
+		WHERE p.reference_id='" . intval($reference_id) . "' AND p.produit_id='" . intval($produit_id) . "'";
+	$query = query($sql);
+	if ($product = fetch_assoc($query)) {
+		$output = $product['quantity'];
+	}
+	return $output;
+}
 
 
 

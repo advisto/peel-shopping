@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: Invoice.php 53254 2017-03-22 14:23:10Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: Invoice.php 53254 2017-03-22 14:23:10Z gboussin $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -40,6 +40,7 @@ class Invoice extends TCPDF {
 	var $format;
 	var $angle = 0;
 	var $remarque_lignes;
+	var $remarque_font_size = 8;
 	var $document_name;
 	var $document_id;
 
@@ -149,23 +150,24 @@ class Invoice extends TCPDF {
 	 *
 	 * @param mixed $texte
 	 * @param mixed $largeur
+	 * @param integer $font_size
 	 * @return
 	 */
-	function sizeOfText($texte, $largeur)
+	function sizeOfText($texte, $largeur, $font_size = null)
 	{
 		$index = 0;
 		$nb_lines = 0;
 		$loop = true;
 		while ($loop) {
-			$pos = String::strpos($texte, "\n");
+			$pos = StringMb::strpos($texte, "\n");
 			if (!$pos) {
 				$loop = false;
 				$ligne = $texte;
 			} else {
-				$ligne = String::substr($texte, $index, $pos);
-				$texte = String::substr($texte, $pos + 1);
+				$ligne = StringMb::substr($texte, $index, $pos);
+				$texte = StringMb::substr($texte, $pos + 1);
 			}
-			$length = floor($this->GetStringWidth($ligne));
+			$length = floor($this->GetStringWidth($ligne, null, null, $font_size));
 			if ($largeur != 0) {
 				$res = 1 + floor($length / $largeur) ;
 			} else {
@@ -177,8 +179,8 @@ class Invoice extends TCPDF {
 	}
 
 	/**
-	 * Cette fonction affiche en haut à gauche le nom de la societe dans la police Helvetica-12-Bold
-	 * les coordonnées de la société dans la police Helvetica-10
+	 * Cette fonction affiche en haut à gauche le nom de la societe dans la police freesans-12-Bold
+	 * les coordonnées de la société dans la police freesans-10
 	 *
 	 * @param mixed $adresse
 	 * @param mixed $logo
@@ -194,7 +196,7 @@ class Invoice extends TCPDF {
 			$y1 = 6;
 		}
 		if (!empty($logo) && empty($GLOBALS['site_parameters']['invoice_pdf_logo_display_disable'])) {
-			if (String::strpos($logo, '://') !== false) {
+			if (StringMb::strpos($logo, '://') !== false) {
 				// Le fichier est hébergé sur un autre serveur que celui-ci, sinon la fonction getSocieteLogoPath aurait changé le lien URL en chemin serveur
 				$logo = thumbs($logo, 125, 80, 'fit', null, null, true, true);
 				$this->Image($logo, $x1 + vb($GLOBALS['site_parameters']['logo_pdf_locationX'], 45), $y1 + vb($GLOBALS['site_parameters']['logo_pdf_locationY'], 0));
@@ -218,13 +220,12 @@ class Invoice extends TCPDF {
 		}
 		if ($bill_mode != 'user_custom_products_list') {
 			$this->SetXY($x1, $y1);
-			// $this->SetFont('Helvetica', 'B', 12);
+			// $this->SetFont('freesans', 'B', 12);
 			// $length = $this->GetStringWidth( $nom );
 			// $this->Cell( $length, 2, $nom);
-			$this->SetFont('Helvetica', '', 10);
+			$this->SetFont('freesans', '', 10);
 			$length = $this->GetStringWidth($adresse);
 			// Coordonnées de la société
-			$lignes = $this->sizeOfText($adresse, $length) ;
 			$this->MultiCell($length, 4, $adresse);
 		}
 	}
@@ -258,7 +259,7 @@ class Invoice extends TCPDF {
 		$loop = 0;
 
 		while ($loop == 0) {
-			$this->SetFont("Helvetica", "B", $szfont);
+			$this->SetFont("freesans", "B", $szfont);
 			$sz = $this->GetStringWidth($texte);
 			if (($r1 + $sz) > $r2)
 				$szfont --;
@@ -320,11 +321,11 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $width, $height, 'D');
 		$this->Rect($r1, $y1, $width, $header_height, 'DF');
 
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->SetXY($r1, $y1 + 0.5);
 		$this->Cell(90, 4, $GLOBALS['STR_PDF_BILL_DATE'], 0, 0, "C");
 
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->SetXY($r1, $y1 + $this->cMargin + $header_height);
 
 		if ($date_a != "") {
@@ -348,7 +349,7 @@ class Invoice extends TCPDF {
 		
 		$text1 = ($mode != 'devis'?$GLOBALS['STR_INVOICE_BOTTOM_TEXT']:$GLOBALS['STR_INVOICE_BOTTOM_TEXT1']);
 		$this->SetXY($r1, $y1);
-		$this->SetFont("Helvetica", "", 8);
+		$this->SetFont("freesans", "", 8);
 		$this->Cell(30, 4, $text1 ,0, 0, "C");
 		if (floatval($tva)==0) {
 			if (check_if_module_active('micro_entreprise')) {
@@ -378,7 +379,7 @@ class Invoice extends TCPDF {
 		$y1 = $this->h - 12;
 
 		$this->SetXY($r1, $y1);
-		$this->SetFont("Helvetica", "", $font_size);
+		$this->SetFont("helvetica", "", $font_size);
 		$this->Cell(30, 4, $GLOBALS['STR_PDF_BILL_PAGE'] . ' ' . $page, 0, 0, "C");
 	}
 
@@ -406,7 +407,7 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $width, $height, 'D');
 		$this->Rect($r1, $y1, $width, $header_height, 'DF');
 
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->SetXY($r1, $y1 + 0.5);
 		$title = $GLOBALS['STR_PDF_FACTURATION'];
 		if (!empty($id_utilisateur)) {
@@ -414,7 +415,7 @@ class Invoice extends TCPDF {
 		}
 		$this->Cell(90, 4, $GLOBALS['STR_PDF_FACTURATION'], 0, 0, "C");
 
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->SetXY($r1, $y1 + $this->cMargin + $header_height);
 		$this->MultiCell(90, 4, $pdf_facturation . "\n");
 	}
@@ -437,11 +438,11 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $width, $height, 'D');
 		$this->Rect($r1, $y1, $width, $header_height, 'DF');
 
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->SetXY($r1, $y1 + 0.5);
 		$this->Cell(90, 4, $GLOBALS['STR_PDF_LIVRAISON'], 0, 0, "C");
 
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->SetXY($r1, $y1 + $this->cMargin + $header_height);
 		$this->MultiCell(90, 4, $pdf_facturation2 . "\n");
 	}
@@ -464,11 +465,11 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $width, $height, 'D');
 		$this->Rect($r1, $y1, $width, $header_height, 'DF');
 
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->SetXY($r1, $y1 + 0.5);
 		$this->Cell(90, 4, $GLOBALS['STR_PDF_PAIEMENT'], 0, 0, "C");
 
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->SetXY($r1, $y1 + $this->cMargin + $header_height);
 		$this->Cell(90, 4, $mode, 0, 0, "C");
 	}
@@ -489,10 +490,10 @@ class Invoice extends TCPDF {
 		$this->InvoiceRoundedRect($r1, $y1, ($r2 - $r1), ($y2 - $y1), 2.5, 'D');
 		$this->Line($r1, $mid, $r2, $mid);
 		$this->SetXY($r1 + ($r2 - $r1) / 2 - 5 , $y1 + 1);
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->Cell(10, 4, $GLOBALS['STR_PDF_DUE_DATE'], 0, 0, "C");
 		$this->SetXY($r1 + ($r2 - $r1) / 2 - 5 , $y1 + 5);
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->Cell(10, 5, $date, 0, 0, "C");
 	}
 
@@ -504,7 +505,7 @@ class Invoice extends TCPDF {
 	 */
 	function addReference($ref)
 	{
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$length = $this->GetStringWidth($GLOBALS['STR_PDF_REF'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . $ref);
 		$r1 = 10;
 		$r2 = $r1 + $length;
@@ -534,7 +535,7 @@ class Invoice extends TCPDF {
 		} else {
 			$height = 5;
 		}
-		//$y2 = $this->h - 27 - $this->remarque_lignes * 5;
+		//$y2 = $this->h - 27 - $this->remarque_lignes * 3.5 * ($this->remarque_font_size/8);
 		$y2 = $y_max_allowed - 10 - $y1;
 		$this->SetXY($r1, $y1);
 		$this->Rect($r1, $y1, $r2, $y2, "D");
@@ -543,7 +544,7 @@ class Invoice extends TCPDF {
 		$this->Rect($r1, $y1, $r2, $height, "DF");
 
 		$colX = $r1;
-		$this->SetFont("Helvetica", "B", $font_size);
+		$this->SetFont("freesans", "B", $font_size);
 		if(!empty($this->colonnes)) {
 			foreach($this->colonnes as $lib => $pos) {
 				$this->SetXY($colX, $y1 + 1);
@@ -616,9 +617,9 @@ class Invoice extends TCPDF {
 		$x = 10;
 		$max_y_reached = $ligne;
 		if($bill_mode == 'user_custom_products_list') {
-			$this->SetFont("Helvetica", "", 7);
+			$this->SetFont("freesans", "", 7);
 		} else {
-			$this->SetFont("Helvetica", "", $font_size);
+			$this->SetFont("freesans", "", $font_size);
 		}
 		if($bill_mode == 'user_custom_products_list') {
 			$ligne = $ligne-3;
@@ -628,7 +629,6 @@ class Invoice extends TCPDF {
 				$longCell = $pos;
 				$texte = $tab[ $lib ];
 				$length = $this->GetStringWidth($texte);
-				$tailleTexte = $this->sizeOfText($texte, $length);
 				$formText = $this->format[ $lib ];
 				$this->SetXY($x, $ligne);
 				$this->MultiCell($longCell, $line_height, $texte, 0, $formText, $fill);
@@ -660,10 +660,10 @@ class Invoice extends TCPDF {
 		$y2 = $y1;
 		$mid = $y1 + ($y2 / 2);
 		$this->SetXY($r1 + ($r2 - $r1) / 2 - 5, $y1 + 3);
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$this->Cell(10, 5, $GLOBALS['STR_PDF_TOTAL_HT'], 0, 0, "C");
 		$this->SetXY($r1 + ($r2 - $r1) / 2 - 5, $y1 + 9);
-		$this->SetFont("Helvetica", "", 10);
+		$this->SetFont("freesans", "", 10);
 		$this->Cell(10, 5, $total_ht . ' HT', 0, 0, "C");
 	}
 
@@ -675,11 +675,11 @@ class Invoice extends TCPDF {
 	 */
 	function addRemarque($remarque)
 	{
-		$this->SetFont("Helvetica", "", 8);
+		$this->SetFont("freesans", "", $this->remarque_font_size);
 		$r1 = 10;
 		$r2 = $this->w - ($r1 * 2) ;
-		$y1 = $this->h - 62 - $this->remarque_lignes * 4 - 5;
-		$y2 = $this->remarque_lignes * 4;
+		$y2 = $this->remarque_lignes * 3.5 * ($this->remarque_font_size/8);
+		$y1 = $this->h - 62 - $y2 - 5;
 		$this->SetXY($r1 , $y1);
 		if (!empty($GLOBALS['site_parameters']['bill_pdf_add_color_behind_comments'])) {
 			// On dessine un cadre coloré
@@ -697,7 +697,7 @@ class Invoice extends TCPDF {
 	 */
 	function addCadreTVAs()
 	{
-		$this->SetFont("Helvetica", "B", 8);
+		$this->SetFont("freesans", "B", 8);
 		$r1 = 10;
 		$r2 = $r1 + 20;
 		$y1 = $this->h;
@@ -716,7 +716,7 @@ class Invoice extends TCPDF {
 		$this->Cell(10, 4, $GLOBALS['STR_PDF_BILL_SHIPPING']);
 		$this->SetX($r1 + 100);
 		$this->Cell(10, 4, $GLOBALS['STR_PDF_BILL_TOTALS']);
-		$this->SetFont("Helvetica", "B", 6);
+		$this->SetFont("freesans", "B", 6);
 		$this->SetXY($r1 + 93, $y2 - 13);
 		$this->Cell(6, 0, $GLOBALS['STR_TTC'] . "   :");
 		$this->SetXY($r1 + 93, $y2 - 8);
@@ -732,7 +732,7 @@ class Invoice extends TCPDF {
 	 */
 	function addCadreSignature()
 	{
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$r1 = 10;
 		$r2 = $r1 + 60;
 		$y1 = $this->h - 60;
@@ -741,7 +741,7 @@ class Invoice extends TCPDF {
 		$this->Line($r1, $y1 + 6, $r2, $y1 + 6);
 		$this->SetXY($r1, $y1 + 1);
 		$this->Cell(60, 4, $GLOBALS['STR_ACCORD'], 0, 0, "C");
-		$this->SetFont("Helvetica", "B", 7);
+		$this->SetFont("freesans", "B", 7);
 		$this->SetXY($r1, $y2 - 21);
 		$this->Cell(60, 0, $GLOBALS['STR_PDF_DATE']);
 		$this->SetXY($r1, $y2 - 16);
@@ -757,7 +757,7 @@ class Invoice extends TCPDF {
 	 */
 	function addCadreRib()
 	{
-		$this->SetFont("Helvetica", "B", 10);
+		$this->SetFont("freesans", "B", 10);
 		$r1 = 10;
 		$r2 = $r1 + 65;
 		$y1 = $this->h - 60;
@@ -770,12 +770,13 @@ class Invoice extends TCPDF {
 		$sql="SELECT code_banque, code_guichet, numero_compte, cle_rib, iban, swift
 			FROM peel_societe
 			WHERE " . get_filter_site_cond('societe') . "
+			ORDER BY site_id DESC
 			LIMIT 1";
 		$query = query($sql);
 		$result = fetch_assoc($query);
 		
 		$this->SetXY($r1, $y1+6);
-		$this->SetFont('Helvetica', '', 10);
+		$this->SetFont('freesans', '', 10);
 		$rib = $GLOBALS['STR_BANK_ACCOUNT_CODE'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $result['code_banque'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_COUNTER'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $result['code_guichet'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_NUMBER'].$GLOBALS['STR_BEFORE_TWO_POINTS'] .  ':'.$result['numero_compte'] . "\r\n" . $GLOBALS['STR_BANK_ACCOUNT_RIB_KEY'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['cle_rib'] . "\r\n" .  $GLOBALS['STR_IBAN'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['iban'] . "\r\n" . $GLOBALS['STR_SWIFT'].$GLOBALS['STR_BEFORE_TWO_POINTS'] . ':'.$result['swift']; 
 		// $length = $this->GetStringWidth($rib);
 		$this->MultiCell(66, 7, $rib, 0, "L");
@@ -819,7 +820,7 @@ class Invoice extends TCPDF {
 	{
 		$re = $this->w - 65;
 		$y1 = $this->h - 55;
-		$this->SetFont("Helvetica", "B", 7);
+		$this->SetFont("freesans", "B", 7);
 		$k = 0;
 
 		if (abs(get_float_from_user_input($params1["tarif_paiement"])) >= 0.01) {
@@ -871,9 +872,9 @@ class Invoice extends TCPDF {
 
 		$k = $k + 4;
 
-		$this->SetFont("Helvetica", "B", 8);
+		$this->SetFont("freesans", "B", 8);
 		$this->SetXY($re, $y1 + $k);
-		$this->Cell(25, 4, String::strtoupper($GLOBALS['STR_PDF_NET']) . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
+		$this->Cell(25, 4, StringMb::strtoupper($GLOBALS['STR_PDF_NET']) . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':');
 		$this->SetXY($re + 30, $y1 + $k);
 		$this->Cell(25, 4, $params1["montant"], '', '', 'R');
 	}
@@ -888,7 +889,7 @@ class Invoice extends TCPDF {
 	{
 		$re = $this->w - 130;
 		$y1 = $this->h - 55;
-		$this->SetFont("Helvetica", "B", 7);
+		$this->SetFont("freesans", "B", 7);
 		$k = 0;
 
 		if (check_if_module_active('micro_entreprise')) {
@@ -897,7 +898,7 @@ class Invoice extends TCPDF {
 			if (!empty($params2["distinct_total_vat"])) {
 				foreach($params2["distinct_total_vat"] as $vat_percent => $value) {
 					$this->SetXY($re, $y1 + $k);
-					$this->Cell(25, 4, $GLOBALS['STR_PDF_TVA'] . ' ' . (String::substr($vat_percent, 0, strlen('transport')) == 'transport'? str_replace('transport', $GLOBALS['STR_PDF_SHIPMENT'], $vat_percent) : $vat_percent) . '%' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . " ");
+					$this->Cell(25, 4, $GLOBALS['STR_PDF_TVA'] . ' ' . (StringMb::substr($vat_percent, 0, strlen('transport')) == 'transport'? str_replace('transport', $GLOBALS['STR_PDF_SHIPMENT'], $vat_percent) : $vat_percent) . '%' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . " ");
 					$this->SetXY($re + 30, $y1 + $k);
 					$this->Cell(25, 4, $value, '', '', 'R');
 					$k = $k + 3;
@@ -922,7 +923,7 @@ class Invoice extends TCPDF {
 	 */
 	function backgoundBigWatermark($texte, $coordx = null, $coordy = null)
 	{
-		$this->SetFont('Helvetica', 'B', 50);
+		$this->SetFont('freesans', 'B', 50);
 		$this->SetTextColor(203, 203, 203);
 		$this->Rotate(45, 55, 190);
 		$this->Text((!empty($coordx)?$coordx:55), (!empty($coordy)?$coordy:190), $texte);
@@ -992,7 +993,6 @@ class Invoice extends TCPDF {
 		}
 		$i = 0;
 		$file_name = '';
-		$societeInfoText = $this->getSocieteInfoText();
 		if ($bill_mode != "user_custom_products_list") {
 			if (!empty($product_infos_array) || !empty($order_object)) {
 				// Dans un mode de commande standard, order_object et product_infos_array ne doivent pas être défini, ce n'est pas cohérent. order_object et product_infos_array sont défini uniquement si bill_mode = user_custom_products_list
@@ -1023,7 +1023,7 @@ class Invoice extends TCPDF {
 				// Un numéro doit être obligatoirement renseigné dans la facture
 				$sql_cond_array[] = "c.numero != ''";
 			}
-			if (is_array($ids_array)) {
+			if (is_array($ids_array) && !empty($ids_array)) {
 				$sql_cond_array[] = "c.id IN (" . implode(',', $ids_array) . ")";
 			}
 			if (empty($sql_cond_array)) {
@@ -1036,7 +1036,7 @@ class Invoice extends TCPDF {
 				ORDER BY c.o_timestamp ASC";
 			$query = query($sql_bills);
 			while ($order_object = fetch_object($query)) {
-				$product_infos_array = get_product_infos_array_in_order($order_object->id, $order_object->devise, $order_object->currency_rate);
+				$product_infos_array = get_product_infos_array_in_order($order_object->id, $order_object->devise, $order_object->currency_rate, null, false, vb($GLOBALS['site_parameters'][$bill_mode.'_product_excluded'], array()));
 				$this->generatePdfOrderContent($column_formats, $bill_mode, $i, $order_object, $product_infos_array);				
 				if(empty($file_name)) {
 					$file_name = $this->document_name . '_' . $this->document_id;
@@ -1058,7 +1058,7 @@ class Invoice extends TCPDF {
 		}
 		if (!empty($i)) {
 			$this->lastPage();
-			$file_name = String::convert_accents(str_replace(array('/', ' '), '-', $file_name));
+			$file_name = StringMb::convert_accents(str_replace(array('/', ' '), '-', $file_name));
 			if ($folder === false) {
 				$this->Output($file_name);
 			} else {
@@ -1080,15 +1080,19 @@ class Invoice extends TCPDF {
 			$_SESSION['session_last_bill_viewed'] = vn($order_object->id);
 		}
 
-		$order_infos = get_order_infos_array($order_object, $product_infos_array);
+		$order_infos = get_order_infos_array($order_object, $product_infos_array, $bill_mode);
 		$societeLogoPath = $this->getSocieteLogoPath($order_object->lang);
-		$societeInfoText = $this->getSocieteInfoText();
+		if (function_exists('get_order_site_id')) {
+			// On regarde si la commande est une commande lié à une demande de fincancement. Dans ce cas la commande prends le site_id du site funding, en remplacement du site_id par défaut de la campagne
+			$order_object->site_id = get_order_site_id($order_object->id, $order_object->site_id);
+		}
+		$societeInfoText = $this->getSocieteInfoText(true, false, $order_object->site_id);
 		unset($y);
 		if (empty($i)) {
 			$this->Open();
 			$this->cMargin = 2;
 			$this->SetAutoPageBreak(false, 10);
-			$this->AliasNbPages('{nb}');
+			$this->setPrintHeader(false);
 		}
 		$this->startPageGroup();
 		$next_product_max_size_forecasted = 30;
@@ -1103,7 +1107,10 @@ class Invoice extends TCPDF {
 		if(!empty($order_object->commentaires)) {
 			$comments[] = $order_object->commentaires;
 		}
-		$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2);
+		for(true;($this->remarque_lignes === null || $this->remarque_lignes>60) && $this->remarque_font_size>5;$this->remarque_font_size--) {
+			// On diminue la taille du texte si la remarque est trop longue. Si c'est vraimpent trop long, il y aura un problème de mise en page quand même
+			$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2, $this->remarque_font_size);
+		}
 		if(!empty($GLOBALS['site_parameters']['billing_as_transaction_receipt'])) {
 			$sql_transaction = "SELECT t.reference
 				FROM peel_transactions t
@@ -1112,34 +1119,34 @@ class Invoice extends TCPDF {
 				LIMIT 1";
 			$query = query($sql_transaction);
 			$result = fetch_assoc($query);
-			$this->document_name = String::strtoupper($GLOBALS['STR_TRANSACTION']);
+			$this->document_name = StringMb::strtoupper($GLOBALS['STR_TRANSACTION']);
 			$this->document_id = $result['reference'];
 		} else {
 			$this->document_name = '';
 			if ($bill_mode == "user_custom_products_list") {
 				$this->document_id = 0;
 			} elseif ($bill_mode == "bdc") {
-				$this->document_name = String::strtoupper($GLOBALS['STR_ORDER_FORM']);
+				$this->document_name = StringMb::strtoupper($GLOBALS['STR_ORDER_FORM']);
 				$this->document_id = intval($order_object->order_id);
 			} elseif ($bill_mode == "proforma") {
-				$this->document_name = String::strtoupper($GLOBALS['STR_PROFORMA']);
+				$this->document_name = StringMb::strtoupper($GLOBALS['STR_PROFORMA']);
 				$this->document_id = intval($order_object->order_id);
 			} elseif ($bill_mode == "devis") {
-				$this->document_name = String::strtoupper($GLOBALS['STR_PDF_QUOTATION']);
+				$this->document_name = StringMb::strtoupper($GLOBALS['STR_PDF_QUOTATION']);
 				$this->document_id = intval($order_object->order_id);
 			} else {
 				if(!empty($order_object->numero)) {
-					$this->document_name = String::strtoupper($GLOBALS['STR_INVOICE']);
+					$this->document_name = StringMb::strtoupper($GLOBALS['STR_INVOICE']);
 					$this->document_id = $order_object->numero;
 				} else {
-					$this->document_name = String::strtoupper($GLOBALS['STR_ORDER_FORM']);
+					$this->document_name = StringMb::strtoupper($GLOBALS['STR_ORDER_FORM']);
 					$this->document_id = intval($order_object->order_id);
 				}
 			}
 		}
 		if(!empty($document_title)) {
 			// On force le nom de document avec $document_title
-			$this->document_name = String::strtoupper($document_title);
+			$this->document_name = StringMb::strtoupper($document_title);
 		}
 		// On refera un test de saut de page juste avant l'affichage des remarques et blocs de fin
 		$product_infos_array[] = null;
@@ -1149,13 +1156,13 @@ class Invoice extends TCPDF {
 				$y_max_allowed = $this->h + 5;
 				if (empty($this_ordered_product)) {
 					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture. L'affichage des blocs de fin de facture dépend du mode
-					$y_max_allowed += -13 - 4 * vn($this->remarque_lignes) - 5;
+					$y_max_allowed += -13 - vn($this->remarque_lignes) * 3.5 * ($this->remarque_font_size/8)  - 5;
 				}
 			} else {
 				$y_max_allowed = $this->h - 10;
 				if (empty($this_ordered_product)) {
 					// On a fini la liste des produits, on veut la place pour les blocs de fin de facture. L'affichage des blocs de fin de facture dépend du mode
-					$y_max_allowed += -45 - 4 * vn($this->remarque_lignes) - 5;
+					$y_max_allowed += -45 - vn($this->remarque_lignes) * 3.5 * ($this->remarque_font_size/8) - 5;
 				}
 			}
 			if (empty($y) || $y + $next_product_max_size_forecasted > $y_max_allowed -5) {
@@ -1196,7 +1203,7 @@ class Invoice extends TCPDF {
 						$displayed_date = get_formatted_date($order_object->o_timestamp, 'short', vb($GLOBALS['site_parameters']['order_hour_display_mode'], 'long'));
 					} else {
 						// On veut une date de facture si possible et pas de commande
-						if(!empty($order_object->f_datetime) && String::substr($order_object->f_datetime, 0, 10) != '0000-00-00') {
+						if(!empty($order_object->f_datetime) && StringMb::substr($order_object->f_datetime, 0, 10) != '0000-00-00') {
 							// Une date de facture est définie
 							$displayed_date = get_formatted_date($order_object->f_datetime, 'short');
 						} else {
@@ -1206,7 +1213,7 @@ class Invoice extends TCPDF {
 					}
 					$this->addDate($displayed_date, $order_infos['displayed_paiement_date'], $bill_mode);
 					if ($bill_mode != "user_custom_products_list") {
-						$this->addReglement(String::str_shorten(get_payment_name($order_object->paiement), 30) . ' - ' . $order_object->devise);
+						$this->addReglement(StringMb::str_shorten(get_payment_name($order_object->paiement), 30) . ' - ' . $order_object->devise);
 					}
 					$this->addClientAdresseFacturation($order_infos['client_infos_bill'], $order_object->id_utilisateur, $bill_mode);
 					if ($bill_mode != "user_custom_products_list" && !empty($GLOBALS['site_parameters']['mode_transport']) && !empty($order_infos['client_infos_ship'])) {
@@ -1249,9 +1256,9 @@ class Invoice extends TCPDF {
 				} else {
 					if (!empty($this_ordered_product["photo"])) {
 						$this_thumb = thumbs($this_ordered_product["photo"], 50, 35);
-						if (!empty($this_thumb) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.String::rawurlencode($this_thumb))) {
+						if (!empty($this_thumb) && file_exists($GLOBALS['uploaddir'].'/thumbs/'.StringMb::rawurlencode($this_thumb))) {
 							// Positionnement du logo à droite des informations sur la société
-							$this->Image($GLOBALS['uploaddir'].'/thumbs/'.String::rawurlencode($this_thumb), 15, $y-4);
+							$this->Image($GLOBALS['uploaddir'].'/thumbs/'.StringMb::rawurlencode($this_thumb), 15, $y-4);
 						}
 					}
 					if (!empty($this_ordered_product["barcode_image_src"])) {
@@ -1306,11 +1313,12 @@ class Invoice extends TCPDF {
 				$qid = query("SELECT * 
 					FROM peel_societe
 					WHERE " . get_filter_site_cond('societe') . "
+					ORDER BY site_id DESC
 					LIMIT 1");
 				$ligne = fetch_assoc($qid);
 				$text = '<a href="' .get_url('/') . '">' . get_url('/') . '</a> Copyright ' . $GLOBALS['site'] . ' ' . date('Y').' / '.$GLOBALS['STR_TEL'].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$ligne['tel'].' / '.$GLOBALS['STR_FAX'].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$ligne['fax'].' / '.$ligne['email'] ;
 				$this->writeHTMLCell("", 4, 10, $y1, $text, 0, 1, false, true, "C");
-				$this->SetFont("Helvetica", "", 6);
+				$this->SetFont("freesans", "", 6);
 				$text = template_tags_replace($GLOBALS['STR_INVOICE_BOTTOM_TEXT2']);
 				$this->writeHTMLCell("", 4, 10, $y1+4, $text, 0, 1, false, true,"C");
 			}
@@ -1324,12 +1332,25 @@ class Invoice extends TCPDF {
 	 * @param boolean $skip_registration_number
 	 * @return string
 	 */
-	function getSocieteInfoText($use_admin_rights = true, $skip_registration_number = false)
+	function getSocieteInfoText($use_admin_rights = true, $skip_registration_number = false, $site_id = 0)
 	{
+		// Recherche d'une société correspondant au site sur lequel est passé la commande
 		$qid = query("SELECT * 
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe', null, $use_admin_rights) . "");
-		if ($ligne = fetch_object($qid)) {
+			WHERE " . get_filter_site_cond('societe', null, $use_admin_rights, $site_id, true) . "
+			ORDER BY site_id DESC
+			LIMIT 1");
+		$ligne = fetch_object($qid);
+		if (empty($ligne)) {
+			// Aucune adresse de société trouvée, on fait une recherche plus générale
+			$qid = query("SELECT * 
+				FROM peel_societe
+				WHERE " . get_filter_site_cond('societe', null, $use_admin_rights) . "
+				ORDER BY site_id DESC
+				LIMIT 1");
+			$ligne = fetch_object($qid);
+		}
+		if (!empty($ligne)) {
 			$pdf_societe = filtre_pdf($ligne->societe) . "\n" ;
 			$pdf_adresse = filtre_pdf($ligne->adresse) . "\n" ;
 			$pdf_codepostal = filtre_pdf($ligne->code_postal);
@@ -1384,14 +1405,14 @@ class Invoice extends TCPDF {
 		if(!empty($pdf_logo) && strpos($pdf_logo, $GLOBALS['dirroot']) === false) {
 			// on découpe le contenu du champs à la recherche du non de l'image fixe
 			// ceci évitera d'envoyer la transmition du logo avec un chemin en http://
-			$pdf_logo = String::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $pdf_logo));
+			$pdf_logo = StringMb::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $pdf_logo));
 			if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
 				// le logo existe sur le serveur
 				$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;
 			} elseif (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/images/' . $pdf_logo)) {
 				// le logo existe sur le serveur dans le dossier images
 				$pdf_logo = $GLOBALS['dirroot'] . '/images/' . $pdf_logo;
-			} elseif (empty($pdf_logo) || !($handle = @String::fopen_utf8($pdf_logo, 'rb'))) {
+			} elseif (empty($pdf_logo) || !($handle = @StringMb::fopen_utf8($pdf_logo, 'rb'))) {
 				// si le logo renseigné n'existe pas, on ne retourne pas d'information
 				$pdf_logo = false;
 			}

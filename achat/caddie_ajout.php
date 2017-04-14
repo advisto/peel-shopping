@@ -1,21 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: caddie_ajout.php 53261 2017-03-22 17:12:58Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
 
 call_module_hook('cart_product_add', array('user_id' => vn($_SESSION['session_utilisateur']['id_utilisateur'])));
+
 if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	// L'utilisateur a chargé la page sans avoir déclaré dans sa requête HTTP de cookie de session.
 	// Donc c'est que ce n'est pas un utilisateur avec les sessions qui fonctionnent, ou c'est un robot qui appelle cette page
@@ -30,9 +31,11 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 
 	$_SESSION['session_display_popup']['error_text'] = '';
 	foreach ($_POST['qte'] as $i => $qte) {
+		$product_infos['on_check'] = 0;
 		$quantite = max(0, get_float_from_user_input($qte));
 		$data_check = null;
 		if (!empty($_GET['checkid'])) {
+			$product_infos['on_check'] = 1;
 			// Le produit est un chèque cadeau
 			$id = intval(trim($_GET['checkid']));
 			$data_check['email_check'] =  vb($_POST['email_check' . vb($_GET['checkid'])]);
@@ -63,7 +66,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 		if(empty($GLOBALS['site_parameters']['allow_float_quantity'])) {
 			$quantite = intval($quantite);
 		}
-		
+		$product_object = new Product($id, $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 		if ((!empty($_GET['from']) && $_GET['from'] == 'search_page') && ((isset($_POST['save_product_list']) && check_if_module_active('cart_preservation')) || (isset($_POST['export_pdf']) && check_if_module_active('facture_advanced', 'administrer/genere_pdf.php')))) {
 			// Sauvegarde via le module de conservation de panier de la liste de produit envoyée.
 			// Constitution du tableau de donnée compatible avec la fonction save_cart (voir plus bas)
@@ -80,7 +83,6 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 			// produit suivant.
 			continue;
 		} else {
-			$product_object = new Product($id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
 			// Hook qui permet d'ajouter ou modifier des infos dans POST
 			call_module_hook('cart_product_added_before_attribut_treatment', array('quantite' => $quantite, 'user_id' => vn($_SESSION['session_utilisateur']['id_utilisateur']), 'product_object' => $product_object));
 
@@ -100,7 +102,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					}
 				} else {
 					// on supprime la variable de session gérant le téléchargement de l'image
-					unset($_SESSION["session_display_popup"]); 
+					unset($_SESSION["session_display_popup"]["upload_error_text"]); 
 				}
 			}
 
@@ -148,10 +150,17 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 						$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_CONTACT_US'];
 					}
 				}
+				if (vn($product_object->quantity_min_order) > 1 && $quantite < $product_object->quantity_min_order) {
+					// on n'ajoute pas au panier
+					$can_add_to_cart = false;
+					$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_ORDER_MIN'].' '.$product_object->quantity_min_order;
+				}
 				// Gestion de l'ajout au caddie
 				if ($can_add_to_cart) {
 					// Pas de problème => on ajoute le produit
-					$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $data_check, $listcadeaux_owner, vb($_GET['reference']));
+					$hook_result = call_module_hook('add_cart_complementary_data_array', vb($_GET), 'array');
+					// $hook_result contient de nouvelle valeurs pour caddie_ajout; On utilise un hook pour filtrer les données du GET
+					$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $data_check, $listcadeaux_owner, $hook_result);
 					// Préparation par exemple de l'affichage d'une popup de confirmation de mise dans le panier dans le module cart_popup
 					call_module_hook('cart_product_added', array('quantite' => $added_quantity, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'product_object' => $product_object));
 					unset($_SESSION['session_taille_id']);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ecotaxes.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: ecotaxes.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -96,6 +96,7 @@ function affiche_formulaire_ajout_ecotaxes(&$frm)
 		}
 		$frm['prix_ht'] = "";
 		$frm['ttc'] = "";
+		$frm['coefficient'] = "";
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['id'] = "";
@@ -141,14 +142,19 @@ function affiche_formulaire_modif_ecotaxes($id, &$frm)
 function affiche_formulaire_ecotaxes(&$frm)
 {
 	if (vb($_REQUEST['mode']) == "modif") {
-		$sql = "SELECT prix_ht, prix_ttc
+		$sql = "SELECT prix_ht, prix_ttc, coefficient
 			FROM peel_ecotaxes
 			WHERE id ='" . intval($frm['id']) . "' AND " . get_filter_site_cond('ecotaxes', null, true);
 		$query = query($sql);
 		$result = fetch_assoc($query);
 		$frm["prix_ht"] = $result['prix_ht'];
 		$prix_ttc = $result['prix_ttc'];
-		$calculated_vat = round(($prix_ttc - $frm["prix_ht"]) / $frm["prix_ht"] * 100 * 100) / 100;
+		if(!empty(intval($frm["prix_ht"])))
+		{
+			$calculated_vat = round(($prix_ttc - $frm["prix_ht"]) / $frm["prix_ht"] * 100 * 100) / 100;
+		} else {
+			$calculated_vat = 0;
+		}
 	} else {
 		$calculated_vat = 0;
 	}
@@ -167,6 +173,7 @@ function affiche_formulaire_ecotaxes(&$frm)
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('prix_ht', $frm["prix_ht"]);
+	$tpl->assign('coefficient', $frm["coefficient"]);
 	$tpl->assign('vat_options', get_vat_select_options($calculated_vat, true));
 	$tpl->assign('titre_bouton', $frm["titre_bouton"]);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
@@ -177,6 +184,7 @@ function affiche_formulaire_ecotaxes(&$frm)
 	$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
 	$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 	$tpl->assign('STR_TAXE', $GLOBALS['STR_TAXE']);
+	$tpl->assign('STR_ADMIN_ECOTAXES_FORM_ECOTAXE_COEFFICIENT', $GLOBALS['STR_ADMIN_ECOTAXES_FORM_ECOTAXE_COEFFICIENT']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	echo $tpl->fetch();
@@ -216,6 +224,7 @@ function insere_ecotaxes($frm)
 			, nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "
+			, coefficient =  '" . nohtml_real_escape_string($frm['coefficient']) . "'
 			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, prix_ht = '" . nohtml_real_escape_string($frm['prix']) . "'
 			, prix_ttc = '" . nohtml_real_escape_string($frm['prix'] * (1 + $frm['taxes'] / 100)) . "'";
@@ -238,6 +247,7 @@ function maj_ecotaxes($id, $frm)
 			, nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
 	$sql .= "
+			, coefficient =  '" . nohtml_real_escape_string($frm['coefficient']) . "' 
 			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, prix_ht = '" . nohtml_real_escape_string($frm['prix']) . "'
 			, prix_ttc = '" . nohtml_real_escape_string($frm['prix'] * (1 + $frm['taxes'] / 100)) . "'
@@ -292,6 +302,7 @@ function affiche_liste_ecotaxes()
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
 	$tpl->assign('STR_ADMIN_ECOTAXES_MODIFY_ECOTAX', $GLOBALS['STR_ADMIN_ECOTAXES_MODIFY_ECOTAX']);
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
+	$tpl->assign('STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND', $GLOBALS['STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND']);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 	echo $tpl->fetch();
 }

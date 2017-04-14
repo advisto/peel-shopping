@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_categorie.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -71,30 +71,8 @@
 				<input type="radio" name="type_affichage" value="1"{% if type_affichage == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_IN_LINES }}
 			</td>
 		</tr>
-		{% if is_lot_module_active %}
-		<tr>
-			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_PRODUITS_LOT_PRICE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
-		</tr>
-			{% if mode == "maj" %}
-		<tr>
-			<td class="title_label">{{ lot_explanation_table }}</td>
-		</tr>
-		<tr>
-			<td class="title_label">
-				<a href="{{ lot_href|escape('html') }}">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}</a>
-					{% if (lot_supprime_href) %}
-				/ <a href="{{ lot_supprime_href|escape('html') }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}">{{ STR_DELETE }}</a>
-					{% endif %}
-			</td>
-		</tr>
-			{% else %}
-		<tr>
-			<td class="title_label" colspan="2">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE_EXPLAIN }}</td>
-		</tr>
-			{% endif %}
-		{% endif %}
 		{% for l in langs %}
-		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} - {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td class="title_label" colspan="2">{{ STR_ADMIN_NAME }} {{ l.lng|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
@@ -169,7 +147,7 @@
 		{% endif %}
 		{% if is_lot_module_active %}
 		<tr>
-			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_PRODUITS_LOT_PRICE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
+			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
 		</tr>
 			{% if mode == "maj" %}
 		<tr>

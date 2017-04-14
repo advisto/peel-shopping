@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: articles.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content');
+necessite_priv('admin_content,admin_communication,admin_finance');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_ARTICLES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -159,6 +159,8 @@ function affiche_formulaire_ajout_article($rubriques = 0, &$frm, &$form_error_ob
 		$frm['on_special'] = "";
 		$frm['on_reseller'] = "";
 		$frm['on_rollover'] = "";
+		$frm['on_new'] = "";
+		$frm['on_focus'] = "";
 		$frm['image1'] = "";
 		$frm['position'] = "";
 	}
@@ -219,6 +221,10 @@ function affiche_formulaire_modif_article($id, &$frm, &$form_error_object)
 		$frm['rubriques'][] = $cat['rubrique_id'];
 		$frm['rubriques'][] = $cat['nom_rubrique'];
 	}
+
+	$hook_result = call_module_hook('affiche_formulaire_modif_article', array('id'=>$id, 'frm'=>$frm), 'array');
+	$frm = array_merge_recursive_distinct($frm, $hook_result);
+		
 	$frm['nouveau_mode'] = "maj";
 	$frm['normal_bouton'] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
 
@@ -272,7 +278,14 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_ARTICLES_IS_ON_RESELLER', $GLOBALS['STR_ADMIN_ARTICLES_IS_ON_RESELLER']);
+	if (!empty($GLOBALS['STR_ADMIN_DISPLAY_FOCUS_CONTENT_HOME_PAGE'])) {
+		$tpl->assign('STR_ADMIN_DISPLAY_FOCUS_CONTENT_HOME_PAGE', $GLOBALS['STR_ADMIN_DISPLAY_FOCUS_CONTENT_HOME_PAGE']);
+	}
+	if (!empty($GLOBALS['STR_ADMIN_DISPLAY_NEW_CONTENT_HOME_PAGE'])) {
+		$tpl->assign('STR_ADMIN_DISPLAY_NEW_CONTENT_HOME_PAGE', $GLOBALS['STR_ADMIN_DISPLAY_NEW_CONTENT_HOME_PAGE']);
+	}
 	if (!empty($rubrique_options)) {
+		$tpl->assign('pdf_logo_src',$GLOBALS['wwwroot_in_admin'] . '/images/logoPDF_small.png');
 		$tpl->assign('action', get_current_url(false) . '?start=0');
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 		$tpl->assign('mode', $frm['nouveau_mode']);
@@ -293,6 +306,15 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		$tpl->assign('is_on_rollover', !empty($frm['on_rollover']));
 		$tpl->assign('on_special', $frm['on_special']);
 		$tpl->assign('on_reseller', $frm['on_reseller']);
+		if(!empty($GLOBALS['site_parameters']['article_focus_and_new_select_multiple'])) {
+			$tpl->assign('article_focus_and_new_select_multiple', $GLOBALS['site_parameters']['article_focus_and_new_select_multiple']);
+			$tpl->assign('new_site_id_select_options_multiple', get_site_id_select_options(vb($frm['on_new']), null, 'STR_ADMIN_ALL_SITES', false, true));
+			$tpl->assign('focus_site_id_select_options_multiple', get_site_id_select_options(vb($frm['on_focus']), null, 'STR_ADMIN_ALL_SITES', false, true));
+		} else {
+			$tpl->assign('on_new', vb($frm['on_new']));
+			$tpl->assign('on_focus', vb($frm['on_focus']));
+		}
+
 		$tpl->assign('technical_code', $frm['technical_code']);
 
 		$tpl_langs = array();
@@ -300,14 +322,28 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 			$tpl_langs[] = array('lng' => $lng,
 				'error' => $form_error_object->text('titre_' . $lng),
 				'titre' => $frm['titre_' . $lng],
-				'chapo_te' => getTextEditor('chapo_' . $lng, '100%', 300, String::html_entity_decode_if_needed(vb($frm['chapo_' . $lng]))),
-				'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng]))),
+				'chapo_te' => getTextEditor('chapo_' . $lng, '100%', 300, StringMb::html_entity_decode_if_needed(vb($frm['chapo_' . $lng]))),
+				'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['texte_' . $lng]))),
 				'meta_titre' => vb($frm['meta_titre_' . $lng]),
 				'meta_key' => $frm['meta_key_' . $lng],
 				'meta_desc' => $frm['meta_desc_' . $lng]
 				);
 		}
 		$tpl->assign('langs', $tpl_langs);
+
+		$tpl_marques_options = array();
+		$select = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat
+		   FROM peel_marques
+		   WHERE " . get_filter_site_cond('marques', null, true) . "
+		   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
+		while ($nom = fetch_assoc($select)) {
+			$tpl_marques_options[] = array('value' => intval($nom['id']),
+				'issel' => in_array($nom['id'], vb($frm['marques'], array())),
+				'name' => $nom['nom_' . $_SESSION['session_langue']] . (empty($nom['etat'])?' ('.$GLOBALS["STR_ADMIN_DEACTIVATED"].')':'')
+				);
+		}
+		$tpl->assign('marques_options', $tpl_marques_options);
+		$tpl->assign('STR_ADMIN_PRODUITS_CHOOSE_BRAND', $GLOBALS['STR_ADMIN_PRODUITS_CHOOSE_BRAND']);
 
 		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		if (!empty($frm["image1"])) {
@@ -337,7 +373,7 @@ function supprime_article($id)
 	query("DELETE FROM peel_articles WHERE id=" . intval($id) . " AND " . get_filter_site_cond('articles', null, true) . "");
 	/* Efface cet article de la table articles_rubriques */
 	query("DELETE FROM peel_articles_rubriques WHERE article_id=" . intval($id));
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ARTICLES_MSG_DELETED'], String::html_entity_decode_if_needed($prod['titre_' . $_SESSION['session_langue']]))))->fetch();
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_ARTICLES_MSG_DELETED'], StringMb::html_entity_decode_if_needed($prod['titre_' . $_SESSION['session_langue']]))))->fetch();
 }
 
 /**
@@ -349,7 +385,7 @@ function supprime_article($id)
 function insere_article($frm)
 {
 	// Remplit les contenus vides
-	$frm = fill_other_language_content($frm);
+	$frm = fill_other_language_content($frm, 'articles');
 	
 	/* ajoute l'article dans la table articles */
 	$sql = "INSERT INTO peel_articles (etat
@@ -362,6 +398,19 @@ function insere_article($frm)
 			, on_reseller
 			, on_special
 			, on_rollover";
+	if(!empty($GLOBALS['site_parameters']['article_on_new_enable'])) {
+		$sql .= "
+			, on_new";
+	}
+	if(!empty($GLOBALS['site_parameters']['article_on_focus_enable'])) {
+		$sql .= "
+			, on_focus";
+	}
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+			, nom_insere
+			, nom_maj";
+	}
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", site_country
 		";
@@ -385,13 +434,26 @@ function insere_article($frm)
 			, '" . intval(vn($frm['on_reseller'])) . "'
 			, '" . intval(vn($frm['on_special'])) . "'
 			, '" . intval(vn($frm['on_rollover'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['article_on_new_enable'])) {
+		$sql .= "
+			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['on_new'])) . "'";
+	}
+	if(!empty($GLOBALS['site_parameters']['article_on_focus_enable'])) {
+		$sql .= "
+			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['on_focus'])) . "'";
+	}
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+			, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'
+			, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+	}
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . real_escape_string($frm['titre_' . $lng]) . "'
 			, '" . real_escape_string($frm['chapo_' . $lng]) . "'
-			, '" . real_escape_string($frm['texte_' . $lng]) . "'
+			, '" . real_escape_string(StringMb::getCleanHTML($frm['texte_' . $lng], null, true, true, true, null, false)) . "'
 			, '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
@@ -408,7 +470,9 @@ function insere_article($frm)
 		$qid = query("INSERT INTO peel_articles_rubriques (rubrique_id, article_id)
 			VALUES ('" . intval($frm['rubriques'][$i]) . "', '" . intval($article_id) . "')");
 	}
-}
+
+	call_module_hook('insere_article', array('article_id'=>$article_id, 'frm'=>$frm));
+	}
 
 /**
  * Met à jour l'article $id avec de nouvelles valeurs. Les champs sont dans $frm
@@ -422,17 +486,29 @@ function insere_article($frm)
 function maj_article($id, $frm)
 {
 	// Remplit les contenu vides
-	$frm = fill_other_language_content($frm);
+	$frm = fill_other_language_content($frm, 'articles');
 	
 	/* Met à jour la table articles */
 	$sql = "UPDATE peel_articles
 		SET etat = '" . intval($frm['etat']) . "'
 		, position = '" . intval($frm['position']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-		
 		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, image1 = '" . nohtml_real_escape_string($frm['image1']) . "'
-		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+			$sql .= "
+			, nom_maj = '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
+		}
+		if(!empty($GLOBALS['site_parameters']['article_on_focus_enable'])) {
+			$sql .= "
+			, on_focus = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['on_focus'])) . "'";
+		}
+		if(!empty($GLOBALS['site_parameters']['article_on_new_enable'])) {
+			$sql .= "
+			, on_new = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['on_new'])) . "'";
+		}
+		$sql .= "
 		, on_reseller = '" . intval(vn($frm['on_reseller'])) . "'
 		, on_special = '" . intval(vn($frm['on_special'])) . "'
 		, on_rollover = '" . intval(vn($frm['on_rollover'])) . "'";
@@ -467,8 +543,10 @@ function maj_article($id, $frm)
 		$qid = query("INSERT INTO peel_articles_rubriques (rubrique_id, article_id)
 			VALUES ('" . intval($frm['rubriques'][$i]) . "', '" . intval($id) . "')");
 	}
-}
-
+	
+	call_module_hook('maj_article', array('id'=>$id, 'frm'=>$frm));
+	}
+	
 /**
  * Supprime le produit spécifié par $id. Il faut supprimer le produit puis les entrées correspondantes de la table produits_categories
  *

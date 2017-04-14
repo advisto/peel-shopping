@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: order_step1.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
@@ -112,7 +112,7 @@
 				</div>
 				<div>
 					<label for="adresse2">{$STR_ADDRESS} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-					<textarea class="form-control" cols="50" rows="3" name="adresse2" id="adresse2">{$adresse2}</textarea>
+					<textarea {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" cols="50" rows="3" name="adresse2" id="adresse2">{$adresse2}</textarea>
 					{$adresse2_error}
 				</div>
 				{foreach $specific_fields as $f}
@@ -129,17 +129,17 @@
 				{/foreach}
 				<div>
 					<label for="code_postal2">{$STR_ZIP} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-					<input class="form-control" type="text" name="code_postal2" id="code_postal2" size="32" value="{$code_postal2|str_form_value}" />
+					<input {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" type="text" name="code_postal2" id="code_postal2" size="32" value="{$code_postal2|str_form_value}" />
 					{$code_postal2_error}
 				</div>
 				<div>
 					<label for="ville2">{$STR_TOWN} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-					<input class="form-control" type="text" name="ville2" id="ville2" size="32" value="{$ville2|str_form_value}" />
+					<input {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" type="text" name="ville2" id="ville2" size="32" value="{$ville2|str_form_value}" />
 					{$ville2_error}
 				</div>
 				<div>
 					<label for="pays2">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
-					<select class="form-control" name="pays2" id="pays2">
+					<select {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" name="pays2" id="pays2">
 						{$pays2_options}
 					</select>
 					{$pays2_error}
@@ -172,9 +172,13 @@
 				<legend>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}: </legend>
 				<div><textarea class="form-control" name="commentaires" cols="54" rows="5">{$commentaires}</textarea></div>
 			</fieldset>
+			{if empty($order_process_disable_cgv)}
 			<p><input type="checkbox" name="cgv" value="1" /> {$STR_CGV_OK}</p>
+			{/if}
 			{if $register_during_order_process}
 			<p><input type="checkbox" name="register_during_order_process" value="1" />{$STR_CREATE_ACCOUNT_FUTURE_USE}</p>
+			{else}
+			<br />
 			{/if}
 			<div class="center">
 				<input type="submit" value="{$STR_ETAPE_SUIVANTE|str_form_value}" class="btn btn-lg btn-primary" />

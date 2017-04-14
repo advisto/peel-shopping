@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: cgv.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: cgv.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content');
+necessite_priv('admin_content,admin_communication');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CGV_TITLE'];
 
@@ -30,7 +30,7 @@ switch (vb($_REQUEST['mode'])) {
 		if (!empty($_POST)) {
 			$frm = $_POST;
 			$form_error_object->valide_form($frm,
-				array('titre_' . $_SESSION['session_langue'] => sprintf($GLOBALS['STR_ADMIN_CGV_ERR_TITLE_EMPTY'], String::strtoupper($_SESSION['session_langue'])),
+				array('titre_' . $_SESSION['session_langue'] => sprintf($GLOBALS['STR_ADMIN_CGV_ERR_TITLE_EMPTY'], StringMb::strtoupper($_SESSION['session_langue'])),
 					'token' => $GLOBALS['STR_INVALID_TOKEN']));
 			if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 				$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
@@ -106,7 +106,9 @@ function affiche_formulaire_modif_cgv($id, &$frm, &$form_error_object)
 		$qid = query("SELECT *
 			FROM peel_cgv
 			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('cgv', null, true));
-		$frm = fetch_assoc($qid);
+		if ($frm = fetch_assoc($qid)) {
+			$frm['site_country'] = explode(',', vb($frm['site_country']));
+		}
 	}
 	if (!empty($frm)) {
 		$frm['nouveau_mode'] = "maj";
@@ -136,13 +138,17 @@ function affiche_formulaire_cgv(&$frm, &$form_error_object)
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('titre_' . $lng),
 			'titre' => vb($frm['titre_' . $lng]),
-			'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['texte_' . $lng])))
+			'texte_te' => getTextEditor('texte_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['texte_' . $lng])))
 			);
 	}
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vn($frm['site_id'])));
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('normal_bouton', $frm['normal_bouton']);
+	$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_CGV_FORM_EXPLAIN', $GLOBALS['STR_ADMIN_CGV_FORM_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
@@ -160,8 +166,12 @@ function affiche_formulaire_cgv(&$frm, &$form_error_object)
 function maj_cgv($id, $frm)
 {
 	$sql = "UPDATE peel_cgv 
-		SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "',
-		date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+		SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= "
+		, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
+	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", titre_" . $lng . "='" . real_escape_string($frm['titre_' . $lng]) . "'
 			, texte_" . $lng . "='" . real_escape_string($frm['texte_' . $lng]) . "'";
@@ -231,7 +241,10 @@ function insere_cgv(&$frm)
 {
 	$sql = "INSERT INTO peel_cgv 
 		SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-		,date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= ", site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
+	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", titre_" . $lng . "='" . real_escape_string($frm['titre_' . $lng]) . "'
 			, texte_" . $lng . "='" . real_escape_string($frm['texte_' . $lng]) . "'";
@@ -265,8 +278,16 @@ function affiche_liste_cgv()
 				'nom' => (!empty($ligne['titre_' . $_SESSION['session_langue']])?$ligne['titre_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
-				'site_name' => get_site_name($ligne['site_id'])
-				);
+				'site_name' => get_site_name($ligne['site_id']));
+			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				$site_country_array = array();
+				if(StringMb::strlen($ligne['site_country'])>0) {
+					foreach(explode(',', $ligne['site_country']) as $this_id) {
+						$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
+					}
+				}
+				$tpl_results['site_country'] = implode(', ', $site_country_array);
+			}
 		}
 		$tpl->assign('results', $tpl_results);
 	}
@@ -280,6 +301,9 @@ function affiche_liste_cgv()
 	$tpl->assign('STR_ADMIN_CGV_NO_FOUND', $GLOBALS['STR_ADMIN_CGV_NO_FOUND']);
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	return $tpl->fetch();
 }
 

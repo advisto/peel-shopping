@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: modules_handler.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -29,7 +29,7 @@ function load_modules($technical_code = null) {
 		$GLOBALS['site_parameters']['modules_front_office_functions_files_array'] = array('thumbs' => '/modules/thumbs/fonctions.php');
 	}
 	$modules_to_check = array_keys(array_merge_recursive_distinct(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
-	foreach($modules_to_check as $this_module) {
+	foreach(array_unique($modules_to_check) as $this_module) {
 		if((empty($technical_code) || $technical_code == $this_module) && empty($GLOBALS['modules_installed'][$this_module])) {
 			// Pour la compatibilité avec d'anciennes versions, on stocke le chemin vers les fichiers de fonctions dans une variable globale
 			if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
@@ -41,8 +41,8 @@ function load_modules($technical_code = null) {
 				if((empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
 					if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 						foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
-							if(String::strpos($this_file, '.php') !== false && !in_array($this_file, vb($GLOBALS['modules_loaded_functions'], array()))) {
-								if(String::strpos($this_file, 'administrer/') === false || String::strpos($this_file, 'admin/') === false || (defined('IN_PEEL_ADMIN') || defined('IN_CRON'))) {
+							if(StringMb::strpos($this_file, '.php') !== false && !in_array($this_file, vb($GLOBALS['modules_loaded_functions'], array()))) {
+								if(StringMb::strpos($this_file, 'administrer/') === false || StringMb::strpos($this_file, 'admin/') === false || (defined('IN_PEEL_ADMIN') || defined('IN_CRON'))) {
 									include($GLOBALS['dirroot'] . $this_file);
 								}
 								$GLOBALS['modules_loaded_functions'][] = $this_file;
@@ -150,7 +150,7 @@ function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_d
 	foreach(vb($GLOBALS['modules_installed'], array()) as $this_module) {
 		// On charge le hook, soit en tant que fonction, soit en tant que méthode de la classe du module
 		$function_name = $this_module . '_hook_' . $hook;
-		$class_name = String::ucfirst($this_module);
+		$class_name = StringMb::ucfirst($this_module);
 		$method_name = 'hook_' . $hook;
 		unset($result);
 		if(function_exists($function_name)) {

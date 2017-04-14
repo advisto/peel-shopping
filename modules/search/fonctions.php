@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,11 +40,11 @@ function search_hook_search_complementary($params) {
 	while ($result = fetch_assoc($query)) {
 		$url = get_url('/cgv.php');
 		// on supprime le HTML du contenu
-		$nom = String::strip_tags(String::html_entity_decode_if_needed($result['titre_' . $_SESSION['session_langue']]));
-		$description = String::strip_tags(String::html_entity_decode_if_needed($result['texte_' . $_SESSION['session_langue']]));
+		$nom = StringMb::strip_tags(StringMb::html_entity_decode_if_needed($result['titre_' . $_SESSION['session_langue']]));
+		$description = StringMb::strip_tags(StringMb::html_entity_decode_if_needed($result['texte_' . $_SESSION['session_langue']]));
 		// on coupe le texte si trop long
-		$nom = String::str_shorten($nom, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
-		$description = String::str_shorten($description, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
+		$nom = StringMb::str_shorten($nom, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
+		$description = StringMb::str_shorten($description, $params['taille_texte_affiche'], '', '...', $params['taille_texte_affiche']-20);
 		// on fait une recherche sur le texte sans accent avec les mots de l'utilisateur,
 		// si qqchose est trouvé, highlight_found_text l'ajoute dans le tableau  $GLOBALS['found_words_array'][]
 		$nom = highlight_found_text($nom, $params['terms'], $GLOBALS['found_words_array']);
@@ -93,7 +93,9 @@ function search_hook_search_form_template_data(&$params) {
 		$tpl_f_select_attributes = array();
 		// affichage des attributs fixes
 		foreach ($search_attribute_tab as $index => $attribute) {
-			$tpl_f_select_attributes[] = display_select_attribute($index, $attribute);
+			if (!in_array($index, vb($GLOBALS['site_parameters']['search_attribute_tab_displayed_in_search_form_disabled'], array()))) {
+				$tpl_f_select_attributes[] = display_select_attribute($index, $attribute);
+			}
 		}
 		$results['select_attributes'] = $tpl_f_select_attributes;
 		// affichage des attributs variables
@@ -102,7 +104,11 @@ function search_hook_search_form_template_data(&$params) {
 		} elseif (!empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'])) {
 			$technical_code = $GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form'];
 		}
-		$results['custom_attribute'] = display_custom_attribute(vb($params['frm']['custom_attribut']), vb($technical_code), true);
+		if (empty($GLOBALS['site_parameters']['custom_attribut_displayed_in_search_form_disabled'])) {
+			$results['custom_attribute'] = display_custom_attribute(vb($params['frm']['custom_attribut']), vb($technical_code), true);
+		} else {
+			$results['custom_attribute'] = null;
+		}
 	}
 	if(check_if_module_active('annonces') && $params['display'] != 'module_products') {
 		$tpl_f_cat_ann_opts = array();
@@ -134,29 +140,10 @@ function search_hook_search_form_template_data(&$params) {
 			$results['ad_lang_select'] = get_lang_ads_choose(false);
 		}
 		$results['city_zip'] = vb($params['frm']['city_zip']);
-		if(!empty($GLOBALS['site_parameters']['ads_filter_countries_in_search'])) {
-			$sql = "SELECT u.pays AS pays
-				FROM peel_utilisateurs u
-				INNER JOIN peel_lot_vente a ON a.id_personne=u.id_utilisateur AND " . get_filter_site_cond('lot_vente', 'a') . "
-				WHERE a.enligne='OK'
-				GROUP BY u.pays";
-			$query = query($sql);
-			while ($result = fetch_assoc($query)) {
-				$country_allowed_ids[$result['pays']] = $result['pays'];
-			}
-			$sql = "SELECT u.pays
-				FROM peel_adresses u
-				INNER JOIN peel_funding f ON f.address_id=u.id
-				INNER JOIN peel_lot_vente a ON a.ref=f.project_id AND " . get_filter_site_cond('lot_vente', 'a') . "
-				WHERE a.enligne='OK'
-				GROUP BY u.pays";
-			$query = query($sql);
-			while ($result = fetch_assoc($query)) {
-				$country_allowed_ids[$result['pays']] = $result['pays'];
-			}
+		$country_allowed_ids = get_ads_country_used();
+		if (empty($GLOBALS['site_parameters']['disable_country_input_on_search_form'])) {
+			$results['country'] = get_country_select_options(vb($params['frm']['country']), null, 'name', false, null, false, null, $country_allowed_ids);
 		}
-		$results['country'] = get_country_select_options(vb($params['frm']['country']), null, 'name', false, null, false, null, vb($country_allowed_ids, null));
-
 		if (empty($GLOBALS['site_parameters']['disable_continent_input_on_search_form'])) {
 			$tpl_continent_inps = array();
 			unset($sql);
@@ -187,10 +174,12 @@ function search_hook_search_form_template_data(&$params) {
 			$results['continent_inputs'] = $tpl_continent_inps;
 		}
 		if (!empty($GLOBALS['site_parameters']['ads_search_date_end_past'])) {
-			$results['date_end_future'] = (!isset($params['frm']['date_end']) || in_array('future', $params['frm']['date_end']));
+			$results['date_end_future'] = (!empty($params['frm']['date_end']) && in_array('future', $params['frm']['date_end']));
 			$results['date_end_past'] = (!empty($params['frm']['date_end']) && in_array('past', $params['frm']['date_end']));
 			$results['STR_MODULE_ANNONCES_DATE_END_FUTURE'] = $GLOBALS['STR_MODULE_ANNONCES_DATE_END_FUTURE'];
 			$results['STR_MODULE_ANNONCES_DATE_END_PAST'] = $GLOBALS['STR_MODULE_ANNONCES_DATE_END_PAST'];
+			$results['date'] = vb($params['frm']['date']);
+			$results['STR_DATE'] = $GLOBALS['STR_DATE'];
 		}
 		$results['user_verified_status_disable'] = !empty($GLOBALS['site_parameters']['user_verified_status_disable']);
 		$results['ads_contain_lot_sizes'] = $GLOBALS['site_parameters']['ads_contain_lot_sizes'];
@@ -251,7 +240,7 @@ function affiche_select_marque($return_mode = false) {
 				$tpl_options[] = array(
 					'id' => $tpl_id,
 					'value' => intval($brand['id']),
-					'name' => String::str_shorten($brand['marque'], 50)
+					'name' => StringMb::str_shorten($brand['marque'], 50)
 				);
 			}
 			$tpl->assign('options', $tpl_options);

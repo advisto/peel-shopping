@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: langues.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: langues.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -216,13 +216,13 @@ function supprime_langue($id)
  */
 function maj_langue($id, $frm)
 {
-	if (empty($frm['lang']) || String::strlen($frm['lang']) != 2) {
+	if (empty($frm['lang']) || StringMb::strlen($frm['lang']) != 2) {
 		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_LANGUES_FORMAT_EXPLAIN']))->fetch();
 	}
 	// Met à jour la table de langues
 
 	$sql = "UPDATE peel_langues
-		SET lang = '" . nohtml_real_escape_string(String::strtolower($frm['lang'])) . "'";
+		SET lang = '" . nohtml_real_escape_string(StringMb::strtolower($frm['lang'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= "
 		, nom_" . $lng . "= '" . nohtml_real_escape_string($frm['nom_' . $lng]) ."'";
@@ -263,12 +263,12 @@ function affiche_liste_langue()
 		$i = 0;
 		while ($ligne = fetch_assoc($query)) {
 			if(!empty($ligne['flag'])) {
-				if(String::strpos($ligne['flag'], '/') === false) {
+				if(StringMb::strpos($ligne['flag'], '/') === false) {
 					$this_flag = '/lib/flag/' . $ligne['flag'];
 				} else {
 					$this_flag = $ligne['flag'];
 				}
-				if(String::substr($this_flag, 0, 1) == '/' && String::substr($this_flag, 0, 2) != '//') {
+				if(StringMb::substr($this_flag, 0, 1) == '/' && StringMb::substr($this_flag, 0, 2) != '//') {
 					$this_flag = (defined('IN_PEEL_ADMIN') ? $GLOBALS['wwwroot_in_admin'] : $GLOBALS['wwwroot']) . $this_flag;
 				}
 			} else {

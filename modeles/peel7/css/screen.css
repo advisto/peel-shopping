@@ -128,7 +128,7 @@ input.form-control[type="file"] {
 	vertical-align: middle;
 }
 .module_login_email {
-	width: 180px;
+	width: 175px;
 }
 .module_login_submit {
 	text-align: center;
@@ -1261,6 +1261,25 @@ td.fc_detail {
 }
 
 /* Divers */
+.produit_thumbnail_promotion {
+	background-image: url("../images/thumbnail_promotion.png");
+	background-repeat: no-repeat;
+	position: absolute;
+	top:0px;
+	left:0px;
+	width:106px;
+	height:106px;
+	z-index:1;
+}
+.produit_thumbnail_promotion > span {
+    color: #ffffff;
+    float: left;
+    font-size: 18px;
+	font-weight: bold;
+    padding-left: 10px;
+    padding-top: 10px;
+    text-align: left;
+}
 .etoile {
 	color: #990000;
 	font-weight: bold;
@@ -1612,6 +1631,16 @@ a.carousel-control:hover, a.carousel-control:focus {
 	float: left;
 }
 
+#header_message a{
+	display: inline-block;
+	height: 34px;
+	padding-top: 6px;
+	text-align: center;
+}
+#header_message {
+    margin: 10px 0px 7px 10px;
+    min-width: 46px;
+}
 /* Styles responsive */
 @media (max-width: 1199px) {
 	.table-responsive {
@@ -1625,6 +1654,9 @@ a.carousel-control:hover, a.carousel-control:focus {
 	}
 }
 @media (max-width: 767px) {
+	#header_message {
+		margin: 8px 10px 7px 10px;
+	}
 	.table-responsive {
 		/* Sécurité en complément de width:100% */
 		max-width: 738px;
@@ -1917,10 +1949,46 @@ a.carousel-control:hover, a.carousel-control:focus {
 	.container {
 		width: 100%;
 	}
-	.bottom_middle, .right_column {
+	.bottom_middle, .right_column, .scroll_to_top, .navbar-header .pull-right, .push, #footer, .main_menu_wide {
 		display:none !important;
+	}
+	#main_header {
+		background: none !important;
+	}
+	.navbar {
+		display:block !important;
+	}
+	.navbar-brand {
+		margin: 0px;
 	}
 	[class*="col-sm-"]{
 		float: left;
+	}
+	h1, .h1 {
+		font-size: 24px;
+	}
+	h2, h2.cgv, .h2 {
+		font-size: 16px;
+	}
+	h3, .h3 {
+		font-size: 14px;
+	}
+	p, li, span, div, td {
+		font-size: 11px;
+	}
+	.page_cgv p {
+		margin-bottom: 5px;
+	}
+	.page_cgv h1, .page_cgv .h1 {
+		font-size: 18px;
+	}
+	.page_cgv h2, .page_cgv h2.cgv, .page_cgv .h2 {
+		font-size: 13px;
+	}
+	.page_cgv h3, .page_cgv .h3 {
+		font-size: 12px;
+	}
+	.page_cgv p, .page_cgv li, .page_cgv span, .page_cgv div, .page_cgv td {
+		font-size: 10px;
 	}
 }

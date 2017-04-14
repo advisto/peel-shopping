@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Cache.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: Cache.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Cache.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: Cache.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class Cache {
@@ -39,7 +39,7 @@ class Cache {
 	 * @param integer $id
 	 * @param array $cfg
 	 */
-	function Cache($id, $cfg = array())
+	function __construct($id, $cfg = array())
 	{
 		// Configuration par défaut
 		$cfgDefault = array('directory' => $GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['cache_folder'] . '/', 'group' => 'page');
@@ -52,7 +52,7 @@ class Cache {
 			// Sinon on charge la config par défaut
 			$this->cfg = $cfgDefault;
 		}
-		$this->file = $this->cfg['directory'] . String::substr(md5($this->cfg['group']), 0, 8) . '_' . String::substr(md5($id), 0, 16);
+		$this->file = $this->cfg['directory'] . StringMb::substr(md5($this->cfg['group']), 0, 8) . '_' . StringMb::substr(md5($id), 0, 16);
 	}
 
 	/**
@@ -105,15 +105,15 @@ class Cache {
 	 */
 	function get()
 	{
-		$fp = String::fopen_utf8($this->file, 'rb');
+		$fp = StringMb::fopen_utf8($this->file, 'rb');
 		if ($fp) {
 			@flock($fp, LOCK_SH);
 			clearstatcache(); // Les résultats de la fonction filesize() sont mis en cache.
 			$content = @fread($fp, @filesize($this->file));
 			@flock($fp, LOCK_UN);
 			@fclose($fp);
-			$key = String::substr($content, 0, 32);
-			$data = String::substr($content, 32);
+			$key = StringMb::substr($content, 0, 32);
+			$data = StringMb::substr($content, 32);
 			// On vérifie que la signature md5 est bien égale au contenu du fichier md5. S'ils ne correspondent
 			// pas, on modifie la date de dernière modification du fichier pour qu'il soit regénéré au prochain appel
 			if ($key != md5($data)) {
@@ -132,10 +132,10 @@ class Cache {
 	 */
 	function save($data)
 	{
-		$fp = String::fopen_utf8($this->file, 'wb');
+		$fp = StringMb::fopen_utf8($this->file, 'wb');
 		if ($fp) {
 			@flock($fp, LOCK_EX);
-			// On utilise strlen et non pas String::strlen car on veut le nombre d'octets et non pas de caractères
+			// On utilise strlen et non pas StringMb::strlen car on veut le nombre d'octets et non pas de caractères
 			@fwrite($fp, md5($data) . $data, 32 + strlen($data));
 			@flock($fp, LOCK_UN);
 			@fclose($fp);
@@ -168,7 +168,7 @@ class Cache {
 	 */
 	function delete_cache_file($clean_all_group = false)
 	{
-		clean_Cache(0, ($clean_all_group?String::substr(md5($this->cfg['group']), 0, 8) . '_':$this->file));
+		clean_Cache(0, ($clean_all_group?StringMb::substr(md5($this->cfg['group']), 0, 8) . '_':$this->file));
 	}
 }
 

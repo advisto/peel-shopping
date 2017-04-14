@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avisAdmin_liste.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: avisAdmin_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
 <div class="entete">{{ STR_MODULE_AVIS_ADMIN_LIST }}</div>
 <p><a href="{{ add_prod_href|escape('html') }}"><img src="{{ add_src|escape('html') }}" width="16" height="16" class="middle" alt="{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT|str_form_value }}" />{{ STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT }}</a></p>
@@ -29,6 +29,7 @@
 			<td class="center">{% if res.reference_url %}<a href="{{ res.reference_url }}">{{ res.nom|html_entity_decode_if_needed }}</a>{% else %}{{ res.nom|html_entity_decode_if_needed }}{% endif %}</td>
 			<td class="center">{% for foo in 1..res.note %}<img src="{{ star_src|escape('html') }}" alt="" style="vertical-align:middle" />{% endfor %}</td>
 			<td class="center">{{ res.date }}</td>
+			<td class="center">{{ res.date_validation }}</td>
 			<td class="center"><img class="change_status" src="{{ res.etat_src|escape('html') }}" alt="" onclick="{{ res.etat_onclick|escape('html') }}" /></td>
 			<td class="center"><a href="{{ res.util_href|escape('html') }}">{{ res.prenom }} ({{ res.email }})</a></td>
 			<td class="center">{{ res.site_name }}</td>

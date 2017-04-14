@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_email-templates_output2.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_email-templates_output2.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}{{ action_html }}
 <form class="entryform form-inline" role="form" action="email-templates.php" method="post" name="form_ajout">
 	<div class="entete">{{ STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE }}</div>

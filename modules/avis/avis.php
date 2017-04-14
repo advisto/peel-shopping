@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: avis.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: avis.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (defined('IN_PEEL')) {
 	return;
 }
@@ -58,7 +58,7 @@ if (!empty($_GET['prodid'])) {
 }
 if (!empty($reference_id) || !empty($id)) {
 	// On charge les fonctions d'avis
-	switch (vb($_REQUEST['update_or_create'])) {
+	switch (vb($_GET['mode'])) {
 		case "edit" :
 			if(!empty($id)) {
 				$sql_cond = "a.id='" . intval($_GET['id']) . "' AND a.etat='1'";
@@ -77,6 +77,7 @@ if (!empty($reference_id) || !empty($id)) {
 					FROM peel_avis a
 					WHERE " . $sql_cond;
 				$query = query($sql);
+				
 				if($result = fetch_assoc($query)) {
 					if(!empty($_POST)) {
 						$frm['type'] = $result['type'];
@@ -90,10 +91,10 @@ if (!empty($reference_id) || !empty($id)) {
 						if (!$form_error_object->count()) {
 							$output .= insere_avis($frm);
 						} else {
-							$output .= formulaire_avis($result['reference_id'], $frm, $form_error_object, $result['type'], $result['mode']);
+							$output .= formulaire_avis($result['reference_id'], $frm, $form_error_object, $result['type'], $result['mode'], null, vn($_GET['campaign_id']));
 						}
 					} else {
-						$output .= formulaire_avis($result['reference_id'], $result, $form_error_object, $result['type'], $result['mode']);
+						$output .= formulaire_avis($result['reference_id'], $result, $form_error_object, $result['type'], $result['mode'], null, vn($_GET['campaign_id']));
 					}
 				}
 			}
@@ -115,10 +116,10 @@ if (!empty($reference_id) || !empty($id)) {
 					$frm['mode'] = $mode;
 					$output .= insere_avis($frm);
 				} else {
-					$output .= formulaire_avis($reference_id, $frm, $form_error_object, $type, $mode);
+					$output .= formulaire_avis($reference_id, $frm, $form_error_object, $type, $mode, null, vn($_GET['campaign_id']));
 				}
 			} else {
-				$output .= formulaire_avis($reference_id, $frm, $form_error_object, $type, $mode);
+				$output .= formulaire_avis($reference_id, $frm, $form_error_object, $type, $mode, null, vn($_GET['campaign_id']));
 			}
 			break;
 	}

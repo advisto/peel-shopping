@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53576 2017-04-13 08:00:05Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -34,16 +34,24 @@ function ecotaxe_hook_admin_menu_items($params) {
  * @return
  */
 function ecotaxe_hook_product_init_post(&$params) {
-	if (!empty($product_infos) && isset($product_infos['ecotaxe_ht']) && isset($product_infos['ecotaxe_ttc'])) {
-		$params['this']->ecotaxe_ht = $product_infos['ecotaxe_ht'];
-		$params['this']->ecotaxe_ttc = $product_infos['ecotaxe_ttc'];
+	if (!empty($params['product_infos']) && isset($params['product_infos']['ecotaxe_ht']) && isset($params['product_infos']['ecotaxe_ttc'])) {
+		$params['this']->ecotaxe_ht = $params['product_infos']['ecotaxe_ht'];
+		$params['this']->ecotaxe_ttc = $params['product_infos']['ecotaxe_ttc'];
 	} else {
 		if (!empty($params['this']->id_ecotaxe)) {
 			$eco = get_ecotax_object($params['this']->id_ecotaxe);
 		}
 		if (!empty($eco)) {
-			$params['this']->ecotaxe_ht = $eco->prix_ht;
-			$params['this']->ecotaxe_ttc = $eco->prix_ttc;
+			if ($eco->coefficient >0 ) {
+				// On a défini un coefficient pour cette taxe. On prend la valeur en pourcentage prioritairement.
+				// Calcul de l'écotaxe à partir du poids du produit.
+				$params['this']->ecotaxe_ht = $eco->coefficient * (($params['this']->poids)/1000);
+				$params['this']->ecotaxe_ttc = $eco->coefficient * (($params['this']->poids)/1000) * (1+$params['this']->tva/100);
+			} else {
+				// Si coefficient est vide, on prend les valeurs fixes
+				$params['this']->ecotaxe_ht = $eco->prix_ht;
+				$params['this']->ecotaxe_ttc = $eco->prix_ttc;
+			}
 		}
 	}
 }
@@ -58,7 +66,7 @@ function get_ecotax_object($id) {
 	static $eco;
 	$cache_id = $id;
 	if (!isset($eco[$cache_id])) {
-		$query = query('SELECT prix_ht, prix_ttc
+		$query = query('SELECT prix_ht, prix_ttc,coefficient
 			FROM peel_ecotaxes
 			WHERE id = "' . intval($id) . '" AND ' . get_filter_site_cond('ecotaxes'));
 		$eco[$cache_id] = fetch_object($query);

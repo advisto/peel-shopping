@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_cgv.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_cgv.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}" enctype="multipart/form-data">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -26,7 +26,7 @@
 			</td>
 		</tr>
 		{% for l in langs %}
-		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} - {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td colspan="2"><b>{{ STR_ADMIN_TITLE }} *</b>{{ STR_BEFORE_TWO_POINTS }}:
 				{{ l.error }}
@@ -38,6 +38,14 @@
 		<tr>
 			<td class="title_label" colspan="2">{{ STR_ADMIN_CGV_TEXT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 		</tr>
+		{% if site_country_checkboxes %}
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_SITE_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				{{ site_country_checkboxes }}
+			</td>
+		</tr>
+		{% endif %}
 		<tr>
 			<td colspan="2">{{ l.texte_te }}</td>
 		</tr>

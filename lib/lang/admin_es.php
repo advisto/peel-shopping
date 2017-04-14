@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_es.php 53576 2017-04-13 08:00:05Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -294,7 +294,7 @@ $GLOBALS["STR_ADMIN_DATE_STARTING"] = "De";
 $GLOBALS["STR_ADMIN_DATE1_DATE2_INCOHERENT"] = "fecha1 mayor o igual a fecha2, por favor, inténtelo de nuevo.";
 $GLOBALS["STR_ADMIN_DEACTIVATE"] = "Desactivar";
 $GLOBALS["STR_ADMIN_DEACTIVATED"] = "No";
-$GLOBALS["STR_ADMIN_DELETE_ALL_RESULTS"] = "Eliminar este %s resultados";
+$GLOBALS['STR_ADMIN_DELETE_ALL_RESULTS'] = "Eliminar este %s resultados";
 $GLOBALS["STR_ADMIN_DELETE_IMAGE"] = "Eliminar este archivo";
 $GLOBALS["STR_ADMIN_DELETE_WARNING"] = "¿Está seguro que desea eliminar?";
 $GLOBALS["STR_ADMIN_DELIVERY_EMAIL_SENT"] = "Un correo electrónico de confirmación de envío se ha enviado a %s";
@@ -315,6 +315,7 @@ $GLOBALS["STR_ADMIN_ECOTAX"] = "Entrega";
 $GLOBALS["STR_ADMIN_ECOTAXES_ADD_ECOTAX"] = "Agregar un impuesto verde";
 $GLOBALS["STR_ADMIN_ECOTAXES_ERR_ECOTAX_NOT_FOUND"] = "El impuesto ecológico no ha sido encontrado.";
 $GLOBALS["STR_ADMIN_ECOTAXES_EXPLAIN"] = "Esta tabla le permite administrar sus eco-tasas impositivas asociadas a diferentes productos Usted puede agregar, editar y eliminar estos ecotasa escalas.";
+$GLOBALS["STR_ADMIN_ECOTAXES_FORM_ECOTAXE_COEFFICIENT"] = "Coeficiente eco-contribución";
 $GLOBALS["STR_ADMIN_ECOTAXES_MODIFY_ECOTAX"] = "Editar este impuesto ecológico";
 $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_CREATED"] = "El impuesto ecológico <b>%s</b> se ha creado.";
 $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_DELETED"] = "El impuesto ecológico <b>%s</b> ha sido eliminado.";
@@ -322,6 +323,9 @@ $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_UPDATED"] = "Cambios en la impuesto ecol
 $GLOBALS["STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND"] = "No ecotasa registrado en la base de datos.";
 $GLOBALS["STR_ADMIN_ECOTAXES_TITLE"] = "Administrar listas de precio Ecotasa cuota ambiental";
 $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Agregar o editar un impuesto ambiental";
+$GLOBALS["STR_ADMIN_EXPORT_CSV"] = "Exportación CSV";
+$GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "No los precios de exportación (para la exportación CSV)";
+$GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Elegir los criterios de exportación";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "Email Template";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE"] = "etiquetas genéricas";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE"] = "Introduzca una plantilla de correo electrónico";
@@ -352,6 +356,7 @@ $GLOBALS["STR_ADMIN_ERR_NO_EMAIL_KNOWN_FOR_ORDER"] = "No se conoce email orden %
 $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "No se puede encontrar el elemento solicitado";
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "El usuario no se ha seleccionado.";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "No se pudo encontrar la página";
+$GLOBALS["STR_ADMIN_EXPORT"] = "Exportar";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "Modo de exportación";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Productos relacionados";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Marca";
@@ -394,7 +399,7 @@ $GLOBALS["STR_ADMIN_HTML_PLACE_INTERSTITIEL"] = "publicidad intersticial";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE"] = "Introducción a la página de patrocinio";
 $GLOBALS["STR_ADMIN_HTML_PLACE_PARTNER"] = "Partner Top";
 $GLOBALS["STR_ADMIN_HTML_PLACE_RESELLER_MAP"] = "top distribuidores de tarjetas";
-$GLOBALS["STR_ADMIN_HTML_PLACE_SCROLLING"] = "Contenido de desplazamiento hacia arriba";
+$GLOBALS["STR_ADMIN_HTML_PLACE_SCROLLING"] = "Contenido destacado";
 $GLOBALS["STR_ADMIN_HTML_PLACE_TOP_CREATE_AD"] = "creación ad superior";
 $GLOBALS["STR_ADMIN_HTML_PLACE"] = "Ubicación";
 $GLOBALS["STR_ADMIN_HTML_TEXT"] = "Su Contenido";
@@ -711,7 +716,7 @@ $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE_INFO"] = "Para personalizar su b
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Añadir un boletín de noticias";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "Etes-vous sûr de vouloir envoyer cette newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "Nota:. El módulo de cron está activada, el número de usuarios que se pueden enviar el boletín no se limita aquí, pero sin embargo puede ser utilizado por el host";
-$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Nota: los envíos. Este módulo está limitado a 250 destinatarios y se trata a la vez, lo cual puede ser problemático debido a las limitaciones de tiempo que se ejecutan en algunos servidores de envíos a masa, utilice el módulo cron o Wanewsletter módulo de interconexión específica.";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "Nota: los envíos. Este módulo está limitado a 250 destinatarios y se trata a la vez, lo cual puede ser problemático debido a las limitaciones de tiempo que se ejecutan en algunos servidores de envíos a masa, utilice el módulo cron.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Agregar o editar un boletín de noticias";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_LAST_SENDING"] = "Fecha de último envío";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_MSG_NEWSLETTER_DELETED"] = "El boletín <b>%s</b> ha sido eliminado.";
@@ -820,6 +825,7 @@ $GLOBALS["STR_ADMIN_PRIX_PURCHASE_PRICE"] = "Precio de Compra";
 $GLOBALS["STR_ADMIN_PRIX_TITLE"] = "productos de gestión de precios por categoría";
 $GLOBALS["STR_ADMIN_PRIX_UPDATE"] = "Cambio de precios";
 $GLOBALS["STR_ADMIN_PRODUCT_NAME"] = "Nombre del producto";
+$GLOBALS["STR_ADMIN_PRODUCT_REFERENCE"] = "Número del producto";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"] = "Eliminar esta línea";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] = "¿Está seguro que desea eliminar este producto? Este borrará después definitivo en Guardar cambios en la parte inferior de la página.";
 $GLOBALS["STR_ADMIN_PRODUCTS_CATEGORY"] = "categorías de sus productos";
@@ -970,6 +976,7 @@ $GLOBALS["STR_ADMIN_SEARCH_IN_ARTICLE"] = "texto del artículo";
 $GLOBALS["STR_ADMIN_SEARCH_IN_TITLE"] = "texto en el título";
 $GLOBALS["STR_ADMIN_SEE_RESULT_IN_REAL"] = "Ver en línea";
 $GLOBALS["STR_ADMIN_SEE"] = "Ver";
+$GLOBALS["STR_ADMIN_SELECT_CATEGORIES_TO_EXPORT"] = "Las categorías para la exportación (válido únicamente para la exportación PDF)";
 $GLOBALS["STR_ADMIN_SEND_BY"] = "Publicado por";
 $GLOBALS["STR_ADMIN_SEND_NOW"] = "Enviar ahora";
 $GLOBALS["STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL"] = "cliente de correo electrónico";
@@ -983,6 +990,7 @@ $GLOBALS["STR_ADMIN_SITEMAP_MSG_CREATED_OK"] = "El archivo ha sido generado.";
 $GLOBALS["STR_ADMIN_SITEMAP_OPEN"] = "Leer el archivo XML";
 $GLOBALS["STR_ADMIN_SITEMAP_TITLE"] = "Crear mapa de sitio XML";
 $GLOBALS["STR_ADMIN_SITES_ABOVE_MIDDLE"] = "Encima del contenido central";
+$GLOBALS['STR_ADMIN_SITE_COUNTRY'] = "Visitor pais";
 $GLOBALS["STR_ADMIN_SITE_ID"] = "Id del Sitio (0 para todos)";
 $GLOBALS["STR_ADMIN_SITE_DUPLICATE_CONFIRM"] = "Confirme la duplicación del sitio %s. Sólo se duplicará la configuración.";
 $GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"] = "Confirme la eliminación del sitio %s";
@@ -1344,6 +1352,7 @@ $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Administrar las tarifas de transporte por 
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "Editar este precio";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "Código Técnico";
 $GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "Número técnico de orden";
+$GLOBALS["STR_ADMIN_TEXT_FOR_PDF_EXPORT"] = "El texto a pie de página para exportación PDF";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "Título - El título no será visible en el sitio";
 $GLOBALS["STR_ADMIN_TITLE"] = "Título";
 $GLOBALS["STR_ADMIN_TO_DO"] = "Para hacer";
@@ -1364,11 +1373,11 @@ $GLOBALS["STR_ADMIN_TVA_TITLE"] = "Gestión del IVA";
 $GLOBALS["STR_ADMIN_TVA_UPDATE"] = "Cambiar el IVA";
 $GLOBALS["STR_ADMIN_UNCHECK_ALL"] = "Desmarcar Todos";
 $GLOBALS["STR_ADMIN_UPDATE"] = "Actualizar";
-$GLOBALS['STR_ADMIN_UPDATE_VERSION_DETECTED'] = 'Versión detecta';
-$GLOBALS['STR_ADMIN_UPDATE_VERSION_INVITE'] = 'Usted necesita actualizar la estructura de su base de datos';
-$GLOBALS['STR_ADMIN_UPDATE_VERSION_OK'] = 'Actualización de la base de datos ejecutadas: versión anterior = %s - nueva versión = %s';
-$GLOBALS['STR_ADMIN_UPDATE_VERSION_WARNING'] = 'Usted debe respaldar su base de datos por su cuenta antes de cualquier actualización automática - Esta herramienta es riesgoso y bajo su propia responsabilidad';
 $GLOBALS["STR_ADMIN_UPDATED_DATE"] = "Crear / Actualizar";
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_DETECTED"] = 'Versión detecta';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_INVITE"] = 'Usted necesita actualizar la estructura de su base de datos';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_OK"] = 'Actualización de la base de datos ejecutadas: versión anterior = %s - nueva versión = %s';
+$GLOBALS["STR_ADMIN_UPDATE_VERSION_WARNING"] = 'Usted debe respaldar su base de datos por su cuenta antes de cualquier actualización automática - Esta herramienta es riesgoso y bajo su propia responsabilidad';
 $GLOBALS["STR_ADMIN_URL_REWRITING"] = "Reescritura de URL";
 $GLOBALS["STR_ADMIN_URLLIST_CREATE_TITLE"] = "Crear mapa del sitio";
 $GLOBALS["STR_ADMIN_URLLIST_GENERATE_SITEMAP"] = "Generar mapa de sitio para Yahoo";
@@ -1542,6 +1551,7 @@ $GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "(Exportar todos los pedidos en 
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Detalles de pedidos de exportación en formato CSV con una línea por cada producto solicitado";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exportar detalles de la orden en formato CSV con una línea por orden";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Exportar los detalles de exportación de las cantidades ordenadas por producto";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST"] = "Exportar Chronopost (standard Alaska rendez vous)";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "Exportar los pedidos seleccionados";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "Nota:. Las tasas de incumplimiento se muestran en la moneda en que se efectuó la orden";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "No hay pedidos durante este período.";
@@ -1813,6 +1823,7 @@ $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_DELETED_OK"] = "La palabra ha sido borrad
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_CREATE"] = "Agregar una palabra al léxico";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_DEFINITION"] = "Definición";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_ERR_NOTHING_FOUND"] = "No hay ninguna contraseña almacenada en la base de datos del diccionario.";
+$GLOBALS["STR_MODULE_LEXIQUE_ADMIN_FORM_TITLE"] = "Añadir o editar una palabra en el léxico";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_CREATED_OK"] = "La palabra <b>%s</b> fue introducido en el léxico.";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_MSG_UPDATED_OK"] = "Los cambios en el léxico de la palabra %s se han tenido en cuenta.";
 $GLOBALS["STR_MODULE_LEXIQUE_ADMIN_TITLE"] = "Administrar el léxico";
@@ -1952,6 +1963,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECEIVED_LIST_TITLE"] = "Lista de correo";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL_EXPLAIN"] = "Lista de correos electrónicos separados por punto y coma posibles";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL"] = "El correo electrónico del destinatario";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENTS"] = "Beneficiarios";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEE_SENT_MESSAGES"] = "Ver los mensajes que hemos enviado a %s";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS"] = "Enviar correo electrónico a los usuarios de %s";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL_TO_N_USERS_LINK"] = "!! PRECAUCIÓN: enviar un correo electrónico a %s usuarios !!";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SEND_EMAIL"] = "Enviar email";
@@ -1970,7 +1982,9 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_TECHNICAL"] = "Técnica";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE"] = "servicio desconocido";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Firma";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "La respuesta";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TREATED"] = "tratada";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "El correo electrónico webmaster / support";
+$GLOBALS['STR_ADMIN_SUPPLIER_LIST'] = "Lista de proveedores";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Añadir un método de envío";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Puede establecer esta página los nombres de los modos de prestación Estos modos de entrega se unirá a las <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">tarifas de envío</a>.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Añadir o modificar un método de envío";

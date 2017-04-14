@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: newsletter.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content');
+necessite_priv('admin_users,admin_content,admin_communication,admin_finance');
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_NEWSLETTERS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -318,6 +318,8 @@ function send_newsletter($id, $debut, $limit, $test = false)
 				}
 				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($output, $newsletter_name_info)))->fetch();
 			} else {
+				// On envoi la newsletter, il faut envoyer l'email directement et pas une notification. Cette variable global sera utilisée dans la fonction send_email.
+				$GLOBALS['send_notification_disable'] = true;
 				$sql_u .= "
 					LIMIT " . intval($debut) . "," . intval($limit);
 				$res_u = query($sql_u);
@@ -330,7 +332,7 @@ function send_newsletter($id, $debut, $limit, $test = false)
 						$result = 'NOK';
 					}
 					if (!$test) {
-						$fc = String::fopen_utf8("sending.log", "ab");
+						$fc = StringMb::fopen_utf8("sending.log", "ab");
 						$w = fwrite ($fc, "[" . $row['email'] . "]\t\t\t " . $result . "\n");
 						fclose($fc);
 					}
@@ -394,17 +396,18 @@ function affiche_liste_newsletter()
 					$titre = $ligne['sujet_' . $this_lang];
 				}
 			}
-			$titre = '[' . String::strtoupper(implode(",", $this_langs_array)) . '] ' . $titre;
-			$sql_u = "SELECT email
+			$titre = '[' . StringMb::strtoupper(implode(",", $this_langs_array)) . '] ' . $titre;
+			$sql_u = "SELECT count(*) AS this_count
 				FROM peel_utilisateurs
 				WHERE newsletter = '1' AND " . get_filter_site_cond('utilisateurs') . " AND etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND lang IN ('" . implode("','", $this_langs_array) . "')";
-			$res_u = query($sql_u);
+			$query = query($sql_u);
+			$result = fetch_assoc($query);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'sujet' => $titre,
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'date' => get_formatted_date($ligne['date']),
-				'subscribers_number' => $Links->nbRecord,
+				'subscribers_number' => $result['this_count'],
 				'format' => $ligne['format'],
 				'statut' => $ligne['statut'],
 				'date_envoi' => $ligne['date_envoi'],

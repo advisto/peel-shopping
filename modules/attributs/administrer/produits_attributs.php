@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits_attributs.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: produits_attributs.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -36,7 +36,7 @@ switch (vb($_REQUEST['mode'])) {
 				query("DELETE FROM peel_produits_attributs
 					WHERE produit_id = '" . intval($product_id) . "'");
 				foreach ($_POST as $this_key => $this_value) {
-					if (String::strpos($this_key, 'attribut_id_') === 0) {
+					if (StringMb::strpos($this_key, 'attribut_id_') === 0) {
 						$temp = explode('_', $this_key);
 						$this_nom_attribut_id = intval($temp[2]);
 						if (!empty($this_nom_attribut_id)) {

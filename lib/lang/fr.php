@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fr.php 53583 2017-04-13 10:07:41Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ $GLOBALS["STR_ADDRESS_NAME"] = "Titre de l'adresse";
 $GLOBALS["STR_ADMIN"] = "Administration";
 $GLOBALS["STR_ADMINISTRATION"] = "Administration";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Voir les bannières à insérer sur votre site";
-$GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "Vous êtes affilié au site {$GLOBALS['site']}.\n\nActuellement, nous vous reversons <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> du Chiffre d'Affaire HT généré par votre compte.";
+$GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "Vous êtes affilié au site {$GLOBALS['site']}.\n\nActuellement, nous vous reversons <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> du Chiffre d'Affaires HT généré par votre compte.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Générer un code HTML pour les produits affiliés";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_SELL"] = "Rapport des ventes";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_URL"] = "Votre lien affilié est";
@@ -69,6 +69,7 @@ $GLOBALS["STR_BANK_ACCOUNT"] = "Compte bancaire";
 $GLOBALS["STR_BARCODE"] = "Code-barres";
 $GLOBALS['STR_BECOME_PARTNER'] = "Devenir Partenaire";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "Accéder à votre commande en ligne";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "Code guichet";
 $GLOBALS["STR_BRAND_LB"] = "Filtrer par : Marque";
@@ -171,7 +172,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "Délai de livraison prévu";
 $GLOBALS["STR_DELIVERY"] = "Livraison";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "%s : Vous n'avez pas les droits pour effectuer cette action";
 $GLOBALS["STR_DESC"] = "décroissant";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Description";
+$GLOBALS["STR_DESCRIPTION"] = "Description";
 $GLOBALS["STR_DESIGNATION"] = "Désignation";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "Vous avez été désinscrit de la newsletter";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "Désinscription de la newsletter";
@@ -181,7 +182,7 @@ $GLOBALS["STR_DETAILS_ORDER"] = "Détails / commander";
 $GLOBALS["STR_DEVIS_ON_LINE_SHOP"] = "Devis boutiques en ligne";
 $GLOBALS["STR_DEVIS"] = "Demande de devis";
 $GLOBALS["STR_DEVISE"] = "Devise";
-$GLOBALS["STR_DISABLE_ACCOUNT"] = "Desactiver son compte";
+$GLOBALS["STR_DISABLE_ACCOUNT"] = "Désactiver son compte";
 $GLOBALS["STR_DISPO"] = "Disponibilité";
 $GLOBALS["STR_DO_NOT_MISS"] = "A ne pas manquer";
 $GLOBALS["STR_DOMICILIATION"] = "Domiciliation";
@@ -278,7 +279,7 @@ $GLOBALS["STR_EVERYBODY"] = "Tout le monde";
 $GLOBALS["STR_EXPEDITION_DATE"] = "Date d'expédition";
 $GLOBALS["STR_FAQ_TITLE"] = "FAQ";
 $GLOBALS["STR_FAX"] = "Fax";
-$GLOBALS["STR_FB_DECONNECT"] = "Deconnexion facebook";
+$GLOBALS["STR_FB_DECONNECT"] = "Déconnexion Facebook";
 $GLOBALS["STR_FILE_EMPTY"] = "Le fichier est vide";
 $GLOBALS["STR_FILE"] = "Fichier";
 $GLOBALS["STR_FILTERED_SEND"] = "Votre message a été filtré et n'a pas été envoyé";
@@ -369,8 +370,9 @@ $GLOBALS["STR_LIST"] = "Liste";
 $GLOBALS["STR_LIST_PRODUCT"] = "Liste des produits";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Liste des sous-rubriques";
 $GLOBALS["STR_LISTE_CADEAU"] = "Ma liste de cadeaux";
+$GLOBALS["STR_LOCATION"] = "Localisation";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Identifiez-vous pour bénéficier de votre réduction";
-$GLOBALS["STR_LOGIN_OK"] = "Merci de votre confiance.";
+$GLOBALS["STR_LOGIN_OK"] = "Merci de votre confiance. Votre inscription est bien prise en compte, vous pouvez dès à présent accéder à votre compte en consultant <a href='%s'>%s</a> ou visiter le site via <a href='%s'>%s</a>";
 $GLOBALS["STR_LOGIN"] = "S'identifier";
 $GLOBALS["STR_LOGO"] = "Logo";
 $GLOBALS["STR_LOGOUT"] = "Se déconnecter";
@@ -384,6 +386,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Mes codes promotionnels utilisés :";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Mes codes promotionnels en cours :";
 $GLOBALS["STR_MESSAGE"] = "Message";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Un montant minimum d'achat de ";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = " produits minimum sont requis pour finaliser la commande";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "champ %s obligatoire";
 $GLOBALS["STR_MLLE"] = "Mlle ";
 $GLOBALS["STR_MME"] = "Mme ";
@@ -460,7 +463,7 @@ $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Liste des mots";
 $GLOBALS["STR_MODULE_PREMIUM_MANDATORY_EMAIL"] = "L'adresse email est obligatoire.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_AFFILIATE"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez accéder à votre espace affilié dès validation de votre compte.";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_NO_STOCK"] = "n'est pas en stock aujourd'hui.\nNous vous préviendrons par email dès qu'il sera disponible :";
-$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Nous vous remercions pour votre confiance. Vous êtes maintenant inscrit à notre programme de parrainage et vous pouvez bénéficer de votre avoir de %s dès votre première commande.\r\nA bientôt sur {$GLOBALS['site']}.\r\n";
+$GLOBALS["STR_MODULE_PREMIUM_MSG_PARRAIN_OK"] = "Nous vous remercions pour votre confiance. Vous êtes maintenant inscrit à notre programme de parrainage et vous pouvez bénéficier de votre avoir de %s dès votre première commande.\r\nA bientôt sur {$GLOBALS['site']}.\r\n";
 $GLOBALS["STR_MODULE_PREMIUM_MSG_RETAILER"] = "Merci de votre confiance.\n\nMerci de noter votre mot de passe et de le garder secret.\n\nVous pourrez bénéficier des prix revendeurs dès validation de votre compte.";
 $GLOBALS["STR_MODULE_PREMIUM_NOTICE_AFFILIATE"] = "En cliquant sur le bouton ci-dessous, vous envoyez votre inscription au Programme Partenaires du site {$GLOBALS['site']}. Votre inscription terminée, vous serez tenu de respecter les conditions détaillées dans les conditions générales d'adhésion que vous recevrez en 2 exemplaires par courrier à nous retourner signé.";
 $GLOBALS["STR_MODULE_PREMIUM_OVERLIB_STOCK"] = "Cet article n'est pas disponible aujourd'hui mais nous pouvons vous avertir par email dès qu'il est à nouveau en stock.";
@@ -508,13 +511,14 @@ $GLOBALS["STR_MODULE_TEMPLATE_EMAIL_TO_DELETE_YOUR_ACCOUNT"] = "Pour vous désin
 $GLOBALS["STR_MODULE_THUMBS_CANNOT_SAVE_PICTURE"] = "Impossible de sauvegarder l'image dans le répertoire cache. Merci de vérifier les droits d'accès sur le serveur.";
 $GLOBALS["STR_MODULE_THUMBS_IMAGE_NOT_AVAILABLE_MESSAGE"] = "Impossible d'ouvrir l'image";
 $GLOBALS["STR_MODULE_THUMBS_PICTURE_NOT_SUPPORTED"] = "Le type de l'image n'est pas supporté";
+$GLOBALS["STR_MODULE_USER_ALERTS_SAVE_SEARCH"] = "Créer une alerte";
 $GLOBALS["STR_MONTH"] = "Mois";
 $GLOBALS["STR_MONTHS"] = "mois";
 $GLOBALS["STR_MORE_DETAILS"] = "+ de détails";
 $GLOBALS["STR_MORE"] = "Acheter";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Le changement des paramètres a été effectué.";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Pour ouvrir un compte, cliquez ici</a>.";
-$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identifiez-vous pour gagner du temps.";
+$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identifiez-vous ci-dessous.";
 $GLOBALS["STR_MSG_THANKS"] = "Merci de votre confiance, votre commande a été enregistrée avec succès. ";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Mes points cadeaux";
@@ -573,6 +577,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "Trier";
 $GLOBALS["STR_ORDER_DETAIL"] = "Détail de la commande";
 $GLOBALS["STR_ORDER_FORM"] = "Bon de commande";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historique des commandes";
+$GLOBALS['STR_ORDER_MIN'] = "Commande minimum";
 $GLOBALS["STR_ORDER_NAME"] = "Commande";
 $GLOBALS["STR_ORDER_NUMBER"] = "Numéro de la commande";
 $GLOBALS["STR_ORDER_POINT"] = "Points cadeaux";
@@ -621,7 +626,7 @@ $GLOBALS["STR_PDF_ECOTAXE_HT"] = "Ecotaxe HT";
 $GLOBALS["STR_PDF_FACTURATION"] = "Adresse de facturation client";
 $GLOBALS["STR_PDF_GESTION"] = "FRAIS DE GESTION";
 $GLOBALS["STR_PDF_LIVRAISON"] = "Adresse de livraison client";
-$GLOBALS["STR_PDF_NET"] = "Net à payer";
+$GLOBALS["STR_PDF_NET"] = "NET A PAYER";
 $GLOBALS["STR_PDF_PAIEMENT"] = "Mode de règlement";
 $GLOBALS["STR_PDF_PRIX_HT"] = "Prix HT";
 $GLOBALS["STR_PDF_PRIX_TTC"] = "Prix TTC";
@@ -663,7 +668,6 @@ $GLOBALS["STR_PRODUCT"] = "Produit";
 $GLOBALS["STR_PRODUCTS_PURCHASED"] = "produits achetés";
 $GLOBALS["STR_PRODUCTS_PURCHASED_LIST"] = "Liste des produits achetés";
 $GLOBALS["STR_PRODUCTS"] = "Nos produits";
-$GLOBALS["STR_PRODUCTS"] = "Nos produits";
 $GLOBALS["STR_PROFORMA"] = "Facture proforma";
 $GLOBALS["STR_PROMO_CODE"] = "Code promo";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "Prix incluant une promotion de";
@@ -691,7 +695,7 @@ $GLOBALS["STR_REFERENCE"] = "Référence";
 $GLOBALS["STR_REFRESH"] = "Mise à jour";
 $GLOBALS["STR_REGISTER"] = "S'inscrire";
 $GLOBALS["STR_REGISTER_ORDER_ADDRESS"] = "Créer une autre adresse";
-$GLOBALS["STR_REGLEMENT_CARTE_BANCAIRE"] = "Réglement par carte bancaire";
+$GLOBALS["STR_REGLEMENT_CARTE_BANCAIRE"] = "Règlement par carte bancaire";
 $GLOBALS["STR_REMINDING_CHAR"] = "caractères restants";
 $GLOBALS["STR_REMISE"] = "Remise";
 $GLOBALS["STR_REQUEST_OK"] = "Votre demande a bien été prise en compte.";
@@ -841,6 +845,7 @@ $GLOBALS["STR_VOIR_PENSE_BETE"] = "Consulter ma liste d'achat";
 $GLOBALS["STR_VOTE"] = "Voter";
 $GLOBALS["STR_WARNING"] = "Attention";
 $GLOBALS["STR_WEBSITE"] = "Site web";
+$GLOBALS["STR_WEBSITE_NONE"] = "Aucun site";
 $GLOBALS["STR_WEEK"] = "Semaine(s)";
 $GLOBALS["STR_WEIGHT"] = "Poids de la commande";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "Que voulez-vous faire avec cette liste ?";

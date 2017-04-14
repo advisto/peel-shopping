@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2008
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class graph
@@ -31,7 +31,7 @@ class graph
 	* Constructer for the open_flash_chart_api
 	* Sets our default variables
 	*/
-	function graph()
+	function __construct()
 	{
 		$this->data_sets = array();
 
@@ -1263,7 +1263,7 @@ class graph
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class line
@@ -1278,7 +1278,7 @@ class line
 	// extra tool tip info:
 	var $tips;
 
-	function line( $line_width, $colour )
+	function __construct( $line_width, $colour )
 	{
 		$this->var = 'line';
 
@@ -1379,16 +1379,16 @@ class line
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class line_hollow extends line
 {
 	var $dot_size;
 
-	function line_hollow( $line_width, $dot_size, $colour )
+	function __construct( $line_width, $dot_size, $colour )
 	{
-		parent::line( $line_width, $colour );
+		parent::__construct( $line_width, $colour );
 		$this->var = 'line_hollow';
 		$this->dot_size = $dot_size;
 	}
@@ -1422,12 +1422,12 @@ class line_hollow extends line
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class line_dot extends line_hollow
 {
-	function line_dot( $line_width, $dot_size, $colour )
+	function __construct( $line_width, $dot_size, $colour )
 	{
 		parent::line_dot( $line_width, $colour );
 		$this->var = 'line_dot';
@@ -1440,7 +1440,7 @@ class line_dot extends line_hollow
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar
@@ -1456,7 +1456,7 @@ class bar
 	// extra tool tip info:
 	var $tips;
 
-	function bar( $alpha, $colour )
+	function __construct( $alpha, $colour )
 	{
 		$this->var = 'bar';
 
@@ -1551,14 +1551,14 @@ class bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar_3d extends bar
 {
-	function bar_3d( $alpha, $colour )
+	function __construct( $alpha, $colour )
 	{
-		parent::bar( $alpha, $colour );
+		parent::__construct( $alpha, $colour );
 		$this->var = 'bar_3d';
 	}
 }
@@ -1569,14 +1569,14 @@ class bar_3d extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar_fade extends bar
 {
-	function bar_fade( $alpha, $colour )
+	function __construct( $alpha, $colour )
 	{
-		parent::bar( $alpha, $colour );
+		parent::__construct( $alpha, $colour );
 		$this->var = 'bar_fade';
 	}
 }
@@ -1587,16 +1587,16 @@ class bar_fade extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar_outline extends bar
 {
 	var $outline_colour;
 
-	function bar_outline( $alpha, $colour, $outline_colour )
+	function __construct( $alpha, $colour, $outline_colour )
 	{
-		parent::bar( $alpha, $colour );
+		parent::__construct( $alpha, $colour );
 		$this->var = 'filled_bar';
 		$this->outline_colour = $outline_colour;
 	}
@@ -1625,7 +1625,7 @@ class bar_outline extends bar
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar_glass extends bar_outline
@@ -1637,9 +1637,9 @@ class bar_glass extends bar_outline
 	 * @param mixed $colour
 	 * @param mixed $outline_colour
 	 */
-	function bar_glass( $alpha, $colour, $outline_colour )
+	function __construct( $alpha, $colour, $outline_colour )
 	{
-		parent::bar_outline( $alpha, $colour, $outline_colour );
+		parent::__construct( $alpha, $colour, $outline_colour );
 		$this->var = 'bar_glass';
 	}
 }
@@ -1651,16 +1651,16 @@ class bar_glass extends bar_outline
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class bar_sketch extends bar_outline
 {
 	var $offset;
 
-	function bar_sketch( $alpha, $offset, $colour, $outline_colour )
+	function __construct( $alpha, $offset, $colour, $outline_colour )
 	{
-		parent::bar_outline( $alpha, $colour, $outline_colour );
+		parent::__construct( $alpha, $colour, $outline_colour );
 		$this->var = 'bar_sketch';
 		$this->offset = $offset;
 	}
@@ -1690,14 +1690,14 @@ class bar_sketch extends bar_outline
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class candle
 {
 	var $out;
 
-	function candle( $high, $open, $close, $low )
+	function __construct( $high, $open, $close, $low )
 	{
 		$this->out = array();
 		$this->out[] = $high;
@@ -1718,14 +1718,14 @@ class candle
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class hlc
 {
 	var $out;
 
-	function hlc( $high, $low, $close )
+	function __construct( $high, $low, $close )
 	{
 		$this->out = array();
 		$this->out[] = $high;
@@ -1745,14 +1745,14 @@ class hlc
  * @package http://teethgrinder.co.uk/open-flash-chart/
  * @author John Glazebrook
  * @copyright Copyright (c) 2010
- * @version $Id: open-flash-chart.php 50572 2016-07-07 12:43:52Z sdelaporte $
+ * @version $Id: open-flash-chart.php 53200 2017-03-20 11:19:46Z sdelaporte $
  * @access public
  */
 class point
 {
 	var $out;
 
-	function point( $x, $y, $size_px )
+	function __construct( $x, $y, $size_px )
 	{
 		$this->out = array();
 		$this->out[] = $x;

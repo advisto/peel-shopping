@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,8 +22,11 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function commerciale_hook_admin_menu_items($params) {
-	$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/commerciale/administrer/list_admin_contact_planified.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_TO_CONTACT"];
-	$result['menu_items']['users_sales'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=search&commercial=' . $_SESSION['session_utilisateur']['id_utilisateur']] = sprintf($GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_PER_SALESMAN"], vb($_SESSION['session_utilisateur']['pseudo']));
+	$result = array();
+	if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline', true)) {
+		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/commerciale/administrer/list_admin_contact_planified.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_TO_CONTACT"];
+		$result['menu_items']['users_sales'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=search&commercial=' . $_SESSION['session_utilisateur']['id_utilisateur']] = sprintf($GLOBALS["STR_ADMIN_MENU_USERS_CLIENTS_PER_SALESMAN"], vb($_SESSION['session_utilisateur']['pseudo']));
+	}
 	return $result;
 }
 
@@ -339,7 +342,7 @@ function create_or_update_contact_planified($frm)
 		if(empty($frm['form_edit_contact_planified_date'])) {
 			$frm['form_edit_contact_planified_date'] = date('d-m-Y', time());
 		}
-		$timestamp_planified_contact = mktime(0, 0, 0, intval(String::substr($frm['form_edit_contact_planified_date'], 3, 2)), intval(String::substr($frm['form_edit_contact_planified_date'], 0, 2)), intval(String::substr($frm['form_edit_contact_planified_date'], 6, 4)));
+		$timestamp_planified_contact = mktime(0, 0, 0, intval(StringMb::substr($frm['form_edit_contact_planified_date'], 3, 2)), intval(StringMb::substr($frm['form_edit_contact_planified_date'], 0, 2)), intval(StringMb::substr($frm['form_edit_contact_planified_date'], 6, 4)));
 		query('UPDATE peel_admins_contacts_planified
 			SET `timestamp` = "' . nohtml_real_escape_string(vb($timestamp_planified_contact)) . '",
 			reason = "' . nohtml_real_escape_string(vb($frm['form_edit_contact_planified_reason'])) . '",
@@ -350,7 +353,7 @@ function create_or_update_contact_planified($frm)
 		if(empty($frm['form_contact_planified_date'])) {
 			$frm['form_contact_planified_date'] = date('d-m-Y', time());
 		}
-		$timestamp_planified_contact = mktime(0, 0, 0, intval(String::substr($frm['form_contact_planified_date'], 3, 2)), intval(String::substr($frm['form_contact_planified_date'], 0, 2)), intval(String::substr($frm['form_contact_planified_date'], 6, 4)));
+		$timestamp_planified_contact = mktime(0, 0, 0, intval(StringMb::substr($frm['form_contact_planified_date'], 3, 2)), intval(StringMb::substr($frm['form_contact_planified_date'], 0, 2)), intval(StringMb::substr($frm['form_contact_planified_date'], 6, 4)));
 		query('INSERT INTO peel_admins_contacts_planified (user_id, admin_id, timestamp, reason, comments)
 			VALUES(
 				' . intval($frm['form_edit_contact_user_id']) . ',

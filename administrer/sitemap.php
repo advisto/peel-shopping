@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sitemap.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: sitemap.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -178,12 +178,12 @@ function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_en
 	$sitemap = $tpl->fetch();
 	// Création du fichier. Ce fichier sera lu par le fichier php /get_sitemap.xml. Une règle de réécriture dans le htaccess rend cet appel transparent pour le client.
 	$xml_filename = $GLOBALS['dirroot'] . "/sitemap_" . substr(md5($this_wwwroot), 0, 4) . ".xml";
-	$create_xml = String::fopen_utf8($xml_filename, "wb");
-	fwrite($create_xml, String::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
+	$create_xml = StringMb::fopen_utf8($xml_filename, "wb");
+	fwrite($create_xml, StringMb::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
 	fclose($create_xml);
 
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITEMAP_MSG_CREATED_OK']))->fetch();
-	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . String::nl2br_if_needed(implode('<hr />', $created_report)) . '</p>';
+	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . StringMb::nl2br_if_needed(implode('<hr />', $created_report)) . '</p>';
 }
 
 /**

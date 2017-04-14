@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -71,6 +71,7 @@
 			<td>{$STR_PSEUDO}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" name="pseudo" style="width:100%" value="{$pseudo|str_form_value}" /></td>
 		</tr>
+		{/if}
 		<tr>
 			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -103,7 +104,6 @@
 				{/if}
 			</td>
 		</tr>
-		{/if}
 {if isset($date_insert)}
 		<tr>
 			<td>{$STR_ADMIN_UTILISATEURS_REGISTRATION_DATE}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -233,7 +233,7 @@
 		</tr>
 		<tr>
 			<td>{$STR_PORTABLE}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="tel" class="form-control" name="portable" style="width:100%" value="{$portable|str_form_value}" />{$portable_calllink}</td>
+			<td><input type="tel" class="form-control" name="portable" style="width:100%" placeholder="{$form_placeholder_portable|str_form_value}" value="{$portable|str_form_value}" />{$portable_calllink}</td>
 		</tr>
 		<tr>
 			<td>{$STR_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -323,7 +323,17 @@
 		</tr>
 		<tr>
 			<td>{$STR_SWIFT}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><input type="text" class="form-control" name="bic" style="width:100%" value="{$bic|str_form_value}" /></td>
+			<td>
+				{if !empty($bic_file)}
+					{if !empty($bic)}
+						{include file="uploaded_file.tpl" f=$bic STR_DELETE=$STR_DELETE_THIS_FILE}
+					{else}
+						<input name="bic" type="file" value="" />
+					{/if}
+				{else}
+					<input type="text" class="form-control" name="bic" style="width:100%" value="{$bic|str_form_value}" />
+				{/if}
+			</td>
 		</tr>
 		<tr>
 			<td>{$STR_IBAN}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -420,7 +430,11 @@
 		<tr>
 			<td style="width:40%;">{$STR_LOGO}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td class="left middle">
-				{if isset($logo_src)}<img src="{$logo_src|escape:'html'}" alt="" /> <a href="{$logo_del_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="" /> {$STR_ADMIN_DELETE_LOGO}</a>{else}<input type="file" id="logo" name="logo" />{/if}
+				{if !empty($logo_src)}
+					<img src="{$logo_src|escape:'html'}" alt="" /> <a href="{$logo_del_href|escape:'html'}"><img src="{$drop_src|escape:'html'}" alt="" /> {$STR_ADMIN_DELETE_LOGO}</a>
+				{else}
+					<input type="file" id="logo" name="logo" />
+				{/if}
 			</td>
 		</tr>
 		{if $is_annonce_module_active && $is_modif_mode}
@@ -491,12 +505,6 @@
 						<td colspan="2">
 							{$get_user_stat_by_site}
 						</td>
-					</tr>
-					{/if}
-					{if $is_annonce_module_active}
-					<tr>
-						<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
-						<td width="60%">{$etat}</td>
 					</tr>
 					{/if}
 					<tr>
@@ -581,6 +589,7 @@
 			<td colspan="2"><p class="center"><input class="btn btn-primary" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>
 		</tr>
 	</table>
+	{$hook_output}
 </form>
 {if $is_abonnement_module_active && $is_id_utilisateur}
 <table class="full_width">
@@ -618,7 +627,7 @@
 {if $is_webmail_module_active && $is_id_utilisateur}
 <table class="full_width">
 	<tr><td>&nbsp;</td></tr>
-	<tr><td>{$list_user_mail}</td></tr>
+	<tr><td>{$more_infos_html}</td></tr>
 </table>
 <br />
 {/if}

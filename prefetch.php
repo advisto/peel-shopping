@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prefetch.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: prefetch.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('PEEL_PREFETCH', true);
 include("configuration.inc.php");
 
@@ -32,11 +32,11 @@ if(empty($GLOBALS['site_parameters']['enable_prefetch'])) {
 
 	
 // On va chercher à quoi peut correspondre la page .htm demandée
-if (String::strpos($short_url, '?') !== false) {
-	$short_url = String::substr($short_url, 0, String::strpos($short_url, '?'));
+if (StringMb::strpos($short_url, '?') !== false) {
+	$short_url = StringMb::substr($short_url, 0, StringMb::strpos($short_url, '?'));
 }
-if (String::strpos($short_url, '/') === 0) {
-	$short_url = String::substr($short_url, 1);
+if (StringMb::strpos($short_url, '/') === 0) {
+	$short_url = StringMb::substr($short_url, 1);
 }
 // Etape 1 : Recherche dans les rubriques de contenu
 $sql = "SELECT r.*
@@ -65,7 +65,7 @@ if ($result = fetch_assoc($query)) {
 if(function_exists('convertHrefUri')) {
 	// Décodage d'URL
 	$href = convertHrefUri($_SERVER['REQUEST_URI']);
-	if(String::strpos($href['script_filename'], '.php') && file_exists($GLOBALS['dirroot'] . '/' . $href['script_filename'])) {
+	if(StringMb::strpos($href['script_filename'], '.php') && file_exists($GLOBALS['dirroot'] . '/' . $href['script_filename'])) {
 		$script_filename = $href['script_filename'];
 		unset($href['script_filename']);
 		$_GET = $href;

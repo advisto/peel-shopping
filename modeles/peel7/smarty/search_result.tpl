@@ -1,19 +1,19 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_result.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: search_result.tpl 53221 2017-03-20 17:19:44Z sdelaporte $
 *}{if $is_annonce_module_active}
 	{if !empty($res_affiche_annonces)}
-<h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if} - {$ads_found} {$STR_MODULE_ANNONCES_ADS}</h1>
+<h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if} - {$ads_found} {$STR_MODULE_ANNONCES_ADS} {if !empty($STR_AT_LEAST_ONE_CAMPAIGN)}{$STR_AT_LEAST_ONE_CAMPAIGN}{/if}</h1>
 {$res_affiche_annonces}
 	{elseif $page<1 && empty($result_affichage_produit)}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if}</h1>
@@ -22,7 +22,7 @@
 {/if}
 {if !$is_annonce_module_active}
 	{if !empty($result_affichage_produit)}
-<h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_SEARCH_RESULT_PRODUCT}{/if} - {$products_found|@count} {$STR_PRODUCTS}</h1>
+<h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_SEARCH_RESULT_PRODUCT}{/if} - {$products_found} {$STR_PRODUCTS}</h1>
 {$result_affichage_produit} 
 	{elseif $page<1 && empty($res_affiche_annonces) &&  (!empty($search) || isset($result_affichage_produit))}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_SEARCH_RESULT_PRODUCT}{/if}</h1>

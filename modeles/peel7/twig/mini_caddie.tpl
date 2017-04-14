@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: mini_caddie.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: mini_caddie.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<div id="fly_to_basket_destination"></div>
 <div class="dropdown">
 	<a class="dropdown-toggle btn btn-default caddie-button" href="#" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart"></span><span class="badge minicaddie_badge_xs">{{ count_products }}</span><span class="caret"></span></a>
@@ -34,7 +34,7 @@
 						{% if (transport) %}
 							<tr><td>{{ transport.label }}:</td><td class="right">{{ transport.value }}</td></tr>
 						{% endif %}
-						{% if (total) %}
+						{% if (total) and mini_caddy_total_display_disable is empty %}
 							<tr><td>{{ total.label }}:</td><td class="right">{{ total.value }}</td></tr>
 						{% endif %}
 						<tr><td colspan="2" class="center"><a href="{{ affichage_href|escape('html') }}" class="btn btn-primary">{{ STR_DETAILS_ORDER }}</a></td></tr>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: sites.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -24,7 +24,7 @@ $frm = $_POST;
 $form_error_object = new FormError();
 
 if (!empty($frm['logo']) && strpos($frm['logo'], '://') === false) {
-	if (String::substr($frm['logo'], 0, 1) != '/') {
+	if (StringMb::substr($frm['logo'], 0, 1) != '/') {
 		$frm['logo'] = '/' . $frm['logo'];
 	}
 	$frm['logo'] = $GLOBALS['wwwroot'] . $frm['logo'];
@@ -95,9 +95,9 @@ switch (vb($_GET['mode'])) {
 					preload_modules();
 					// Gestion de l'installation ou la désinstallation d'un module
 					foreach($frm['install'] as $this_module => $install_or_uninstall) {
-						if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
+						if(class_exists(StringMb::ucfirst($this_module)) && method_exists(StringMb::ucfirst($this_module), 'check_install')) {
 							// Module complet avec classe permettant de gérer proprement l'installation
-							$class_name = String::ucfirst($this_module);
+							$class_name = StringMb::ucfirst($this_module);
 							// La syntaxe $class_name::check_install() n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
 							if($install_or_uninstall != call_user_func_array(array($class_name, 'check_install'), array())) {
 								if(!isset($GLOBALS[$class_name])) {
@@ -445,9 +445,9 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$i=0;
 	foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
 		$file_path = vb($GLOBALS['modules_on_disk_infos'][$this_module]['file_path'], null);
-		if(class_exists(String::ucfirst($this_module)) && method_exists(String::ucfirst($this_module), 'check_install')) {
+		if(class_exists(StringMb::ucfirst($this_module)) && method_exists(StringMb::ucfirst($this_module), 'check_install')) {
 			// Une classe est détectée, c'est un module complet avec une méthode d'installation
-			$class_name = String::ucfirst($this_module);
+			$class_name = StringMb::ucfirst($this_module);
 			if(!isset($GLOBALS[$class_name])) {
 				$GLOBALS[$class_name] = new $class_name();
 			}
@@ -459,7 +459,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 		} else {
 			// Module léger sans classe - sa présence sur le disque suffit à considérer qu'il est installé
 			$type = 'light';
-			$name = vb($GLOBALS['modules_light_default_names'][$this_module], String::ucfirst($this_module));
+			$name = vb($GLOBALS['modules_light_default_names'][$this_module], StringMb::ucfirst($this_module));
 			if(empty($GLOBALS['modules_on_disk_infos'][$this_module]['installed'])) {
 				if(!empty($GLOBALS['modules_on_disk_infos'][$this_module]['to_install'])) {
 					foreach(array('peel_' . $this_module . '.sql', '' . $this_module . '.sql') as $this_filename) {
@@ -484,7 +484,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 					if(file_exists($folder_path . '/' . $this_filename)) {
 						// Fichier d'administration, de classe ou de fonctions du module
 						$file_path = $folder_path . '/' . $this_filename;
-						if(String::strpos($file_path, '.php') !== false && !in_array(vb($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]), vb($GLOBALS['modules_loaded_functions'], array())) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
+						if(StringMb::strpos($file_path, '.php') !== false && !in_array(vb($GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module]), vb($GLOBALS['modules_loaded_functions'], array())) && (empty($GLOBALS['site_parameters']['modules_no_library_load_array']) || !in_array($this_module, $GLOBALS['site_parameters']['modules_no_library_load_array']))) {
 							include($file_path);
 							if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), $GLOBALS['site_parameters']['modules_admin_functions_array'])) {
 								$GLOBALS['site_parameters']['modules_admin_functions_array'][$this_module] = str_replace($GLOBALS['dirroot'], '', $file_path);
@@ -499,9 +499,9 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 			$version = '';
 			// On cherche dans le fichier de référence le numéro de version dans une ligne de commentaire d'entête du type
 			// PEEL Modules X.X.X
-			if($fp = String::fopen_utf8($file_path, "r")) {
+			if($fp = StringMb::fopen_utf8($file_path, "r")) {
 				while ($line = fgets($fp, 1024)) { 
-					if(String::substr($line, 0, 2) == '//' && preg_match("/PEEL (Shopping|Modules) ([0-9.]*)/i", $line, $matches)) { 
+					if(StringMb::substr($line, 0, 2) == '//' && preg_match("/PEEL (Shopping|Modules) ([0-9.]*)/i", $line, $matches)) { 
 						$version = $matches[2];
 						break;
 					}
@@ -535,7 +535,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 				'type' => 'none',
 				'installed' => false,
 				'enabled' => false,
-				'name' => vb($GLOBALS['modules_light_default_names'][$this_module], String::ucfirst($this_module)),
+				'name' => vb($GLOBALS['modules_light_default_names'][$this_module], StringMb::ucfirst($this_module)),
 				'technical_code' => $this_module,
 				'version' => null,
 				'contact' => true,
@@ -561,12 +561,12 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('zones', $tpl_zones);
 	$tpl->assign('zones_href', $GLOBALS['administrer_url'] . '/zones.php');
 
-	$tpl->assign('action', get_current_url(false) . '?mode=' . String::str_form_value($frm["nouveau_mode"]) . (!empty($frm["id"]) ?'&id=' . intval($frm['id']):''));
+	$tpl->assign('action', get_current_url(false) . '?mode=' . StringMb::str_form_value($frm["nouveau_mode"]) . (!empty($frm["id"]) ?'&id=' . intval($frm['id']):''));
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode']));
 	$tpl->assign('site_suspended', vb($frm['site_suspended']));
 
 	if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
-		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite'], $_SESSION['session_langue']);
 	} else {
 		$this_wwwroot =  $GLOBALS['wwwroot'];
 	}
@@ -578,7 +578,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => vb($frm['nom_' . $lng]),
 			'logo' => vb($frm['logo_' . $lng]),
-			'module_vacances_value' => (!empty($frm['module_vacances_client_msg_' . $lng]) ? String::html_entity_decode_if_needed(vb($frm['module_vacances_client_msg_' . $lng])) : ""),
+			'module_vacances_value' => (!empty($frm['module_vacances_client_msg_' . $lng]) ? StringMb::html_entity_decode_if_needed(vb($frm['module_vacances_client_msg_' . $lng])) : ""),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
@@ -611,7 +611,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	if (!empty($frm["favicon"])) {
 		$tpl->assign('favicon', array('src' => get_url_from_uploaded_filename($frm["favicon"]),
 				'favicon' => vb($frm['favicon']),
-				'sup_href' => get_current_url(false) . '?mode=supprfavicon&id=' . vb($frm['id']) . '&favicon=' . String::str_form_value(vb($frm["favicon"]))
+				'sup_href' => get_current_url(false) . '?mode=supprfavicon&id=' . vb($frm['id']) . '&favicon=' . StringMb::str_form_value(vb($frm["favicon"]))
 				));
 	}
 
@@ -1184,10 +1184,10 @@ function supprime_site($id)
 	}
 	if (!empty($site_erased)) {
 		// suppression du site effectuée, il y a avait des entrées correspondantes au site dans la BDD. Il faut afficher un message de confirmation de suppression à l'admin
-		return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_OK'], String::html_entity_decode_if_needed(vb($all_sites_name_array[$id])))))->fetch();
+		return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_OK'], StringMb::html_entity_decode_if_needed(vb($all_sites_name_array[$id])))))->fetch();
 	} else {
 		// Aucune suppression effectuée, il n'y avait pas d'entrées correspondantes au site dans la BDD. Il faut avertir l'admin.
-		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_NOK'], String::html_entity_decode_if_needed(vn($id)))))->fetch();
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_SITES_MSG_DELETED_NOK'], StringMb::html_entity_decode_if_needed(vn($id)))))->fetch();
 	}
 }
 

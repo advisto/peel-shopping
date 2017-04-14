@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: display_article.php 53200 2017-03-20 11:19:46Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -103,7 +103,7 @@ if (!function_exists('get_rubriques_sons_html')) {
 				$data[] = $tmp;
 			}
 			$tpl->assign('data', $data);
-			$tpl->assign('description', String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]))),500,'','...',450));
+			$tpl->assign('description', StringMb::str_shorten(trim(StringMb::strip_tags(StringMb::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]))),500,'','...',450));
 			$output .= $tpl->fetch();
 		}
 		correct_output($output, true, 'html', $_SESSION['session_langue']);
@@ -156,10 +156,11 @@ if (!function_exists('get_articles_html')) {
 				if ((!a_priv("admin_product") && !a_priv("reve")) && $art['on_reseller'] == 1) {
 					continue;
 				}
-				if(!empty($art['chapo'])){
-					$chapo = String::nl2br_if_needed(trim(String::html_entity_decode_if_needed($art['chapo'])));
+				// L'éditeur de texte est susceptible de rajouter des paragraphes vides, donc on teste en retirant ce qui semble vide pour l'utilisateur mais ne l'est pas techniquement
+				if(trim(str_replace(array('<p>','&#160;', '</p>'), '', $art['chapo'])) != ''){
+					$chapo = StringMb::nl2br_if_needed(trim(StringMb::html_entity_decode_if_needed($art['chapo'])));
 				}else{
-					$chapo = String::nl2br_if_needed(String::str_shorten(trim(String::strip_tags(String::html_entity_decode_if_needed($art['texte']))),500,'','...',450));
+					$chapo = StringMb::nl2br_if_needed(StringMb::str_shorten(trim(StringMb::strip_tags(StringMb::html_entity_decode_if_needed($art['texte']))),500,'','...',450));
 				}
 				$chapo = str_replace(array('<h1', '<h2', '<h3', '<h4', '</h1', '</h2', '</h3', '</h4'), array('<p', '<p', '<p', '<p', '</p', '</p', '</p', '</p'), $chapo);
 				if($chapo == strip_tags($chapo)) {
@@ -201,6 +202,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 		$rowrub = fetch_assoc($resrub);
 		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_list_brief_html.tpl');
 		$tpl->assign('is_not_empty', !empty($rowrub));
+		$tpl->assign('title_article_disabled', empty($GLOBALS['site_parameters']['title_article_disabled'])?'':$GLOBALS['site_parameters']['title_article_disabled']);
 		if (!empty($rowrub)){
 			if($rowrub['technical_code'] == 'add_cart_by_reference') {
 				include($GLOBALS['dirroot'] . "/lib/fonctions/display_caddie.php");
@@ -218,7 +220,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 				));
 			}
 			$tpl->assign('technical_code', $rowrub['technical_code']);
-			$tpl->assign('description', String::nl2br_if_needed($rowrub['description']));
+			$tpl->assign('description', StringMb::nl2br_if_needed($rowrub['description']));
 			if($rowrub['technical_code'] == 'clients' && check_if_module_active('clients')) {
 				$tpl->assign('descriptions_clients', affiche_descriptions_clients());
 			}
@@ -244,7 +246,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 		if (vb($GLOBALS['site_parameters']['content_category_count_method'], $GLOBALS['site_parameters']['category_count_method']) == 'global' || (empty($rubid) && empty($rowrub))) {
 			$tpl->assign('rubriques_sons_html', get_rubriques_sons_html($rubid));
 		}
-		if (est_identifie() && a_priv('admin_content')) {
+		if (a_priv('admin_content')) {
 			$tpl->assign('admin', array(
 				'href' => $GLOBALS['administrer_url'] . '/rubriques.php?mode=modif&id=' . $rubid,
 				'modify_content_category_txt' => $GLOBALS['STR_MODIFY_CONTENT_CATEGORY']
@@ -365,9 +367,9 @@ function get_rss_feed_content($feed_url) {
 				$output .= '<img src="' . $enclosure->get_link() . '" style="float: left; margin: 4px; margin-top: 8px;" />';
 			}
 			if($item->get_date()){
-				$output .= String::ucfirst(get_formatted_date($item->get_date(), 'long', 'short')) . ' - ';
+				$output .= StringMb::ucfirst(get_formatted_date($item->get_date(), 'long', 'short')) . ' - ';
 			}
-			$output .= String::ucfirst($item->get_description()). '
+			$output .= StringMb::ucfirst($item->get_description()). '
 			</div>';
         }
 	}

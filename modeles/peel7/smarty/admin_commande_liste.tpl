@@ -1,17 +1,18 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
-*}<div class="entete">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}{$STR_BEFORE_TWO_POINTS}: {$links_nbRecord}</div>
+// $Id: admin_commande_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+*}{if $return == 'full_html'}
+<div class="entete">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}{$STR_BEFORE_TWO_POINTS}: {$links_nbRecord}</div>
 <form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div style="margin-top: 15px; margin-bottom: 15px">
 		<div class="row">
@@ -48,39 +49,46 @@
 		</div>
 	</div>
 </form>
-{if $is_fianet_sac_module_active}
+	{if $is_fianet_sac_module_active}
 <form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<div class="center" style="margin-top: 27px;">
 		<input class="btn btn-primary" type="submit" name="fianet_sac_update_status" value="{$STR_ADMIN_COMMANDER_FIANET_UPDATE|str_form_value}" />
 	</div>
 </form>
-{/if}
+	{/if}
 <form class="entryform form-inline" role="form" method="post" action="{$action2|escape:'html'}">
 	{$form_token}
+{/if}
 {if isset($results)}
+	{if $return == 'full_html'}
 	<div class="alert alert-info">
 		<img src="{$update_src|escape:'html'}" alt="" /> {$STR_ADMIN_COMMANDER_CLIENT_UPDATED_ICON_EXPLAIN}
 	</div>
 	<input type="hidden" name="mode" value="maj_statut" />
 	<div class="table-responsive">
+	{/if}
 		<table id="tablesForm" class="table">
 			{$links_header_row}
 			{foreach $results as $res}
 			{$res.tr_rollover}
+			{if $return == 'full_html'}
 				<td class="center">
 					<a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$STR_MODIFY}</a><br />
 				{if $is_duplicate_module_active}
 					<a href="{$res.dup_href|escape:'html'}" data-confirm="{$STR_ADMIN_ORDER_DUPLICATE_WARNING|str_form_value}" title="{$STR_ADMIN_ORDER_DUPLICATE|str_form_value}"><img src="{$res.dup_src|escape:'html'}" alt="" /></a>
 				{/if}
 				</td>
+			{/if}
 				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$res.order_id}</a></td>
 				<td class="center">{if !empty($res.numero)}<a href="commander.php?mode=modif&amp;commandeid={$res.id}">{$res.numero|default:'&nbsp;'}{/if}</a></td>
 				<td class="center">{$res.date}</td>
 				<td class="center">{$res.montant_prix}</td>
 				<td class="center">{$res.avoir_prix}</td>
 				<td class="center">{$res.modifUser}</td>
+			{if $return == 'full_html'}
 				<td class="center"><input type="checkbox" name="change_statut{$res.id}" id="checkbox_tbl_{$res.id}" value="1" /></td>
 				<td class="center">{$res.payment_name}</td>
+			{/if}
 				<td class="center"><input type="hidden" name="id[]" value="{$res.id|str_form_value}" />
 					{$res.payment_status_name}
 				</td>
@@ -103,6 +111,7 @@
 			</tr>
 			{/foreach}
 		</table>
+	{if $return == 'full_html'}
 	</div>
 	<div style="margin-bottom: 10px; margin-top: 10px;">
 		<div class="row center">
@@ -121,15 +130,23 @@
 			<input type="submit" value="{$STR_ADMIN_COMMANDER_UPDATED_STATUS_FOR_SELECTION|str_form_value}" class="btn btn-primary" />
 		</div>
 	</div>
-	{if $is_module_genere_pdf_active}
+		{if $is_module_genere_pdf_active}
 	<div style="margin-bottom: 10px; margin-top: 10px;">
 		<div class="row center">
 			<input type="submit" name="export_pdf" value="{$STR_MODULE_FACTURES_ADMIN_TITLE|str_form_value}" class="btn btn-primary" />
 		</div>
 	</div>
-	{/if}
+		{/if}
+		{if !empty($get_csv_export_from_html_table)}
+	<div class="row center">
+		<a href="{$get_current_url}?mode=export" class="btn btn-primary">{$STR_ADMIN_EXPORT}</a>
+		</div>
+		{/if}
 	<div class="center">{$links_multipage}</div>
+	{/if}
 {else}
 	<p>{$STR_ADMIN_COMMANDER_NO_ORDER_FOUND}</p>
 {/if}
+{if $return == 'full_html'}
 </form>
+{/if}

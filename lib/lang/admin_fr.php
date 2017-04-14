@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	 |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 50582 2016-07-08 10:15:15Z sdelaporte $
+// $Id: admin_fr.php 53576 2017-04-13 08:00:05Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -315,6 +315,7 @@ $GLOBALS["STR_ADMIN_ECOTAX"] = "Ecotaxe";
 $GLOBALS["STR_ADMIN_ECOTAXES_ADD_ECOTAX"] = "Ajouter une écotaxe";
 $GLOBALS["STR_ADMIN_ECOTAXES_ERR_ECOTAX_NOT_FOUND"] = "L'écotaxe n'a pas été trouvée.";
 $GLOBALS["STR_ADMIN_ECOTAXES_EXPLAIN"] = "Voici le tableau vous permettant de gérer vos barèmes eco-taxe associés aux différents produits. Vous pouvez ajouter, modifier et supprimer ces barèmes ecotaxe.";
+$GLOBALS["STR_ADMIN_ECOTAXES_FORM_ECOTAXE_COEFFICIENT"] = "Coefficient éco-contribution";
 $GLOBALS["STR_ADMIN_ECOTAXES_MODIFY_ECOTAX"] = "Modifier cette écotaxe";
 $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_CREATED"] = "L'écotaxe <b>%s</b> a été créée.";
 $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_DELETED"] = "L'écotaxe <b>%s</b> a été effacée.";
@@ -322,6 +323,9 @@ $GLOBALS["STR_ADMIN_ECOTAXES_MSG_ECOTAX_UPDATED"] = "Les changements apportés �
 $GLOBALS["STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND"] = "Aucune écotaxe enregistrée dans la base.";
 $GLOBALS["STR_ADMIN_ECOTAXES_TITLE"] = "Gestion des barêmes ECOTAXE d'écoparticipation";
 $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Ajouter ou modifier une écotaxe";
+$GLOBALS["STR_ADMIN_EXPORT_CSV"] = "Export CSV";
+$GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Ne pas exporter les tarifs (pour l'export CSV)";
+$GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Choisissez vos critères d'export";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "Modèle d'email";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE"] = "TAGS GENERIQUES";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE"] = "Insérer un modèle d'email";
@@ -395,7 +399,7 @@ $GLOBALS["STR_ADMIN_HTML_PLACE_INTERSTITIEL"] = "Interstitiel de publicité";
 $GLOBALS["STR_ADMIN_HTML_PLACE_INTRO_PARRAINAGE"] = "Introduction à la page parrainage";
 $GLOBALS["STR_ADMIN_HTML_PLACE_PARTNER"] = "Haut de la page des partenaires";
 $GLOBALS["STR_ADMIN_HTML_PLACE_RESELLER_MAP"] = "Haut de page de la carte des revendeurs";
-$GLOBALS["STR_ADMIN_HTML_PLACE_SCROLLING"] = "Défilement de contenu en haut de page";
+$GLOBALS["STR_ADMIN_HTML_PLACE_SCROLLING"] = "Contenu en haut de page";
 $GLOBALS["STR_ADMIN_HTML_PLACE_TOP_CREATE_AD"] = "Haut de la page de création d'annonce";
 $GLOBALS["STR_ADMIN_HTML_PLACE"] = "Emplacement";
 $GLOBALS["STR_ADMIN_HTML_TEXT"] = "Votre contenu";
@@ -712,7 +716,7 @@ $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE_INFO"] = "Pour personnaliser vot
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Ajouter une newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "Etes-vous sûr de vouloir envoyer cette newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "NB : Le module de crons est activé, le nombre d'utilisateurs à qui la newsletter peut être envoyée n'est donc pas limité ici, mais peut néanmoins l'être par votre hébergeur.";
-$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "NB : Les envois par ce module sont limités à 250 destinataires et traités en une seule fois, ce qui peut poser des problèmes à cause des limitations de temps d'exécution sur certains serveurs. Pour des envois en masse, utilisez le module de cron ou le module spécifique d'interconnexion avec Wanewsletter.";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_DEACTIVATED_EXPLAIN"] = "NB : Les envois par ce module sont limités à 250 destinataires et traités en une seule fois, ce qui peut poser des problèmes à cause des limitations de temps d'exécution sur certains serveurs. Pour des envois en masse, utilisez le module de cron.";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_FORM_TITLE"] = "Ajouter ou modifier une newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_LAST_SENDING"] = "Date dernier envoi";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_MSG_NEWSLETTER_DELETED"] = "La newsletter <b>%s</b> a été effacée.";
@@ -821,6 +825,7 @@ $GLOBALS["STR_ADMIN_PRIX_PURCHASE_PRICE"] = "Prix d'achat";
 $GLOBALS["STR_ADMIN_PRIX_TITLE"] = "Gestion des prix des produits par catégorie";
 $GLOBALS["STR_ADMIN_PRIX_UPDATE"] = "Modifier les prix";
 $GLOBALS["STR_ADMIN_PRODUCT_NAME"] = "Nom du produit";
+$GLOBALS["STR_ADMIN_PRODUCT_REFERENCE"] = "Référence du produit";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"] = "Supprimer cette ligne";
 $GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"] = "Etes-vous sûr de vouloir supprimer ce produit ? Cette suppression sera définitive après sauvegarde des changements en bas de page.";
 $GLOBALS["STR_ADMIN_PRODUCTS_CATEGORY"] = "Catégories de vos produits";
@@ -971,6 +976,7 @@ $GLOBALS["STR_ADMIN_SEARCH_IN_ARTICLE"] = "Texte dans l'article";
 $GLOBALS["STR_ADMIN_SEARCH_IN_TITLE"] = "Texte dans le titre";
 $GLOBALS["STR_ADMIN_SEE_RESULT_IN_REAL"] = "Voir en ligne";
 $GLOBALS["STR_ADMIN_SEE"] = "Voir";
+$GLOBALS["STR_ADMIN_SELECT_CATEGORIES_TO_EXPORT"] = "Catégories à exporter (uniquement valable pour l'export PDF)";
 $GLOBALS["STR_ADMIN_SEND_BY"] = "Envoyé par";
 $GLOBALS["STR_ADMIN_SEND_NOW"] = "Envoyer maintenant";
 $GLOBALS["STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL"] = "Envoyer par email au client";
@@ -984,6 +990,7 @@ $GLOBALS["STR_ADMIN_SITEMAP_MSG_CREATED_OK"] = "Le fichier a bien été génér�
 $GLOBALS["STR_ADMIN_SITEMAP_OPEN"] = "Lire le fichier XML";
 $GLOBALS["STR_ADMIN_SITEMAP_TITLE"] = "Création du sitemap XML";
 $GLOBALS["STR_ADMIN_SITES_ABOVE_MIDDLE"] = "Au dessus du contenu central";
+$GLOBALS['STR_ADMIN_SITE_COUNTRY'] = 'Autorisation par pays du visiteur';
 $GLOBALS["STR_ADMIN_SITE_ID"] = "Id du site (0 pour tous)";
 $GLOBALS["STR_ADMIN_SITE_DUPLICATE_CONFIRM"] = "Confirmer la duplication du site %s. Seul la configuration sera dupliquée.";
 $GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"] = "Confirmer la supression du site %s";
@@ -1345,6 +1352,7 @@ $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Gestion des tarifs d'expédition par mode 
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "Modifier ce tarif";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "Code technique";
 $GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "Numéro technique de la commande";
+$GLOBALS["STR_ADMIN_TEXT_FOR_PDF_EXPORT"] = "Texte en bas de page pour l'export PDF";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "Titre - Ce titre ne sera pas visible sur le site";
 $GLOBALS["STR_ADMIN_TITLE"] = "Titre";
 $GLOBALS["STR_ADMIN_TO_DO"] = "A faire";
@@ -1543,6 +1551,7 @@ $GLOBALS["STR_ADMIN_VENTES_ALL_EXPORT_EXCEL"] = "(Exporter toutes les commandes 
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL"] = "Exporter le détail des commandes au format CSV avec une ligne par produit commandé";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER"] = "Exporter le détail des commandes au format CSV avec une ligne par commande";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT"] = "Exporter le détail des quantités commandées par produit";
+$GLOBALS["STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST"] = "Export Chronopost (standard Alaska rendez-vous)";
 $GLOBALS["STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER"] = "Exporter les commandes sélectionnées";
 $GLOBALS["STR_ADMIN_VENTES_FORM_EXPLAIN"] = "NB : Par défaut les prix sont affichés dans la devise dans laquelle la commande a été effectuée.";
 $GLOBALS["STR_ADMIN_VENTES_NO_ORDER_FOUND"] = "Aucune commande durant cette période pour le statut demandé.";
@@ -1950,7 +1959,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND"] = "Il n'y a actuellement pas
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_SENT_FOUND"] = "Il n'y a actuellement pas d'email envoyé.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ORDER_MANAGEMENT_EMAIL"] = "Email traitement des commandes";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_READ"] = "Lu";
-$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECEIVED_LIST_TITLE"] = "Liste d'emails";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECEIVED_LIST_TITLE"] = "Demandes de contact faites via le formulaire en front-office";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL_EXPLAIN"] = "Liste d'emails possible avec séparation par point virgule";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENT_EMAIL"] = "Email destinataire";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_RECIPIENTS"] = "Destinataires";
@@ -1973,6 +1982,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_TECHNICAL"] = "Technique";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE_UNDEFINED_SERVICE"] = "Service inconnu";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_SIGNATURE"] = "Signature";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TO_ANSWER"] = "A répondre";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_TREATED"] = "Traité";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_WEBMASTER_EMAIL"] = "Email webmaster / support";
 $GLOBALS['STR_ADMIN_SUPPLIER_LIST'] = "Liste des fournisseur";
 $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Ajouter un mode de livraison";

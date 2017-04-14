@@ -1,20 +1,20 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: email-templates.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_content");
+necessite_priv("admin_manage,admin_content,admin_communication,admin_finance");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE'];
 
@@ -32,14 +32,14 @@ if (!empty($_GET['id'])) {
 		if (empty($_POST['form_text'])) {
 			$form_error_object->add('form_text');
 		} elseif (strip_tags($_POST['form_text']) != $_POST['form_text']) {
-			// ATTENTION ne pas utiliser String::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessus
+			// ATTENTION ne pas utiliser StringMb::strip_tags car sinon les remplacements d'espaces divers altèreraient la validité du test ci-dessus
 			// On corrige le HTML si nécessaire
-			if (String::strpos($_POST['form_text'], '<br>') === false && String::strpos($_POST['form_text'], '<br />') === false && String::strpos($_POST['form_text'], '</p>') === false && String::strpos($_POST['form_text'], '<table') === false) {
+			if (StringMb::strpos($_POST['form_text'], '<br>') === false && StringMb::strpos($_POST['form_text'], '<br />') === false && StringMb::strpos($_POST['form_text'], '</p>') === false && StringMb::strpos($_POST['form_text'], '<table') === false) {
 				// Par exemple si on a mis des balises <b> ou <u> dans email sans mettre de <br /> nulle part, on rajoute <br /> en fin de ligne pour pouvoir nettoyer ensuite le HTML de manière cohérente
 				$added_br = true;
 				$_POST['form_text'] = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), "\n", $_POST['form_text']));
 			}
-			$_POST['form_text'] = String::getCleanHTML($_POST['form_text'], null, true, true, true, null, false);
+			$_POST['form_text'] = StringMb::getCleanHTML($_POST['form_text'], null, true, true, true, null, false);
 			if (!empty($added_br)) {
 				$_POST['form_text'] = str_replace(array("<br />\n"), "\n", $_POST['form_text']);
 			}
@@ -315,11 +315,11 @@ if (!empty($results_array)) {
 		}
 		$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 			'id' => $this_template["id"],
-			'technical_code' => String::str_shorten_words($this_template["technical_code"], 20, '<br />'),
+			'technical_code' => StringMb::str_shorten_words($this_template["technical_code"], 20, '<br />'),
 			'category_name' => $category_name,
 			'name' => $this_template["name"],
-			'subject' => String::str_shorten_words($this_template["subject"], 40),
-			'text' => String::str_shorten_words($this_template["text"], 40),
+			'subject' => StringMb::str_shorten_words($this_template["subject"], 40),
+			'text' => StringMb::str_shorten_words($this_template["text"], 40),
 			'lang' => $this_template["lang"],
 			'etat_onclick' => 'change_status("email-templates", "' . $this_template['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 			'etat_src' => $GLOBALS['administrer_url'] . '/images/' . ($this_template["active"] != "TRUE" ? 'puce-blanche.gif' : 'puce-verte.gif'),
@@ -358,7 +358,7 @@ function emailLinksExplanations()
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_emailLinksExplanations.tpl');
 	if(empty($_SESSION['session_admin_multisite']) || $_SESSION['session_admin_multisite'] != $GLOBALS['site_id']) {
-		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite']);
+		$this_wwwroot =  get_site_wwwroot($_SESSION['session_admin_multisite'], $_SESSION['session_langue']);
 	} else {
 		$this_wwwroot =  $GLOBALS['wwwroot'];
 	}

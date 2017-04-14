@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: pt.php 53557 2017-04-11 17:15:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -66,6 +66,7 @@ $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "Clé RIB";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Conta bancaria";
 $GLOBALS["STR_BARCODE"] = "";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
+$GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
 $GLOBALS["STR_BOUGHT_FACTURE"] = "";
 $GLOBALS["STR_BOX_OFFICE_CODE"] = "Code guichet";
 $GLOBALS["STR_BRAND_LB"] = "";
@@ -165,7 +166,7 @@ $GLOBALS["STR_DELIVERY_STOCK"] = "Data de entrega prevista";
 $GLOBALS["STR_DELIVERY"] = "";
 $GLOBALS["STR_RIGHTS_LIMITED"] = "";
 $GLOBALS["STR_DESC"] = "";
-$GLOBALS["STR_DESCRIPTION_WEBSITE"] = "Descrição";
+$GLOBALS["STR_DESCRIPTION"] = "Descrição";
 $GLOBALS["STR_DESIGNATION"] = "";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER_OK"] = "";
 $GLOBALS["STR_DESINSCRIPTION_NEWSLETTER"] = "";
@@ -372,6 +373,7 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "";
 $GLOBALS["STR_MESSAGE"] = "Mensagem";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "";
+$GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "";
 $GLOBALS["STR_MLLE"] = "";
 $GLOBALS["STR_MME"] = "";
@@ -497,7 +499,7 @@ $GLOBALS["STR_MORE_DETAILS"] = "";
 $GLOBALS["STR_MORE"] = "+ detalhes";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Os parâmetros foram modificados";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Para abrir a sua encomenda, clique aqui</a>?";
-$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identificar-se vous para ganhar tempo.\n";
+$GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identificar-se.\n";
 $GLOBALS["STR_MSG_THANKS"] = "Obrigado da sua confiança, a sua encomenda foi registrada com sucesso.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Meu Presente Pontos";
@@ -556,6 +558,7 @@ $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detalhe da encomenda";
 $GLOBALS["STR_ORDER_FORM"] = "";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historial das encomendas";
+$GLOBALS['STR_ORDER_MIN'] = "";
 $GLOBALS["STR_ORDER_NAME"] = "";
 $GLOBALS["STR_ORDER_NUMBER"] = "número da encomenda";
 $GLOBALS["STR_ORDER_POINT"] = "Pontos prémios da encomenda";

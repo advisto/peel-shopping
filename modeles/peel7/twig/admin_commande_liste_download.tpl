@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_liste_download.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_commande_liste_download.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<table class="full_width">
 	<tr>
 		<td class="entete" colspan="11">{{ STR_ADMIN_COMMANDER_DOWNLOADS_LIST_TITLE }}</td>
@@ -38,8 +38,8 @@
 		<td class="center">{{ res.payment_status_name }}</td>
 		<td class="center">{{ res.delivery_status_name }}</td>
 		<td class="center"><a href="commander.php?mode=send_download&amp;commandeid={{ res.id }}"><img src="{{ mail_src|escape('html') }}" alt="" /></a> <a href="commander.php?mode=send_download&amp;commandeid={{ res.id }}&amp;email={{ res.email }}">{{ STR_ADMIN_SEND_NOW }}</a></td>
-		<td class="center">{{ res.statut_envoi }} ({{ res.nb_envoi }})</td>
-		<td class="center">{{ res.date_download }} ({{ res.nb_download }})</td>
+		<td class="center">{{ res.statut_envoi }} / ({{ res.nb_envoi }})</td>
+		<td class="center">{{ res.date_download }} / ({{ res.nb_download }})</td>
 	</tr>
 	{% endfor %}
 	<tr><td colspan="11" class="center">{{ links_multipage }}</td></tr>

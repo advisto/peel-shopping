@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: marques.php 53200 2017-03-20 11:19:46Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -170,7 +170,7 @@ function supprime_marque($id)
 	if ($this_brand = fetch_assoc($qid)) {
 		/* efface cette marque */
 		query("DELETE FROM peel_marques WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('marques', null, true));
-		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MARQUES_MSG_BRAND_DELETED_OK'], String::html_entity_decode_if_needed($this_brand['name']))))->fetch();
+		$message = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_MARQUES_MSG_BRAND_DELETED_OK'], StringMb::html_entity_decode_if_needed($this_brand['name']))))->fetch();
 		echo $message;
 	}
 }
@@ -258,6 +258,10 @@ function maj_marque(&$frm)
 			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "', site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 			WHERE id_marque='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
 		query($sql_site_country);
+		
+		if(function_exists('brand_article_association_rebuild')) {
+			brand_article_association_rebuild();
+	}
 	}
 	$sql = "UPDATE peel_marques
 		SET image = '" . nohtml_real_escape_string($frm['image']) . "'";
@@ -317,7 +321,6 @@ function affiche_liste_marque(&$frm)
 	$sql = "SELECT m.*
 		FROM peel_marques m
 		WHERE " . get_filter_site_cond('marques', 'm', true) . "";
-
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_marque.tpl');
 
 	$Links = new Multipage($sql, 'marques');
@@ -326,8 +329,9 @@ function affiche_liste_marque(&$frm)
 		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
 		$HeaderTitlesArray['site_country'] = $GLOBALS["STR_ADMIN_SITE_COUNTRY"];
 	}
+	$Links->OrderDefault =  vb($GLOBALS['site_parameters']['brand_in_admin_sort_list'], 'position') ;
+	$Links->SortDefault = "ASC";
 	$Links->HeaderTitlesArray = $HeaderTitlesArray;
-	$Links->OrderDefault = 'position';
 	$results_array = $Links->Query();
 
 	$tpl->assign('href', get_current_url(false) . '?mode=ajout');
@@ -398,7 +402,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('nom_' . $lng),
 			'nom' => vb($frm['nom_' . $lng]),
-			'description_te' => getTextEditor('description_' . $lng, '100%', 500, String::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
+			'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_titre' => $frm['meta_titre_' . $lng],
 			'meta_key' => $frm['meta_key_' . $lng],
 			'meta_desc' => $frm['meta_desc_' . $lng],

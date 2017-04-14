@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_type.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: admin_formulaire_type.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	{{ form_token }}
 	<input type="hidden" name="mode" value="{{ mode|str_form_value }}" />
@@ -28,7 +28,7 @@
 			</td>
 		</tr>
 		{% for l in langs %}
-		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} {{ lang_names[l.lng]|upper }}</h2></td></tr>
+		<tr><td colspan="2" class="bloc"><h2>{{ STR_ADMIN_LANGUAGES_SECTION_HEADER }} - {{ lang_names[l.lng]|upper }}</h2></td></tr>
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_NAME }} {{ l.lng|upper }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="nom_{{ l.lng }}" value="{{ l.nom|str_form_value }}" /></td>
@@ -96,6 +96,15 @@
 			<td>
 				<input type="radio" name="tnt_threshold" value="1" {% if tnt_threshold == 1 %} checked="checked"{% endif %} /> {{ STR_ADMIN_TYPES_TNT_HOME }}
 				<input type="radio" name="tnt_threshold" value="0" {% if tnt_threshold == 0 %} checked="checked"{% endif %} /> {{ STR_ADMIN_TYPES_TNT_DELIVERY_POINT }}
+			</td>
+		</tr>
+		{% endif %}
+		{% if is_ups_module_active %}
+		<tr>
+			<td>{{ STR_ADMIN_TYPES_LINK_TO_UPS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="radio" name="is_ups" value="1" {% if is_ups == 1 %} checked="checked"{% endif %} /> {{ STR_YES }}
+				<input type="radio" name="is_ups" value="0" {% if is_ups == 0 %} checked="checked"{% endif %} /> {{ STR_NO }}
 			</td>
 		</tr>
 		{% endif %}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: produit_details_html.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -61,6 +61,9 @@
 					{/if}
 				{/foreach}
 				</ul>
+			{/if}
+			{if isset($departements_get_bootbox_dialog)}
+				{$departements_get_bootbox_dialog}
 			{/if}
 			<br />
 			{if !empty($display_share_tools_on_product_pages)}
@@ -150,19 +153,25 @@
 		{if isset($check)}
 			{$check}
 		{elseif isset($critere_stock)}
+			{if empty($product_disable_ad_cart_if_user_not_logged)}
 			{$critere_stock}
+			{else}
+			<div class="affiche_critere_stock well pull-right ">
+			{$STR_MSG_NEW_CUSTOMER}
+			</div>
+			{/if}
 		{elseif !empty($on_estimate)}
 			<div class="on_estimate well pull-right">
 				<div class="center">
 					<span style="font-size: 20px;">{$on_estimate.label}</span><br />
-							<form class="entryform form-inline" role="form" method="post" action="{$on_estimate.action}">
+					<form class="entryform form-inline" role="form" method="post" action="{$on_estimate.action}">
 						<input class="btn btn-primary btn-lg" type="submit" value="{$on_estimate.contact_us|str_form_value}">
-							</form>
-			</div>
+					</form>
+				</div>
 			</div>
 		{/if}
 		{if isset($reference)}
-			<h4 property="mpn">{$reference.label} {$reference.txt}</h4>
+			<h4 property="mpn">{$reference.label} <span id="reference_{$product_id}">{$reference.txt}</span></h4>
 		{/if}
 		{if isset($ean_code)}
 			<h4 property="gtin8">{$ean_code.label}: {$ean_code.txt}</h4>

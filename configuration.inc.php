@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2016 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.4, which is subject to an	  |
+// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 50572 2016-07-07 12:43:52Z sdelaporte $
+// $Id: configuration.inc.php 53210 2017-03-20 16:03:19Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '8.0.4');
+define('PEEL_VERSION', '8.0.5');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -169,7 +169,7 @@ if(!empty($GLOBALS['wwwroot'])) {
  */
 require($GLOBALS['dirroot'] . "/lib/class/Module.php");
 require($GLOBALS['dirroot'] . "/lib/class/Cache.php");
-require($GLOBALS['dirroot'] . "/lib/class/String.php");
+require($GLOBALS['dirroot'] . "/lib/class/StringMb.php");
 require($GLOBALS['dirroot'] . "/lib/class/Caddie.php");
 require($GLOBALS['dirroot'] . "/lib/class/FormError.php");
 require($GLOBALS['dirroot'] . "/lib/class/Multipage.php");
@@ -253,8 +253,8 @@ if (!empty($GLOBALS['site_parameters']['load_site_specific_files_before_others']
 	foreach($GLOBALS['site_parameters']['load_site_specific_files_before_others'] as $this_file_relative_path) {
 		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
 			include($GLOBALS['dirroot'] . $this_file_relative_path);
-			if(String::strpos($this_file_relative_path, '/modules/') !==false) {
-				$temp = String::substr($this_file_relative_path, String::strpos($this_file_relative_path, '/modules/')+1);
+			if(StringMb::strpos($this_file_relative_path, '/modules/') !==false) {
+				$temp = StringMb::substr($this_file_relative_path, StringMb::strpos($this_file_relative_path, '/modules/')+1);
 				$temp2 = explode('/', $temp);
 			}
 			$GLOBALS['modules_installed'][$temp2[1]] = $temp2[1];
@@ -359,37 +359,37 @@ $_SESSION['session_langue'] = check_language($_SESSION['session_langue'], (defin
 
 if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
 	if (empty($_POST) && !defined('IN_CRON')) {
-		if (String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false && String::strpos(String::strtolower(String::rawurldecode(get_url('/'))), String::strtolower(String::rawurldecode($GLOBALS['apparent_folder']))) !== false) {
+		if (StringMb::strpos(StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot'])))) === false && StringMb::strpos(str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot']))), StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST']))) !== false && StringMb::strpos(StringMb::strtolower(StringMb::rawurldecode(get_url('/'))), StringMb::strtolower(StringMb::rawurldecode($GLOBALS['apparent_folder']))) !== false) {
 			// Dans le cas où un site est accessible via un domaine directement
 			// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
 			// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plus complexes de configuration avec plusieurs chemins serveurs)
 			// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
-			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
+			redirect_and_die(StringMb::substr($GLOBALS['wwwroot'], 0, StringMb::strlen($GLOBALS['wwwroot']) - StringMb::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
 		}
-		if (String::strpos(String::strtolower(rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), 'www.' . str_replace(array('http://', 'https://'), '', String::strtolower(rawurldecode($GLOBALS['wwwroot'])))) === 0) {
+		if (StringMb::strpos(StringMb::strtolower(rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), 'www.' . str_replace(array('http://', 'https://'), '', StringMb::strtolower(rawurldecode($GLOBALS['wwwroot'])))) === 0) {
 			// Si on a www. en trop par rapport à ce qui est prévu dans wwwroot, on retire le www.
-			redirect_and_die(String::substr($GLOBALS['wwwroot'], 0, String::strlen($GLOBALS['wwwroot']) - String::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
+			redirect_and_die(StringMb::substr($GLOBALS['wwwroot'], 0, StringMb::strlen($GLOBALS['wwwroot']) - StringMb::strlen($GLOBALS['apparent_folder']) + 1) . $_SERVER['REQUEST_URI'], true);
 		}
 		// redirections éventuelles si la langue est définie sans cohérence avec ce qui est configuré dans peel_langues
-		if (String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/' && empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']])) {
+		if (StringMb::substr($_SERVER['REQUEST_URI'], StringMb::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/' && empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']])) {
 			// Exemple : on redirige domaine.com/en vers domaine.com/
-			redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], 3 + String::strlen($GLOBALS['apparent_folder']) - 1), true);
+			redirect_and_die($GLOBALS['wwwroot'] . StringMb::substr($_SERVER['REQUEST_URI'], 3 + StringMb::strlen($GLOBALS['apparent_folder']) - 1), true);
 		}
 		if (!empty($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']]) && strpos($GLOBALS['lang_url_rewriting'][$_SESSION['session_langue']], '//') !== false) {
 			if ($GLOBALS['detected_wwwroot'] != $GLOBALS['wwwroot'] && $GLOBALS['detected_wwwroot'] == str_replace(array('www.'), array($_SESSION['session_langue'] . '.'), $GLOBALS['wwwroot_main'])) {
 				// Exemple : on redirige en.domaine.com vers domaine-specifique-pour-langue-en.com
-				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
+				redirect_and_die($GLOBALS['wwwroot'] . StringMb::substr($_SERVER['REQUEST_URI'], StringMb::strlen($GLOBALS['apparent_folder']) - 1), true);
 			}
-			if (String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/') {
+			if (StringMb::substr($_SERVER['REQUEST_URI'], StringMb::strlen($GLOBALS['apparent_folder']) - 1, 4) == '/' . $_SESSION['session_langue'] . '/') {
 				// Exemple : on redirige domaine.com/en vers domaine-specifique-pour-langue-en.com
-				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], 3 + String::strlen($GLOBALS['apparent_folder']) - 1), true);
+				redirect_and_die($GLOBALS['wwwroot'] . StringMb::substr($_SERVER['REQUEST_URI'], 3 + StringMb::strlen($GLOBALS['apparent_folder']) - 1), true);
 			}
-			if (String::substr_count($GLOBALS['wwwroot'], '/') == 2 && String::strpos(String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot'])))) === false && String::strpos(str_replace(array('http://', 'https://'), '', String::strtolower(String::rawurldecode($GLOBALS['wwwroot']))), String::strtolower(String::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
+			if (StringMb::substr_count($GLOBALS['wwwroot'], '/') == 2 && StringMb::strpos(StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot'])))) === false && StringMb::strpos(str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot']))), StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST']))) !== false) {
 				// Dans le cas où un site est accesible via un domaine directement (pas via un répertoire) :
 				// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
 				// NB : Il manque donc un sous-domaine, mais on n'est pas sur une URL alternative (en effet, on fait attention à se trouver uniquement dans des cas "normaux" d'absence de sous-domaine, pas d'autres cas plsu complexes de configuration avec plusieurs chemins serveurs)
 				// par exemple : wwwroot indique un sous-domaine tel que www, alors que l'URL en cours ne contient pas www => on redirige vers une URL qui respecte la configuration de wwwroot
-				redirect_and_die($GLOBALS['wwwroot'] . String::substr($_SERVER['REQUEST_URI'], String::strlen($GLOBALS['apparent_folder']) - 1), true);
+				redirect_and_die($GLOBALS['wwwroot'] . StringMb::substr($_SERVER['REQUEST_URI'], StringMb::strlen($GLOBALS['apparent_folder']) - 1), true);
 			}
 		}
 		handle_setup_redirections(get_current_url());
@@ -445,7 +445,7 @@ if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['cod
 	if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
 		if(!empty($GLOBALS['site_parameters']['code'])) {
 			// Site sans module de gestion des devises
-			$_SESSION['session_devise']['symbole'] = String::html_entity_decode(str_replace('&euro;', '€', vb($GLOBALS['site_parameters']['symbole'])));
+			$_SESSION['session_devise']['symbole'] = StringMb::html_entity_decode(str_replace('&euro;', '€', vb($GLOBALS['site_parameters']['symbole'])));
 			$_SESSION['session_devise']['symbole_place'] = vb($GLOBALS['site_parameters']['symbole_place']);
 			$_SESSION['session_devise']['conversion'] = 1;
 			$_SESSION['session_devise']['code'] = vb($GLOBALS['site_parameters']['code']);
@@ -485,6 +485,12 @@ if($GLOBALS['force_demo_rights']) {
 //	- Les inscrits à la newsletter
 //	- Les inscrits aux téléchargements
 $GLOBALS['disable_login_by_privilege'] = vb($GLOBALS['site_parameters']['disable_login_by_privilege'], array('load', 'newsletter', 'stop', 'stand'));
+
+// Force le login d'un utilisateur précis en fonction de son IP et de son user agent
+$GLOBALS['forced_login'] = (!empty($GLOBALS['site_parameters']['allow_forced_login']) && !est_identifie() && StringMb::strpos(vb($_SERVER['REMOTE_ADDR']), $GLOBALS['site_parameters']['allow_forced_login']['ip']) !== false && StringMb::strpos(vb($_SERVER['HTTP_USER_AGENT']), $GLOBALS['site_parameters']['allow_forced_login']['user_agent']) !== false);
+if($GLOBALS['forced_login']) {
+	user_login_now($GLOBALS['site_parameters']['allow_forced_login']['email'], null, false);
+}
 
 handle_template_engine_init((defined('DEBUG_TEMPLATES') && DEBUG_TEMPLATES) || (!empty($_GET['update']) && $_GET['update'] == 1) || (!defined('IN_CRON') && (strpos($GLOBALS['wwwroot'], '://localhost')!==false || strpos($GLOBALS['wwwroot'], '://127.0.0.1')!==false)) || empty($GLOBALS['site_parameters']['smarty_avoid_check_template_files_update']));
 
@@ -543,8 +549,8 @@ if (!defined('LOAD_NO_OPTIONAL_MODULE') && !empty($GLOBALS['site_parameters']['l
 	foreach($GLOBALS['site_parameters']['load_site_specific_files_after_others'] as $this_file_relative_path) {
 		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
 			include($GLOBALS['dirroot'] . $this_file_relative_path);
-			if(String::strpos($this_file_relative_path, '/modules/') !==false) {
-				$temp = String::substr($this_file_relative_path, String::strpos($this_file_relative_path, '/modules/')+1);
+			if(StringMb::strpos($this_file_relative_path, '/modules/') !==false) {
+				$temp = StringMb::substr($this_file_relative_path, StringMb::strpos($this_file_relative_path, '/modules/')+1);
 				$temp2 = explode('/', $temp);
 				$GLOBALS['modules_installed'][$temp2[1]] = $temp2[1];
 			}
@@ -625,7 +631,7 @@ if(!isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters
 		}
 	}
 }
-if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_404_ERROR_PAGE')) {
+if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE')) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true); 
 }
 account_update();
