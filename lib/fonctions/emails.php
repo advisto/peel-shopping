@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 53555 2017-04-11 16:30:55Z sdelaporte $
+// $Id: emails.php 53611 2017-04-19 11:12:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -353,7 +353,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			} else {
 				if(!IN_INSTALLATION) {
 					// On n'affiche le message de désactivation des envois qu'à l'extérieur de l'installation
-					echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();
+					$GLOBALS['notification_output_array'][] = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_EMAIL_SENDING_DEACTIVATED'], $mail_subject)))->fetch();
 				}
 			}
 		}

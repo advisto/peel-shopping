@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Product.php 53269 2017-03-23 09:09:06Z sdelaporte $
+// $Id: Product.php 53600 2017-04-14 16:13:44Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Product.php 53269 2017-03-23 09:09:06Z sdelaporte $
+ * @version $Id: Product.php 53600 2017-04-14 16:13:44Z sdelaporte $
  * @access public
  */
 class Product {
@@ -521,7 +521,7 @@ class Product {
 					$sizes_array[$result['taille_id']] = $result['nom_' . $this->lang];
 					if($result['prix']!=0 || $result['prix_revendeur']!=0) {
 						// Ajout d'informations sur le prix si adapté
-						$sizes_array[$result['taille_id']] .= '§'.$taille['prix'].'§'.$taille['prix_revendeur'];
+						$sizes_array[$result['taille_id']] .= '§'.$result['prix'].'§'.$result['prix_revendeur'];
 					}
 				} else {
 					if ($reseller_mode && check_if_module_active('reseller') && is_reseller() && $result["prix_revendeur"] != 0) {

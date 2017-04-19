@@ -10,7 +10,6 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 53555 2017-04-11 16:30:55Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -4124,7 +4123,6 @@ function fill_other_language_content($frm, $mode=null){
 				// On boucle sur les langues
 				foreach ($this_form_fields as $this_field) {
 					// On boucle sur les champs.
-					if (empty(trim(strip_tags($frm[$this_field.$lng]))) && !empty($GLOBALS['site_parameters']['admin_data_copy_if_empty_by_language_array'][$lng])) {
 						// Le champ n'a pas été rempli par l'utilisateur.
 						// Et on souhaite remplir cette langue par une autre.
 						// => on prend la valeur de la langue source.
@@ -5462,7 +5460,7 @@ function preload_modules()
 		} else {
 			// Module pas installé et inconnu 
 			foreach(array('fonctions.php', 'functions.php', StringMb::ucfirst($this_module) . '.php', 'functions/emails.php') as $this_filename) {
-				if(!in_array(StringMb::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php')) && file_exists($folder_path . '/' . $this_filename)) {
+				if(!in_array(StringMb::strtolower(str_replace($GLOBALS['dirroot'], '', $folder_path . '/' . $this_filename)), array('/modules/calc/calc.php', '/modules/crons/crons.php')) && file_exists($folder_path . '/' . $this_filename)) {
 					// Fichier de classe ou de fonctions du module
 					$file_path = $folder_path . '/' . $this_filename;
 					if(!in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_before_others'], array())) && !in_array(str_replace($GLOBALS['dirroot'], '', $file_path), vb($GLOBALS['site_parameters']['load_site_specific_files_after_others'], array()))) {
