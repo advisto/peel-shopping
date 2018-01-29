@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 53285 2017-03-23 18:12:26Z sdelaporte $
+// $Id: categories.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -244,6 +244,9 @@ function affiche_formulaire_ajout_produits_categorie($id, &$frm)
 			$frm['image_' . $lng] = "";
 			$frm['sentence_displayed_on_product_' . $lng] = "";
 		}
+		if (!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
+			$frm['poids'] = 0;
+		}
 		$frm['position'] = 0;
 		$frm['etat'] = "0";
 		$frm['on_special'] = "";
@@ -333,6 +336,7 @@ function insere_categorie(&$frm)
 	if (!empty($frm['nom_' . $_SESSION['session_langue']])) {
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$frm['image_' . $lng] = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_' . $lng]));
+			$frm['image_header_' . $lng] = upload('image_header_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_header_' . $lng]));
 		}
 		
 		// Remplit les contenus vides
@@ -361,6 +365,10 @@ function insere_categorie(&$frm)
 			$sql .= ", site_country
 			";
 		}
+		if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
+			$sql .= ", poids
+			";
+		}
 		if (check_if_module_active('category_promotion')) {
 			$sql .= ', promotion_devises
 			, promotion_percent
@@ -375,6 +383,7 @@ function insere_categorie(&$frm)
 			, meta_key_' . $lng . '
 			, meta_desc_' . $lng . '
 			, image_' . $lng . '
+			, image_header_' . $lng . '
 			, header_html_' . $lng . ' 
 			, sentence_displayed_on_product_' . $lng;
 		}
@@ -401,6 +410,9 @@ function insere_categorie(&$frm)
 			$sql .= ", '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 			";
 		}
+		if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
+			$sql .= ", '" . nohtml_real_escape_string($frm['poids']) . "'";
+		}
 		if (check_if_module_active('category_promotion')) {
 			$sql .= ", '" . floatval(get_float_from_user_input($frm['promotion_devises'])) . "'
 			, '" . floatval(get_float_from_user_input($frm['promotion_percent'])) . "'
@@ -415,6 +427,7 @@ function insere_categorie(&$frm)
 			, '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['image_' . $lng]) . "'
+			, '" . nohtml_real_escape_string($frm['image_header_' . $lng]) . "'
 			, '" . real_escape_string($frm['header_html_' . $lng]) . "'
 			, '" . real_escape_string(vb($frm['sentence_displayed_on_product_' . $lng])) . "'";
 		}
@@ -447,6 +460,7 @@ function maj_produits_categorie($id, $frm)
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$frm['image_' . $lng] = upload('image_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_' . $lng]));
+		$frm['image_header_' . $lng] = upload('image_header_' . $lng, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_header_' . $lng]));
 	}
 	
 	// Remplit les contenus vides
@@ -475,6 +489,10 @@ function maj_produits_categorie($id, $frm)
 		, site_country = '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 		";
 	}
+	if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
+		$sql .= "
+		, poids = '" . nohtml_real_escape_string($frm['poids']) . "'";
+	}
 	if (check_if_module_active('category_promotion')) {
 		$sql .= ", promotion_devises = '" . nohtml_real_escape_string($frm['promotion_devises']) . "'
 		, promotion_percent = '" . nohtml_real_escape_string($frm['promotion_percent']) . "'
@@ -484,6 +502,7 @@ function maj_produits_categorie($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(StringMb::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 		, nom_" . $lng . "='" . real_escape_string($frm['nom_' . $lng]) . "'
+		, image_header_" . $lng . "='" . real_escape_string($frm['image_header_' . $lng]) . "'
 		, image_" . $lng . "='" . real_escape_string($frm['image_' . $lng]) . "'
 		, description_" . $lng . "='" . real_escape_string($frm['description_' . $lng]) . "'
 		, meta_titre_" . $lng . "='" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
@@ -573,6 +592,9 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('is_on_carrousel', !empty($frm['on_carrousel']));
 	$tpl->assign('allow_show_all_sons_products', !empty($frm['allow_show_all_sons_products']));
 	$tpl->assign('position', $frm['position']);
+	if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
+		$tpl->assign('poids', $frm['poids']);
+	}
 	$tpl->assign('etat', $frm['etat']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
@@ -604,6 +626,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 			'header_html' => vb($frm['header_html_' . $lng]),
 			'sentence_displayed_on_product' => vb($frm['sentence_displayed_on_product_' . $lng]),
 			'image' => get_uploaded_file_infos('image_' . $lng, vb($frm['image_' . $lng]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&lang=' . $lng),
+			'image_header' => get_uploaded_file_infos('image_header_' . $lng, vb($frm['image_header_' . $lng]), get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image_header&lang=' . $lng),
 			);
 	}
 	$tpl->assign('langs', $tpl_langs);
@@ -637,6 +660,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_DESCRIPTION', $GLOBALS['STR_ADMIN_DESCRIPTION']);
 	$tpl->assign('STR_ADMIN_HEADER_HTML_TEXT', $GLOBALS['STR_ADMIN_HEADER_HTML_TEXT']);
 	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
+	$tpl->assign('STR_IMAGE_HEADER', $GLOBALS['STR_IMAGE_HEADER']);
 	$tpl->assign('STR_ADMIN_CUSTOMIZE_APPEARANCE', $GLOBALS['STR_ADMIN_CUSTOMIZE_APPEARANCE']);
 	$tpl->assign('STR_ADMIN_BACKGROUND_COLOR', $GLOBALS['STR_ADMIN_BACKGROUND_COLOR']);
 	$tpl->assign('STR_ADMIN_BACKGROUND_COLOR_FOR_MENU', $GLOBALS['STR_ADMIN_BACKGROUND_COLOR_FOR_MENU']);
@@ -666,6 +690,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT', $GLOBALS['STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT']);
+	$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT']);
 	echo $tpl->fetch();
 }
 
@@ -690,9 +715,21 @@ function supprime_fichier_categorie($id, $file, $lang)
 			query("UPDATE peel_categories
 				SET image_" . word_real_escape_string($lang) . " = ''
 				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('categories', null, true) . "");
+			delete_uploaded_file_and_thumbs($file['image_' . $lang]);
+			break;
+	
+		case "image_header":
+			$sql = "SELECT image_header_" . word_real_escape_string($lang) . "
+				FROM peel_categories
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('categories', null, true) . "";
+			$res = query($sql);
+			$file = fetch_assoc($res);
+			query("UPDATE peel_categories
+				SET image_header_" . word_real_escape_string($lang) . " = ''
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('categories', null, true) . "");
+			delete_uploaded_file_and_thumbs($file['image_header_' . $lang]);
 			break;
 	}
-	delete_uploaded_file_and_thumbs($file['image_' . $lang]);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_FILE_DELETED'], $file['image_' . $lang])))->fetch();
 }
 

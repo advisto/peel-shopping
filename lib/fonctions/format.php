@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 53289 2017-03-24 09:21:25Z sdelaporte $
+// $Id: format.php 55514 2017-12-14 09:44:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -306,7 +306,7 @@ function rewriting_urlencode($string, $convert_string_to_lower = true)
 	if ($convert_string_to_lower == true) {
 		$string = StringMb::strtolower($string);
 	}
-	$string = preg_replace('/[^a-zA-Z0-9_]/', "-", utf8_decode(StringMb::strip_tags(StringMb::convert_accents($string))));
+	$string = preg_replace('/[^a-zA-Z0-9_]/', "-", utf8_decode(StringMb::strip_tags(StringMb::convert_accents(StringMb::html_entity_decode($string)))));
 	$string = preg_replace('/[-]{2,}/', "-", $string);
 	$url_part = StringMb::rawurlencode(StringMb::str_shorten($string, 60, '', '', 30));
 	return $url_part;
@@ -539,9 +539,10 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
  *
  * @param string $string
  * @param boolean $use_current_hour_min_sec_if_missing Force l'ajout de l'heure H:i:s correspondant à l'instant t, si cette heure n'est pas spécifiée ; permet de générer facilement une date t + X jours
+ * @param string $forced_string_format Force le format souhaité de la date en retour
  * @return
  */
-function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_missing = false)
+function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_missing = false, $forced_string_format = null)
 {
 	if(is_numeric($string) && $string>100000000) {
 		// $string est un timestamp
@@ -557,6 +558,9 @@ function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_mi
 		// On supprime les % pour avoir les bonnes valeurs utilisables ensuite avec date() pour la génération finale
 		// Pour l'heure, on utilise le format standard compatible dans date(), car le format utilisateur va rester de toutes façons dans le même ordre
 		$supposed_string_format = $GLOBALS['date_format_short'].' '.$GLOBALS['time_basic_format_long'];
+	}
+	if (!empty($forced_string_format)) {
+		$supposed_string_format = $forced_string_format;
 	}
 	$user_date_format_array = explode('-', str_replace(array('%', ' ', '/', '.', ':', '_', 'h', ','), array('', '-', '-', '-', '-', '-', '-', '-'), $supposed_string_format));
 	$user_date_array = explode('-', str_replace(array(' ', '/', '.', ':', '_', 'h', ','), array('-', '-', '-', '-', '-', '-', '-'), $string));
@@ -673,6 +677,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			$template_tags['SITE'] = $GLOBALS['site'];
 			$template_tags['SITE_NAME'] = $GLOBALS['site'];
 			$template_tags['WWWROOT'] = get_lang_rewrited_wwwroot($lang);
+			$template_tags['ADMINISTRER_URL'] =  $GLOBALS['administrer_url'];
 			$template_tags['REPERTOIRE_IMAGES'] = $GLOBALS['repertoire_images'];
 			if(!$avoid_load_urls) {
 				$template_tags['CATALOG_URL'] = get_product_category_url();
@@ -788,11 +793,13 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
 			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES]') !== false) {
 				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
+			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES_CARROUSEL]') !== false) {
+				$template_tags['CLIENT_REFERENCES_CARROUSEL'] = affiche_reference_carrousel(true,null, 1, 1, 12, 0);
 			}
 			if(StringMb::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
 				$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div></div>';
 				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
-					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div></div>';
+					$template_tags['CLOSE_MAIN_CONTAINER'] .= vb($GLOBALS['site_parameters']['close_main_container_in_rubrique_article'], '</div></div></div>');
 				} elseif(defined('IN_HOME')) {
 					$template_tags['CLOSE_MAIN_CONTAINER'] .= '</div>';
 				}
@@ -800,7 +807,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			if(StringMb::strpos($text, '[REOPEN_MAIN_CONTAINER]') !== false) {
 				$template_tags['REOPEN_MAIN_CONTAINER'] = '<div class="container"><div class="row"><div class="middle_column col-sm-12"><div class="middle_column_repeat">';
 				if(defined('IN_RUBRIQUE') || defined('IN_RUBRIQUE_ARTICLE')) {
-					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="rub_wrapper special_content"><div class="rub_content">';
+				$template_tags['REOPEN_MAIN_CONTAINER'] .= vb($GLOBALS['site_parameters']['reopen_main_container_in_rubrique_article'], '<div class="col-md-12"><div class="rub_wrapper special_content"><div class="rub_content">');
 				} elseif(defined('IN_HOME')) {
 					$template_tags['REOPEN_MAIN_CONTAINER'] .= '<div class="page_home_content">';
 				}
@@ -1484,24 +1491,35 @@ function phoneOk ($phone_number, $international_phone_number = true) {
  * permet de générer un fichier csv contenant une liste de résultat normalement affiché sous forme de tableau HTML.
  *
  * @param string $report
+ * @param string $add_extra_csv_data permet d'ajouter du contenu déjà au format csv
+ * @param boolean $return_formated_string permet de retourner uniquement la chaine de caractère formaté.
+ * @param string $filename permet d'indiquer le nom du document a télécharger
  *
  * @return 
  *
  */
-function get_csv_export_from_html_table($report) {
+function get_csv_export_from_html_table($report, $add_extra_csv_data = null, $return_formated_string = false, $filename = null) {
 	if (!empty($report)) {
-		header("Content-type: Binary/CSV");
-		header("Content-Disposition: attachment; filename=\"advisto-" . str_replace(array('----', '---', '--', '-.'), array('-', '-', '-', '.'), implode('-', $_GET) . ".csv") . "\"");
-		header("Content-Description: File Transfer");
-		header("Content-Transfer-Encoding: binary");
-		header("Content-Length: " . StringMb::strlen($report));
-
+		if (empty($return_formated_string)) {
+			header("Content-type: Binary/CSV");
+			if (empty(!empty($filename))) {
+				$filename = "advisto-" . str_replace(array('----', '---', '--', '-.'), array('-', '-', '-', '.'), implode('-', $_GET) . ".csv");
+			}
+			header("Content-Disposition: attachment; filename=\"".$filename."\"");
+			header("Content-Description: File Transfer");
+			header("Content-Transfer-Encoding: binary");
+			header("Content-Length: " . StringMb::strlen($report));
+		}
 		$report = str_replace(array("\n", "\r", "\t", ';'), array('', '', '', ','), html_entity_decode(str_replace('>&nbsp;<', '><', $report)));
 		// On met des ; au lieu de \t car sinon Excel ne reconnaît pas forcément les données
 		$report = str_replace(array('</td>', '</th>', '</tr>'), array('</td>' . ";", '</th>' . ";", '</tr>' . "\r\n"), $report);
 		$report = strip_tags(StringMb::substr($report, 0, strpos($report, '</table>')));
-		echo $report;
-		die();
+		if (!empty($return_formated_string)) {
+			return $add_extra_csv_data.$report;
+		} else {
+			echo $add_extra_csv_data.$report;
+			die();
+		}
 	} else {
 		die('Aucune donnée générée');
 	}

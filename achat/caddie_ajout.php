@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 53261 2017-03-22 17:12:58Z sdelaporte $
+// $Id: caddie_ajout.php 55332 2017-12-01 10:44:06Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -155,6 +155,10 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					$can_add_to_cart = false;
 					$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_ORDER_MIN'].' '.$product_object->quantity_min_order;
 				}
+				if (!empty($GLOBALS['site_parameters']['user_offers_table_enable']) && order_only_if_offer_users($product_object)) {
+					$order_only_if_offer_users = true;
+					$can_add_to_cart = false;
+				}
 				// Gestion de l'ajout au caddie
 				if ($can_add_to_cart) {
 					// Pas de problème => on ajoute le produit
@@ -169,7 +173,11 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 				}
 				if ($added_quantity < $quantite && empty($_SESSION['session_display_popup']['error_text'])) {
 					// La quantité à ajouter est égale au maximum de la quantité commandable
-					$_SESSION['session_display_popup']['error_text'] = $GLOBALS['STR_QUANTITY_INSUFFICIENT'] . "\n";
+					if (!empty($order_only_if_offer_users)) {
+						$_SESSION['session_display_popup']['error_text'] = $GLOBALS['STR_PRODUCT_NOT_AVAILABLE_CONTACT_SELL_SERVICE'] . "\n";
+					} else {
+						$_SESSION['session_display_popup']['error_text'] = $GLOBALS['STR_QUANTITY_INSUFFICIENT'] . "\n";
+					}
 					if ($added_quantity == 0) {
 						// Aucun produit ajouté au caddie
 						$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_ZERO_PRODUCT_ADD'];

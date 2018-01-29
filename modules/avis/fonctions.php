@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53418 2017-03-31 17:03:30Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -104,7 +104,7 @@ function avis_hook_search_complementary($params) {
 	// Recherche dans les avis
 	$results = array();
 	$urls_array = array(); // On ne veut pas de doublon dans les résultats
-	if(empty($params['terms'])) {
+	if(empty($params['terms']) || vn($params['page'])>1) {
 		return null;
 	}
 	$fields[] = 'nom_produit';
@@ -122,9 +122,9 @@ function avis_hook_search_complementary($params) {
 		}
 		$sql = "SELECT *
 			FROM peel_avis
-			WHERE " . $sql_cond . "
+			WHERE etat=1 AND " . $sql_cond . "
 			ORDER BY id DESC
-			LIMIT 40";
+			LIMIT ". vn($GLOBALS['site_parameters']['avis_search_results_max'], 40);
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			unset($nom);
@@ -344,8 +344,17 @@ function ajout_avis($frm, $update_user_account = false)
 				SET pseudo = '" . nohtml_real_escape_string($frm['pseudo']) . "'
 				WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
 		}
-		$custom_template_tags['PRENOM'] = vb($_SESSION['session_utilisateur']['prenom']);
-		$custom_template_tags['NOM_FAMILLE'] = vb($_SESSION['session_utilisateur']['nom_famille']);
+		if (est_identifie()) {
+			$nom_famille = $_SESSION['session_utilisateur']['nom_famille'];
+			$prenom = $_SESSION['session_utilisateur']['prenom'];
+		} elseif(!empty($frm['id_utilisateur'])) {
+			$user_info = get_user_information($frm['id_utilisateur']);
+			$nom_famille = $user_info['nom_famille'];
+			$prenom = $user_info['prenom'];
+		}
+
+		$custom_template_tags['PRENOM'] = vb($prenom);
+		$custom_template_tags['NOM_FAMILLE'] = vb($nom_famille);
 		$custom_template_tags['NOM_PRODUIT'] = StringMb::html_entity_decode_if_needed($frm['titre']);
 		$custom_template_tags['AVIS'] = $frm['avis'];
 		if (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
@@ -451,6 +460,7 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 	$tpl->assign('title', $title);
 	$tpl->assign('type', $type);
 	$tpl->assign('star_src', get_url('/images/star1.gif'));
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT', $GLOBALS['STR_MODULE_AVIS_PEOPLE_OPINION_ABOUT_PRODUCT']);
 	$tpl->assign('STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT', $GLOBALS['STR_MODULE_AVIS_PEOPLE_NEWS_ABOUT_PRODUCT']);
 	$tpl->assign('STR_MODULE_AVIS_AVERAGE_RATING_GIVEN', $GLOBALS['STR_MODULE_AVIS_AVERAGE_RATING_GIVEN']);
@@ -503,7 +513,7 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 		}
 		$sqlAvis = "SELECT a.*, u.pseudo
 			FROM peel_avis a
-			INNER JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
+			LEFT JOIN peel_utilisateurs u ON a.id_utilisateur = u.id_utilisateur AND " . get_filter_site_cond('utilisateurs', 'u') . "
 			WHERE a.ref='" . intval($prodid) . "' AND a.etat='1' AND " . ($mode == 'avis'?"a.note>-99":"a.note=-99") . " AND a.avis!='' ".$sql_cond;
 		if (!empty($campaign_id)) {
 			$sqlAvis .= " AND item_id=".intval($campaign_id);
@@ -564,8 +574,10 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 			}
 			if (!empty($Avis['pseudo'])) {
 				$pseudo = StringMb::html_entity_decode_if_needed($Avis['pseudo']);
-			} else {
+			} elseif (!empty($Avis['prenom'])) {
 				$pseudo = StringMb::html_entity_decode_if_needed($Avis['prenom']);
+			} else {
+				$pseudo = '[...]';
 			}
 			$tpl_results[] = array('i' => $i,
 				'pseudo' => $pseudo,

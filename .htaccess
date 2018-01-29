@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 53343 2017-03-28 17:11:29Z sdelaporte $
+# $Id: .htaccess 55332 2017-12-01 10:44:06Z sdelaporte $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -29,7 +29,7 @@
 # - Chez Free, plusieurs choses sont à faire : 
 #   . Activez la ligne suivante en retirant le # en début de ligne (ce qui active PHP5) :
 # php 1
-#   . Supprimez les .htaccess des dossiers suivants : administrer/modeles/css/  administrer/modeles/  lib/js/ lib/css/ images/  upload/  modeles/peel7/  modeles/peel7/images/  modeles/peel7/css/ 
+#   . Supprimez les .htaccess des dossiers suivants : administrer/modeles/css/  administrer/modeles/  lib/js/ lib/css/ images/  upload/  modeles/peel9/  modeles/peel9/images/  modeles/peel9/css/ 
 #   . Supprimez tout ce qui est après la ligne ErrorDocument 404 /search.php?type=error404 de ce document
 #
 # - Chez Aquaray, activez la ligne suivante en retirant le # en début de ligne :
@@ -121,7 +121,7 @@ Options -Indexes
 AddDefaultCharset UTF-8
 
 # Interdire fichiers .htaccess et .htpasswd, info et configuration, et avec extensions exotiques
-<FilesMatch "\.(inc|tpl|h|ihtml|sql|ini|conf|class|bin|spd|theme|module|exe|asa|log|dat|bak|db|PHPEditBackup|htaccess|htpasswd)$">
+<FilesMatch "\.(inc|tpl|h|ihtml|sql|ini|conf|class|bin|spd|theme|module|asa|log|dat|bak|db|PHPEditBackup|htaccess|htpasswd)$">
 	Deny from all
 </FilesMatch>
 
@@ -190,9 +190,10 @@ AddDefaultCharset UTF-8
 
 	RewriteCond %{REQUEST_URI} !^/js/(.*)$
 	RewriteCond %{REQUEST_URI} !^js/(.*)$
+	RewriteRule ^([a-z]{2})/([a-z]{2})/(.*)$ /$1/$3 [QSA,L,R=301] 
+	
 	# Suivant les hébergements, il faut ou non laisser un / devant $2 dans la ligne suivante (bug apache sur certaines versions ?)
 	# => A changer si vous modifiez RewriteBase ci-dessus, ou si vous avez un problème d'URL rewriting sur les répertoires virtuels de langue
-	RewriteRule ^([a-z]{2})/([a-z]{2})/(.*)$ /$1/$3 [QSA,L,R=301] 
 	RewriteRule ^([a-z]{2})/(.*)$ /$2?langue=$1 [QSA,L]
 	# RewriteRule ^([a-z]{2})/(.*)$ $2?langue=$1 [QSA,L]
 
@@ -216,7 +217,24 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(lexique|lexicon|lexico|lexikon|lessico)/mot-(.*)-(.*)-([0-9]+)\.html$ lexique/index.php?lettre=$2&id=$4 [QSA,L]
 	RewriteRule ^(lexicon|lexico|lexikon|lessico)/$ lexique/index.php [QSA,L]
 	RewriteRule ^(dire-a-un-ami|tell-a-friend|haga-conocer-a-amigos|vertel-een-vriend)$ modules/direaunami/direaunami.php [L,QSA]
-	RewriteRule ^(merk|marca|marque|brand)/(.*)$ achat/marque.php?brand=$2 [QSA,L]
+	RewriteRule ^(merk|marke|marca|marque|brand)/(.*)$ achat/marque.php?brand=$2 [QSA,L]
+	
+	# Si module d'annnonces, pour les pages de categories d'annonces	
+	# RewriteRule ^([A-Z].*)-([0-9]+|rss)-([0-9]+)\.(html|xml)$ modules/annonces/index.php?catid=$3&page=$2 [L,QSA]
+	# Si module d'annnonces, pour les pages de détail d'annonces
+	# RewriteRule ^(.*)-([0-9]+)\.html$ modules/annonces/annonces_details.php?ref=$2 [L,QSA]
+	
+	# Si module vitrine
+	# RewriteRule ^acheter/liste-grossiste-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^comprar/lista-mayoristas-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^buy/list-wholesaler-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^acheter/annonceur-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^comprar/lista-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^buy/list-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+
+	RewriteRule ^expertcomptable$ /experts-comptables.htm [R=301,L]
+	RewriteRule ^avocats$ /gestion-de-temps-avocats.htm [R=301,L]
+	RewriteRule ^emailing/(.*)$ modules/temps2000/$1 [QSA,L]
 
 	# LAISSE EN FIN DE FICHIER - KEEP THE FOLLOWING AT END OF FILE
 	# Gestion des erreurs 404 si serveur utilise FastCGI : il faut capturer ici ces erreurs sinon "File not found" tout simple sera généré - au pire, ça fait double emploi avec ErrorDocument défini plus haut

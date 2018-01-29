@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53577 2017-04-13 08:16:48Z sdelaporte $
+// $Id: fonctions.php 55772 2018-01-16 17:06:37Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -35,7 +35,7 @@ function display_prices_with_taxes_active() {
  */
 function unique_id()
 {
-	mt_srand(microtime_float() * 1000000);
+	mt_srand(intval(microtime_float() * 1000000));
 	return substr(sha256($GLOBALS['site_parameters']['sha256_encoding_salt'] . mt_rand(0, 9999999)), 0, 32);
 }
 
@@ -67,7 +67,7 @@ function MDP($chrs = 8, $data_user_info_array = array())
 		}
 		$pwd .= date('y').date('m').date('d').date('H');
 	} else {
-		mt_srand(microtime_float() * 1000000);
+		mt_srand(intval(microtime_float() * 1000000));
 		while (StringMb::strlen($pwd) < $chrs) {
 			$chr = chr(mt_rand(0, 255));
 			// on évite les 1, i, I, o, O et 0
@@ -91,7 +91,7 @@ function generate_token($name = 'general', $use_existing_token = true)
 	if ($use_existing_token && !empty($_SESSION['token_' . $name])) {
 		$_SESSION['token_time_' . $name] = time();
 	} else {
-		srand(microtime_float() * 1000000);
+		srand(intval(microtime_float() * 1000000));
 		$_SESSION['token_' . $name] = md5(uniqid(mt_rand()));
 		$_SESSION['token_time_' . $name] = time();
 	}
@@ -276,7 +276,7 @@ function calcul_nbarti_parrub($rub)
 function fprix($price, $display_currency = false, $currency_code_or_default = null, $convertion_needed_into_currency = true, $currency_rate = null, $display_iso_currency_code = false, $format = true, $force_format_separator = null, $add_rdfa_properties = false, $round_even_if_no_format = false)
 {
 	static $currency_infos_by_code;
-	if(!empty($GLOBALS['site_parameters']['price_hide_if_not_loggued']) && !defined('IN_IPN') && (!est_identifie() || (!a_priv('util*') && !a_priv('admin*') && !a_priv('reve*')))) {
+	if(!empty($GLOBALS['site_parameters']['price_hide_if_not_loggued']) && !defined('IN_IPN') && (!est_identifie() || (!a_priv('util*') && !a_priv('admin*') && !a_priv('reve*')) || a_priv('*refused') || a_priv('*wait'))) {
 		return '-';
 	}
 	
@@ -296,12 +296,18 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 			$symbole_place = $currency_infos_by_code[$currency_code_or_default]['symbole_place'];
 		}
 	}
-	if (empty($currency_symbole)) {
+	if (empty($currency_symbole) && !empty($_SESSION['session_devise'])) {
 		// Par défaut ou si on ne recupère aucun symbole de devise alors on utilise le symbole et le taux de conversion de session
 		$currency_code = $_SESSION['session_devise']['code'];
 		$currency_symbole = $_SESSION['session_devise']['symbole'];
 		$currency_rate_item = $_SESSION['session_devise']['conversion'];
 		$symbole_place = $_SESSION['session_devise']['symbole_place'];
+	} else {
+		// valeur par défaut que l'on retrouve dans configuration.inc.php.
+		$currency_code = 'EUR';
+		$currency_symbole = ' €';
+		$currency_rate_item = 1;
+		$symbole_place = 1;
 	}
 	if (!empty($currency_rate)) {
 		// Si on veut forcer le taux de change, alors on l'applique à la place de celui qu'on a récupéré en BDD ou en session
@@ -324,12 +330,16 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 	} else {
 		if(!empty($GLOBALS['site_parameters']['prices_decimal_separator']) && is_array($GLOBALS['site_parameters']['prices_decimal_separator']) && isset($GLOBALS['site_parameters']['prices_decimal_separator'][$currency_code])) {
 			$prices_decimal_separator = $GLOBALS['site_parameters']['prices_decimal_separator'][$currency_code];
+		} elseif (!empty($_SESSION['session_devise']['decimal_separator'])) {
+			$prices_decimal_separator = $_SESSION['session_devise']['decimal_separator'];
 		} else {
 			$prices_decimal_separator = vb($GLOBALS['site_parameters']['prices_decimal_separator'], ',');
 		}
 	}
 	if(!empty($GLOBALS['site_parameters']['prices_thousands_separator']) && is_array($GLOBALS['site_parameters']['prices_thousands_separator']) && isset($GLOBALS['site_parameters']['prices_thousands_separator'][$currency_code])) {
 		$prices_thousands_separator = $GLOBALS['site_parameters']['prices_thousands_separator'][$currency_code];
+	} elseif (!empty($_SESSION['session_devise']['thousands_separator'])) {
+		$prices_thousands_separator = $_SESSION['session_devise']['thousands_separator'];
 	} else {
 		$prices_thousands_separator = vb($GLOBALS['site_parameters']['prices_thousands_separator'], ' ');
 	}
@@ -348,7 +358,7 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 			$price_displayed = number_format($price_displayed, $prices_precision, $prices_decimal_separator, $prices_thousands_separator);
 		}
 		if($add_rdfa_properties) {
-			$price_displayed = '<span property="price">'.$price_displayed.'</span>';
+			$price_displayed = '<span property="price" content="'.number_format(str_replace(array(',', ' '), array('.',''), $price_displayed), $prices_precision, '.', '') . '">'.$price_displayed.'</span>';
 		}
 		if ($display_iso_currency_code) {
 			if($add_rdfa_properties) {
@@ -357,14 +367,14 @@ function fprix($price, $display_currency = false, $currency_code_or_default = nu
 			$price_displayed .= ' ' . $currency_code;
 		} elseif ($display_currency) {
 			// Si on veut afficher le symbole de la devise (Par défaut, on affiche uniquement le montant)
+			if($add_rdfa_properties) {
+				$currency_symbole = '<span property="priceCurrency" content="'.$currency_code.'">'.$currency_symbole.'</span>';
+			}
 			if ($symbole_place == 1) {
 				$price_displayed .= $GLOBALS['STR_BEFORE_TWO_POINTS'] . $currency_symbole;
 			} else {
 				$price_displayed = $currency_symbole . ' ' . $price_displayed;
 			}
-			/*if($add_rdfa_properties) {
-				$price_displayed .= ' <span class="hidden" property="priceCurrency">'.$currency_code.'</span>';
-			}*/
 		}
 	} elseif($round_even_if_no_format) {
 		$price_displayed = round($price_displayed, $prices_precision);
@@ -596,6 +606,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 		$load_module = true;
 		$this_block_style = '';
 		$this_module_output = '';
+		unset($width_class);
 		if (!empty($id_categorie)) {
 			$display_catalog_allowed = extra_catalogue_condition($id_categorie);
 		} else {
@@ -741,7 +752,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'newsletter_in_column') {
 				// $this_module_output = get_newsletter_in_column();
 			} elseif ($this_module['technical_code'] == 'subscribe_newsletter') {
-				$this_module_output = get_newsletter_form($this_module['location'], true);
+				$this_module_output = get_newsletter_form();
 			} elseif ($this_module['technical_code'] == 'contact') {
 				$this_module_output = get_contact_sideblock($this_module['location'], true);
 			} elseif ($this_module['technical_code'] == 'annonces' && check_if_module_active('annonces')) {
@@ -749,7 +760,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'become_verified' && check_if_module_active('abonnement')) {
 				$this_module_output = get_verified_sideblock_link($this_module['location'], true);
 			} elseif ($this_module['technical_code'] == 'upsell' && check_if_module_active('abonnement')) {
-				$this_module_output = getVerifiedAdsList();
+				$this_module_output = getVerifiedAdsList(vn($GLOBALS['site_parameters']['verified_ads_list_nb_picture_max'], 12), vn($GLOBALS['site_parameters']['verified_ads_list_picture_max_width'], 130), vn($GLOBALS['site_parameters']['verified_ads_list_picture_max_height'], 100));
 			} elseif ($this_module['technical_code'] == 'search_by_list' && check_if_module_active('annonces')) {
 				$this_module_output = get_annonces_in_box('search_by_list', $this_module['location'], true);
 				$this_module['sliding_mode'] = false;
@@ -780,9 +791,11 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 				$this_module_output = Carrousel::display('references', true);
 			} elseif ($this_module['technical_code'] == 'partenaires' && check_if_module_active('carrousel')) {
 				$this_module_output = Carrousel::display('partenaires', true);
-			}elseif ($this_module['technical_code'] == 'forum_rss') {
+			} elseif ($this_module['technical_code'] == 'listecadeau' && check_if_module_active('listecadeau')) {
+				$this_module_output = bloc_liste_cadeau();
+			} elseif ($this_module['technical_code'] == 'forum_rss') {
 				$this_module_output = get_xml_value($GLOBALS['site_parameters']['forum_rss_url'], $GLOBALS['site_parameters']['forum_rss_filter_string'], 9, 90);
-			}elseif (function_exists('get_'.$this_module['technical_code'].'_module')) {
+			} elseif (function_exists('get_'.$this_module['technical_code'].'_module')) {
 				$this_module_output = call_user_func('get_'.$this_module['technical_code'].'_module');
 			}
 			if (!empty($this_module_output_cache_object)) {
@@ -869,15 +882,16 @@ function insere_ticket(&$frm)
 	}
 	if ((StringMb::strpos(vb($frm['sujet']), '/24') !== false || StringMb::strpos(vb($frm['sujet']), '24/') !== false) && !empty($GLOBALS['site_parameters']['email_emergency'])) {
 		$recipient_email = $GLOBALS['site_parameters']['email_emergency'];
+	} elseif (!empty($GLOBALS['site_parameters']['contact_email_by_subject']) && array_key_exists(vb($frm['sujet']), $GLOBALS['site_parameters']['contact_email_by_subject'])) {
+		// Un destinataire différent par sujet du formulaire de contact
+		$recipient_email = $GLOBALS['site_parameters']['contact_email_by_subject'][vb($frm['sujet'])];
 	} elseif (!empty($GLOBALS['site_parameters']['contact_email_by_site']) && in_array(vb($frm['site_id']), array_keys($GLOBALS['site_parameters']['contact_email_by_site']))) {
 		// Un destinataire différent par site indiqué du formulaire de contact si multisite et $GLOBALS['site_parameters']['site_configured_array'] défini
 		$recipient_email = $GLOBALS['site_parameters']['contact_email_by_site'][vb($frm['site_id'])];
-	} elseif (!empty($GLOBALS['site_parameters']['contact_email_by_subject']) && in_array(vb($frm['sujet']), $GLOBALS['site_parameters']['contact_email_by_subject'])) {
-		// Un destinataire différent par sujet du formulaire de contact
-		$recipient_email = $GLOBALS['site_parameters']['contact_email_by_subject'][vb($frm['sujet'])];
 	} else {
 		$recipient_email = $GLOBALS['support_sav_client'];
 	}
+
 	if (!empty($recipient_email)) {
 		unset($custom_template_tags);
 		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
@@ -1103,9 +1117,11 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 	$output = '';
 	$sql_condition = '';
 	if ($preselect_shop_country_if_none_selected && empty($selected_country_name) && empty($selected_country_id)) {
-		if(!empty($_SESSION['session_country_detected'])) {
-			$selected_country_id = vn($_SESSION['session_country_detected']);
+		if (!defined('IN_PEEL_ADMIN')) {
+			// En front-office : pays de la consultation du site
+			$selected_country_id = vn($_SESSION['session_site_country']);
 		} else {
+			// En back-office : on ne veut pas que la configuration de l'administration affecte les présélections
 			$selected_country_id = vn($GLOBALS['site_parameters']['default_country_id']);
 		}
 	}
@@ -1119,12 +1135,12 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 		$sql_condition .= ' AND etat = "1"';
 	}
 	if (!empty($allowed_zone_id)) {
-		if (check_if_module_active('departements')) {
+		if (check_if_module_active('departements') && empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])) {
 			// Si le module département est actif, les zones sont gérées en fonction du département, et pas du pays. 
 			// Pour déterminer à quel pays correspond les départements, la zone de ce pays a pour valeur -1.
 			$sql_condition .= ' AND zone = "-1"';
 		} else {
-			$sql_condition .= ' AND zone = "' . intval($allowed_zone_id) . '"';
+			$sql_condition .= (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])?' AND FIND_IN_SET(' . intval($allowed_zone_id) . ', zone)':' AND zone = "' . intval($allowed_zone_id) . '"');
 		}
 	}
 	if (!empty($allowed_ids)) {
@@ -1134,8 +1150,8 @@ function get_country_select_options($selected_country_name = null, $selected_cou
 		FROM peel_pays
 		WHERE 1 ' . $sql_condition . '  AND ' . get_filter_site_cond('pays') . '
 		ORDER BY position, pays_' . $_SESSION['session_langue'];
-
 	$res_pays = query($sql_pays);
+	
 	$tpl = $GLOBALS['tplEngine']->createTemplate('select_options.tpl');
 	$tpl_options = array();
 	while ($tab_pays = fetch_assoc($res_pays)) {
@@ -1288,21 +1304,44 @@ function set_paiement(&$frm)
  * @param integer $specific_site_id
  * @return
  */
-function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false, $show_site_info_if_needed = false, $form_error_object = null, $specific_site_id = null)
+function get_payment_select($selected_payment_technical_code = null, $show_selected_even_if_not_available = false, $show_site_info_if_needed = false, $form_error_object = null, $specific_site_id = null, $payment_multiple = null, $display_none_option = false)
 {
 	$output = '';
 	$sql_cond = '';
 	$excluded_payment_array = call_module_hook('payment_select_excluded_ids', array(), 'array');
-	// On gère des listes sur le modèle codetechnique1,!codetechnique2,... avec le ! qui permet d'exclure un type de paiement
-	if(!is_array($selected_payment_technical_code)) {
+	if(!is_array($selected_payment_technical_code) && !empty($selected_payment_technical_code)) {
 		$selected_payment_technical_code = explode(',', $selected_payment_technical_code);
 	}
-	foreach($selected_payment_technical_code as $this_type) {
-		if(StringMb::substr($this_type, 0, 1) == '!') {
-			$types_excluded_array[] = StringMb::substr($this_type, 1);
-		} else {
-			$types_allowed_array[] = $this_type;
+	if (empty($selected_payment_technical_code)) {
+		$selected_payment_technical_code = array();
+	}
+	if (!defined('IN_PEEL_ADMIN') && !empty($_SESSION['session_caddie']->zoneId)) {
+        // On va recherche si il y a une zone associée à un moyen de paiement.
+        $sql = "SELECT payment_technical_code
+            FROM peel_zones
+            WHERE payment_technical_code!='' AND id = " . intval($_SESSION['session_caddie']->zoneId);
+        $query = query($sql);
+        if ($result = fetch_assoc($query)) {
+            // Donc pour cette zone, il y a un paiement configuré. On souhaite que ce soit uniquement ce paiement qui s'affiche.
+            $sql_cond .= " AND p.technical_code = '" . nohtml_real_escape_string($result['payment_technical_code']) . "'";
+        }
+		// On gère des listes sur le modèle codetechnique1,!codetechnique2,... avec le ! qui permet d'exclure un type de paiement
+
+		foreach($selected_payment_technical_code as $this_type) {
+			if(StringMb::substr($this_type, 0, 1) == '!') {
+				$types_excluded_array[] = StringMb::substr($this_type, 1);
+			} else {
+				$types_allowed_array[] = $this_type;
+			}
 		}
+		if (!empty($excluded_payment_array))  {
+			$sql_cond .= " AND p.id NOT IN(".implode(',',real_escape_string($excluded_payment_array)).")";
+		}
+    }
+	if (!empty($payment_multiple) && empty($sql_cond))  {
+		// On choisit d'afficher que les paiements qui correspondent à un paiement en plusieurs fois. Les paiements en plusieurs fois possèdent #1 ou #3 par exemple à la fin du code technique.
+		// Ce paramétrage est possible uniquement si on ne veut pas d'un paiement associé à la zone
+		$sql_cond .= " AND p.technical_code LIKE('%#" . intval($payment_multiple) . "')";
 	}
 	if (!empty($excluded_payment_array))  {
 		$sql_cond .= " AND p.id NOT IN(".implode(',',real_escape_string($excluded_payment_array)).")";
@@ -1333,45 +1372,54 @@ function get_payment_select($selected_payment_technical_code = null, $show_selec
 			$results_array[] = $tab_paiement;
 		}
 	}
-	foreach($results_array as $tab_paiement) {
-		$payment_complement_informations = '';
-		if (StringMb::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
-			if ($tab_paiement['technical_code'] == 'kwixo_credit') {
-				// Popup popuprnp3x et popuprnp1xrnp défini dans ' . $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js
-				$payment_complement_informations .= '<a onclick="popuprnp3x();return false;" href="#" title="kwixo3x">';
-			} elseif($tab_paiement['technical_code'] == 'kwixo') {
-				$payment_complement_informations .= '<a onclick="popuprnp1xrnp();return false;" href="#" title="kwixo1x">';
+	if (!empty($display_none_option)) {
+		$results_array[] = array("technical_code"=>'', 'nom_' . $_SESSION['session_langue']=>$GLOBALS['STR_NONE'], 'tarif'=>0, 'tarif_percent'=>0);
+	}
+	if(!empty($results_array)) {
+		foreach($results_array as $tab_paiement) {
+			$payment_complement_informations = '';
+			if (StringMb::strpos($tab_paiement['technical_code'], 'kwixo') !== false) {
+				if ($tab_paiement['technical_code'] == 'kwixo_credit') {
+					// Popup popuprnp3x et popuprnp1xrnp défini dans ' . $GLOBALS['wwwroot'] . '/modules/fianet/lib/js/fianet.js
+					$payment_complement_informations .= '<a onclick="popuprnp3x();return false;" href="#" title="kwixo3x">';
+				} elseif($tab_paiement['technical_code'] == 'kwixo') {
+					$payment_complement_informations .= '<a onclick="popuprnp1xrnp();return false;" href="#" title="kwixo1x">';
+				}
+				if(file_exists($GLOBALS['dirroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png')) {
+					$payment_complement_informations .= '
+			<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.StringMb::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
+	';
+				}
+				$payment_complement_informations .= $GLOBALS['STR_MORE_DETAILS'] . '</a></td>';
 			}
-			if(file_exists($GLOBALS['dirroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png')) {
-				$payment_complement_informations .= '
-		<img src="'.$GLOBALS['wwwroot'].'/modules/fianet/images/' . $tab_paiement['technical_code'] .'_mini.png" alt="'.StringMb::str_form_value($tab_paiement['nom_' . $_SESSION['session_langue']]).'" />
-';
+			$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
+			if (!empty($GLOBALS['site_parameters']['payment_alert_text_'.$tab_paiement['technical_code']])) {
+				$payment_alert_text = 'bootbox.alert("' .$GLOBALS['site_parameters']['payment_alert_text_'.$tab_paiement['technical_code']] . '");';
+				$tpl->assign('payment_alert_text', $payment_alert_text);
 			}
-			$payment_complement_informations .= $GLOBALS['STR_MORE_DETAILS'] . '</a></td>';
+			$tpl->assign('technical_code', $tab_paiement['technical_code']);
+			$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
+			$tpl->assign('issel', (in_array($tab_paiement['technical_code'], $selected_payment_technical_code) || count($results_array) == 1));
+			if ($tab_paiement['tarif'] != 0) {
+				$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
+			}
+			if ($tab_paiement['tarif_percent'] != 0) {
+				$tpl->assign('tarif_percent', $tab_paiement['tarif_percent']);
+			}
+			$tpl->assign('isempty_moneybookers_payment_methods', empty($_SESSION['session_commande']['moneybookers_payment_methods']));
+			$tpl->assign('moneybookers_payment_methods', vb($_SESSION['session_commande']['moneybookers_payment_methods']));
+			$tpl->assign('moneybookers_active', ($tab_paiement['technical_code'] == 'moneybookers'));
+			if (!empty($payment_complement_informations)) {
+				$tpl->assign('payment_complement_informations', $payment_complement_informations);
+			}
+			if(!empty($form_error_object)) {
+				$tpl->assign('order_form_payment_methods_error', $form_error_object->text('order_form_payment_methods'));
+			}
+			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('STR_TRANSFER', $GLOBALS['STR_TRANSFER']);
+			$tpl->assign('STR_ORDER_FORM', $GLOBALS['STR_ORDER_FORM']);
+			$output .= $tpl->fetch();
 		}
-		$tpl = $GLOBALS['tplEngine']->createTemplate('payment_select.tpl');
-		$tpl->assign('technical_code', $tab_paiement['technical_code']);
-		$tpl->assign('nom', ($show_site_info_if_needed?get_site_info($tab_paiement):'') . $tab_paiement['nom_' . $_SESSION['session_langue']]);
-		$tpl->assign('issel', (in_array($tab_paiement['technical_code'], $selected_payment_technical_code) || count($results_array) == 1));
-		if ($tab_paiement['tarif'] != 0) {
-			$tpl->assign('fprix_tarif', fprix($tab_paiement['tarif'], true));
-		}
-		if ($tab_paiement['tarif_percent'] != 0) {
-			$tpl->assign('tarif_percent', $tab_paiement['tarif_percent']);
-		}
-		$tpl->assign('isempty_moneybookers_payment_methods', empty($_SESSION['session_commande']['moneybookers_payment_methods']));
-		$tpl->assign('moneybookers_payment_methods', vb($_SESSION['session_commande']['moneybookers_payment_methods']));
-		$tpl->assign('moneybookers_active', ($tab_paiement['technical_code'] == 'moneybookers'));
-		if (!empty($payment_complement_informations)) {
-			$tpl->assign('payment_complement_informations', $payment_complement_informations);
-		}
-		if(!empty($form_error_object)) {
-			$tpl->assign('order_form_payment_methods_error', $form_error_object->text('order_form_payment_methods'));
-		}
-		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-		$tpl->assign('STR_TRANSFER', $GLOBALS['STR_TRANSFER']);
-		$tpl->assign('STR_ORDER_FORM', $GLOBALS['STR_ORDER_FORM']);
-		$output .= $tpl->fetch();
 	}
 	return $output;
 }
@@ -1580,8 +1628,8 @@ function get_datepicker_javascript()
 				}, 0);
 			}
 		});
-		$(".datepicker").attr("placeholder","'.str_replace(array('d', 'm', 'y'), array(StringMb::substr(StringMb::strtolower($GLOBALS['strDays']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strMonths']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strYears']), 0, 1)), str_replace('y', 'yy', $datepicker_format)).'");
-	';
+		$(".datepicker").attr("placeholder","'.str_replace(array('d', 'm', 'y'), array(StringMb::substr(StringMb::strtolower($GLOBALS['strDays']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strMonths']), 0, 1), StringMb::substr(StringMb::strtolower($GLOBALS['strYears']), 0, 1)), str_replace('y', 'yy', $datepicker_format)).'");';
+		
 		if(!empty($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'],'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'],'iPod') || strstr($_SERVER['HTTP_USER_AGENT'],'iPad'))) {
 			// Quand on rentre la date on ne veut pas avoir le clavier qui s'affiche car on se sert du datepicker
 			$GLOBALS['js_ready_content_array'][] = '
@@ -2844,7 +2892,7 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 			FROM peel_configuration
 			WHERE etat='1' AND ";
 		if ($forced_site_id === null) {
-			$sql .= get_filter_site_cond('configuration') . " AND ";
+			$sql .= get_filter_site_cond('configuration', null, false, $GLOBALS['site_id']) . " AND ";
 		} else {
 			$sql .= get_filter_site_cond('configuration', null, false, $forced_site_id) . " AND ";
 		}
@@ -2938,9 +2986,9 @@ function load_site_parameters($lang = null, $skip_loading_currency_infos = false
 		query("SET @@session.sql_mode='" . vb($GLOBALS['site_parameters']['mysql_sql_mode_force'], 'MYSQL40') . "'");
 	}
 	if(empty($GLOBALS['site_parameters']['peel_database_version'])) {
-		// La version de la base de donnée est inférieur à 8. On est dans un contexte de migration, il faut forcer le dossier modele à PEEL7.
-		// Les dossiers modeles des versions plus ancienne utilisent des fonctions is_module_XXXX_active qui ne sont plus défini dans la version 8.
-		$GLOBALS['site_parameters']['template_directory'] = 'peel7';
+		// La version de la base de données est inférieur à 8. On est dans un contexte de migration, il faut forcer le dossier modele à peel9.
+		// Les dossiers modeles des versions plus anciennes utilisent des fonctions is_module_XXXX_active qui ne sont plus définies depuis la version 8.
+		$GLOBALS['site_parameters']['template_directory'] = 'peel9';
 	} else {
 		// On prend un dossier de template par défaut si pas défini ou inexistant
 		if(!isset($GLOBALS['site_parameters']['template_directory']) || !file_exists($GLOBALS['dirroot'] . "/modeles/" . $GLOBALS['site_parameters']['template_directory'])) {
@@ -2998,10 +3046,17 @@ function FormErrorPush(&$tab, $name, $text = 0)
  * @param mixed $additional_sql_cond
  * @param mixed $additionnal_sql_having
  * @param string $use_index_sql
+ * @param string $avoid_pagination_calculation
  * @return
  */
-function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page, $mode = 'general', $reference_id = 0, $nb_colonnes, $always_show_multipage_footer = true, $additional_sql_inner = null, $additional_sql_cond = null, $additionnal_sql_having = null, $use_index_sql = null)
+function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page, $mode = 'general', $reference_id = 0, $nb_colonnes, $always_show_multipage_footer = true, $additional_sql_inner = null, $additional_sql_cond = null, $additionnal_sql_having = null, $use_index_sql = null, $avoid_pagination_calculation = false)
 {
+	if (!empty($GLOBALS['site_parameters']['params_affiche_produits_to_connect'])) {
+		if(!est_identifie() && ((!empty($GLOBALS['site_parameters']['params_affiche_produits_to_connect_in_home']) && !defined('IN_HOME')) || (!empty($GLOBALS['site_parameters']['params_affiche_produits_to_connect_in_search']) && !defined('IN_SEARCH')) || (!empty($GLOBALS['site_parameters']['params_affiche_produits_to_connect_in_new']) && !defined('IN_NEW')
+		))) {
+			redirect_and_die(get_account_url(false, false));
+		}
+	}
 	$sql_cond_array = array();
 	$titre = '';
 	$affiche_filtre = '';
@@ -3010,13 +3065,8 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	if (!empty($nb_colonnes) && ($nb_par_page % $nb_colonnes > 0)) {
 		$nb_par_page = $nb_par_page + ($nb_colonnes - ($nb_par_page % $nb_colonnes));
 	}
-	if ($type == 'associated_product') {
-		$params_list['small_width'] = 160;
-		$params_list['small_height'] = 160;
-	} else {
-		$params_list['small_width'] = vn($GLOBALS['site_parameters']['small_width']);
-		$params_list['small_height'] = vn($GLOBALS['site_parameters']['small_height']);
-	}
+	$params_list['small_width'] = vn($GLOBALS['site_parameters']['small_width']);
+	$params_list['small_height'] = vn($GLOBALS['site_parameters']['small_height']);
 	$params_list['cartridge_product_css_class'] = 'item-column product_per_line_' . $nb_colonnes;
 	$display_multipage_template_name = null;
 	// On veut éviter de faire une jointure avec la table catégories si ce n'est pas nécessaire dans des cas particuliers.
@@ -3113,33 +3163,38 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$infos = array();
 		$commande_id_array = array();
 		// On vérifie si la case remontée de produit a été cochée et qu'un nombre de produits à afficher a bien été saisi
-		$sql = query('SELECT on_ref_produit, nb_ref_produits
-			FROM peel_produits
-			WHERE id = ' . intval(vn($reference_id))." AND " . get_filter_site_cond('produits') . "");
-		$infos = fetch_assoc($sql);
-		if (!empty($infos)) {
-			// Récupération des id des commandes dont le produit fait partie
-			$sql = 'SELECT commande_id
-				FROM peel_commandes_articles
-				WHERE produit_id = "' . intval($reference_id) . '"  AND  ' . get_filter_site_cond('commandes_articles');
-			$q = query($sql);
-			while ($result = fetch_assoc($q)) {
-				$commande_id_array[] = $result['commande_id'];
-			}
-			// Si la case a bien été cochée et qu'un nombre a été saisi et que le produit affiché a déjà été commandé
-			if ($infos['on_ref_produit'] == 1 && $infos['nb_ref_produits'] > 0 && count($commande_id_array) > 0) {
-				$sql_inner .= " INNER JOIN peel_commandes_articles pca ON pca.produit_id = p.id AND " . get_filter_site_cond('commandes_articles', 'pca') . "";
-				$sql_cond_array[] = "pca.commande_id IN ('" . implode("','", nohtml_real_escape_string($commande_id_array)) . "')";
-				$sql_cond_array[] = "p.id!=" . intval($reference_id);
-				$nb_par_page = intval($infos['nb_ref_produits']);
-			} else { 
-				// Dans le cas contraire, on affiche les références produit associées
-				$sql_cond_array[] = "pr.produit_id = '" . intval($reference_id) . "'";
-				if(empty($GLOBALS['site_parameters']['product_references_display_limit']) && empty($GLOBALS['site_parameters']['product_references_order_by'])) {
-					$sql_inner .= " INNER JOIN peel_produits_references pr ON p.id = pr.reference_id";
-				} else {
-					$sql_inner .= " INNER JOIN (SELECT * FROM peel_produits_references WHERE produit_id='" . intval($reference_id) . "' ORDER BY ".real_escape_string(vb($GLOBALS['site_parameters']['product_references_order_by'], 'reference_id ASC'))." LIMIT ".intval(vn($GLOBALS['site_parameters']['product_references_display_limit'], 10)).") pr ON p.id = pr.reference_id";
+		$product_fields = get_table_field_names('peel_produits', null, false, array("on_ref_produit", "nb_ref_produits"));
+		if(!empty($product_fields)) {
+			//Aut
+			$sql = query("SELECT " . implode(', ', $product_fields) . "
+				FROM peel_produits
+				WHERE id = " . intval(vn($reference_id))." AND " . get_filter_site_cond('produits') . "");
+			$infos = fetch_assoc($sql);
+			if (!empty($infos) && $infos['on_ref_produit'] == 1 && $infos['nb_ref_produits'] > 0) {
+				// Récupération des id des commandes dont le produit fait partie
+				$sql = 'SELECT commande_id
+					FROM peel_commandes_articles
+					WHERE produit_id = "' . intval($reference_id) . '"  AND  ' . get_filter_site_cond('commandes_articles');
+				$q = query($sql);
+				while ($result = fetch_assoc($q)) {
+					$commande_id_array[] = $result['commande_id'];
 				}
+			}
+		}
+		if (!empty($commande_id_array) && count($commande_id_array) > 0) {
+			// Gestion de l'association automatique des références produits en fonction des anciennes commandes
+			// Si la case a bien été cochée et qu'un nombre a été saisi et que le produit affiché a déjà été commandé
+			$sql_inner .= " INNER JOIN peel_commandes_articles pca ON pca.produit_id = p.id AND " . get_filter_site_cond('commandes_articles', 'pca') . "";
+			$sql_cond_array[] = "pca.commande_id IN ('" . implode("','", nohtml_real_escape_string($commande_id_array)) . "')";
+			$sql_cond_array[] = "p.id!=" . intval($reference_id);
+			$nb_par_page = intval($infos['nb_ref_produits']);
+		} else { 
+			// Dans le cas contraire, on affiche les références produit associées
+			$sql_cond_array[] = "pr.produit_id = '" . intval($reference_id) . "'";
+			if(empty($GLOBALS['site_parameters']['product_references_display_limit']) && empty($GLOBALS['site_parameters']['product_references_order_by'])) {
+				$sql_inner .= " INNER JOIN peel_produits_references pr ON p.id = pr.reference_id";
+			} else {
+				$sql_inner .= " INNER JOIN (SELECT * FROM peel_produits_references WHERE produit_id='" . intval($reference_id) . "' ORDER BY ".real_escape_string(vb($GLOBALS['site_parameters']['product_references_order_by'], 'reference_id ASC'))." LIMIT ".intval(vn($GLOBALS['site_parameters']['product_references_display_limit'], 10)).") pr ON p.id = pr.reference_id";
 			}
 		}
 		$titre = $GLOBALS['STR_ASSOCIATED_PRODUCT'];
@@ -3214,13 +3269,13 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	if (!empty($additionnal_sql_having)) {
 		$sql .= ' ' . $additionnal_sql_having;
 	}
-	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = true;
+	$GLOBALS['multipage_avoid_redirect_if_page_over_limit'] = !defined('IN_SEARCH');
 	if ($type == 'special') {
 		$Links = new Multipage($sql, 'home', $nb_par_page, 7, 0, $always_show_multipage_footer);
 	} elseif ($type == 'associated_product') {
 		$Links = new Multipage($sql, 'affiche_produits_reference', $nb_par_page, 7, 0, $always_show_multipage_footer);
 	} else {
-		$Links = new Multipage($sql, 'affiche_produits', $nb_par_page, 7, 0, $always_show_multipage_footer, $display_multipage_template_name);
+		$Links = new Multipage($sql, 'affiche_produits', $nb_par_page, 7, 0, $always_show_multipage_footer, $display_multipage_template_name, 1, null, false, $avoid_pagination_calculation);
 	}
 	if (!empty($_GET['tri']) && !in_array($_GET['tri'], array('nom_' . $_SESSION['session_langue'], 'prix'))) {
 		// Filtrage des colonnes de tri possibles
@@ -3232,7 +3287,7 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 	$Links->order_get_variable = vb($GLOBALS['order_get_variable'], 'tri');
 	$Links->sort_get_variable = 'sort';
 	$Links->OrderDefault = vb($GLOBALS['site_parameters']['product_list_order_default'], 'position');
-	$Links->SortDefault = 'ASC';
+	$Links->SortDefault = vb($GLOBALS['site_parameters']['product_list_sort_default'], 'ASC');
 	
 	//$Links->forced_second_order_by_string = 'p.id DESC';
 	$Links->forced_before_first_order_by_string = null;
@@ -3808,7 +3863,12 @@ function http_download_and_die($filename_with_realpath, $serve_download_with_php
 			$content_disposition = 'inline';
 		}
 		header("Content-Type: " . $type . "", false);
-		header("Content-disposition: " . $content_disposition . "; filename=\"" . rawurlencode($file_name_given) . "\"");
+		if(strpos(vb($_SERVER['HTTP_USER_AGENT']), "MSIE") !== false) {
+			header("Content-disposition: " . $content_disposition . "; filename=\"" . StringMb::rawurlencode(convert_encoding($file_name_given, 'ISO-8859-1')) . "\"");
+		} else {
+			// attwithfn2231ws3 marche avec tous les navigateurs sauf IE 
+			header("Content-disposition: " . $content_disposition . "; filename*=UTF-8''" . StringMb::rawurlencode($file_name_given));
+		}
 		header("Content-Transfer-Encoding: binary");
 		header("Content-Length: " . intval($content_length));
 		if (ob_get_length()) {
@@ -4105,11 +4165,11 @@ if (!function_exists('desinscription_newsletter')) {
 			WHERE email = "' . nohtml_real_escape_string($mail) . '" AND ' . get_filter_site_cond('utilisateurs') . '');
 		if ($data = fetch_assoc($q)) {
 			query('UPDATE peel_utilisateurs
-				SET newsletter = "0"
+				SET newsletter = "0", commercial = "0", newsletter_validation_date="0000-00-00", commercial_validation_date="0000-00-00"
 				WHERE id_utilisateur=' . intval($data['id_utilisateur']) . ' AND ' . get_filter_site_cond('utilisateurs') . '');
-			$tpl->assign('msg', $GLOBALS['STR_DESINSCRIPTION_NEWSLETTER_OK']);
+			$tpl->assign('msg', $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_DESINSCRIPTION_NEWSLETTER_OK']))->fetch());
 		} else {
-			$tpl->assign('msg', $GLOBALS['STR_EMAIL_ABSENT']);
+			$tpl->assign('msg', $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_EMAIL_ABSENT']))->fetch());
 		}
 		$tpl->assign('STR_DESINSCRIPTION_NEWSLETTER', $GLOBALS['STR_DESINSCRIPTION_NEWSLETTER']);
 		return $tpl->fetch();
@@ -4227,6 +4287,9 @@ function close_page_generation($html_page = true)
  */
 function optimize_Tables()
 {
+	if(!empty($GLOBALS['site_parameters']['optimize_tables_skip'])) {
+		return false;
+	}
 	$GLOBALS['contentMail'] .= 'Optimisation des tables : ';
 	$tables = '';
 	$q = query('SHOW TABLES FROM ' . $GLOBALS['nom_de_la_base']);
@@ -4456,37 +4519,38 @@ bkLib.onDomLoaded(function() {
 		// Editeur CKeditor
 		// La hauteur demandée sera celle de la zone éditable - donc la hauteur totale sera bien supérieure
 		if(empty($GLOBALS['html_editor_loaded'])) {
-			$GLOBALS['js_files_pageonly'][] = get_url('/lib/ckeditor/ckeditor.js');
 			$GLOBALS['html_editor_loaded'] = true;
+			$GLOBALS['js_files_pageonly'][] = get_url('/lib/ckeditor/ckeditor.js');
 			$GLOBALS['js_ready_content_array'][] = "
-			CKEDITOR.plugins.add( 'imageuploader', {
-				init: function( editor ) {
-					editor.config.filebrowserBrowseUrl='" . get_url('/lib/ckeditor/plugins/imageuploader/imgbrowser.php') . "';
-					editor.config.filebrowserUploadUrl='" . get_url('/lib/ckeditor/plugins/imageuploader/imgupload.php') . "';
-				}
-			});";
-			
-			// Configuration entities pour éviter la conversion des accents en entités HTML
-			// Format pour CSS : config.contentsCss = [ '/css/mysitestyles.css', '/css/anotherfile.css' ];
-			$ckeditor_config_js = '
-				config.entities=false;
-				config.entities_latin=false;
-				config.contentsCss=["'.implode('", "', $css_files).'"];
-			';
-			if (!defined('IN_PEEL_ADMIN')) {
-				// Pas d'upload en front-office via CKEditor
-				$ckeditor_config_js .= "
-				config.removeButtons = 'Image';";
-			}
-			$GLOBALS['js_ready_content_array'][] = "
-			CKEDITOR.editorConfig = function( config ) {
-				" . $ckeditor_config_js . "
-			};";
-			
+				CKEDITOR.plugins.add( 'imageuploader', {
+					init: function( editor ) {
+						editor.config.filebrowserBrowseUrl='" . get_url('/lib/ckeditor/plugins/imageuploader/imgbrowser.php') . "';
+						editor.config.filebrowserUploadUrl='" . get_url('/upload/') . "';
+					}
+				});";
 		}
 
 		$GLOBALS['js_ready_content_array'][] = '
-		CKEDITOR.replace( "' . $instance_name . '" );';
+			CKEDITOR.replace( "' . $instance_name . '" );';
+		// Configuration entities pour éviter la conversion des accents en entités HTML
+		// Format pour CSS : config.contentsCss = [ '/css/mysitestyles.css', '/css/anotherfile.css' ];
+		$ckeditor_config_js = '
+			config.entities=false;
+			config.entities_latin=false;
+			config.contentsCss=["'.implode('", "', $css_files).'"];
+		';
+		
+		if (empty($GLOBALS['site_parameters']['ckeditor_upload_image_enable'])) {
+			// Le module imageuploader permet l'upload d'image depuis l'éditeur HTML. Il ajoute un onglet "Téléverser" dans la fenêtre de gestion des images. 
+			// Mais ce module ne fonctionne pas, lorsque l'on souhaite uplaoder une image, un message "Forbidden You don't have permission to access /upload/ on this server."
+			// Donc la gestion des images est désactivée par défaut pour cet éditeur.
+			$ckeditor_config_js .= "
+			config.removeButtons = 'Image';";
+		}
+		$GLOBALS['js_ready_content_array'][] = "
+		CKEDITOR.editorConfig = function( config ) {
+			" . $ckeditor_config_js . "
+		};";
 		$output .= '
 		<textarea class="ckeditor" name="' . $instance_name . '" id="' . $instance_name . '" style="width:' . $width_css . '; height:' . $height . 'px" rows="' . ($height / 12) . '" cols="' . $cols . '">' . StringMb::htmlentities($default_text) . '</textarea>	
 
@@ -4955,10 +5019,17 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 		if($active_only) {
 			$sql_additional_cond .= " AND etat='1'";
 		}
+
 		if(is_numeric($search)) {
+			$product_table_field_names = get_table_field_names('peel_produits');
+			$sql_where = "(p.id='" . nohtml_real_escape_string($search) . "'";
+			if (in_array('ean_code', $product_table_field_names)) {
+				$sql_where .= " OR ean_code = '" . nohtml_real_escape_string($search) . "'";
+			}
+			$sql_where .= ") AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond;
 			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 				FROM peel_produits p
-				WHERE (p.id='" . nohtml_real_escape_string($search) . "' OR ean_code = '" . nohtml_real_escape_string($search) . "') AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
+				WHERE " . $sql_where . "
 				LIMIT 1";
 		}
 		if(!empty($search_category)) {
@@ -5026,6 +5097,9 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 			$queries_results_array[$result->id_utilisateur] = $result;
 		}
 	}
+	$hook_result = call_module_hook('quick_search_results', array('search' => $search, 'maxRows' => $maxRows, 'active_only' => $active_only, 'search_category' => $search_category, 'mode' => $mode), 'array');
+	$queries_results_array = array_merge_recursive_distinct($queries_results_array, $hook_result);
+	
 	return $queries_results_array;
 }
 
@@ -5117,11 +5191,12 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_s
 	} elseif(!empty($site_id) && !empty($_SESSION['session_utilisateur']['site_id']) && $site_id != $_SESSION['session_utilisateur']['site_id'] && $site_id != vn($GLOBALS['site_id']) && empty($GLOBALS['site_parameters']['multisite_disable_utilisateurs'])) {
 		// Protection sur les site_id autorisés : sécurité, on empêche l'utilisateur d'agir sur un site qui ne le concerne pas
 		return 0;
-	} elseif(isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array($table_technical_code, array('articles', 'categories', 'cgv', 'marques', 'html', 'offres', 'produits', 'societe', 'vignettes_carrousels')) && ($table_technical_code!='categories' || empty($GLOBALS['site_parameters']['categories_disabled_show_to_admin_in_front']) || !a_priv("admin_products", false))) {
+	} elseif(isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array($table_technical_code, array('articles', 'categories', 'cgv', 'marques', 'html', 'offres', 'produits', 'societe', 'tva', 'vignettes_carrousels')) && ($table_technical_code != 'categories' || empty($GLOBALS['site_parameters']['categories_disabled_show_to_admin_in_front']) || !a_priv("admin_products", false))) {
 		// Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
 		// Si pas dans un contexte d'administration de la donnée : ajout de la condition de le pays du visiteur 
 		$cond_array[] = "FIND_IN_SET('" . real_escape_string($_SESSION['session_site_country']) . "', " . $prefix . "site_country)";
 	}
+	// On théorie on devrait ajouter un test sur les tables qui ont le champs site_id en SET, mais FIND_IN_SET fonctionne également avec les champs INT.
 	$use_set = (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_' . $table_technical_code])));
 	if($exclude_public_items) {
 		// La requête concerne un seul site, sans tenir compte de la configuration globale.
@@ -5153,6 +5228,21 @@ function get_site_id_sql_set_value($site_ids) {
 		$site_ids = array($site_ids);
 	}
 	$output = "" . implode(",", $site_ids) . "";
+	return $output;
+}
+
+/**
+ * Retourne la valeur SQL d'un champ INT ou SET suivant que ce soit un entier ou un tableau
+ *
+ * @param mixed $zone_ids
+ * @return
+ */
+function get_zone_id_sql_set_value($zone_ids) {
+	$output = '';
+	if(!is_array($zone_ids)) {
+		$zone_ids = array($zone_ids);
+	}
+	$output = "" . implode(",", $zone_ids) . "";
 	return $output;
 }
 
@@ -5237,6 +5327,17 @@ function get_all_sites_name_array($admin_force_multisite_if_allowed = false, $al
 function get_user_job_options($selected_fonction_name = null)
 {
 	$output = '';
+	if (!empty($GLOBALS['site_parameters']['user_job_popover_message_enabled'])) {
+		$GLOBALS['js_ready_content_array'][] = '
+		$("#fonction").on("change", function () {
+		   $("#message_option").text($(this).find(":selected").data("description"));
+		   document.getElementById("popover").setAttribute("class", "popover fade right in");
+		  if ($("#message_option").html() == "" || $("#message_option").html() == '.$GLOBALS['STR_CHOOSE'].'){
+			document.getElementById("popover").setAttribute("class", "hidden");
+		  }
+		});'
+		;
+	}
 	if (!empty($GLOBALS['site_parameters']['user_job_array'])) {
 		$tpl_options = array();
 		$user_job_array = $GLOBALS['site_parameters']['user_job_array'];
@@ -5247,8 +5348,11 @@ function get_user_job_options($selected_fonction_name = null)
 			if(StringMb::substr($this_job, 0, 4)== 'STR_' && !empty($GLOBALS[$this_job])) {
 				// Si le nom est une variable de langue, il faut utiliser cette variable.
 				$this_job = $GLOBALS[$this_job];
+				if (!empty($GLOBALS['site_parameters']['user_job_popover_message_enabled'])) {
+					$this_data_content = $GLOBALS['site_parameters']['user_job_data_content_'.$this_job_code];
+				}
 			}
-			$output .= '<option value="'.StringMb::str_form_value($this_job_code).'" ' . frmvalide($selected_fonction_name == $this_job_code, ' selected="selected"') . '>'.$this_job.'</option>';
+			$output .= '<option data-description="' . vb($this_data_content) . '" value="'.StringMb::str_form_value($this_job_code).'" ' . frmvalide($selected_fonction_name == $this_job_code, ' selected="selected"') . '>'.$this_job.'</option>';
 		}
 	}
 	return $output;
@@ -5350,6 +5454,21 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 				if (!empty($GLOBALS['STR_CONTACT_SUBJECT'])) {
 					$mandatory_fields['sujet'] = $GLOBALS['STR_ERR_SUBJECT'];
 				}
+				$module_hook_mandatory_fields = call_module_hook('handle_contact_form_mandatory_fields', array(), 'array');
+				if (!empty($module_hook_mandatory_fields)) {
+					foreach($module_hook_mandatory_fields as $this_field=>$error_text) {
+						$mandatory_fields[$this_field] = $error_text;
+					}
+				}
+				foreach ($_GET as $this_item => $this_value) {
+					$fields_list_array = explode(",", vb($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['hidden_fields_list']));
+					foreach(array_keys($mandatory_fields) as $this_field) {
+						if (in_array($this_field, $fields_list_array)) {
+							// le champ est masqué donc on le supprime des champs obligatoires
+							unset($mandatory_fields[$this_field]);
+						}
+					}
+				}
 				$form_error_object->valide_form($frm,
 					$mandatory_fields);
 			}
@@ -5389,6 +5508,16 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 					// On récupère uniquement l'information "recipient" de la variable de configuration "contact_page_prefill_XXXXX" car le formulaire prérempli a été soumis et on ne veut pas modifier les éventuelles modifications des champs
 					if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'])) {
 						$frm['recipient'] = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'];
+					}
+					// On récupère les champs dédié à l'email de réponse automatique.
+					if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['reponse_sujet'])) {
+						$reponse_sujet = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['reponse_sujet'];
+					}
+					if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['reponse_texte'])) {
+						$reponse_texte = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['reponse_texte'];
+					}
+					if (!empty($reponse_sujet) && !empty($reponse_texte) && !empty($frm['email'])) {
+						send_email($frm['email'],$reponse_sujet,$reponse_texte);
 					}
 				}
 				if (check_if_module_active('captcha')) {
@@ -5472,9 +5601,19 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 						if (!empty($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'])) {
 							$frm['recipient'] = $GLOBALS['site_parameters']['contact_page_prefill_'.$this_item]['recipient'];
 						}
+						foreach ($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item] as $field_name => $field_value) {
+							// On récupère le formulaire configuré.
+							if (!empty($_POST[$field_name])) {
+								// L'utilisateur a peut-être modifié une valeur dans le champ, donc on prend en priorité les données qui viennent du formulaire.
+								$frm[$field_name] = $_POST[$field_name];
+							} else {
+								// Sinon on prend la valeur par défaut du champ (utile pour récuéprer hidden_fields_list par exemple).
+								$frm[$field_name] = $field_value;
+							}
+						}
 					} else {
 						// Préremplissage des champs du formulaire
-						foreach ($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item] as $field_name => $field_value) {	
+						foreach ($GLOBALS['site_parameters']['contact_page_prefill_'.$this_item] as $field_name => $field_value) {
 							if ($field_name == 'meta_title') {
 								$GLOBALS['meta_title'] = $field_value;
 							} elseif ($field_name == 'meta_description') {
@@ -5492,8 +5631,8 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 								$frm[$field_name] = $field_value;
 							}
 						}
-						$frm['contact_page_map_display'] = true;
 					}
+					$frm['contact_page_map_display'] = true;
 				}
 			}
 		}
@@ -5574,6 +5713,7 @@ function insere_code_promo($frm)
 		, nb_used_per_client
 		, product_filter
 		, cat_not_apply_code_promo
+		, promo_code_combinable
 	) VALUES (
 		'" . nohtml_real_escape_string(StringMb::strtoupper(vb($frm['nom']))) . "'
 		, '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm["date_debut"])) . "'
@@ -5594,6 +5734,7 @@ function insere_code_promo($frm)
 		, '" . intval(vb($frm['nb_used_per_client'])) . "'
 		, '" . nohtml_real_escape_string(vb($frm['product_filter'])) . "'
 		, '" . nohtml_real_escape_string(get_string_from_array(vb($frm['cat_not_apply_code_promo']), true)) . "'
+		, '" . nohtml_real_escape_string(vb($frm['promo_code_combinable'])) . "'
 		)";
 	query($sql);
 	return insert_id();
@@ -5638,23 +5779,32 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 	$specific_fields = array();
 	$field_types_with_single_value_array = array('datepicker', 'hidden', 'password', 'separator', 'text', 'textarea', 'html', 'upload');
 	
+	if(!empty($fill_with_user_id)) {
+		// On veut compléter $frm avec les informations d'un utilisateur en base de données
+		$user_infos = get_user_information($fill_with_user_id);
+	} elseif($fill_with_user_session && est_identifie()) {
+		// On veut compléter $frm avec les informations de session d'un utilisateur
+		$user_infos = $_SESSION['session_utilisateur'];
+	}
+		
 	$specific_field_prefix = $form_usage;
 	if (in_array($form_usage, array('reseller', 'user'))) {
 		$mandatory_field_prefix = 'user';
 	} else {
 		$mandatory_field_prefix = $specific_field_prefix;
 	}
-	$mandatory_fields = template_tags_replace(vb($GLOBALS['site_parameters'][$mandatory_field_prefix . '_mandatory_fields'], array()), $custom_template_tags);
+
+	if(!empty($GLOBALS['site_parameters'][$mandatory_field_prefix . '_' . vb($user_infos['user_type']) . '_mandatory_fields'])) {
+		// Si il y a une configuration spécifique pour les champs obligatoires
+		$mandatory_fields = template_tags_replace(vb($GLOBALS['site_parameters'][$mandatory_field_prefix  . '_' . $user_infos['user_type'] . '_mandatory_fields'], array()), $custom_template_tags);
+	} else {
+		// Sinon on prennd la configuration par défaut
+		$mandatory_fields = template_tags_replace(vb($GLOBALS['site_parameters'][$mandatory_field_prefix . '_mandatory_fields'], array()), $custom_template_tags);
+	}
+
 	foreach(array('readonly', 'style', 'titles', 'types', 'names', 'class', 'id', 'values', 'positions', 'steps', 'search', 'types', 'javascript', 'placeholder', 'multiple') as $this_info_name) {
 		$this_var_name = 'specific_field_' . $this_info_name;
 
-		if(!empty($fill_with_user_id)) {
-			// On veut compléter $frm avec les informations d'un utilisateur en base de données
-			$user_infos = get_user_information($fill_with_user_id);
-		} elseif($fill_with_user_session && est_identifie()) {
-			// On veut compléter $frm avec les informations de session d'un utilisateur
-			$user_infos = $_SESSION['session_utilisateur'];
-		}
 		if(vb($user_infos['user_type']) == 'company') {
 			// Si l'utilisateur est une personne moral
 			$specific_field_user_type_prefix = $specific_field_prefix . '_company';
@@ -5666,6 +5816,10 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			// On test si il existe une variable qui utilise le type d'utilisateur dans le nom; Si oui on prend le contenu de cette variable.
 			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
 		} else {
+			if ($specific_field_prefix == 'ad_admin' && empty($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_' . $this_info_name])) {
+				// Si le champ spécifique pour l'administrateur n'existe pas, on prend la configuration pour le front office qui s'appliquera dans ce cas en back office également.
+				$specific_field_prefix = 'ad';
+			}
 			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
 		}
 	}
@@ -5942,7 +6096,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
  * @return
  */
 function handle_specific_fields(&$frm, $form_usage = 'user') {
-	$table_correspondance = array('user_util_client_person' => 'utilisateurs','user_util_client_company' => 'utilisateurs','user_util_agent_person' => 'utilisateurs','user_util_agent_company' => 'utilisateurs','user_util_contributeur_person' => 'utilisateurs','user_util_contributeur_company' => 'utilisateurs','user_util_expert_person' => 'utilisateurs','user_util_expert_company' => 'utilisateurs','user_util_porteur_person' => 'utilisateurs', 'user_util_porteur_company' => 'utilisateurs', 'user' => 'utilisateurs', 'order' => 'commandes', 'ad' => 'lot_vente', 'ad_admin' => 'lot_vente', 'partner' => 'partenaires', 'user_util_lender_person' => 'utilisateurs');
+	$table_correspondance = array('user_util_client_person' => 'utilisateurs','user_util_client_company' => 'utilisateurs','user_util_agent_person' => 'utilisateurs','user_util_agent_company' => 'utilisateurs','user_util_contributeur_person' => 'utilisateurs','user_util_contributeur_company' => 'utilisateurs','user_util_expert_person' => 'utilisateurs','user_util_expert_company' => 'utilisateurs','user_util_porteur_person' => 'utilisateurs', 'user_util_porteur_company' => 'utilisateurs', 'user' => 'utilisateurs', 'order' => 'commandes', 'ad' => 'lot_vente', 'ad_admin' => 'lot_vente', 'partner' => 'partenaires', 'user_util_lender_person' => 'utilisateurs', 'user_kyc_person' => 'utilisateurs', 'user_kyc_company' => 'utilisateurs');
 	$addresses_potential_fields_array = array('societe', 'prenom', 'nom', 'adresse', 'code_postal', 'ville', 'pays', 'email', 'contact');
 	if(empty($table_correspondance[$form_usage])) {
 		return null;
@@ -6001,6 +6155,11 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 			continue;
 		} elseif (vb($specific_field_types[$this_field]) == 'upload') {
 			$frm[$this_field] = upload($this_field, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_field]));
+			if (StringMb::strpos(vb($_POST[$this_field]), '/cache/') === 0) {
+				// Comme il y a /cache/ dans le POST, cela veut dire que l'utilisateur a uploadé un nouveau fichier pour ce champ. Dans le cas contraire on a juste le nom du document, sans /cache/.
+				// Donc on rempli une variable qui indique quel fichier a été mis à jour par l'utilisateur.
+				$_SESSION['document_updated_by_user'][$this_field] = $frm[$this_field];
+			}
 		}
 		if (isset($frm[$this_field]) && in_array($this_field, $this_table_field_names)) {
 			// Champ présent dans le formulaire et présent en base de données
@@ -6158,10 +6317,15 @@ function handle_upload_use_specific_table($frm, $source = '', $upload_multiple_f
 			$annonce_object = new Annonce($frm['ref']);
 		}
 		$i = 1;
-		foreach($frm[$upload_multiple_fieldname] as $this_cache_file) {
-			$_REQUEST[$upload_multiple_fieldname.'_'.$i] = $this_cache_file;
-			$uploaded_files[] = upload($upload_multiple_fieldname.'_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
-			$i++;
+		if (!empty($frm['messaging_attached_document'])) {
+			// Si un document a déjà été uploadé, on peut le passer comme pièce jointe à un message en l'ajoutant dans le POST['messaging_attached_document']
+			$GLOBALS['uploaded_file_new'][] = $frm['messaging_attached_document'];
+		} else {
+			foreach($frm[$upload_multiple_fieldname] as $this_cache_file) {
+				$_REQUEST[$upload_multiple_fieldname.'_'.$i] = $this_cache_file;
+				$uploaded_files[] = upload($upload_multiple_fieldname.'_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+				$i++;
+			}
 		}
 		if (!empty($frm['ref'])) {
 			// On supprime tous les fichiers de peel_telechargement liés à $source et qui ne sont plus dans ce qui a été géré par la boucle sur upload ci-dessus
@@ -6668,6 +6832,28 @@ function data_position_sort($arg1, $arg2) {
 	}
 }
 
+/**
+ * Récupére le formatage des sépareurs de prix selon le pays du site
+ * @return
+ */
+function set_session_site_country($country_id) {
+	// En fonction du pays du site, on stocke les préférences d'affichage de la devise dans session_devise. Cette préférence est moins prioritaire que les tableaux $GLOBALS['site_parameters']['prices_decimal_separator'] et $GLOBALS['site_parameters']['prices_thousands_separator']
+	$sql_pays = 'SELECT * 
+		FROM peel_pays 
+		WHERE id = ' . vn($country_id);
+	$query_pays = query($sql_pays);
+	if($pays = fetch_assoc($query_pays)){
+		$_SESSION['session_site_country'] = $pays['id'];
+		$_SESSION['session_devise']['decimal_separator'] = $pays['prices_decimal_separator'];
+		$_SESSION['session_devise']['thousands_separator'] = $pays['prices_thousands_separator'];
+		return true;
+	} else {
+		$_SESSION['session_devise']['decimal_separator'] = null;
+		$_SESSION['session_devise']['thousands_separator'] = null;
+		$_SESSION['session_site_country'] = 0;
+		return false;
+	}
+}
 
 /**
  * Récupère la quantité de produit pour ajouter au panier un produit complémentaire
@@ -6688,6 +6874,7 @@ function get_quantity_product_reference($reference_id, $produit_id)
 	}
 	return $output;
 }
+
 
 
 

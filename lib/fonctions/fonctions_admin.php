@@ -1,15 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
+// $Id: fonctions_admin.php 55792 2018-01-17 11:49:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -64,13 +65,15 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['manage_general'][$GLOBALS['administrer_url'] . '/langues.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LANGUES"];
 			$GLOBALS['menu_items']['manage_general'][$GLOBALS['administrer_url'] . '/clean_folders.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_CLEAN_FOLDERS"];
 		}
-		if (a_priv('admin_manage,admin_finance', true)) {
+		if (a_priv('admin_manage,admin_finance', true) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
+			// Dans le cas d'un site vitrine, on ne souhaite pas afficher le lien vers l'administration des moyens de paiement.
 			$GLOBALS['menu_items']['manage']['manage_payments'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT_AND_TAXES"];
 			$GLOBALS['menu_items']['manage_payments'][$GLOBALS['administrer_url'] . '/paiement.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_PAYMENT"];
 			$GLOBALS['menu_items']['manage_payments'][$GLOBALS['administrer_url'] . '/tva.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_TVA"];
 			$GLOBALS['menu_items']['manage_payments'][$GLOBALS['administrer_url'] . '/statut_paiement.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PAYMENT_STATUS"];
 		}
-		if (a_priv('admin_manage,admin_finance', true)) {
+		if (a_priv('admin_manage,admin_finance', true) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
+			// Dans le cas d'un site vitrine, on ne souhaite pas afficher le lien vers l'administration des modes de transport.
 			$GLOBALS['menu_items']['manage']['manage_delivery'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_DELIVERY_HEADER"];
 		}
 		if (a_priv('admin_manage', true)) {
@@ -84,7 +87,8 @@ function get_admin_menu()
 		if (a_priv('admin_manage', true)) {
 			$GLOBALS['menu_items']['manage_delivery'][$GLOBALS['administrer_url'] . '/statut_livraison.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_STATUS"];
 		}
-		if(a_priv('admin_manage,admin_content,admin_communication,admin_finance', true)) {
+		if(a_priv('admin_manage,admin_content,admin_communication,admin_finance', true) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
+			// Dans le cas d'un site vitrine, on ne souhaite pas afficher le lien vers l'administration des emails.
 			$GLOBALS['menu_items']['manage']['manage_emails'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAILS_HEADER"];	
 			$GLOBALS['menu_items']['manage_emails'][$GLOBALS['administrer_url'] . '/email-templates.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAIL"];
 		}
@@ -124,7 +128,7 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/birthday/administrer/bons_anniversaires.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BIRTHDAY"];
 			}
 		}
-		if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
+		if (a_priv('admin_users_contact_form,admin_users,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
 			// On affichera le menu relation client uniquement si $GLOBALS['menu_items']['users_sales'] n'est pas vide
 			$GLOBALS['menu_items']['users']['users_sales'] = $GLOBALS["STR_ADMIN_MENU_USERS_SALES_MANAGEMENT"];
 		}
@@ -323,6 +327,7 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['webmastering_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"];
 		}
 		$hook_result = call_module_hook('admin_menu_items', array(), 'array');
+		
 		$GLOBALS['main_menu_items'] = array_merge_recursive_distinct($GLOBALS['main_menu_items'], vb($hook_result['main_menu_items'], array()));
 		$GLOBALS['menu_items'] = array_merge_recursive_distinct($GLOBALS['menu_items'], vb($hook_result['menu_items'], array()));
 		if(!empty($GLOBALS['site_parameters']['admin_menu_items_additional_menus_array']) && !empty($GLOBALS['site_parameters']['admin_menu_items_additional_titles_array'])) {
@@ -356,7 +361,13 @@ function get_admin_menu()
 	$output = '
 ';
 	$i = 0;
+	// Il faut remplacer les tags dans la configuration admin_menu_items_excluded pour remplacer par exemple ADMINISTRER_URL
+	$GLOBALS['site_parameters']['admin_menu_items_excluded'] = template_tags_replace(vb($GLOBALS['site_parameters']['admin_menu_items_excluded']));
 	foreach ($GLOBALS['main_menu_items'] as $this_main_item => $this_main_array) {
+		if (!empty($GLOBALS['site_parameters']['admin_menu_items_excluded']) && in_array($this_main_item, $GLOBALS['site_parameters']['admin_menu_items_excluded'])) {
+			// On ne souhaite pas cet élément dans le menu, donc on passe au suivant
+			continue;
+		}
 		if (!empty($GLOBALS['menu_items'][$this_main_item]) && is_array($GLOBALS['menu_items'][$this_main_item])) {
 			foreach(array_keys($GLOBALS['menu_items'][$this_main_item]) as $this_key) {
 				$current_menu = (!empty($GLOBALS['menu_items'][$this_key][$current_url_full]));
@@ -401,12 +412,20 @@ function get_admin_menu()
 				$this_main_text .= '<ul class="sousMenu dropdown-menu" role="menu" aria-labelledby="menu_label_'.$this_main_item.'">
 ';
 				foreach ($GLOBALS['menu_items'][$this_main_item] as $this_url => $this_submenu) {
+					if (!empty($GLOBALS['site_parameters']['admin_menu_items_excluded']) && in_array($this_url, $GLOBALS['site_parameters']['admin_menu_items_excluded'])) {
+						// On ne souhaite pas cet élément dans le menu, donc on passe au suivant
+						continue;
+					}
 					if (!empty($GLOBALS['menu_items'][$this_url]) && is_array($GLOBALS['menu_items'][$this_url])) {
 						$this_main_text .= '<li class="dropdown-submenu">
 							<a id="menu_'.substr(md5($this_url . $this_submenu),0,8).'" href="#" class="dropdown-toggle">' . StringMb::strtoupper($this_submenu) . '</a>
 							<ul class="sousMenu dropdown-menu" role="menu" aria-labelledby="menu_'.substr(md5($this_url . $this_submenu),0,8).'">
 ';
 						foreach ($GLOBALS['menu_items'][$this_url] as $this_url => $this_title) {
+							if (!empty($GLOBALS['site_parameters']['admin_menu_items_excluded']) && in_array($this_url, $GLOBALS['site_parameters']['admin_menu_items_excluded'])) {
+								// On ne souhaite pas cet élément dans le menu, donc on passe au suivant
+								continue;
+							}
 							if (($current_url == $this_url && !$full_match) || $current_url_full == $this_url) {
 								$class = ' class="active"';
 							} else {
@@ -778,7 +797,8 @@ function execute_sql($file_path, $max_sql_lines_at_once = 10000, $disable_echo =
 		for ($i = 0; $i < count($tab); $i++) {
 			// Remplacement des tags dans la ligne.
 			if($replace_tags) {
-				$tab[$i] = template_tags_replace($tab[$i], $custom_template_tags);
+				// 3ème argument $replace_only_custom_tags à true. On ne veut pas remplacer tous les tags, seulement site_id. En effet des tags comme CLOSE_MAIN_CONTAINER ou REOPEN_MAIN_CONTAINER qui sont présent dans le SQL d'installation ne doivent pas être remplacée. Ces tags sont fait pour être remplacé lors de la lecture des informations, pas lors de l'intertion en BDD. La valeur de ces tags dépend de la page sur laquelle ils sont lu
+				$tab[$i] = template_tags_replace($tab[$i], $custom_template_tags, true);
 			}
 			if(StringMb::strpos($tab[$i], 'DELETE') === 0 || StringMb::strpos($tab[$i], 'DROP TABLE') === 0 || (StringMb::strpos($tab[$i], 'ALTER TABLE') === 0 && StringMb::strpos($tab[$i], 'DROP INDEX') !== false && StringMb::strpos($tab[$i], 'ADD INDEX') === false)) {
 				// On veut supprimer un élément, donc si cet élément ne peut pas être supprimé ce n'est probablement pas grave, on ne veut pas de message d'erreur
@@ -1358,10 +1378,12 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			}
 			if (!empty($commande) && check_if_module_active('tnt')) {
 				$q_type = query('SELECT * 
-					FROM peel_types 
-					WHERE is_tnt="1" AND ' . get_filter_site_cond('types') . ' AND nom_' . $commande['lang'] . ' = "' . nohtml_real_escape_string($commande['type']) . '"');
+					FROM peel_types
+					WHERE is_tnt="1" AND ' . get_filter_site_cond('types') . ' AND id = "' . nohtml_real_escape_string($commande['typeId']) . '"');
 				if ($result = fetch_assoc($q_type)) {
 					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b><a target="_blank" href="' . $GLOBALS['wwwroot'] . '/modules/tnt/administrer/etiquette.php?order_id='.$commande['id'] .'">Imprimer l\'étiquette tnt (ouvre une nouvelle fenêtre)</a>');
+				} else {
+					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b> Ce n\'est pas une commande liée au type de livraison TNT');
 				}
 			}
 			$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
@@ -1407,6 +1429,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 
 		$tpl->assign('devise', vb($commande['devise']));
 		$tpl->assign('mode_transport', vn($GLOBALS['site_parameters']['mode_transport']));
+		$tpl->assign('STR_SHIP_TYPE_CHOOSE', $GLOBALS["STR_SHIP_TYPE_CHOOSE"]);
 		if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 			$tpl->assign('delivery_type_options', get_delivery_type_options(vb($commande['typeId'])));
 			$tpl->assign('vat_select_options', get_vat_select_options(vb($commande['tva_transport']), true));
@@ -1469,6 +1492,9 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl->assign('points_etat', vn($commande['points_etat']));
 		}
 		$tpl->assign('commande_interne', vb($commande['commande_interne']));
+		if (!empty($commande['commentaires']) && !empty($GLOBALS['site_parameters']['order_alert_comment_enabled'])) {
+			$GLOBALS['js_ready_content_array'][] = '$(window).on("load",function(){bootbox.alert("' .$GLOBALS['site_parameters']['order_alert_text_comment'] . vb($commande['commentaires']). '");});';
+		}
 		$tpl->assign('commentaires', vb($commande['commentaires']));
 		$tpl->assign('commentaires_admin', vb($commande['commentaires_admin']));
 		$tpl->assign('specific_fields', get_specific_field_infos($commande, null, 'order'));
@@ -1476,9 +1502,9 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl_client_infos = array();
 		for ($i = 1; $i < 3; $i++) {
 			if ($i == 1) {
-				$value = 'bill';
+				$value = (empty($GLOBALS['site_parameters']['order_ship_before_bill'])?'bill':'ship');
 			} else {
-				$value = 'ship';
+				$value = (empty($GLOBALS['site_parameters']['order_ship_before_bill'])?'ship':'bill');
 			}
 			$tpl_client_infos[] = array('value' => $value,
 				'i' => $i,
@@ -1581,6 +1607,9 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				$i++;
 				unset($product_object);
 			}
+		}
+		if(($commande['zip_bill'] != $commande['zip_ship'] || $commande['adresse_bill'] != $commande['adresse_ship'] || $commande['ville_bill'] != $commande['ville_ship']) && !empty($GLOBALS['site_parameters']['order_adresse_difference_color'])) {
+			$tpl->assign('order_adresse_difference_color', true);
 		}
 		$tpl->assign('order_lines', $tpl_order_lines);
 
@@ -2092,7 +2121,10 @@ function save_commande_in_database($frm)
 				INNER JOIN peel_produits p ON e.id = p.id_ecotaxe AND " . get_filter_site_cond('produits', 'p') . "
 				WHERE p.id='" . intval($this_article['product_id']) . "' AND " . get_filter_site_cond('ecotaxes', 'e') . "");
 			if ($product_ecotaxe_infos = fetch_assoc($product_ecotaxe_infos_query)) {
-				if (!empty($product_ecotaxe_infos['id'])) {
+				if ($product_ecotaxe_infos['coefficient'] >0 ) {
+					$this_article['ecotaxe_ttc'] = $product_ecotaxe_infos['coefficient'] * ($product_object->poids) * (1+$product_object->tva/100);
+					$this_article['ecotaxe_ht'] = $product_ecotaxe_infos['coefficient'] * ($product_object->poids);
+				} elseif (!empty($product_ecotaxe_infos['id'])) {
 					$this_article['ecotaxe_ttc'] = $product_ecotaxe_infos['prix_ttc'];
 					$this_article['ecotaxe_ht'] = $product_ecotaxe_infos['prix_ht'];
 				} else {
@@ -2853,9 +2885,10 @@ function tab_followed_reason()
  * @param array $frm Array with all fields data
  * @param boolean $try_alter_table_even_if_modules_not_active
  * @param mixed $force_update_database_lang_content 
+ * @param boolean $update_index 
  * @return
  */
-function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true, $force_update_database_lang_content = false)
+function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true, $force_update_database_lang_content = false, $update_index = true)
 {
 	$output = '';
 	$new_lang = StringMb::strtolower($frm['lang']);
@@ -2902,6 +2935,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `meta_desc_' . word_real_escape_string($new_lang) . '` TEXT NOT NULL';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `header_html_' . word_real_escape_string($new_lang) . '` TEXT NOT NULL';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `image_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `image_header_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `alpha_' . word_real_escape_string($new_lang) . '` CHAR( 1 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `sentence_displayed_on_product_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	if(!in_array('nom_'.$new_lang, get_table_index('peel_categories', null, true))) {
@@ -2955,17 +2989,21 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	if ($try_alter_table_even_if_modules_not_active || check_if_module_active('annonces')) {
 		$query_alter_table[] = 'ALTER TABLE `peel_lot_vente` ADD `titre_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 		$query_alter_table[] = 'ALTER TABLE `peel_lot_vente` ADD `description_' . word_real_escape_string($new_lang) . '` TEXT NOT NULL';
-		if(in_array('search_fulltext', get_table_index('peel_lot_vente', null, true))) {
-			// On regénère l'index FULLTEXT sur le colonnes des langues actives
-			// Attention, cette commande prendra du temps si la table est de taille importante
-			$query_alter_table[] = 'DROP INDEX `search_fulltext` ON peel_lot_vente';
+		if (!empty($update_index)) {
+			// update_index : On ne fait pas la mise à jour de l'index dans le cas ou les champs de langues pour le module n'existe pas du tout.
+			// Parce qu'ici on génère l'index pour tous les champs en une seule fois, alors que lors de l'installation de PEEL avec le module annonces il faut d'abord avoir exécuter insere_langue pour toutes les langues avant de mettre à jour l'index search_fulltext.
+			if(in_array('search_fulltext', get_table_index('peel_lot_vente', null, true))) {
+				// On regénère l'index FULLTEXT sur le colonnes des langues actives
+				// Attention, cette commande prendra du temps si la table est de taille importante
+				$query_alter_table[] = 'DROP INDEX `search_fulltext` ON peel_lot_vente';
+			}
+			unset($index_array);
+			foreach ($GLOBALS['admin_lang_codes'] as $lng) {
+				$index_array[]='titre_'.$lng;
+				$index_array[]='description_'.$lng;
+			}
+			$query_alter_table[] = 'ALTER TABLE `peel_lot_vente` ADD FULLTEXT KEY `search_fulltext` ('.implode(',', real_escape_string($index_array)).')';
 		}
-		unset($index_array);
-		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-			$index_array[]='titre_'.$lng;
-			$index_array[]='description_'.$lng;
-		}
-		$query_alter_table[] = 'ALTER TABLE `peel_lot_vente` ADD FULLTEXT KEY `search_fulltext` ('.implode(',', real_escape_string($index_array)).')';
 	}
 	$query_alter_table[] = 'ALTER TABLE `peel_marques` ADD `nom_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_marques` ADD `description_' . word_real_escape_string($new_lang) . '` MEDIUMTEXT NOT NULL';
@@ -3500,14 +3538,14 @@ if (!function_exists('affiche_liste_produits')) {
 						'cats' => array(),
 						'site_name' => get_site_name($ligne['site_id']),
 						'modify_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'] . '&page=' . (!empty($frm['page']) ? $frm['page'] : 1),
-						'modify_label' => $product_object->name . ($ligne['on_gift'] == 1 ? "&nbsp;(cadeau)" : ""),
+						'modify_label' => $product_object->name . (vn($ligne['on_gift']) == 1 ? "&nbsp;(cadeau)" : ""),
 						'prix' => fprix((display_prices_with_taxes_in_admin() ? $ligne['prix'] : $ligne['prix'] / (1 + $ligne['tva'] / 100)), false, $GLOBALS['site_parameters']['code'], false, null, false, false),
 						'prix_suf' => (display_prices_with_taxes_in_admin() ? $GLOBALS['STR_TTC'] : $GLOBALS['STR_HT']),
 						'etat_onclick' => 'change_status("produits", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 						'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
 						'date' => get_formatted_date($ligne['date_maj']),
 						'product_name' => $product_object->name,
-						'nb_view' => $ligne['nb_view'],
+						'nb_view' => vn($ligne['nb_view']),
 					);
 					if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 						$tmpLigne['site_country'] = get_country_name($ligne['site_country']);
@@ -3528,7 +3566,7 @@ if (!function_exists('affiche_liste_produits')) {
 					}
 					$tmpLigne['site_id'] = $ligne['site_id'];
 					if (check_if_module_active('stock_advanced')) {
-						if ($ligne['on_stock'] == 1) {
+						if (vn($ligne['on_stock']) == 1) {
 							$tmpLigne['stock_href'] = get_current_url(false) . '?mode=stock&id=' . $ligne['id'];
 							$tmpLigne['stock_src'] = $GLOBALS['administrer_url'] . '/images/stock.gif';
 						}
@@ -3633,7 +3671,7 @@ function get_admin_products_search_sql($frm, $delete = false, $get_only_product_
 			$where .= " AND p.reference = '" . nohtml_real_escape_string($frm['reference_search']) . "'";
 		}
 		if (isset($frm['name_search']) && !empty($frm['name_search'])) {
-			$where .= " AND p.nom_" . $_SESSION['session_langue'] . " LIKE '%" . nohtml_real_escape_string($frm['name_search']) . "%'";
+			$where .= " AND p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " LIKE '%" . nohtml_real_escape_string($frm['name_search']) . "%'";
 		}
 		if (!empty($frm['brand_search'])) {
 			$where .= " AND p.id_marque = '" . nohtml_real_escape_string($frm['brand_search']) . "'";
@@ -4123,6 +4161,8 @@ function fill_other_language_content($frm, $mode=null){
 				// On boucle sur les langues
 				foreach ($this_form_fields as $this_field) {
 					// On boucle sur les champs.
+					$temp = trim(strip_tags($frm[$this_field.$lng]));
+					if (empty($temp) && !empty($GLOBALS['site_parameters']['admin_data_copy_if_empty_by_language_array'][$lng])) {
 						// Le champ n'a pas été rempli par l'utilisateur.
 						// Et on souhaite remplir cette langue par une autre.
 						// => on prend la valeur de la langue source.
@@ -4136,14 +4176,14 @@ function fill_other_language_content($frm, $mode=null){
 	if(!empty($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang']) && is_array($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang'])) {
 		foreach ($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang'] as $this_field) {
 			// Recherche du contenu principal
-			if(!empty($frm[$this_field . '_' . $GLOBALS['site_parameters']['main_content_lang']])) {
+			if(!empty(trim(strip_tags(vb($frm[$this_field . '_' . $GLOBALS['site_parameters']['main_content_lang']]))))) {
 				// La langue principale n'est pas vide
 				$main_content = $GLOBALS['site_parameters']['main_content_lang'];
 			}
 			if (empty($main_content)) {
 				// Recherche de contenu par langue, si la langue principale est vide
 				foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-					if(!empty($frm[$this_field . '_' . $lng])) {
+					if(!empty(trim(strip_tags(vb($frm[$this_field . '_' . $lng]))))) {
 						// un contenu dans une langue a été trouvé.
 						$main_content = $lng;
 						// on sort de la boucle
@@ -4154,7 +4194,7 @@ function fill_other_language_content($frm, $mode=null){
 			if (!empty($main_content)) {
 				// On a un contenu principal, il faut compléter les champs vides avec
 				foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-					if (empty($frm[$this_field . '_' . $lng])) {
+					if (empty(trim(strip_tags(vb($frm[$this_field . '_' . $lng]))))) {
 						$frm[$this_field . '_' . $lng] = vb($frm[$this_field . '_' . $main_content]);
 					}
 				}
@@ -4460,7 +4500,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		}
 		foreach ($zones_availables as $this_zone_id => $this_zone_country_array_by_technical_code) {
 			query('UPDATE peel_pays
-				SET zone='.intval($this_zone_id).'
+				SET zone = ' . nohtml_real_escape_string(get_zone_id_sql_set_value(intval($this_zone_id))) . '
 				WHERE iso3 IN ("'.implode('","',nohtml_real_escape_string($this_zone_country_array_by_technical_code)).'") AND ' . get_filter_site_cond('pays', null, false, $site_id));
 			
 			if ($france_zone_id == $this_zone_id) {
@@ -4961,6 +5001,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			});
 ';
 
+		$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('profil_select_options', get_priv_options(vb($_GET['priv']), 'output', true));
 		$tpl->assign('newsletter_options', formSelect('newsletter', tab_followed_newsletter(), vb($_GET['newsletter'])));

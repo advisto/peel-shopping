@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 53208 2017-03-20 14:35:34Z sdelaporte $
+// $Id: produits.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -150,7 +150,11 @@ switch (vb($_REQUEST['mode'])) {
 				$frm[$this_image] = upload($this_image, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm[$this_image]));
 			}
 			$output .= insere_produit($frm);
-			$output .= affiche_liste_produits(array());
+			if (!empty($GLOBALS['site_parameters']['product_redirect_to_edit_page_after_create']) && !empty($GLOBALS['last_insert_product_id'])) {
+				redirect_and_die($GLOBALS['administrer_url'] . '/produits.php?mode=modif&id=' . $GLOBALS['last_insert_product_id']);
+			} else {
+				$output .= affiche_liste_produits(array());
+			}
 		} else {
 			if ($form_error_object->has_error('token')) {
 				$output .=  $form_error_object->text('token');
@@ -249,9 +253,11 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 			$frm['meta_desc_' . $lng] = "";
 		}
 		$frm['reference'] = "";
+		$frm['reference_fournisseur'] = "";
 		$frm['ean_code'] = "";
 		$frm['etat_stock'] = "";
 		$frm['affiche_stock'] = "";
+		$frm['allow_add_product_with_no_stock_in_cart'] = "";
 		$frm['delai_stock'] = "";
 		$frm['on_stock'] = "";
 		$frm['on_rupture'] = "";
@@ -309,6 +315,7 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 		$frm['categories'] = array($categorie_id);
 	}
 	$frm['references'] = array();
+	$frm['reference_fournisseur'] = array();
 	$frm['couleurs'] = array();
 	$frm['tailles'] = array();
 	if (check_if_module_active('payment_by_product')) {
@@ -378,13 +385,13 @@ function affiche_formulaire_modif_produit($id, &$frm)
 			if (!display_prices_with_taxes_in_admin ()) {
 				$frm['prix'] = $frm['prix'] / (1 + $frm['tva'] / 100);
 				if (check_if_module_active('flash')) {
-					$frm['prix_flash'] = $frm['prix_flash'] / (1 + $frm['tva'] / 100);
+					$frm['prix_flash'] = vn($frm['prix_flash']) / (1 + $frm['tva'] / 100);
 				} else {
 					$frm['prix_flash'] = 0;
 				}
 			}
 			if (check_if_module_active('reseller') && (!display_prices_with_taxes_in_admin () || !empty($GLOBALS['site_parameters']['force_display_reseller_prices_without_taxes']))) {
-				$frm['prix_revendeur'] = round($frm['prix_revendeur'] / (1 + $frm['tva'] / 100), 2); // C'est le prix HT qui fait foi, pas le prix TTC pour le prix revendeur => on arrondit au centime le prix revendeur HT
+				$frm['prix_revendeur'] = round(vn($frm['prix_revendeur']) / (1 + $frm['tva'] / 100), 2); // C'est le prix HT qui fait foi, pas le prix TTC pour le prix revendeur => on arrondit au centime le prix revendeur HT
 			} else {
 				$frm['prix_revendeur'] = 0;
 			}
@@ -469,9 +476,13 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	$prix_flash = fprix(get_float_from_user_input(vb($frm['prix_flash'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	$prix_revendeur = fprix(get_float_from_user_input(vb($frm['prix_revendeur'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	$prix_achat = fprix(get_float_from_user_input($frm['prix_achat']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	$prix_promo = fprix(get_float_from_user_input($frm['prix_promo']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	// Si aucune référence n'est choisie on initialise le tableau des références.
 	if (!isset($frm['references'])) {
 		$frm['references'] = array();
+	}
+	if (!isset($frm['reference_fournisseur'])) {
+		$frm['reference_fournisseur'] = array();
 	}
 	// Si aucune couleur n'est choisie on initialise le tableau des couleurs
 	if (!isset($frm['couleurs'])) {
@@ -503,13 +514,16 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				// Le lien du produit est généré sans categorie. Le produit sera accessible depuis ce lien.
 				$prod_href = get_product_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']], 0, null, false, false, $frm['site_id']);
 			}
-			$sql_nb_view = query("SELECT nb_view
-				FROM peel_produits
-				WHERE id = " . intval($frm['id']) . " AND " . get_filter_site_cond('produits', null, true) . "");
-			$prod = fetch_assoc($sql_nb_view);
+			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_UPDATE'] . ' "' .  vb($frm['nom_' . $_SESSION['session_langue']]) . '" - <a href="' . $prod_href . '" onclick="return(window.open(this.href)?false:true);">' . $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL'] . '</a>';
+			if(empty($GLOBALS['site_parameters']['avoid_increment_products_nb_view'])) {
+				$sql_nb_view = query("SELECT nb_view
+					FROM peel_produits
+					WHERE id = " . intval($frm['id']) . " AND " . get_filter_site_cond('produits', null, true) . "");
+				$prod = fetch_assoc($sql_nb_view);
+				$GLOBALS['DOC_TITLE'] .= ' - ' . $GLOBALS['STR_ADMIN_PRODUITS_VIEWS_COUNT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $prod['nb_view'];
+			}
+			$tpl->assign('nb_view', vn($prod['nb_view']));
 			$tpl->assign('prod_href', $prod_href);
-			$tpl->assign('nb_view', $prod['nb_view']);
-			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_UPDATE'] . ' "' .  vb($frm['nom_' . $_SESSION['session_langue']]) . '" - <a href="' . $prod_href . '" onclick="return(window.open(this.href)?false:true);">' . $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL'] . '</a> - ' . $GLOBALS['STR_ADMIN_PRODUITS_VIEWS_COUNT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . $prod['nb_view'];
 		} else {
 			$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRODUITS_ADD'];		
 		}
@@ -556,6 +570,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 			$tpl->assign('STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM', $GLOBALS['STR_ADMIN_PRODUCT_MULTIPLE_REFERENCE_FORM']);
 		}
 		$tpl->assign('conditionnement', vb($frm['conditionnement']));
+		$tpl->assign('conditioning_text', vb($frm['conditioning_text']));
 		$tpl->assign('unit_per_pallet', vb($frm['unit_per_pallet']));
 	
 		$tpl->assign('is_rollover_module_active', check_if_module_active('menus'));
@@ -566,6 +581,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_recommanded_product_on_cart_page', !empty($frm['recommanded_product_on_cart_page']));
 		$tpl->assign('etat', vb($frm['etat']));
 		$tpl->assign('reference', vb($frm['reference']));
+		$tpl->assign('reference_fournisseur', vb($frm['reference_fournisseur']));
 		$tpl->assign('ean_code', vb($frm['ean_code']));
 
 		$tpl->assign('is_id', !empty($frm['id']));
@@ -578,8 +594,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 				'descriptif' => vb($frm['descriptif_' . $lng]),
 				'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 				'meta_titre' => vb($frm['meta_titre_' . $lng]),
-				'meta_key' => $frm['meta_key_' . $lng],
-				'meta_desc' => $frm['meta_desc_' . $lng]
+				'meta_key' => vb($frm['meta_key_' . $lng]),
+				'meta_desc' => vb($frm['meta_desc_' . $lng])
 				);
 		}
 		$tpl->assign('langs', $tpl_lang_names);
@@ -728,7 +744,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		}
 		$tpl->assign('colors', $tpl_colors);
 
-		$tpl->assign('youtube_code', $frm['youtube_code']);
+		$tpl->assign('youtube_code', vb($frm['youtube_code']));
 
 		$tpl_util_options = array();
 		$select = query("SELECT id_utilisateur, societe
@@ -836,7 +852,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 					// Les images sont gérés dans la partie FICHIERS ASSOCIÉS AUX PRODUITS.
 					continue;
 				}
-				$products_table_additionnal_fields[] = array('title' => $this_value, 'name' => $this_key, 'value' => vb($frm[$this_key]), 'type' => 'text');
+				$products_table_additionnal_fields[] = array('title' => $this_value, 'name' => $this_key, 'value' => vb($frm[$this_key]), 'type' => vb($GLOBALS['site_parameters']['products_table_additionnal_fields_form_type'][$this_key], 'text'));
 			}
 			$tpl->assign('products_table_additionnal_fields_array', $products_table_additionnal_fields);
 		}
@@ -848,8 +864,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_flash_sell_module_active', check_if_module_active('flash'));
 		if (check_if_module_active('flash')) {
 			$tpl->assign('prix_flash', vn($prix_flash));
-			$tpl->assign('flash_start', get_formatted_date($frm['flash_start'], 'short', 'long'));
-			$tpl->assign('flash_end', get_formatted_date($frm['flash_end'], 'short', 'long'));
+			$tpl->assign('flash_start', get_formatted_date(vb($frm['flash_start']), 'short', 'long'));
+			$tpl->assign('flash_end', get_formatted_date(vb($frm['flash_end']), 'short', 'long'));
 			$tpl->assign('is_on_flash', !empty($frm['on_flash']));
 		}
 		$tpl->assign('is_module_gift_checks_active', check_if_module_active('gift_check'));
@@ -892,7 +908,9 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
 		$tpl->assign('STR_ADMIN_OFFLINE', $GLOBALS['STR_ADMIN_OFFLINE']);
 		$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+		$tpl->assign('STR_REFERENCE_FOURNISSEUR', $GLOBALS['STR_REFERENCE_FOURNISSEUR']);
 		$tpl->assign('STR_CONDITIONNEMENT', $GLOBALS['STR_CONDITIONNEMENT']);
+		$tpl->assign('STR_ADMIN_CONDITIONNEMENT_TEXT', $GLOBALS['STR_ADMIN_CONDITIONNEMENT_TEXT']);
 		$tpl->assign('STR_CONDITIONNEMENT_QTY', $GLOBALS['STR_CONDITIONNEMENT_QTY']);
 		$tpl->assign('STR_ADMIN_PRODUITS_EAN_CODE', $GLOBALS['STR_ADMIN_PRODUITS_EAN_CODE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_UNIT_PER_PALLET', $GLOBALS['STR_ADMIN_PRODUITS_UNIT_PER_PALLET']);
@@ -1097,7 +1115,7 @@ function supprime_fichier_couleur($id, $file, $couleur_id)
 function insere_produit($frm)
 {
 	$output = '';
-	if (!empty($frm['promotion'])) {
+	if ($frm['promotion']>0) {
 		$frm['on_promo'] = 1;
 	} else {
 		$frm['on_promo'] = 0;
@@ -1130,205 +1148,117 @@ function insere_produit($frm)
 	}
 	$prix_achat = $frm['prix_achat'] * (1 + $frm['tva'] / 100);
 	/* ajoute le produit dans la table produits */
+	$product_fields[] = "date_insere = '" . date('Y-m-d H:i:s', time()) . "'";
 
-	$sqlProd = "INSERT INTO peel_produits (
-		reference
-		, ean_code
-		, prix
-		, prix_promo
-		, prix_revendeur
-		, prix_achat
-		, default_image
-		, image1
-		, image2
-		, image3
-		, image4
-		, image5
-		, image6
-		, image7
-		, image8
-		, image9
-		, image10
-		, youtube_code
-		, promotion
-		, tva
-		, etat
-		, date_insere
-		, date_maj
-		, on_special
-		, poids
-		, on_promo
-		, on_reseller
-		, alpha
-		, on_new
-		, on_stock
-		, delai_stock
-		, affiche_stock
-		, id_marque
-		, on_rupture
-		, id_ecotaxe
-		, id_utilisateur
-		, position
-		, on_ref_produit
-		, nb_ref_produits
-		, display_price_by_weight
-		, volume
-		, on_estimate
-		, recommanded_product_on_cart_page
-		, extra_link
-		, technical_code
-		, site_id";
+	// Début de la section comme pour MAJ
+	$product_fields[] = "reference = '" . nohtml_real_escape_string($frm['reference']) . "'";
+	$product_fields[] = "reference_fournisseur = '" . nohtml_real_escape_string($frm['reference_fournisseur']) . "'";
+	$product_fields[] = "ean_code = '" . nohtml_real_escape_string($frm['ean_code']) . "'";
+	$product_fields[] = "prix = '" . nohtml_real_escape_string($prix) . "'";
+	$product_fields[] = "prix_promo = '" . nohtml_real_escape_string($prix_promo) . "'";
+	$product_fields[] = "prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'";
+	$product_fields[] = "prix_achat = '" . nohtml_real_escape_string($prix_achat) . "'";
+	$product_fields[] = "default_image = '" . nohtml_real_escape_string($frm['default_image']) . "'";
+	$product_fields[] = "image1 = '" . nohtml_real_escape_string($frm['image1']) . "'";
+	$product_fields[] = "image2 = '" . nohtml_real_escape_string($frm['image2']) . "'";
+	$product_fields[] = "image3 = '" . nohtml_real_escape_string($frm['image3']) . "'";
+	$product_fields[] = "image4 = '" . nohtml_real_escape_string($frm['image4']) . "'";
+	$product_fields[] = "image5 = '" . nohtml_real_escape_string($frm['image5']) . "'";
+	$product_fields[] = "image6 = '" . nohtml_real_escape_string($frm['image6']) . "'";
+	$product_fields[] = "image7 = '" . nohtml_real_escape_string($frm['image7']) . "'";
+	$product_fields[] = "image8 = '" . nohtml_real_escape_string($frm['image8']) . "'";
+	$product_fields[] = "image9 = '" . nohtml_real_escape_string($frm['image9']) . "'";
+	$product_fields[] = "image10 = '" . nohtml_real_escape_string($frm['image10']) . "'";
+	$product_fields[] = "youtube_code = '" . real_escape_string($frm['youtube_code']) . "'";
+	$product_fields[] = "promotion = '" . nohtml_real_escape_string($frm['promotion']) . "'";
+	$product_fields[] = "tva = '" . nohtml_real_escape_string($frm['tva']) . "'";
+	$product_fields[] = "etat = '" . nohtml_real_escape_string($frm['etat']) . "'";
+	$product_fields[] = "date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+	$product_fields[] = "on_special = '" . nohtml_real_escape_string(vn($frm['on_special'])) . "'";
+	$product_fields[] = "poids = '" . nohtml_real_escape_string($frm['poids']) . "'";
+	$product_fields[] = "on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'";
+	$product_fields[] = "on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'";
+	$product_fields[] = "on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'";
+	$product_fields[] = "alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'";
+	$product_fields[] = "on_stock = '" . intval(vn($frm['on_stock'])) . "'";
+	$product_fields[] = "affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'";
+	$product_fields[] = "delai_stock = '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'";
+	$product_fields[] = "etat_stock = '" . intval(vn($frm['etat_stock'])) . "'";
+	$product_fields[] = "extra_link = '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'";
+	$product_fields[] = "technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
+	$product_fields[] = "id_marque = '" . intval(vn($frm['id_marque'])) . "'";
+	$product_fields[] = "on_rupture = '" . intval(vn($frm['on_rupture'])) . "'";
+	$product_fields[] = "id_ecotaxe = '" . intval(vn($frm['id_ecotaxe'])) . "'";
+	$product_fields[] = "id_utilisateur = '" . intval(vn($frm['id_utilisateur'])) . "'";
+	$product_fields[] = "position = '" . intval($frm['position']) . "'";
+	$product_fields[] = "on_ref_produit = '" . intval(vn($frm['on_ref_produit'])) . "'";
+	$product_fields[] = "nb_ref_produits = '" . intval($frm['nb_ref_produits']) . "'";
+	$product_fields[] = "display_price_by_weight = '" . nohtml_real_escape_string($frm['display_price_by_weight']) . "'";
+	$product_fields[] = "volume = '" . nohtml_real_escape_string($frm['volume']) . "'";
+	$product_fields[] = "on_estimate = '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'";
+	$product_fields[] = "recommanded_product_on_cart_page = '" . nohtml_real_escape_string(vn($frm['recommanded_product_on_cart_page'])) . "'";
+	$product_fields[] = "default_color_id = '" . intval(vn($frm['default_color_id'])) . "'";
+	$product_fields[] = "site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'";
+	$product_fields[] = "allow_add_product_with_no_stock_in_cart = '" . intval(vn($frm['allow_add_product_with_no_stock_in_cart'])) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-		$sqlProd .= "
-		, site_country";
+		$product_fields[] = "site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$sqlProd .= "
-		, nom_" . $lng . "
-		, descriptif_" . $lng . "
-		, description_" . $lng . '
-		, meta_titre_' . $lng . '
-		, meta_key_' . $lng . '
-		, meta_desc_' . $lng;
+		if(empty($GLOBALS['site_parameters']['product_name_forced_lang']) || $lng == $GLOBALS['site_parameters']['product_name_forced_lang']) {
+			$product_fields[] = "nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
+		}
+		if(empty($GLOBALS['site_parameters']['product_description_forced_lang']) || $lng == $GLOBALS['site_parameters']['product_description_forced_lang']) {
+			$product_fields[] = "description_" . $lng . " = '" . real_escape_string($frm['description_' . $lng]) . "'";
+		}
+		$product_fields[] = "descriptif_" . $lng . " = '" . real_escape_string($frm['descriptif_' . $lng]) . "'";
+		$product_fields[] = "meta_titre_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'";
+		$product_fields[] = "meta_key_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'";
+		$product_fields[] = "meta_desc_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
 	}
 	if (check_if_module_active('flash')) {
-		$sqlProd .= ', prix_flash
-					, on_flash
-					, flash_start
-					, flash_end';
-	}
-	if (check_if_module_active('gift_check')) {
-		$sqlProd .= ', on_check';
+		$product_fields[] = "prix_flash = '" . nohtml_real_escape_string($prix_flash) . "'";
+		$product_fields[] = "on_flash = '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'";
+		$product_fields[] = "flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'";
+		$product_fields[] = "flash_end = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_end'])) . "'";
 	}
 	if (check_if_module_active('best_seller')) {
-		$sqlProd .= ', on_top';
+		$product_fields[] = "on_top = '" . nohtml_real_escape_string(vn($frm['on_top'])) . "'";
 	}
+
 	if (check_if_module_active('menus')) {
-		$sqlProd .= ', on_rollover';
+		$product_fields[] = "on_rollover = '" . nohtml_real_escape_string(vn($frm['on_rollover'])) . "'";
 	}
 	if (check_if_module_active('gifts')) {
-		$sqlProd .= ', points
-					 , on_gift
-					 , on_gift_points';
+		$product_fields[] = "points = '" . nohtml_real_escape_string($frm['points']) . "'";
+		$product_fields[] = "on_gift = '" . nohtml_real_escape_string(vn($frm['on_gift'])) . "'";
+		$product_fields[] = "on_gift_points = '" . nohtml_real_escape_string(vn($frm['on_gift_points'])) . "'";
+	}
+	if (check_if_module_active('gift_check')) {
+		$product_fields[] = "on_check = '" . nohtml_real_escape_string(vn($frm['on_check'])) . "'";
 	}
 	if (check_if_module_active('download')) {
-		$sqlProd .= ', zip
-					, on_download';
+		$product_fields[] = "zip = '" . nohtml_real_escape_string($frm['zip']) . "'";
+		$product_fields[] = "on_download = '" . nohtml_real_escape_string(vn($frm['on_download'])) . "'";
 	}
 	if (check_if_module_active('conditionnement')) {
-		$sqlProd .= ', conditionnement';
-		$sqlProd .= ', unit_per_pallet';
+		$product_fields[] = "conditionnement = '" . intval($frm['conditionnement']) . "'";
+		$product_fields[] = "unit_per_pallet = '" . intval($frm['unit_per_pallet']) . "'";
+		$product_fields[] = "conditioning_text = '" . nohtml_real_escape_string($frm['conditioning_text']) . "'";
 	}
 	if(!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
 		foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
-			$sqlProd .= ', ' . word_real_escape_string($this_key);
+			$product_fields[] = word_real_escape_string($this_key) . " = '" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
 		}
 	}
-	$sqlProd .= "
-	 ) VALUES (
-		'" . nohtml_real_escape_string($frm['reference']) . "'
-		, '" . nohtml_real_escape_string($frm['ean_code']) . "'
-		, '" . nohtml_real_escape_string($prix) . "'
-		, '" . nohtml_real_escape_string($prix_promo) . "'
-		, '" . nohtml_real_escape_string($prix_revendeur) . "'
-		, '" . nohtml_real_escape_string($prix_achat) . "'
-		, '" . nohtml_real_escape_string($frm['default_image']) . "'
-		, '" . nohtml_real_escape_string($frm['image1']) . "'
-		, '" . nohtml_real_escape_string($frm['image2']) . "'
-		, '" . nohtml_real_escape_string($frm['image3']) . "'
-		, '" . nohtml_real_escape_string($frm['image4']) . "'
-		, '" . nohtml_real_escape_string($frm['image5']) . "'
-		, '" . nohtml_real_escape_string($frm['image6']) . "'
-		, '" . nohtml_real_escape_string($frm['image7']) . "'
-		, '" . nohtml_real_escape_string($frm['image8']) . "'
-		, '" . nohtml_real_escape_string($frm['image9']) . "'
-		, '" . nohtml_real_escape_string($frm['image10']) . "'
-		, '" . real_escape_string($frm['youtube_code']) . "'
-		, '" . nohtml_real_escape_string($frm['promotion']) . "'
-		, '" . nohtml_real_escape_string($frm['tva']) . "'
-		, '" . nohtml_real_escape_string($frm['etat']) . "'
-		, '" . date('Y-m-d H:i:s', time()) . "'
-		, '" . date('Y-m-d H:i:s', time()) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_special'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['poids'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'
-		, '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper($frm['nom_' . $_SESSION['session_langue']]), 0, 1)) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_stock'])) . "'
-		, '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
-		, '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vn($frm['affiche_stock']))) . "'
-		, '" . nohtml_real_escape_string(vn($frm['id_marque'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_rupture'])) . "'
-		, '" . intval(vn($frm['id_ecotaxe'])) . "'
-		, '" . intval(vn($frm['id_utilisateur'])) . "'
-		, '" . intval($frm['position']) . "'
-		, '" . intval(vn($frm['on_ref_produit'])) . "'
-		, '" . intval(vn($frm['nb_ref_produits'])) . "'
-		, '" . nohtml_real_escape_string($frm['display_price_by_weight']) . "'
-		, '" . nohtml_real_escape_string($frm['volume']) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['recommanded_product_on_cart_page'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
-		, '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'";
-	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-		$sqlProd .= "
-		, '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
-	}
-	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
-		, '" . real_escape_string($frm['descriptif_' . $lng]) . "'
-		, '" . real_escape_string($frm['description_' . $lng]) . "'
-		, '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
-		, '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
-		, '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
-	}
-	if (check_if_module_active('flash')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string($prix_flash) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'
-		, '" . nohtml_real_escape_string($frm['flash_start']) . "'
-		, '" . nohtml_real_escape_string($frm['flash_end']) . "'";
-	}
-	if (check_if_module_active('gift_check')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string(vn($frm['on_check'])) . "'";
-	}
-	if (check_if_module_active('best_seller')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string(vn($frm['on_top'])) . "'";
-	}
-	if (check_if_module_active('menus')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string(vn($frm['on_rollover'])) . "'";
-	}
-	if (check_if_module_active('gifts')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string($frm['points']) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_gift'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_gift_points'])) . "'";
-	}
-	if (check_if_module_active('download')) {
-		$sqlProd .= "
-		, '" . nohtml_real_escape_string($frm['zip']) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_download'])) . "'";
-	}
-	if (check_if_module_active('conditionnement')) {
-		$sqlProd .= ", '" . intval($frm['conditionnement']) . "'";
-		$sqlProd .= ", '" . intval($frm['unit_per_pallet']) . "'";
-	}
-	if(!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
-		foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
-			$sqlProd .= ", '" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
-		}
-	}
-	$sqlProd .= ")";
-	$qid = query($sqlProd);
+	$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
+	// Fin de la section identique à MAJ des produits
+	
+	$sql = "INSERT INTO peel_produits
+		SET	" . implode(', ', $product_fields) . "";
+	query($sql);
 
 	$product_id = insert_id();
-
+	$GLOBALS['last_insert_product_id'] = $product_id;
 	/* ajoute le produit sous les catégories spécifiées */
 	for ($i = 0; $i < count(vn($frm['categories'])); $i++) {
 		if (!empty($frm['categories'][$i])) {
@@ -1428,119 +1358,112 @@ function maj_produit($id, $frm)
 		update_payment_by_product(vb($frm['paiment_allowed'], array()), $id);
 	}
 	$prix_achat = get_float_from_user_input($frm['prix_achat']) * (1 + $frm['tva'] / 100);
+	
 	/* Met à jour la table produits */
-	$sql = "UPDATE peel_produits SET
-		reference = '" . nohtml_real_escape_string($frm['reference']) . "'
-		, ean_code = '" . nohtml_real_escape_string($frm['ean_code']) . "'
-		, prix = '" . nohtml_real_escape_string($prix) . "'
-
-		, prix_promo = '" . nohtml_real_escape_string($prix_promo) . "'
-		, prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
-		, prix_achat = '" . nohtml_real_escape_string($prix_achat) . "'
-		, default_image = '" . nohtml_real_escape_string($frm['default_image']) . "'
-		, image1 = '" . nohtml_real_escape_string($frm['image1']) . "'
-		, image2 = '" . nohtml_real_escape_string($frm['image2']) . "'
-		, image3 = '" . nohtml_real_escape_string($frm['image3']) . "'
-		, image4 = '" . nohtml_real_escape_string($frm['image4']) . "'
-		, image5 = '" . nohtml_real_escape_string($frm['image5']) . "'
-		, image6 = '" . nohtml_real_escape_string($frm['image6']) . "'
-		, image7 = '" . nohtml_real_escape_string($frm['image7']) . "'
-		, image8 = '" . nohtml_real_escape_string($frm['image8']) . "'
-		, image9 = '" . nohtml_real_escape_string($frm['image9']) . "'
-		, image10 = '" . nohtml_real_escape_string($frm['image10']) . "'
-		, youtube_code = '" . real_escape_string($frm['youtube_code']) . "'
-		, promotion = '" . nohtml_real_escape_string($frm['promotion']) . "'
-		, tva = '" . nohtml_real_escape_string($frm['tva']) . "'
-		, etat = '" . nohtml_real_escape_string($frm['etat']) . "'
-		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'
-		, on_special = '" . nohtml_real_escape_string(vn($frm['on_special'])) . "'
-		, poids = '" . nohtml_real_escape_string($frm['poids']) . "'
-		, on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'
-		, on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'
-		, on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'
-		, alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'
-		, on_stock = '" . intval(vn($frm['on_stock'])) . "'
-		, affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'
-		, delai_stock = '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'
-		, etat_stock = '" . intval(vn($frm['etat_stock'])) . "'
-		, extra_link = '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'
-		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
-		, id_marque = '" . intval(vn($frm['id_marque'])) . "'
-		, on_rupture = '" . intval(vn($frm['on_rupture'])) . "'
-		, id_ecotaxe = '" . intval(vn($frm['id_ecotaxe'])) . "'
-		, id_utilisateur = '" . intval(vn($frm['id_utilisateur'])) . "'
-		, position = '" . intval($frm['position']) . "'
-		, on_ref_produit = '" . intval(vn($frm['on_ref_produit'])) . "'
-		, nb_ref_produits = '" . intval($frm['nb_ref_produits']) . "'
-		, display_price_by_weight = '" . nohtml_real_escape_string($frm['display_price_by_weight']) . "'
-		, volume = '" . nohtml_real_escape_string($frm['volume']) . "'
-		, on_estimate = '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'
-		, recommanded_product_on_cart_page = '" . nohtml_real_escape_string(vn($frm['recommanded_product_on_cart_page'])) . "'
-		, default_color_id = '" . intval(vn($frm['default_color_id'])) . "'
-		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'";
+	$product_fields[] = "reference = '" . nohtml_real_escape_string($frm['reference']) . "'";
+	$product_fields[] = "reference_fournisseur = '" . nohtml_real_escape_string($frm['reference_fournisseur']) . "'";
+	$product_fields[] = "ean_code = '" . nohtml_real_escape_string($frm['ean_code']) . "'";
+	$product_fields[] = "prix = '" . nohtml_real_escape_string($prix) . "'";
+	$product_fields[] = "prix_promo = '" . nohtml_real_escape_string($prix_promo) . "'";
+	$product_fields[] = "prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'";
+	$product_fields[] = "prix_achat = '" . nohtml_real_escape_string($prix_achat) . "'";
+	$product_fields[] = "default_image = '" . nohtml_real_escape_string($frm['default_image']) . "'";
+	$product_fields[] = "image1 = '" . nohtml_real_escape_string($frm['image1']) . "'";
+	$product_fields[] = "image2 = '" . nohtml_real_escape_string($frm['image2']) . "'";
+	$product_fields[] = "image3 = '" . nohtml_real_escape_string($frm['image3']) . "'";
+	$product_fields[] = "image4 = '" . nohtml_real_escape_string($frm['image4']) . "'";
+	$product_fields[] = "image5 = '" . nohtml_real_escape_string($frm['image5']) . "'";
+	$product_fields[] = "image6 = '" . nohtml_real_escape_string($frm['image6']) . "'";
+	$product_fields[] = "image7 = '" . nohtml_real_escape_string($frm['image7']) . "'";
+	$product_fields[] = "image8 = '" . nohtml_real_escape_string($frm['image8']) . "'";
+	$product_fields[] = "image9 = '" . nohtml_real_escape_string($frm['image9']) . "'";
+	$product_fields[] = "image10 = '" . nohtml_real_escape_string($frm['image10']) . "'";
+	$product_fields[] = "youtube_code = '" . real_escape_string($frm['youtube_code']) . "'";
+	$product_fields[] = "promotion = '" . nohtml_real_escape_string($frm['promotion']) . "'";
+	$product_fields[] = "tva = '" . nohtml_real_escape_string($frm['tva']) . "'";
+	$product_fields[] = "etat = '" . nohtml_real_escape_string($frm['etat']) . "'";
+	$product_fields[] = "date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
+	$product_fields[] = "on_special = '" . nohtml_real_escape_string(vn($frm['on_special'])) . "'";
+	$product_fields[] = "poids = '" . nohtml_real_escape_string($frm['poids']) . "'";
+	$product_fields[] = "on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'";
+	$product_fields[] = "on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'";
+	$product_fields[] = "on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'";
+	$product_fields[] = "alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'";
+	$product_fields[] = "on_stock = '" . intval(vn($frm['on_stock'])) . "'";
+	$product_fields[] = "affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'";
+	$product_fields[] = "delai_stock = '" . nohtml_real_escape_string(StringMb::html_entity_decode_if_needed(vb($frm['delai_stock']))) . "'";
+	$product_fields[] = "etat_stock = '" . intval(vn($frm['etat_stock'])) . "'";
+	$product_fields[] = "extra_link = '" . nohtml_real_escape_string(vb($frm['extra_link'])) . "'";
+	$product_fields[] = "technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
+	$product_fields[] = "id_marque = '" . intval(vn($frm['id_marque'])) . "'";
+	$product_fields[] = "on_rupture = '" . intval(vn($frm['on_rupture'])) . "'";
+	$product_fields[] = "id_ecotaxe = '" . intval(vn($frm['id_ecotaxe'])) . "'";
+	$product_fields[] = "id_utilisateur = '" . intval(vn($frm['id_utilisateur'])) . "'";
+	$product_fields[] = "position = '" . intval($frm['position']) . "'";
+	$product_fields[] = "on_ref_produit = '" . intval(vn($frm['on_ref_produit'])) . "'";
+	$product_fields[] = "nb_ref_produits = '" . intval($frm['nb_ref_produits']) . "'";
+	$product_fields[] = "display_price_by_weight = '" . nohtml_real_escape_string($frm['display_price_by_weight']) . "'";
+	$product_fields[] = "volume = '" . nohtml_real_escape_string($frm['volume']) . "'";
+	$product_fields[] = "on_estimate = '" . nohtml_real_escape_string(vn($frm['on_estimate'])) . "'";
+	$product_fields[] = "recommanded_product_on_cart_page = '" . nohtml_real_escape_string(vn($frm['recommanded_product_on_cart_page'])) . "'";
+	$product_fields[] = "default_color_id = '" . intval(vn($frm['default_color_id'])) . "'";
+	$product_fields[] = "allow_add_product_with_no_stock_in_cart = '" . intval(vn($frm['allow_add_product_with_no_stock_in_cart'])) . "'";
+	$product_fields[] = "site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-		$sql .= "
-		, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
+		$product_fields[] = "site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		if(empty($GLOBALS['site_parameters']['product_name_forced_lang']) || $lng == $GLOBALS['site_parameters']['product_name_forced_lang']) {
-			$sql .= "
-		, nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
+			$product_fields[] = "nom_" . $lng . " = '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 		}
 		if(empty($GLOBALS['site_parameters']['product_description_forced_lang']) || $lng == $GLOBALS['site_parameters']['product_description_forced_lang']) {
-			$sql .= "
-		, description_" . $lng . " = '" . real_escape_string($frm['description_' . $lng]) . "'";
+			$product_fields[] = "description_" . $lng . " = '" . real_escape_string($frm['description_' . $lng]) . "'";
 		}
-		$sql .= "
-		, descriptif_" . $lng . " = '" . real_escape_string($frm['descriptif_' . $lng]) . "'
-		, meta_titre_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
-		, meta_key_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
-		, meta_desc_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
+		$product_fields[] = "descriptif_" . $lng . " = '" . real_escape_string($frm['descriptif_' . $lng]) . "'";
+		$product_fields[] = "meta_titre_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'";
+		$product_fields[] = "meta_key_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'";
+		$product_fields[] = "meta_desc_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
 	}
 	if (check_if_module_active('flash')) {
-		$sql .= "
-		, prix_flash = '" . nohtml_real_escape_string($prix_flash) . "'
-		, on_flash = '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'
-		, flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'
-		, flash_end = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_end'])) . "'";
+		$product_fields[] = "prix_flash = '" . nohtml_real_escape_string($prix_flash) . "'";
+		$product_fields[] = "on_flash = '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'";
+		$product_fields[] = "flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'";
+		$product_fields[] = "flash_end = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_end'])) . "'";
 	}
 	if (check_if_module_active('best_seller')) {
-		$sql .= "
-		, on_top = '" . nohtml_real_escape_string(vn($frm['on_top'])) . "'";
+		$product_fields[] = "on_top = '" . nohtml_real_escape_string(vn($frm['on_top'])) . "'";
 	}
 
 	if (check_if_module_active('menus')) {
-		$sql .= "
-		, on_rollover = '" . nohtml_real_escape_string(vn($frm['on_rollover'])) . "'";
+		$product_fields[] = "on_rollover = '" . nohtml_real_escape_string(vn($frm['on_rollover'])) . "'";
 	}
 	if (check_if_module_active('gifts')) {
-		$sql .= "
-		, points = '" . nohtml_real_escape_string($frm['points']) . "'
-		, on_gift = '" . nohtml_real_escape_string(vn($frm['on_gift'])) . "'
-		, on_gift_points = '" . nohtml_real_escape_string(vn($frm['on_gift_points'])) . "'";
+		$product_fields[] = "points = '" . nohtml_real_escape_string($frm['points']) . "'";
+		$product_fields[] = "on_gift = '" . nohtml_real_escape_string(vn($frm['on_gift'])) . "'";
+		$product_fields[] = "on_gift_points = '" . nohtml_real_escape_string(vn($frm['on_gift_points'])) . "'";
 	}
 	if (check_if_module_active('gift_check')) {
-		$sql .= "
-		, on_check = '" . nohtml_real_escape_string(vn($frm['on_check'])) . "'";
+		$product_fields[] = "on_check = '" . nohtml_real_escape_string(vn($frm['on_check'])) . "'";
 	}
 	if (check_if_module_active('download')) {
-		$sql .= "
-		, zip = '" . nohtml_real_escape_string($frm['zip']) . "'
-		, on_download = '" . nohtml_real_escape_string(vn($frm['on_download'])) . "'";
+		$product_fields[] = "zip = '" . nohtml_real_escape_string($frm['zip']) . "'";
+		$product_fields[] = "on_download = '" . nohtml_real_escape_string(vn($frm['on_download'])) . "'";
 	}
 	if (check_if_module_active('conditionnement')) {
-		$sql .= ", conditionnement = '" . intval($frm['conditionnement']) . "'";
-		$sql .= ", unit_per_pallet = '" . intval($frm['unit_per_pallet']) . "'";
+		$product_fields[] = "conditionnement = '" . intval($frm['conditionnement']) . "'";
+		$product_fields[] = "unit_per_pallet = '" . intval($frm['unit_per_pallet']) . "'";
+		$product_fields[] = "conditioning_text = '" . nohtml_real_escape_string($frm['conditioning_text']) . "'";
 	}
 	if(!empty($GLOBALS['site_parameters']['products_table_additionnal_fields'])) {
 		foreach($GLOBALS['site_parameters']['products_table_additionnal_fields'] as $this_key => $this_value) {
-			$sql .= ", " . word_real_escape_string($this_key) . "='" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
+			$product_fields[] = word_real_escape_string($this_key) . " = '" . nohtml_real_escape_string(vb($frm[$this_key])) . "'";
 		}
 	}
-	$sql .= " WHERE id =" . intval($id) . "
-	";
-
-	$qid = query($sql);
+	$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
+	$sql = "UPDATE peel_produits
+		SET	" . implode(', ', $product_fields) . "
+		WHERE id =" . intval($id) . "";
+	query($sql);
 	/* Efface toutes les catégories auxquelles le produit est associé */
 	query("DELETE FROM peel_produits_categories WHERE produit_id = '" . intval($id) . "'");
 	query("DELETE FROM peel_produits_references WHERE produit_id = '" . intval($id) . "'");
@@ -1572,7 +1495,7 @@ function maj_produit($id, $frm)
 			$result = fetch_assoc($query);
 			if (empty($result)) {
 				// Association de produit non présente.
-				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id, quantity)
+				query("INSERT INTO peel_produits_references (reference_id, produit_id, quantity)
 					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "', '" . intval(vn($frm['quantity_product_reference'][$i])) . "')");
 			}
 		}
@@ -1580,7 +1503,7 @@ function maj_produit($id, $frm)
 	
 	foreach($frm['couleurs'] as $this_color_id) {
 		// On recupere chaque champ default_image par couleur
-		$qid = query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id, default_image)
+		query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id, default_image)
 			VALUES ('" . nohtml_real_escape_string($this_color_id) . "', '" . intval($id) . "','" . intval(vn($frm["default_image" . $this_color_id])) . "')");
 		if(isset($_POST['default_image' . $this_color_id])) {
 			// En cas de nouvelle association d'une couleur avec le produit, il ne peut pas y avoir d'ajout d'images pour cette nouvelle couleur.
@@ -1598,7 +1521,7 @@ function maj_produit($id, $frm)
 	}
 
 	for ($i = 0; $i < count($frm["tailles"]); $i++) {
-		$qid = query("INSERT INTO peel_produits_tailles (taille_id, produit_id)
+		query("INSERT INTO peel_produits_tailles (taille_id, produit_id)
 			VALUES ('" . nohtml_real_escape_string($frm["tailles"][$i]) . "', '" . intval($id) . "')");
 	}
 	if (check_if_module_active('stock_advanced') && $frm['on_stock'] == 1) {
@@ -1640,7 +1563,7 @@ function affiche_liste_produits_fournisseur()
 	if (check_if_module_active('gifts')) {
 		$sql .= "p.points, p.on_gift, p.on_gift_points, ";
 	}
-	$sql .= "p.id, p.reference, p.etat_stock, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, p.id_utilisateur, p.prix, p.etat, p.date_maj, p.on_stock
+	$sql .= "p.id, p.reference, p.reference_fournisseur, p.etat_stock, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, p.id_utilisateur, p.prix, p.etat, p.date_maj, p.on_stock
 		FROM peel_produits p
 		WHERE p.id_utilisateur = '" . intval($_GET['id_utilisateur']) . "' AND " . get_filter_site_cond('produits', 'p', true) . "
 		ORDER BY p.id ASC";
@@ -1680,6 +1603,7 @@ function affiche_liste_produits_fournisseur()
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'] . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1),
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'] . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1),
 				'reference' => $ligne['reference'],
+				'reference_fournisseur' => $ligne['reference_fournisseur'],
 				'cats' => $tpl_cats,
 				'site_name' => get_site_name($cat['site_id']),
 				'prix' => fprix((display_prices_with_taxes_in_admin() ? $ligne['prix'] : $ligne['prix'] / (1 + $ligne['tva'] / 100)), false, $GLOBALS['site_parameters']['code'], false),
@@ -1705,6 +1629,7 @@ function affiche_liste_produits_fournisseur()
 	$tpl->assign('STR_ADMIN_CATEGORIES_ADD_PRODUCT', $GLOBALS['STR_ADMIN_CATEGORIES_ADD_PRODUCT']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_ADMIN_ACTION']);
 	$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+	$tpl->assign('STR_REFERENCE_FOURNISSEUR', $GLOBALS['STR_REFERENCE_FOURNISSEUR']);
 	$tpl->assign('STR_CATEGORY', $GLOBALS['STR_CATEGORY']);
 	$tpl->assign('STR_WEBSITE', $GLOBALS['STR_WEBSITE']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
@@ -1731,22 +1656,14 @@ function affiche_liste_produits_fournisseur()
  */
 function maj_tab($frm)
 {
-	$sql = "UPDATE peel_produits SET
-		 display_tab = '" . intval($frm['display_tab']) . "'
-		, tab1_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab1_html_' . $frm['lng']]) . "'
-		, tab2_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab2_html_' . $frm['lng']]) . "'
-		, tab3_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab3_html_' . $frm['lng']]) . "'
-		, tab4_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab4_html_' . $frm['lng']]) . "'
-		, tab5_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab5_html_' . $frm['lng']]) . "'
-		, tab6_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab6_html_' . $frm['lng']]) . "'
-		, tab1_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab1_title_' . $frm['lng']]) . "'
-		, tab2_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab2_title_' . $frm['lng']]) . "'
-		, tab3_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab3_title_' . $frm['lng']]) . "'
-		, tab4_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab4_title_' . $frm['lng']]) . "'
-		, tab5_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab5_title_' . $frm['lng']]) . "'
-		, tab6_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab6_title_' . $frm['lng']]) . "'
-		WHERE id ='" . intval($frm['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
-	query($sql);
+	$product_fields = array("display_tab = '" . intval($frm['display_tab']) . "'", "tab1_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab1_html_' . $frm['lng']]) . "'", "tab2_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab2_html_' . $frm['lng']]) . "'", "tab3_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab3_html_' . $frm['lng']]) . "'", "tab4_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab4_html_' . $frm['lng']]) . "'", "tab5_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab5_html_' . $frm['lng']]) . "'", "tab6_html_" . $frm['lng'] . " = '" . real_escape_string($frm['tab6_html_' . $frm['lng']]) . "'", "tab1_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab1_title_' . $frm['lng']]) . "'", "tab2_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab2_title_' . $frm['lng']]) . "'", "tab3_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab3_title_' . $frm['lng']]) . "'", "tab4_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab4_title_' . $frm['lng']]) . "'", "tab5_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab5_title_' . $frm['lng']]) . "'", "tab6_title_" . $frm['lng'] . " = '" . nohtml_real_escape_string($frm['tab6_title_' . $frm['lng']]) . "'");
+	$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
+	if(!empty($product_fields)) {
+		$sql = "UPDATE peel_produits SET
+			" . implode(', ', $product_fields) . "
+			WHERE id ='" . intval($frm['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
+		query($sql);
+	}
 }
 
 /**

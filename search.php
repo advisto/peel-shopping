@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 53221 2017-03-20 17:19:44Z sdelaporte $
+// $Id: search.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -32,6 +32,7 @@ if (defined('PEEL_PREFETCH')) {
 	include("configuration.inc.php");
 }
 
+call_module_hook('search_pre', array());
 $launch_search = true;
 
 if (!empty($GLOBALS['site_parameters']['search_default_display_show_no_result']) && empty($_GET)) {
@@ -210,7 +211,7 @@ if($launch_search) {
 		}
 	}
 	// Résultats du hook : à renvoyer sous le format 'XXX(modulename)' => array('results' => $results_found, 'title' => $GLOBALS['STR_XXX_TITLE'], 'no_result' => null)
-	$GLOBALS['search_complementary_results_array'] = call_module_hook('search_complementary', array('frm' => $_GET, 'match' => $match, 'real_search' => $real_search, 'terms' => $terms, 'taille_texte_affiche' => $taille_texte_affiche, 'mode' => 'search'), 'array');
+	$GLOBALS['search_complementary_results_array'] = call_module_hook('search_complementary', array('frm' => $_GET, 'match' => $match, 'real_search' => $real_search, 'terms' => $terms, 'taille_texte_affiche' => $taille_texte_affiche, 'mode' => 'search', 'page' => vn($_GET['page'])), 'array');
 	if(!empty($GLOBALS['site_parameters']['search_complementary_found_sort_array'])) {
 		// Tri des thématiques de résultats si défini
 		// Le tableau search_complementary_found_sort_array peut être sous la forme 'type' => N, ...  ou simplement 'type1', 'type2', ...
@@ -609,7 +610,7 @@ function search_products($frm, $terms, $match, $real_search) {
 			} else {
 				$additional_sql_cond = '';
 			}
-			$result_affichage_produit = affiche_produits(null, 2, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, 3, true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
+			$result_affichage_produit = affiche_produits(null, 2, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, vn($GLOBALS['site_parameters']['search_pages_nb_column'],3), true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
 			if(!empty($GLOBALS['products_found']) && StringMb::strlen($real_search)>=4) {
 				$GLOBALS['found_words_array'][] = $real_search;
 			}

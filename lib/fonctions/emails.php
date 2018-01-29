@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 53611 2017-04-19 11:12:30Z sdelaporte $
+// $Id: emails.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -38,9 +38,13 @@ if (!defined('IN_PEEL')) {
  */
 function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false, $filter_html_to_be_safe = false)
 {
-	$emails_force_delivery_technical_codes = array('new_message', 'warn_message_filtered', 'initialise_mot_passe');
+	$emails_force_delivery_technical_codes = array('new_message', 'warn_message_filtered', 'initialise_mot_passe', 'ifu_cerfa2561volet1', 'retenues_fiscales', 'edi_cerfa2561');
+	if($to == $GLOBALS['support'] || $to == $GLOBALS['support_sav_client'] || $to == $GLOBALS['support_commande']) {
+		$for_admin_email = true;
+	}
+
 	if(!empty($GLOBALS['site_parameters']['email_webmaster_by_technical_code']) && !empty($GLOBALS['site_parameters']['email_webmaster_by_technical_code'][$template_technical_code])) {
-		if($to == $GLOBALS['support'] || $to == $GLOBALS['support_sav_client'] || $to == $GLOBALS['support_commande']) {
+		if(!empty($for_admin_email)) {
 			$to = $GLOBALS['site_parameters']['email_webmaster_by_technical_code'][$template_technical_code];
 		}
 	}
@@ -48,9 +52,6 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$eol = "\r\n";
 	// $eol = PHP_EOL;
 	// $eol = "\n";
-	if(empty($lang) || !in_array($lang, $GLOBALS['admin_lang_codes'])){
-		$lang = $_SESSION['session_langue'];
-	}
 	if (empty($format)) {
 		$format = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
 	}
@@ -67,7 +68,30 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		$from = $GLOBALS['support'];
 	}
 	$recipient_array = explode(',', str_replace(';', ',', $to));
+	// On complète ci-dessous les tags avec les informations relatives à la première adresse email à laquelle on veut envoyer l'email
+	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
+	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
+	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
+	$query = query('SELECT *
+		FROM peel_utilisateurs
+		WHERE email="' . real_escape_string(current($recipient_array)) . '"
+		LIMIT 1');
+	if($result = fetch_assoc($query)) {
+		foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
+			if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
+				$template_tags[$tag_key] = $result[$database_key];
+			}
+		}
+		if(empty($for_admin_email) && empty($lang) && !empty($result['lang'])) {
+			// Email pour un utilisateur et non pas un administrateur => on veut utiliser par défaut la langue de l'utilisateur
+			$lang = $result['lang'];
+		}
+	}
+	if(empty($lang) || !in_array($lang, $GLOBALS['admin_lang_codes'])){
+		$lang = $_SESSION['session_langue'];
+	}
 	$used_template_technical_code = null;
+	$mail_content_without_signature = $mail_content;
 	if (!empty($template_technical_code)) {
 		// Si on demande plusieurs codes de modèle d'email dans un tableau, alors on prend en priorité le premier si trouvé, sinon le second (qui peut par exemple être un modèle plus générique)
 		if(!is_array($template_technical_code)) {
@@ -93,8 +117,10 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 					} else {
 						$signature = 'signature';
 					}
+					$mail_content_without_signature = $mail_content;
 					$signature_infos = getTextAndTitleFromEmailTemplateLang($signature, $lang);
 					if (!empty($signature_infos)) {
+						$signature_text = $signature_infos['text'];
 						$mail_content .= $signature_infos['text'];
 					}
 				}
@@ -147,24 +173,10 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			$mail_content = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), array("\n", "\n"), $mail_content));
 		}
 	}
-	// On complète ci-dessous les tags avec les informations relatives à la première adresse email à laquelle on veut envoyer l'email
-	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
-	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
-	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
-	$query = query('SELECT *
-		FROM peel_utilisateurs
-		WHERE email="' . real_escape_string(current($recipient_array)) . '"
-		LIMIT 1');
-	if($result = fetch_assoc($query)) {
-		foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
-			if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
-				$template_tags[$tag_key] = $result[$database_key];
-			}
-		}
-	}
 	// Traitement des tags dans les templates. Même si $template_tags est vide il faut le faire pour gérer les tags génériques
 	// NB : Si on veut du HTML avec $format='html', le contenu de ces tags est converti par template_tags_replace en HTML
 	$mail_content = template_tags_replace($mail_content, $template_tags, false, $format, $lang);
+	$mail_content_without_signature = template_tags_replace($mail_content_without_signature, $template_tags, false, $format, $lang);
 	$mail_subject = template_tags_replace(StringMb::strip_tags($mail_subject), $template_tags, false, 'text', $lang);
 	if ($format == "text") {
 		// On force le format en texte sans HTML
@@ -281,8 +293,8 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 				$query = query('SELECT id_utilisateur
 					FROM peel_utilisateurs
 					WHERE email="' . real_escape_string($from) . '"');
-				if($result = fetch_assoc($query)) {
-					$params['id_expediteur'] = $result['id_utilisateur'];
+				if($user_result = fetch_assoc($query)) {
+					$params['id_expediteur'] = $user_result['id_utilisateur'];
 				}
 			}
 		}
@@ -328,13 +340,25 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 				}
 				$custom_template_tags_warn['SENDER_DISPO'] = vb($sender_infos['dispo']);
 				$custom_template_tags_warn['SUJET'] = $mail_subject;
-				$custom_template_tags_warn['TEXTE'] = '<a href="'.get_url('/modules/messaging/messaging.php').'">'. StringMb::str_shorten(trim(StringMb::html_entity_decode(StringMb::strip_tags($mail_content))), 50) . '</a>';
+				$mail_content_without_signature = str_replace(array("\r\n", "\r", "<br />"), "\n", $mail_content_without_signature);
+				$content_email_array = explode("\n",$mail_content_without_signature);
+				$mail_content = "";
+				foreach($content_email_array as $this_line){
+					$mail_content .= trim(StringMb::html_entity_decode(StringMb::strip_tags($this_line))) . "<br />";
+					if (StringMb::strlen($mail_content)>40) {
+						break;
+					}
+				}
+				$custom_template_tags_warn['TEXTE'] =  $mail_content .'<br /><a href="'.get_url('/modules/messaging/messaging.php').'">'. $GLOBALS['STR_MODULE_DREAMTAKEOFF_MESSAGING_MORE_DETAIL'] . '</a>';
 				// On désactive le paramètre d'envoi d'un nouveau message 
 				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
 					$sender = $GLOBALS['support'];
 					$reply_to = $GLOBALS['support'];
 				}
-				send_email($to, '', '', 'new_message', $custom_template_tags_warn, $format, $sender, $html_add_structure, $html_correct_conformity, $html_convert_url_to_links, $reply_to, null, $lang, $additional_infos_array, true);	
+				$result = send_email($to, '', '', 'new_message', $custom_template_tags_warn, $format, $sender, $html_add_structure, $html_correct_conformity, $html_convert_url_to_links, $reply_to, null, $lang, $additional_infos_array, true);	
+				continue;
+			}
+			if(!empty($sender['status']) && $sender['status'] == 'FILTERED') {
 				continue;
 			}
 			if (((strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false) || !empty($GLOBALS['site_parameters']['localhost_send_email_active'])) && !empty($GLOBALS['site_parameters']['send_email_active'])) {

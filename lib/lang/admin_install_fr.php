@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_fr.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: admin_install_fr.php 55928 2018-01-26 17:31:15Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -34,6 +34,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "Nous allons pour cela vous dem
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "Vous devez obtenir auprès de votre hébergeur des identifiants MySQL.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "Evitez l'utilisation de root, et préférez un mot de passe mysql qui sont robuste et différent de votre mot de passe SSH pour plus de sécurité";
 $GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Erreur ! Veuillez vérifier les langues sélectionnées et que vos informations de configuration sont complètes";
+$GLOBALS["STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE"] = "Choisissez le type de site que vous souhaitez installer";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "Information : Vous pouvez indiquer une URL en https pour utiliser le chiffrement SSL seulement si votre domaine a un certificat SSL valide configuré sur votre hébergement.";
 $GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "URL du site :";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Forcer l'utilisation du chiffrement SSL pour l'administration :";
@@ -73,8 +74,13 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "FORTEMENT RECOMMAND
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Votre site a été configuré pour n'afficher les erreurs PHP que pour votre IP, à savoir {$_SERVER['REMOTE_ADDR']}. Ce paramètre est modifiable dans l'administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB : Si vous souhaitez intervenir sur le code PHP de votre site, faites attention lorsque vous modifiez vos fichiers d'utiliser un éditeur qui gère bien l'UTF-8 et ne rajoute pas de BOM (caractères invisibles) en entête des fichiers. En cas de doute, utilisez Notepad++ qui est téléchargeable gratuitement sur Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Choisissez les langues à installer :";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB"] = "Préremplir la base de données";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB_EXPLANATION"] = "Vous pouvez choisir d'installer votre site sans y mettre de contenu par défaut, ou d'utiliser le contenu de démonstration pour préremplir votre base de données. Ce contenu vous permettra de découvrir toutes les fonctionnalités offertes par PEEL. Des catégories, des produits, des rubriques de contenu seront automatiquement ajoutés à votre site et vous pourrez les modifier, les supprimer et créer de nouveaux contenus.";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Il vous faut activer PHP >= 5.2 sur votre site : éditez le fichier .htaccess à la racine du site pour activer les lignes correspondant à votre hébergement en retirant le # en début de ligne, ou contactez votre hébergeur - Pour avoir un hébergement chez PEEL, contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Il vous faudra modifier manuellement l'encodage du site - contactez PEEL : contact@peel.fr ou 01 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Le fonctionnement sera normal hormis certains modules qui pourraient ne pas fonctionner";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOP"] = "Site e-commerce";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOWCASE"] = "Site vitrine";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_AD"] = "Site d'annonce (uniquement si le module est présent. Vous pouvez commander ce module depuis <a onclick=\"return(window.open(this.href)?false:true);\" href=\"https://www.peel.fr/divers-128/module-annonces-installation-52.html\">cette page</a>)";
 

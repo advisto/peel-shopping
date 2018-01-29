@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_ventes.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: export_ventes.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -84,7 +84,7 @@ $sqlC = "SELECT *
 	$ligne_tarif_paiement_ht = $ligne_tva_tarif_paiement = $ligne_tarif_paiement = 0;
 	if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
 		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
-			$output .= "Numéro commande\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tArticle\tQuantité\tPrix unitaire HT\tTotal HT\tTaux TVA\tTVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\r\n";
+			$output .= "Numéro commande\tDate de vente\tNom de l'acheteur\tSociété\tAdresse\tVille\tCode postal\tPays\tArticle\tQuantité\tPrix unitaire HT\tTotal HT\tTaux TVA\tTVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\r\n";
 		} elseif($mode == 'one_line_per_product') {
 			$output .= "Produit\tQuantite\r\n";
 		} elseif($mode != 'chronopost') {
@@ -92,7 +92,7 @@ $sqlC = "SELECT *
 				// $GLOBALS['site_parameters']['export_order_custom_field'] : array('nom_de_la_variable'=>'Nom du champ')
 				$output .= implode("\t", $GLOBALS['site_parameters']['export_order_custom_field']) . "\r\n";
 			} else {
-				$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tAvoir client\tNet à payer\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
+				$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tSociété\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tAvoir client\tNet à payer\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
 			}
 		}
 	} else {
@@ -114,6 +114,7 @@ $sqlC = "SELECT *
 		$date_vente = get_formatted_date($commande['o_timestamp'], 'short', 'long');
 		$date_achat = get_formatted_date($commande['a_timestamp'], 'short', 'long');
 		$nom_acheteur = StringMb::htmlspecialchars_decode($commande['nom_bill'], ENT_QUOTES);
+		$societe = StringMb::htmlspecialchars_decode(str_replace("\t","",$commande['societe_bill']), ENT_QUOTES);
 		$adresse = StringMb::htmlspecialchars_decode($commande['adresse_bill'], ENT_QUOTES);
 		$ville = StringMb::htmlspecialchars_decode($commande['ville_bill'], ENT_QUOTES);
 		$code_postal = $commande['zip_bill'];
@@ -194,7 +195,7 @@ $sqlC = "SELECT *
 				}
 				$output .= "\r\n";
 			} else {
-				$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($commande['montant_ht']) . "\t" . filtre_csv($commande['total_tva']) . "\t" . filtre_csv($commande['montant']+$commande['avoir'])  ."\t" . filtre_csv($commande['avoir']) . "\t"  . filtre_csv($commande['montant']) . "\t" .  filtre_csv($commande['cout_transport_ht']) . "\t" .  filtre_csv($commande['tva_cout_transport']) . "\t" .  filtre_csv($commande['cout_transport']) ."\t" .  filtre_csv($commande['tarif_paiement']) ."\t" .  filtre_csv($commande['tva_tarif_paiement']) . "\t" . filtre_csv($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . filtre_csv($commande['total_produit_ht']) . "\t" . filtre_csv($commande['tva_total_produit']) . "\t" . filtre_csv($commande['total_produit']) ."\r\n";
+				$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($societe) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($commande['montant_ht']) . "\t" . filtre_csv($commande['total_tva']) . "\t" . filtre_csv($commande['montant']+$commande['avoir'])  ."\t" . filtre_csv($commande['avoir']) . "\t"  . filtre_csv($commande['montant']) . "\t" .  filtre_csv($commande['cout_transport_ht']) . "\t" .  filtre_csv($commande['tva_cout_transport']) . "\t" .  filtre_csv($commande['cout_transport']) ."\t" .  filtre_csv($commande['tarif_paiement']) ."\t" .  filtre_csv($commande['tva_tarif_paiement']) . "\t" . filtre_csv($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . filtre_csv($commande['total_produit_ht']) . "\t" . filtre_csv($commande['tva_total_produit']) . "\t" . filtre_csv($commande['total_produit']) ."\r\n";
 			}
 		}
 	}

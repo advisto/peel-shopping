@@ -1,24 +1,61 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: achat_maintenant.php 55332 2017-12-01 10:44:06Z sdelaporte $
 include("../configuration.inc.php");
 
 $output = '';
 if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
 	// Test sur l'identification, il faut obligatoirement être connecté à son compte pour renseigner un code promo. Les utilisateurs 'stop' (attente revendeur) ou 'stand' (attente affiliation) ne peuvent pas se connecter à leur compte, ne peuvent donc pas passer commande et ne bénéficient donc pas des avantages liés au statut final 'reve' (revendeur confirmé) ou 'affi' (affilié confirmé). Les utilisateurs 'load' (téléchargement) ou 'newsletter' (abonné newsletter) ne peuvent pas se connecter, et donc ne peuvent pas non plus passer commande.
 	necessite_identification();
+	// Test sur les privilèges en cas où un utilisateur connecté essayerait de passer à l'étape 2 en modifiant POST de caddie_affichage.php
+	if (check_if_module_active('devis') && !a_priv('admin*')) {
+		if (!a_priv('util') && !a_priv('reve') && est_identifie()) {
+			redirect_and_die(get_url('/modules/devis/devis.php'));
+		}
+	}
 }
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
+$short_order_process = vb($_GET['short_order_process']);
+// Il faut vérifier la cohérence du panier, dans le cas où la quantité de produit a été mise à jour sans que le panier est été rafraichi.
+if (!empty($_SESSION['session_caddie']->typeId)) {
+	$_SESSION['session_caddie']->update();
+	if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && is_tnt_module_active() && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
+		$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
+		if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
+			// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
+			// Il faut afficher un message spécifique dans ce cas
+			$short_order_process = true;
+		}
+	}
+	if (empty($short_order_process)) {
+		// $short_order_process : Si on est dans un cas de figure avec un dépassement de seuil (poids ou dimension), le type de transport choisi n'est plus cohérent. Mais comme on passe en mode de process court le type choisi n'a plus d'importance, donc dans ce cas on ne veut pas passer par ce morceau de code qui vérifie la cohérence du panier.
+		$sqlType = get_tarifs_sql();
+		$resType = query($sqlType);
+		$type_array = array();
+		if (!empty($resType) && num_rows($resType) > 0) {
+			while ($Type = fetch_assoc($resType)) {
+				$type_array[] = $Type['id'];
+			}
+		}
+		if (!in_array($_SESSION['session_caddie']->typeId, $type_array)) {
+			// Suppression du mode de transport défini dans le panier, car il n'est plus en accord avec la configuration du panier
+			$_SESSION['session_caddie']->set_type('');
+			// le mode de tranport n'est plus disponible pour cette configuration de panier. On redirige l'utilisateur vers le panier
+			redirect_and_die($GLOBALS['wwwroot'] . "/achat/caddie_affichage.php");
+		}
+	}
+}
+
 if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 	$user_table_fields_names = get_table_field_names('peel_utilisateurs');
 	$order_table_fields_names = get_table_field_names('peel_commandes');
@@ -77,8 +114,17 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 				FROM peel_pays
 				WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '" AND ' . get_filter_site_cond('pays'));
 			if ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
-				if ($r_check_country_to_zone['zone'] != '-1' && $r_check_country_to_zone['zone'] != $_SESSION['session_caddie']->zoneId) {
-					// $r_check_country_to_zone['zone'] est égal à -1 lorsque le pays est associé à une zone spécifique, non prévu par le code par défaut (dans le cadre du module départements par exemple.)
+				// Code compatible si zone sous forme d'entier ou de liste (stocké en SET)
+				$zone_ok = false;
+				foreach(explode(',', $r_check_country_to_zone['zone']) as $this_zone) {
+					if ($this_zone != '-1' && $this_zone == $_SESSION['session_caddie']->zoneId) {
+						// Le pays est bien associé à la zone choisie préalablement
+						// PS : la zone est égale à -1 lorsque le pays est associé à une zone spécifique, non prévue par le code par défaut (dans le cadre du module départements par exemple.)
+						$zone_ok = true;
+					}
+				}
+				if(!$zone_ok) {
+					// Nous sommes dans le cas où la zone existe mais pas celle choisie dans l'étape précédente => ça ne va donc pas (même si l'interface ne permet normalement pas d'avoir ce pays, ici c'est une protection supplémentaire si on chercher à manipuler le POST directement)
 					$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
 				}
 			}
@@ -139,6 +185,25 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 	}
 }
 
+if (check_if_module_active('listecadeau') && empty($_SESSION['session_commande']['is_icirelais_order'])) {
+	// Si le module liste de cadeaux est actif, on va d'abord chercher si il y a des produits appartenant à une liste de cadeaux dans le panier, et récupérer l'id de l'utilisateur à qui les cadeaux vont être offert (le propriétaire de la liste).
+	// Cela permettra ensuite de vérifier le paramètre set_delivery_address dans le paramétrage de la liste de cadeaux et récupérer les bonnes valeurs pour l'adresse de livraison.
+	$list_owner_id = get_list_owner_id_in_cart();
+	if (!empty($list_owner_id) && is_array($list_owner_id) && count($list_owner_id) == 1) {
+		// Il n'y a qu'un seul propriétaire de liste concerné dans le caddie. Dans le cas contraire, si il n'y a pas de produit associé à une liste de cadeaux, ou qu'il y a plusieurs utilisateur concerné, alors on ne force pas l'adresse de livraison de l'utilisateur qui passe commande.
+		$sql = "SELECT set_delivery_address
+			FROM peel_listecadeau_to_user
+			WHERE user_id = ".intval($list_owner_id[0])."";
+		$query = query($sql);
+		if($result = fetch_assoc($query)) {
+			// On a retrouvé la configuration du propriétaire de la liste
+			if (!empty($result['set_delivery_address'])) {
+				// Le propriétaire de la liste de cadeaux souhaite que son adresse de livraison soit proposée lorsqu'un utilisateur achète un produit de sa liste
+				$set_delivery_address_owner_id = $list_owner_id[0];
+			}
+		}
+	}
+}
 // Chargement des informations d'adresse par défaut ou si changement demandé par l'utilisateur
 foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_address_id) {
 	if(!empty($address_change_type) && $address_type == $address_change_type && !empty($_POST['personal_address_'.$address_change_type])) {
@@ -157,9 +222,30 @@ foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_ad
 		continue;
 	}
 	// On va remplir l'adresse
+	if (!empty($set_delivery_address_owner_id) && $session_commande_address_id == 2) {
+		// Pour l'adrese de livraison, dans le cas où l'on souhaite utiliser l'adresse de livraison de l'utilisateur propriétaire de la liste.
+		// On va rechercher l'adresse de livraison configurée par le propriétaire de la liste.
+		$list_owner_infos = get_user_information($set_delivery_address_owner_id);
+
+		if (!empty($list_owner_infos['address_' . $address_type . '_default']) && $list_owner_infos['address_' . $address_type . '_default'] == 'original_address') {
+			// C'est l'adresse principale, dans peel_utilisateurs qui doit être utilisée. Par contre on va utiliser l'id du propriétaire de la liste.
+			$this_new_address = 'original_address';
+			$this_address_user_id = $set_delivery_address_owner_id;
+		} else {
+			$this_new_address = $list_owner_infos['address_' . $address_type . '_default'];
+		}
+	}
+
 	if($this_new_address == 'original_address') {
 		// Si l'utilisateur utilise l'adresse dans peel_utilisateur, qu'il a remplie lors de la création de son compte.
-		$where = 'id_utilisateur = "'.intval($_SESSION['session_utilisateur']['id_utilisateur']).'"';
+		if (!empty($this_address_user_id)) {
+			// On a défini un autre utilisateur pour rechercher l'adresse à utiliser
+			$user_id = $this_address_user_id;
+		} else {
+			$user_id = $_SESSION['session_utilisateur']['id_utilisateur'];
+		}
+		$where = 'id_utilisateur = "' . intval($user_id) . '"';
+		
 		$table_to_use = 'peel_utilisateurs';
 	} else {
 		// Adresse renseignée depuis la page de création d'adresse utilisateurs/adresse.php
@@ -174,7 +260,7 @@ foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_ad
 	if($result = fetch_assoc($q)) {
 		foreach($result as $key => $value) {
 			if (!empty($value)) {
-				// Si la valeur existe, on remplit la session avec ce qui vient de la base de donnée.
+				// Si la valeur existe, on remplit la session avec ce qui vient de la base de données.
 				if($key=='pays') {
 					// l'id est stockée en BDD, et c'est le nom qui est utilisé dans ce formulaire.
 					if (empty($value)) {
@@ -248,7 +334,7 @@ $frm['cgv'] = vb($_POST['cgv'], vb($_SESSION['session_commande']['cgv']));
 
 
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['achat_maintenant_page_columns_count'];
-if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['session_caddie']->zoneId) || empty($_SESSION['session_caddie']->typeId))) {
+if (empty($short_order_process) && !empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['session_caddie']->zoneId) || empty($_SESSION['session_caddie']->typeId))) {
 	define('IN_CADDIE', true);
 	$GLOBALS['DOC_TITLE'] =  $GLOBALS['STR_CADDIE'];
 	$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
@@ -262,10 +348,12 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 		define("IN_STEP1", true);
 		$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_STEP1'];
 	}
-	if (!empty($_GET['short_order_process']) || !empty($GLOBALS['site_parameters']['short_order_process']) || (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0)) {
+	if (!empty($short_order_process) || !empty($GLOBALS['site_parameters']['short_order_process']) || (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0)) {
 		if ($_SESSION['session_caddie']->count_products() > 0) {
 			// Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l'absence de paiement et de validation des CGV => Utile pour des demandes de devis
 			// on prend les informations préremplies automatiquement ci-dessus dans $frm pour mettre dans $_SESSION['session_commande'] sans être passé par POST
+			// Il n'y a pas de moyen de paiement défini dans le process de commande court.
+			$frm['payment_technical_code'] = '';
 			if (!empty($GLOBALS['site_parameters']['user_specific_field_titles'])) {
 				foreach($GLOBALS['site_parameters']['user_specific_field_titles'] as $this_field => $this_title) {
 					if ((StringMb::substr($this_field, -5) == '_bill') && !empty($utilisateur[$this_field]) && in_array($this_field, $user_table_fields_names)) {
@@ -278,6 +366,10 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			}
 			put_session_commande($frm);
 			$commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
+			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
+				// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			}
 			if (!empty($GLOBALS['site_parameters']['short_order_process_if_total_cart_amount_is_empty']) && $_SESSION['session_caddie']->total == 0) {
 				// Si le panier est égal à 0, on valide automatiquement la commande puisqu'il n'y a pas de paiement.
 				update_order_payment_status($commandeid, true);
@@ -286,7 +378,7 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['s
 			// Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 			$_SESSION['session_caddie']->init();
 			$output .= affiche_contenu_html('short_order_process', true);
-			$output .= get_order_step3($commandeid);
+			$output .= get_order_step3($commandeid, empty($GLOBALS['site_parameters']['order_process_short_payment_method_disable']));
 		} else {
 			redirect_and_die(get_url('/'));
 		}

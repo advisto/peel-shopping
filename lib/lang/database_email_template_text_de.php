@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2012 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_de.php 53198 2017-03-20 11:07:12Z sdelaporte $
+// $Id: database_email_template_text_de.php 55746 2018-01-15 17:18:01Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -28,6 +28,7 @@ $peel_email_template["text"] = array(
   "signature_marketing" => "",
   "signature_direction" => "",
   "signature_externe" => "",
+  "signature_support" => "",
   "download_product" => "Guten Tag,
 
 Ihre Bestellung [ORDER_ID] ist bestätigt. Sie können sie über folgenden Link laden:
@@ -335,7 +336,7 @@ hat sich folgender Nutzer angemeldet:
 [link=\"[ADMIN_URL]\"]Verwalten Sie das Konto dieses Nutzers[/link]
 ",
   "warn_admin_reve_subscription" => "",
-  "email_retour_virement" => "Guten Tag,
+"email_retour_virement" => "Guten Tag,
 
 Ihre Rücksendung mit der Nummer [RETURN_ID] ist in bester Ordnung bei uns eingegangen.
 Gemäß Ihrer Auswahl wird Ihnen umgehend der Betrag von [MONTANT] überwiesen.",
@@ -360,10 +361,17 @@ RÜCKSENDENUMMER [RETURN_ID].
 
 Wir erinnern Sie daran, dass die zurückzusendenden Artikel in gutem Zustand und in ihrer Originalverpackung sein müssen.
 Nach Eingang Ihrer Artikel werden wir die entsprechende Erstattung validieren.",
+  "cron_order_payment_failure_alerts" => "",
+  "cron_order_not_paid_alerts" => "",
+  "cron_update_contact_info" => "",
+"inscription_newsletter" => "",
   "send_mail_for_account_creation_stop" => "",
   "send_mail_for_account_creation_reve" => "",
   "send_mail_for_account_creation_stand" => "",
   "send_mail_for_account_creation_affi" => "",
-  "validating_registration_by_admin" => ""
+  "validating_registration_by_admin" => "",
+  "confirm_newsletter_registration" => "",
+  "user_double_optin_registration" => ""
+
 );
 

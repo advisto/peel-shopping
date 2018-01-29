@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55928 2018-01-26 17:31:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -268,7 +268,7 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 	$results_array = $Links->Query();
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/commercialeAdmin_form_contact_user.tpl');
-	$tpl->assign('action', get_current_url(false));
+	$tpl->assign('action', get_current_url(true));
 	$tpl->assign('id_user', intval(vn($id_user)));
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$tpl->assign('are_results', !empty($results_array));
@@ -337,7 +337,7 @@ function affiche_form_contact_user($id_user, $return_mode = false)
 function create_or_update_contact_planified($frm)
 {
 	// Si $frm['form_edit_contact_planified_id'] existe, cela signifie que nous sommes en mode mise à jour
-
+	$output = '';
 	if (!empty($frm['form_edit_contact_planified_id'])) {
 		if(empty($frm['form_edit_contact_planified_date'])) {
 			$frm['form_edit_contact_planified_date'] = date('d-m-Y', time());
@@ -348,7 +348,7 @@ function create_or_update_contact_planified($frm)
 			reason = "' . nohtml_real_escape_string(vb($frm['form_edit_contact_planified_reason'])) . '",
 			comments = "' . nohtml_real_escape_string(vb($frm['form_edit_contact_planified_comment'])) . '"
 			WHERE id = "' . intval($frm['form_edit_contact_planified_id']) . '"');
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_UPDATED_OK'], intval(vn($_GET['id_contact_planified'])))))->fetch();
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_UPDATED_OK'], intval(vn($_GET['id_contact_planified'])))))->fetch();
 	} elseif ($frm['form_edit_contact_user_id']) {
 		if(empty($frm['form_contact_planified_date'])) {
 			$frm['form_contact_planified_date'] = date('d-m-Y', time());
@@ -362,8 +362,9 @@ function create_or_update_contact_planified($frm)
 				"' . nohtml_real_escape_string(vb($frm['form_contact_planified_reason'])) . '",
 				"' . nohtml_real_escape_string(vb($frm['form_contact_planified_comment']))
 			 . '")');
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_CREATED_OK']))->fetch();
+		$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_CREATED_OK']))->fetch();
 	}
+	return $output;
 }
 
 /**
@@ -374,10 +375,12 @@ function create_or_update_contact_planified($frm)
  */
 function delete_contact_planified($form_edit_contact_planified_id)
 {
+	$output = '';
 	if (!empty($form_edit_contact_planified_id)) {
 		query('DELETE FROM peel_admins_contacts_planified 
 			WHERE id  = "' . intval(vn($form_edit_contact_planified_id)) . '"');
-		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_DELETED_OK']))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMERCIALE_MSG_CONTACT_PLANIFIED_DELETED_OK']))->fetch();
 	}
+	return $output;
 }
 

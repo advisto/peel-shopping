@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: enregistrement.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
@@ -38,6 +38,35 @@ $frm = $_POST;
 if(isset($frm['email'])) {
 	$frm['email'] = trim($frm['email']);
 }
+
+if (!empty($_GET['mode']) && $_GET['mode'] == 'register_validation' && !empty($_GET['email']) && !empty($_GET['hash'])) {
+	$sql = "SELECT * 
+		FROM peel_utilisateurs
+		WHERE email = '" . nohtml_real_escape_string($_GET['email'])."'";
+	$query = query($sql);
+	if($result = fetch_assoc($query)) {
+		if ($_GET['hash'] == get_registration_validation_hash($result)) {
+			// L'utilisateur existe, et on a confirmé la demande en vérifiant le hash
+			// => On active le compte. Si l'utilisateur est inscrit à la newlsetter et/ou aux offres commerciales, on met à jour ces informations également
+			$set_sql = "etat = 1";
+			if ($result['newsletter'] == 1) {
+				$set_sql .= ', newsletter_validation_date="' . get_mysql_date_from_user_input(time()) . '"';
+			}
+			if ($result['commercial'] == 1) {
+				$set_sql .= ', commercial_validation_date="' . get_mysql_date_from_user_input(time()) . '"';
+			}
+
+			query('UPDATE peel_utilisateurs 
+				SET '.$set_sql.'
+				WHERE id_utilisateur = ' . intval($result['id_utilisateur']));
+			// => on connecte l'utilisateur
+			user_login_now($_GET['email'], '', false);
+			$_SESSION['session_display_popup']['message_text'] = $GLOBALS['STR_ACCOUNT_ACTIVATED'];
+			// puis on redirige vers le page de compte
+			redirect_and_die(get_url('compte'));
+		}
+	}
+}
 $form_error_object = new FormError();
 // Dans un premier temps on stocke dans $mandatory_fields les champs obligatoires indiqués dans $GLOBALS['site_parameters']['user_mandatory_fields'].
 $mandatory_fields = array();
@@ -48,6 +77,9 @@ if (!empty($_POST['user_type'])) {
 	// Chargement des champs obligatoires pour un profil d'utilisateur
 	foreach(vb($GLOBALS['site_parameters']['user_'.$_POST['user_type'].'_mandatory_fields'], array()) as $key => $value) {
 		$mandatory_fields[$key] = $value;
+	}
+	if (!empty($mandatory_fields['naissance_company']) && !empty($mandatory_fields['naissance'])) {
+		unset($mandatory_fields['naissance']);
 	}
 }
 // Dans un second temps on ajoute à cette variable les champs obligatoires qui doivent être vérifiés dans tous les cas, ou si des modules ou variables de configurations sont présents.
@@ -62,6 +94,7 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 if(!empty($frm['user_type']) && $frm['user_type'] == 'company') {
 	$mandatory_fields['societe'] = 'STR_ERR_SOCIETY';
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
+
 }
 if(check_if_module_active('annonces')) {
 	if(vb($GLOBALS['site_parameters']['type_affichage_user_favorite_id_categories']) == 'checkbox') {
@@ -92,7 +125,12 @@ if (check_if_module_active('socolissimo')) {
 if (!empty($frm)) {
 	// D'abord on génère une erreur pour tous les champs obligatoires qui sont vides
 	$form_error_object->valide_form($frm, $mandatory_fields, array('mot_passe' => vn($GLOBALS['site_parameters']['password_length_required'], 8)), array('mot_passe' => 'check_password_format', 'portable' => 'phoneOk'));
-
+	if (!empty($frm['url'])) {
+		$is_url = (StringMb::strpos($frm['url'],'://') !=false );
+		if (empty($is_url)) {
+			$form_error_object->add('url', $GLOBALS['STR_ERR_URL']);
+		}		
+	}
 	// On traite ensuite les champs avec des règles plus compliquées
 	if (!empty($frm['siret']) && vb($frm['pays']) == 1 && !preg_match("#([0-9]){9,14}#", str_replace(array(' ', '.'), '', $frm['siret']))) {
 		// Si nous sommes en France, nous avons renseigné le numéro $GLOBALS['STR_SIREN'], cela nécessite un contrôle de la valeur rentrée par l'utilisateur
@@ -154,6 +192,12 @@ if (!empty($frm)) {
 	}
 	if (!$form_error_object->count()) {
 		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+		if (!empty($frm['dream_societe_kbis'])) {
+			$frm['dream_societe_kbis'] = upload('dream_societe_kbis', false, 'dream_societe_kbis', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+		}
+		if (!empty($frm['naissance_company'])) {
+			$frm['naissance'] = $frm['naissance_company'];
+		}
 		// Le formulaire envoyé est apparemment OK, on le traite
 		if (check_if_module_active('captcha')) {
 			// Code OK on peut effacer le code
@@ -163,17 +207,57 @@ if (!empty($frm)) {
 			// Protection du formulaire contre les robots
 			die();
 		}
-		insere_utilisateur($frm, false, !empty($GLOBALS['site_parameters']['user_register_send_password_by_email']), true);
-		$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
+		if (empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
+			// Par défaut le compte n'est pas validé. L'utilisateur va recevoir un email (user_double_optin_registration) qui lui demandera d'activer son compte en cliquant sur un lien
+			$frm['etat'] = 0;
+		}
+		// Enregistrement de l'utilisateur dans la base de données.
+		$id_utilisateur = insere_utilisateur($frm, false, !empty($GLOBALS['site_parameters']['user_register_send_password_by_email']), true);
+		if (empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
+			// on récupère les informations sur l'utilisateur qui vient d'être enregistré en BDD pour pouvoir créer le hash qui sécurisera la validation du compte
+			$sql = "SELECT * 
+				FROM peel_utilisateurs
+				WHERE id_utilisateur = '" . nohtml_real_escape_string($id_utilisateur)."'";
+			$query = query($sql);
+			$result = fetch_assoc($query);
+
+			// On créer un tableau de correspondance entre les intitulés des champs et leurs noms en BDD
+			$field_name_mapping = array('email'=>$GLOBALS['STR_EMAIL'], 'pseudo'=>$GLOBALS['STR_PSEUDO'], 'civilite'=>$GLOBALS['STR_GENDER'], 'nom_famille'=>$GLOBALS['STR_NAME'], 'prenom'=>$GLOBALS['STR_FIRST_NAME'], 'societe'=>$GLOBALS['STR_SOCIETE'], 'siret'=>$GLOBALS['STR_COMPANY_IDENTIFICATION'], 'intracom_for_billing'=>$GLOBALS['STR_INTRACOM_FORM'], 'url'=>$GLOBALS['STR_WEBSITE'], 'type'=>$GLOBALS['STR_YOU_ARE'], 'activity'=>$GLOBALS['STR_ACTIVITY'], 'fonction'=>$GLOBALS['STR_FONCTION'], 'naissance'=>$GLOBALS['STR_NAISSANCE'], 'telephone'=>$GLOBALS['STR_TELEPHONE'], 'portable'=>$GLOBALS['STR_PORTABLE'], 'fax'=>$GLOBALS['STR_FAX'], 'adresse'=>$GLOBALS['STR_ADDRESS'], 'code_postal'=>$GLOBALS['STR_ZIP'], 'ville'=>$GLOBALS['STR_TOWN'], 'pays'=>$GLOBALS['STR_COUNTRY'], 'id_cat_1'=>$GLOBALS['STR_FIRST_CHOICE'], 'id_cat_2'=>$GLOBALS['STR_SECOND_CHOICE'], 'id_cat_3'=>$GLOBALS['STR_THIRD_CHOICE'], 'origin'=>$GLOBALS['STR_USER_ORIGIN'], 'logo'=>$GLOBALS['STR_LOGO'], 'newsletter'=>$GLOBALS['STR_NEWSLETTER_YES'], 'commercial'=>$GLOBALS['STR_COMMERCIAL_YES']); 
+
+			// On créer une variable qui contiendra les informations sur le compte à valider et qui servira dans l'email de validation
+			$custom_template_tags['FIELDS'] = '';
+
+			foreach ($field_name_mapping as $field_name => $value) {
+				if (!empty($frm[$field_name]) && $frm[$field_name] != "0000-00-00") {
+					if ($field_name == 'naissance') {
+						$frm[$field_name] = get_formatted_date($frm[$field_name]);	
+					} elseif ($field_name == 'origin') {
+						$frm[$field_name] = $GLOBALS['STR_USER_ORIGIN_OPTIONS_' . $frm[$field_name]];
+					} elseif ($field_name == 'pays') {
+						$frm[$field_name] = get_country_name($frm[$field_name]);
+					} elseif (($field_name == 'commercial' || $field_name == 'newsletter') && $frm[$field_name] == 1) {
+						$frm[$field_name] = $GLOBALS['STR_YES'];
+					}
+					$custom_template_tags['FIELDS'] .= $value.': '.$frm[$field_name].'<br />';
+				}
+			}
+			// Dans le lien on ajoute un hash pour s'assurer que c'est bien l'utilisateur propriétaire du compte qui fait la validation.
+			$custom_template_tags['VALIDATION_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/enregistrement.php?mode=register_validation&email='.$frm['email'].'&hash='.get_registration_validation_hash($result);
+			// Envoi de l'email à l'utilisateur l'invitant à valider l'ouverture de son compte. Cet email reprend les informations du formulaire, notamment l'inscription à la newsletter et aux offres commerciales.
+			send_email($frm['email'],'','','user_double_optin_registration', $custom_template_tags);
+		} else {
+			// Pas de validation de compte, donc on connecte l'utilisateur à son compte immédiatement après l'enregistrement
+			$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
+		}
 
 		if(!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
 			$output = Devis::create_devis_order($frm);
 		} else {
 			$output = get_user_register_success($frm);
 		}
-		if (!empty($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][$utilisateur['priv']])) {
+		if (!empty($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][vb($utilisateur['priv'])])) {
 			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
-			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][$utilisateur['priv']]);
+			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_register_by_priv'][vb($utilisateur['priv'])]);
 		} elseif ($_SESSION['session_caddie']->count_products() > 0) {
 			if (empty($_SESSION['session_caddie']->zoneId) || empty($_SESSION['session_caddie']->typeId)) {
 				include($GLOBALS['repertoire_modele'] . "/haut.php");

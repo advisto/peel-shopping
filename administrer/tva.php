@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: tva.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: tva.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -99,6 +99,7 @@ function affiche_formulaire_ajout_tva(&$frm)
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm['titre_bouton'] = $GLOBALS['STR_ADMIN_ADD'];
+	$frm['site_country'] =  vb($GLOBALS['site_parameters']['site_country_allowed_array'], array());
 
 	affiche_formulaire_tva($frm);
 }
@@ -118,7 +119,11 @@ function affiche_formulaire_modif_tva(&$id, &$frm)
 		$qid = query("SELECT *
 			FROM peel_tva
 			WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('tva', null, true));
-		$frm = fetch_assoc($qid);
+		if ($frm = fetch_assoc($qid)) {
+			$frm['site_country'] = explode(',', vb($frm['site_country']));
+		} else {
+			$frm = array();
+		}
 	}
 	if (!empty($frm)) {
 		$frm['nouveau_mode'] = "maj";
@@ -143,6 +148,7 @@ function affiche_formulaire_tva($frm)
 		$id = "";
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_tva.tpl');
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($id)));
@@ -154,6 +160,10 @@ function affiche_formulaire_tva($frm)
 	$tpl->assign('STR_ADMIN_TVA_FORM_TITLE', $GLOBALS['STR_ADMIN_TVA_FORM_TITLE']);
 	$tpl->assign('STR_ADMIN_VAT_PERCENTAGE', $GLOBALS['STR_ADMIN_VAT_PERCENTAGE']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	echo $tpl->fetch();
 }
 				
@@ -183,8 +193,15 @@ function insere_tva($frm)
 		FROM peel_tva
 		WHERE tva = '" . floatval($frm['tva']) . "' AND " . get_filter_site_cond('tva', null, true));
 	if (!fetch_assoc($qid)) {
-		$qid = query("INSERT INTO peel_tva (tva, site_id)
-			VALUES ('" . floatval($frm['tva']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "')");
+		$sql = "INSERT INTO peel_tva 
+			SET tva='" . floatval($frm['tva']) . "'
+				, site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+			$sql .= "
+				, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+			";
+		}
+		query($sql);
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_MSG_CREATED_OK']))->fetch();
 	} else {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_ERR_ALREADY_EXISTS']))->fetch();
@@ -201,9 +218,17 @@ function insere_tva($frm)
 function maj_tva($id, $frm)
 {
 	$frm['tva'] = get_float_from_user_input($frm['tva']);
-	query("UPDATE peel_tva
-		SET tva='" . floatval($frm['tva']) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-		WHERE id='" . intval($frm['id']) . "'  AND " . get_filter_site_cond('tva', null, true));
+	$sql = "UPDATE peel_tva
+		SET tva='" . floatval($frm['tva']) . "'
+			, site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$sql .= "
+			, site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
+		";
+	}
+	$sql .= "
+		WHERE id='" . intval($frm['id']) . "'  AND " . get_filter_site_cond('tva', null, true);
+	query($sql);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_TVA_MSG_UPDATED_OK']))->fetch();
 }
 
@@ -219,19 +244,29 @@ function affiche_liste_tva()
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$query = query("SELECT id, tva, site_id
+	$sql = "SELECT id, tva, site_id". (!empty($GLOBALS['site_parameters']['site_country_allowed_array'])?", site_country ":''). "
 		FROM peel_tva
 		WHERE " . get_filter_site_cond('tva', null, true) ." 
-		ORDER BY id ASC");
-	if (!(num_rows($query) == 0)) {
+		ORDER BY id ASC";
+	$query = query($sql);
+	if (num_rows($query)) {
 		$tpl_results = array();
 		$i = 0;
 		while ($ligne = fetch_assoc($query)) {
+			$site_country_array = array();
+			if (!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+				if(StringMb::strlen($ligne['site_country'])>0) {
+					foreach(explode(',', $ligne['site_country']) as $this_id) {
+						$site_country_array[] = ($this_id == 0? $GLOBALS['STR_OTHER']:get_country_name($this_id));
+					}
+				}
+			}
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'modif_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
 				'tva' => $ligne['tva'],
-				'site_name' => get_site_name($ligne['site_id'])
+				'site_name' => get_site_name($ligne['site_id']),
+				'site_country' => implode(', ', $site_country_array)
 				);
 			$i++;
 		}
@@ -249,6 +284,9 @@ function affiche_liste_tva()
 	$tpl->assign('STR_ADMIN_TVA_UPDATE', $GLOBALS['STR_ADMIN_TVA_UPDATE']);
 	$tpl->assign('STR_ADMIN_TVA_NOTHING_FOUND', $GLOBALS['STR_ADMIN_TVA_NOTHING_FOUND']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
+	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
+	}
 	echo $tpl->fetch();
 }
 

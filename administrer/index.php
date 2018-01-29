@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 53596 2017-04-14 09:38:09Z sdelaporte $
+// $Id: index.php 55371 2017-12-04 14:43:39Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -72,13 +72,19 @@ $tpl->assign('site_id_select_options', get_site_id_select_options(vb($_SESSION['
 $tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	
 if (check_if_module_active('phone_cti')) {
-	$block_content = array();
-	$block_content['title'] = 'Liste des Appels';
-	$block_content['logo'] = '';
-	$block_content['link'] = $GLOBALS['wwwroot_in_admin'] . '/modules/phone_cti/administrer/list_calls.php';
-	$block_content['description1'] = getKeyyoCalls(true);
-	$block_content['description2'] = '';
-	$tpl->assign('KeyyoCalls', backoffice_home_block($block_content, 'red', true));
+	// Il y a deux types de sites avec le module phone_cti :
+	// - les sites qui historisent les appels (dans la table peel_calls) 
+	// - les sites avec la seule fonctionnalité de mise en forme des numéros de téléphone sur les fiches utilisateurs. Ces sites n'ont pas la table peel_calls, mais le module phone_cti est quand même actif.
+	$listTables = listTables();
+	if (in_array('peel_calls', $listTables)) {
+		$block_content = array();
+		$block_content['title'] = 'Liste des Appels';
+		$block_content['logo'] = '';
+		$block_content['link'] = $GLOBALS['wwwroot_in_admin'] . '/modules/phone_cti/administrer/list_calls.php';
+		$block_content['description1'] = getKeyyoCalls(true);
+		$block_content['description2'] = '';
+		$tpl->assign('KeyyoCalls', backoffice_home_block($block_content, 'red', true));
+	}
 }
 $delivery = '';
 if(a_priv('admin_sales', true)) {
@@ -100,7 +106,11 @@ $home_modules['peel'] = backoffice_home_block('peel', 'black', true);
 // On transmet les blocs par défaut en paramètre du hook, pour pouvoir les retirer ou en rajouter d'autres, ou même changer l'ordre dans le tableau
 
 $home_modules = call_module_hook('get_admin_home_block', $home_modules, 'array', true);
-
+if (!empty($GLOBALS['site_parameters']['admin_home_block_display_disable'])) {
+	foreach ($GLOBALS['site_parameters']['admin_home_block_display_disable'] as $this_home_block) {
+		unset($home_modules[$this_home_block]);
+	}
+}
 if(vb($GLOBALS['site_parameters']['peel_database_version']) != PEEL_VERSION) {
 	$tpl->assign('version_update_link', $GLOBALS['administrer_url'] . '/update.php');
 	$tpl->assign('STR_ADMIN_UPDATE_VERSION_INVITE', $GLOBALS['STR_ADMIN_UPDATE_VERSION_INVITE']);
@@ -140,9 +150,9 @@ function backoffice_home_block($block_content, $title_bg_color, $return_mode = f
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_backoffice_home_block.tpl');
 	$tpl->assign('bg_src', $GLOBALS['repertoire_images'] .'/'. get_block_header_image(StringMb::strtolower($title_bg_color)));
 	$tpl->assign('title_bg_color', $title_bg_color);
-	$tpl->assign('link', $block_content['link']);
-	$tpl->assign('title', $block_content['title']);
-	$tpl->assign('logo', $block_content['logo']);
+	$tpl->assign('link', vb($block_content['link']));
+	$tpl->assign('title', vb($block_content['title']));
+	$tpl->assign('logo', vb($block_content['logo']));
 	$tpl->assign('description1', vb($block_content['description1']));
 	$tpl->assign('description2', vb($block_content['description2']));
 
@@ -260,6 +270,9 @@ function get_home_block_content($content_code)
 			break;
 
 		case 'products':
+			if(!empty($GLOBALS['site_parameters']['admin_home_skip_product_categories_stats'])) {
+				break;
+			}
 			$block_content['title'] = $GLOBALS['STR_ADMIN_INDEX_PRODUCTS_REPORT'];
 			$block_content['logo'] = $GLOBALS['repertoire_images'] . '/products.jpg';
 			$block_content['link'] = $GLOBALS['administrer_url'] . '/produits.php';

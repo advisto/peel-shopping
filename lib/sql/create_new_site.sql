@@ -1,15 +1,15 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 53200 2017-03-20 11:19:46Z sdelaporte $
+# $Id: create_new_site.sql 55931 2018-01-29 08:37:36Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -47,6 +47,10 @@ INSERT INTO `peel_banniere` (`description`, `image`, `date_debut`, `date_fin`, `
 --
 
 INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES
+('logo_es', 'sites.php', 'string', 'modeles/peel9/images/logo_Made_with_PEEL.png', '', NOW(), '', 1, "[SITE_ID]"),
+('logo_fr', 'sites.php', 'string', 'modeles/peel9/images/logo_Made_with_PEEL.png', '', NOW(), '', 1, "[SITE_ID]"),
+('logo_en', 'sites.php', 'string', 'modeles/peel9/images/logo_Made_with_PEEL.png', '', NOW(), '', 1, "[SITE_ID]"),
+('display_footer_full_custom_html', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('compatibility_mode_with_htmlentities_encoding_content', 'core', 'boolean', 'false', '', NOW(), 'Si true : permet de décoder les données en BDD encodées par des versions de PEEL < 5.7.  Mettre à false pour une nouveau site, et à true si des données ont été migrées', 1, "[SITE_ID]"),
 ('post_variables_with_html_allowed_if_not_admin', 'core', 'array', '"description"', '', NOW(), 'Protection générale supplémentaire en complément de nohtml_real_escape_string', 1, "[SITE_ID]"),
 ('order_article_order_by', 'core', 'string', 'id', '', NOW(), 'Spécifie l''ordre des produits dans une commande, s''applique sur l''ensemble du site', 1, "[SITE_ID]"),
@@ -76,7 +80,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('avoir', 'core', 'integer', '10', '', NOW(), '', 1, "[SITE_ID]"),
 ('commission_affilie', 'core', 'integer', '0', '', NOW(), '', 1, "[SITE_ID]"),
 ('css', 'core', 'string', 'screen.css', '', NOW(), 'List of css file names inside /modeles/.../css/ separated by a coma', 1, "[SITE_ID]"),
-('template_directory', 'core', 'string', 'peel7', '', NOW(), '', 1, "[SITE_ID]"),
+('template_directory', 'core', 'string', 'peel9', '', NOW(), '', 1, "[SITE_ID]"),
 ('template_multipage', 'core', 'string', 'default_1', '', NOW(), '', 1, "[SITE_ID]"),
 ('email_paypal', 'core', 'string', '', '', NOW(), '', 1, "[SITE_ID]"),
 ('email_commande', 'core', 'string', '', '', NOW(), '', 1, "[SITE_ID]"),
@@ -132,10 +136,10 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('module_rollover', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('type_rollover', 'core', 'integer', '2', '', NOW(), '', 1, "[SITE_ID]"),
 ('logo_affiliation', 'core', 'string', '', '', NOW(), '', 1, "[SITE_ID]"),
-('small_width', 'core', 'integer', '160', '', NOW(), '', 1, "[SITE_ID]"),
-('small_height', 'core', 'integer', '160', '', NOW(), '', 1, "[SITE_ID]"),
-('medium_width', 'core', 'integer', '300', '', NOW(), '', 1, "[SITE_ID]"),
-('medium_height', 'core', 'integer', '300', '', NOW(), '', 1, "[SITE_ID]"),
+('small_width', 'core', 'integer', '263', '', NOW(), '', 1, "[SITE_ID]"),
+('small_height', 'core', 'integer', '172', '', NOW(), '', 1, "[SITE_ID]"),
+('medium_width', 'core', 'integer', '800', '', NOW(), '', 1, "[SITE_ID]"),
+('medium_height', 'core', 'integer', '800', '', NOW(), '', 1, "[SITE_ID]"),
 ('mode_transport', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('module_url_rewriting', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('display_prices_with_taxes', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
@@ -227,10 +231,10 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('minify_js', 'core', 'boolean', 'true', '', NOW(), 'Concatenation automatique des fichiers Javascript pour plus de rapidité du site - ATTENTION : en cas de modification des fichiers Javascript, vous devez cliquer sur le bouton de mise-à-jour "CSS & Javascript" dans le menu "Configuration" > "Nettoyage des dossiers", ou incrémenter manuellement la variable "minify_id_increment", ou supprimer les fichiers de cache JS dans le dossier de cache // Automatic merge of Javascript files in order to speed up pages loading - NOTICE : after any Javascript file modification, you must click on the "CSS & Javascript" update button on "Site Management" > "Cleaning File", or manually increment the "minify_id_increment" variable, or manually delete in the cache folder the Javascript files which will be automatically regenerated', 1, "[SITE_ID]"),
 ('product_categories_depth_in_menu', 'core', 'integer', '1', '', NOW(), 'Profondeur du menu de catégories de produits. NB : Seules les catégories de produits avec position>0 s''afficheront, ce qui permet d''en exclure du menu en les mettant à position=0', 1, "[SITE_ID]"),
 ('content_categories_depth_in_menu', 'core', 'integer', '1', '', NOW(), 'Profondeur du menu de rubriques de contenu. NB : Seules les rubriques de contenu avec position>0 s''afficheront, ce qui permet d''en exclure du menu en les mettant à position=0', 1, "[SITE_ID]"),
-('main_menu_items_if_available', 'core', 'array', '"home", "cat_*", "rub_*", "annonces", "vitrine", "other"', '', NOW(), 'Liste à définir dans l''ordre d''affichage parmi : "home", "catalog", "content", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "promotions", "admin", "cat_*", "rub_*", "art_*", "contact_us", "faq", "brand"', 1, "[SITE_ID]"),
+('main_menu_items_if_available', 'core', 'array', '"home", "cat_*", "rub_*", "annonces", "vitrine", "other"', '', NOW(), 'Liste à définir dans l''ordre d''affichage parmi : "home", "catalog", "content", "news", "promotions", "annonces", "vitrine", "check", "account", "contact", "promotions", "admin", "cat_*", "rub_*", "art_*", "contact_form", "access_plan", "contact_us", "faq", "flash", "brand", "reseller"', 1, "[SITE_ID]"),
 ('template_engine', 'core', 'string', 'smarty', '', NOW(), 'Par défaut : smarty - Existe aussi en version de test : twig', 1, "[SITE_ID]"),
 ('catalog_products_columns_default', 'core', 'integer', '3', '', NOW(), '', 1, "[SITE_ID]"),
-('associated_products_columns_default', 'core', 'integer', '3', '', NOW(), '', 1, "[SITE_ID]"),
+('associated_products_columns_default', 'core', 'integer', '4', '', NOW(), '', 1, "[SITE_ID]"),
 ('associated_products_display_mode', 'core', 'string', 'column', '', NOW(), '', 1, "[SITE_ID]"),
 ('show_on_estimate_text', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('show_add_to_cart_on_free_products', 'core', 'boolean', 'false', '', NOW(), '', 1, "[SITE_ID]"),
@@ -262,7 +266,8 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('display_nb_vote_graphic_view', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('display_content_category_diaporama', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('subcategorie_nb_column', 'core', 'integer', '4', '', NOW(), '', 1, "[SITE_ID]"),
-('product_category_pages_nb_column', 'core', 'integer', '3', '', NOW(), '', 1, "[SITE_ID]"),
+('product_category_pages_nb_column', 'core', 'integer', '4', '', NOW(), '', 1, "[SITE_ID]"),
+('search_pages_nb_column', 'core', 'integer', '4', '', NOW(), '', 1, "[SITE_ID]"),
 ('display_share_tools_on_product_pages', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('prices_precision', 'core', 'integer', '2', '', NOW(), 'Nombre de décimales pour l''affichage des prix / Decimal count for prices display', 1, "[SITE_ID]"),
 ('short_order_process', 'core', 'boolean', 'false', '', NOW(), 'Fin du process de commande, si le paramètre short_order_process est actif. Ce paramètre implique l''absence de paiement et de validation des CGV => Utile pour des demandes de devis', 1, "[SITE_ID]"),
@@ -302,7 +307,8 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('display_recommanded_product_on_cart_page', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_register_form', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_affiche_compte', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
-('scroll_to_top', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]");
+('scroll_to_top', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
+('anim_loading_page', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]");
 
 -- --------------------------------------------------------
 
@@ -381,16 +387,26 @@ INSERT INTO `peel_ecotaxes` (`code`, `prix_ht`, `prix_ttc`, `site_id`) VALUES
 
 INSERT INTO peel_html (`lang`, `contenu_html`, `etat`, `titre`, `o_timestamp`, `a_timestamp`, `emplacement`, `site_id`) VALUES
 ('fr', 'Afin de vous proposer le meilleur service, [SITE] utilise des cookies. En naviguant sur le site, vous acceptez leur utilisation.', 0, 'En-tête du site', NOW(), NOW(), 'header', "[SITE_ID]"),
-('fr', '<p>Bas de page du site personnalisable dans lequel on peut insérer des liens vers les partenaires</p>', 1, 'Bas de page du site', NOW(), NOW(), 'footer', "[SITE_ID]"),
-('fr', '<p>Contenu personnalisable dans lequel on peut insérer des images, du texte HTML et des bannières publicitaires</p>', 1, 'Contenu d''accueil du site', NOW(), NOW(), 'home', "[SITE_ID]"),
-('fr', '<p>Interstitiel de publicité</p>', 0, 'Publicité', NOW(), NOW(), 'interstitiel', "[SITE_ID]"),
-('fr', '<p>Introduction personnalisable</p>', 0, 'Devenir revendeur', NOW(), NOW(), 'devenir_revendeur', "[SITE_ID]"),
 ('en', 'In order to offer you the best service, [SITE] uses cookies. By navigating on this website, you accept their use.', 0, 'En-tête du site', NOW(), NOW(), 'header', "[SITE_ID]"),
 ('fr','<h1>La page demandée n''est pas disponible</h1>', 1, 'Page d''erreur 404', NOW(), NOW(), 'error404', "[SITE_ID]"),
 ('en','<h1>This page is not found</h1>', 1, 'Error 404 page content', NOW(), NOW(), 'error404', "[SITE_ID]"),
-('fr','<p class="center">Bas de page du site personnalisable dans lequel on peut insérer des liens (footer_link)</p>', 0, 'Liens du footer', NOW(), NOW(), 'footer_link', "[SITE_ID]"),
 ('fr','Merci de votre confiance, votre commande a été enregistrée avec succès.', 1, 'Fin du process de command court', NOW(), NOW(), 'end_process_order', "[SITE_ID]"),
-('en','Thank you for your order. It has been successful.', 1, 'End of short order process', NOW(), NOW(), 'end_process_order', "[SITE_ID]");
+('en','Thank you for your order. It has been successful.', 1, 'End of short order process', NOW(), NOW(), 'end_process_order', "[SITE_ID]"),
+('fr', '<p>Interstitiel de publicité</p>', 0, 'Publicité', NOW(), NOW(), 'interstitiel', "[SITE_ID]"),
+('en', '<p>Interstitial advertising</p>', 0, 'Advertising', NOW(), NOW(), 'interstitiel', "[SITE_ID]"),
+('fr', '', 1, 'Bas de page du site', NOW(), NOW(), 'footer', "[SITE_ID]"),
+('en', '', 1, 'Bottom of page', NOW(), NOW(), 'footer', "[SITE_ID]"),
+('fr', '', 1, 'Contenu d''accueil du site', NOW(), NOW(), 'home', "[SITE_ID]"),
+('en', '', 1, 'Home site content', NOW(), NOW(), 'home', "[SITE_ID]"),
+('fr','', 0, 'Liens du footer', NOW(), NOW(), 'footer_link', "[SITE_ID]"),
+('en','', 0, 'Footer link', NOW(), NOW(), 'footer_link', "[SITE_ID]"),
+('fr', '', 0, 'Devenir revendeur', NOW(), NOW(), 'devenir_revendeur', "[SITE_ID]"),
+('en', '', 0, 'Become a reseller', NOW(), NOW(), 'devenir_revendeur', "[SITE_ID]"),
+('fr', '', 0, 'Milieu accueil du site', NOW(), NOW(), 'home_middle', "[SITE_ID]"),
+('en', '', 0, 'Middle home page', NOW(), NOW(), 'home_middle', "[SITE_ID]");
+
+
+
 
 -- --------------------------------------------------------
 

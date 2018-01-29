@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bdd.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: bdd.php 55858 2018-01-22 17:04:25Z sdelaporte $
 define('IN_INSTALLATION', 2);
 include("../configuration.inc.php");
 
@@ -54,6 +54,9 @@ $tpl->assign('email_webmaster_value', (!empty($_SESSION['session_install_email_w
 $tpl->assign('serveur_value', (!empty($_SESSION['session_install_serveur'])?$_SESSION['session_install_serveur']:'localhost'));
 $tpl->assign('utilisateur_value', (!empty($_SESSION['session_install_utilisateur'])?$_SESSION['session_install_utilisateur']:''));
 $tpl->assign('motdepasse_value', (!empty($_SESSION['session_install_motdepasse'])?$_SESSION['session_install_motdepasse']:''));
+$tpl->assign('website_type_value', (!empty($_SESSION['session_install_website_type'])?$_SESSION['session_install_website_type']:''));
+$tpl->assign('fill_db', (!empty($_SESSION['session_install_fill_db'])?$_SESSION['session_install_fill_db']:''));
+$tpl->assign('ad_site_disable', !file_exists($GLOBALS['dirroot'].'/modules/annonces/fonctions.php'));
 $tpl->assign('select_languages', $GLOBALS['select_languages']);
 $tpl->assign('install_langs_value', (!empty($_SESSION['session_install_langs'])?$_SESSION['session_install_langs']:$_SESSION['session_langue']));
 $tpl->assign('STR_ADMIN_SITES_GENERAL_PARAMETERS', $GLOBALS['STR_ADMIN_SITES_GENERAL_PARAMETERS']);
@@ -72,12 +75,18 @@ $tpl->assign('STR_ADMIN_INSTALL_SSL_ADMIN_NO', $GLOBALS['STR_ADMIN_INSTALL_SSL_A
 $tpl->assign('STR_ADMIN_INSTALL_SSL_ADMIN_YES', $GLOBALS['STR_ADMIN_INSTALL_SSL_ADMIN_YES']);
 $tpl->assign('STR_ADMIN_INSTALL_SSL_ADMIN_EXPLAIN', $GLOBALS['STR_ADMIN_INSTALL_SSL_ADMIN_EXPLAIN']);
 $tpl->assign('STR_ADMIN_INSTALL_LANGUAGE_CHOOSE', $GLOBALS['STR_ADMIN_INSTALL_LANGUAGE_CHOOSE']);
+$tpl->assign('STR_ADMIN_INSTALL_FILL_DB', $GLOBALS['STR_ADMIN_INSTALL_FILL_DB']);
+$tpl->assign('STR_ADMIN_INSTALL_FILL_DB_EXPLANATION', $GLOBALS['STR_ADMIN_INSTALL_FILL_DB_EXPLANATION']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_SERVER', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_SERVER']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_SERVER_EXPLAIN', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_SERVER_EXPLAIN']);
 $tpl->assign('STR_ADMIN_INSTALL_DATABASE_USERNAME', $GLOBALS['STR_ADMIN_INSTALL_DATABASE_USERNAME']);
 $tpl->assign('STR_PASSWORD', $GLOBALS['STR_PASSWORD']);
 $tpl->assign('STR_CONTINUE', $GLOBALS['STR_CONTINUE']);
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+$tpl->assign('STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE', $GLOBALS['STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE']);
+$tpl->assign('STR_ADMIN_INSTALL_WEBSITE_SHOP', $GLOBALS['STR_ADMIN_INSTALL_WEBSITE_SHOP']);
+$tpl->assign('STR_ADMIN_INSTALL_WEBSITE_SHOWCASE', $GLOBALS['STR_ADMIN_INSTALL_WEBSITE_SHOWCASE']);
+$tpl->assign('STR_ADMIN_INSTALL_WEBSITE_AD', $GLOBALS['STR_ADMIN_INSTALL_WEBSITE_AD']);
 
 $output = $tpl->fetch();
 

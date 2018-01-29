@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: database.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -184,7 +184,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		if ($i > 0) {
 			// Si on veut réessayer la requête, on regarde si c'est adapté de réinitialiser la connexion
 			if (empty($error_number) || in_array($error_number, array(111, 126, 127, 141, 144, 145, 1034, 1053, 1137, 1152, 1154, 1156, 1184, 1205, 1317, 2003, 2006, 2013))) {
-				// Liste des erreurs : http://dev.mysql.com/doc/mysql/fr/Error-messages.html
+				// Liste des erreurs : https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
 				// par ailleurs : 2013 : Lost connection to MySQL server during query
 				// 2006 MySQL server has gone away
 				if(!empty($database_object)) {
@@ -246,6 +246,9 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		if (!$silent_if_error || in_array($error_number, array(1118))) {
 			// Si l'erreur est 1118 (Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535.) qui peut arriver lors d'un ALTER TABLE ADD alors on affiche quand même l'erreur pour meilleure gestion par l'administrateur
 			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . ' ' . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
+			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+				$error_message .= print_r(debug_backtrace(), true);
+			}
 			if (empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 				// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur
 				echo '[admin info : ' . $error_message . ']<br />';
@@ -491,17 +494,37 @@ function create_sql_from_array($array)
 /**
  * get_table_fields()
  *
- * @param mixed $table_name
+ * @param string $table_name
  * @param mixed $database_object
  * @param boolean $silent_if_error
+ * @param array $fields_filtered
  * @return
  */
-function get_table_fields($table_name, $database_object = null, $silent_if_error = false)
+function get_table_fields($table_name, $database_object = null, $silent_if_error = false, $fields_filtered = null)
 {
 	$sql = "SHOW COLUMNS FROM `" . word_real_escape_string($table_name) . "`";
 	$query = query($sql, false, $database_object, $silent_if_error);
 	while ($result = fetch_assoc($query)) {
 		$fields[] = $result;
+		$field_names[] = $result['Field'];
+	}
+	if($fields_filtered !== null && !empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
+		// D'abord on nettoie le tableau $fields_filtered
+		foreach($fields_filtered as $this_key => $this_field) {
+			$temp = explode(' ', trim($this_field));
+			$this_field = $temp[0];
+			if(StringMb::strpos($this_field, '.') !== false) {
+				$temp = explode('.', $this_field);
+				$this_field = $temp[1];
+			}
+			$fields_filtered[$this_key] = $this_field;
+		}
+		// On ne garde que les champs de $fields présents dans $fields_filtered
+		foreach($fields as $this_key => $this_field) {
+			if(!in_array($this_field, $fields_filtered)) {
+				unset($fields[$this_key]);
+			}
+		}
 	}
 	if (empty($fields)) {
 		return null;
@@ -513,12 +536,13 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
 /**
  * get_table_field_names()
  *
- * @param mixed $table_name
+ * @param string $table_name
  * @param mixed $link_identifier
  * @param boolean $silent_if_error
+ * @param array $fields_filtered
  * @return
  */
-function get_table_field_names($table_name, $link_identifier = null, $silent_if_error = false)
+function get_table_field_names($table_name, $link_identifier = null, $silent_if_error = false, $fields_filtered = null)
 {
 	static $fields;
 	if(!isset($fields[$table_name])) {
@@ -530,6 +554,28 @@ function get_table_field_names($table_name, $link_identifier = null, $silent_if_
 		foreach($fields[$table_name] as $this_field) {
 			$results[] = $this_field['Field'];
 		}
+		if($fields_filtered !== null) {
+			if (!empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
+				foreach($fields_filtered as $this_key => $this_field) {
+					// D'abord on extrait les noms de champs du tableau $fields_filtered
+					$temp = explode(' ', trim(str_replace('=', ' = ', $this_field)));
+					$this_field = $temp[0];
+					if(StringMb::strpos($this_field, '.') !== false) {
+						$temp = explode('.', $this_field);
+						$this_field = $temp[1];
+					}
+					// On ne garde que les champs de $fields_filtered présents dans $results
+					if(!in_array($this_field, $results)) {
+						unset($fields_filtered[$this_key]);
+					}
+				}
+				$results = $fields_filtered;
+				return $results;
+			} else {
+				// Si products_check_existing_fields est vide, alors on retourne la liste passée en paramètre tel quel
+				return $fields_filtered;
+			}
+		}
 		return $results;
 	}
 }
@@ -540,9 +586,34 @@ function get_table_field_names($table_name, $link_identifier = null, $silent_if_
  * @param mixed $table_name
  * @param mixed $link_identifier
  * @param boolean $silent_if_error
+ * @param array $fields_filtered
  * @return
  */
-function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false)
+function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false, $fields_filtered = null)
+{
+	static $fields;
+	if(!isset($fields[$table_name])) {
+		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error, $fields_filtered);
+	}
+	if (empty($fields[$table_name])) {
+		return null;
+	} else {
+		foreach($fields[$table_name] as $this_field) {
+			$results[$this_field['Field']] = $this_field['Type'];
+		}
+		return $results;
+	}
+}
+
+/**
+ * get_table_field_names()
+ *
+ * @param mixed $table_name
+ * @param mixed $link_identifier
+ * @param boolean $silent_if_error
+ * @return
+ */
+function get_existing_table_fields($table_name, $link_identifier = null, $silent_if_error = false)
 {
 	static $fields;
 	if(!isset($fields[$table_name])) {
@@ -552,7 +623,7 @@ function get_table_field_types($table_name, $link_identifier = null, $silent_if_
 		return null;
 	} else {
 		foreach($fields[$table_name] as $this_field) {
-			$results[$this_field['Field']] = $this_field['Type'];
+			$results[] = $this_field['Field'];
 		}
 		return $results;
 	}

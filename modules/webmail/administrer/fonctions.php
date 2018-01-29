@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55792 2018-01-17 11:49:45Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,11 +23,11 @@ if (!defined('IN_PEEL')) {
  */
 function webmail_hook_admin_menu_items($params) {
 	$result = array();
-	if (a_priv('admin_users,admin_finance', true)) {
+	if (a_priv('admin_users,admin_users_contact_form,admin_finance', true)) {
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
 	}
-	if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline', true)) {
+	if (a_priv('admin_users,admin_users_contact_form,admin_finance,admin_operations,admin_productsline', true)) {
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
 	}
 	return $result;
@@ -321,7 +321,7 @@ function send_mail_admin($frm)
 	$custom_template_tags = array();
 	if (!empty($frm)) {
 		if (empty($frm['destination_mail']) && empty($_SESSION['count_from_send_email_all'][$_GET['email_all_hash']])) {
-			return $tplEngine->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ERR_SENT_NO_EMAIL"]))->fetch();
+			return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_ERR_SENT_NO_EMAIL"]))->fetch();
 		}
 		if (!empty($frm['id_webmail'])) {
 			query("UPDATE `peel_webmail`
@@ -787,6 +787,7 @@ $output_array = '
 		<input type="button" value="'.$GLOBALS["STR_ADMIN_UNCHECK_ALL"].'" onclick="if (unMarkAllRows(\'tablesForm\')) return false;" class="btn btn-info" />&nbsp;&nbsp;&nbsp;
 		<input type="submit" value="'.$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_READ"].'" class="btn btn-primary" name="mail_is_read" />
 		<input type="submit" value="'.$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_NOT_READ"].'" class="btn btn-primary" name="mail_is_not_read" />
+		<input type="submit" value="'.$GLOBALS["STR_DELETE"].'" class="btn btn-primary" name="mail_delete" />
 		<a href="'.get_current_url(false).'?mode=export&sujet='.vb($_POST['sujet']).'" class="btn btn-primary" >'.$GLOBALS["STR_ADMIN_EXPORT"].'</a>
 	</div>
 	<div class="center">' . $Links->GetMultipage() . '</div>
@@ -808,20 +809,27 @@ $output_array = '
  */
 function update_state_mail($frm)
 {
+	$output = '';
 	if (!empty($frm) && !empty($frm['form_delete'])) {
 		if (!empty($frm['mail_is_not_read'])) {
 			foreach($_POST['form_delete'] as $this_post => $this_value) {
 				query('UPDATE `peel_webmail`
 					SET `read`="NO"
 					WHERE `id`="' . intval(vn($this_value)) . '" AND `read`!="NO" AND ' . get_filter_site_cond('webmail', null, true));
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_NOT_READ_OK"], intval(vn($this_value)))))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_NOT_READ_OK"], intval(vn($this_value)))))->fetch();
 			}
-		} else {
+		} elseif (!empty($frm['mail_is_read'])) {
 			foreach($_POST['form_delete'] as $this_post => $this_value) {
 				query('UPDATE `peel_webmail`
 					SET `read`="READ"
 					WHERE `id`="' . intval(vn($this_value)) . '" AND `read`="NO" AND ' . get_filter_site_cond('webmail', null, true));
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_READ_OK"], intval(vn($this_value)))))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_READ_OK"], intval(vn($this_value)))))->fetch();
+			}
+		} elseif (!empty($frm['mail_delete'])) {
+			foreach($_POST['form_delete'] as $this_post => $this_value) {
+				query('DELETE FROM `peel_webmail`
+				WHERE `id`="' . intval(vn($this_value)) . '"');
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_DELETE_OK"], intval(vn($this_value)))))->fetch();
 			}
 		}
 	} elseif(!empty($frm['etat']) && !empty($frm['id'])) {
@@ -829,4 +837,5 @@ function update_state_mail($frm)
 			SET `read`="'.nohtml_real_escape_string($frm['etat']).'", update_datetime = "' . nohtml_real_escape_string(date('Y-m-d H:i:s', time())) . '"
 			WHERE `id`="' . intval(vn($frm['id'])) . '" AND ' . get_filter_site_cond('webmail', null, true));
 	}
+	return $output;
 }

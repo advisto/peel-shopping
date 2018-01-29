@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_nl.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: database_email_template_text_nl.php 55746 2018-01-15 17:18:01Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -336,7 +336,7 @@ heeft de volgende gebruiker zich geregistreerd:
 
 [link=\"[ADMIN_URL]\"]Beheer deze gebruiker [/link]",
   "warn_admin_reve_subscription" => "",
-  "email_retour_virement" => "Hallo,
+"email_retour_virement" => "Hallo,
 
 we hebben uw retournummer ontvangen [RETURN_ID].
 Conform uw keuze wordt het betreffende bedrag [MONTANT] per ommegaande via bankoverschrijving aan u overgemaakt.",
@@ -361,10 +361,17 @@ RETOURNUMMER [RETURN_ID].
 
 Houd er rekening mee dat de artikelen teruggestuurd moeten worden in goede staat en in de originele verpakking.
 Na ontvangst van uw artikelen, zullen wij de terugbetaling van deze valideren.",
+  "cron_order_payment_failure_alerts" => "",
+  "cron_order_not_paid_alerts" => "",
+  "cron_update_contact_info" => "",
+"inscription_newsletter" => "",
   "send_mail_for_account_creation_stop" => "",
   "send_mail_for_account_creation_reve" => "",
   "send_mail_for_account_creation_stand" => "",
   "send_mail_for_account_creation_affi" => "",
-  "validating_registration_by_admin" => ""
+  "validating_registration_by_admin" => "",
+  "confirm_newsletter_registration" => "",
+  "user_double_optin_registration" => ""
+
 );
 

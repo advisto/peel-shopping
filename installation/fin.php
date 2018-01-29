@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fin.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 
@@ -33,6 +33,7 @@ if(empty($_SESSION['session_install_finished'])) {
 
 	unset($_SESSION['session_peel_sql']);
 	unset($_SESSION['session_peel_sql_premium']);
+	unset($_SESSION['session_peel_sql_website_type']);
 
 	ob_start();
 	$new_user_infos = array('priv' => 'admin',
@@ -85,6 +86,8 @@ $_SESSION['session_install_utilisateur'] = "";
 $_SESSION['session_install_motdepasse'] = "";
 $_SESSION['session_install_choixbase'] = "";
 $_SESSION['session_install_langs'] = "";
+$_SESSION['session_install_website_type'] = "";
+$_SESSION['session_install_fill_db'] = "";
 $_SESSION['session_install_finished'] = true;
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('installation_fin.tpl');

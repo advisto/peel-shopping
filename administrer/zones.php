@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: zones.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: zones.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -103,6 +103,7 @@ function affiche_formulaire_ajout_zone(&$frm)
 		$frm['position'] = "";
 		$frm['site_id'] = "";
 		$frm['technical_code'] = "";
+		$frm['payment_method'] = "";
 		if (!empty($GLOBALS['site_parameters']['delivery_with_carbo_glace'])) {
 			$frm['carboglace_ht'] = '';
 			$frm['carboglace_tva_percent'] = '';
@@ -163,6 +164,7 @@ function affiche_formulaire_zone(&$frm)
 	}
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('tva', $frm['tva']);
+	$tpl->assign('payment_select', get_payment_select(vb($frm['payment_technical_code']), false,  false, null, null, null, true));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
 	$tpl->assign('on_franco', $frm['on_franco']);
@@ -197,6 +199,7 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('STR_ADMIN_VAT_PERCENTAGE', $GLOBALS['STR_ADMIN_VAT_PERCENTAGE']);
 	$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 	$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
+	$tpl->assign('STR_ADMIN_ZONES_PAYMENT_METHOD', $GLOBALS['STR_ADMIN_ZONES_PAYMENT_METHOD']);
 	echo $tpl->fetch();
 }
 
@@ -241,7 +244,8 @@ function insere_zone($frm)
 		, on_franco
 		, on_franco_amount
 		, on_franco_reseller_amount
-		, on_franco_nb_products";
+		, on_franco_nb_products
+		, payment_technical_code";
 	if (check_if_module_active('fianet')) {
 		$sql .= ", technical_code";
 	}
@@ -262,7 +266,8 @@ function insere_zone($frm)
 		, '" . intval(vn($frm['on_franco'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_amount'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_reseller_amount'])) . "'
-		, '" . nohtml_real_escape_string(vn($frm['on_franco_nb_products'])) . "'";
+		, '" . nohtml_real_escape_string(vn($frm['on_franco_nb_products'])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['payment_technical_code'])) . "'";
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
 	}
@@ -303,7 +308,9 @@ function maj_zone($id, $frm)
 		, position = '" . nohtml_real_escape_string($frm['position']) . "'
 		, on_franco_amount = '" . nohtml_real_escape_string($frm['on_franco_amount']) . "'
 		, on_franco_reseller_amount = '" . nohtml_real_escape_string($frm['on_franco_reseller_amount']) . "'
-		, on_franco_nb_products = '" . nohtml_real_escape_string($frm['on_franco_nb_products']) . "', on_franco = '" . intval(vn($frm['on_franco'])) . "'
+		, on_franco_nb_products = '" . nohtml_real_escape_string($frm['on_franco_nb_products']) . "'
+		, on_franco = '" . intval(vn($frm['on_franco'])) . "'
+		, payment_technical_code = '" . nohtml_real_escape_string(vb($frm['payment_technical_code'])) . "'
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('zones', null, true) . "";
 	query($sql);
 }

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_de.php 53576 2017-04-13 08:00:05Z sdelaporte $
+// $Id: admin_de.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -19,6 +19,8 @@ $GLOBALS["STR_ADMIN_ACTION"] = "Aktion";
 $GLOBALS["STR_ADMIN_ACTIVATE"] = "aktivieren";
 $GLOBALS["STR_ADMIN_ACTIVATED"] = "aktiviert";
 $GLOBALS["STR_ADMIN_ADD_EMPTY_LINE"] = "Fügen Sie eine Leerzeile";
+$GLOBALS["STR_ADMIN_ADD_USER_TO_OFFER"] = "";
+$GLOBALS["STR_ADMIN_ADDRESS_CLIENT"] = "";
 $GLOBALS["STR_ADMIN_ADD"] = "hinzufügen Auf";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_ACTIONS"] = "Lager";
 $GLOBALS["STR_ADMIN_ADMIN_ACTIONS_ALL_LIST"] = "Liste der Moderation Aktionen";
@@ -154,6 +156,7 @@ $GLOBALS["STR_ADMIN_CODES_PROMOS_SEND_BY_EMAIL"] = "Senden Sie mit diesem Gutsch
 $GLOBALS["STR_ADMIN_CODES_PROMOS_STATUS"] = "Staat Code";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_TITLE"] = "Verwaltung der Gutscheincode";
 $GLOBALS["STR_ADMIN_CODES_PROMOS_VALUE"] = "Rabatt (in %s)";
+$GLOBALS["STR_ADMIN_CODES_PROMOS_COMBINABLE"] = "";
 $GLOBALS["STR_ADMIN_COMMANDER_ADD_PRODUCTS_TO_ORDER"] = "Fügen Sie Artikel zu dieser Bestellung";
 $GLOBALS["STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER"] = "Die Linie wurde hinzugefügt";
 $GLOBALS["STR_ADMIN_COMMANDER_AFFILIATE_COMMISSION_PAYMENT_STATUS_DONE"] = "Bezahlung";
@@ -240,6 +243,7 @@ $GLOBALS["STR_ADMIN_COMMENTS"] = "Kommentare Administrator";
 $GLOBALS["STR_ADMIN_COMPARE_BETWEEN"] = "zwischen";
 $GLOBALS["STR_ADMIN_COMPARE_EQUALS"] = "gleich";
 $GLOBALS["STR_ADMIN_CONCERNS"] = "Sorgen";
+$GLOBALS["STR_ADMIN_CONDITIONNEMENT_TEXT"] = "";
 $GLOBALS["STR_ADMIN_CONFIGURATION_ERR_NOT_FOUND"] = "Die Konfiguration wurde nicht gefunden.";
 $GLOBALS["STR_ADMIN_CONFIGURATION_FORM_TITLE"] = "Hinzufügen oder Bearbeiten einer Konfiguration";
 $GLOBALS["STR_ADMIN_CONFIGURATION_MSG_CREATED"] = "Die Konfiguration <b>%s</b> wurde erstellt.";
@@ -552,6 +556,7 @@ $GLOBALS["STR_ADMIN_MENU_MANAGE_TITLE"] = "Konfiguration";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_SITES"] = "Site-Einstellungen";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_CARROUSEL"] = "Management-Karussells";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_SOCIETE"] = "Unternehmensinformationen";
+$GLOBALS["STR_ADMIN_MENU_MANAGE_DISTRIBUTORS"] = "";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_DEVISES"] = "Währungsmanagement";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_LANGUES"] = "Language Management";
 $GLOBALS["STR_ADMIN_MENU_MANAGE_EXOTAXE"] = "Management von Umweltsteuer";
@@ -845,6 +850,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_AUTO_REF_PRODUCT"] = "Automatische Berechnung von v
 $GLOBALS["STR_ADMIN_PRODUITS_BEST_SELLERS"] = "Anzeige im Abschnitt \"Bestseller \"";
 $GLOBALS["STR_ADMIN_PRODUITS_BUYERS_LIST"] = "Liste der Käufer";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_BRAND"] = "WÄHLEN SIE DIE IN ZUSAMMENHANG BRAND";
+$GLOBALS["STR_ADMIN_DISTRIBUTOR_PRODUITS_CHOOSE_BRAND"] = "";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE_EXPLAIN"] = "Wenn Sie die automatische Berechnung Option wählen, werden die damit verbundenen Produkte auf dem Produkt angezeigt die Produkte von den Nutzern entlang bestellt werden. In diesem Fall wird die Produktliste oben, werden nicht berücksichtigt.";
 $GLOBALS["STR_ADMIN_PRODUITS_CHOOSE_REFERENCE"] = "Wählen Sie Verweise Verwandte Produkte (Cross-Selling)";
 $GLOBALS["STR_ADMIN_PRODUITS_CREATE_CATEGORY_FIRST"] = "Sie müssen zunächst eine Produktkategorie erstellen";
@@ -1264,6 +1270,7 @@ $GLOBALS["STR_ADMIN_SITES_THUMBS_SIZE"] = "Miniaturgröße (Seite Katalog)";
 $GLOBALS["STR_ADMIN_SITES_TITLE"] = "Site Configuration";
 $GLOBALS["STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER"] = "Transport Kontonummer TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_EXPEDITION_DELAY"] = "Verzögerung zwischen Auftragsannahme und Versand von Paketen";
+$GLOBALS["STR_ADMIN_SITES_TNT_TRESHOLD"] = "";
 $GLOBALS["STR_ADMIN_SITES_TNT_MODULE"] = "TNT Liefer";
 $GLOBALS["STR_ADMIN_SITES_TNT_PASSWORD"] = "TNT vergessen";
 $GLOBALS["STR_ADMIN_SITES_TNT_USERNAME"] = "ID TNT";
@@ -1289,11 +1296,15 @@ $GLOBALS["STR_ADMIN_SITES_VAT_DISPLAY_MODE"] = "Anzeige der Preise außer für W
 $GLOBALS["STR_ADMIN_SITES_VATLAYER_MODULE"] = "Anschluss an SPS, um die EU-Mehrwertsteuernummer zu prüfen";
 $GLOBALS["STR_ADMIN_SITES_ZOOM_SELECTION"] = "Auswählen des Zoom der Hauptbild Produkte blättern verwendet";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_COMPANY_PARAMETERS"] = "Firmeneinstellungen";
+$GLOBALS["STR_ADMIN_DISTRIBUTORS_FORM_COMPANY_PARAMETERS"] = "";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_EXPLAIN"] = "Die Informationen in dieser Seite sind für die Abrechnung einschließlich verwendet:";
 $GLOBALS["STR_ADMIN_SOCIETE_FORM_SECOND_ADDRESS"] = "Zweite Adresse (falls erforderlich)";
 $GLOBALS["STR_ADMIN_SOCIETE_LIST_TITLE"] = "Firmeneinstellungen";
+$GLOBALS["STR_ADMIN_DISTRIBUTORS_LIST_TITLE"] = "";
 $GLOBALS["STR_ADMIN_SOCIETE_MSG_UPDATED_OK"] = "Ihre Einstellungen berücksichtigt.";
 $GLOBALS["STR_ADMIN_SOCIETE_TITLE"] = "Firmeneinstellungen";
+$GLOBALS["STR_ADMIN_SOCIETE_TYPE"] = "";
+$GLOBALS["STR_ADMIN_DISTRIBUTORS_TITLE"] = "";
 $GLOBALS["STR_ADMIN_SOCIETE_UPDATE"] = "Fügen Sie Parameter des Unternehmens";
 $GLOBALS["STR_ADMIN_SOURCE"] = "Quelle";
 $GLOBALS["STR_ADMIN_STATUT_FORM_TITLE"] = "Hinzufügen oder Bearbeiten einer Art Status";
@@ -1385,6 +1396,8 @@ $GLOBALS["STR_ADMIN_URLLIST_READ_SITEMAP"] = "Lesen Sitemap für Yahoo!";
 $GLOBALS["STR_ADMIN_URLLIST_TITLE"] = "Export Sitemap";
 $GLOBALS["STR_ADMIN_USED_CURRENCY"] = "Währung";
 $GLOBALS["STR_ADMIN_USER"] = "Benutzer";
+$GLOBALS["STR_ADMIN_UTILISATEURS_ACCESS_HISTORY"] = "Zutrittskontrolle historische";
+$GLOBALS["STR_ADMIN_UTILISATEURS_ACCESS_HISTORY_CHECKBOX"] = "Markieren Sie das Kästchen für die Benutzer ihre Bestellhistorie zugreift";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ACCOUNT_MANAGER"] = "Account Manager";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT"] = "Aktionen Moderatoren / Administratoren auf dieses Konto";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE"] = "Fügen Sie einen neuen Tag der Kontakt / Managing Kontakt Termine";
@@ -1588,6 +1601,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CREATE_THIS_OPTION"] = "Fügen Sie diese Op
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CREATE"] = "Attribut erstellen";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CUSTOM_TEXT"] = "Customizable text";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_DEFAULT_DISPLAY_MODE"] = "Gemäß dem allgemeinen Aufbau der Website (default)";
+$GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT'] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_DISPLAY_MODE"] = "Produktanzeigeattribute";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_EXPLAIN"] = "Attribute müssen erstellt werden, bevor Sie ihre Optionen zu verknüpfen. Jedes Produkt kann mit N Attribute zugeordnet werden, wobei dies durch die Produktedition Form verwaltet.";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_FREE_TEXT_ATTRIBUTE"] = "Attribut Freitext (die der Anwender in der Produktdatei zu füllen)";
@@ -1685,6 +1699,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_UPDATE"] = "Bearbeiten Sie diese Banner";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_VIEWED"] = "Ansicht";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_WIDTH"] = "Breite (Dimension in px)";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"] = "Das Banner <b>%s</b> wurde erstellt.";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_ON_BACKGROUND_SITE"] = "";
 $GLOBALS["STR_MODULE_BOUNCES_BAD_EMAILS_TITLE"] = "Liste der E-Mail-Problem";
 $GLOBALS["STR_MODULE_BOUNCES_ACTIONS_SELECTION"] = "Die Aktienauswahl";
 $GLOBALS["STR_MODULE_BOUNCES_SEARCH_EMAIL_PROBLEM"] = "Suche eine E-Mail Problem";
@@ -1860,6 +1875,7 @@ $GLOBALS["STR_MODULE_PREMIUM_ALERT_ADMIN_TREATED"] = "Diese Warnung hat bereits 
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_SUPPLIER"] = "Alle Zulieferer";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALL_PRODUCTS_IN_STOCK"] = "Alle Produkte sind auf Lager";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHECK_TO_SEE_IF_STOCK"] = "Aktivieren Sie diese Option, wenn das Produkt nicht vorrätig ist";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALLOW_ADD_PRODUCT_WITH_NO_STOCK_IN_CART"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Kategorie und / oder den Provider Wählen Sie das Lager verwaltet werden sollen";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"] = "Wählen Sie Ihren Anbieter";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"] = "Geschätzte Lieferfrist (Tage)";
@@ -1954,6 +1970,7 @@ $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MARK_AS_READ"] = "(En) lesen";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_SENT_OK"] = "E-Mail an %s gesendet wurde.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_NOT_READ_OK"] = "Die E-Mail # %s gefunden wurde nicht gelesen.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_STATUS_READ_OK"] = "Die E-Mail # %s wurde erklärt lesen.";
+$GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_DELETE_OK"] = "";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_MSG_WILL_SEND_BY_CRON_OK"] = "Senden E-Mail wurde berücksichtigt und wird innerhalb der nächsten Minuten durchgeführt werden.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_FOUND"] = "Es liegen noch keine E-Mail.";
 $GLOBALS["STR_MODULE_WEBMAIL_ADMIN_NO_EMAIL_SENT_FOUND"] = "Es liegen noch keine E-Mail versendet.";
@@ -2006,3 +2023,7 @@ $GLOBALS["STR_ADMIN_TYPES_TNT_HOME"] = "Zuhause";
 $GLOBALS["STR_ADMIN_TYPES_TNT"] = "TNT";
 $GLOBALS["STR_ADMIN_TYPES_UPDATE"] = "Bearbeiten Sie diese Lieferung";
 $GLOBALS["STR_ADMIN_VISITOR"] = "Besucher ";
+$GLOBALS["STR_ADMIN_ZONES_PAYMENT_METHOD"] = "";
+$GLOBALS["STR_ADMIN_SEPARATOR_PRICE"] = "";
+$GLOBALS["STR_ADMIN_DECIMAL_SEPARATOR_PRICE"] = "";
+$GLOBALS["STR_ADMIN_THOUSANDS_SEPARATOR_PRICE"] = "";

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_en.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: admin_install_en.php 55928 2018-01-26 17:31:15Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -34,6 +34,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "We're going to ask you for con
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "You need to get from your hosting MySQL identifiers.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "Avoid using root, and prefer a mysql password which is robust and different from your SSH password for more security";
 $GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Error! Please check your selected languages and that your configuration information is complete";
+$GLOBALS["STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE"] = "Choose the type of site you want to install";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "Information: You can specify a URL to use https SSL encryption only if your domain has a valid SSL certificate configured on your hosting.";
 $GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "Site main URL:";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Force the use of SSL for the administration:";
@@ -73,8 +74,14 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "STRONGLY RECOMMENDE
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Your site has been configured to display PHP errors for your IP, namely {$_SERVER['REMOTE_ADDR']}. This parameter can be changed in the administration.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "NB: If you want to work on the PHP code on your site, be careful when you edit your files using an editor that supports UTF-8 well and does not add BOM (invisible characters) in the header files. If in doubt, use Notepad++ which is a free download on the Internet.";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Select the languages ​​to install:";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB"] = "Fill the database";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB_EXPLANATION"] = "You can choose to install your site from scratch, or to use the demo content to prefill the database. This content will allow you to discover all the features offered by PEEL. Categories, products, content topics will automatically be added to your site and you will be able edit, delete and create new content.";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "You must enable PHP >= 5.2 on your site: edit the file. Htaccess at the root of the site to enable the lines corresponding to your accommodation by removing the # at the beginning of the line, or contact your hosting - For hosting by PEEL, contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "You will need to manually change the encoding of the site - contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "You will need to manually change the encoding of the site - contact PEEL: contact@peel.fr or +33 (0) 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Operation will be normal except that some external module may not function";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOP"] = "E-commerce website";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOWCASE"] = "Showcase site";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_AD"] = "Ad Site (Only if the module is present. You can order this module from <a onclick=\"return(window.open(this.href)?false:true);\" href=\"https://www.peel-shopping.com/various-128/module-annonces-installation-52.html\">this page</a>)";
+
 

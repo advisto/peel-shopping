@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -41,11 +41,13 @@ function attributs_hook_product_set_configuration(&$params) {
 		// Initialisation
 		$params['this']->configuration_attributs_list = $params['attributs_list'];
 		$params['this']->configuration_total_original_price_attributs_ht = 0;
+		$params['this']->configuration_total_original_price_attributs_ht_without_reduction = 0;
 		$params['this']->configuration_attributs_description = "";
 		// Traitement des attributs
 		if (!empty($params['attributs_list'])) {
-			$params['this']->configuration_attributs_description = affiche_attributs_form_part($params['this'], 'selected_text', null, null, null, null, null, $params['reseller_mode']);
+			$params['this']->configuration_attributs_description = affiche_attributs_form_part($params['this'], 'selected_text', null, null, null, null, null, $params['reseller_mode']);;
 			$params['this']->configuration_total_original_price_attributs_ht = vn($GLOBALS['last_calculation_additional_price_ht']);
+			$params['this']->configuration_total_original_price_attributs_ht_without_reduction = vn($GLOBALS['last_calculation_additional_price_ht_without_reduction']);
 		}
 	}
 }
@@ -183,7 +185,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
-		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'')."
+		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'').", na.disable_reductions
 			".$sql_from_and_where."
 			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
@@ -305,6 +307,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 {
 	$output = '';
 	$GLOBALS['last_calculation_additional_price_ht'] = 0;
+	$GLOBALS['last_calculation_additional_price_ht_without_reduction'] = 0;
 	// On récupère éventuellement les attributs sauvegardés qui devront être présélectionnés
 	$attributs_list_array = explode('§', vb($product_object->configuration_attributs_list));
 	foreach($attributs_list_array as $this_attributs_list) {
@@ -371,13 +374,23 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				$additional_price_ht = $additional_price_ttc / (1 + $product_object->tva / 100);
 				// On garde en mémoire le calcul pour utilisation potentielle après exécution de cette fonction
 				if (!empty($update_last_calculation_additional_price_ht) && !in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
-					$GLOBALS['last_calculation_additional_price_ht'] += $additional_price_ht;
+					if (empty($this_attribut_infos['disable_reductions'])) {
+						// On somme le montant des attributs, qui sera ensuite ajouté au prix du produit. Ce montant attribut+produit sera sujet aux réductions éventuelles.
+						$GLOBALS['last_calculation_additional_price_ht'] += $additional_price_ht;
+					} else {
+						// Ce montant s'appliquera sur le prix du produit APRES l'application des réductions. Cela permet de ne pas appliquer de réductions sur le montant de l'attribut.
+						$GLOBALS['last_calculation_additional_price_ht_without_reduction'] += $additional_price_ht;
+					}
 				}
 				if ($additional_price_ttc != 0 && $show_additionnal_price) {
 					if (in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
 						$price_text = ' + '.$additional_price_ht.'%';
 					} else {
-						$final_additional_price_ht = $additional_price_ht * (1 - $product_object->get_all_promotions_percentage($reseller_mode, get_current_user_promotion_percentage(), false) / 100);
+						if (empty($this_attribut_infos['disable_reductions'])) {
+							$final_additional_price_ht = $additional_price_ht * (1 - $product_object->get_all_promotions_percentage($reseller_mode, get_current_user_promotion_percentage(), false) / 100);
+						} else {
+							$final_additional_price_ht = $additional_price_ht;
+						}
 						$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, true);
 					}
 				} else {
@@ -833,7 +846,7 @@ function get_attribut_list_from_post_data(&$product_object, &$frm, $keep_free_at
 								unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 							}
 						}
-					} else {
+					} elseif(!empty($this_value)) {
 						$combinaisons_array[] = $this_value;
 						unset($GLOBALS['error_attribut_mandatory'][$this_nom_attribut_id]);
 					}

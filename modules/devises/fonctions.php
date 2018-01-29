@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -74,7 +74,7 @@ function set_current_devise($currency_id_or_code, $reference_country_id = null)
 		} elseif(!empty($reference_country_id)) {
 			// On cherche uniquement la devise correspondant au pays donné. Si pas disponible sur le site, on ne modifie pas session_devise
 			$cond = "c.id='" . intval($reference_country_id) . "'";
-			$join = "INNER JOIN peel_pays c ON c.devise=d.code";
+			$join = "INNER JOIN peel_pays c ON c.devise=d.code  AND " . get_filter_site_cond('pays', 'c');
 		}
 		$sql = "SELECT d.*
 			FROM peel_devises d
@@ -109,7 +109,7 @@ function affiche_module_devise($return_mode = false)
 		$resDevise = query("SELECT *
 			FROM peel_devises
 			WHERE etat='1' AND " . get_filter_site_cond('devises') . "
-			ORDER BY devise");
+			ORDER BY main DESC, devise ASC");
 		$url_part = str_replace(array('?devise=' . vb($_GET['devise']), '&devise=' . vb($_GET['devise'])), array('', ''), $_SERVER['REQUEST_URI']);
 		if (StringMb::strpos($url_part, '?') === false) {
 			$url_part .= '?devise=';
@@ -118,11 +118,19 @@ function affiche_module_devise($return_mode = false)
 		}
 		$tpl_options = array();
 		while ($Devise = fetch_assoc($resDevise)) {
+			if(isset($last_main) && $last_main != $Devise['main']) {
+				$tpl_options[] = array(
+					'value' => 0,
+					'issel' => false,
+					'name' => '---------'
+				);
+			}
 			$tpl_options[] = array(
 				'value' => intval($Devise['id']),
 				'issel' => $Devise['code'] == $_SESSION['session_devise']['code'],
 				'name' => $Devise['devise']
 			);
+			$last_main = $Devise['main'];
 		}
 		if(count($tpl_options)>1) {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('modules/devises.tpl');

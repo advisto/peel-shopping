@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: SmartyEngine.php 55761 2018-01-16 14:08:36Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 53200 2017-03-20 11:19:46Z sdelaporte $
+ * @version $Id: SmartyEngine.php 55761 2018-01-16 14:08:36Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -108,8 +108,8 @@ class SmartyEngine extends EngineTpl {
 			$data['cart_qties'] = $_SESSION['session_caddie']->count_products();
 			$data['cart'] = $_SESSION['session_caddie']->articles;
 		}
-		$data['currencies'] = array($_SESSION['session_devise']['code']);
-		$data['id_currency_cookie'] = $_SESSION['session_devise']['code'];
+		$data['currencies'] = array(vb($_SESSION['session_devise']['code'],'EUR'));
+		$data['id_currency_cookie'] = vb($_SESSION['session_devise']['code'],'EUR');
 		$data['logged'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur']));
 		$data['page_name'] = null; // Non disponible systématiquement ici
 		$data['customerName'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur'])?vb($_SESSION['session_utilisateur']['prenom']) . ' '. vb($_SESSION['session_utilisateur']['nom_famille']):null);
@@ -121,7 +121,7 @@ class SmartyEngine extends EngineTpl {
 function SmartyDefaultTemplateHandler($resource_type, $resource_name, &$template_source, &$template_timestamp, Smarty $smarty)
 {
 	if($resource_type == 'file' ) {
-		return $GLOBALS['dirroot'] . "/modeles/peel7/smarty/".$resource_name;
+		return $GLOBALS['dirroot'] . "/modeles/peel9/smarty/".$resource_name;
 	} else {
 		// pas un fichier
 		return false;

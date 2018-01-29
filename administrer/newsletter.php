@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: newsletter.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -292,6 +292,9 @@ function send_newsletter($id, $debut, $limit, $test = false)
 			$sql_cond = "etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND " . get_filter_site_cond('utilisateurs', 'u') . " AND ";
 			if (!$test) {
 				$sql_cond .= "newsletter='1' AND (lang='" . nohtml_real_escape_string($this_lang) . "' OR lang='')";
+				if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
+					$sql_cond .= " AND newsletter_validation_date NOT LIKE '0000-00-00%'";
+				}
 			} else {
 				$sql_cond .= "priv LIKE '%admin%'";
 				$sujet[$this_lang] .= ' [envoyé aux administrateurs seulement]';
@@ -397,9 +400,13 @@ function affiche_liste_newsletter()
 				}
 			}
 			$titre = '[' . StringMb::strtoupper(implode(",", $this_langs_array)) . '] ' . $titre;
+
 			$sql_u = "SELECT count(*) AS this_count
 				FROM peel_utilisateurs
 				WHERE newsletter = '1' AND " . get_filter_site_cond('utilisateurs') . " AND etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND lang IN ('" . implode("','", $this_langs_array) . "')";
+			if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
+				$sql_u .= " AND newsletter_validation_date NOT LIKE '0000-00-00%'";
+			}
 			$query = query($sql_u);
 			$result = fetch_assoc($query);
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),

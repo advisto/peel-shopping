@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ariane.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: ariane.tpl 55930 2018-01-29 08:36:36Z sdelaporte $
 *}{if empty($hidden)}<div property="breadcrumb" class="breadcrumb">
 	{if !empty($ariane)}{if $ariane.href}<span typeof="Breadcrumb"><a href="{$ariane.href|escape:'html'}" property="url" title="{$ariane.txt}"><span property="title" class="hidden">{$ariane.txt}</span>{/if}<span class="glyphicon glyphicon-home" title="{$ariane.txt}"></span>{if $ariane.href}</a></span>{/if}{/if}
 	{if $other.txt}

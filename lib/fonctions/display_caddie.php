@@ -1,21 +1,21 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 53555 2017-04-11 16:30:55Z sdelaporte $
+// $Id: display_caddie.php 55637 2017-12-29 18:35:08Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
-if (!function_exists('get_caddie_content_html')) {
 
+if (!function_exists('get_caddie_content_html')) {
 	/**
 	 * get_caddie_content_html()
 	 *
@@ -34,12 +34,25 @@ if (!function_exists('get_caddie_content_html')) {
 		$shipping_text = '';
 		// Récupération des informations de la zone sélectionnée pour adapter le message.
 		if(!empty($_SESSION['session_caddie']->zoneId)) {
-			$q = query('SELECT on_franco_amount, on_franco_nb_products, on_franco_reseller_amount
+			$q = query('SELECT on_franco, on_franco_amount, on_franco_nb_products, on_franco_reseller_amount
 				FROM peel_zones z
 				WHERE id="'.intval($_SESSION['session_caddie']->zoneId).'" AND ' . get_filter_site_cond('zones', 'z') . '');
 			$zone_result = fetch_assoc($q);
-			$on_franco_amount = floatval((check_if_module_active('reseller') && is_reseller()) ? $zone_result['on_franco_reseller_amount'] : $zone_result['on_franco_amount']);
-			$on_franco_nb_products = $zone_result['on_franco_nb_products'];
+			if (!empty($zone_result['on_franco'])) {
+				$on_franco_amount = floatval((check_if_module_active('reseller') && is_reseller()) ? $zone_result['on_franco_reseller_amount'] : $zone_result['on_franco_amount']);
+				$on_franco_nb_products = $zone_result['on_franco_nb_products'];
+			}
+		}
+		
+		if(!empty($_SESSION['session_caddie']->typeId)) {
+			// On va regarder ensuite le franco de port pour le mode de livraison. On fait la vérification après la zone, car c'est le franco par type qui est prioritaire, donc on remplace le franco de port récupéré pour la zone par le franco par type. 
+			$q = query('SELECT on_franco_amount
+				FROM peel_types t
+				WHERE id="'.intval($_SESSION['session_caddie']->typeId).'" AND ' . get_filter_site_cond('types', 't') . '');
+			$types_result = fetch_assoc($q);
+			if ($types_result['on_franco_amount']>0) {
+				$on_franco_amount = floatval($types_result['on_franco_amount']);
+			}
 		}
 		if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 			if (round($seuil_total_used, 2) > 0 || !empty($GLOBALS['site_parameters']['nb_product']) || (!empty($on_franco_amount) && round($on_franco_amount, 2) > 0) || (!empty($on_franco_nb_products) && $on_franco_nb_products > 0)) {
@@ -73,7 +86,6 @@ if (!function_exists('get_caddie_content_html')) {
 				$tpl->assign('global_error', vb($GLOBALS['site_parameters']['module_vacances_client_msg_' . $_SESSION['session_langue']]));
 			}
 			$tpl->assign('erreur_caddie', $_SESSION['session_caddie']->affiche_erreur_caddie());
-			$tpl->assign('action', get_current_url(false));
 			$tpl->assign('products_summary_table', get_caddie_products_summary_table(true, true, $mode_transport, $shipping_text));
 			$tpl->assign('shipping_text', $shipping_text);
 			$tpl->assign('STR_UPDATE', $GLOBALS['STR_UPDATE']);
@@ -161,11 +173,7 @@ if (!function_exists('get_caddie_content_html')) {
 				if (!empty($_SESSION['session_caddie']->zoneId) && !empty($mode_transport)) {
 					if ($mode_transport == 1) {
 						// Ici on est dans le cas où le calcul des frais de ports est par poids ou par montant total
-						$sqlType = 'SELECT DISTINCT(t.id), t.nom_' . $_SESSION['session_langue'] . '
-							FROM peel_tarifs tf
-							INNER JOIN peel_types t ON t.id = tf.type AND ' . get_filter_site_cond('types', 't') . '
-							WHERE t.etat = 1 AND ' . get_filter_site_cond('tarifs', 'tf') . ' AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0)
-							ORDER BY t.position ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC';
+						$sqlType = get_tarifs_sql();
 						$resType = query($sqlType);
 					}
 					$tpl->assign('shipping_type_error', $form_error_object->text('type'));
@@ -173,6 +181,10 @@ if (!function_exists('get_caddie_content_html')) {
 					$tpl->assign('STR_SHIP_TYPE_CHOOSE', $GLOBALS['STR_SHIP_TYPE_CHOOSE']);
 					$tpl->assign('STR_ERREUR_TYPE', $GLOBALS['STR_ERREUR_TYPE']);
 					if (!empty($resType) && num_rows($resType) > 0) {
+						if (num_rows($resType) == 1) {
+							// Un seul résultat, on selectionne par défaut
+							$selected = true;
+						}
 						$type_options = array();
 						while ($Type = fetch_assoc($resType)) {
 							if (!empty($GLOBALS['site_parameters']['zipcode_array_for_free_delivery']) && !empty($GLOBALS['site_parameters']['free_delivery_by_zipcode_array']) && in_array($Type['id'], $GLOBALS['site_parameters']['free_delivery_by_zipcode_array']) && !in_array(vb($_SESSION['session_utilisateur']['code_postal']), $GLOBALS['site_parameters']['zipcode_array_for_free_delivery'])) {
@@ -180,11 +192,15 @@ if (!function_exists('get_caddie_content_html')) {
 							}
 							$type_options[] = array(
 								'value' => intval($Type['id']),
-								'issel' => (vb($_SESSION['session_caddie']->typeId) == $Type['id']),
+								'issel' => (!empty($selected) || vb($_SESSION['session_caddie']->typeId) == $Type['id']),
 								'name' => $Type['nom_' . $_SESSION['session_langue']]
 							);
 						}
 						$tpl->assign('shipping_type_options', $type_options);
+					} else {
+						// Pas de mode de livraison trouvé, donc on supprime ce qui avait été mis auparavant
+						$_SESSION['session_caddie']->set_type('');
+						$extra_action_parameters = '?cart_measurement_max_reached=true';
 					}
 				}
 			}
@@ -219,13 +235,41 @@ if (!function_exists('get_caddie_content_html')) {
 				$tpl->assign('is_minimum_error', false);
 				$tpl->assign('STR_ORDER', $GLOBALS['STR_ORDER']);
 			}
+			if (check_if_module_active('devis') && !a_priv('admin*')) {
+				// Si l'utilisateur connecté est pas "util" ou "reve" on affiche le lien de redirection vers le formulaire de devis à la place du bouton "Finaliser votre commande"
+				if (!a_priv('util') && !a_priv('reve') && est_identifie()) {
+					$tpl->assign('devis_by_privilege', true);
+					$tpl->assign('devis_url', get_url('/modules/devis/devis.php'));
+					$tpl->assign('STR_DEVIS', $GLOBALS['STR_DEVIS']);
+				}
+			}
 			$tpl->assign('shopping_href', get_url('/achat/'));
 			$tpl->assign('empty_list_href', get_current_url(false) . '?func=vide');
 			$tpl->assign('STR_SHOPPING', $GLOBALS['STR_SHOPPING']);
 			$tpl->assign('STR_EMPTY_LIST', $GLOBALS['STR_EMPTY_LIST']);
 			$tpl->assign('STR_EMPTY_CART', $GLOBALS['STR_EMPTY_CART']);
+			if (!empty($GLOBALS['site_parameters']['payment_multiple'])) {
+				// On va d'abord regarder si il y a un paiement associé à la zone. Dans ce cas on n'affiche pas la possibilité de choisir parmis plusieurs mode de paiement. 
+				if (!defined('IN_PEEL_ADMIN') && !empty($_SESSION['session_caddie']->zoneId)) {
+					// On va recherche si il y a une zone associée à un moyen de paiement.
+					$sql = "SELECT payment_technical_code
+						FROM peel_zones
+						WHERE payment_technical_code!='' AND id = " . intval($_SESSION['session_caddie']->zoneId);
+					$query = query($sql);
+					if ($result = fetch_assoc($query)) {
+						// un mode de paiement est défini pour la zone, donc on ne veut pas proposer plusieurs choix à l'utilisateur;
+						$payment_multiple_disable = true;
+					}
+				}
+				$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
+				// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier réglement.
+				// Donc pour l'affichage des différents paiement possible (1x, 3x, 5x, etc ...) on récupère seulement les clés du tableau.
+				if (empty($payment_multiple_disable) && !empty($GLOBALS['site_parameters']['payment_multiple'])) {
+					$tpl->assign('payment_multiple', array_keys($GLOBALS['site_parameters']['payment_multiple']));
+				}
+			}
 		}
-
+		$tpl->assign('action', get_current_url(false) . vb($extra_action_parameters));
 		$hook_result = call_module_hook('caddie_content_template_data', array(), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
@@ -326,7 +370,7 @@ if (!function_exists('get_order_step1')) {
 					$tpl->assign('STR_ERR_PAYMENT', $GLOBALS['STR_ERR_PAYMENT']);
 				}
 				$tpl->assign('payment_error', $form_error_object->text('payment_technical_code'));
-				$tpl->assign('payment_select', get_payment_select($_SESSION['session_caddie']->payment_technical_code, false, false, $form_error_object));
+				$tpl->assign('payment_select', get_payment_select($_SESSION['session_caddie']->payment_technical_code, false, false, $form_error_object, null, vb($_SESSION['session_caddie']->payment_multiple)));
 				$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
 			} else {
 				$tpl->assign('is_payment_cgv', false);
@@ -445,10 +489,12 @@ if (!function_exists('get_order_step3')) {
 	 * @param integer $commandeid
 	 * @return
 	 */
-	function get_order_step3($commandeid)
+	function get_order_step3($commandeid, $display_payment_method = true)
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('order_step3.tpl');
-		$tpl->assign('payment_form', get_payment_form($commandeid, null, true));
+		if (!empty($display_payment_method)) {
+			$tpl->assign('payment_form', get_payment_form($commandeid, null, true));
+		}
 		$tpl->assign('resume_commande', affiche_resume_commande($commandeid, false, true));
 		$tpl->assign('conversion_page', affiche_contenu_html("conversion_page", true));
 		$tpl->assign('STR_STEP3', $GLOBALS['STR_STEP3']);
@@ -650,7 +696,7 @@ if (!function_exists('affiche_resume_commande')) {
 			}
 			$tpl->assign('products_data', $products_data);
 			if($show_payment_form) {
-				$tpl->assign('payment_form', get_payment_form($id), $commande->paiement);
+				$tpl->assign('payment_form', get_payment_form($id, $commande->paiement));
 			}
 			$tpl->assign('STR_LIST_PRODUCT', $GLOBALS['STR_LIST_PRODUCT']);
 			$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
@@ -873,20 +919,22 @@ if (!function_exists('get_caddie_products_summary_table')) {
 						$ecotaxe = vb($_SESSION['session_caddie']->ecotaxe_ttc[$numero_ligne]);
 					}
 					$option = vn($_SESSION['session_caddie']->option[$numero_ligne]);
+					$option_without_reduction = vn($_SESSION['session_caddie']->option_without_reduction[$numero_ligne]);
 					$remise_displayed = $remise;
 					// $total_attribut_displayed = $total_attribut;
 					$prix_cat_displayed = $prix_cat;
-					$prix_avant_code_promo_sans_option_displayed = $_SESSION['session_caddie']->prix_avant_code_promo[$numero_ligne] - $_SESSION['session_caddie']->option[$numero_ligne] * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100);
+					$prix_avant_code_promo_sans_option_displayed = ($_SESSION['session_caddie']->prix_avant_code_promo[$numero_ligne] - $_SESSION['session_caddie']->option[$numero_ligne] * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100)) - $_SESSION['session_caddie']->option_without_reduction[$numero_ligne] ;
 					$total_prix_displayed = $total_prix;
 				} else {
 					if (check_if_module_active('ecotaxe')) {
 						$ecotaxe = vb($_SESSION['session_caddie']->ecotaxe_ht[$numero_ligne]);
 					}
 					$option = vn($_SESSION['session_caddie']->option_ht[$numero_ligne]);
+					$option_without_reduction = vn($_SESSION['session_caddie']->option_without_reduction_ht[$numero_ligne]);
 					$remise_displayed = $remise_ht;
 					// $total_attribut_displayed = $total_attribut / (1 + $product_object->tva / 100);
 					$prix_cat_displayed = $prix_cat_ht;
-					$prix_avant_code_promo_sans_option_displayed = $_SESSION['session_caddie']->prix_ht_avant_code_promo[$numero_ligne] - $_SESSION['session_caddie']->option_ht[$numero_ligne] * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100);
+					$prix_avant_code_promo_sans_option_displayed = ($_SESSION['session_caddie']->prix_ht_avant_code_promo[$numero_ligne] - $_SESSION['session_caddie']->option_ht[$numero_ligne] * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100)) - $_SESSION['session_caddie']->option_without_reduction_ht[$numero_ligne];
 					$total_prix_displayed = $total_prix_ht;
 				}
 				if (check_if_module_active('attributs') && !empty($product_object->configuration_attributs_description)) {
@@ -898,7 +946,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					'numero_ligne' => $numero_ligne,
 					'id' => $product_id,
 					'listcadeaux_owner' => vb($listcadeaux_owner),
-					'option' => $option,
+					'option' => $option+$option_without_reduction,
 					'id_attribut' => vb($_SESSION['session_caddie']->id_attribut[$numero_ligne]),
 					'name' => $product_object->name,
 					'reference' => $product_object->reference,
@@ -950,12 +998,22 @@ if (!function_exists('get_caddie_products_summary_table')) {
 					$tmpProd['prix_promo'] = fprix($prix_avant_code_promo_sans_option_displayed, true);
 				}
 				if (check_if_module_active('ecotaxe') && !empty($ecotaxe)) {
-					$tmpProd['prix_ecotaxe'] = fprix($ecotaxe, true);
+					if (empty($GLOBALS['site_parameters']['product_ecotaxe_display_split'])) {
+						$tmpProd['prix_ecotaxe'] = fprix($ecotaxe, true);
+					} else {
+						$tmpProd['prix_ht_without_ecotax'] = array(
+						'label' => $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'],
+						'prix_ecotaxe' => fprix($ecotaxe, true),
+						'prix' => fprix($product_object->get_original_price(false, false, false, false, false), true));
+					}
 				}
-				if ($option != 0) {
-					$tmpProd['option_prix'] = fprix($option * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100), true);
-					if (!empty($_SESSION['session_caddie']->percent_remise_produit[$numero_ligne]))
+				if (($option + $option_without_reduction) != 0) {
+					$tmpProd['option_prix'] = fprix($option * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100) + $option_without_reduction, true);
+					if (!empty($_SESSION['session_caddie']->percent_remise_produit[$numero_ligne]) && empty($option_without_reduction)) {
+						// option_without_reduction : Dans le cas ou le produit contient des options sans et avec réduction, on n'affiche pas le prix barré parce que la lecture de ce montant n'est pas clair.
 						$tmpProd['option_prix_remise'] = fprix($option, true);
+					}
+					$tpl->assign('show_options_column', true);
 				}
 				if($product_object->technical_code == "ad" || $product_object->on_gift == "1") {
 					// Si un produit "ad" est dans le panier, alors il est associé à une annonce : il ne faut pas permettre à l'utilisateur de modifier la quantité pour ce produit, car il est applicable à une annonce précise seulement
@@ -965,13 +1023,12 @@ if (!function_exists('get_caddie_products_summary_table')) {
 				} else {
 					$display_form_fields = $with_form_fields;
 				}
-				if ($display_form_fields) {
-					
+				if ($display_form_fields) {	
 					$tmpProd['quantite'] = array(
 						'value' => $quantite,
 					);
 					// On prépare le message à afficher en javascript si la quantité demandée est trop élevée par rapport au stock disponible
-					if (check_if_module_active('stock_advanced') && $product_object->on_stock == 1 && empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
+					if (check_if_module_active('stock_advanced') && $product_object->on_stock == 1 && empty($product_object->allow_add_product_with_no_stock_in_cart) && empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
 						$additionnal_quantity_possible = $stock_commandable - $quantite;
 						$this_prepared_javascript_message = $GLOBALS['STR_QUANTITY_INSUFFICIENT'] . ' ';
 						if ($additionnal_quantity_possible == 0) {
@@ -1034,7 +1091,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 				$tpl->assign('total_ecotaxe', fprix($total_ecotaxe_displayed, true));
 			}
 			// - Si la session client contient une remise > 0
-			if (!empty($_SESSION['session_caddie']->total_remise)) {
+			if ($_SESSION['session_caddie']->total_remise > 0) {
 				$tpl->assign('total_remise', fprix($total_remise_displayed, true));
 				if (!empty($_SESSION['session_caddie']->percent_code_promo) || !empty($_SESSION['session_caddie']->valeur_code_promo)) {
 					$tpl->assign('code_promo', array(

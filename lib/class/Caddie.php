@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 53261 2017-03-22 17:12:58Z sdelaporte $
+// $Id: Caddie.php 55512 2017-12-13 17:28:58Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 53261 2017-03-22 17:12:58Z sdelaporte $
+ * @version $Id: Caddie.php 55512 2017-12-13 17:28:58Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -70,6 +70,10 @@ class Caddie {
 	var $etat_stock = array();
 	/* Tableau délai d'approvisionnement du stock */
 	var $delai_stock = array();
+	/* Tableau du prix des options */
+	var $option_without_reduction = array();
+	/* Tableau du prix des options */
+	var $option_without_reduction_ht = array();
 	/* Tableau du prix des options */
 	var $option = array();
 	/* Tableau du prix des options */
@@ -173,6 +177,9 @@ class Caddie {
 	var $conditionnement;
 	var $pallet_count;
 	var $global_percent_pallet_filled;
+	/* Commentaire pour un produit */
+	var $commentaires_admin;
+	var $payment_multiple;
 
 
 	/**
@@ -267,6 +274,8 @@ class Caddie {
 
 		$this->commande_id = 0;
 		$this->commande_hash = '';
+		
+		$this->commentaires_admin = '';
 
 		$this->pallet_count = 0;
 		$this->global_percent_pallet_filled = 0;
@@ -276,6 +285,9 @@ class Caddie {
 			// Protection pour éviter injection via cookie de demande de création de n'importe quel objet
 			if (!empty($GLOBALS['site_parameters']['save_caddie_in_cookie']) && !empty($_COOKIE[$GLOBALS['caddie_cookie_name']]) && !preg_match('/(^|;|{|})O:\+?[0-9]+:"/', $_COOKIE[$GLOBALS['caddie_cookie_name']])) {
 				// Le panier vient d'être initialisé. Si un cookie qui contient des produits n'est pas vide, il faut remplir le panier avec les informations du cookie si le paramétrage de la boutique le permet.
+			
+				// Un cookie ne peut faire que 4Ko. Donc le nombre de produit à retenir dans le cookie est d'environ 25 produits.
+				// On pourrait décompresser le contenu dans le cookie en utilisant unserialize(gzuncompress(base64_decode($GLOBALS['product_in_caddie_cookie']))) mais il reste un problème de gestion des caractères =, il faudrait faire de la bidouille pour contourner le problème, donc on ne fait rien.
 				$product_in_caddie_cookie = @unserialize($_COOKIE[$GLOBALS['caddie_cookie_name']]);
 				foreach ($product_in_caddie_cookie as $this_product_info) {
 					// Il ne faut pas mettre les données stockées dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuses.
@@ -455,6 +467,10 @@ class Caddie {
 			} else {
 				$this->quantite[$numero_ligne] += reservation_stock_temp($product_id, $couleur_id, $taille_id, $added_quantity_wished);
 			}
+			// texte informatif pour chaque produit commandé hors stock
+			if (!get_stock($this->articles[$numero_ligne], $this->couleurId[$numero_ligne], $this->tailleId[$numero_ligne])) {
+				$this->commentaires_admin[$numero_ligne] = $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"];
+			}
 		} else {
 			$this->quantite[$numero_ligne] += $added_quantity_wished;
 		}
@@ -527,7 +543,7 @@ class Caddie {
 			// Le module de gestion des stocks est activé et le produit a on_stock=1 ($product_object->etat_stock est la valeur de on_stock du produit)
 			// On réserve des stocks temporaires pour les nouvelles informations de la ligne
 			// Si nécessaire on rectifie la quantité dans le panier en fonction de ce qui a pu être réservé après vérification des stocks temporaires et réels.
-			if (empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
+			if (empty($product_object->allow_add_product_with_no_stock_in_cart) && empty($GLOBALS['site_parameters']['allow_add_product_with_no_stock_in_cart'])) {
 				// Dans le cas d'un timemax faible, si un produit avec un exemplaire en stock est commandé par un premier utilisateur, le produit sera à nouveau disponible si l'uilisateur fait une pause longue sur les pages de process de commande après le panier. Le produit pourra alors être à nouveau ajouté au panier par un autre utilisateur. On se retrouvera avec 2 panier avec ce produit qui est pourtant disponible en un seul exemplaire.
 				// => pour cette raison il faut vérifier à chaque mise à jour du panier si le produit est disponible dans le stock temporaire, et mettre la quantité à jour en fonction. Un utilisateur risque de voir son produit disparaitre de son panier sans comprendre pourquoi. Il faudra dans ce cas augmenter le timemax.
 				$quantity_wished = min($this->quantite[$numero_ligne], get_stock($product_object->id, $product_object->configuration_color_id, $product_object->configuration_size_id, 0));
@@ -580,7 +596,7 @@ class Caddie {
 		}
 		if (check_if_module_active('attributs')) {
 			// Ces valeurs servent pour remplir la table peel_commandes, mais pas pour les calculs qui se servent de la classe Product qui gère tout cela
-			$this->total_prix_attribut[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht, $apply_vat, false, false, false);
+			$this->total_prix_attribut[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht + $product_object->configuration_total_original_price_attributs_ht_without_reduction, $apply_vat, false, false, false);
 			$this->attribut[$numero_ligne] = $product_object->configuration_attributs_description;
 		} else {
 			$this->total_prix_attribut[$numero_ligne] = null;
@@ -589,6 +605,11 @@ class Caddie {
 		// Les valeurs des options ne contiennent pas les éventuelles réductions en pourcentage
 		$this->option_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false);
 		$this->option[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, $apply_vat, false, false, false);
+		
+		// montant des options pour lesquels aucune réduction ne s'applique (valeur calculée dans la fonction affiche_attributs_form_part du module attribut.)
+		$this->option_without_reduction_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht_without_reduction, false, false, false, false);
+		$this->option_without_reduction[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht_without_reduction, $apply_vat, false, false, false);
+
 		// Total poids de la ligne
 		$this->poids[$numero_ligne] = ($product_object->poids + $product_object->configuration_overweight) * $this->quantite[$numero_ligne];
 		// Calcul du prix original avant réductions et options
@@ -598,11 +619,13 @@ class Caddie {
 			// On doit arrondir les valeurs tarifaires officielles qui sont en TTC
 			$this->prix_cat[$numero_ligne] = round($this->prix_cat[$numero_ligne], 2);
 			$this->option[$numero_ligne] = round($this->option[$numero_ligne], 2);
+			$this->option_without_reduction[$numero_ligne] = round($this->option_without_reduction[$numero_ligne], 2);
 			$this->ecotaxe_ttc[$numero_ligne] = round($this->ecotaxe_ttc[$numero_ligne], 2);
 		} else {
 			// On doit arrondir les valeurs tarifaires officielles qui sont en HT
 			$this->prix_cat_ht[$numero_ligne] = round($this->prix_cat_ht[$numero_ligne], 2);
 			$this->option_ht[$numero_ligne] = round($this->option_ht[$numero_ligne], 2);
+			$this->option_without_reduction_ht[$numero_ligne] = round($this->option_without_reduction_ht[$numero_ligne], 2);
 			$this->ecotaxe_ht[$numero_ligne] = round($this->ecotaxe_ht[$numero_ligne], 2);
 		}
 		// NB : on n'applique pas ici la ventilation d'un code promo en valeur sur le nouveau produit, car le calcul concerne forcément tout le panier en même temps
@@ -633,10 +656,11 @@ class Caddie {
 			$this->prix_ht_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, false, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_tested, true, true, false, $this->count_products($product_object->categorie_id)) / $real_stock_tested;
 
 			$this->prix_avant_code_promo[$numero_ligne] = $product_object->get_final_price($this->percent_remise_user, $apply_vat, check_if_module_active('reseller') && is_reseller(), false, false, $real_stock_tested, true, true, false,$this->count_products($product_object->categorie_id)) / $real_stock_tested;
+			
 		}
 		$this->percent_remise_produit[$numero_ligne] = $product_object->get_all_promotions_percentage(check_if_module_active('reseller') && is_reseller(), $this->percent_remise_user, false);
 		if(!empty($product_object->on_gift) && $product_object->on_gift_points * $this->quantite[$numero_ligne] <= $max_available_gift_points) {
-			foreach(array('ecotaxe', 'ecotaxe_ht', 'prix_cat', 'prix_cat_ht', 'option', 'option_ht', 'prix_ht_avant_code_promo', 'prix_avant_code_promo', 'percent_remise_produit') as $this_property) {
+			foreach(array('ecotaxe', 'ecotaxe_ht', 'prix_cat', 'prix_cat_ht', 'option', 'option_ht', 'option_without_reduction', 'option_without_reduction_ht', 'prix_ht_avant_code_promo', 'prix_avant_code_promo', 'percent_remise_produit') as $this_property) {
 				$this_temp = &$this->$this_property;
 				$this_temp[$numero_ligne] = 0;
 			}
@@ -685,6 +709,8 @@ class Caddie {
 			$this->delai_stock[$numero_ligne],
 			$this->option[$numero_ligne],
 			$this->option_ht[$numero_ligne],
+			$this->option_without_reduction[$numero_ligne],
+			$this->option_without_reduction_ht[$numero_ligne],
 			$this->data_check[$numero_ligne],
 			$this->ecotaxe_ttc[$numero_ligne],
 			$this->ecotaxe_ht[$numero_ligne],
@@ -756,7 +782,7 @@ class Caddie {
 				// On fait la somme des produits en faisant attention à ce qu'un produit pourrait apparaître dans plusieurs catégories donc on peut sommer les montants
 				$found_cat = null;
 				$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, true, false, true);
-				$apply_code_on_this_product = $product_object->is_code_promo_applicable($code_infos['id_categorie'], $code_infos['product_filter'], $found_cat, $code_infos['cat_not_apply_code_promo']);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($code_infos['id_categorie'], $code_infos['product_filter'], $found_cat, $code_infos['cat_not_apply_code_promo'], $code_infos['promo_code_combinable']);
 				unset($product_object);
 				if($apply_code_on_this_product) {
 					// ATTENTION : la somme de $this->total_produit_related_to_code_promo n'est pas égale au total du caddie si des produits se retrouvent dans plusieurs catégories
@@ -771,7 +797,8 @@ class Caddie {
 					}
 				}
 			}
-			if ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat))) {
+			if ($this->total_produit_related_to_code_promo > 0 && ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat)))) {
+				// Il y a des produits qui s'applique au code promo
 				// Si le code s'applique à toutes les catégories OU si le code s'applique à une seule catégorie et qu'il y a au moins un article de la catégorie correspondante dans le panier
 				// On vérifie maintenant que le code est bien valide pour l'utilisateur qui veut l'utiliser
 				$sql_check_cp_use = "SELECT c.id
@@ -866,7 +893,7 @@ class Caddie {
 	/**
 	 * Traitement du moyen de paiement
 	 *
-	 * @param integer $payment_technical_code
+	 * @param string $payment_technical_code
 	 * @return
 	 */
 	function set_paiement($payment_technical_code)
@@ -882,7 +909,7 @@ class Caddie {
 		} else {
 			$this->tarif_paiement = $this->tarif_paiement_ht;
 		}
-		$this->tva_tarif_paiement = $this->tarif_paiement - $this->tarif_paiement_ht ;
+		$this->tva_tarif_paiement = $this->tarif_paiement - $this->tarif_paiement_ht;
 	}
 
 	/**
@@ -910,10 +937,12 @@ class Caddie {
 				$this->zoneTva = $Zone['tva'];
 				$this->zoneFranco = $Zone['on_franco'];
 				$this->zoneId = $zoneId;
-				// On initialise le type de port à blank car on a changé de zone ou de pays
-				$this->type = "";
-				$this->typeId = "";
-				$this->update();
+				// On initialise le type de port à blank car on a changé de zone ou de pays 
+				$old_type = $this->type;
+				$this->set_type('');
+				// On essaye d'associer à nouveau le type, si la configuration le permet.
+				$this->set_type($old_type);
+
 			}
 		}
 	}
@@ -929,7 +958,14 @@ class Caddie {
 		$typeId = intval($typeId);
 		if ($typeId != $this->typeId) {
 			$type_name = get_delivery_type_name($typeId);
-			if ($type_name !== false) {
+			// Pour fixer le type, il faut obligatoirement une zone associée. Donc on regarde en base de donnée si ce type est asssocié à la zone configurée.
+			// L'association entre type et zone est faite dans peel_tarifs
+			$sql = "SELECT 1
+				FROM peel_tarifs tf
+				INNER JOIN peel_types t ON t.id = tf.type AND " . get_filter_site_cond('types', 't') . "
+				WHERE t.etat = 1 AND tf.type='" . intval($typeId) . "' AND tf.zone = '" . intval($this->zoneId) . "' AND " . get_filter_site_cond('tarifs', 'tf') . "";
+			$query = query($sql);
+			if ($type_name !== false && num_rows($query) > 0) {
 				// On définit le type de port seulement si trouvé en BDD
 				$this->typeId = $typeId;
 				$this->type = $type_name;
@@ -989,7 +1025,7 @@ class Caddie {
 						$sql = "SELECT o.*
 							FROM peel_offres o
 							LEFT JOIN peel_utilisateurs_offres uo ON uo.id_utilisateur='" . intval(vn($_SESSION['session_utilisateur']['id_utilisateur'])) . "' AND o.id_offre=uo.id_offre
-							WHERE " . get_filter_site_cond('offres', 'o') . " AND (o.id_offre=0 OR uo.id_offre IS NOT NULL) AND o.date_limite>='" . date('Y-m-d', time()) . "' AND (" . (!empty($product_object->reference)?"(o.ref='".real_escape_string($product_object->reference)."' AND o.qnte<='".intval($this->quantite[$numero_ligne])."' AND o.seuil<='".max(floatval($this->quantite[$numero_ligne]*$product_object->prix_ht), floatval($value_total))."') OR ":"") . "(o.ref='' AND o.fournisseur IN ('".implode("','", real_escape_string($product_object->get_product_brands(true)))."') AND o.qnte<='".intval($quantity_by_brand['brand_'.$product_object->get_product_brands(false)])."' AND o.seuil<='".max(floatval($total_by_brand['brand_'.$product_object->get_product_brands(false)]), floatval($value_total))."') OR (o.ref='' AND o.fournisseur='' AND o.qnte<='".intval($quantity_total)."' AND o.seuil<='".floatval($value_total)."'))
+							WHERE " . get_filter_site_cond('offres', 'o') . " AND (o.id_offre=0 OR uo.id_offre IS NOT NULL) AND o.date_limite>='" . date('Y-m-d', time()) . "' AND (" . (!empty($product_object->reference)?"(o.ref='".real_escape_string($product_object->reference)."' AND o.qnte<='".intval($this->quantite[$numero_ligne])."' AND o.seuil<='".max(floatval($this->quantite[$numero_ligne]*$product_object->prix_ht), floatval($value_total))."') OR ":"") . "(o.ref='' AND o.fournisseur IN ('".implode("','", real_escape_string($product_object->get_product_brands(true)))."') AND o.qnte<='".intval(vb($quantity_by_brand['brand_'.$product_object->get_product_brands(false)]))."' AND o.seuil<='".max(floatval($total_by_brand['brand_'.$product_object->get_product_brands(false)]), floatval($value_total))."') OR (o.ref='' AND o.fournisseur='' AND o.qnte<='".intval($quantity_total)."' AND o.seuil<='".floatval($value_total)."'))
 							ORDER BY " . (floatval($product_object->prix_ht)>0 ? "IF(o.prix>0 AND o.remise_percent>0, LEAST(o.prix, (1-o.remise_percent/100)*'".floatval($product_object->prix_ht)."'), IF(o.remise_percent>0, (1-o.remise_percent/100)*'".floatval($product_object->prix_ht)."', o.prix))" : "o.prix") . " ASC, o.remise_percent DESC, o.port_offert DESC, o.carbo_offert DESC
 							LIMIT 1";
 						$query = query($sql);
@@ -1000,16 +1036,18 @@ class Caddie {
 						unset($product_object);
 					}
 				}
-				$sql = 'SELECT z.carboglace_ht, z.carboglace_tva_percent
-					FROM peel_zones z
-					WHERE id = "' . intval($this->zoneId) . '" AND ' . get_filter_site_cond('zones', 'z') . '
-					LIMIT 1';
-				$query = query($sql);
-				$result_zones = fetch_assoc($query);
-				if (!empty($result_zones)) {
-					$product_object = new Product('carboglace', null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
-					if(!empty($product_object->id)) {
-						$_SESSION['session_caddie']->add_product($product_object, 1, '', '');
+				if(!empty($apply_carboglace)) {
+					$sql = 'SELECT z.carboglace_ht, z.carboglace_tva_percent
+						FROM peel_zones z
+						WHERE id = "' . intval($this->zoneId) . '" AND ' . get_filter_site_cond('zones', 'z') . '
+						LIMIT 1';
+					$query = query($sql);
+					$result_zones = fetch_assoc($query);
+					if (!empty($result_zones)) {
+						$product_object = new Product('carboglace', null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+						if(!empty($product_object->id)) {
+							$_SESSION['session_caddie']->add_product($product_object, 1, '', '');
+						}
 					}
 				}
 			}
@@ -1052,6 +1090,8 @@ class Caddie {
 				unset($this->etat_stock[$numero_ligne]);
 				unset($this->delai_stock[$numero_ligne]);
 				unset($this->option[$numero_ligne]);
+				unset($this->option_without_reduction[$numero_ligne]);
+				unset($this->option_without_reduction_ht[$numero_ligne]);
 				unset($this->option_ht[$numero_ligne]);
 				unset($this->data_check[$numero_ligne]);
 				unset($this->ecotaxe_ttc[$numero_ligne]);
@@ -1113,7 +1153,7 @@ class Caddie {
 			if (!empty($this->total_produit_related_to_code_promo) && !empty($this->code_infos)) {
 				$found_cat = null;
 				$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, true, false, true);
-				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo']);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo'], $this->code_infos['promo_code_combinable']);
 				unset($product_object);
 				if ($apply_code_on_this_product) {
 					// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles qui concernent au moins un produit du panier
@@ -1212,7 +1252,7 @@ class Caddie {
 				$sql = "SELECT o.*
 					FROM peel_offres o
 					LEFT JOIN peel_utilisateurs_offres uo ON uo.id_utilisateur='" . intval(vn($_SESSION['session_utilisateur']['id_utilisateur'])) . "' AND o.id_offre=uo.id_offre
-					WHERE " . get_filter_site_cond('offres', 'o') . " AND (o.id_offre=0 OR uo.id_offre IS NOT NULL) AND o.date_limite>='" . date('Y-m-d', time()) . "' AND (" . (!empty($product_object->reference)?"(o.ref='".real_escape_string($product_object->reference)."' AND o.qnte<='".intval($this->quantite[$numero_ligne])."' AND o.seuil<='".max(floatval($this->quantite[$numero_ligne]*$product_object->prix_ht), floatval($value_total))."') OR ":"") . "(o.ref='' AND o.fournisseur IN ('".implode("','", real_escape_string($product_object->get_product_brands(true)))."') AND o.qnte<='".intval($quantity_by_brand['brand_'.$product_object->get_product_brands(false)])."' AND o.seuil<='".max(floatval($total_by_brand['brand_'.$product_object->get_product_brands(false)]), floatval($value_total))."') OR (o.ref='' AND o.fournisseur='' AND o.qnte<='".intval($quantity_total)."' AND o.seuil<='".floatval($value_total)."'))
+					WHERE " . get_filter_site_cond('offres', 'o') . " AND (o.id_offre=0 OR uo.id_offre IS NOT NULL) AND o.date_limite>='" . date('Y-m-d', time()) . "' AND (" . (!empty($product_object->reference)?"(o.ref='".real_escape_string($product_object->reference)."' AND o.qnte<='".intval($this->quantite[$numero_ligne])."' AND o.seuil<='".max(floatval($this->quantite[$numero_ligne]*$product_object->prix_ht), floatval($value_total))."') OR ":"") . "(o.ref='' AND o.fournisseur IN ('".implode("','", real_escape_string($product_object->get_product_brands(true)))."') AND o.qnte<='".intval(vn($quantity_by_brand['brand_'.$product_object->get_product_brands(false)]))."' AND o.seuil<='".max(floatval(vn($total_by_brand['brand_'.$product_object->get_product_brands(false)])), floatval($value_total))."') OR (o.ref='' AND o.fournisseur='' AND o.qnte<='".intval($quantity_total)."' AND o.seuil<='".floatval($value_total)."'))
 					ORDER BY " . (floatval($product_object->prix_ht)>0 ? "IF(o.prix>0 AND o.remise_percent>0, LEAST(o.prix, (1-o.remise_percent/100)*'".floatval($product_object->prix_ht)."'), IF(o.remise_percent>0, (1-o.remise_percent/100)*'".floatval($product_object->prix_ht)."', o.prix))" : "o.prix") . " ASC, o.remise_percent DESC, o.port_offert DESC, o.carbo_offert DESC
 					LIMIT 1";
 				$query = query($sql);
@@ -1279,17 +1319,12 @@ class Caddie {
 				// Le cookie qui contient les produits est vidé à chaque calcul du caddie, c'est plus simple que de mettre à jour ligne par ligne.
 				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
 			}
-			$product_in_caddie_cookie = array();
+			$GLOBALS['product_in_caddie_cookie'] = array();
 			foreach ($this->articles as $numero_ligne => $product_id) {
 				// on ajoute le produit à la liste.
-				$product_in_caddie_cookie[] = array('quantite'=>$this->quantite[$numero_ligne],'product_id'=>$product_id,'couleurId'=>$this->couleurId[$numero_ligne],'tailleId'=>$this->tailleId[$numero_ligne],'id_attribut'=>$this->id_attribut[$numero_ligne]);
+				$GLOBALS['product_in_caddie_cookie'][] = array('quantite'=>$this->quantite[$numero_ligne],'product_id'=>$product_id,'couleurId'=>$this->couleurId[$numero_ligne],'tailleId'=>$this->tailleId[$numero_ligne],'id_attribut'=>$this->id_attribut[$numero_ligne]);
 			}
-			// on crée le cookie avec 1 an de vie
-			if($GLOBALS['site_parameters']['force_sessions_for_subdomains']){
-				@setcookie($GLOBALS['caddie_cookie_name'], serialize($product_in_caddie_cookie), time() + 365 * 24 * 60 * 60, '/', '.'.get_site_domain());
-			} else {
-				@setcookie($GLOBALS['caddie_cookie_name'], serialize($product_in_caddie_cookie), time() + 365 * 24 * 60 * 60, '/');
-			}
+			
 		}
 		// FIN
 		$update_in_process = false;
@@ -1340,8 +1375,8 @@ class Caddie {
 				$real_stock_used = intval($this->quantite[$numero_ligne]);
 			}
 
-			$this->remise_ht[$numero_ligne] = ($this->prix_cat_ht[$numero_ligne] + $this->option_ht[$numero_ligne] - $this->prix_ht[$numero_ligne]) * $real_stock_used;
-			$this->remise[$numero_ligne] = ($this->prix_cat[$numero_ligne] + $this->option[$numero_ligne] - $this->prix[$numero_ligne]) * $real_stock_used;
+			$this->remise_ht[$numero_ligne] = ($this->prix_cat_ht[$numero_ligne] + $this->option_ht[$numero_ligne] + $this->option_without_reduction_ht[$numero_ligne] - $this->prix_ht[$numero_ligne]) * $real_stock_used;
+			$this->remise[$numero_ligne] = ($this->prix_cat[$numero_ligne] + $this->option[$numero_ligne] + $this->option_without_reduction[$numero_ligne] - $this->prix[$numero_ligne]) * $real_stock_used;
 			$this->total_remise += $this->remise[$numero_ligne];
 			$this->total_remise_ht += $this->remise_ht[$numero_ligne];
 			$this->total_quantite += $this->quantite[$numero_ligne];
@@ -1349,8 +1384,8 @@ class Caddie {
 			$this->total_produit_ht += $this->total_prix_ht[$numero_ligne];
 			$this->total_ecotaxe_ttc += $this->ecotaxe_ttc[$numero_ligne] * $real_stock_used;
 			$this->total_ecotaxe_ht += $this->ecotaxe_ht[$numero_ligne] * $real_stock_used;
-			$this->total_option += $this->option[$numero_ligne] * $real_stock_used;
-			$this->total_option_ht += $this->option_ht[$numero_ligne] * $real_stock_used;
+			$this->total_option += ($this->option[$numero_ligne]+$this->option_without_reduction[$numero_ligne]) * $real_stock_used;
+			$this->total_option_ht += ($this->option_ht[$numero_ligne]+$this->option_without_reduction_ht[$numero_ligne]) * $real_stock_used;
 			$this->tva_total_produit += $this->tva[$numero_ligne];
 			$this->total_poids += $this->poids[$numero_ligne];
 			if (check_if_module_active('gifts')) {
@@ -1458,8 +1493,8 @@ class Caddie {
 			$articles[$numero_ligne]['remise_ht'] = $this->remise_ht[$numero_ligne];
 			$articles[$numero_ligne]['etat_stock'] = $this->etat_stock[$numero_ligne];
 			$articles[$numero_ligne]['delai_stock'] = $this->delai_stock[$numero_ligne];
-			$articles[$numero_ligne]['option'] = $this->option[$numero_ligne];
-			$articles[$numero_ligne]['option_ht'] = $this->option_ht[$numero_ligne];
+			$articles[$numero_ligne]['option'] = $this->option[$numero_ligne] + $this->option_without_reduction[$numero_ligne];
+			$articles[$numero_ligne]['option_ht'] = $this->option_ht[$numero_ligne] + $this->option_without_reduction_ht[$numero_ligne];
 			$articles[$numero_ligne]['data_check'] = $this->data_check[$numero_ligne];
 			$articles[$numero_ligne]['ecotaxe_ttc'] = $this->ecotaxe_ttc[$numero_ligne];
 			$articles[$numero_ligne]['ecotaxe_ht'] = $this->ecotaxe_ht[$numero_ligne];
@@ -1467,6 +1502,7 @@ class Caddie {
 			$articles[$numero_ligne]['attribut'] = vb($this->attribut[$numero_ligne]);
 			$articles[$numero_ligne]['id_attribut'] = vb($this->id_attribut[$numero_ligne]);
 			$articles[$numero_ligne]['total_prix_attribut'] = vb($this->total_prix_attribut[$numero_ligne]);
+			$articles[$numero_ligne]['commentaires_admin'] = vb($this->commentaires_admin[$numero_ligne]);
 		}
 		if (sha1(serialize($order_infos) . serialize($articles)) != $this->commande_hash) {
 			// La commande n'avait jamais été créée, ou les informations de la commande sont différentes

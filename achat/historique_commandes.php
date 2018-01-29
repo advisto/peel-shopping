@@ -1,18 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: historique_commandes.php 55332 2017-12-01 10:44:06Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
+if (!empty($GLOBALS['site_parameters']['order_history_for_user_disable']) && empty($_SESSION['session_utilisateur']['access_history'])) {
+    // On a activé la possibilité de désactiver l'accès à l'historique de commande. Donc cet utilisateur n'a pas les droits pour accéder à cette page, on le redirige vers la home.
+    redirect_and_die('/');
+}
 
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -37,7 +41,13 @@ switch (vb($_REQUEST['mode'])) {
 			} else {
 				$payment_status_forbid_payment = array('being_checked', 'completed', 'cancelled');
 			}
-			if(is_numeric(key($payment_status_forbid_payment))) {
+			foreach($payment_status_forbid_payment as $this_statut) {
+				if (is_numeric($this_statut)) {
+					$numeric_value=true;
+					break;
+				}
+			}
+			if(!empty($numeric_value)) {
 				$allow_status_change = !in_array($this_order['id_statut_paiement'], $payment_status_forbid_payment);
 			} else {
 				$allow_status_change = !in_array($this_order['statut_paiement'], $payment_status_forbid_payment);

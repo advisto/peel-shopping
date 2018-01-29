@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: codes_promos.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -190,6 +190,7 @@ function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 	$tpl->assign('nom', vn($frm['nom']));
 	$tpl->assign('date_debut', get_formatted_date(vb($frm['date_debut'])));
 	$tpl->assign('date_fin', get_formatted_date(vb($frm['date_fin'])));
+	$tpl->assign('promo_code_combinable', !empty($frm['promo_code_combinable']));
 	$tpl->assign('remise_percent', vn($frm['remise_percent']));
 	$tpl->assign('site_symbole', $GLOBALS['site_parameters']['symbole']);
 	$tpl->assign('remise_valeur', vn($frm['remise_valeur']));
@@ -231,6 +232,7 @@ function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_PRODUCT_NAME', $GLOBALS['STR_ADMIN_PRODUCT_NAME']);
 	$tpl->assign('STR_ADMIN_PRODUCT_REFERENCE', $GLOBALS['STR_ADMIN_PRODUCT_REFERENCE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO', $GLOBALS['STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO']);
+	$tpl->assign('STR_ADMIN_CODES_PROMOS_COMBINABLE', $GLOBALS['STR_ADMIN_CODES_PROMOS_COMBINABLE']);
 	echo $tpl->fetch();
 }
 
@@ -276,6 +278,7 @@ function maj_code_promo($id, $frm)
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
 			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true), true) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
+			, promo_code_combinable = '" . nohtml_real_escape_string(vb($frm['promo_code_combinable'])) . "'
 		WHERE id='" . intval($id) . "'";
 	query($sql);
 }

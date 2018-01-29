@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: marques.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -98,7 +98,7 @@ function affiche_formulaire_ajout_marque(&$frm, &$form_error_object)
 	if(empty($frm)) {
 		$frm = array();
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-			$frm['nom_' . $lng] = "Marque langue $lng";
+			$frm['placeholder_' . $lng] = "Marque langue $lng";
 			$frm['description_' . $lng] = "";
 
 			/* gestion des meta */
@@ -190,10 +190,17 @@ function insere_sous_marque(&$frm)
 		image
 		, site_id
 		, etat
-		, position";
+		, position
+		, date_insere
+		, date_maj";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", site_country
 		";
+	}	
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+		, nom_insere
+		, nom_maj";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . ", description_" . $lng;
@@ -206,10 +213,17 @@ function insere_sous_marque(&$frm)
 		'" . nohtml_real_escape_string($frm['image']) . "'
 		, '" . nohtml_real_escape_string(get_site_id_sql_set_value(vb($frm['site_id']))) . "'
 		, '" . intval(vn($frm['etat'])) . "'
-		, '" . intval($frm['position']) . "'";
+		, '" . intval($frm['position']) . "'	
+		, '" . date('Y-m-d H:i:s', time()) . "'	
+		, '" . date('Y-m-d H:i:s', time()) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 		";
+	}
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+		, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'
+		, '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
 	}
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
@@ -243,15 +257,17 @@ function maj_marque(&$frm)
 	// Remplit les contenus vides
 	$frm = fill_other_language_content($frm);
 	
-	$sql_promo = "UPDATE peel_produits 
-		SET on_promo='".intval($on_promo)."' 
-		WHERE id_marque='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
-	if(empty($on_promo)) {
-		// On ne retire on_promo que si le produit lui-même n'a pas de promotion
-		$sql_promo .= " AND promotion=0";
+	$product_field_names = get_table_field_names('peel_produits');
+	if(in_array('on_promo', $product_field_names)) {
+		$sql_promo = "UPDATE peel_produits 
+			SET on_promo='".intval($on_promo)."' 
+			WHERE id_marque='" . intval($_POST['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
+		if(empty($on_promo) && in_array('promotion', $product_field_names)) {
+			// On ne retire on_promo que si le produit lui-même n'a pas de promotion
+			$sql_promo .= " AND promotion=0";
+		}
+		query($sql_promo);
 	}
-	query($sql_promo);
-
 	// On met à jour tous les droits par pays des produits liés à cette marque
 	if(!empty($_REQUEST['update_product_countries_submit']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql_site_country = "UPDATE peel_produits 
@@ -264,7 +280,8 @@ function maj_marque(&$frm)
 	}
 	}
 	$sql = "UPDATE peel_marques
-		SET image = '" . nohtml_real_escape_string($frm['image']) . "'";
+		SET image = '" . nohtml_real_escape_string($frm['image']) . "'
+		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 		$sql .= ", description_" . $lng . "='" . real_escape_string($frm['description_' . $lng]) . "'";
@@ -275,6 +292,10 @@ function maj_marque(&$frm)
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$sql .= ", site_country = '" . real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 		";
+	}
+	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
+		$sql .= "
+		, nom_maj = '" . nohtml_real_escape_string($_SESSION['session_utilisateur']['prenom'] . ' ' . $_SESSION['session_utilisateur']['nom_famille']) . "'";
 	}
 	$sql .= ", etat = '" . vn($frm['etat']) . "'
 			, position = '" . intval($frm['position']) . "'
@@ -402,6 +423,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 		$tpl_langs[] = array('lng' => $lng,
 			'error' => $form_error_object->text('nom_' . $lng),
 			'nom' => vb($frm['nom_' . $lng]),
+			'placeholder' => vb($frm['placeholder_' . $lng]),
 			'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_titre' => $frm['meta_titre_' . $lng],
 			'meta_key' => $frm['meta_key_' . $lng],

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: prix.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -31,10 +31,18 @@ switch (vb($_REQUEST['mode'])) {
 				$prix = get_float_from_user_input($_POST['prix'][$i]);
 				// $prix_ht = get_float_from_user_input($_POST['prix'][$i]) / (1 + $product_object->tva / 100);
 				$prix_revendeur = get_float_from_user_input($_POST['prix_revendeur'][$i]);
+				$product_fields[] = "prix = '" . nohtml_real_escape_string($prix) . "'";
+				$product_fields[] = "promotion = '" . nohtml_real_escape_string(get_float_from_user_input($_POST['promotion'][$i])) . "'";
+				$product_fields[] = "prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'";
+				$product_fields[] = "prix_achat = '" . nohtml_real_escape_string(get_float_from_user_input($_POST['prix_achat'][$i])) . "'";
+
+				$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
 				query("UPDATE peel_produits
-					SET prix = '" . nohtml_real_escape_string($prix) . "', prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "', prix_achat = '" . nohtml_real_escape_string(get_float_from_user_input($_POST['prix_achat'][$i])) . "', promotion = '" . nohtml_real_escape_string(get_float_from_user_input($_POST['promotion'][$i])) . "'
+					SET	" . implode(', ', $product_fields) . "
 					WHERE id = '" . intval($prodid) . "' AND " . get_filter_site_cond('produits', null, true) . "");
 				// unset($product_object);
+				
+				
 			}
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_MSG_UPDATED_OK']))->fetch();
 		}
@@ -60,8 +68,11 @@ include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
  * @return
  */
 function affiche_formulaire_modif_prix($catid)
-{
-	$sql = "SELECT p.id, p.prix, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.prix_revendeur, p.prix_achat, p.promotion
+{	
+	$product_fields = array('p.id', 'p.prix', 'p.nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']).' AS nom','p.prix_revendeur','p.prix_achat','p.promotion');
+	$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
+	$sql = "SELECT
+	" . implode(', ', $product_fields) . "
 		FROM peel_produits_categories pc
 		INNER JOIN peel_produits p ON pc.produit_id = p.id
 		WHERE pc.categorie_id='" . intval($catid) . "' AND " . get_filter_site_cond('produits', 'p', true) . "
@@ -83,9 +94,9 @@ function affiche_formulaire_modif_prix($catid)
 				'modif_href' => 'produits.php?mode=modif&id=' . $prod['id'],
 				'nom' => $prod['nom'],
 				'prix' => number_format($prod['prix'], 2, '.', ''),
-				'prix_revendeur' => number_format($prod['prix_revendeur'], 2, '.', ''),
-				'prix_achat' => number_format($prod['prix_achat'], 2, '.', ''),
-				'promotion' => number_format($prod['promotion'], 2, '.', '')
+				'prix_revendeur' => number_format(vn($prod['prix_revendeur']), 2, '.', ''),
+				'prix_achat' => number_format(vn($prod['prix_achat']), 2, '.', ''),
+				'promotion' => number_format(vn($prod['promotion']), 2, '.', '')
 				);
 			$i++;
 		}

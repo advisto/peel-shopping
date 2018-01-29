@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: types.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -150,6 +150,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
+	$tpl->assign('on_franco_amount', vb($frm['on_franco_amount']));
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
@@ -198,6 +199,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_ADMIN_TYPES_NO_DELIVERY', $GLOBALS['STR_ADMIN_TYPES_NO_DELIVERY']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
+	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
 	$tpl->assign('STR_ADMIN_TYPES_TNT', $GLOBALS['STR_ADMIN_TYPES_TNT']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_TNT', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_TNT']);
 	$tpl->assign('STR_ADMIN_TYPES_TNT_DESTINATION', $GLOBALS['STR_ADMIN_TYPES_TNT_DESTINATION']);
@@ -206,7 +208,10 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_ADMIN_TYPES_KWIXO', $GLOBALS['STR_ADMIN_TYPES_KWIXO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN']);
-	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_UPS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_UPS']);
+	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT']);
+	if (check_if_module_active('ups')) {
+		$tpl->assign('STR_ADMIN_TYPES_LINK_TO_UPS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_UPS']);
+	}
 	return $tpl->fetch();
 }
 
@@ -232,7 +237,7 @@ function supprime_type($id)
  */
 function insere_type($frm)
 {
-	$sql = "INSERT INTO peel_types (position, site_id
+	$sql = "INSERT INTO peel_types (position, on_franco_amount, site_id
 		, without_delivery_address, etat";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
@@ -257,7 +262,7 @@ function insere_type($frm)
 		$sql .= ", is_kiala";
 	}
 	$sql .= "
-	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+	) VALUES ('" . intval($frm['position']) . "', " . nohtml_real_escape_string($frm['on_franco_amount']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
 		, '" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -297,6 +302,7 @@ function insere_type($frm)
 function maj_type($id, $frm)
 {
 	$sql = "UPDATE peel_types SET position = '" . nohtml_real_escape_string($frm['position']) . "'
+		, on_franco_amount = '" . nohtml_real_escape_string($frm['on_franco_amount']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, without_delivery_address='" . intval($frm['without_delivery_address']) . "'
 		, etat='" . intval(vn($frm['etat'])) . "'";

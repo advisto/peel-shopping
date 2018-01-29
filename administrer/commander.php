@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: commander.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -77,13 +77,16 @@ switch (vb($_REQUEST['mode'])) {
 			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
 		} elseif (!empty($_POST)) {
 			$save_commande = true;
-			for ($i = 1; $i <= $frm['nb_produits']; $i++) {	
-				// On vérifie si la commande ne comporte pas de produit avec une quantité inférieure au minimum requis
-				$product_object = new Product($frm["id" . $i]);
-				if (vn($product_object->quantity_min_order) > 1 && $frm["q" . $i] < $product_object->quantity_min_order) {
-					$save_commande = false;
+			for ($i = 1; $i <= 1000; $i++) {
+				// $i <= 1000 : C'est le moyen le plus simple de traiter le formulaire, car les ids dans le formulaire ne se suivent par forcement, l'administrateur peut avoir supprimer le produit 1, ce qui fait que $frm["id1"] n'existe pas
+				if (!empty($frm["id" . $i])) {
+					// On vérifie si la commande ne comporte pas de produit avec une quantité inférieure au minimum requis
+					$product_object = new Product($frm["id" . $i]);
+					if (vn($product_object->quantity_min_order) > 1 && $frm["q" . $i] < $product_object->quantity_min_order) {
+						$save_commande = false;
+					}
+					unset($product_object);
 				}
-				unset($product_object);
 			}
 			if ($save_commande) {
 				// Ajout d'une commande en db + affichage du détail de la commande
@@ -157,6 +160,21 @@ switch (vb($_REQUEST['mode'])) {
 			$export = affiche_liste_commandes_admin($_GET, 'html_array');
 			get_csv_export_from_html_table($export);
 		}
+	break;
+
+	case "update_transactions_table" :
+	if (check_if_module_active('transactions')) {
+		$output .= edit_transaction_table($_POST, $_GET['commandeid']);
+	}
+	$output .= affiche_details_commande($_GET['commandeid'], 'modif', null);
+	break;
+		
+	case "mode_reglement" :
+	if (check_if_module_active('transactions') && !empty($_POST['suppr_reglement'])) {
+		// Suppression de l'ancien enregistrement pour mettre le nouveau.
+		query("DELETE FROM peel_transactions WHERE id=".intval($_POST['suppr_reglement']));
+		$output .= affiche_details_commande($_GET['commandeid'], $_GET['mode'], null);
+	}
 	break;
 
 	case "recherche" :

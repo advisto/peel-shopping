@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 53261 2017-03-22 17:12:58Z sdelaporte $
+// $Id: order.php 55488 2017-12-11 17:46:44Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -331,7 +331,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			// Mise à jour de la date de paiement si le statut est en réglé (et ne l'était pas avant)
 			$sql_set_array[] = "a_timestamp='" . date('Y-m-d H:i:s', time()) . "'";
 			// afin d'éviter un doublon d'incrémentation des stocks lorsque l'utilisateur choisit l'annulation de livraison.
-			$output .= call_module_hook('order_status_completed', array('order_id' => $order_id, 'order_infos' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
+			$output .= call_module_hook('order_status_completed', array('order_id' => $order_id, 'order_infos' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new, 'payment_technical_code' => $payment_technical_code), 'string');
 		}
 		if(in_array($statut_paiement_new, array('cancelled', 'refunded')) && !in_array($commande['statut_paiement'], array('cancelled', 'refunded'))) {
 			// Dans le cas particulier d'une commande contenant des produits cadeaux commandés avec des points puis annulée :
@@ -365,6 +365,13 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 				WHERE id="' . intval($order_id) . '" AND ' . get_filter_site_cond('commandes'));
 		}
 		$output .= call_module_hook('update_order_payment_status', array('no_stock_decrement_already_done' => $no_stock_decrement_already_done,'order_id' => $order_id, 'commande' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
+		if ($statut_livraison_new == 'pending' && $commande['statut_livraison'] != $statut_livraison_new) {
+			$custom_template_tags['ORDER_ID'] = $order_id;
+			$custom_template_tags['NOM_FAMILLE'] = $commande['nom_bill'];
+			$custom_template_tags['PRENOM'] = $commande['prenom_bill'];
+			$custom_template_tags['EMAIL'] = $commande['email'];
+			send_email($commande['email'], '', '', 'status_pending', $custom_template_tags, 'html', $GLOBALS['support']);
+		}
 	}
 	return $output;
 }
@@ -497,9 +504,10 @@ function create_or_update_order($order_infos, $articles_array)
 	}
 	// Avant de mettre à jour la commande, on récupère l'ancienne valeur du statut de paiement
 	if (!empty($order_infos['id'])) {
-		$statut_q = query('SELECT c.id_statut_paiement, c.total_points, c.points_etat, c.o_timestamp, sp.technical_code AS statut_paiement
+		$statut_q = query('SELECT c.id_statut_paiement, c.total_points, c.points_etat, c.o_timestamp, sp.technical_code AS statut_paiement, sl.technical_code AS statut_livraison
 			FROM peel_commandes c
 			LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . '
+			LEFT JOIN peel_statut_livraison sl ON sl.id=c.id_statut_livraison AND ' . get_filter_site_cond('statut_livraison', 'sl') . '
 			WHERE c.id=' . intval($order_infos['id']) . ' AND ' . get_filter_site_cond('commandes', 'c') . '');
 		$order_infos_ex = fetch_assoc($statut_q);
 		
@@ -746,7 +754,8 @@ function create_or_update_order($order_infos, $articles_array)
 		$order_infos['commandeid'] = insert_id();
 	}
 	$order_id = $order_infos['commandeid'];
-	if(!empty($order_infos['numero']) && $order_infos['numero']!=vb($GLOBALS['site_parameters']['format_numero_facture'])) {
+
+	if(!empty($order_infos['numero']) && $order_infos['numero']!=vb(get_configuration_variable('format_numero_facture', vn($order_infos['site_id']), $_SESSION['session_langue']))) {
 		// Si un numéro est spécifié par l'admin (donc n'est pas le format par défaut), alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
 		$numero = get_bill_number($order_infos['numero'], $order_id, false);
 	} else {
@@ -765,7 +774,14 @@ function create_or_update_order($order_infos, $articles_array)
 			$product_infos_array = get_product_infos_array_in_order($order_id);
 			foreach ($product_infos_array as $this_ordered_product) {
 				// On réincrémente le stock uniquement pour les articles onstock=1, c'est-à-dire dont le stock est géré
-				if ($this_ordered_product['etat_stock'] == 1 && in_array($order_infos_ex['statut_paiement'], explode(',', $GLOBALS['site_parameters']['payment_status_decrement_stock'])) ) {
+				if(vb($GLOBALS['site_parameters']['stock_update_on_event'], 'order_payment') == 'order_delivery') {
+					$status_decrement_stock = $GLOBALS['site_parameters']['delivery_status_decrement_stock'];
+					$statut = $order_infos_ex['statut_livraison'];
+				} else {
+					$status_decrement_stock = $GLOBALS['site_parameters']['payment_status_decrement_stock'];
+					$statut = $order_infos_ex['statut_paiement'];
+				}
+				if ($this_ordered_product['etat_stock'] == 1 && in_array($statut, explode(',', $status_decrement_stock))) {
 					incremente_stock($this_ordered_product['quantite'] - $this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
 					// On initialise les demande de réassort de stock lié à ce produit commandé en supprimant ensuite les lignes de peel_commandes_articles, donc pas besoin de faire :
 					// query("UPDATE peel_commandes_articles
@@ -934,7 +950,8 @@ function create_or_update_order($order_infos, $articles_array)
 		if (check_if_module_active('stock_advanced')) {
 			$sql .= "
 			, etat_stock = '" . nohtml_real_escape_string(vb($article_infos['etat_stock'])) . "'
-			, delai_stock = '" . nohtml_real_escape_string(vb($article_infos['delai_stock'])) . "'";
+			, delai_stock = '" . nohtml_real_escape_string(vb($article_infos['delai_stock'])) . "'
+			, commentaires_admin = '" . nohtml_real_escape_string(vb($article_infos['commentaires_admin'])) . "'";
 		}
 		if (check_if_module_active('listecadeau') && !empty($article_infos['giftlist_owners'])) {
 			$sql .= "
@@ -1170,14 +1187,21 @@ function get_delivery_type_name($id)
 function get_needed_for_free_delivery($total_weight, $total_price, $type_id = null, $zone_id = null, $nb_product = 1)
 {
 	$add_for_free_delivery = array();
+	$treshold_reached = false;
 	// Frais de port gratuits si le total principal (TTC ou HT suivant configuration boutique) des produits est > au seuil.
 	if (!empty($GLOBALS['site_parameters']['nb_product']) && $GLOBALS['site_parameters']['nb_product'] <= $nb_product) {
 		// Frais de port gratuits si plus de nb_product commandés
 		return null;
-	}elseif (!empty($GLOBALS['site_parameters']['nb_product'])) {
+	} elseif (!empty($GLOBALS['site_parameters']['nb_product'])) {
 		$add_for_free_delivery['products'] = $GLOBALS['site_parameters']['nb_product'] - $nb_product;
 	}
-	
+	if (check_if_module_active('tnt') && !empty($_SESSION['session_caddie']->typeId) && !empty($GLOBALS['site_parameters']['tnt_treshold']) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
+		$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
+		if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
+			// dans ce cas les frais de port sont spécifique, et ne sont pas calculé par la boutique.
+			return null;
+		}
+	}
 	if (!empty($zone_id)) {
 		$query = query('SELECT z.on_franco, z.on_franco_amount, z.on_franco_reseller_amount, z.on_franco_nb_products
 			FROM peel_zones z
@@ -1188,22 +1212,46 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 			$amount_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $result_zones['on_franco_reseller_amount'] : $result_zones['on_franco_amount']);
 			// Zone franco de port
 			if ($amount_used <= round($total_price, 2)) {
-				return null;
+				$treshold_reached = true;
 			} else {
+				$treshold_reached = false;
 				$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
 			}
 		}
 		if (!empty($result_zones['on_franco_nb_products'])) {
 			// Zone franco de port
 			if($result_zones['on_franco_nb_products'] <= $nb_product) {
-				return null;
+				$treshold_reached = true;
 			} else {
+				$treshold_reached = false;
 				$add_for_free_delivery['products'] = $result_zones['on_franco_nb_products'] - $nb_product;
 			}
 		}
 	}
-	// Le seuil d'exonération de frais de port de la zone est prioritaire sur le seuil d'exonération de frais de port généraux.
-	// Don con ne teste ici les exonérations générales que si il n'y a pas de configuration d'exonération par zone
+	if (!empty($type_id)) {
+		// On va regarder ensuite le franco de port pour le mode de livraison. On fait la vérification après la zone, car c'est le franco par type qui est prioritaire, donc on remplace le franco de port récupérer pour la zone par le franco par type. 
+		$query = query('SELECT t.on_franco_amount
+			FROM peel_types t
+			WHERE id = "' . intval($type_id) . '" AND ' . get_filter_site_cond('types', 't') . '
+			LIMIT 1');
+		$result_types = fetch_assoc($query);
+		if ($result_types['on_franco_amount']>0) {
+			$amount_used = floatval($result_types['on_franco_amount']);
+			// Zone franco de port
+			if ($amount_used <= round($total_price, 2)) {
+				$treshold_reached = true;
+			} else {
+				$treshold_reached = false;
+				$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
+			}
+		}
+	}
+	if (!empty($treshold_reached)) {
+		// Le seuil d'exonération a été atteint pour le franco par zone ou par type de livraison. On retourne null pour signifier qu'il faut exonérer les frais de port.
+		return null;
+	}
+	// Les seuils d'exonérations de frais de port de la zone et du type sont prioritaire sur le seuil d'exonération de frais de port généraux.
+	// Donc on ne teste ici les exonérations générales que si il n'y a pas de configuration d'exonération par zone
 	if (empty($add_for_free_delivery['amount'])) {
 		// Cas où un seuil de commande minimal est défini pour l'utilisateur de manière globale au niveau de la configuration du site
 		$seuil_total_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $GLOBALS['site_parameters']['seuil_total_reve'] : $GLOBALS['site_parameters']['seuil_total']);
@@ -1490,7 +1538,7 @@ function get_order_infos_array($order_object, $product_infos_array=array(), $bil
 		$order_infos['code_promo_text'] = $GLOBALS['STR_CODE_PROMO_REMISE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . $order_object->code_promo;
 		$code_promo_query = query('SELECT code_promo, valeur_code_promo, percent_code_promo, devise
 			FROM peel_commandes pc
-			WHERE code_promo="' . nohtml_real_escape_string($order_object->code_promo) . '" AND ' . get_filter_site_cond('commandes', 'pc') . '');
+			WHERE id="'.intval($order_object->id).'" AND code_promo="' . nohtml_real_escape_string($order_object->code_promo) . '" AND ' . get_filter_site_cond('commandes', 'pc') . '');
 		if ($cp = fetch_assoc($code_promo_query)) {
 			$order_infos['code_promo_text'] .= ' - ' . get_discount_text($cp['valeur_code_promo'], $cp['percent_code_promo'], true, $cp['devise']) . '';
 		}
@@ -1535,7 +1583,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 	while ($prod = fetch_assoc($qid_items)) {
 		if (!empty($invoice_product_excluded)) {
 			// On souhaite exclure des produits de la liste des produits commandés, 
-			// Le paramère est un tableau, qui contient les références à exclure.
+			// Le paramètre est un tableau, qui contient les références à exclure.
 			foreach ($invoice_product_excluded as $this_excluded_reference) {
 				if (StringMb::strpos($prod['reference'], $this_excluded_reference) === 0 && StringMb::strpos($prod['reference'], 'commission') === false) {
 					// Si le produit commandé contient la référence à exclure et que ce n'est pas une commission, on passe ce produit.
@@ -1560,6 +1608,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 			$attribut_text = '';
 		}
 		$delai_text = (!empty($prod['delai_stock']) ? "\r\n" . $GLOBALS['STR_DELIVERY_STOCK'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . get_formatted_duration((intval($prod['delai_stock']) * 24 * 3600), false, true) : "");
+		$commentaires_admin = (!empty($prod['commentaires_admin']) ? "\r\n" . $prod['commentaires_admin']: "");
 		// Attention : un test !empty ne marche pas sur prix_option, percent_remise_produit et ecotaxe_ttc car au format "0.00"
 		$option_text = ($prod['prix_option'] != 0 ? "\r\n" . $GLOBALS['STR_OPTION_PRIX'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['prix_option'], true, $devise, true, $currency_rate) . "" : "");
 		// ATTENTION : ne pas utiliser ici $prod['percent_remise_produit']
@@ -1569,10 +1618,14 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		$remise_text = ($prod['remise'] > 0 ? "\r\n" . $GLOBALS['STR_PROMOTION_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . get_discount_text((display_prices_with_taxes_active()?$prod['remise']:$prod['remise_ht']), $prod['percent_remise_produit'] , display_prices_with_taxes_active(), $devise) : "");
 		if (check_if_module_active('ecotaxe')) {
 			// On affiche le montant de l'écotaxe dans la colonne dénomination du produit et non pas prix pour des raisons de largeur de colonne
-			$ecotaxe_text = ($prod['ecotaxe_ttc'] > 0) ? "\r\n" . $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ttc'], true, $devise, true, $currency_rate) : "";
+			if (display_prices_with_taxes_active()) {
+				$ecotaxe_text = ($prod['ecotaxe_ttc'] > 0) ? "\r\n" . (defined('IN_INVOICE_PDF') || defined('IN_INVOICE_HTML')?$GLOBALS['STR_ECOTAXE_INCLUDED']:$GLOBALS['STR_ECOTAXE_INCLUDE']) . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ttc'], true, $devise, true, $currency_rate) : "";
+			} else {
+				$ecotaxe_text = ($prod['ecotaxe_ht'] > 0) ? "\r\n" . (defined('IN_INVOICE_PDF') || defined('IN_INVOICE_HTML')?$GLOBALS['STR_ECOTAXE_INCLUDED']:$GLOBALS['STR_ECOTAXE_INCLUDE']) . ' ' . $GLOBALS['STR_HT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($prod['ecotaxe_ht'], true, $devise, true, $currency_rate) : "";
+			}
 		}
 		$prod['product_technical_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text));
-		$prod['product_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text));
+		$prod['product_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text) . vb($commentaires_admin));
 		$product_infos_array[] = $prod;
 	}
 	return $product_infos_array;
@@ -1589,7 +1642,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
  * @param array $params Possibilité de définir des paramètres particuliers pour les moyens de paiement appelés via get_payment_form_XXXX qui les prendraient en compte, par exemple "title"
  * @return string
  */
-function get_payment_form($order_id, $forced_type = null, $send_admin_email = false, $amount_to_pay = 0, $allow_autosend = true, $params = array())
+function get_payment_form($order_id, $forced_type = null, $send_admin_email = false, $forced_amount_to_pay = 0, $allow_autosend = true, $params = array())
 {
 	static $admin_email_sent;
 	$output = '';
@@ -1600,7 +1653,9 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 	if(empty($com)) {
 		return null;
 	}
-	if (empty($amount_to_pay)) {
+	if (!empty($forced_amount_to_pay)) {
+		$amount_to_pay = $forced_amount_to_pay;
+	} else {
 		$amount_to_pay = floatval($com->montant);
 	}
 	if($amount_to_pay == 0 || !is_order_modification_allowed($com->o_timestamp)) {
@@ -1625,7 +1680,22 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// In $com->payment_technical_code is stored the "technical_code" found in peel_paiement
 		$type = $com->paiement;
 	}
-	if (empty($type) || is_array($type)) {
+	if (!empty($GLOBALS['site_parameters']['payment_multiple']) && String::strpos($type, '#')!==false) {
+		// Si le paiement multiple est actif, et qu'il y a le caractère # dans le code technique du moyen de paiement, on récupère les informations pour faire un paiement partiel.
+		// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier réglement.
+		$payment_array = explode('#', $type);
+		if (is_numeric($payment_array[1])) {
+			// le deuxième élément du tableau est numérique, donc on peut utiliser les infos récupérée via le explode.
+			// On récupère le type du paiement, pour qu'il soit correctement traité plus bas dans la fonction dans le switch/case.
+			$type = $payment_array[0];
+			if (empty($forced_amount_to_pay)) {
+					// On passe ici uniquement si le montant à payer provient de la table peel_commandes, dans le cas contraire c'est qu'on souhaite que l'utilisateur paye un montant spécifique donc on y touche pas.
+				// Calcul du montant à payer, qui correspond au pourcentage défini dans le paramètre payment_multiple
+				$amount_to_pay = $amount_to_pay * ($GLOBALS['site_parameters']['payment_multiple'][$payment_array[1]]/100);
+			}
+		}
+	}
+	if ((empty($type) || is_array($type)) && empty($GLOBALS['site_parameters']['payment_method_display_disable_if_type_empty'])) {
 		// Affichage de tous les modes de paiement si aucun défini (seulement si commande passée dans l'administration)
 		if (!empty($com->site_id)) {
 			$site_id = $com->site_id;
@@ -1650,6 +1720,11 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('payment_form.tpl');
 	$tpl->assign('type', $type);
+	if ($type == 'transfer' && $com->paiement == '!atos' && !empty($com->campaign_id) && function_exists('get_public_campaign_id')) {
+		// Affichage d'une mention spéciale pour les virements dans le cadre d'une commande liée à lemonway
+		$tpl->assign('STR_MODULE_DREAMTAKEOFF_INSERT_CODE', $GLOBALS['STR_MODULE_DREAMTAKEOFF_INSERT_CODE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . get_campaign_wallet_id($com->campaign_id, $com->site_id) . '');
+		$payment_rib = 'payment_lemonway';
+	}
 	$tpl->assign('commande_pdf_href', get_site_wwwroot($com->site_id, $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
 	$tpl->assign('amount_to_pay_formatted', fprix($amount_to_pay, true, $com->devise, true, get_float_from_user_input(vn($com->currency_rate))));
 	$tpl->assign('disable_address_payment_by_check', !empty($GLOBALS['site_parameters']['disable_address_payment_by_check']));
@@ -1667,7 +1742,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			break;
 
 		case 'transfer':
-			$tpl->assign('rib', print_rib(true));
+			$tpl->assign('rib', print_rib(true, vb($payment_rib)));
 			break;
 
 		case 'cmcic' :
@@ -1851,7 +1926,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		default :
 			if (function_exists('get_payment_form_'.$type)) {
 				$function_name = 'get_payment_form_'.$type;
-				$standard_params = array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship, 'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type);
+				$standard_params = array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'societe_ship' => $com->societe_ship, 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship,'fullname_ship' => $com->prenom_ship . ' ' . $com->nom_ship, 'telephone_ship' => $com->telephone_ship, 'societe_bill' => $com->societe_bill,'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type, 'id_utilisateur' => $com->id_utilisateur);
 				$params = array_merge_recursive_distinct($standard_params, $params);
 				$tpl->assign('form', $function_name($params));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
@@ -1955,4 +2030,18 @@ function get_order_id($id = null, $site_id = null)
 			return null;
 		}
 	}
+}
+/**
+ * Fonction qui génère la requête SQL de sélection du mode de transport
+ *
+ * @return string
+ */
+function get_tarifs_sql()
+{
+	$sqlType = 'SELECT DISTINCT(t.id), t.nom_' . $_SESSION['session_langue'] . '
+		FROM peel_tarifs tf
+		INNER JOIN peel_types t ON t.id = tf.type AND ' . get_filter_site_cond('types', 't') . '
+		WHERE t.etat = 1 AND ' . get_filter_site_cond('tarifs', 'tf') . ' AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0)
+		ORDER BY t.position ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC';
+	return $sqlType;
 }

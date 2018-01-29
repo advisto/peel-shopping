@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: url_standard.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: url_standard.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -282,8 +282,11 @@ if (!function_exists('get_url')) {
 				unset($get_array['id']);
 			}
 		}
-		if(function_exists('convertHrefUri') && empty($forced_site_id)) {
-			$url = convertHrefUri($uri, $get_array, $lang);
+		if(!empty($GLOBALS['site_parameters']['url_use_convertHrefUri']) && function_exists('convertHrefUri') && empty($forced_site_id)) {
+			// URL rewirting spécifique, expérimental => désactivé par défaut
+			$href_array = $get_array;
+			$href_array['script_filename'] = $uri;
+			$uri = convertHrefUri(null, $href_array, $lang);
 		} else {
 			if(StringMb::substr($uri, 0, 1) !== '/') {
 				$uri = '/' . $uri;
@@ -299,11 +302,11 @@ if (!function_exists('get_url')) {
 				}
 				$uri .= implode('&', $queryString);
 			}
-			if(StringMb::strpos($uri, '://') === false) {
-				$uri = get_site_wwwroot($forced_site_id, $lang) . $uri;
-			}
-			$url = handle_setup_redirections($uri, 'value');
 		}
+		if(StringMb::strpos($uri, '://') === false) {
+			$uri = get_site_wwwroot($forced_site_id, $lang) . $uri;
+		}
+		$url = handle_setup_redirections($uri, 'value');
 		return $url;
 	}
 }

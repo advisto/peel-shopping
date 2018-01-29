@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix_pourcentage.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: prix_pourcentage.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -32,21 +32,25 @@ if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['pe
 
 		switch ($_POST['for_price']) {
 			case "all" :
-				$sql_set = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . "), prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
 				break;
 
 			case "1" :
-				$sql_set = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
 				break;
 
 			case "2" :
-				$sql_set = "prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
 				break;
 
 			default:
-				$sql_set = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . "), prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix = prix * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
+				$product_fields[] = "prix_revendeur = prix_revendeur * (1 " . $operation_symbol . " " . floatval($percent_prod_to_apply) . ")";
 				break;
 		}
+		
+		$product_fields = get_table_field_names('peel_produits', null, false, $product_fields);
 		if (!empty($_POST['categories'])) {
 			if (!in_array('all', $_POST['categories'])) {
 				$sql_where = "id IN (SELECT produit_id FROM peel_produits_categories WHERE categorie_id IN (" . nohtml_real_escape_string(implode(',', get_category_tree_and_itself($_POST['categories'], 'sons'))) . "))";
@@ -54,7 +58,7 @@ if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['pe
 				$sql_where = '1';
 			}
 			query ('UPDATE peel_produits
-				SET  ' . $sql_set . '
+				SET	' . implode(', ', $product_fields) . '
 				WHERE ' . get_filter_site_cond('produits', null, true) .' AND ' . $sql_where);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK']))->fetch();
 		} elseif (!empty($_POST['produits'])) {
@@ -64,7 +68,7 @@ if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['pe
 				$sql_where = ' 1';
 			}
 			query('UPDATE peel_produits
-				SET ' . $sql_set . '
+				SET	' . implode(', ', $product_fields) . '
 				WHERE ' . get_filter_site_cond('produits', null, true) .' AND ' . $sql_where);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_MSG_UPDATE_OK']))->fetch();
 		} else {

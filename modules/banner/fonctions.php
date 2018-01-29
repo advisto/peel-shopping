@@ -1,22 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
 
 // Définition du tableau de critère SQL (champ => Valeur)
-$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page');
+$GLOBALS['page_types_array'] = array('home_page', 'first_page_category', 'other_page_category', 'ad_page_details', 'search_engine_page', 'ad_creation_page', 'background_site');
 
 /**
  * Traitement de la fin de la génération d'une page
@@ -155,10 +155,11 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 				$output.=$temp[1];
 			}
 		} else {
-			$queryBanner = query("SELECT *
+			$sql_banner = "SELECT *
 				FROM peel_banniere
 				" . $sql_where . " AND date_fin>='" . date('Y-m-d') . "' AND " . get_filter_site_cond('banniere') . "
-				ORDER BY rang ASC, id_categorie DESC, RAND() ASC");
+				ORDER BY rang ASC, id_categorie DESC, RAND() ASC";
+			$queryBanner = query($sql_banner);
 			while ($banner = fetch_assoc($queryBanner)) {
 				if(check_if_module_active('annonces') && defined('IN_CATALOGUE_ANNONCE_DETAILS') && !empty($banner['list_id']) && !empty($ad_id) && (StringMb::strpos($banner['list_id'], StringMb::substr($ad_id, -1)) === false)) {
 					// Sélection d'annonce en fonction du dernier chiffre de l'id d'une annonce. Si une liste d'id est définie, et que l'id courante n'est pas trouvée dans la liste, on passe
@@ -308,8 +309,8 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 			}
 			if(StringMb::strpos($output, 'googlesyndication')!==false && (StringMb::strpos($output, 'x90')===false && StringMb::strpos($output, 'x15')===false)) {
 				// Cette bannière n'est pas un x90 ou x15 et est donc susceptible de compter dans la limite de 3 bannière Google maximum
-				if(StringMb::strpos(StringMb::strtolower($output), 'correspond')===false) {
-					// Cette bannière n'est pas identifiée comme un contenu correspondant => elle compte dans la limite de 3 bannière Google maximum
+				if((StringMb::strpos(StringMb::strtolower($output), 'correspond')===false && StringMb::strpos(StringMb::strtolower($output), 'enable_page_level_ads')===false && StringMb::strpos(StringMb::strtolower($output), 'image-side')===false) || !empty($GLOBALS['disable_google_ads'])) {
+					// Cette bannière n'est pas identifiée comme un contenu correspondant, n'est pas "Annonces au niveau de la page" (pubs pour mobiles), et n'est pas une annonce pour flux (qui ne compte pas dans le max de 3 blocs) => elle compte dans la limite de 3 bannière Google maximum
 					if(vn($GLOBALS['google_pub_count']) >= 3 || !empty($GLOBALS['disable_google_ads'])) {
 						// On ne doit pas afficher plus de 3 espaces Google hors pubs listes de mots clés, de hauteur x90 ou x15 ou ne pas afficher de bannière adsense si $GLOBALS['disable_google_ads'] est true. $GLOBALS['disable_google_ads'] est défini à false dans les cas de figure défini par la fonction is_adsense_compliant
 						$output='';
@@ -401,18 +402,42 @@ function update_viewed_banners()
 	}
 }
 
+/**
+ *
+ * @param mixed $var
+ * @return
+ */
 function read_global($var) {
   return isset($_SERVER[$var]) ? $_SERVER[$var]: '';
 }
 
+/**
+ *
+ * @param mixed $url
+ * @param mixed $param
+ * @param mixed $value
+ * @return
+ */
 function google_append_url(&$url, $param, $value) {
   $url .= '&' . $param . '=' . urlencode($value);
 }
 
+/**
+ *
+ * @param mixed $url
+ * @param mixed $param
+ * @return
+ */
 function google_append_globals(&$url, $param) {
   google_append_url($url, $param, $GLOBALS['google'][$param]);
 }
 
+/**
+ *
+ * @param mixed $url
+ * @param mixed $param
+ * @return
+ */
 function google_append_color(&$url, $param) {
   global $google_dt;
   $color_array = explode(',', $GLOBALS['google'][$param]);
@@ -420,6 +445,10 @@ function google_append_color(&$url, $param) {
                     $color_array[$google_dt % count($color_array)]);
 }
 
+/**
+ *
+ * @return
+ */
 function google_set_screen_res() {
   $screen_res = read_global('HTTP_UA_PIXELS');
   if ($screen_res == '') {
@@ -435,6 +464,10 @@ function google_set_screen_res() {
   }
 }
 
+/**
+ *
+ * @return
+ */
 function google_set_muid() {
   $muid = read_global('HTTP_X_DCMGUID');
   if ($muid != '') {
@@ -458,6 +491,10 @@ function google_set_muid() {
   }
 }
 
+/**
+ *
+ * @return
+ */
 function google_set_via_and_accept() {
   $ua = read_global('HTTP_USER_AGENT');
   if ($ua == '') {
@@ -466,6 +503,10 @@ function google_set_via_and_accept() {
   }
 }
 
+/**
+ *
+ * @return
+ */
 function google_get_ad_url() {
   $google_ad_url = 'http://pagead2.googlesyndication.com/pagead/ads?';
   google_append_url($google_ad_url, 'dt',
@@ -483,4 +524,13 @@ function google_get_ad_url() {
     }
   }
   return $google_ad_url;
+}
+
+
+/**
+ *
+ * @return
+ */
+function banner_hook_front_html_header_template_data () {
+    return array('background_banner' => affiche_banner(null, true, null, null, 0, "background_site", null, null, true));
 }

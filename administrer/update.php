@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 53591 2017-04-13 15:46:58Z sdelaporte $
+// $Id: update.php 55482 2017-12-11 14:58:04Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -1299,7 +1299,7 @@ INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `str
 (28, 'commission_affilie', 'core', 'integer', '0', '', NOW(), '', 1),
 (29, 'id', 'core', 'integer', '1', '', NOW(), '', 1),
 (30, 'css', 'core', 'string', 'screen.css', '', NOW(), '', 1),
-(31, 'template_directory', 'core', 'string', 'peel7', '', NOW(), '', 1),
+(31, 'template_directory', 'core', 'string', 'peel9', '', NOW(), '', 1),
 (32, 'template_multipage', 'core', 'string', 'default_1', '', NOW(), '', 1),
 (33, 'email_paypal', 'core', 'string', '', '', NOW(), '', 1),
 (34, 'email_commande', 'core', 'string', '', '', NOW(), '', 1),
@@ -1929,7 +1929,7 @@ UPDATE `peel_email_template` SET name = \"Order confirmation #[ORDER_ID] on [SIT
 -- Ajout du champ sentence_displayed_on_product
 ALTER TABLE `peel_categories` ADD `sentence_displayed_on_product_en` varchar(255) NOT NULL DEFAULT '';
 -- Modification du drapeaux de la langues
-UPDATE `peel_langues` SET flag = '/images/en.png' WHERE flag='gb.gif';
+UPDATE `peel_langues` SET flag = '/images/en.png' WHERE flag='uk.gif';
 
 ";
 }
@@ -2445,6 +2445,7 @@ ALTER TABLE `peel_avis`  ADD `item_id` int(11) NOT NULL DEFAULT '0';
 if(file_exists($GLOBALS['dirroot'] . '/modules/annonces')) {
 	$sql_update_array['8.0.4'] .= "
 ALTER TABLE `peel_lot_vente` ADD `id_adresse` int(11) NOT NULL DEFAULT '0';
+ALTER TABLE `peel_lot_vente` ADD INDEX ( `id_adresse` );
 ";
 }
 $sql_update_array['8.0.4'] .= "
@@ -2526,6 +2527,80 @@ if(file_exists($GLOBALS['dirroot'] . '/modules/annonces') || file_exists($GLOBAL
 ALTER TABLE `peel_user_contacts` CHANGE `status` `status` SET('TRUE','FALSE','FILTERED','NO_EMAIL','READ','SEND','TREATED','TRASH','DELETED') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'TRUE'; 
 ";
 }
+$sql_update_array['8.0.5'] = "
+ALTER TABLE `peel_devises` ADD `main` tinyint(1) NOT NULL default '0';
+ALTER TABLE `peel_categories` ADD `poids` FLOAT(10,2) NOT NULL DEFAULT '0.00000';
+ALTER TABLE `peel_utilisateurs` ADD `access_history` TINYINT(1) NOT NULL DEFAULT '1';
+ALTER TABLE `peel_produits` ADD `allow_add_product_with_no_stock_in_cart` TINYINT(1) NOT NULL DEFAULT '0';
+ALTER TABLE `peel_produits` ADD `reference_fournisseur` VARCHAR(100) NOT NULL DEFAULT '' AFTER `reference`;
+ALTER TABLE `peel_commandes_articles` ADD `commentaires_admin` VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE `peel_codes_promos` ADD `promo_code_combinable` tinyint(1) NOT NULL DEFAULT '0';
+ALTER TABLE `peel_types` ADD `on_franco_amount` FLOAT(15,5) NOT NULL DEFAULT '0.00000';
+ALTER TABLE `peel_zones` ADD `payment_technical_code` VARCHAR(255) NOT NULL DEFAULT '';";
+
+if(file_exists($GLOBALS['dirroot'] . '/modules/banner')) {
+	$sql_update_array['8.0.5'] .= "
+ALTER TABLE `peel_banniere` ADD `on_background_site` TINYINT(1) NOT NULL DEFAULT '0' AFTER `on_search_engine_page`;";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/conditionnement')) {
+	$sql_update_array['8.0.5'] .= "
+ALTER TABLE `peel_produits` ADD `conditioning_text` VARCHAR(255) NOT NULL DEFAULT '';";
+}
+
+$sql_update_array['8.0.5'] .= "
+ALTER TABLE `peel_pays` ADD `prices_decimal_separator` CHAR(1) NOT NULL, ADD `prices_thousands_separator` CHAR(1) NOT NULL AFTER `prices_decimal_separator`;
+ALTER TABLE `peel_marques` ADD `date_insere` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `promotion_percent`, ADD `date_maj` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `date_insere`; 
+ALTER TABLE `peel_societe` ADD `societe_type` VARCHAR(255) NOT NULL DEFAULT '' AFTER `site_id`, ADD `id_marques` VARCHAR(255) NOT NULL DEFAULT '' AFTER `societe_type`; 
+ALTER TABLE `peel_profil` ADD `position` INT(11) NOT NULL DEFAULT '0' AFTER `priv`;
+";
+foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+	$sql_update_array['8.0.5'] .= "
+	ALTER TABLE `peel_categories` ADD `image_header_".$this_lang."` VARCHAR(255) NOT NULL DEFAULT '' AFTER `image_".$this_lang."`;";
+	
+	
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/annonces')) {
+	$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES (NULL, 'website_type', 'core', 'string', 'ad', '', NOW(), '', '1', '1');";
+} else {
+	$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES (NULL, 'website_type', 'core', 'string', 'shop', '', NOW(), '', '1', '1');";
+}
+$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_configuration` (`id`, `technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`, `site_id`) VALUES (NULL, 'anim_loading_page', 'core', 'integer', '1', '', NOW(), '', '1', '1');
+	ALTER TABLE `peel_utilisateurs` ADD `newsletter_validation_date` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `newsletter`; 
+	ALTER TABLE `peel_utilisateurs` ADD `commercial_validation_date` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `commercial`;
+
+";
+if(in_array('fr', $GLOBALS['admin_lang_codes'])) {
+	$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_email_template` (`id`, `technical_code`, `name`, `subject`, `text`, `lang`, `active`, `id_cat`, `default_signature_code`, `site_id`) VALUES
+	(NULL, 'user_double_optin_registration', 'Validation de l\'inscription sur [SITE]', 'Validation de l\'inscription sur [SITE]', 'Bonjour,\r\n\r\nVous venez de vous inscrire sur [SITE]. Rappel des informations transmises : \r\n[FIELDS]\r\n\r\nVeuillez cliquer sur le lien ci dessous pour activer votre compte : \r\n<a href=\'[VALIDATION_LINK]\'>[VALIDATION_LINK]</a>\r\n', 'fr', 'TRUE', 1, '', 1),
+	(NULL, 'confirm_newsletter_registration', 'Inscription à la newsletter / offres commerciales', 'inscription [TYPE] de [SITE]', 'Bonjour,\r\n\r\nVous vous êtes inscrit [TYPE] du site [SITE].\r\nPour confirmer cette inscription veuillez cliquer sur le lien suivant :\r\n<a href=\'[CONFIRM_NEWSLETTER_REGISTER_LINK]\'>[CONFIRM_NEWSLETTER_REGISTER_LINK]</a>', 'fr', 'TRUE', 1, '', 1);";
+}
+
+if(in_array('en', $GLOBALS['admin_lang_codes'])) {
+	$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_email_template` (`id`, `technical_code`, `name`, `subject`, `text`, `lang`, `active`, `id_cat`, `default_signature_code`, `site_id`) VALUES
+	(NULL, 'user_double_optin_registration', 'Validation of the inscription on [SITE]', 'Validation of the inscription on [SITE]', 'Hello,\r\n\r\nYou have just registered on [SITE]. Reminder of the information transmitted:\r\n[FIELDS]\r\n\r\nPlease click on the link below to activate your account:\r\n<a href=\'[VALIDATION_LINK]\'> [VALIDATION_LINK] </a>', 'en', 'TRUE', 1, '', 1),
+	(NULL, 'confirm_newsletter_registration', 'newsletter subscription / commercial offers', 'register [TYPE] from [SITE]', 'Hello,\r\nYou registered [TYPE] of the [SITE] site.\r\nTo confirm this registration please click on the following link:\r\n<a href=\'[CONFIRM_NEWSLETTER_REGISTER_LINK]\'>[CONFIRM_NEWSLETTER_REGISTER_LINK]</a>', 'en', 'TRUE', 1, '', 1);";
+}
+
+if(in_array('es', $GLOBALS['admin_lang_codes'])) {
+	$sql_update_array['8.0.5'] .= "
+	INSERT INTO `peel_email_template` (`id`, `technical_code`, `name`, `subject`, `text`, `lang`, `active`, `id_cat`, `default_signature_code`, `site_id`) VALUES
+	(NULL, 'confirm_newsletter_registration', 'Registro [TYPE] de [SITE]', 'suscripción al boletín / ofertas comerciales', 'Hola, \r\nSe registró [TYPE] del sitio [SITE]. \r\nPara confirmar este registro, haga clic en el siguiente enlace: \r\n <a href=\'[CONFIRM_NEWSLETTER_REGISTER_LINK]\'> [CONFIRM_NEWSLETTER_REGISTER_LINK] </a>', 'es', 'TRUE', 1, '', 1),
+	(NULL, 'user_double_optin_registration', 'Validación de la inscripción en [SITE]', 'Validación de la inscripción en [SITE]', 'Hola, \r\nacaba de registrarse en [SITE].\r\n Recordase de la información transmitida:\r\n [FIELDS].\r\n\r\nHaga clic en el enlace debajo para activar su cuenta:\r\n<a href=\'[VALIDATION_LINK]\'> [VALIDATION_LINK] </a>', 'es', 'TRUE', 1, '', 1);";
+}
+
+if(file_exists($GLOBALS['dirroot'] . '/modules/attributs')) {
+	$sql_update_array['8.0.5'] .= "
+	ALTER TABLE `peel_nom_attributs` ADD `disable_reductions` TINYINT(1) NOT NULL DEFAULT '0';";
+}
+$sql_update_array['8.0.5'] .= "
+	ALTER TABLE `peel_adresses` ADD `longitude` VARCHAR(255) NOT NULL DEFAULT '' AFTER `email`, ADD `latitude` VARCHAR(255) NOT NULL DEFAULT '' AFTER `longitude`; 
+	ALTER TABLE `peel_adresses` ADD `address_hash` VARCHAR(2) NOT NULL DEFAULT '' AFTER `latitude`;
+";
 // FIN du SQL par version
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	

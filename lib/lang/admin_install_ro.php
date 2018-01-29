@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_ro.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: admin_install_ro.php 55928 2018-01-26 17:31:15Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -34,6 +34,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "Vom cere pentru aceasta diferi
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "Trebuie să obţineţi de isp dvs. identificatorii  MySQL .";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "URL site:";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Forţaţi utilizarea criptării SSL pentru administrare : ";
@@ -73,8 +74,13 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB_EXPLANATION"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOP"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOWCASE"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_AD"] = "";
 

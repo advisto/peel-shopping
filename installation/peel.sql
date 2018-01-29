@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 8.0.5, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 53584 2017-04-13 10:08:26Z sdelaporte $
+# $Id: peel.sql 55482 2017-12-11 14:58:04Z sdelaporte $
 #
 
 --
@@ -108,6 +108,9 @@ CREATE TABLE IF NOT EXISTS `peel_adresses` (
   `nom` varchar(255) NOT NULL DEFAULT '',
   `address_type` varchar(255) NOT NULL DEFAULT '',
   `email` varchar(255) NOT NULL DEFAULT '',
+  `longitude` varchar(255) NOT NULL DEFAULT '',
+  `latitude` varchar(255) NOT NULL DEFAULT '',
+  `address_hash` varchar(2) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -226,6 +229,7 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `on_announcement_creation_page` tinyint(1) NOT NULL DEFAULT '0',
   `on_other_page` tinyint(1) NOT NULL DEFAULT '0',
   `on_search_engine_page` tinyint(1) NOT NULL DEFAULT '0',
+  `on_background_site` tinyint(1) NOT NULL DEFAULT '0',
   `keywords` mediumtext NOT NULL,
   `list_id` varchar(255) NOT NULL DEFAULT '',
   `pages_allowed` enum('all','odd','even') NOT NULL DEFAULT 'all',
@@ -266,6 +270,7 @@ CREATE TABLE IF NOT EXISTS `peel_categories` (
   `promotion_percent` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_carrousel` tinyint(1) NOT NULL DEFAULT '0',
   `allow_show_all_sons_products` tinyint(1) NOT NULL DEFAULT '0',
+  `poids` float(10,2) NOT NULL DEFAULT '0.00000',
   `date_insere` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `date_maj` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site_id` int(11) NOT NULL DEFAULT '0',
@@ -315,6 +320,7 @@ CREATE TABLE IF NOT EXISTS `peel_codes_promos` (
   `email_ami` varchar(255) NOT NULL DEFAULT '',
   `email_acheteur` varchar(255) NOT NULL DEFAULT '',
   `on_check` tinyint(1) NOT NULL DEFAULT '0',
+  `promo_code_combinable` tinyint(1) NOT NULL DEFAULT '0',
   `id_site` int(11) NOT NULL DEFAULT '0',
   `id_categorie` int(11) NOT NULL DEFAULT '0',
   `nombre_prevue` int( 11 ) NOT NULL DEFAULT '0',
@@ -490,6 +496,7 @@ CREATE TABLE IF NOT EXISTS `peel_commandes_articles` (
   `nom_attribut` MEDIUMTEXT NOT NULL,
   `total_prix_attribut` float(15,5) NOT NULL DEFAULT '0.00000',
   `statut` tinyint(1) NOT NULL DEFAULT '0',
+  `commentaires_admin` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `commande_id` (`commande_id`),
@@ -590,6 +597,7 @@ CREATE TABLE IF NOT EXISTS `peel_devises` (
   `code` varchar(3) NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
+  `main` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -782,6 +790,8 @@ CREATE TABLE IF NOT EXISTS `peel_marques` (
   `image` varchar(255) NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `position` int(11) NOT NULL DEFAULT '0',
+  `date_insere` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `date_maj` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `promotion_devises` float(15,5) NOT NULL DEFAULT '0.00000',
   `promotion_percent` float(15,5) NOT NULL DEFAULT '0.00000',
   `site_id` int(11) NOT NULL DEFAULT '0',
@@ -876,6 +886,7 @@ CREATE TABLE IF NOT EXISTS `peel_nom_attributs` (
   `show_description` tinyint(1) NOT NULL DEFAULT '1',
   `upload` tinyint(1) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
+  `disable_reductions` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int( 11 ) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `technical_code` (`technical_code`),
@@ -931,6 +942,8 @@ CREATE TABLE IF NOT EXISTS `peel_pays` (
   `iso3` varchar(3) NOT NULL DEFAULT '',
   `iso_num` smallint(4) NOT NULL DEFAULT '0',
   `devise` varchar(3) NOT NULL DEFAULT '',
+  `prices_thousands_separator` CHAR(1) NOT NULL,
+  `prices_decimal_separator` CHAR(1) NOT NULL,
   `position` int(11) NOT NULL DEFAULT '0',
   `risque_pays` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `site_id` int( 11 ) NOT NULL DEFAULT '0',
@@ -974,6 +987,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   `technical_code` varchar(255) NOT NULL DEFAULT '',
   `alpha` char(1) NOT NULL DEFAULT '',
   `reference` varchar(100) NOT NULL DEFAULT '',
+  `reference_fournisseur` varchar(100) NOT NULL DEFAULT '',
   `ean_code` varchar(13) NOT NULL DEFAULT '',
   `default_image` tinyint(1) NOT NULL DEFAULT '1',
   `image1` varchar(255) NOT NULL DEFAULT '',
@@ -1043,6 +1057,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   `display_tab` tinyint(1) NOT NULL DEFAULT '0',
   `nb_view` int(11) NOT NULL DEFAULT '0',
   `extra_link` varchar(255) NOT NULL DEFAULT '',
+  `allow_add_product_with_no_stock_in_cart` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `marque` (`id_marque`),
@@ -1158,6 +1173,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits_tailles` (
 CREATE TABLE IF NOT EXISTS `peel_profil` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `priv` varchar(255) NOT NULL DEFAULT '',
+  `position` int(11) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)
@@ -1222,6 +1238,8 @@ CREATE TABLE IF NOT EXISTS `peel_security_codes` (
 CREATE TABLE IF NOT EXISTS `peel_societe` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `societe` varchar(255) NOT NULL DEFAULT '',
+  `societe_type` varchar(255) NOT NULL DEFAULT '',
+  `id_marques` varchar(255) NOT NULL DEFAULT '',
   `adresse` varchar(255) NOT NULL DEFAULT '',
   `adresse2` varchar(255) NOT NULL DEFAULT '',
   `code_postal` varchar(100) NOT NULL DEFAULT '',
@@ -1401,6 +1419,7 @@ CREATE TABLE IF NOT EXISTS `peel_tva` (
 CREATE TABLE IF NOT EXISTS `peel_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `technical_code` varchar(255) NOT NULL DEFAULT '',
+  `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `position` int(11) NOT NULL DEFAULT '0',
   `without_delivery_address` tinyint(1) NOT NULL DEFAULT '0',
   `is_socolissimo` tinyint(1) NOT NULL DEFAULT '0',
@@ -1448,7 +1467,9 @@ CREATE TABLE IF NOT EXISTS `peel_utilisateurs` (
   `address_ship_default` varchar(32) NOT NULL DEFAULT '',
   `cnil` tinyint(1) NOT NULL DEFAULT '1',
   `newsletter` tinyint(1) NOT NULL DEFAULT '1',
+  `newsletter_validation_date` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   `commercial` tinyint(1) NOT NULL DEFAULT '1',
+  `commercial_validation_date` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   `remise_percent` float(5,2) NOT NULL DEFAULT '0.00',
   `remise_valeur` float(5,2) NOT NULL DEFAULT '0.00',
   `points` int(4) NOT NULL DEFAULT '0',
@@ -1506,6 +1527,7 @@ CREATE TABLE IF NOT EXISTS `peel_utilisateurs` (
   `document` varchar(255) NOT NULL DEFAULT '',
   `on_client_module` tinyint(1) NOT NULL DEFAULT '0',
   `on_photodesk` tinyint(1) NOT NULL DEFAULT '0',
+  `access_history` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   `parameters` TEXT NOT NULL,
   PRIMARY KEY  (`id_utilisateur`),
@@ -1598,6 +1620,7 @@ CREATE TABLE IF NOT EXISTS `peel_zones` (
   `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_reseller_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_nb_products` int(5) NOT NULL DEFAULT '0',
+  `payment_technical_code` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)

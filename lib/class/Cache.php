@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Cache.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: Cache.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,13 +21,15 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Cache.php 53200 2017-03-20 11:19:46Z sdelaporte $
+ * @version $Id: Cache.php 55332 2017-12-01 10:44:06Z sdelaporte $
  * @access public
  */
 class Cache {
 	// Filename with path, generated automatically
 	var $file;
 	var $filemtime = null;
+	var $jquery_loading_requests = null;
+	
 	// Configuration, if not set default values are used
 	// directory => 'directory_name_with_complete_path'
 	// group => 'page'
@@ -53,6 +55,7 @@ class Cache {
 			$this->cfg = $cfgDefault;
 		}
 		$this->file = $this->cfg['directory'] . StringMb::substr(md5($this->cfg['group']), 0, 8) . '_' . StringMb::substr(md5($id), 0, 16);
+		$this->jquery_loading_requests = array_merge(vb($GLOBALS['js_content_array'], array()), vb($GLOBALS['js_ready_content_array'], array()), vb($GLOBALS['js_files'], array()));
 	}
 
 	/**
@@ -132,6 +135,11 @@ class Cache {
 	 */
 	function save($data)
 	{
+		if($this->jquery_loading_requests != array_merge(vb($GLOBALS['js_content_array'], array()), vb($GLOBALS['js_ready_content_array'], array()), vb($GLOBALS['js_files'], array()))) {
+			// Si on a fait des opérations qui induisent des demandes de génération de javascript, celles-ci ne peuvent être mises en cache, et donc on ne sauvegarde pas les informations => ça désactive de facto le cache dans ce contexte
+			@unlink($this->file);
+			return false;
+		}
 		$fp = StringMb::fopen_utf8($this->file, 'wb');
 		if ($fp) {
 			@flock($fp, LOCK_EX);

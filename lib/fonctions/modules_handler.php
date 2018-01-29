@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: modules_handler.php 55332 2017-12-01 10:44:06Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -29,8 +29,9 @@ function load_modules($technical_code = null) {
 		$GLOBALS['site_parameters']['modules_front_office_functions_files_array'] = array('thumbs' => '/modules/thumbs/fonctions.php');
 	}
 	$modules_to_check = array_keys(array_merge_recursive_distinct(vb($GLOBALS['site_parameters']['modules_front_office_functions_files_array'], array('thumbs' => '/modules/thumbs/fonctions.php')), vb($GLOBALS['site_parameters']['modules_admin_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_crons_functions_array'], array()), vb($GLOBALS['site_parameters']['modules_lang_folders_array'], array())));
+	$modules_installed = array();
 	foreach(array_unique($modules_to_check) as $this_module) {
-		if((empty($technical_code) || $technical_code == $this_module) && empty($GLOBALS['modules_installed'][$this_module])) {
+		if((empty($technical_code) || $technical_code == $this_module) && empty($modules_installed[$this_module])) {
 			// Pour la compatibilité avec d'anciennes versions, on stocke le chemin vers les fichiers de fonctions dans une variable globale
 			if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 				$GLOBALS[vb($GLOBALS['site_parameters']['modules_fonctions_variable_array'][$this_module], 'fonctions'. $this_module)] = $GLOBALS['dirroot'] . str_replace(',', ',' . $GLOBALS['dirroot'], $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]);
@@ -63,9 +64,13 @@ function load_modules($technical_code = null) {
 				if(!empty($GLOBALS['site_parameters']['modules_lang_folders_array'][$this_module])) {
 					$GLOBALS['modules_lang_folders_to_load_array'][] = $GLOBALS['site_parameters']['modules_lang_folders_array'][$this_module];
 				}
-				$GLOBALS['modules_installed'][$this_module] = $this_module;
+				$modules_installed[$this_module] = $this_module;
 			}
 		}
+	}
+	if(!empty($modules_installed)) {
+		// On fusionne le tableau issu du chargement de load_site_specific_files_before_others avec le tableau venant de la fonction en cours
+		$GLOBALS['modules_installed'] = array_merge_recursive_distinct($GLOBALS['modules_installed'], $modules_installed);
 	}
 	if(empty($technical_code)) {
 		// On charge les fichiers de langue des modules
@@ -153,6 +158,9 @@ function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_d
 		$class_name = StringMb::ucfirst($this_module);
 		$method_name = 'hook_' . $hook;
 		unset($result);
+		if(!empty($GLOBALS['site_parameters'][$method_name.'_skip_modules_array']) && in_array($this_module, $GLOBALS['site_parameters'][$method_name.'_skip_modules_array'])) {
+			continue;
+		}
 		if(function_exists($function_name)) {
 			$result = $function_name($params);
 		} elseif(class_exists($class_name) && method_exists($class_name, $method_name)) {

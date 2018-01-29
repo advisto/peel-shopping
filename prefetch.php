@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prefetch.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: prefetch.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('PEEL_PREFETCH', true);
 include("configuration.inc.php");
 
@@ -64,43 +64,25 @@ if ($result = fetch_assoc($query)) {
 
 if(function_exists('convertHrefUri')) {
 	// Décodage d'URL
-	$href = convertHrefUri($_SERVER['REQUEST_URI']);
-	if(StringMb::strpos($href['script_filename'], '.php') && file_exists($GLOBALS['dirroot'] . '/' . $href['script_filename'])) {
+	$href = convertHrefUri($_SERVER['REQUEST_URI'], null, $_SESSION['session_langue']);	
+	if(StringMb::strpos($href['script_filename'], '.php') !== false) {
 		$script_filename = $href['script_filename'];
 		unset($href['script_filename']);
 		$_GET = $href;
 		unset($href);
-		require_once($GLOBALS['dirroot'] . '/' . $script_filename);
+		$_SERVER['SCRIPT_NAME'] = '/' . $script_filename;
+		if (!empty($_GET['page']) && (is_numeric($_GET['page']) || strpos($_GET['page'], 'rss') === 0)) { // || !empty($_GET['logout'])
+			if ($script_filename == 'form_save.php') {
+				require_once($GLOBALS['dirroot'] . '/modules/advistocom/form_save.php');
+				die();
+			} elseif (file_exists($GLOBALS['dirroot'] . '/' . $script_filename)) {
+				require_once($GLOBALS['dirroot'] . '/' . $script_filename);
+				die();
+			}
+		}
 		die();
 	}
+	die('nothing found rewrited');
 }
-
-/*
-// Annonces Advisto.com
-$href = convertHrefUri($_SERVER['REQUEST_URI'], null, $_SESSION['session_langue']);
-
-if (!empty($href) && !empty($href[0])) {
-	// On réécrit le nom du script dans la variable $_SERVER
-	$file_name = $href[0];
-	$_SERVER['SCRIPT_NAME'] = '/' . $href[0];
-	if(isset($_GET['test_ads'])){
-		$test_ads=$_GET['test_ads'];
-	}
-	$_GET = $href;
-	unset($_GET[0]);
-	unset($href);
-	if(isset($test_ads)){
-		$_GET['test_ads']=$test_ads;
-	}
-	if (!empty($_GET['page']) && (is_numeric($_GET['page']) || strpos($_GET['page'], 'rss') === 0)) { // || !empty($_GET['logout'])
-		if ($file_name == 'form_save.php') {
-			require_once($GLOBALS['dirroot'] . '/modules/advistocom/form_save.php');
-		} elseif (file_exists('files/' . $file_name)) {
-			require_once($GLOBALS['dirroot'] . 'files/' . $file_name);
-			die();
-		}
-	}
-}
-*/
 
 echo 'nothing found';

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: display_article.php 55637 2017-12-29 18:35:08Z gboussin $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -193,6 +193,12 @@ if (!function_exists('get_articles_list_brief_html')) {
 	 */
 	function get_articles_list_brief_html($rubid)
 	{
+		if(empty($GLOBALS['css_files']['font-awesome'])) {
+			// On va utiliser sur cette page spécifiquement les icônes Font Awesome 
+			$GLOBALS['css_files']['font-awesome'] = get_url('/lib/css/font-awesome.min.css');
+			// On exclut ce fichier de la minification car usage ponctuel
+			$GLOBALS['site_parameters']['minify_css_exclude_array'][] = 'font-awesome.min.css';
+		}
 		$output ='';
 		$sqlrub = "SELECT image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom, articles_review, etat, technical_code
 			FROM peel_rubriques r
@@ -277,7 +283,10 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('plus', $plus);
 			}
 		}
-		
+		$hook_result = call_module_hook('articles_list_brief_html', array(), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
 		$output .= $tpl->fetch();
 		correct_output($output, true, 'html', $_SESSION['session_langue']);
 		return $output;
@@ -291,9 +300,10 @@ if (!function_exists('affiche_arbre_rubrique')) {
 	 * @param integer $rubid
 	 * @param mixed $additional_text
 	 * @param boolean $hidden Used only for generating hidden breadcrumb with microdata for google
+	 * @param integer $level Niveau pour les microdonnées BreadcrumbList (1 étant pour la page d'accueil)
 	 * @return
 	 */
-	function affiche_arbre_rubrique($rubid = 0, $additional_text = null, $hidden = false)
+	function affiche_arbre_rubrique($rubid = 0, $additional_text = null, $hidden = false, $level = 2)
 	{
 		static $tpl;
 		$output = '';
@@ -308,13 +318,14 @@ if (!function_exists('affiche_arbre_rubrique')) {
 			$tpl->assign('href', get_content_category_url($rubid, $nom));
 			$tpl->assign('label', $nom);
 			$tpl->assign('hidden', $hidden);
+			$tpl->assign('level', $level);
 			$nom = $tpl->fetch();
 		} else {
 			$parent = 0;
 			$nom = '';
 		}
 		if ($parent > 0) {
-			return affiche_arbre_rubrique($parent, ' &gt; ' . $nom, $hidden);
+			return affiche_arbre_rubrique($parent, ' &gt; ' . $nom, $hidden, $level+1);
 		} else {
 			return $nom . (!$hidden ? $additional_text : '');
 		}

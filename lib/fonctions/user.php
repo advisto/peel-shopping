@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 53557 2017-04-11 17:15:39Z sdelaporte $
+// $Id: user.php 55806 2018-01-17 16:43:14Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -78,7 +78,8 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
 		} else {
 			$user_priv_array = explode('+', $user_priv);
 			foreach($user_priv_array as $this_user_priv) {
-				if (substr($requested_priv, 0, 5) == 'admin' && $this_user_priv == 'admin') {
+				if ((substr($requested_priv, 0, 5) == 'admin' && $this_user_priv == 'admin' && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') || (vb($GLOBALS['site_parameters']['website_type']) == 'showcase' && (in_array($requested_priv, array('admin_content', 'admin_webmastering', 'admin_manage', 'admin', 'admin_users_contact_form'))))) {
+					// En mode vitrine, l'administrateur à les droits admin, admin webmaster, admin manage (configuation du site, en complément de test sur website_type dans get_admin_menu) et admin content pour qu'il puisse éditer uniquement le contenu associé au mode vitrine.
 					// admin est un administrateur global qui a tous les droits de type admin*
 					return true;
 				} elseif ($demo_allowed && $this_user_priv == 'demo') {
@@ -87,8 +88,16 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
 				}
 				if (strpos($requested_priv, '*') !== false) {
 					// Pour admin*, tout droit du type admin ou admin_.... est autorisé
-					if (strpos($requested_priv, substr($this_user_priv, 0, strpos($requested_priv, '*'))) === 0) {
-						return true;
+					if(strpos($requested_priv, '*') === 0) {
+						// Etoile au début
+						if (strrpos($this_user_priv, substr($requested_priv, 1)) !== false && strrpos($this_user_priv, substr($requested_priv, 1)) + strlen(substr($requested_priv, 1)) == strlen($this_user_priv)) {
+							return true;
+						}
+					} else {
+						// Etoile à la fin
+						if (strpos($requested_priv, substr($this_user_priv, 0, strpos($requested_priv, '*'))) === 0) {
+							return true;
+						}
 					}
 				} elseif ($this_user_priv == $requested_priv) {
 					return true;
@@ -112,7 +121,7 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
  * @param boolean $create_password_on_behalf_of_user
  * @return mixed New user id or array with user information
  */
-function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false)
+function insere_utilisateur($frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false)
 {
 	$sql_condition_array = array();
 	// Si un compte a un privilège ci-dessous, et qu'un utilisateur veut créer un nouveau compte avec le même email, alors il est remplacé automatiquement par le nouveau compte
@@ -173,7 +182,7 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		if (!$skip_existing_account_tests) {
 			// On veut créer un compte normal, ou même newsletter ou load : n'importe quel type de compte
 			// On teste si l'utilisateur existe déjà (si ses droits étaient inférieurs, le compte existant déjà vient d'être supprimé ci-dessus)
-			$sql = "SELECT id_utilisateur
+			$sql = "SELECT *
 				FROM peel_utilisateurs
 				WHERE (" . implode(' OR ', $sql_condition_array).") AND " . get_filter_site_cond('utilisateurs') . "";
 			$query = query($sql);
@@ -246,6 +255,8 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	$frm['seg_buy'] = vb($frm['seg_buy'], 'no_info');
 	$frm['address_bill_default'] = 'original_address';
 	$frm['address_ship_default'] = 'original_address';
+	
+
 	if(!empty($_SESSION['session_parameters'])) {
 		// Paramètres divers tels que des informations sur les réseaux sociaux connectés pour lesquels on va garder souvenir de l'id
 		$frm['parameters'] = serialize($_SESSION['session_parameters']);
@@ -257,6 +268,9 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 		if(isset($frm['specific_field_sql_set'][$this_field])) {
 			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
 			continue;
+		} elseif(in_array($this_field, array('newsletter', 'commercial'))) {
+			// Pour l'inscription à la newselleter et aux offres commercial il faut prendre en compte la checkbox décochée.
+			$frm[$this_field] = vn($frm[$this_field]);
 		} elseif($this_field == 'mot_passe' && isset($password_hash)) {
 			// $frm['mot_passe'] contient le mot de passe en clair, pour éventuel envoi par email
 			// Ici il faut utiliser $password_hash
@@ -291,12 +305,31 @@ function insere_utilisateur(&$frm, $password_already_encoded = false, $send_user
 	query($sql);
 	
 	$frm['id'] = insert_id();
-	$code_client = vb($frm['code_client'], "CLT" . date("Y") . $frm['id']);
-
+	
+	if(empty($frm['code_client'])) {	
+		$code_client = "CLT" . date("Y") . $frm['id'];
+	} else {
+		$code_client = $frm['code_client'];
+	}
 	query("UPDATE peel_utilisateurs
 		SET code_client = '" . nohtml_real_escape_string($code_client) . "'
 		WHERE id_utilisateur = '" . intval($frm['id']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
-
+	if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation']) && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
+		// && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable']) : Si la validation de compte par email est active, alors la validation de l'inscrption à la newsletter/offres commerciales se fera en même temps que la validation du compte
+		if (!empty($frm['newsletter'])) {
+			// double optin pour l'inscription à la newsletter
+			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
+			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
+			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+		}
+		if (!empty($frm['commercial'])) {
+			// double optin pour l'inscription aux partenaires commerciaux
+			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
+			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
+			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+		}
+	}
+	
 	if ($send_user_confirmation) {
 		// Envoi de l'email qui contient le mot de passe qui a été demandé ou créé automatiquement suivant que $frm['mot_passe'] était vide ou déjà rempli
 		send_mail_for_account_creation($frm['email'], $frm['mot_passe'], vb($frm['priv']));
@@ -357,9 +390,9 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	if(empty($frm['lang'])) {
 		$frm['lang'] = $_SESSION['session_langue'];
 	}
+	$this_user = get_user_information($frm['id_utilisateur']);
 	if(!isset($frm['site_id'])) {
 		// Si site_id n'est pas défini dans le formulaire, le site_id défini pour l'utilisateur est celui du site en cours de consultation, sauf pour les administrateurs multisite.
-		$this_user = get_user_information($frm['id_utilisateur']);
 		if (empty($this_user) || $this_user['site_id']>0) {
 			// si l'utilisateur est multisite, le champ site_id resera à 0 avec la fonction vn()
 			$frm['site_id'] = $GLOBALS['site_id'];
@@ -368,6 +401,7 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 	$frm['site_id'] = get_site_id_sql_set_value(vn($frm['site_id']));
 	$frm['format'] = vb($from['format'], vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html'));
 	$frm['date_update'] = date('Y-m-d H:i:s', time());
+
 	if(!empty($frm['email'])) {
 		// Réinitilisation des informations de bounces d'email
 		$frm['email'] = trim($frm['email']);
@@ -393,8 +427,8 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
 			continue;
 		} elseif(!isset($frm[$this_field])) {
-			if ($this_field == 'newsletter' || $this_field == 'commercial' || in_array($this_field, vb($GLOBALS['site_parameters']['user_extra_database_fields_array'],array()))) {
-				// Ce sont les deux champs en checkbox du formulaire. Si pas coché, alors il faut mettre 0 en base de données.
+			if ($this_field == 'newsletter' || $this_field == 'commercial' || $this_field == 'access_history' || in_array($this_field, vb($GLOBALS['site_parameters']['user_extra_database_fields_array'],array()))) {
+				// Ce sont les champs en checkbox du formulaire. Si pas coché, alors il faut mettre 0 en base de données.
 				$frm[$this_field] = 0;
 			} else {
 				continue;
@@ -443,15 +477,56 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$_SESSION['session_utilisateur']['adresse'] = $user_infos['adresse'];
 			$_SESSION['session_utilisateur']['code_postal'] = $user_infos['code_postal'];
 			$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
-			$_SESSION['session_utilisateur']['newsletter'] = intval(vn($user_infos['newsletter']));
-			$_SESSION['session_utilisateur']['commercial'] = intval(vn($user_infos['commercial']));
 			$_SESSION['session_utilisateur']['format'] = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
+			$_SESSION['session_utilisateur']['naissance'] = vb($user_infos['naissance']);
+			$_SESSION['session_utilisateur']['dream_ca'] = vb($user_infos['dream_ca']);
+			$_SESSION['session_utilisateur']['description'] = vb($user_infos['description']);
+			$_SESSION['session_utilisateur']['url'] = vb($user_infos['url']);
+			$_SESSION['session_utilisateur']['dream_societe_kbis'] = vb($user_infos['dream_societe_kbis']);
 		}
 	}
+
 	if (!empty($frm['email'])) {
 		if (check_if_module_active('bounces')) {
 			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php");
 			resolve_bounce($frm['id_utilisateur'], $frm['email']);
+		}
+	}
+	if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
+		if (!empty($frm['newsletter']) && empty($this_user['newsletter'])) {
+			// double optin pour l'inscription à la newsletter
+			$sql = "UPDATE peel_utilisateurs
+				SET newsletter = 0, newsletter_validation_date='0000-00-00'
+				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+			query($sql);
+
+			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
+			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
+			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+			
+		} elseif(empty($frm['newsletter']) && !empty($this_user['newsletter'])) {
+			// Désinscription à la newsletter
+			$sql = "UPDATE peel_utilisateurs
+				SET newsletter = 0, newsletter_validation_date='0000-00-00'
+				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+			query($sql);
+		}
+		if (!empty($frm['commercial']) && empty($this_user['commercial'])) {
+			// double optin pour l'inscription aux partenaires commerciaux
+			$sql = "UPDATE peel_utilisateurs
+				SET commercial = 0, commercial_validation_date='0000-00-00'
+				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+			query($sql);
+			
+			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
+			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
+			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+		} elseif(empty($frm['commercial']) && !empty($this_user['commercial'])) {
+			// Désinscription aux partenaires commerciaux
+			$sql = "UPDATE peel_utilisateurs
+				SET commercial = 0, commercial_validation_date='0000-00-00'
+				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+			query($sql);
 		}
 	}
 	if (isset($frm['comments'])) {
@@ -555,10 +630,11 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				$_SESSION['session_caddie']->update(get_current_user_promotion_percentage());
 			}
 			if (!empty($_SESSION['session_utilisateur']['pays'])) {
-				// Enregistrer la zone d'expedition de l'utilisateur
-				$sqlUserZone = 'SELECT zone
-					FROM peel_pays
-					WHERE id="' . intval($_SESSION['session_utilisateur']['pays']) . '" AND ' . get_filter_site_cond('pays') . '
+				// Récupère la zone d'expédition de l'utilisateur qui sera utilisée par défaut pour la présélection dans le caddie
+				$sqlUserZone = 'SELECT ' . (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])?'z.id AS zone':'p.zone') . '
+					FROM peel_pays p
+					' . (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])?'INNER JOIN peel_zones z ON FIND_IN_SET(z.id,p.zone) AND ' . get_filter_site_cond('zones', 'z') . '':'') . '
+					WHERE p.id="' . intval($_SESSION['session_utilisateur']['pays']) . '" AND ' . get_filter_site_cond('pays', 'p') . '
 					LIMIT 1';
 				$resUserZone = query($sqlUserZone);
 				if ($Zone = fetch_assoc($resUserZone)) {
@@ -588,8 +664,11 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 				updateTelContactNotClosed();
 				// On avertit le contact boutique du login d'un administrateur
 				$custom_template_tags['USER'] = $user_pseudo;
+				$custom_template_tags['USER_RIGHTS'] = $utilisateur['priv'];
 				$custom_template_tags['REVERSE_DNS'] = gethostbyaddr(vb($_SERVER['REMOTE_ADDR']));
-				send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
+				if(!in_array(vb($_SERVER['REMOTE_ADDR']), vb($GLOBALS['site_parameters']['admin_login_email_warning_skipped_for_ips_array'], array()))) {
+					send_email($GLOBALS['support_sav_client'], '', '', 'admin_login', $custom_template_tags, null, $GLOBALS['support'], true, false, true, $GLOBALS['support']);
+				}
 			}
 			
 			query('INSERT INTO peel_utilisateur_connexions (user_id, user_login, user_ip, date, site_id)
@@ -618,12 +697,16 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
  */
 function user_logout()
 {
-	// Désaffecte la variable de session $_SESSION['session_utilisateur'] pour déconnecter l'utilisateur.
+	// Désaffecte la variable de session $_SESSION['session_utilisateur'] pour déconnecter l'utilisateur. On retire également les informations de pays et devise en session car pouvant être liées au compte utilisateur utilisé
 	unset($_SESSION['session_utilisateur']);
+	unset($_SESSION['session_devise']);
+	unset($_SESSION['session_country_detected']);
+	unset($_SESSION['session_site_country']);
+	
 	// Désaffecte la variable session_admin_multisite
 	unset($_SESSION['session_admin_multisite']);
 	// On ne détruit pas toutes les variables pour garder le cas échéant par exemple des variables de session
-	// de limitation de spam, le cookie conserve les produits dans le panier ou autres variables d'historique récent d'actions utilisateur
+	// de limitation de spam, le cookie qui conserve les produits dans le panier ou autres variables d'historique récent d'actions utilisateur
 	unset($_SESSION['session_download_rights']);
 	unset($_SESSION['session_form']);
 	$_SESSION['session_caddie']->init(false, false);
@@ -830,7 +913,7 @@ function get_user_information($user_id = null, $get_full_infos = false, $skip_ca
 		if (!isset($result_array[$cache_id]) || $skip_cache) {
 			$qid = query("SELECT *
 				FROM peel_utilisateurs
-				WHERE id_utilisateur = '" . intval($user_id) . "' AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
+				WHERE (id_utilisateur = '" . intval($user_id) . "' OR email = '" . nohtml_real_escape_string($user_id) . "') AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
 			if($result_array[$cache_id] = fetch_assoc($qid)) {
 				// L'utilisateur a été trouvé, on complète les informations
 				$result_array[$cache_id]['parameters'] = unserialize(vb($result_array[$cache_id]['parameters']));
@@ -914,7 +997,7 @@ function get_priv_options($selected, $mode = 'output', $search_mode = false)
 	$resProfil = query("SELECT *, name_".$_SESSION['session_langue']." AS name
 		FROM peel_profil
 		WHERE " . get_filter_site_cond('profil') . " 
-		ORDER BY name ASC");
+		ORDER BY position,name ASC");
 	while ($Profil = fetch_assoc($resProfil)) {
 		$priv_name = $Profil['name'];
 		if (defined('IN_PEEL_ADMIN') && isset($_SESSION['session_admin_multisite']) && $_SESSION['session_admin_multisite'] === 0) {
@@ -1058,24 +1141,46 @@ function account_update() {
  * @param mixed $address_type
  * @param integer $selected
  * @param boolean $add_manage_choice
- * @param boolean $css_style
+ * @param string $css_style
+ * @param boolean $validate_form_on_change
+ * @param boolean $original_address_suggest
+ * @param boolean $return_nb_result
  * @return
  */
-function get_personal_address_form($id_utilisateur, $address_type = 'bill', $selected = null, $add_manage_choice = true, $css_style = null) {
+function get_personal_address_form($id_utilisateur, $address_type = 'bill', $selected = null, $add_manage_choice = true, $css_style = null, $validate_form_on_change = true, $original_address_suggest = true, $return_nb_result = false) {
 	if(empty($id_utilisateur)) {
 		return false;
 	} else {
-		$sql = 'SELECT id, nom
+		if (!is_array($address_type)) {
+			$address_type = array($address_type);
+		}
+		$sql_address_type = $address_type;
+		// Pour pouvoir récupérer les adresses valable pour la livraison et pour la facturation. Pour ces adresses le champ address_type est vide 
+		$sql_address_type[] = "";
+		$sql = 'SELECT *
 			FROM peel_adresses
-			WHERE id_utilisateur="' . intval($id_utilisateur) . '" AND address_type IN ("","'.real_escape_string($address_type).'")';
-		$q = query($sql);
+			WHERE id_utilisateur="' . intval($id_utilisateur) . '" AND address_type IN ("'.implode('","', real_escape_string($sql_address_type)).'")';
+		$query = query($sql);
+		if (!empty($return_nb_result)) {
+			// Dans ce mode on veut juste savoir si il y a des résultats ou non.
+			return num_rows($query);
+		}
 		$output = '
-		<select class="form-control" onchange="if(this.value){this.form.submit()}" name="personal_address_' . StringMb::str_form_value($address_type) . '" style="' . $css_style. '">
-			<option value="">' . $GLOBALS['STR_ADDRESS'] . '....</option>
-			<option value="original_address"' . frmvalide($selected == 'original_address', ' selected="selected"') . '>' . $GLOBALS['STR_DEFAULT_ADDRESS'] . '</option>';
-		while($result = fetch_assoc($q)) {
+		<select class="form-control" '.(!empty($validate_form_on_change)?'onchange="if(this.value){this.form.submit()}"':'').' name="personal_address_' . StringMb::str_form_value(implode('"_"', $address_type)) . '" style="' . $css_style. '">
+			<option value="">' . $GLOBALS['STR_ADDRESS'] . '....</option>';
+		
+		if (!empty($original_address_suggest)) {
 			$output .= '
-			<option value="' . intval($result['id']) . '"' . frmvalide($selected == $result['id'], ' selected="selected"') . '>' . $result['nom'] . '</option>';
+			<option value="original_address"' . frmvalide($selected == 'original_address', ' selected="selected"') . '>' . $GLOBALS['STR_DEFAULT_ADDRESS'] . '</option>';
+		}
+		while($result = fetch_assoc($query)) {
+			if (!empty($result['nom'])) {
+				$nom = $result['nom'];
+			} else {
+				$nom = $result['adresse'] . ' - ' . $result['code_postal'] . ' - ' . $result['ville'];
+			}
+			$output .= '
+			<option value="' . intval($result['id']) . '"' . frmvalide($selected == $result['id'], ' selected="selected"') . '>' . $nom . '</option>';
 		}
 		if($add_manage_choice) {
 			$output .= '
@@ -1097,13 +1202,48 @@ function get_personal_address_form($id_utilisateur, $address_type = 'bill', $sel
  * @param integer $return_id
  * @return
  */
-function insert_or_update_address($frm, $return_id = false) {
+function insert_or_update_address($frm, $return_id = false, $user_id = null) {
 	if(!empty($frm['contact1']) && empty($frm['telephone'])) {
 		$frm['telephone'] = $frm['contact1'];
 	}
-	if(empty($frm['id_utilisateur']) && !empty($_SESSION['session_utilisateur']['id_utilisateur']) && !defined('IN_PEEL_ADMIN')) {
-		$frm['id_utilisateur'] = intval($_SESSION['session_utilisateur']['id_utilisateur']);
+	if(empty($frm['id_utilisateur'])) {
+		if (!empty($user_id)) {
+			$frm['id_utilisateur'] = intval($user_id);
+		} elseif (!empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
+			$frm['id_utilisateur'] = intval($_SESSION['session_utilisateur']['id_utilisateur']);
+		} else {
+			// On est pas parvenu à trouver l'id de l'utilisateur, donc on s'arrête là.
+			return false;
+		}
 	}
+	// On récupère les données de l'utilisateur, pour compléter le formulaire si besoin. Au minimum les champs adresse, code_postal et ville sont rempli
+	$user_information = get_user_information($frm['id_utilisateur']);
+	if (empty($frm['nom_famille'])) {
+		$frm['nom_famille'] = $user_information['nom_famille'];
+	}
+	if (empty($frm['civilite'])) {
+		$frm['civilite'] = $user_information['civilite'];
+	}
+	if (empty($frm['prenom'])) {
+		$frm['prenom'] = $user_information['prenom'];
+	}
+	if (empty($frm['societe'])) {
+		$frm['societe'] = $user_information['societe'];
+	}
+	if (empty($frm['telephone'])) {
+		$frm['telephone'] = $user_information['telephone'];
+	}
+	if (empty($frm['portable'])) {
+		$frm['portable'] = $user_information['portable'];
+	}
+	if (empty($frm['email'])) {
+		$frm['email'] = $user_information['email'];
+	}
+	if (empty($frm['nom'])) {
+		// Composition automatique du nom de l'adresse, si c'est pas rempli
+		$frm['nom'] = $frm['nom_famille'] . ' - ' . $frm['code_postal'] . ' - ' . $frm['ville'];
+	}
+
 	$table_fields_types = get_table_field_types('peel_adresses');
 	foreach($table_fields_types as $this_field => $this_type) {
 		if(!isset($frm[$this_field])) {
@@ -1129,11 +1269,11 @@ function insert_or_update_address($frm, $return_id = false) {
 		$result = query($sql);
 		$frm['id'] = insert_id();
 	}
-		if($return_id) {
+	if($return_id) {
 		return $frm['id'];
-		} else {
+	} else {
 		return $result;
-		}
+	}
 }
 
 /**
@@ -1285,3 +1425,51 @@ function get_profile_bloc($user_infos, $annonce_object = null, $additional_text 
 ';
 	return $output;
 }
+
+/* 
+ * Supprime une adresse, si le résultat du hook le permet
+ *
+ * @param integer $id_address
+ * @param integer $user_id
+ * @return
+*/
+function delete_address($id_address, $user_id) {
+	$output = '';
+	$hook_result = call_module_hook('address_delete_pre', array('id_address'=>$id_address, 'user_id'=>$user_id), 'boolean');
+	if (!empty($hook_result)) {
+		// La suppression est autorisé
+		$sql = 'DELETE FROM peel_adresses
+			WHERE id = "' . intval($_GET['id']) . '" 
+			AND id_utilisateur = ' . intval($user_id);
+		$q = query($sql);
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADDRESS_DELETED']))->fetch();
+	} else {
+		// On ne doit pas supprimer cette adresse, on affiche un message à l'utilisateur.
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADDRESS_DELETED_ERROR_OCCURRED']))->fetch();
+	}
+	return $output;
+}
+
+
+/* 
+ * Calcul le hash de validation d'ouverture de compte à partir des données de l'utilisateur
+ *
+ * @param integer $user_info
+ * @return
+*/
+function get_registration_validation_hash($user_info) {
+	$output = '';
+	// le mot de passe est hashé ici, mais on s'en sert uniquement pour créer le hash.
+	$output .= StringMb::substr(sha256($GLOBALS['site_parameters']['sha256_encoding_salt'].$user_info['email'].$user_info['mot_passe']),0,16);
+	return $output;
+}
+
+
+
+
+
+
+
+
+
+

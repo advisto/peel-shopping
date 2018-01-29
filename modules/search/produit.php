@@ -3,20 +3,20 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2013 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit.php 53198 2017-03-20 11:07:12Z sdelaporte $
+// $Id: produit.php 55325 2017-11-30 10:47:17Z sdelaporte $
 
 include('../../configuration.inc.php');
 
 if (!check_if_module_active('search')) {
-	// This module is not activated => we redirect to the homepage
-	redirect_and_die(get_url('/'));
+	// This module is not activated
+	die();
 }
 // Javascript
 $page_encoding='utf-8';
@@ -76,7 +76,7 @@ if (vb($_POST['type']) == "update_session_add") {
 				} else {
 					$product_picture = null;
 				}
-				$url = get_product_url($result->id, $result->nom, vb($result->categorie_id), vb($result->categorie));
+				$url = $product_object->get_product_url();
 				$this_label = (!empty($GLOBALS['site_parameters']['autocomplete_hide_images'])?'<div>':'<div class="autocomplete_image"><a href="'.$url.'"><img src="'.$product_picture.'" /></a></div><div style="display:table-cell; vertical-align:middle; height:45px;">') . '<a href="'.$url.'">'. highlight_found_text(StringMb::html_entity_decode($result->nom), $search, $GLOBALS['found_words_array']) . (!empty($GLOBALS['site_parameters']['autocomplete_show_references']) && StringMb::strlen($result->reference) ? ' - <span class="autocomplete_reference_result">' . highlight_found_text(StringMb::html_entity_decode($result->reference), $search, $GLOBALS['found_words_array']) . '</span>' : '') . '</a></div><div class="clearfix" />';
 				if(!in_array($this_label, $labels_array)) { 
 					$results_array[] = array(

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 53591 2017-04-13 15:46:58Z sdelaporte $
+// $Id: configuration.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -192,6 +192,8 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'exaprint' => '/modules/exaprint',
 		'annonces' => '/modules/annonces/class/Annonce.php,' . '/modules/annonces/fonctions.php,'. '/modules/annonces/display_annonce.php',
 		'cart_popup' => '/modules/cart_popup/fonctions.php', // Module d'affichage de popup lors de l'ajout au caddie
+		'abonnement' => '/modules/abonnement/fonctions.php',
+		'vitrine' => '/modules/vitrine/fonctions.php',
 		'tagcloud' => '/modules/tagcloud/fonctions.php', // Module d'affichage des produits les plus recherchés sous forme de nuage de mots
 		'banner' => '/modules/banner/fonctions.php', // Module d'affichage de publicité
 		'rss' => '/modules/rss/fonctions.php',
@@ -222,6 +224,7 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'iphone-ads' => '/modules/iphone-ads',
 		'bounces' => '/modules/bounces',
 		'vatlayer' => '/modules/vatlayer/functions.php',
+		'counter' => '/modules/counter/functions.php',
 		'faq' => '/modules/faq/fonctions.php'
 		);
 set_configuration_variable(array('technical_code' => 'modules_front_office_functions_files_array', 'string' => $modules_front_office_functions_files_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
@@ -253,9 +256,9 @@ foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
 		// On exécute le SQL pour les modules préconfigurés uniquement
 		// Pour les autres modules qui peuvent éventuellement avoir été mis dans le dossier modules/ avant le lancement de l'installation, ils seront gérés par la page de configuration générale sites.php
 		foreach(array('peel_' . $this_module . '.sql', '' . $this_module . '.sql') as $this_filename) {
-			if (file_exists($folder_path . '/' . $this_module . '/' . $this_filename)) {
+			if (file_exists($folder_path . '/' . $this_filename)) {
 				// Exécution du SQL d'installation d'un module
-				$error_msg = execute_sql($folder_path . '/' . $this_module . '/' . $this_filename, null, true);
+				$error_msg = execute_sql($folder_path . '/' . $this_filename, null, true);
 				$messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_SQL_FILE_EXECUTED']. $GLOBALS['STR_BEFORE_TWO_POINTS'].': /' . $this_module . '/' . $this_filename))->fetch();
 				if(!empty($error_msg)) {
 					$messages .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
@@ -264,7 +267,53 @@ foreach($GLOBALS['modules_on_disk'] as $this_module => $folder_path) {
 		}
 	}
 }
+foreach($_SESSION['session_install_langs'] as $this_lang) {
+	// Les langues pour le site ont été créée par la fonction create_or_update_site 
+	// On fait une réparation de langue après l'installation des modules.
+	// 4ème paramètre à false => On ne gère pas les index dans insere_langue, mais après.
+	insere_langue(array('lang' => $this_lang, 'site_id' => 1), true, false, false);
+}
+if (check_if_module_active('annonces')) {
+	// Spécifiquement pour le module d'annonce, on gère l'index search_fulltext une fois que tous les champs par langue ont été créé.
+	$index_array= array();
+	foreach ($_SESSION['session_install_langs'] as $lng) {
+		$index_array[]='titre_'.$lng;
+		$index_array[]='description_'.$lng;
+	}
+	query('ALTER TABLE `peel_lot_vente` ADD FULLTEXT KEY `search_fulltext` ('.implode(',', real_escape_string($index_array)).')');
+}
+if (!isset($_SESSION['session_peel_sql_website_type']) && !empty($_SESSION['session_install_website_type']) && file_exists($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type'].".sql")) {
+	// Exécution du SQL spécifique au type de site installé. On exécute ce code après la configuration des modules pour permettre au fichier de adapter la configuration des modules au type de site.
+	$error_msg = execute_sql($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type'].".sql", null, true, 1);
+	$_SESSION['session_peel_sql_website_type'] = true;
+	set_configuration_variable(array('technical_code' => 'website_type', 'string' => $_SESSION['session_install_website_type'], 'type' => 'string', 'site_id' => 1, 'origin' => 'core'), false);
 
+	if(!empty($error_msg)) {
+		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
+	} else {
+		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_SQL_FILE_EXECUTED']. $GLOBALS['STR_BEFORE_TWO_POINTS'].': lib/sql/peel_'.$_SESSION['session_install_website_type'].'.sql'))->fetch();
+	}
+}
+if (!empty($_SESSION['session_install_website_type']) && !empty($_SESSION['session_install_fill_db']) && file_exists($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content.sql")) {
+	// Exécution de fichier qui contient le contenu, sans le contenu par langue
+	$error_msg = execute_sql($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content.sql", null, true, 1);
+	if(!empty($error_msg)) {
+		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
+	} else {
+		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_SQL_FILE_EXECUTED']. $GLOBALS['STR_BEFORE_TWO_POINTS'].': lib/sql/peel_'.$_SESSION['session_install_website_type'].'_content.sql'))->fetch();
+	}
+	foreach ($_SESSION['session_install_langs'] as $lng) {
+		if(file_exists($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content_".$lng.".sql")) {
+			// Exécution des fichiers de contenu dans la langue paramétrée
+			$error_msg = execute_sql($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content_".$lng.".sql", null, true, 1);
+			if(!empty($error_msg)) {
+				$messages .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message_to_escape' => $error_msg))->fetch();
+			} else {
+				$messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_SQL_FILE_EXECUTED']. $GLOBALS['STR_BEFORE_TWO_POINTS'].': lib/sql/peel_'.$_SESSION['session_install_website_type'].'_content_'.$lng.'.sql'))->fetch();
+			}
+		}
+	}
+}
 if (file_exists("info.inc.src.php")) {
 	$fic = file_get_contents("info.inc.src.php");
 } else {

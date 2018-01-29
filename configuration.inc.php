@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 53210 2017-03-20 16:03:19Z sdelaporte $
+// $Id: configuration.inc.php 55428 2017-12-07 16:06:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '8.0.5');
+define('PEEL_VERSION', '9.0.0');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -258,6 +258,7 @@ if (!empty($GLOBALS['site_parameters']['load_site_specific_files_before_others']
 				$temp2 = explode('/', $temp);
 			}
 			$GLOBALS['modules_installed'][$temp2[1]] = $temp2[1];
+			$GLOBALS['modules_loaded_functions'][] = $this_file_relative_path;
 		}
 	}
 }
@@ -358,7 +359,8 @@ if(!defined('IN_CRON')) {
 $_SESSION['session_langue'] = check_language($_SESSION['session_langue'], (defined('IN_PEEL_ADMIN')?$GLOBALS['admin_lang_codes']:$GLOBALS['lang_codes']));
 
 if (!IN_INSTALLATION && empty($GLOBALS['installation_folder_active'])) {
-	if (empty($_POST) && !defined('IN_CRON')) {
+	if (empty($_POST) && !defined('IN_CRON') && !defined('IN_IPN')) {
+		// IN_IPN : On ne souhaite pas avoir de redirection du http vers https dans le cas d'un appel à un fichier IPN. Sinon la redirection fait que les informations en POST sont perdus, et la mise à jour automatique des statuts ne fonctionne pas. Dans le cadre d'IPN, avoir une belle URL n'apporte rien, donc on peut passer ce bloc de code.
 		if (StringMb::strpos(StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])), str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot'])))) === false && StringMb::strpos(str_replace(array('http://', 'https://'), '', StringMb::strtolower(StringMb::rawurldecode($GLOBALS['wwwroot']))), StringMb::strtolower(StringMb::rawurldecode($_SERVER['HTTP_HOST']))) !== false && StringMb::strpos(StringMb::strtolower(StringMb::rawurldecode(get_url('/'))), StringMb::strtolower(StringMb::rawurldecode($GLOBALS['apparent_folder']))) !== false) {
 			// Dans le cas où un site est accessible via un domaine directement
 			// Si on est sur une URL qui ne contient pas wwwroot, mais le domaine est bien contenu dans wwwroot => on veut donc rajouter le sous-domaine
@@ -459,7 +461,7 @@ if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['cod
 	}
 }
 
-if (!defined('IN_CRON') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
+if (!defined('IN_CRON') && !defined('IN_IPN') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
 	// On ne souhaite pas faire la redirection si le nom de domaine utilisé n'est pas le domaine principal. Il faut faire la redirection uniquement si le $_SERVER['HTTP_HOST'] est présent dans wwwroot
@@ -597,41 +599,49 @@ if (!IN_INSTALLATION) {
 		unset($_SESSION['session_redirect_after_login']);
 	}
 }
-
+if (!isset($_SESSION['session_country_detected']) && !empty($_SERVER['REMOTE_ADDR']) && check_if_module_active('geoip')) {
+	// Géolocalisation de l'IP une fois pour toutes, et ensuite on garde l'information en session
+	if(!class_exists('geoIP')) {
+		include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
+	}
+	$geoIP = new geoIP();
+	$_SESSION['session_country_detected'] = $geoIP->geoIPCountryIDByAddr($_SERVER['REMOTE_ADDR']);
+	$geoIP->geoIPClose();
+	unset($geoIP);
+}
 // Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
-if(isset($_GET['site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
-	if(!empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
+if(isset($_GET['site_country'])) {
+	// L'utilisateur souhaite voir la version du site correspondant au pays $_GET['site_country']
+	if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && !empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
+		//  l'utilisateur est géolocalisé dans un pays qui est autorisé pour lui permettre de choisir son pays
+		// ET l'utilisateur n'a pas de pays forcé dans peel_utilisateurs
 		if(in_array(strval($_GET['site_country']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
-			$_SESSION['session_site_country'] = intval($_GET['site_country']);
+			// Le choix en GET est autorisé => on le prend
+			set_session_site_country(intval($_GET['site_country']));
 		}
 	}
 	// On redirige 302 après avoir défini le site_country
 	redirect_and_die(get_current_url(true, false, array('site_country')));
 }
-if(!isset($_SESSION['session_site_country']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
+if(!isset($_SESSION['session_site_country'])) {
 	// On définit pour quel pays on montre les données du site, lors de la première page vue par l'utilisateur
 	if(!empty($_SESSION['session_utilisateur']['site_country'])) {
-		$_SESSION['session_site_country'] = intval($_SESSION['session_utilisateur']['site_country']);
+		// Pays forcé pour un utilisateur
+		set_session_site_country(intval($_SESSION['session_utilisateur']['site_country']));
+		// on essaie de prendre la devise correspondant au pays si elle est disponible sur le site pour la forcer, sinon on laisse session_devise tel que défini plus tôt dans ce fichier
+	} elseif(!empty($_SESSION['session_country_detected']) && !empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
+		set_session_site_country(intval($_SESSION['session_country_detected']));
 		// on essaie de prendre la devise correspondant au pays si elle est disponible sur le site, sinon on laisse session_devise tel que défini plus tôt dans ce fichier
+	} elseif(!empty($GLOBALS['site_parameters']['default_country_id']) && (empty($GLOBALS['site_parameters']['site_country_allowed_array']) || (!empty($GLOBALS['site_parameters']['site_country_allowed_array']) && in_array(strval($GLOBALS['site_parameters']['default_country_id']), $GLOBALS['site_parameters']['site_country_allowed_array'])))) {
+		set_session_site_country(intval($GLOBALS['site_parameters']['default_country_id']));
+	} else {
+		set_session_site_country(0);
+	}
+	if(!empty($_SESSION['session_site_country']) && check_if_module_active('devises')) {
 		set_current_devise(null, $_SESSION['session_site_country']);
-	} elseif (!isset($_SESSION['session_country_detected']) && !empty($_SERVER['REMOTE_ADDR']) && check_if_module_active('geoip')) {
-		if(!class_exists('geoIP')) {
-			include($GLOBALS['dirroot'] . '/modules/geoip/class/geoIP.php');
-		}
-		$geoIP = new geoIP();
-		$_SESSION['session_country_detected'] = $geoIP->geoIPCountryIDByAddr($_SERVER['REMOTE_ADDR']);
-		$geoIP->geoIPClose();
-		unset($geoIP);
-		if(in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
-			$_SESSION['session_site_country'] = intval($_SESSION['session_country_detected']);
-			// on essaie de prendre la devise correspondant au pays si elle est disponible sur le site, sinon on laisse session_devise tel que défini plus tôt dans ce fichier
-			set_current_devise(null, $_SESSION['session_site_country']);
-		} else {
-			$_SESSION['session_site_country'] = 0;
-		}
 	}
 }
-if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE')) {
+if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE') && !defined('IN_RPC')) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true); 
 }
 account_update();

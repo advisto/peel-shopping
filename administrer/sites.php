@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: sites.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -39,6 +39,7 @@ if (!empty($_GET['mode']) && in_array($_GET['mode'], array('insere', 'ajout', 'd
 switch (vb($_GET['mode'])) {
 	case "siteid_to_SET" :
 		// pour le mode multisite où l'on peut spécifier une liste de site différent pour un élément. Il faut passer pour cela site_id à SET de 32 possibilités
+		// on considère aussi que quand on est en mode multisite, on sera aussi en mode multizone, on change donc aussi le champ zone de peel_pays en SET
 		// pour lancer la requête il faut appeler cette page avec mode=siteid_to_SET.
 		// Fonction expérimentale , à n'utiliser vous maitriser le sujet.
 		query("ALTER TABLE `peel_admins_actions` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
@@ -52,11 +53,14 @@ switch (vb($_GET['mode'])) {
 			ALTER TABLE `peel_html` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_langues` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_marques` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
-			ALTER TABLE `peel_meta` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_meta` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';			
+			ALTER TABLE `peel_pays` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_pays` CHANGE `zone` `zone` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '0';
 			ALTER TABLE `peel_produits` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_rubriques` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_societe` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_tarifs` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
+			ALTER TABLE `peel_tva` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_utilisateurs` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_utilisateur_connexions` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
 			ALTER TABLE `peel_vignettes_carrousels` CHANGE `site_id` `site_id` SET('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31') NOT NULL DEFAULT '1';
@@ -344,7 +348,7 @@ function affiche_formulaire_ajout_site(&$frm)
 		$frm['tnt_username'] = 0;
 		$frm['tnt_password'] = 0;
 		$frm['tnt_account_number'] = 0;
-		$frm['expedition_delay'] = 0;
+		$frm['tnt_treshold'] = 0;
 		$frm['expedition_delay'] = 0;
 		$frm['export_encoding'] = 0;
 		$frm['category_count_method'] = 0;
@@ -809,6 +813,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('tnt_username', vn($frm['tnt_username']));
 	$tpl->assign('tnt_password', vn($frm['tnt_password']));
 	$tpl->assign('tnt_account_number', vn($frm['tnt_account_number']));
+	$tpl->assign('tnt_treshold', vn($frm['tnt_treshold']));
 	$tpl->assign('expedition_delay', vn($frm['expedition_delay']));
 	$tpl->assign('act_on_top', vn($frm['act_on_top']));
 	$tpl->assign('auto_promo', vn($frm['auto_promo']));
@@ -1106,6 +1111,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_TNT_USERNAME', $GLOBALS['STR_ADMIN_SITES_TNT_USERNAME']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_PASSWORD', $GLOBALS['STR_ADMIN_SITES_TNT_PASSWORD']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER', $GLOBALS['STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER']);
+	$tpl->assign('STR_ADMIN_SITES_TNT_TRESHOLD', $GLOBALS['STR_ADMIN_SITES_TNT_TRESHOLD']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_EXPEDITION_DELAY', $GLOBALS['STR_ADMIN_SITES_TNT_EXPEDITION_DELAY']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_CERTIFICATE', $GLOBALS['STR_ADMIN_SITES_SIPS_CERTIFICATE']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SIPS_EXPLAIN']);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -95,6 +95,7 @@ function affiche_formulaire_ajout_nom_attribut(&$frm)
 		$frm['mandatory'] = 0;
 		$frm['technical_code'] = "";
 		$frm['show_description'] = 1;
+		$frm['disable_reductions'] = 0;
 		if (empty($frm['type_affichage_attribut'])) {
 			// On préremplit par une référence à la configuration générale du site
 			// NB : On ne préremplit pas par la valeur par défaut utilisée sur le site pour permettre changement général plus facile si on n'a pas de spécificité par produit
@@ -153,6 +154,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('type_affichage_attribut', vn($frm["type_affichage_attribut"]));
 	$tpl->assign('technical_code', vb($frm["technical_code"]));
 	$tpl->assign('show_description', vb($frm["show_description"]));
+	$tpl->assign('disable_reductions', vn($frm["disable_reductions"]));
 	$tpl->assign('mandatory', vn($frm["mandatory"]));
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -186,6 +188,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_RADIO_BUTTONS', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_RADIO_BUTTONS']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_DEFAULT_DISPLAY_MODE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_DEFAULT_DISPLAY_MODE']);
+	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT']);
 	echo $tpl->fetch();
 }
 
@@ -230,14 +233,14 @@ function insere_nom_attribut($frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
-	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description
+	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description, disable_reductions
 	) VALUES ('" . intval($frm['etat']) . "'
 			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, '" . intval($frm['mandatory']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "')";
+	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "', '" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "')";
 
 	query($sql);
 }
@@ -271,6 +274,7 @@ function maj_nom_attribut($id, $frm)
 			 , technical_code ='" . nohtml_real_escape_string($frm['technical_code']) . "'
 			 , type_affichage_attribut ='" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "'
 			 , show_description ='" . nohtml_real_escape_string($frm['show_description']) . "'
+			 , disable_reductions ='" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "'
 			WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('nom_attributs', null, true);
 	query($sql);
 	// Si le nom de l'attribut est un texte libre alors on retire toutes ces options :
@@ -302,7 +306,7 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
-	$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description, site_id
+	$query = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat, texte_libre, upload, show_description, disable_reductions, site_id
 		FROM peel_nom_attributs 
 		WHERE " . get_filter_site_cond('nom_attributs', null, true) . "
 		ORDER BY nom_" . $_SESSION['session_langue'] . "");

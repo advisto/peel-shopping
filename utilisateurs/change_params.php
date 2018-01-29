@@ -1,23 +1,24 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: change_params.php 55428 2017-12-07 16:06:06Z sdelaporte $
+define('IN_CHANGE_PARAMS', true);
 include("../configuration.inc.php");
 necessite_identification();
 
-define('IN_CHANGE_PARAMS', true);
 $GLOBALS['page_name'] = 'change_params';
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_CHANGE_PARAMS'];
 $GLOBALS['allow_fineuploader_on_page'] = true;
+$noticemsg_keep_form = '';
 include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
 
 $form_error_object = new FormError();
@@ -64,6 +65,9 @@ foreach($mandatory_fields as $key => $value) {
 		$mandatory_fields[$key] = $GLOBALS[$value];
 	}
 }
+if (!empty($_GET['complete_account_message_display']) && !empty($GLOBALS['STR_COMPLETE_ACCOUNT_MESSAGE'])) {
+	$noticemsg_keep_form .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_COMPLETE_ACCOUNT_MESSAGE'], 'box_dismiss_disable'=>true))->fetch();
+}
 $frm = $_POST;
 /* Supprime l'image associée à l'utilisateur. */
 switch (vb($_REQUEST['mode'])) {
@@ -78,7 +82,7 @@ switch (vb($_REQUEST['mode'])) {
 			SET logo = ''
 			WHERE id_utilisateur = '" . intval($id)."'");
 		delete_uploaded_file_and_thumbs($file['logo']);
-		$noticemsg_keep_form = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MSG_CHANGE_PARAMS'], $file['logo'])))->fetch();
+		$noticemsg_keep_form .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MSG_CHANGE_PARAMS'], $file['logo'])))->fetch();
 		break;
 }
 if (a_priv('demo')) {
@@ -140,16 +144,36 @@ if (a_priv('demo')) {
 		$form_error_object->add('intracom_for_billing', $GLOBALS['STR_MODULE_VATLAYER_ERR_INTRACOM']);
 	}
 	if (!$form_error_object->count()) {
+		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MSG_CHANGE_PARAMS'], 'list_content' => $GLOBALS['STR_CHANGE_PARAMS_OK']))->fetch();
+		
+		if (!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation']) && ((!empty($frm['newsletter']) && empty($_SESSION['session_utilisateur']['newsletter'])) || (!empty($frm['commercial']) && empty($_SESSION['session_utilisateur']['commercial'])))) {
+			$noticemsg .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REGISTER_NEWLSETTER_COMMERCIAL_YES']))->fetch();
+		}
+
 		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+		if (!empty($frm['dream_societe_kbis'])) {
+			$frm['dream_societe_kbis'] = upload('dream_societe_kbis', false, 'dream_societe_kbis', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+			if (StringMb::strpos(vb($_POST['dream_societe_kbis']), '/cache/') === 0) {
+				// Comme il y a /cache/ dans le POST, cela veut dire que l'utilisateur a uploadé un nouveau fichier pour ce champ. Dans le cas contraire on a juste le nom du document, sans /cache/.
+				// Donc on rempli une variable qui indique quel fichier a été mis à jour par l'utilisateur.
+				$_SESSION['document_updated_by_user']['dream_societe_kbis'] = $frm['dream_societe_kbis'];
+			}
+		}
+		if (!empty($frm['societe']) && !empty($frm['naissance_company'])) {
+			$frm['naissance'] = $frm['naissance_company'];
+		}
 		$frm['priv'] = $_SESSION['session_utilisateur']['priv'];
 		maj_utilisateur($frm, true);
-		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MSG_CHANGE_PARAMS'], 'list_content' => $GLOBALS['STR_CHANGE_PARAMS_OK']))->fetch();
+
 	}
 } else {
 	$frm = get_user_information($_SESSION['session_utilisateur']['id_utilisateur']);
 }
 
 if (empty($noticemsg)) {
+	if (!empty($frm['naissance'])) {
+		$frm['naissance_company'] = $frm['naissance'];
+	}
 	$output = vb($noticemsg_keep_form) . get_user_change_params_form($frm, $form_error_object, $mandatory_fields);
 } else {
 	$output = $noticemsg;

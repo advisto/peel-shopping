@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 53555 2017-04-11 16:30:55Z sdelaporte $
+// $Id: utilisateurs.php 55928 2018-01-26 17:31:15Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -47,6 +47,41 @@ if (!empty($_POST['print_all_bill'])) {
 }
 
 switch (vb($_REQUEST['mode'])) {
+	case 'insert_address':
+		if(insert_or_update_address($_POST, false, $id_utilisateur)) {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_YOUR_NEW_ADDRESS_CREATE']))->fetch();
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERROR_OCCURRED']))->fetch();
+		}
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		break;
+		
+	case 'create_new_address':
+	$output .= '<h1>'.$GLOBALS['STR_REGISTER_ORDER_ADDRESS'].'</h1>
+		' . get_address_form(null, $id_utilisateur, true);
+		break;
+	case 'suppr_address':
+		// supprimer l'adresse dans PEEL_ADRESSES
+		$output .= delete_address($_GET['id'], $id_utilisateur);
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		break;
+
+	case 'modif_address':
+		// modifier l'adresse dans PEEL_ADRESSES
+		$q = query('SELECT *
+			FROM peel_adresses
+			WHERE id = "' . intval($_GET['id']) . '"');
+		if($result = fetch_assoc($q)) {
+			$output .= get_address_form($result, $id_utilisateur, true);
+		}
+		break;
+
+	case 'update_address':
+		insert_or_update_address($_POST, false, $id_utilisateur);
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_YOUR_UPDATE_ADDRESS_CREATE']))->fetch();
+		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
+		break;
+
 	case "update_newsletter" :
 		if (isset($_GET['new_newsletter_value']) && !empty($_GET['user_id'])) {
 			query('UPDATE peel_utilisateurs
@@ -60,7 +95,7 @@ switch (vb($_REQUEST['mode'])) {
 		if (isset($_GET['etat']) && !empty($_GET['id'])) {
 			$user_infos = get_user_information($_GET['id']);
 			if(!empty($user_infos)) {
-				if(!a_priv('admin*', false, false, $_GET['id']) || a_priv('admin', false, true)) {
+				if(!a_priv('admin*', false, false, $_GET['id']) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 					// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a le droit de le modifier
 					// NB : il faut être administrateur général pour avoir le droit de modifier les autres administrateurs.
 					if ($_GET['etat'] == 1) {
@@ -187,7 +222,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "modif" :
-		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		} else {
@@ -196,7 +231,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "suppr" :
-		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$user_infos = get_user_information($id_utilisateur);
 			if(!empty($user_infos)) {
@@ -215,7 +250,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "supprlogo" :
-		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= supprime_logo($id_utilisateur);
 			$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
@@ -225,7 +260,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "supprfile" :
-		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
 			$output .= delete_uploaded_file_and_thumbs($_GET['bic']);
 			$sql = "UPDATE peel_utilisateurs
@@ -329,6 +364,7 @@ switch (vb($_REQUEST['mode'])) {
 		if (!$form_error_object->count()) {
 			$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
 			$frm['document'] = upload('document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['document']));
+			$frm['residence_abroad_document'] = upload('residence_abroad_document', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['residence_abroad_document']));
 			// Suppression de l'ancien fichier
 			if (!empty($frm['old_document']) && $frm['document'] != $frm['old_document']) {
 				delete_uploaded_file_and_thumbs($frm['old_document']);
@@ -364,7 +400,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "init_mdp" :
-		if(!a_priv('admin*', false, false, $id_utilisateur) || a_priv('admin', false, true)) {
+		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
 			// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier. initialise_mot_passe retourne un boolean
 			initialise_mot_passe($_REQUEST['email']);
 			$qid = query("SELECT email
@@ -487,7 +523,7 @@ switch (vb($_REQUEST['mode'])) {
 	case "update_contact_planified":
 		// Mise à jour d'une planification de contact
 		if (!empty($_POST['form_edit_contact_planified_id']) && check_if_module_active('commerciale')) {
-			create_or_update_contact_planified($_POST);
+			$output .= create_or_update_contact_planified($_POST);
 		}
 		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
 		break;
@@ -750,7 +786,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_utilisateur_form.tpl');
 	
 	$tpl->assign('hook_actions', call_module_hook('user_edit_actions', array('id_utilisateur' => vb($frm['id_utilisateur'])), 'string'));
-	$tpl->assign('action', get_current_url(false) . '?start=' . (isset($_GET['start']) ? $_GET['start'] : 0));
+	$tpl->assign('action', get_current_url(true));
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval(vn($frm['id_utilisateur']))));
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id_utilisateur', vb($frm['id_utilisateur']));
@@ -790,6 +826,9 @@ function afficher_formulaire_utilisateur(&$frm)
 		$email_infos = vb($frm['email_bounce']);
 	}
 	if(!empty($frm['email']) && !EmailOK($frm['email'], vb($frm['email_bounce']))) {
+		if(empty($email_infos)) {
+			$email_infos = "Emails rejected";
+		}
 		$email_infos = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $email_infos))->fetch();
 	}
 	$tpl->assign('email_infos', $email_infos);
@@ -797,39 +836,10 @@ function afficher_formulaire_utilisateur(&$frm)
 
 	$tpl->assign('priv_options', get_priv_options(vb($frm['priv'])));
 	$tpl->assign('commercial_contact_id', vb($frm['commercial_contact_id']));
-	if (!empty($frm['priv']) && function_exists('specific_profile_form')) {
-		$all_priv_infos = get_priv_options(null, 'array');
-		// Si on gère les profils spécifique, on affiche la page de profil spécifique pour l'administrateur.
-		$specific_profile_results = '';
-		foreach(explode('+', $frm['priv']) as $this_priv) {
-			if(!isset($all_priv_infos[$this_priv]) || !in_array($this_priv, vb($GLOBALS['site_parameters']['specific_profil_array'], array()))) {
-				continue;
-			}
-			$specific_profile_results .= '<br />';
-			$specific_profile_results .= '<br />';
-			if(StringMb::substr($this_priv, 0, 5) == 'stop_') {
-				// Pour refuser l'inscription
-				$specific_profile_results .= '<p><a href="' . $GLOBALS['wwwroot'] . '/modules/dreamtakeoff/specific_profile.php?form_step=1&priv='.str_replace('stop_','util_', $this_priv).'&form_id=' . MDP(16) . '&id_utilisateur=' . vb($frm['id_utilisateur']) . '">' . sprintf($GLOBALS['STR_MODULE_DREAMTAKEOFF_SPECIFIC_PROFILE_IN_WAIT_LINK'], $all_priv_infos[$this_priv]['name']) . '</a></p>
-				<a class="btn btn-primary" href="'.get_current_url(false).'?mode=registration_refused&id_utilisateur=' . intval($frm['id_utilisateur']) . '&priv=' . $this_priv . '">'.$GLOBALS['STR_MODULE_DREAMTAKEOFF_CANCEL_SUBSCRIPTION'].' '.$all_priv_infos[$this_priv]['name'].'</a>';
-				// Pour valider l'inscription
-				if ($this_priv == 'stop_agent' || $this_priv == 'stop_expert') {
-					$specific_profile_results .= '<br />'.'<input type="checkbox" name="eligibility_'.StringMb::substr($this_priv, 5).'" ' . frmvalide(!empty($frm['eligibility_' . StringMb::substr($this_priv, 5)]), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_ELIGIBILITY_OK'] . ' ' . $all_priv_infos[$this_priv]['name'];
-					$specific_profile_results .= '<br />'.'<input type="checkbox" name="'.StringMb::substr($this_priv, 5).'_renewal" ' . frmvalide(!empty($frm[StringMb::substr($this_priv, 5).'_renewal']), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_PRIV_RENEWAL'] . ' ' . $all_priv_infos[$this_priv]['name'] . '';
-				} else {
-					$specific_profile_results .= '<br /><br />
-				<a class="btn btn-primary" href="'.get_current_url(false).'?mode=registration_validated&id_utilisateur=' . intval($frm['id_utilisateur']) . '&priv=' . $this_priv . '">' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_VALIDATE_SUBSCRIPTION'].' '.$all_priv_infos[$this_priv]['name'] . '</a>';
-				}
-			} elseif(StringMb::substr($this_priv, 0, 5) == 'util_') {
-				$specific_profile_results .= '<a href="' . $GLOBALS['wwwroot'] . '/modules/dreamtakeoff/specific_profile.php?form_step=1&priv='.str_replace('stop_','util_', $this_priv).'&form_id=' . MDP(16) . '&id_utilisateur=' . vb($frm['id_utilisateur']) . '">' . sprintf($GLOBALS['STR_MODULE_DREAMTAKEOFF_SPECIFIC_PROFILE_LINK'], $all_priv_infos[$this_priv]['name']) . '</a><br />';
-				if ($this_priv == 'util_agent' || $this_priv == 'util_expert') {
-					$specific_profile_results .= '<input type="checkbox" name="eligibility_'.StringMb::substr($this_priv, 5).'" ' . frmvalide(!empty($frm['eligibility_' . StringMb::substr($this_priv, 5)]), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_ELIGIBILITY_OK'] . ' ' . $all_priv_infos[$this_priv]['name'] . '<br />';
-					$specific_profile_results .= '<input type="checkbox" name="'.StringMb::substr($this_priv, 5).'_renewal" ' . frmvalide(!empty($frm[StringMb::substr($this_priv, 5).'_renewal']), ' checked="checked"') . ' value="1" /> ' . $GLOBALS['STR_MODULE_DREAMTAKEOFF_USER_PRIV_RENEWAL'] . ' ' . $all_priv_infos[$this_priv]['name'] . '';
-				}
-			}
-		}
-		$tpl->assign('specific_profile_results', vb($specific_profile_results));
+	if (!empty($frm['priv']) && function_exists('specific_profile_admin_form')) {
+		$tpl->assign('specific_profile_results', specific_profile_admin_form($frm));
 	}
-	
+
 	$tpl_util_options = array();
 	$q = query('SELECT id_utilisateur, pseudo, email, etat, commercial_contact_id
 		FROM peel_utilisateurs
@@ -960,6 +970,8 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('issel_on_photodesk_module', !isset($frm['on_photodesk']) || !empty($frm['on_photodesk']));
 	$tpl->assign('gift_check_link', check_if_module_active('gift_check') && !empty($frm['id_utilisateur']));
 
+	$tpl->assign('order_history_for_user_disable', !empty($GLOBALS['site_parameters']['order_history_for_user_disable']));
+	$tpl->assign('issel_access_history', !isset($frm['access_history']) || !empty($frm['access_history']));
 	$tpl->assign('issel_newsletter', !isset($frm['newsletter']) || !empty($frm['newsletter']));
 	$tpl->assign('issel_commercial', !isset($frm['commercial']) || $frm['commercial']);
 
@@ -1015,10 +1027,8 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('is_webmail_module_active', check_if_module_active('webmail'));
 	if (!empty($frm['id_utilisateur'])) {
 		$tpl->assign('more_infos_html', call_module_hook('admin_user_edit_more_infos_html', array('id_utilisateur' => $frm['id_utilisateur']), 'string'));
-		if (!empty($GLOBALS['STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER'])) {
-			$tpl->assign('STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER', $GLOBALS['STR_MODULE_DREAMTAKEOFF_DISPLAY_PROJECTS_WITH_RELATED_USER']);
-			$tpl->assign('display_projects_with_related_user_link', $GLOBALS['wwwroot'] . '/modules/annonces/index.php?affiche=related_user_ad_list&show_all_related_project=true&related_user_id='.$frm['id_utilisateur']);
-		}
+		$tpl->assign('more_infos_html_top_list_link', call_module_hook('admin_user_edit_more_infos_html_top_list_link', array('id_utilisateur' => $frm['id_utilisateur']), 'string'));
+		
 	}
 	if (!empty($frm['user_ip'])) {
 		// Insertion du module de géoip permettant de définir en fonction de la dernière ip le lieu où s'est connecté la personne dernièrement
@@ -1106,23 +1116,10 @@ function afficher_formulaire_utilisateur(&$frm)
 	}
 
 	if (!empty($GLOBALS['site_parameters']['profil_enable_display_statistic']) && function_exists('get_user_stat_by_site')) {
-		$user_stat_by_site_array = get_user_stat_by_site($frm['id_utilisateur']);
-		$output_get_user_stat_by_site = '
-		<div class="well">';
-		foreach($user_stat_by_site_array as $site_name => $this_result_array) {
-			// Affichage du nom du site
-			$output_get_user_stat_by_site .= '<h2>'.$site_name.'</h2>';
-			// Affichage des valeurs pour ce site 
-			foreach ($this_result_array as $this_technical_code=>$this_value) {
-				if (!empty($this_value)) {
-					$output_get_user_stat_by_site .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_' . StringMb::strtoupper($this_technical_code)].$GLOBALS['STR_BEFORE_TWO_POINTS'].': '.$this_value . '<br />';
-				}
-			}
-		}
-		$output_get_user_stat_by_site .= '
-		</div>';
+		$output_get_user_stat_by_site = get_user_stat_by_site($frm['id_utilisateur'], true);
 		$tpl->assign('get_user_stat_by_site', $output_get_user_stat_by_site);
 	}
+	$tpl->assign('get_address_list', get_address_list($frm['id_utilisateur'], true));
 	$tpl->assign('STR_PSEUDO', $GLOBALS['STR_PSEUDO']);
 	$tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
@@ -1225,6 +1222,8 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD', $GLOBALS['STR_ADMIN_UTILISATEURS_SEND_NEW_PASSWORD']);
 	$tpl->assign('STR_ADMIN_COMMANDER_CLIENT_INFORMATION', $GLOBALS['STR_ADMIN_COMMANDER_CLIENT_INFORMATION']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_ACCESS_HISTORY', $GLOBALS['STR_ADMIN_UTILISATEURS_ACCESS_HISTORY']);
+	$tpl->assign('STR_ADMIN_UTILISATEURS_ACCESS_HISTORY_CHECKBOX', $GLOBALS['STR_ADMIN_UTILISATEURS_ACCESS_HISTORY_CHECKBOX']);
 	$tpl->assign('STR_ADMIN_UTILISATEURS_CLIENT_TYPE', $GLOBALS['STR_ADMIN_UTILISATEURS_CLIENT_TYPE']);
 	$tpl->assign('STR_ADMIN_UTILISATEURS_WHO', $GLOBALS['STR_ADMIN_UTILISATEURS_WHO']);
 	$tpl->assign('STR_ADMIN_UTILISATEURS_BUY', $GLOBALS['STR_ADMIN_UTILISATEURS_BUY']);
@@ -1240,6 +1239,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
+	$tpl->assign('STR_ADMIN_ADDRESS_CLIENT', $GLOBALS['STR_ADMIN_ADDRESS_CLIENT']);
 	$tpl->assign('hook_output', call_module_hook('user_admin_form_additional_part', array('frm' => $frm), 'string'));
 	$output = $tpl->fetch();
 

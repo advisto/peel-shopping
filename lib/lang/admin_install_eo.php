@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_install_eo.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: admin_install_eo.php 55928 2018-01-26 17:31:15Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -34,6 +34,7 @@ $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_2"] = "Pro tio, necesas peti diversaj
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_3"] = "Necesas ricevi de la gastanto de via retejo la identigajn informojn.";
 $GLOBALS["STR_ADMIN_INSTALL_DATABASE_INTRO_4"] = "Evitu uzi la radik-konton 'root', kaj por plia sekureco, favoru ĉe 'mySQL' pasvorton fortikan kaj malsaman ol tiu ĉe SSH";
 $GLOBALS["STR_ADMIN_INSTALL_ERROR_CONNEXION"] = "Eraro! Bonvolu kontroli la elektitajn lingvojn kaj la datumbazajn konektajn informojn";
+$GLOBALS["STR_ADMIN_INSTALL_CHOOSE_WEBSITE_TYPE"] = "Elektu la tipon de retejo vi volas instali";
 $GLOBALS["STR_ADMIN_INSTALL_EXPLAIN_SSL"] = "Averto: eblas indiki \"HTTPS\"-adreson, cele al uzi la sekuran \"SSL\"-ciferigon, nur kaze ke via retregiono posedas validan SSL-atestilon agordita ĉe via gastiganto";
 $GLOBALS["STR_ADMIN_INSTALL_URL_STORE"] = "URL de la retejo:";
 $GLOBALS["STR_ADMIN_INSTALL_SSL_ADMIN"] = "Trudi uzon de \"SSL\"-ciferigon por administrado:";
@@ -73,8 +74,12 @@ $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_RENAME_ADMIN"] = "TRE REKOMENDAS NI, 
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_PHP_ERRORS_DISPLAY"] = "Via retejo agordiĝis por afiŝi la PHP-erarojn nur el via IP-adreso, t.e. {$_SERVER['REMOTE_ADDR']}. Eblas aliigi tiun agordaĵon en la administrejo.";
 $GLOBALS["STR_ADMIN_INSTALL_FINISHED_INFOS_UTF8_WARNING"] = "Notu: se vi deziras aliigi la PHP-kodon de via retejo, atentu dum redakto de paĝoj pri uzado de redaktilo kongrua kun UTF-8-signaro (kiu ne aldonas nevideblajn signojn ene de dosieroj). Kaze de dubo, ni konsilas la senpage libere el-interrete alŝuteblan programon \"Notepad++\".";
 $GLOBALS["STR_ADMIN_INSTALL_LANGUAGE_CHOOSE"] = "Elektu la instalotajn lingvojn:";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB"] = "";
+$GLOBALS["STR_ADMIN_INSTALL_FILL_DB_EXPLANATION"] = "";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_PHP5"] = "Necesas aktivigi la PHP5-programon en via retejo: redaktu la dosieron \".htaccess\" situanta en la rediko de la retejo, kaj malkomenti la liniojn rilataj al via gastigado, forigante la signojn '#' komence de linio, aŭ kontaktu la gastiganton. Eblas gastigi la retejon rekte ĉe PEEL - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_MBSTRING"] = "Necesos aliigi mane la kodigon de la retejo - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_UTF8"] = "Necesos aliigi mane la kodigon de la retejo - kontaktu PEEL ĉe contact@peel.fr aŭ telefone al +33 1 75 43 67 97";
 $GLOBALS["STR_ADMIN_INSTALL_ACTIVATE_URL_FOPEN"] = "Ĉio devus en orde funkcii, krom modulo kies funkciado ne eblos.";
-
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOP"] = "e-komerco retejo";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_SHOWCASE"] = "storefront";
+$GLOBALS["STR_ADMIN_INSTALL_WEBSITE_AD"] = "Ad Site (nur se la modulo ĉeestas. Vi povas ordigi ĉi tiun modulon de ĉi <a onclick=\"return(window.open(this.href)?false:true);\" href=\"https://www.peel-shopping.com/various-128/module-annonces-installation-52.html\">tiu paĝo</a>)";

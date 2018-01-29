@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 53254 2017-03-22 14:23:10Z gboussin $
+// $Id: Invoice.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 53254 2017-03-22 14:23:10Z gboussin $
+ * @version $Id: Invoice.php 55332 2017-12-01 10:44:06Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -160,7 +160,7 @@ class Invoice extends TCPDF {
 		$loop = true;
 		while ($loop) {
 			$pos = StringMb::strpos($texte, "\n");
-			if (!$pos) {
+			if ($pos === false) {
 				$loop = false;
 				$ligne = $texte;
 			} else {
@@ -769,7 +769,7 @@ class Invoice extends TCPDF {
 		
 		$sql="SELECT code_banque, code_guichet, numero_compte, cle_rib, iban, swift
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe') . "
+			WHERE " . get_filter_site_cond('societe') . " AND id_marques = 0
 			ORDER BY site_id DESC
 			LIMIT 1";
 		$query = query($sql);
@@ -1107,6 +1107,7 @@ class Invoice extends TCPDF {
 		if(!empty($order_object->commentaires)) {
 			$comments[] = $order_object->commentaires;
 		}
+		$comments[] = call_module_hook('invoice_pdf_comments', array('order_object' => $order_object), 'string');
 		for(true;($this->remarque_lignes === null || $this->remarque_lignes>60) && $this->remarque_font_size>5;$this->remarque_font_size--) {
 			// On diminue la taille du texte si la remarque est trop longue. Si c'est vraimpent trop long, il y aura un problème de mise en page quand même
 			$this->remarque_lignes = $this->sizeOfText(implode("\n", $comments), $this->w - 10 * 2, $this->remarque_font_size);
@@ -1337,7 +1338,7 @@ class Invoice extends TCPDF {
 		// Recherche d'une société correspondant au site sur lequel est passé la commande
 		$qid = query("SELECT * 
 			FROM peel_societe
-			WHERE " . get_filter_site_cond('societe', null, $use_admin_rights, $site_id, true) . "
+			WHERE " . get_filter_site_cond('societe', null, $use_admin_rights, $site_id, true) . " AND id_marques = 0
 			ORDER BY site_id DESC
 			LIMIT 1");
 		$ligne = fetch_object($qid);
@@ -1345,7 +1346,7 @@ class Invoice extends TCPDF {
 			// Aucune adresse de société trouvée, on fait une recherche plus générale
 			$qid = query("SELECT * 
 				FROM peel_societe
-				WHERE " . get_filter_site_cond('societe', null, $use_admin_rights) . "
+				WHERE " . get_filter_site_cond('societe', null, $use_admin_rights) . " AND id_marques = 0
 				ORDER BY site_id DESC
 				LIMIT 1");
 			$ligne = fetch_object($qid);

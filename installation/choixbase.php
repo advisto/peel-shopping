@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: choixbase.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: choixbase.php 55332 2017-12-01 10:44:06Z sdelaporte $
 define('IN_INSTALLATION', 3);
 include("../configuration.inc.php");
 
@@ -25,6 +25,8 @@ if (isset($_POST['motdepasse'])) $_SESSION['session_install_motdepasse'] = $_POS
 if (isset($_POST['langs'])) $_SESSION['session_install_langs'] = $_POST['langs'];
 if (isset($_POST['site_name'])) $_SESSION['session_install_site_name'] = $_POST['site_name'];
 if (isset($_POST['email_webmaster'])) $_SESSION['session_install_email_webmaster'] = $_POST['email_webmaster'];
+if (isset($_POST['website_type'])) $_SESSION['session_install_website_type'] = $_POST['website_type'];
+if (isset($_POST['fill_db'])) $_SESSION['session_install_fill_db'] = $_POST['fill_db'];
 
 if ((isset($_POST['langs']) && empty($_POST['langs'])) || (isset($_POST['site_name']) && empty($_POST['site_name'])) || (isset($_POST['email_webmaster']) && empty($_POST['email_webmaster'])) || (isset($_POST['serveur']) && empty($_POST['serveur'])) || (isset($_POST['utilisateur']) && empty($_POST['utilisateur']))) {
 	redirect_and_die("bdd.php?err=empty");

@@ -1,16 +1,16 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_clients_par_produit.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: admin_liste_clients_par_produit.tpl 55332 2017-12-01 10:44:06Z sdelaporte $
 #}<div class="entete">{{ STR_ADMIN_PRODUITS_ACHETES_LIST_TITLE }} {{ nom }}</div>
 <div class="table-responsive">
 	<table class="table admin_liste_clients_par_produit">

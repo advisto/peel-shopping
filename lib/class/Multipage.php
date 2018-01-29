@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: Multipage.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 53200 2017-03-20 11:19:46Z sdelaporte $
+ * @version $Id: Multipage.php 55332 2017-12-01 10:44:06Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -81,7 +81,7 @@ class Multipage {
 	/**
 	 * Constructeur
 	 */
-	function __construct($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null, $no_pagination_displayed = false)
+	function __construct($sqlRequest, $nombre_session_var_name = 'default_results_per_page', $DefaultResultsPerPage = 50, $LinkPerPage = 7, $AddToColspan = 0, $always_show = true, $template_name = null, $round_elements_per_page = 1, $external_results_to_merge_at_beginning = null, $no_pagination_displayed = false, $avoid_pagination_calculation = false)
 	{
 		if (empty($template_name)) {
 			if(defined('IN_PEEL_ADMIN')) {
@@ -93,6 +93,7 @@ class Multipage {
 			}
 		}
 		$this->tpl_name = $template_name;
+		$this->avoid_pagination_calculation = $avoid_pagination_calculation;
 		$this->no_pagination_displayed = $no_pagination_displayed;
 		$this->sqlRequest = $sqlRequest;
 		$this->DefaultResultsPerPage = $DefaultResultsPerPage;
@@ -101,9 +102,11 @@ class Multipage {
 		} else {
 			$divisor = 5;
 		}
-		$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
-		$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
-		$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
+		if ($this->DefaultResultsPerPage !='*') {
+			$this->nb1 = max($round_elements_per_page, round($this->DefaultResultsPerPage / $divisor) - round($this->DefaultResultsPerPage / $divisor) % $round_elements_per_page);
+			$this->nb2 = max(2 * $round_elements_per_page, round($this->DefaultResultsPerPage) - round($this->DefaultResultsPerPage) % $round_elements_per_page);
+			$this->nb3 = max(10, 3*$round_elements_per_page, round($this->DefaultResultsPerPage * 5) - round($this->DefaultResultsPerPage * 5) % $round_elements_per_page);
+		}
 		if (!empty($GLOBALS['site_parameters']['multipage_show_all_result'])) {
 			$this->nb4 = '*';
 		}
@@ -176,6 +179,8 @@ class Multipage {
 				}
 			}
 			$this->ResultPerPage = $ResultsPerPage;
+		} else {
+			$this->ResultPerPage = $this->DefaultResultsPerPage;
 		}
 	}
 
@@ -221,16 +226,17 @@ class Multipage {
 			$this->LimitSQL .= " LIMIT " . intval($lines_begin) . ", " . intval($lines_count);
 		}
 		$sql = $this->LimitSQL;
-		if(($this->sql_count === null || StringMb::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (StringMb::strpos(StringMb::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (StringMb::substr($sql, 0, 1) != '(' || StringMb::strpos($sql, 'UNION') === false || StringMb::substr_count($sql, 'SELECT')<2))) {
+		if(($this->sql_count === null || StringMb::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (StringMb::strpos(StringMb::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (StringMb::substr($sql, 0, 1) != '(' || StringMb::strpos($sql, 'UNION SELECT') === false || StringMb::substr_count($sql, 'SELECT')<4))) {
 			// Si nécessaire, on rajoute SQL_CALC_FOUND_ROWS
 			// On ne le fait pas pour une requête de type UNION - le test sur la parenthèse est une sécurité qui évite des hacks lors de recherche utilisateur
 			$sql = str_replace(array('SELECT ', 'select '), 'SELECT SQL_CALC_FOUND_ROWS ', StringMb::substr($sql, 0, 10)) . StringMb::substr($sql, 10);
 		}
+		// var_dump($sql);
 		$query = query($sql);
 		if ($this->ResultPerPage != '*') {
-		for($i=max(0, intval($this->ResultPerPage * ($this->page - 1)));isset($this->external_results_to_merge_at_beginning[$i]) && $i<max(0, intval($this->ResultPerPage * $this->page));$i++) {
-			$results_array[] = $this->external_results_to_merge_at_beginning[$i];
-		}
+			for($i=max(0, intval($this->ResultPerPage * ($this->page - 1)));isset($this->external_results_to_merge_at_beginning[$i]) && $i<max(0, intval($this->ResultPerPage * $this->page));$i++) {
+				$results_array[] = $this->external_results_to_merge_at_beginning[$i];
+			}
 		}
 		if ($return_objects) {
 			while ($ligne = fetch_object($query)) {
@@ -249,7 +255,9 @@ class Multipage {
 				}
 			}
 		}
-		$this->Calcul(!empty($query));
+		if ((empty($results_array) && $this->page > 1) || empty($this->avoid_pagination_calculation)) {
+			$this->Calcul(!empty($query));
+		}
 		return $results_array;
 	}
 
@@ -415,7 +423,7 @@ class Multipage {
 	 *
 	 * @return
 	 */
-	function getHeaderRow()
+	function getHeaderRow($return_raw_title = false, $style = null)
 	{
 		$output = '
 	<tr>';
@@ -435,12 +443,12 @@ class Multipage {
 			}
 			if ($this->allow_get_sort && !empty($_SESSION[$this->nombre_session_var_name.'_order']) && $key === $_SESSION[$this->nombre_session_var_name.'_order']) {
 				$output .= '
-		<th class="menu center multipage_selected_field"' . $colspan_text . '>';
+		<th class="menu center multipage_selected_field"' . $colspan_text . ''.(!empty($style)?' style="'.$style.'"':'').'>';
 			} else {
 				$output .= '
-		<th class="menu center"' . $colspan_text . '>';
+		<th class="menu center"' . $colspan_text . '' . $colspan_text . ''.(!empty($style)?' style="'.$style.'"':'').'>';
 			}
-			if (!is_numeric($key) && $this->allow_get_sort) {
+			if (empty($return_raw_title) && !is_numeric($key) && $this->allow_get_sort) {
 				$link_url = $_SERVER['REQUEST_URI'];
 				if (empty($_GET[$this->order_get_variable])) {
 					if (StringMb::strpos($link_url, '?') === false) {
@@ -478,6 +486,9 @@ class Multipage {
 	 */
 	function getOrderBy()
 	{
+		if (!empty($GLOBALS['site_parameters']['multipage_sort_disable']) || !empty($GLOBALS['multipage_sort_disable'])) {
+			return null;
+		}
 		if(!empty($_GET[$this->sort_get_variable]) && !empty($this->nombre_session_var_name)){
 			$_SESSION[$this->nombre_session_var_name.'_sort'] = $_GET[$this->sort_get_variable];
 		}
@@ -514,7 +525,7 @@ class Multipage {
 			}
 		} elseif (!empty($this->forced_order_by_string)) {
 			$order_by[] = $this->forced_order_by_string;
-		} elseif (!empty($this->OrderDefault)) {
+		} elseif ($this->forced_order_by_string !== false && !empty($this->OrderDefault)) {
 			$order_by[] = $this->OrderDefault;
 		} 
 		if (!empty($this->forced_second_order_by_string)) {

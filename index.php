@@ -1,17 +1,17 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 53200 2017-03-20 11:19:46Z sdelaporte $
-/*! \mainpage PEEL Shopping 8.0.5 - Open eCommerce
+// $Id: index.php 55332 2017-12-01 10:44:06Z sdelaporte $
+/*! \mainpage PEEL Shopping 9.0.0 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -95,6 +95,8 @@ if (function_exists('html_zone_custom_template_tags')) {
 $tpl->assign('contenu_html', affiche_contenu_html("home", true, $custom_template_tags));
 $tpl->assign('center_middle_home', get_modules('center_middle_home', true));
 $tpl->assign('home_middle_top', affiche_contenu_html('home_middle_top', true)); 
+$tpl->assign('home_middle', affiche_contenu_html('home_middle', true));
+$tpl->assign('website_type', vb($GLOBALS['site_parameters']['website_type']));
 
 $modules_left = get_modules('home_left', true, null, null);
 $tpl->assign('MODULES_LEFT', $modules_left);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2017 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 8.0.5, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ if (!defined('IN_PEEL')) {
  * @return
  */
 function search_hook_search_complementary($params) {
-	if(empty($params['terms'])) {
+	if(empty($params['terms']) || vn($params['page'])>1) {
 		return null;
 	}
 	// Recherche dans les conditions générales
@@ -35,7 +35,7 @@ function search_hook_search_complementary($params) {
 		FROM peel_cgv
 		WHERE " . build_terms_clause($params['terms'], $fields, $params['match']) . " AND " . get_filter_site_cond('cgv') . "
 		ORDER BY date_maj DESC, id DESC
-		LIMIT 20";
+		LIMIT ". vn($GLOBALS['site_parameters']['cgv_search_results_max'], 20);
 	$query = query($sql);
 	while ($result = fetch_assoc($query)) {
 		$url = get_url('/cgv.php');
