@@ -262,7 +262,7 @@ function insere_type($frm)
 		$sql .= ", is_kiala";
 	}
 	$sql .= "
-	) VALUES ('" . intval($frm['position']) . "', " . nohtml_real_escape_string($frm['on_franco_amount']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string($frm['on_franco_amount']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
 		, '" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
