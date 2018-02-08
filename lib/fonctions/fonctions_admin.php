@@ -4176,14 +4176,16 @@ function fill_other_language_content($frm, $mode=null){
 	if(!empty($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang']) && is_array($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang'])) {
 		foreach ($GLOBALS['site_parameters']['field_auto_complete_with_main_content_lang'] as $this_field) {
 			// Recherche du contenu principal
-			if(!empty(trim(strip_tags(vb($frm[$this_field . '_' . $GLOBALS['site_parameters']['main_content_lang']]))))) {
+			$temp = trim(strip_tags(vb($frm[$this_field . '_' . $GLOBALS['site_parameters']['main_content_lang']])));
+			if(!empty($temp)) {
 				// La langue principale n'est pas vide
 				$main_content = $GLOBALS['site_parameters']['main_content_lang'];
 			}
 			if (empty($main_content)) {
 				// Recherche de contenu par langue, si la langue principale est vide
 				foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-					if(!empty(trim(strip_tags(vb($frm[$this_field . '_' . $lng]))))) {
+					$temp = trim(strip_tags(vb($frm[$this_field . '_' . $lng])));
+					if(!empty($temp)) {
 						// un contenu dans une langue a été trouvé.
 						$main_content = $lng;
 						// on sort de la boucle
@@ -4194,7 +4196,8 @@ function fill_other_language_content($frm, $mode=null){
 			if (!empty($main_content)) {
 				// On a un contenu principal, il faut compléter les champs vides avec
 				foreach ($GLOBALS['admin_lang_codes'] as $lng) {
-					if (empty(trim(strip_tags(vb($frm[$this_field . '_' . $lng]))))) {
+					$temp = trim(strip_tags(vb($frm[$this_field . '_' . $lng])));
+					if (empty($temp)) {
 						$frm[$this_field . '_' . $lng] = vb($frm[$this_field . '_' . $main_content]);
 					}
 				}

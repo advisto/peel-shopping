@@ -1502,7 +1502,7 @@ function get_csv_export_from_html_table($report, $add_extra_csv_data = null, $re
 	if (!empty($report)) {
 		if (empty($return_formated_string)) {
 			header("Content-type: Binary/CSV");
-			if (empty(!empty($filename))) {
+			if (empty($filename)) {
 				$filename = "advisto-" . str_replace(array('----', '---', '--', '-.'), array('-', '-', '-', '.'), implode('-', $_GET) . ".csv");
 			}
 			header("Content-Disposition: attachment; filename=\"".$filename."\"");
