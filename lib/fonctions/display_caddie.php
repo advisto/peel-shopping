@@ -181,6 +181,7 @@ if (!function_exists('get_caddie_content_html')) {
 					$tpl->assign('STR_SHIP_TYPE_CHOOSE', $GLOBALS['STR_SHIP_TYPE_CHOOSE']);
 					$tpl->assign('STR_ERREUR_TYPE', $GLOBALS['STR_ERREUR_TYPE']);
 					if (!empty($resType) && num_rows($resType) > 0) {
+						$selected = false;
 						if (num_rows($resType) == 1) {
 							// Un seul résultat, on selectionne par défaut
 							$selected = true;
