@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -140,7 +140,7 @@
 		<tr>
 			<td>{$STR_CATEGORY}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
-				<select class="form-control" name="id_categorie">
+				<select class="form-control" name="id_categorie[]" multiple="multiple" >
 					<option value="">{$STR_CHOOSE}...</option>
 					{foreach $cat_options as $o}
 					<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name}</option>
@@ -239,6 +239,15 @@
 		<tr>
 			<td>{$STR_ADMIN_LANGUAGE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="text" class="form-control" name="lang" style="width:100%" value="{$lang|str_form_value}" /></td>
+		</tr>
+		<tr>
+			<td>{$STR_SCREEN_SIZE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="checkbox" name="screen_size[]" value="xs" {if $screen_size_xs} checked="checked"{/if} /> XS
+				<input type="checkbox" name="screen_size[]" value="sm" {if $screen_size_sm} checked="checked"{/if} /> SM
+				<input type="checkbox" name="screen_size[]" value="md" {if $screen_size_md} checked="checked"{/if} /> MD
+				<input type="checkbox" name="screen_size[]" value="lg" {if $screen_size_lg} checked="checked"{/if} /> LG
+			</td>
 		</tr>
 		<tr>
 			<td colspan="2" class="center"><p><input class="btn btn-primary" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>

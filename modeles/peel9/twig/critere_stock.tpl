@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -30,6 +30,11 @@
 							<option value="{{ c.id|str_form_value }}"{% if c.issel %} selected="selected"{% endif %}{% if not c.isavailable %} disabled="disabled"{% endif %}>{{ c.name }}{{ c.suffix }}{% if not c.isavailable %} - {{ STR_NO_AVAILABLE }}{% endif %}</option>
 						{% endfor %}
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="attribut-color">
+				{% if src_img_color %}<img alt="" src="{{ src_img_color }}"/>{% endif %}
 				</td>
 			</tr>
 		</table>

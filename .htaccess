@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: .htaccess 55332 2017-12-01 10:44:06Z sdelaporte $
+# $Id: .htaccess 58031 2018-09-03 09:52:46Z sdelaporte $
 #
 # DEBUT CONFIGURATION ###
 # Configuration éventuellement nécessaire chez certains hébergeurs si votre hébergement n'est pas déjà en PHP5
@@ -203,8 +203,9 @@ AddDefaultCharset UTF-8
 	RewriteRule ^(.*)rss-([0-9]+)\.xml$  modules/rss/rss.php?cat=$2 [QSA,L]
 
 	# sitemap pour google et yahoo
-	RewriteRule ^sitemap\.xml$  get_sitemap.php?file=sitemap [QSA,L]
-	RewriteRule ^urllist\.txt$  get_sitemap.php?file=urllist [QSA,L]
+	RewriteRule ^sitemap\.xml$ get_sitemap.php?file=sitemap [QSA,L]
+	RewriteRule ^urllist\.txt$ get_sitemap.php?file=urllist [QSA,L]
+	RewriteRule ^ascreen\.jpg$ get_sitemap.php?file=ascreen [L,QSA]
 	
 	RewriteRule ^(buy|comprar|kauf|acquisto|koop)/$ achat/index.php [QSA,L]
 	RewriteRule ^(achat|buy|comprar|kauf|acquisto|koop)/cat-(.*)-([0-9]+)\.html$ achat/index.php?catid=$3 [QSA,L]
@@ -223,6 +224,8 @@ AddDefaultCharset UTF-8
 	# RewriteRule ^([A-Z].*)-([0-9]+|rss)-([0-9]+)\.(html|xml)$ modules/annonces/index.php?catid=$3&page=$2 [L,QSA]
 	# Si module d'annnonces, pour les pages de détail d'annonces
 	# RewriteRule ^(.*)-([0-9]+)\.html$ modules/annonces/annonces_details.php?ref=$2 [L,QSA]
+	# Annonces gold
+	# RewriteRule ^(anuncio-gold|annonces-gold|gold-ads)$ modules/annonces/gold.php [L,QSA]
 	
 	# Si module vitrine
 	# RewriteRule ^acheter/liste-grossiste-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
@@ -231,6 +234,7 @@ AddDefaultCharset UTF-8
 	# RewriteRule ^acheter/annonceur-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
 	# RewriteRule ^comprar/lista-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
 	# RewriteRule ^buy/list-([0-9]+)\.html$ modules/vitrine/index.php?page=$1 [L,QSA]
+	# RewriteRule ^(boutique)-(.+)\.html$ modules/vitrine/boutique.php?bt=$2 [L,QSA]
 
 	RewriteRule ^expertcomptable$ /experts-comptables.htm [R=301,L]
 	RewriteRule ^avocats$ /gestion-de-temps-avocats.htm [R=301,L]

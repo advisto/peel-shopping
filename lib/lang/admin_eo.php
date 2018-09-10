@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_eo.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: admin_eo.php 57731 2018-08-16 16:43:07Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -41,8 +41,10 @@ $GLOBALS["STR_ADMIN_ADMINISTRATOR"] = "Administranto";
 $GLOBALS["STR_ADMIN_ALL_CATEGORIES"] = "Ĉiuj kategorioj";
 $GLOBALS["STR_ADMIN_ALL_ORDERS"] = "Ĉiuj instrukcioj";
 $GLOBALS["STR_ADMIN_ALL_PRODUCTS"] = "";
+$GLOBALS["STR_ADMIN_ALL_ZONES"] = "";
 $GLOBALS["STR_ADMIN_ALL"] = "Ĉiuj";
 $GLOBALS["STR_ADMIN_ALL_SITES"] = "";
+$GLOBALS["STR_ADMIN_ALL_STATUS_DELIVERY"] = "";
 $GLOBALS["STR_ADMIN_ANY"] = "Ne gravas";
 $GLOBALS["STR_ADMIN_ARTICLE_SHORT_DESCRIPTION"] = "Kap-resumo (povas aperi en listoj kun ligilo al la kompleta teksto)";
 $GLOBALS["STR_ADMIN_ARTICLES_ALL"] = "Ĉiuj artikoloj";
@@ -55,6 +57,7 @@ $GLOBALS["STR_ADMIN_ARTICLES_ERR_NOT_FOUND"] = "Neniu artikolo troviĝas kun ide
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_ADD_BUTTON"] = "Aldoni ĉi artikolon";
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_ADD"] = "Aldoni artikolon";
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_MODIFY"] = "Modifi la artikolon";
+$GLOBALS["STR_ADMIN_ARTICLES_IS_ON_LAYOUT"] = "Display layout short description";
 $GLOBALS["STR_ADMIN_ARTICLES_IS_ON_ROLLOVER"] = "";
 $GLOBALS["STR_ADMIN_ARTICLES_IS_ON_RESELLER"] = "";
 $GLOBALS["STR_ADMIN_ARTICLES_MSG_CREATED_OK"] = "La artikolo %s estis kreita";
@@ -62,6 +65,8 @@ $GLOBALS["STR_ADMIN_ARTICLES_MSG_DELETED"] = "La artikolo %s estis forigita.";
 $GLOBALS["STR_ADMIN_ARTICLES_NOTHING_FOUND_FOR_LANG"] = "Neniu artikolo ekzistas en la datumbazo en ĉi lingvo";
 $GLOBALS["STR_ADMIN_ARTICLES_TITLE"] = "Mastrumi la artikolojn";
 $GLOBALS["STR_ADMIN_ASKED_STATUS"] = "Stato petita";
+$GLOBALS["STR_ADMIN_ASSIGN"] = "";
+$GLOBALS["STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP"] = "";
 $GLOBALS["STR_ADMIN_AT_ROOT"] = "Al la radika dosierujo";
 $GLOBALS["STR_ADMIN_ATTRIBUTE"] = "";
 $GLOBALS["STR_ADMIN_ATTRIBUT_STYLE_LINK"] = "";
@@ -71,6 +76,7 @@ $GLOBALS["STR_ADMIN_BACKGROUND_COLOR_FOR_MENU"] = "Fona koloro de la menu, je fo
 $GLOBALS["STR_ADMIN_BACKGROUND_COLOR"] = "Fona koloro de la paĝo, je formato #RRVVBB (ekz: griza => #EEEEEE)";
 $GLOBALS["STR_ADMIN_BEGIN_DATE"] = "Komenca dato";
 $GLOBALS["STR_ADMIN_BILL_TOTALS"] = "ENTUTE";
+$GLOBALS["STR_ADMIN_BRANDS_TO_EXCLUDE"] = "";
 $GLOBALS["STR_ADMIN_CASE_NOT_FORECASTED"] = "Neantaŭviditaĵo";
 $GLOBALS["STR_ADMIN_CATEGORIES_ADD_PRODUCT"] = "Aldoni varon";
 $GLOBALS["STR_ADMIN_CATEGORIES_ADD_SUBCATEGORY"] = "Aldoni sub-kategorion";
@@ -413,38 +419,41 @@ $GLOBALS["STR_ADMIN_HTML_DELETE_COOKIE_LINK"] = "Forigi la interspaca-reklaman k
 $GLOBALS["STR_ADMIN_HTML_EXPLAIN"] = "Ĉiam aperas la plej freŝdata entenaĵo en la petita pozicio.";
 $GLOBALS["STR_ADMIN_HTML_UPDATE"] = "Modifi ĉi entenaĵon";
 $GLOBALS["STR_ADMIN_ID"] = "Identigila numero";
+$GLOBALS["STR_ADMIN_IP"] = "";
 $GLOBALS["STR_ADMIN_IMAGE_SHORT_PATH"] = "Bildo / Dosierujo";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_COLUMN_NOT_HANDLED"] = "La kolumno n-o %s ne estas permesita je importo (nur priskribas je eksporto): %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_COLUMN_NOT_KNOWN"] = "La kolumno n-o %s estas ne rekonita, sekve ne importita: %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_FIELDS_NOT_CHOSEN"] = "Vi elektu almenaŭ unu markbutonon.<br />Importado ĉesas.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_FILE_NOT_FOUND"] = "Netrovebla dosiero!<br />Importado ĉesas.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_INCOHERENT_COLUMNS"] = "Problemo dum importado: ekzistas pluraj kolumnoj \"%s\" en la font-dosiero - importado ne efektiviĝis.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_REFERENCE_DOES_NOT_EXIST"] = "La referenca kategorio %s ne ekzistas";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_TYPE_NOT_CHOSEN"] = "Neniu importa tipo elektita.<br />Importado ĉesis.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN"] = "- La unua linio nepre indiku la kolumno-kapojn<br />- Ne aperu formulojn en la dosiero CSV<br />- La decimal-signo estu la punkto, ne la komo<br />- La disig-signo de la dosiero: tabel-signo, punktokomo aŭ komo nepre indiku nur ŝanĝo de kolumno<br />- La dosiero ne estu jam malfermita de alia programo dum alŝuto<br />- La bildoj rilataj al la varoj estu aparte prizorgitaj: alŝuti ilin per FTP-ilo en la dosierujon {$GLOBALS['uploaddir']}/<br />- <b>Antaŭ ol importi kategoriajn nomojn, certiĝu de administranto, ke ili estis antaŭe kreitaj</b><br />";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING"] = "Kodigo de la datumoj";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE"] = "Ekzempla dosiero";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN"] = "Permesitaj signoj de kolumna disigo: punktokomo, komo, tabo, ktp";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT"] = "Nepra formato de la dosiero";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME"] = "Datuma dosiero";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE"] = "IMPORTI VARAN DOSIERON";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_ALL_FIELDS"] = "Importado de ĉiuj kampoj trovitaj en la dosiero";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_MODE"] = "Elekto de la importa reĝimo";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_SELECTED_FIELDS"] = "Importo nur de la ĉi sube elektitaj kampoj ";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_ATTRIBUTE_CREATED"] = "Kreado de atributo %s - kreita kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_BRAND_CREATED"] = "Kreado de marko %s - kreita kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_CATEGORY_CREATED"] = "Kreado de kategorio %s - kreita kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_IMPORTATION_OK"] = "Nombro da varoj sukcese importitaj: %s entute, inkluzive: %s modifitaj, %s ne modifitaj kaj %s kreitaj.<br />Kategoriigo de varoj: %s pliaj.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_LINE_CREATED"] = "Kreado de linio %s - kreita kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_LINE_UPDATED"] = "Kreado de linio %s - ĝisdatigita varo kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_OPTION_CREATED"] = "Kreado de agordo %s - kreita kun id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_CREATED"] = "Kreado de malkreska tarifo (%s), revendista_prezo (%s) kaj kvanto (%s) por la produkto id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_UPDATED"] = "Ĝisdatigo de malkreska tarifo (%s), revendista_prezo (%s) kaj kvanto (%s) por la produkto id=%s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SELECT_FIELDS"] = "ELektu la kampojn kiujn vi deziras ĝisdatigi";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN"] = "indiku \\t por tabo - nenion indiku por aŭtomata eltrovo.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR"] = "Kolumna disiga signo";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_TITLE"] = "Importa modulo";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID"] = "Atentu: se la kolumno \"id\" aperas en la dosiero, modifiĝos la datumoj de produktoj kies \"id\" estas trovitaj.";
+$GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE"] = "";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "La kolumno n-o %s ne estas permesita je importo (nur priskribas je eksporto): %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "La kolumno n-o %s estas ne rekonita, sekve ne importita: %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "Vi elektu almenaŭ unu markbutonon.<br />Importado ĉesas.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND"] = "Netrovebla dosiero!<br />Importado ĉesas.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS"] = "Problemo dum importado: ekzistas pluraj kolumnoj \"%s\" en la font-dosiero - importado ne efektiviĝis.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_REFERENCE_DOES_NOT_EXIST"] = "La referenca kategorio %s ne ekzistas";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_TYPE_NOT_CHOSEN"] = "Neniu importa tipo elektita.<br />Importado ĉesis.";
+$GLOBALS["STR_ADMIN_IMPORT_EXPLAIN"] = "- La unua linio nepre indiku la kolumno-kapojn<br />- Ne aperu formulojn en la dosiero CSV<br />- La decimal-signo estu la punkto, ne la komo<br />- La disig-signo de la dosiero: tabel-signo, punktokomo aŭ komo nepre indiku nur ŝanĝo de kolumno<br />- La dosiero ne estu jam malfermita de alia programo dum alŝuto<br />- La bildoj rilataj al la varoj estu aparte prizorgitaj: alŝuti ilin per FTP-ilo en la dosierujon {$GLOBALS['uploaddir']}/<br />- <b>Antaŭ ol importi kategoriajn nomojn, certiĝu de administranto, ke ili estis antaŭe kreitaj</b><br />";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_ENCODING"] = "Kodigo de la datumoj";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_EXAMPLE"] = "Ekzempla dosiero";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN"] = "Permesitaj signoj de kolumna disigo: punktokomo, komo, tabo, ktp";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT"] = "Nepra formato de la dosiero";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_NAME"] = "Datuma dosiero";
+$GLOBALS["STR_ADMIN_IMPORT_FORM_TITLE"] = "IMPORTI VARAN DOSIERON";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS"] = "Importado de ĉiuj kampoj trovitaj en la dosiero";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_MODE"] = "Elekto de la importa reĝimo";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS"] = "Importo nur de la ĉi sube elektitaj kampoj ";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_ATTRIBUTE_CREATED"] = "Kreado de atributo %s - kreita kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_BRAND_CREATED"] = "Kreado de marko %s - kreita kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_CATEGORY_CREATED"] = "Kreado de kategorio %s - kreita kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_IMPORTATION_OK"] = "Nombro da varoj sukcese importitaj: %s entute, inkluzive: %s modifitaj, %s ne modifitaj kaj %s kreitaj.<br />Kategoriigo de varoj: %s pliaj.";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_LINE_CREATED"] = "Kreado de linio %s - kreita kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_LINE_UPDATED"] = "Kreado de linio %s - ĝisdatigita varo kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_OPTION_CREATED"] = "Kreado de agordo %s - kreita kun id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_CREATED"] = "Kreado de malkreska tarifo (%s), revendista_prezo (%s) kaj kvanto (%s) por la produkto id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_UPDATED"] = "Ĝisdatigo de malkreska tarifo (%s), revendista_prezo (%s) kaj kvanto (%s) por la produkto id=%s";
+$GLOBALS["STR_ADMIN_IMPORT_SELECT_FIELDS"] = "ELektu la kampojn kiujn vi deziras ĝisdatigi";
+$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN"] = "indiku \\t por tabo - nenion indiku por aŭtomata eltrovo.";
+$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Kolumna disiga signo";
+$GLOBALS["STR_ADMIN_IMPORT_TITLE"] = "Importa modulo";
+$GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Atentu: se la kolumno \"id\" aperas en la dosiero, modifiĝos la datumoj de produktoj kies \"id\" estas trovitaj.";
+$GLOBALS["STR_ADMIN_IMPORT_TYPE"] = "";
 $GLOBALS["STR_ADMIN_IN_COLUMNS"] = "Laŭ kolumno";
 $GLOBALS["STR_ADMIN_IN_LINES"] = "Laŭ vico";
 $GLOBALS["STR_ADMIN_INCLUDING_DELIVERY_COST"] = "inkl. liveraj kostoj";
@@ -1426,8 +1435,17 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_COUNT"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_RECEIVED"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_OFFER_TO_BEST_CLIENTS"] = "Doni rabatajn kodojn al la plej bonaj klientoj";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_EXPLAIN"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_CHOOSE_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND"] = "Sendi ĉi rabat-kodon al la ĉi sube elektitaj uzantoj";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_TO_ALL"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_CHECKED_USERS"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_GROUP_SELECT_EXPLAIN"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_TO_BEST_CLIENTS"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_CHOOSE_NEWSLETTER"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_CHECKED_USERS"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_TO_ALL"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL_CHECKBOX"] = "";
+$GLOBALS["STR_ADMIN_UTILISATEURS_USERS_GROUP"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL_OFFERS"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL"] = "";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CONTACT_FORECASTED_DATE"] = "";
@@ -1580,10 +1598,15 @@ $GLOBALS["STR_ADMIN_ZONES_DELIVERY_COSTS_EXPLAIN"] = "La sojlo pri senpageco de 
 $GLOBALS["STR_ADMIN_ZONES_DELIVERY_COSTS_IN_ZONE"] = "";
 $GLOBALS["STR_ADMIN_ZONES_DOES_VAT_APPLY_IN_ZONE"] = "Ĉu la aldonvalor-imposta kvoto aplikiĝas en ĉi regiono?";
 $GLOBALS["STR_ADMIN_ZONES_FORM_TITLE"] = "";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_FRANCO_MODE_ON"] = "";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_FRANCO_MODE_NO"] = "";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_MODE_ON_AMOUNT"] = "";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_MODE_ON_WEIGHT"] = "";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT"] = "";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN"] = "Ĉi nombro utilas nur se elektitas la supra aktiviga butono. Indiki 0 (nulo) por ne enkaluli la nombron da varoj.";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS"] = "Nombro da aĉetitaj varoj kies kriterio pri senpageco de livero efektiviĝas";
+$GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_WEIGHT"] = "";
 $GLOBALS["STR_ADMIN_ZONES_FREE_DELIVERY"] = "";
 $GLOBALS["STR_ADMIN_ZONES_MSG_CREATED_OK"] = "";
 $GLOBALS["STR_ADMIN_ZONES_MSG_DELETED_OK"] = "La regiono <b>%s</b> estis forigita.";
@@ -1593,6 +1616,8 @@ $GLOBALS["STR_ADMIN_ZONES_NOTHING_FOUND"] = "Neniu regiono ekzistas en la datumb
 $GLOBALS["STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_ZONES_TITLE"] = "";
 $GLOBALS["STR_ADMIN_ZONES_UPDATE"] = "";
+$GLOBALS["STR_ADMIN_SELECT_ICIRELAIS_SHIPPING"] = "";
+$GLOBALS["STR_ADMIN_UNASSIGN"] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN"] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST"] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX"] = "";
@@ -2006,6 +2031,7 @@ $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Aldoni liveran manieron";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "Eblas ĉi paĝe difini la nomojn de liveraj manieroj. Tiuj liveraj manieroj estu poste ligitaj al <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">liveraj kostoj</a>. Por ŝanĝi la aperontan ordon, oni movu la vicon rilata al livera maniero ĝis la dezirata loko.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Aldoni aŭ modifi liveran manieron";
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "Pago per KWIXO-servo";
+$GLOBALS["STR_ADMIN_TYPES_LINK_TO_DPD"] = "Ligi ĉi liveran manieron al \"DPD\"-servo";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Ligi ĉi liveran manieron al \"ICI relais\"-servo";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN"] = "";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO"] = "";
@@ -2027,3 +2053,5 @@ $GLOBALS["STR_ADMIN_ZONES_PAYMENT_METHOD"] = "";
 $GLOBALS["STR_ADMIN_SEPARATOR_PRICE"] = "";
 $GLOBALS["STR_ADMIN_DECIMAL_SEPARATOR_PRICE"] = "";
 $GLOBALS["STR_ADMIN_THOUSANDS_SEPARATOR_PRICE"] = "";
+$GLOBALS["STR_ADMIN_NAME_SHORT"] = "Name short";
+$GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"] = "";

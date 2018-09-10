@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 58057 2018-09-05 13:30:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -63,6 +63,7 @@ function affiche_formulaire_ajout_banniere($categorie_id = 0, &$frm)
 		$frm["on_other_page"] = "";
 		$frm["pages_allowed"] = "";
 		$frm["keywords"] = "";
+		$frm["screen_size"] = "";
 	}
 	$frm["titre_bouton"] = $GLOBALS["STR_MODULE_BANNER_ADMIN_ADD_BUTTON"];
 	$frm["nouveau_mode"] = "insere";
@@ -134,6 +135,11 @@ function affiche_formulaire_banniere(&$frm)
 	$tpl->assign('on_search_engine_page', vb($frm["on_search_engine_page"]));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
 	$tpl->assign('on_first_page_category', vb($frm["on_first_page_category"]));
+	$tpl->assign('STR_SCREEN_SIZE', $GLOBALS['STR_SCREEN_SIZE']);
+    $tpl->assign('screen_size_xs', StringMb::strpos($frm['screen_size'], 'xs')!==false);
+    $tpl->assign('screen_size_sm', StringMb::strpos($frm['screen_size'], 'sm')!==false);
+    $tpl->assign('screen_size_md', StringMb::strpos($frm['screen_size'], 'md')!==false);
+    $tpl->assign('screen_size_lg', StringMb::strpos($frm['screen_size'], 'lg')!==false);
 
 	if (check_if_module_active('annonces')) {
 		$tpl->assign('on_ad_creation_page', vb($frm["on_ad_creation_page"]));
@@ -155,10 +161,11 @@ function affiche_formulaire_banniere(&$frm)
 			ORDER BY position ASC, nom_" . $_SESSION['session_langue'] . " ASC");
 	}
 	$tpl_cat_opts = array();
+	$frm['id_categorie'] = explode(',', vb($frm['id_categorie']));
 	while ($cat = fetch_assoc($qid)) {
 		$tpl_cat_opts[] = array(
 			'value' => intval($cat['id']),
-			'issel' => vb($frm["id_categorie"]) == $cat['id'],
+			'issel' => in_array($cat['id'],$frm['id_categorie']),
 			'name' => $cat['nom_' . $_SESSION['session_langue']]
 		);
 	}
@@ -306,6 +313,7 @@ function insere_banniere(&$frm)
 			, on_other_page
 			, keywords
 			, site_id
+			, screen_size
 		) VALUES (
 			'" . nohtml_real_escape_string($frm['description']) . "'
 			, '" . nohtml_real_escape_string($frm['image']) . "'
@@ -332,7 +340,7 @@ function insere_banniere(&$frm)
 			, '" . nohtml_real_escape_string($frm['target']) . "'
 			, '" . real_escape_string($frm['tag_html']) . "'
 			, '" . real_escape_string($frm['extra_javascript']) . "'
-			, '" . intval(vn($frm['id_categorie'])) . "'
+			, '" . real_escape_string(implode(',',vb($frm['id_categorie'], array()))) . "'
 			, '" . intval(vn($frm['width'])) . "'
 			, '" . intval(vn($frm['height'])) . "'
 			, '" . intval(vn($frm['rang'])) . "'
@@ -340,6 +348,7 @@ function insere_banniere(&$frm)
 			, '" . intval(vn($frm['on_other_page'])) . "'
 			, '" . nohtml_real_escape_string(vb($frm['keywords'])) . "'
 			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+			, '" . implode(',',nohtml_real_escape_string(vb($frm['screen_size'], array()))) . "'
 		)";
 		$qid = query($sql);
 		echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_OK"], vb($_POST['description']))))->fetch();
@@ -389,12 +398,13 @@ function maj_banniere($id, &$frm)
 		, target = "' . nohtml_real_escape_string($frm['target']) . '"
 		, tag_html = "' . real_escape_string($frm['tag_html']) . '"
 		, extra_javascript  = "' . real_escape_string($frm['extra_javascript']) . '"
-		, id_categorie  = "' . intval(vn($frm['id_categorie'])) . '"
+		, id_categorie  = "' . real_escape_string(implode(',',vb($frm['id_categorie'], array()))) . '"
 		, width = "' . intval(vn($frm['width'])) . '"
 		, height = "' . intval(vn($frm['height'])) . '"
 		, rang = "' . intval(vn($frm['rang'])) . '"
 		, keywords = "' . nohtml_real_escape_string(vb($frm['keywords'])) . '"
 		, site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value(vn($frm['site_id']))) . '"
+		, screen_size = "' . implode(',',nohtml_real_escape_string(vb($frm['screen_size'], array()))) . '"
 		WHERE id = "' . intval($id) . '"';
 	if (query($sql)) {
 		$ouptut = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_MODULE_BANNER_ADMIN_MSG_UPDATED_OK"], $id)))->fetch();

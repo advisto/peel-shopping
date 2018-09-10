@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: zones.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: zones.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -99,6 +99,7 @@ function affiche_formulaire_ajout_zone(&$frm)
 		$frm['on_franco'] = "";
 		$frm['on_franco_amount'] = "";
 		$frm['on_franco_reseller_amount'] = "";
+		$frm['on_franco_weight'] = "";
 		$frm['on_franco_nb_products'] = "";
 		$frm['position'] = "";
 		$frm['site_id'] = "";
@@ -166,10 +167,12 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('tva', $frm['tva']);
 	$tpl->assign('payment_select', get_payment_select(vb($frm['payment_technical_code']), false,  false, null, null, null, true));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_zones'])));
 	$tpl->assign('on_franco', $frm['on_franco']);
+	$tpl->assign('applied_franco_mode', $frm['applied_franco_mode']);
 	$tpl->assign('on_franco_amount', $frm['on_franco_amount']);
 	$tpl->assign('on_franco_reseller_amount', $frm['on_franco_reseller_amount']);
+	$tpl->assign('on_franco_weight', $frm['on_franco_weight']);
 	$tpl->assign('on_franco_nb_products', $frm['on_franco_nb_products']);
 	$tpl->assign('position', $frm['position']);
 	$tpl->assign('is_fianet_module_active', check_if_module_active('fianet'));
@@ -185,6 +188,10 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('STR_ADMIN_LANGUAGES_SECTION_HEADER', $GLOBALS['STR_ADMIN_LANGUAGES_SECTION_HEADER']);
 	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
+	$tpl->assign('STR_ADMIN_ZONES_APPLY_FRANCO_MODE_ON', $GLOBALS['STR_ADMIN_ZONES_APPLY_FRANCO_MODE_ON']);
+	$tpl->assign('STR_ADMIN_ZONES_APPLY_FRANCO_MODE_NO', $GLOBALS['STR_ADMIN_ZONES_APPLY_FRANCO_MODE_NO']);
+	$tpl->assign('STR_ADMIN_ZONES_APPLY_MODE_ON_AMOUNT', $GLOBALS['STR_ADMIN_ZONES_APPLY_MODE_ON_AMOUNT']);
+	$tpl->assign('STR_ADMIN_ZONES_APPLY_MODE_ON_WEIGHT', $GLOBALS['STR_ADMIN_ZONES_APPLY_MODE_ON_WEIGHT']);
 	$tpl->assign('STR_ADMIN_ZONES_DOES_VAT_APPLY_IN_ZONE', $GLOBALS['STR_ADMIN_ZONES_DOES_VAT_APPLY_IN_ZONE']);
 	$tpl->assign('STR_ADMIN_ZONES_DELIVERY_COSTS_IN_ZONE', $GLOBALS['STR_ADMIN_ZONES_DELIVERY_COSTS_IN_ZONE']);
 	$tpl->assign('STR_ADMIN_ZONES_DELIVERY_COSTS_EXPLAIN', $GLOBALS['STR_ADMIN_ZONES_DELIVERY_COSTS_EXPLAIN']);
@@ -193,6 +200,8 @@ function affiche_formulaire_zone(&$frm)
 	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT_EXPLAIN', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS']);
 	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_WEIGHT', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_WEIGHT']);
+	
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN', $GLOBALS['STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
@@ -245,7 +254,9 @@ function insere_zone($frm)
 		, on_franco_amount
 		, on_franco_reseller_amount
 		, on_franco_nb_products
-		, payment_technical_code";
+		, payment_technical_code
+		, applied_franco_mode
+		, on_franco_weight";
 	if (check_if_module_active('fianet')) {
 		$sql .= ", technical_code";
 	}
@@ -267,7 +278,9 @@ function insere_zone($frm)
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_amount'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_reseller_amount'])) . "'
 		, '" . nohtml_real_escape_string(vn($frm['on_franco_nb_products'])) . "'
-		, '" . nohtml_real_escape_string(vb($frm['payment_technical_code'])) . "'";
+		, '" . nohtml_real_escape_string(vb($frm['payment_technical_code'])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['applied_franco_mode'])) . "'
+		, '" . nohtml_real_escape_string(vb($frm['on_franco_weight'])) . "'";
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'";
 	}
@@ -311,6 +324,8 @@ function maj_zone($id, $frm)
 		, on_franco_nb_products = '" . nohtml_real_escape_string($frm['on_franco_nb_products']) . "'
 		, on_franco = '" . intval(vn($frm['on_franco'])) . "'
 		, payment_technical_code = '" . nohtml_real_escape_string(vb($frm['payment_technical_code'])) . "'
+		, applied_franco_mode = '" . nohtml_real_escape_string(vb($frm['applied_franco_mode'])) . "'
+		, on_franco_weight = '" . nohtml_real_escape_string(vb($frm['on_franco_weight'])) . "'
 		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('zones', null, true) . "";
 	query($sql);
 }

@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: codes_promos.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: codes_promos.php 58057 2018-09-05 13:30:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_sales,admin_users,admin_operations,admin_finance,admin_productsline");
+necessite_priv("admin_white_label,admin_sales,admin_users,admin_operations,admin_finance,admin_productsline");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CODES_PROMOS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -137,6 +137,7 @@ function affiche_formulaire_ajout_code_promo(&$frm, &$form_error_object)
 		$frm["nom"] = "";
 		$frm["site_id"] = "";
 		$frm["cat_not_apply_code_promo"] = "";
+		$frm["brand_not_apply_code_promo"] = "";
 	}
 	$frm["nouveau_mode"] = "insere";
 	$frm["date_debut"] = get_formatted_date(time());
@@ -197,12 +198,29 @@ function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 	$tpl->assign('montant_min', vn($frm['montant_min']));
 	$tpl->assign('categorie_options', get_categories_output(null, 'categories', vb($frm['id_categorie']), 'option', '&nbsp;&nbsp;', null, null, true, 80));
 	$tpl->assign('cat_not_apply_code_promo_options', get_categories_output(null, 'categories', get_array_from_string(vn($frm['cat_not_apply_code_promo'])), 'option', '&nbsp;&nbsp;', null, null, true, 80));
+	$tpl_marques_options = array();
+	$brand_not_apply_code_promo = array();
+	if (!empty($frm['brand_not_apply_code_promo'])) { 
+		$brand_not_apply_code_promo = explode(',',$frm['brand_not_apply_code_promo']);
+	}
+	$select = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", etat
+	   FROM peel_marques
+	   WHERE " . get_filter_site_cond('marques') . "
+	   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
+	while ($nom = fetch_assoc($select)) {
+		$tpl_marques_options[] = array('value' => intval($nom['id']),
+			'issel' => in_array($nom['id'], $brand_not_apply_code_promo),
+			'name' => $nom['nom_' . $_SESSION['session_langue']] . (empty($nom['etat'])?' ('.$GLOBALS["STR_ADMIN_DEACTIVATED"].')':'')
+			);
+	}
+		
+	$tpl->assign('marques_options', $tpl_marques_options);
 	$tpl->assign('nombre_prevue', vb($frm["nombre_prevue"]));
 	$tpl->assign('nb_used_per_client', vb($frm["nb_used_per_client"]));
 	$tpl->assign('product_filter', vb($frm['product_filter']));
 	$tpl->assign('etat', vn($frm['etat']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_codes_promos'])));
 	$tpl->assign('titre_bouton', vn($frm['titre_bouton']));
 	$tpl->assign('name_error', $form_error_object->text('nom'));
 	if($frm["nouveau_mode"] != "insere") {
@@ -233,6 +251,7 @@ function affiche_formulaire_code_promo(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_PRODUCT_REFERENCE', $GLOBALS['STR_ADMIN_PRODUCT_REFERENCE']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO', $GLOBALS['STR_ADMIN_CODES_PROMOS_EMPTY_NAME_INFO']);
 	$tpl->assign('STR_ADMIN_CODES_PROMOS_COMBINABLE', $GLOBALS['STR_ADMIN_CODES_PROMOS_COMBINABLE']);
+	$tpl->assign('STR_ADMIN_BRANDS_TO_EXCLUDE', $GLOBALS['STR_ADMIN_BRANDS_TO_EXCLUDE']);
 	echo $tpl->fetch();
 }
 
@@ -271,12 +290,12 @@ function maj_code_promo($id, $frm)
 			, montant_min = '" . floatval(get_float_from_user_input($frm['montant_min'])) . "'
 			, etat = '" . intval($frm['etat']) . "'
 			, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
-			, id_site = '" . $GLOBALS['site_parameters']['id'] . "'
 			, id_categorie = '" . intval($frm['id_categorie']) . "'
 			, nombre_prevue = '" . intval($frm['nombre_prevue']) . "'
 			, nb_used_per_client = '" . intval($frm['nb_used_per_client']) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
 			, cat_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['cat_not_apply_code_promo']), true), true) . "'
+			, brand_not_apply_code_promo ='" . nohtml_real_escape_string(get_string_from_array(vn($frm['brand_not_apply_code_promo']), true), true) . "'
 			, product_filter = '" . nohtml_real_escape_string($frm['product_filter']) . "'
 			, promo_code_combinable = '" . nohtml_real_escape_string(vb($frm['promo_code_combinable'])) . "'
 		WHERE id='" . intval($id) . "'";

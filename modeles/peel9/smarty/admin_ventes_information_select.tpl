@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,8 +12,19 @@
 // +----------------------------------------------------------------------+
 // $Id: admin_ventes_information_select.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
 *}
+<div>
 {$STR_ORDER_STATUT_PAIEMENT}:
 <select class="form-control" name="statut" style="width:200px;margin:auto;">
 	<option value="">{$STR_ADMIN_ALL_ORDERS}</option>
 	{$payment_status_options}
 </select>
+</div>
+<div style="padding-top:1px;">
+{$STR_SHIPPING_ZONE}:
+<select class="form-control" name="zone" style="width:200px;margin:auto;">
+	<option value="">{$STR_ADMIN_ALL_ZONES}</option>
+{foreach $options as $o}
+	<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed}</option>
+{/foreach}
+</select>
+</div>

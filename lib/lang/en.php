@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: en.php 57992 2018-08-31 08:27:28Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "Manage my billing and shipping addresses";
 $GLOBALS["STR_ADDRESS_NAME"] = "Address title";
 $GLOBALS["STR_ADMIN"] = "Administration";
 $GLOBALS["STR_ADMINISTRATION"] = "Administration";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "Advanced search";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "Access advanced search";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "See flags included on our website";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "You are registered in partner {$GLOBALS['site']}\n\nPresently we are paying you <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> of total sales excl. VAT created by your account.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Create an HTML code for partner products";
@@ -243,7 +245,8 @@ $GLOBALS["STR_ERR_FIRST_CHOICE"] = "You must choose at least one favorite catego
 $GLOBALS["STR_ERR_FIRSTNAME"] = "Please fill in your first name.\n";
 $GLOBALS["STR_ERR_FORM"] = "Your form is incomplete or comprises errors";
 $GLOBALS["STR_ERR_HASH"] = "The link is not valid. No changes were made.";
-$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "You haven't yet chosen your country, or your delivery information.<br /><br />Please fill in the missing fields.";
+$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "You haven't yet chosen your country, or your delivery information, or your delivery area is not consistent with the country of delivery of the address used
+.<br /><br />Please fill in the missing fields.";
 $GLOBALS["STR_ERR_KEYB"] = "Press the <b>x</b> key to close";
 $GLOBALS["STR_ERR_LOGIN"] = "Please fill in your login.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Please fill in your message.\n";
@@ -353,6 +356,7 @@ $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "Click here once the installation di
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "Installation procedure";
 $GLOBALS["STR_INSTALLATION"] = "Installation";
 $GLOBALS["STR_INTRACOM_FORM"] = "Intracom VAT number (Only for European companies)";
+$GLOBALS["STR_INTRACOM_FORM_ALERT"] = "DO NOT FILL IN IF COUNTRY IS FRANCE OR OUTSIDE EUROPE";
 $GLOBALS["STR_INTRODUCTORY_TEXT"] = "Introductory text";
 $GLOBALS["STR_INVALID_TOKEN"] = "Invalid Token: Cookies disabled, treatment already done, ​​or HTTP Referer not sent by your browser";
 $GLOBALS["STR_INVOICE_ADDRESS"] = "Billing Address";
@@ -481,6 +485,7 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Click here to return to yo
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "This email address cannot be sponsored: already in our database";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Please fill in the mandatory fields in order to sponsor your friends.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Click here to return to the previous page</a>.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Your friends have received your demand for sponsorship. As soon as they validate their account, you will beneficiate a credit of %s on their first order. They also will be able to benefit from their credit of %s on their first order.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND_SINGLE"] = "Your friend have received your demand for sponsorship. As soon as he validate his account, you will beneficiate a credit of %s on their first order. He also will be able to benefit from a credit of %s on his first order.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Please confirm your registration with the reference ID you receive by email! You will receive a credit certificate of %s usable on your first order on our website.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmation of registration to the sponsoring program of {$GLOBALS['site']} website";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "TOTAL:";
@@ -531,6 +536,7 @@ $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroo
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Please sign in.";
 $GLOBALS["STR_MSG_THANKS"] = "Thank you for your order. It has been successful.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
+$GLOBALS["STR_MY_DATA"] = "My data";
 $GLOBALS["STR_MY_GIFT_POINT"] = "My gift points";
 $GLOBALS["STR_MY_ORDER"] = "My orders";
 $GLOBALS["STR_MY_QUOTES"] = "My quotes";
@@ -659,6 +665,7 @@ $GLOBALS["STR_PER_PAGE"] = "Number of results per page";
 $GLOBALS["STR_PERSON_TO_CONTACT"] = "Contact";
 $GLOBALS["STR_PHOTO_NOT_AVAILABLE_ALT"] = "photo not available";
 $GLOBALS["STR_PHOTO"] = "Photo";
+$GLOBALS["STR_PIECE"] = "";
 $GLOBALS["STR_PIECE"] = "Piece";
 $GLOBALS["STR_PICTURE_SIZE_EXTENTION_ERROR"] = "Verify that the file selected is a valid image (%s) and smaller than %s Ko";
 $GLOBALS["STR_PICTURE"] = "Picture";
@@ -689,6 +696,7 @@ $GLOBALS["STR_PROFORMA"] = "Proforma invoice";
 $GLOBALS["STR_PROMO_CODE"] = "promo code";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "Special offer included";
 $GLOBALS["STR_PROMOTION"] = "Special offer";
+$GLOBALS["STR_PROMOTION_SHORT"] = "Promo";
 $GLOBALS["STR_PROMOTIONS"] = "Special offer";
 $GLOBALS["STR_PROPULSE"] = "Created by";
 $GLOBALS["STR_PSEUDO"] = "Nickname";
@@ -732,6 +740,7 @@ $GLOBALS["STR_RSS_TITLE"] = "RSS feed of the website {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "Our RSS Feed";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Terms and conditions";
 $GLOBALS["STR_SAVE_CART"] = "Save Cart";
+$GLOBALS['STR_SCREEN_SIZE'] = "Screen size";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "All words";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "Any word";
 $GLOBALS["STR_SEARCH_BRAND"] = "Search by brand";
@@ -758,6 +767,7 @@ $GLOBALS["STR_SHIP_ADDRESS"] = "Shipping address";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Choose your type of shipment";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Choose your zone of shipment";
 $GLOBALS["STR_SHIPPING_COST"] = "Shipping cost";
+$GLOBALS["STR_SHIPPING_TO_BE_DETERMINED"] = "to be determined";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Means of shipping";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Shipping zone";
 $GLOBALS["STR_SHOPPING"] = "Continue my shopping";
@@ -881,6 +891,8 @@ $GLOBALS["STR_WORD_RESELLER"] = "Reseller";
 $GLOBALS["STR_WORD_SELLERS"] = "Sellers";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "Enter your email address";
 $GLOBALS["STR_YES"] = "Yes";
+$GLOBALS["STR_YES_NOT_VALIDATE"] = "Yes, not validated";
+$GLOBALS["STR_YES_VALIDATE"] = "Yes validated";
 $GLOBALS["STR_YOU_ARE"] = "You are";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "We are inviting you to edit your invoice from your personal account";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Your promotional code";
@@ -895,3 +907,11 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "Update address OK";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "No product was added";
 $GLOBALS["STR_ZIP"] = "Zip code";
 $GLOBALS["STR_ZOOM"] = "Zoom";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
+$GLOBALS["STR_CARD_ESTIMATE"] = "Turn this cart into a quote";
+$GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "Open professional account ";
+$GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/modules/reseller/retailer.php\">Click here to open an account pro</a>.";
+$GLOBALS["STR_PRIX_SEARCH_HT"] = "Price Bef. VAT";
+$GLOBALS["STR_PRIX_SEARCH_TTC"] = "Price Aft. VAT";
+$GLOBALS["STR_REGISER_CART_ALERT"] = "There are more than 25 products in the cart, so it will not be saved automatically. To save your basket you can click on the link 'Save the product list' of the basket page";

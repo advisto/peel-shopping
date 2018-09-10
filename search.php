@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: search.php 57738 2018-08-17 08:50:39Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -233,6 +233,11 @@ if($launch_search) {
 	}
 	$search_text = implode(' - ', $GLOBALS['search_text_array']);
 	$tpl_r->assign('search', $search_text);
+	
+	
+	$tpl_r->assign('attributs_list', implode(' / ',vb($GLOBALS['search_attribut_array'], array())));
+
+	
 	$result = $tpl_r->fetch();
 	$GLOBALS['meta_title'] = $search_text;
 	$GLOBALS['meta_description'] = $search_text;
@@ -316,6 +321,10 @@ function search_content_categories($terms, $match, $taille_texte_affiche) {
 		$query = query($sql);
 		$i = 0;
 		while ($rub = fetch_assoc($query)) {
+			//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$rub = get_default_content($rub, $rub['id'], 'rubriques');
+			}
 			$titre = $rub['nom_' . $_SESSION['session_langue']];
 			// on supprime le HTML du contenu
 			$texte = StringMb::strip_tags(StringMb::html_entity_decode_if_needed($rub['description_' . $_SESSION['session_langue']]));
@@ -392,6 +401,10 @@ function search_articles($terms, $match, $taille_texte_affiche) {
 		$query = query($sql);
 		$i = 0;
 		while ($art = fetch_assoc($query)) {
+			//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$art = get_default_content($art, $art['id'], 'articles');
+			}
 			$surtitre = $art['surtitre_' . $_SESSION['session_langue']];
 			$titre = $art['titre_' . $_SESSION['session_langue']];
 			// on supprime le HTML du contenu
@@ -472,6 +485,10 @@ function search_brands($terms, $match, $taille_texte_affiche) {
 		$sql = search_brands_sql($terms, $fields, $match);
 		$query = query($sql);
 		while ($marque = fetch_assoc($query)) {
+			//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$rub = get_default_content($marque, intval($marque['id']), 'marques');
+			}
 			$nom = $marque['nom_' . $_SESSION['session_langue']];
 			$urlbrand = get_url('/achat/marque.php', array('id' => $marque['id']));
 			// on supprime le HTML du contenu
@@ -556,6 +573,22 @@ function search_products($frm, $terms, $match, $real_search) {
 					}
 				}
 			}
+			$hook_result = call_module_hook('search_engine_attributs_lists', array('frm'=>$frm), 'array');
+			foreach($hook_result as $this_attribut_id) {
+				$attributs_array[intval($this_attribut_id)] = true;
+			}
+			if (!empty($attributs_array)) {
+				// On récupère le texte descriptif des attributs sélectionnés pour l'afficher dans le titre de la page de recherche
+				$sql_attribut_name = 'SELECT descriptif_' . $_SESSION['session_langue'] . ' as attribut_name
+					FROM peel_attributs
+					WHERE id IN ('.implode(',', array_keys($attributs_array)).')';
+				$query_attribut_name = query($sql_attribut_name);
+				$GLOBALS['search_attribut_array'] = array();
+				while($result_attribut_name = fetch_assoc($query_attribut_name)) {
+					$GLOBALS['search_attribut_array'][] = $result_attribut_name['attribut_name'];
+				}
+			}
+
 			if (!empty($frm['custom_nom_attribut']) && is_array($frm['custom_nom_attribut'])) {
 				foreach($frm['custom_nom_attribut'] as $this_nom_attribut_id) {
 					if (!empty($this_nom_attribut_id) && is_numeric($this_nom_attribut_id)) {
@@ -568,7 +601,13 @@ function search_products($frm, $terms, $match, $real_search) {
 				if (!empty($attributs_array)) {
 					$additional_sql_cond_array[] = 'pat.attribut_id IN (' . nohtml_real_escape_string(implode(',', array_keys($attributs_array))) . ')';
 					if(count($attributs_array)>1) {
-						$having_cond_array[] = 'COUNT(DISTINCT pat.attribut_id)>=' . count($attributs_array);
+						$hook_result = call_module_hook('search_engine_nb_attributs_criterias', array('frm'=>$frm), 'integer');
+						if (!empty($hook_result)) {
+							$nb_criterias = $hook_result;
+						} else {
+							$nb_criterias = count($attributs_array);
+						}
+						$having_cond_array[] = 'COUNT(DISTINCT pat.attribut_id)>=' . $nb_criterias;
 					}
 				}
 				if (!empty($nom_attributs_array)) {
@@ -583,25 +622,36 @@ function search_products($frm, $terms, $match, $real_search) {
 					$additional_sql_having .= 'HAVING '.implode(' AND ', $having_cond_array);
 				}
 			}
+			$hook_result = call_module_hook('search_engine_additional_sql_cond', array('frm'=>$frm), 'array');
+			$additional_sql_cond_array = array_merge($additional_sql_cond_array,$hook_result);
+			$additional_sql_inner .= call_module_hook('search_engine_additional_inner', array('frm'=>$frm), 'string');
 		}
+		
+			
 		if (count($terms) > 0 || !empty($additional_sql_cond_array)) {
 			// SQL lié à la recherche textuelle
 			unset($fields);
 			$fields[] = 'p.nom_' . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']);
-			$fields[] = 'p.descriptif_' . $_SESSION['session_langue'];
-			$fields[] = 'p.description_' . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']);
-			$fields[] = 'p.tab1_html_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab1_title_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab2_html_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab2_title_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab3_html_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab3_title_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab4_html_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab4_title_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab5_html_' . $_SESSION['session_langue'];
-			$fields[] = 'p.tab5_title_' . $_SESSION['session_langue'];
-			$fields[] = 'p.reference';
-			$fields[] = 'c.nom_' . $_SESSION['session_langue'];
+			if (empty($GLOBALS['site_parameters']['search_product_in_other_field_except_title_disable'])) {
+				$fields[] = 'p.descriptif_' . $_SESSION['session_langue'];
+				$fields[] = 'p.description_' . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']);
+				$fields[] = 'p.tab1_html_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab1_title_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab2_html_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab2_title_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab3_html_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab3_title_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab4_html_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab4_title_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab5_html_' . $_SESSION['session_langue'];
+				$fields[] = 'p.tab5_title_' . $_SESSION['session_langue'];
+				$fields[] = 'p.reference';
+				$fields[] = 'c.nom_' . $_SESSION['session_langue'];
+			}
+			$extra_fields = call_module_hook('search_engine_product_extra_fields', array(), 'array');
+			foreach($extra_fields as $this_field) {
+				$fields[] = $this_field;
+			}
 			if (count($terms) > 0) {
 				$additional_sql_cond_array[] = build_terms_clause($terms, $fields, $match);
 			}
@@ -610,7 +660,7 @@ function search_products($frm, $terms, $match, $real_search) {
 			} else {
 				$additional_sql_cond = '';
 			}
-			$result_affichage_produit = affiche_produits(null, 2, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, vn($GLOBALS['site_parameters']['search_pages_nb_column'],3), true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
+			$result_affichage_produit = affiche_produits(null, 2, 'search', $GLOBALS['site_parameters']['nb_produit_page'], 'column', true, 0, vn($GLOBALS['site_parameters']['search_pages_nb_column'],4), true, true, $additional_sql_inner, $additional_sql_cond, $additional_sql_having);
 			if(!empty($GLOBALS['products_found']) && StringMb::strlen($real_search)>=4) {
 				$GLOBALS['found_words_array'][] = $real_search;
 			}

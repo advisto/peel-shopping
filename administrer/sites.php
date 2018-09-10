@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: sites.php 58057 2018-09-05 13:30:06Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -905,7 +905,6 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS', $GLOBALS['STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS']);
-	$tpl->assign('STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_PAYMENT_FORM_AUTO_VALIDATION_WAIT_SECONDS_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_SITES_CATEGORY_COUNT_METHOD', $GLOBALS['STR_ADMIN_SITES_CATEGORY_COUNT_METHOD']);
 	$tpl->assign('STR_ADMIN_SITES_CATEGORY_COUNT_INDIVIDUAL', $GLOBALS['STR_ADMIN_SITES_CATEGORY_COUNT_INDIVIDUAL']);
 	$tpl->assign('STR_ADMIN_SITES_CATEGORY_COUNT_GLOBAL', $GLOBALS['STR_ADMIN_SITES_CATEGORY_COUNT_GLOBAL']);

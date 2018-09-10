@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: configuration.php 57753 2018-08-17 15:28:42Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -294,7 +294,8 @@ if (!isset($_SESSION['session_peel_sql_website_type']) && !empty($_SESSION['sess
 		$messages .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_INSTALL_SQL_FILE_EXECUTED']. $GLOBALS['STR_BEFORE_TWO_POINTS'].': lib/sql/peel_'.$_SESSION['session_install_website_type'].'.sql'))->fetch();
 	}
 }
-if (!empty($_SESSION['session_install_website_type']) && !empty($_SESSION['session_install_fill_db']) && file_exists($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content.sql")) {
+if (!isset($_SESSION['session_peel_sql_website_content']) && !empty($_SESSION['session_install_website_type']) && !empty($_SESSION['session_install_fill_db']) && file_exists($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content.sql")) {
+	$_SESSION['session_peel_sql_website_content'] = true;
 	// Exécution de fichier qui contient le contenu, sans le contenu par langue
 	$error_msg = execute_sql($GLOBALS['dirroot']."/lib/sql/peel_".$_SESSION['session_install_website_type']."_content.sql", null, true, 1);
 	if(!empty($error_msg)) {

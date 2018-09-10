@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -99,6 +99,10 @@ if (!function_exists('get_cart_popup_div')) {
 		$tpl_content->assign('total', fprix($_SESSION['session_caddie']->total, true));
 		$tpl_content->assign('total_ht', fprix($_SESSION['session_caddie']->total_ht, true));
 		$tpl_content->assign('header_src', $GLOBALS['repertoire_images'].'/popup_cart_top1_'.$_SESSION['session_langue'].'.png');
+		if (count($_SESSION['session_caddie']->articles) >= 25 && !empty($GLOBALS['site_parameters']['save_caddie_in_cookie'])) {
+			// Plus de 25 références dans le panier, on invite les utilisateurs à sauvegarder leur panier dans la BDD
+			$tpl_content->assign('STR_REGISER_CART_ALERT', $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_REGISER_CART_ALERT']))->fetch());
+		}
 
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/cart_popup_div.tpl');		
 		$tpl->assign('header_src', $GLOBALS['repertoire_images'].'/popup_cart_top1_'.$_SESSION['session_langue'].'.png');		

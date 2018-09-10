@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: url_standard.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: url_standard.php 57970 2018-08-29 15:06:01Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,10 +168,18 @@ if (!function_exists('get_contact_url')) {
 	 * @param boolean $html_encode
 	 * @return
 	 */
-	function get_contact_url($add_get_suffixe = false, $html_encode = false)
+	function get_contact_url($add_get_suffixe = false, $html_encode = false, $site_id = null)
 	{
-		$url_contact_url = get_url('/utilisateurs/contact.php');
-
+		if (!empty($_GET['page_offline']) && !empty($GLOBALS['site_parameters']['url_rewriting_schema_array']['page_contact'])) {
+			// On génère la page pour le site hors ligne, donc il faut formater le nom des fichiers pour ce mode
+			// Le schéma de l'url est stocké dans le paramètre url_rewriting_schema_array. Ce paramètre est un tableau qui contient en index le code technique et en valeur le schéma de l'url. Le schéma contient des tags que l'on remplace par les bonnes valeures.
+			$custom_template_tags['SITE_ID'] = $GLOBALS['site_id'];
+			$custom_template_tags['LANGUE'] = $_SESSION['session_langue'];
+			$custom_template_tags['PAGE'] = '';
+			$url_contact_url = template_tags_replace($GLOBALS['site_parameters']['url_rewriting_schema_array']['page_contact'], $custom_template_tags, true);
+		} else {
+			$url_contact_url = get_url('/utilisateurs/contact.php', array(), null, $site_id);
+		}
 		if ($add_get_suffixe) {
 			$url_contact_url .= '?';
 		}
@@ -258,6 +266,21 @@ if (!function_exists('get_url')) {
 	 * @access public
 	 */
 	function get_url($uri, $get_array = array(), $lang = null, $forced_site_id = null) {
+		if (!empty($_GET['page_offline'])) {
+			// Dans le site offline, les fichiers JS et CSS sont dans un sous dossier à la racine du site offline.
+			// Il faut donc adapter les liens vers ces fichiers dans ce mode.
+			if(StringMB::strpos($uri,'.css')) {
+				return 'css/'.basename($uri);
+			} elseif(StringMB::strpos($uri,'.js')) {
+				return 'js/'.basename($uri);
+			} elseif($uri == '/') {
+				return 'index.html';
+			} elseif($uri == 'catalog' || $uri == '/achat/') {
+				return 'achat_index.html';
+			}elseif($uri == 'cgv') {
+				return 'cgv.html';
+			}
+		}
 		$uri_by_technical_code = array('catalog' => '/achat/index.php', 'account' => '/compte.php', 'caddie_affichage' => '/achat/caddie_affichage.php', 'achat_maintenant' => '/achat/achat_maintenant.php');
 		if(!empty($uri_by_technical_code[$uri])){
 			$uri = $uri_by_technical_code[$uri];
@@ -272,15 +295,30 @@ if (!function_exists('get_url')) {
 			$uri .= '.php';
 		}
 		if($uri == '/achat/marque.php' && !empty($get_array['id'])) {
-			// On récupère les informations manquantes
-			$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
-				FROM peel_marques p
-				WHERE p.id='" . intval($get_array['id']) . "'";
-			$query = query($sql);
-			if($result = fetch_assoc($query)){
-				$uri = '/' . rewriting_urlencode($GLOBALS['STR_BRAND']) . '/' . StringMb::ucfirst(rewriting_urlencode($result['marque']));
-				unset($get_array['id']);
-			}
+			if (!empty($_GET['page_offline']) && !empty($GLOBALS['site_parameters']['url_rewriting_schema_array']['brand'])) {
+				// On génère la page pour le site hors ligne, donc il faut formater le nom des fichiers pour ce mode
+				// Le schéma de l'url est stocké dans le paramètre url_rewriting_schema_array. Ce paramètre est un tableau qui contient en index le code technique et en valeur le schéma de l'url. Le schéma contient des tags que l'on remplace par les bonnes valeures.
+				$custom_template_tags['SITE_ID'] = $GLOBALS['site_id'];
+				$custom_template_tags['LANGUE'] = $_SESSION['session_langue'];
+				$custom_template_tags['ID'] = $get_array['id'];
+				$custom_template_tags['PAGE'] = vn($get_array['page']);
+
+				return template_tags_replace($GLOBALS['site_parameters']['url_rewriting_schema_array']['brand'], $custom_template_tags, true);
+			} else {
+				// On récupère les informations manquantes
+				$sql = "SELECT id, nom_" . $_SESSION['session_langue'] . " AS marque
+					FROM peel_marques p
+					WHERE p.id='" . intval($get_array['id']) . "'";
+				$query = query($sql);
+				if($result = fetch_assoc($query)){
+					//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+					if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+						$result = get_default_content($result, intval($get_array['id']), 'marques');
+					}
+					$uri = '/' . rewriting_urlencode($GLOBALS['STR_BRAND']) . '/' . StringMb::ucfirst(rewriting_urlencode($result['marque']));
+					unset($get_array['id']);
+				}
+			}			
 		}
 		if(!empty($GLOBALS['site_parameters']['url_use_convertHrefUri']) && function_exists('convertHrefUri') && empty($forced_site_id)) {
 			// URL rewirting spécifique, expérimental => désactivé par défaut
@@ -288,7 +326,7 @@ if (!function_exists('get_url')) {
 			$href_array['script_filename'] = $uri;
 			$uri = convertHrefUri(null, $href_array, $lang);
 		} else {
-			if(StringMb::substr($uri, 0, 1) !== '/') {
+			if(StringMb::substr($uri, 0, 1) !== '/' && StringMb::strpos($uri, '://') === false) {
 				$uri = '/' . $uri;
 			}
 			if (count($get_array) > 0) {

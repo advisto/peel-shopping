@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57904 2018-08-27 11:05:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -50,6 +50,10 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		// Gestion des zip
 		$source_filename = 'zip.png';
 		$source_folder = $GLOBALS['dirroot'] .'/images/';
+	} elseif($file_type == 'svg') {
+		// Gestion des svg
+		// le type svg n'est pas supporté par thumbs, donc on retourne l'image dans le dossier upload;
+		return $GLOBALS['wwwroot'].'/upload/'.$source_filename;
 	} elseif($file_type != 'image') {
 		// Gestion des autres documents
 		$source_filename = 'document.png';
@@ -123,6 +127,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 		$thumb_filename = $thumb_rename;
 		$thumb_path = $thumb_folder . $thumb_filename;
 	}
+
 	$thumb_path_filemtime=@filemtime($thumb_path);
 	// Si on peut avoir la date de modification de 'image source srcTime :
 	// => ALORS : Si la vignette n'existe pas ou qu'elle est plus vieille que la source, alors on la calcule
@@ -185,7 +190,7 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 				$outWidth = intval($srcWidth / $ratio);
 				$outHeight = intval($srcHeight / $ratio);
 			}
-			if($allow_return_path_to_local_original_if_unchanged && strpos($source_path, '//') === false && ($return_absolute_path === true || strpos($return_absolute_path, '//') !== false) && $srcWidth == $outWidth && $srcHeight == $outHeight) {
+			if(empty($_GET['page_offline']) && $allow_return_path_to_local_original_if_unchanged && strpos($source_path, '//') === false && ($return_absolute_path === true || strpos($return_absolute_path, '//') !== false) && $srcWidth == $outWidth && $srcHeight == $outHeight) {
 				// On évite de générer un thumbs de la même taille que l'image originale
 				// Du coup à chaque appel au thumb, il y aura eu un @getimagesize en plus du @filemtime => un peu plus lent, mais pas beaucoup tant que ce n'est pas un appel http
 				// On gagne au final ici le fait de ne pas avoir généré de thumb qui soit stocké sur le disque, et la qualité de l'image est celle de l'original, et si c'est un GIF animé il l'est toujours
@@ -269,7 +274,9 @@ function thumbs($source_filename, $width, $height, $method = 'fit', $source_fold
 			}
 		}
 	}
-	if(!empty($return_absolute_path) && !empty($thumb_filename)) {
+	if (!empty($_GET['page_offline'])) {
+		return 'upload/thumbs/'.StringMb::rawurlencode($thumb_filename);
+	} elseif(!empty($return_absolute_path) && !empty($thumb_filename)) {
 		if($return_absolute_path === true) {
 			return $GLOBALS['repertoire_upload'] . '/thumbs/' . StringMb::rawurlencode($thumb_filename);
 		} else {

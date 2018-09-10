@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -63,6 +63,37 @@
 			<td>{$l.message_te}</td>
 		</tr>
 		{/foreach}
+		{if $products_in_newsletter}
+		<tr>
+			<td>
+				<script><!--//--><![CDATA[//><!--
+					 var new_order_line_html = '<tr class="top" id="sortable_[i]"><td><img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm(\'{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}\', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line([i], true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" /> <input type="hidden" name="product_ids[]" value="[id]"></td><td>[ref] [nom]</td></tr>';
+				//--><!]]></script>
+				<div class="full_width" style="border: 1px #000000 dotted; background-color: #FAFAFA; padding:5px">
+					<table class="table admin_commande_details">
+						<thead>
+							<tr style="background-color:#EEEEEE">
+								<td colspan="2" class="title_label center" style="width:65px">{$STR_REFERENCE} - {$STR_ADMIN_NAME}</td>
+							</tr>
+						</thead>
+						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}
+						<tbody id="dynamic_order_lines">{foreach $produits_options as $o}<tr class="top" id="sortable_{$o.i}">
+									<td>
+										<img src="{$administrer_url}/images/b_drop.png" alt="{$STR_DELETE}" onclick="if(bootbox.confirm('{$STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM|filtre_javascript:true:true:false}', function(result) {ldelim}if(result) {ldelim}admin_delete_products_list_line({$o.i}, true);{rdelim} {rdelim} ))return false;" title="{$STR_ADMIN_PRODUCT_ORDERED_DELETE}" style="cursor:pointer" />
+										<input type="hidden" name="product_ids[]" value="{$o.value|str_form_value}">
+									</td>
+									<td>{$o.reference} {$o.name}</td>
+								</tr>{/foreach}</tbody>
+					</table>
+					<p style="margin-top:0px;">{$STR_DELETE} {$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" onclick="lookup(this.value, '', '', '', '', '', '#suggestions', 'products');" />
+
+
+					<div class="suggestions" id="suggestions"></div>
+					<input id="nb_produits" type="hidden" name="nb_produits" value="{$nb_produits|str_form_value}" />
+				</div>
+			</td>
+		</tr>
+		{/if}
 		<tr>
 			<td class="center"><p><input class="btn btn-primary" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>
 		</tr>

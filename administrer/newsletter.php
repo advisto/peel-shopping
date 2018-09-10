@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: newsletter.php 58058 2018-09-05 14:28:17Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_users,admin_content,admin_communication,admin_finance');
+necessite_priv("admin_white_label,admin_users,admin_content,admin_communication,admin_finance");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_NEWSLETTERS_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -63,7 +63,7 @@ switch (vb($_REQUEST['mode'])) {
 				$debut = intval($_GET['debut']);
 			}
 			$id = intval($_GET['id']);
-			send_newsletter($id, $debut, $limit, !empty($_GET['test']));
+			echo send_newsletter($id, $debut, $limit, !empty($_GET['test']));
 		} elseif ($form_error_object->has_error('token')) {
 			echo $form_error_object->text('token');
 		}
@@ -114,6 +114,7 @@ function affiche_formulaire_ajout_newsletter(&$frm)
 	$frm['id'] = "";
 	$frm['format'] = "html";
 	$frm['titre_bouton'] = $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"];
+	$frm['product_info_array'] = array();
 
 	affiche_formulaire_newsletter($frm);
 }
@@ -139,6 +140,17 @@ function affiche_formulaire_modif_newsletter($id, &$frm)
 		$frm['id'] = $id;
 		$frm["nouveau_mode"] = "maj";
 		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
+		
+		$product_info_array = array();
+		if (!empty($frm['product_ids'])) {
+			$q = query("SELECT nom_".$_SESSION['session_langue']." as name, reference, id as value
+				FROM peel_produits
+				WHERE id IN (".$frm['product_ids'].")");
+			while($result = fetch_assoc($q)) {
+				$product_info_array[] = $result;
+			}
+		}
+		$frm['product_info_array'] = $product_info_array;
 		affiche_formulaire_newsletter($frm);
 	} else {
 		redirect_and_die(get_current_url(false).'?mode=ajout');
@@ -154,6 +166,26 @@ function affiche_formulaire_modif_newsletter($id, &$frm)
 function affiche_formulaire_newsletter(&$frm)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_newsletter.tpl');
+	$i=1;
+	foreach ($frm['product_info_array'] as $produits_options) {
+		$tpl_produits_options[] = array('value' => intval($produits_options['value']),
+			'reference' => $produits_options['reference'],
+			'name' => $produits_options['name'],
+			'i' => $i,
+		);
+		$i++;
+	}
+	$tpl->assign('products_in_newsletter', vn($GLOBALS['site_parameters']['products_in_newsletter']));
+	$tpl->assign('produits_options', vb($tpl_produits_options));
+	$tpl->assign('nb_produits', count($frm['product_info_array']));
+	$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE', $GLOBALS['STR_ADMIN_PRODUCT_ORDERED_DELETE']);
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH', $GLOBALS['STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH']);
+	$tpl->assign('STR_ADMIN_NAME', $GLOBALS['STR_ADMIN_NAME']);
+	$tpl->assign('STR_REFERENCE', $GLOBALS['STR_REFERENCE']);
+	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+	$tpl->assign('STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM', $GLOBALS['STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM']);
+	$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', $frm["nouveau_mode"]);
@@ -209,16 +241,16 @@ function supprime_newsletter($id)
  */
 function insere_newsletter($frm)
 {
-	$req = "INSERT INTO peel_newsletter (";
-	// Insertion de la nouvelle news en fonction des langues définies sur le site
-	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-		$req .= "sujet_" . $this_lang . ", message_" . $this_lang . ",";
-	}
-	$req .= "date, format, statut, template_technical_code, site_id) VALUES (";
-	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-		$req .= "'" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "','" . real_escape_string($frm['message_' . $this_lang]) . "',";
-	}
-	$req .= " '" . date('Y-m-d H:i:s', time()) . "', 'html', 'envoi nok', '" . nohtml_real_escape_string($frm['template_technical_code']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "')";
+	 $req = "INSERT INTO peel_newsletter (";
+    // Insertion de la nouvelle news en fonction des langues définies sur le site
+    foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+        $req .= "sujet_" . $this_lang . ", message_" . $this_lang . ",";
+    }
+    $req .= "date, format, statut, template_technical_code, product_ids, site_id) VALUES (";
+    foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+        $req .= "'" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "','" . real_escape_string($frm['message_' . $this_lang]) . "',";
+    }
+    $req .= " '" . date('Y-m-d H:i:s', time()) . "', 'html', 'envoi nok', '" . nohtml_real_escape_string($frm['template_technical_code']) . "' , '" . implode(',', nohtml_real_escape_string(vb($frm['product_ids'], array()))). "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "')";
 
 	$qid = query($req);
 }
@@ -233,127 +265,21 @@ function insere_newsletter($frm)
 function maj_newsletter($id, $frm)
 {
 	$req = "UPDATE peel_newsletter
-		SET ";
-	// Maj d'une news en fonction des langues définies sur le site
-	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-		$req .= "
-			sujet_" . $this_lang . " = '" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "',
-			message_" . $this_lang . " = '" . real_escape_string($frm['message_' . $this_lang]) . "',";
-	}
-	$req .= "
-			format='html',
-			date = '" . date('Y-m-d H:i:s', time()) . "',
-			template_technical_code = '" . nohtml_real_escape_string($frm['template_technical_code']) . "',
-			site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "' 
-		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
+        SET ";
+    // Maj d'une news en fonction des langues définies sur le site
+    foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+        $req .= "
+            sujet_" . $this_lang . " = '" . nohtml_real_escape_string($frm['sujet_' . $this_lang]) . "',
+            message_" . $this_lang . " = '" . real_escape_string($frm['message_' . $this_lang]) . "',";
+    }
+    $req .= "
+            format='html',
+            date = '" . date('Y-m-d H:i:s', time()) . "',
+            template_technical_code = '" . nohtml_real_escape_string($frm['template_technical_code']) . "',
+            product_ids = '" . implode(',', nohtml_real_escape_string($frm['product_ids'])) . "',
+            site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+        WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
 	$qid = query($req);
-}
-
-/**
- * Programmation de l'envoi de la newsletter
- *
- * @param integer $id
- * @param mixed $debut
- * @param mixed $limit
- * @return
- */
-function send_newsletter($id, $debut, $limit, $test = false)
-{
-	$sql_n = "SELECT *
-		FROM peel_newsletter
-		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
-	$res_n = query($sql_n);
-	$news_infos = fetch_assoc($res_n);
-
-	$format = $news_infos['format'];
-	// Récupération du technical_code du template associé à la newsletter
-	$template_technical_code = $news_infos['template_technical_code'];
-	// Stockage des messages et sujets, selon les langues disponibles sur le site
-	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-		// Ajout des Custom template tag de la newsletter en fonction de la langue
-		$custom_template_tags[$this_lang] = null;
-		if (!empty($news_infos['message_' . $this_lang])) {
-			// Récupération du template email associé à la newsletter en fonction des langues disponibles
-			if (!empty($template_technical_code)) {
-				// On a un modèle, qui contient un tag NEWSLETTER : on récupère son HTML, et on remplace [NEWSLETTER] par le texte de la newsletter
-				$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $this_lang);
-				$message[$this_lang] = $template_infos['text'];
-				$custom_template_tags[$this_lang]['NEWSLETTER'] = $news_infos['message_' . $this_lang];
-			} else {
-				$message[$this_lang] = $news_infos['message_' . $this_lang];
-			}
-			// Le sujet de la newsletter est prioritaire sur celui du template
-			$sujet[$this_lang] = $news_infos['sujet_' . $this_lang];
-		}
-	}
-	// Récupération de la liste des emails
-	if (!empty($message)) {
-		foreach(array_keys($message) as $this_lang) {
-			$sql_cond = "etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND " . get_filter_site_cond('utilisateurs', 'u') . " AND ";
-			if (!$test) {
-				$sql_cond .= "newsletter='1' AND (lang='" . nohtml_real_escape_string($this_lang) . "' OR lang='')";
-				if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
-					$sql_cond .= " AND newsletter_validation_date NOT LIKE '0000-00-00%'";
-				}
-			} else {
-				$sql_cond .= "priv LIKE '%admin%'";
-				$sujet[$this_lang] .= ' [envoyé aux administrateurs seulement]';
-			}
-			$sql_u = "SELECT *
-				FROM peel_utilisateurs u
-				WHERE " . $sql_cond;
-			// Le SQL suivant va permettre de récupérer des données utilisateurs pouvant servir dans des TAGS
-			// => il faut mettre tous les champs de la table utilisateurs, à appeler u
-			if (check_if_module_active('crons')) {
-				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
-				// Les emails seront envoyés a posteriori avec un cron
-				// Si nous avons des tags à remplacer dans le contenue
-				$message[$this_lang] = template_tags_replace($message[$this_lang], $custom_template_tags[$this_lang], true, null, $this_lang);
-				program_cron_email($sql_u, $message[$this_lang], $sujet[$this_lang], $_SESSION['session_utilisateur']['email'], null, $this_lang);
-				query("UPDATE peel_newsletter
-					SET statut='envoi ok', date_envoi='" . date('Y-m-d H:i:s', time()) . "'
-					WHERE id='" . intval($news_infos['id']) . "' AND " . get_filter_site_cond('newsletter', null, true));
-				$newsletter_name_info = $id . ' (' . $this_lang . ') "' . $sujet[$this_lang] . '"';
-				if (!$test) {
-					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_SUBSCRIBERS'];
-				} else {
-					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_ADMINISTRATORS'];
-				}
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($output, $newsletter_name_info)))->fetch();
-			} else {
-				// On envoi la newsletter, il faut envoyer l'email directement et pas une notification. Cette variable global sera utilisée dans la fonction send_email.
-				$GLOBALS['send_notification_disable'] = true;
-				$sql_u .= "
-					LIMIT " . intval($debut) . "," . intval($limit);
-				$res_u = query($sql_u);
-				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
-				$i = 0;
-				while ($row = fetch_assoc($res_u)) {
-					if (send_email($row['email'], $sujet[$this_lang], $message[$this_lang], '', $custom_template_tags[$this_lang], $format, $GLOBALS['support'])) {
-						$result = 'OK';
-					} else {
-						$result = 'NOK';
-					}
-					if (!$test) {
-						$fc = StringMb::fopen_utf8("sending.log", "ab");
-						$w = fwrite ($fc, "[" . $row['email'] . "]\t\t\t " . $result . "\n");
-						fclose($fc);
-					}
-					$i++;
-				}
-				if ($i >= $limit && $debut + $i < 250) {
-					// On continue à envoyer la newsletter
-					sleep(1);
-					send_newsletter($id, $debut + $i, min($limit, 250 - ($debut + $i)), $test);
-				} else {
-					query("UPDATE peel_newsletter
-						SET statut='envoi ok', date_envoi='" . date('Y-m-d H:i:s', time()) . "'
-						WHERE id='" . intval($news_infos['id']) . "' AND " . get_filter_site_cond('newsletter', null, true));
-					echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SENT_OK'], $id, $sujet[$this_lang], $debut + $i)))->fetch();
-				}
-			}
-		}
-	}
 }
 
 /**
@@ -391,8 +317,7 @@ function affiche_liste_newsletter()
 			$this_langs_array = array();
 			$titre = $ligne['sujet_' . $_SESSION['session_langue']];
 			foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
-				// Ajout des Custom template tag de la newsletter en fonction de la langue
-				if (!empty($ligne['message_' . $this_lang])) {
+				if (!empty($ligne['message_' . $this_lang]) || !empty($ligne['sujet_' . $this_lang])) {
 					$this_langs_array[] = $this_lang;
 				}
 				if (empty($titre)) {

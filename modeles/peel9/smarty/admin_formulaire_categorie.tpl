@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -45,6 +45,15 @@
 			<td><input type="checkbox" name="on_carrousel" value="1"{if $is_on_carrousel} checked="checked"{/if} /></td>
 		</tr>
 		{/if}
+		{if $cart_force_exapaq_delivery_mode}
+		<tr>
+			<td class="top">{$STR_ADMIN_SELECT_ICIRELAIS_SHIPPING}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="on_exapaq_delivery" value="1" {if $on_exapaq_delivery == 1} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="on_exapaq_delivery" value="0" {if $on_exapaq_delivery == 0} checked="checked"{/if} /> {$STR_NO}
+			</td>
+		</tr>
+		{/if}
 		<tr>
 			<td>{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="number" class="form-control" name="position" value="{$position|str_form_value}" /></td>
@@ -77,6 +86,10 @@
 				<input type="radio" name="type_affichage" value="1"{if $type_affichage == '1'} checked="checked"{/if} /> {$STR_ADMIN_IN_LINES}
 			</td>
 		</tr>
+		<tr>
+			<td>{$STR_ADMIN_ZONES_FREE_DELIVERY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="franco" value="{$franco|str_form_value}" /></td>
+		</tr>
 		{foreach $langs as $l}
 		<tr><td colspan="2" class="bloc"><h2>{$STR_ADMIN_LANGUAGES_SECTION_HEADER} - {$lang_names[$l.lng]|upper}</h2></td></tr>
 		<tr>
@@ -84,6 +97,12 @@
 		</tr>
 		<tr>
 			<td colspan="2"><input style="width:100%" type="text" class="form-control" name="nom_{$l.lng}" value="{$l.nom|str_form_value}" /></td>
+		</tr>
+		<tr>
+			<td class="title_label" colspan="2">{$STR_ADMIN_NAME_SHORT} {$l.lng|upper}{$STR_BEFORE_TWO_POINTS}:</td>
+		</tr>
+		<tr>
+			<td colspan="2"><input style="width:100%" type="text" class="form-control" name="nom_court_{$l.lng}" value="{$l.nom_court|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="title_label">{$STR_ADMIN_DESCRIPTION} {$l.lng|upper}:</td>

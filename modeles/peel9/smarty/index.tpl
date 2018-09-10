@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -22,6 +22,11 @@
 <div class="page_home_content">
 {if isset($carrousel_html)}
 	{$carrousel_html}
+{/if}
+{if !empty($tableau_recherche_avancee)}
+	<div class="col-xs-12 col-sm-6 pull-right">
+		{$tableau_recherche_avancee}
+	</div>
 {/if}
 {if isset($categorie_annonce)}
 	{$categorie_annonce}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ro.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: ro.php 57737 2018-08-17 08:32:59Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -353,6 +353,7 @@ $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "";
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "";
 $GLOBALS["STR_INSTALLATION"] = "";
 $GLOBALS["STR_INTRACOM_FORM"] = "";
+$GLOBALS["STR_INTRACOM_FORM_ALERT"] = "";
 $GLOBALS["STR_INTRODUCTORY_TEXT"] = "";
 $GLOBALS["STR_INVALID_TOKEN"] = "";
 $GLOBALS["STR_INVOICE_ADDRESS"] = "";
@@ -481,6 +482,7 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND_SINGLE"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "";
@@ -531,6 +533,7 @@ $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "";
 $GLOBALS["STR_MSG_THANKS"] = "";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "";
+$GLOBALS["STR_MY_DATA"] = "";
 $GLOBALS["STR_MY_GIFT_POINT"] = "";
 $GLOBALS["STR_MY_ORDER"] = "";
 $GLOBALS["STR_MY_QUOTES"] = "";
@@ -690,6 +693,7 @@ $GLOBALS["STR_PROFORMA"] = "";
 $GLOBALS["STR_PROMO_CODE"] = "";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "";
 $GLOBALS["STR_PROMOTION"] = "Promoţii";
+$GLOBALS["STR_PROMOTION_SHORT"] = "";
 $GLOBALS["STR_PROMOTIONS"] = "";
 $GLOBALS["STR_PROPULSE"] = "";
 $GLOBALS["STR_PSEUDO"] = "";
@@ -759,6 +763,7 @@ $GLOBALS["STR_SHIP_ADDRESS"] = "";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "";
 $GLOBALS["STR_SHIPPING_COST"] = "";
+$GLOBALS["STR_SHIPPING_TO_BE_DETERMINED"] = "";
 $GLOBALS["STR_SHIPPING_TYPE"] = "";
 $GLOBALS["STR_SHIPPING_ZONE"] = "";
 $GLOBALS["STR_SHOPPING"] = "";
@@ -882,6 +887,8 @@ $GLOBALS["STR_WORD_RESELLER"] = "";
 $GLOBALS["STR_WORD_SELLERS"] = "";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "";
 $GLOBALS["STR_YES"] = "Da";
+$GLOBALS["STR_YES_NOT_VALIDATE"] = "Da, nu este validată";
+$GLOBALS["STR_YES_VALIDATE"] = "Da validată";
 $GLOBALS["STR_YOU_ARE"] = "";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "";
@@ -896,3 +903,11 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "";
 $GLOBALS["STR_ZIP"] = "";
 $GLOBALS["STR_ZOOM"] = "";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_CARD_ESTIMATE"] = "";
+$GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
+$GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
+$GLOBALS["STR_PRIX_SEARCH_HT"] = "";
+$GLOBALS["STR_PRIX_SEARCH_TTC"] = "";
+$GLOBALS["STR_REGISER_CART_ALERT"] = "";

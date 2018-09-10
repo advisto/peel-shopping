@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -18,14 +18,14 @@
 	<link rel="shortcut icon" type="image/x-icon" href="{{ favicon_href }}" />{% endif %}
 	{% if (link_rss_html) %}{{ link_rss_html }}{% endif %}
 {% for css_href in css_files %}
-	<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" />
+	<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" {% if (css_href|strpos(print)) %}media="print"{% else %}media="all"{% endif %} />
 {% endfor %}
-	{% if background_banner %}
 	<style>
+	{% if background_banner %}
 	{% for this_background in background_banner %}
 	#main_content{
 		background:url('{{ this_background.url_img }}') no-repeat scroll top center rgba(0, 0, 0, 0);
-		background-size: cover;
+		cursor:pointer;
 	}
 	{% endfor %}
 	</style>
@@ -36,8 +36,11 @@
 		<!--[if IE]>
 			#contact_form{height:100% !important;}
 		<![endif]-->
-	</style>
 	{% endif %}
+	{% if site_static_css_style %}
+		{{ site_static_css_style }}
+	{% endif %}
+	</style>
 	{{ js_output }}
 	<!--[if lt IE 9]>
 	<script src="{{ wwwroot }}/lib/js/html5shiv.js"></script>

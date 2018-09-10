@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: Multipage.php 57904 2018-08-27 11:05:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 55332 2017-12-01 10:44:06Z sdelaporte $
+ * @version $Id: Multipage.php 57904 2018-08-27 11:05:50Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -164,7 +164,7 @@ class Multipage {
 					// L'URL contient bien en GET nombre=... (sans qu'il ne soit dans une URL réécrite) et qui s'applique au multipage souhaité
 					// On fait une redirection 302 pour éviter que cette URL ne soit indexée
 					redirect_and_die(get_current_url(true, false, array('nombre', 'multipage')));
-				}
+				} 
 			}
 			$ResultsPerPage = $this->DefaultResultsPerPage;
 			if (!empty($this->nombre_session_var_name) && isset($_SESSION[$this->nombre_session_var_name])) {
@@ -213,8 +213,8 @@ class Multipage {
 	{
 		$results_array = array();
 		if ($this->ResultPerPage !='*') {
-		$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning));
-		$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning)));
+			$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning));
+			$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning)));
 		}
 		$this->LimitSQL = $this->sqlRequest;
 		if((isset($lines_count) && $lines_count > 0) || $this->ResultPerPage =='*') {
@@ -223,7 +223,12 @@ class Multipage {
 		if ($this->DefaultResultsPerPage != '*' && $this->ResultPerPage != '*') {
 			// Si le nombre de $this->external_results_to_merge_at_beginning est élevé, potentiellement sur les premières pages on a uniquement des éléments extérieurs à cette requête SQL
 			// Donc on obtient ci-dessous LIMIT 0,0 => c'est nécessaire néanmoins de lancer la requête, car elle sert puisqu'elle contient SQL_CALC_FOUND_ROWS qui va servir ensuite au calcul pour le nombre de pages
-			$this->LimitSQL .= " LIMIT " . intval($lines_begin) . ", " . intval($lines_count);
+			if(strpos($this->LimitSQL, 'alias_with_limit_before') === false) {
+				$this->LimitSQL .= " LIMIT " . intval($lines_begin) . ", " . intval($lines_count);		
+			} else {
+				// Optimisation dans cas particulier de sous-requête
+				$this->LimitSQL = str_replace(') alias_with_limit_before', " LIMIT " . intval($lines_begin) . ", " . intval($lines_count) . ') alias_with_limit_before', $this->LimitSQL);		
+			}
 		}
 		$sql = $this->LimitSQL;
 		if(($this->sql_count === null || StringMb::strpos($this->sql_count, 'FOUND_ROWS') !== false) && (StringMb::strpos(StringMb::strtoupper($sql), 'SQL_CALC_FOUND_ROWS') === false && (StringMb::substr($sql, 0, 1) != '(' || StringMb::strpos($sql, 'UNION SELECT') === false || StringMb::substr_count($sql, 'SELECT')<4))) {
@@ -255,8 +260,19 @@ class Multipage {
 				}
 			}
 		}
+		$forced_nbRecord = null;
+		if (count($results_array)<$this->ResultPerPage && $this->page == 1) {
+			// Pas plus de résultats que peut en contenir la première page
+			// Donc pas besoin de calculer par la suite le nombre de résultats, on le connait déjà
+			$forced_nbRecord = count($results_array);
+		}
 		if ((empty($results_array) && $this->page > 1) || empty($this->avoid_pagination_calculation)) {
-			$this->Calcul(!empty($query));
+			// De manière générale, on veut calculer le nombre de résultats, sauf si avoid_pagination_calculation est défini
+			// Si pas de résultat sur une page qui n'est pas la première, on doit de toutes façons calculer le nombre de résultats pour pouvoir faire une redirection vers la dernière page
+			$this->Calcul(!empty($query), $forced_nbRecord);
+		} elseif(!empty($this->avoid_pagination_calculation) && $forced_nbRecord !== null) {
+			// On ne veut pas faire de calcul de pagination ; et on connait nbRecord car peu de résultats dans la première page
+			$this->nbRecord = $forced_nbRecord + count($this->external_results_to_merge_at_beginning);
 		}
 		return $results_array;
 	}
@@ -266,26 +282,32 @@ class Multipage {
 	 *
 	 * @return
 	 */
-	function Calcul($query_without_error = true)
+	function Calcul($query_without_error = true, $forced_nbRecord = null)
 	{
 		if($query_without_error) {
 			// Compte le nombre de liens qu'il y aura (= nombre de page)
 			if($this->sql_count === null) {
 				$this->sql_count = "SELECT FOUND_ROWS() AS rows_count";
 			}
-			if(!empty($this->sql_count)) {
+			if($forced_nbRecord !== null) {
+				$this->nbRecord = $forced_nbRecord;
+			} elseif(!empty($this->sql_count)) {
 				$query_count_rs = query($this->sql_count);
 				$query_count_row = fetch_assoc($query_count_rs);
 				$this->nbRecord = $query_count_row['rows_count'];
-				$this->nbRecord += count($this->external_results_to_merge_at_beginning);
 			}
+			$this->nbRecord += count($this->external_results_to_merge_at_beginning);
 		} else {
 			$this->nbRecord = count($this->external_results_to_merge_at_beginning);
 		}
 		if ($this->ResultPerPage != '*' && !empty($this->ResultPerPage) && ($this->ResultPerPage < $this->nbRecord)) {
 			$this->pages_count = ceil($this->nbRecord / $this->ResultPerPage);
 		}
-
+		if (!empty($_GET['page_offline'])) {
+			// Le nombre de page limite est de 10 pour les sites statiques
+			$this->pages_count = min(10, $this->pages_count);
+		}
+		
 		$GLOBALS['all_multipage_limit'] = max($this->pages_count, vn($GLOBALS['all_multipage_limit']));
 		if (empty($GLOBALS['multipage_avoid_redirect_if_page_over_limit']) && !in_array(str_replace('session_multipage_', '', $this->nombre_session_var_name), vb($GLOBALS['site_parameters']['multipage_avoid_redirect_if_page_over_limit_technical_codes_array'], array())) && $this->page > $GLOBALS['all_multipage_limit']) {
 			$new_url = $this->getPageURL($this->pages_count);
@@ -314,6 +336,7 @@ class Multipage {
 	function getPageURL($page, $nombre = null)
 	{
 		$link = get_current_generic_url();
+
 		if (strpos($link, '[PAGE]') !== false) {
 			$link = str_replace('[PAGE]', StringMb::rawurlencode($page), $link);
 		} elseif ($page > 1) {
@@ -335,6 +358,19 @@ class Multipage {
 				}
 			}
 			$link .= $this->href_suffix;
+		}
+	
+		if(!empty($_GET['page_offline'])) {
+			if (defined('IN_RUBRIQUE_ARTICLE')) {
+				$technical_code = 'content';
+			} elseif (defined('IN_RUBRIQUE')) {
+				$technical_code = 'content_category';
+			} elseif (defined('IN_CATALOGUE')) {
+				$technical_code = 'product_category';
+			} elseif (defined('IN_SEARCH_BRAND')) {
+				$technical_code = 'brand';
+			}
+			$link = get_generated_html_file_name($technical_code, $link);
 		}
 		return $link;
 	}
@@ -374,7 +410,11 @@ class Multipage {
 			}
 			$links_per_page .= (($this->nb1 != $this->ResultPerPage && $this->nb2 != $this->ResultPerPage && $this->nb3 != $this->ResultPerPage && (empty($GLOBALS['site_parameters']['multipage_show_all_result']) || $this->nb4 != $this->ResultPerPage))?(' (' . $this->ResultPerPage . ')'):'');
 		}
-		$tpl->assign('results_per_page', $links_per_page);
+		if (empty($_GET['page_offline'])) {
+			$tpl->assign('results_per_page', $links_per_page);
+		} else {
+			$tpl->assign('results_per_page', '');
+		}
 		$liens = array();
 		if ($this->pages_count > 1) {
 			$this->first_link_page = max(1, min($this->page - ceil($this->LinkPerPage / 2) + 1, $this->pages_count - $this->LinkPerPage + 1));

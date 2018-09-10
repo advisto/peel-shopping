@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -77,6 +77,9 @@
 		{if isset($icirelais_id_delivery_points_radio_inputs)}
 		{$icirelais_id_delivery_points_radio_inputs}
 		{/if}
+		{if isset($dpd_id_delivery_points_radio_inputs)}
+        {$dpd_id_delivery_points_radio_inputs}
+        {/if}
 		{if isset($get_tnt_id_delivery_points_radio_inputs)}
 		{$get_tnt_id_delivery_points_radio_inputs}
 		{/if}

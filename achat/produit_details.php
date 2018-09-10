@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: produit_details.php 57719 2018-08-14 10:15:25Z sdelaporte $
 include("../configuration.inc.php");
 
 define('IN_CATALOGUE_PRODUIT', true);
@@ -54,7 +54,7 @@ if ($result = fetch_assoc($query)) {
 	$product_infos['on_check'] = $result['on_check'];
 }
 $product_object = new Product($_GET['id'], $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
-if (!empty($_GET['step'])) {
+if (!empty($_GET['step']) && check_if_module_active('attributs')) {
 	call_module_hook('attribut_step', array('product_object'=>$product_object, 'frm'=> $_POST, 'step'=> $_GET['step']));
 	$_SESSION['session_attributs_step'][$_GET['step']] = get_attribut_list_from_post_data($product_object, $_POST);
 }

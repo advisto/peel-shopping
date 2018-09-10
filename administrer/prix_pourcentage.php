@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix_pourcentage.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: prix_pourcentage.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -19,7 +19,7 @@ necessite_priv("admin_products");
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
-if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['percent_prod']) && is_numeric($_POST['percent_prod']) && !empty($_POST['for_price'])) {
+if (empty($_POST['conditionnement']) && empty($_POST['taille']) && !empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['percent_prod']) && is_numeric($_POST['percent_prod']) && !empty($_POST['for_price'])) {
 	if (!verify_token($_SERVER['PHP_SELF'])) {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_INVALID_TOKEN']))->fetch();
 	} else {
@@ -75,6 +75,11 @@ if (!empty($_POST['submit']) && !empty($_POST['operation']) && !empty($_POST['pe
 			echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_CHOOSE_ITEM']))->fetch();
 		}
 	}
+} elseif (!empty($_POST['conditionnement']) || !empty($_POST['taille'])) {
+	$hook_result = call_module_hook('handle_prix_pourcentage_form', array('frm' => $_POST), 'array');
+	foreach($hook_result as $this_key => $this_value) {
+		echo $this_value;
+	}
 } else {
 	if (isset($_POST['submit'])) {
 		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERR_FORM']))->fetch();
@@ -126,6 +131,10 @@ $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_RESELLERS_ONLY', $GLOBALS['STR_ADMIN_PR
 $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_LOWER', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_LOWER']);
 $tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_RAISE', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_RAISE']);
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+$hook_result = call_module_hook('prix_pourcentage_form_template_data', array('frm' => $_POST), 'array');
+foreach($hook_result as $this_key => $this_value) {
+	$tpl->assign($this_key, $this_value);
+}
 echo $tpl->fetch();
 
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -22,7 +22,7 @@
 {/if}
 {if !$is_annonce_module_active}
 	{if !empty($result_affichage_produit)}
-<h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_SEARCH_RESULT_PRODUCT}{/if} - {$products_found} {$STR_PRODUCTS}</h1>
+<h1 property="name" class="search_result">{$STR_RESULT_SEARCH} {$search|strtoupper} {if !empty($attributs_list)} {$attributs_list} {/if}{$STR_SEARCH_RESULT_PRODUCT} - {$products_found} {$STR_PRODUCTS}</h1>
 {$result_affichage_produit} 
 	{elseif $page<1 && empty($res_affiche_annonces) &&  (!empty($search) || isset($result_affichage_produit))}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_SEARCH_RESULT_PRODUCT}{/if}</h1>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 55488 2017-12-11 17:46:44Z sdelaporte $
+// $Id: order.php 58057 2018-09-05 13:30:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -373,6 +373,9 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			send_email($commande['email'], '', '', 'status_pending', $custom_template_tags, 'html', $GLOBALS['support']);
 		}
 	}
+	if ($statut_livraison_new == 'ready' && $commande['statut_livraison'] != $statut_livraison_new && !empty($GLOBALS['site_parameters']['mode_transport'])) {
+		send_avis_expedition($order_id, $delivery_tracking, 'ready');
+	} 
 	return $output;
 }
 
@@ -430,6 +433,7 @@ function put_session_commande(&$frm)
 		$_SESSION['session_commande']['moneybookers_payment_methods'] = '';
 	}
 	$_SESSION['session_commande']['cgv'] = vn($frm['cgv']);
+	$_SESSION['session_commande']['document'] = vn($frm['document']);
 }
 
 /**
@@ -722,9 +726,14 @@ function create_or_update_order($order_infos, $articles_array)
 	if(!empty($order_infos['appuId'])) {
 		$set_sql .= ", appuId = '" . nohtml_real_escape_string(vb($order_infos['appuId'])) . "'";
 	}
+	if (!empty($order_infos['document'])) {
+		$set_sql .= ", document = '" . nohtml_real_escape_string(vb($order_infos['document'])) . "'";
+	}
+	
 	if (!empty($order_infos['specific_field_sql_set'])) {
 		$set_sql .= ',' . implode(',', $order_infos['specific_field_sql_set']);
 	}
+	
 	if (!empty($order_infos['commandeid'])) {
 		// On met à jour la commande
 		$sql = "UPDATE peel_commandes
@@ -747,6 +756,7 @@ function create_or_update_order($order_infos, $articles_array)
 			, order_id = '" . intval(get_order_id(null, vn($order_infos['site_id']))) . "'
 			, code_facture = '" . nohtml_real_escape_string($code_facture) . "'
 			, o_timestamp = '" . date('Y-m-d H:i:s', time()) . "' ";
+			// var_dump($sql);die();
 		$order_infos['o_timestamp'] = date('Y-m-d H:i:s', time());
 	}
 	query($sql);
@@ -1027,7 +1037,12 @@ function email_commande($order_id)
 		$custom_template_tags['URL_FACTURE'] = get_site_wwwroot($order_object->site_id, $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . urlencode($order_object->code_facture) . '&mode=facture';
 		$custom_template_tags['BOUGHT_ITEMS'] = '';
 		$custom_template_tags['COMMENT'] = $order_object->commentaires;
-
+		$document_attachment = array();
+		if (!empty($order_object->document)) {
+			$document_attachment['path_file_attachment'][0] = $GLOBALS['uploaddir'].'/';
+			$document_attachment['name'][0] = $order_object->document;
+			$document_attachment['type-mime'][0] = "application/octet-stream";
+		}
 		$product_infos_array = get_product_infos_array_in_order($order_id, $order_object->devise, $order_object->currency_rate);
 		foreach ($product_infos_array as $this_ordered_product) {
 			$custom_template_tags['BOUGHT_ITEMS'] .= $this_ordered_product["product_text"] . "\n";
@@ -1037,14 +1052,14 @@ function email_commande($order_id)
 		foreach ($product_infos_array as $this_ordered_product) {
 			if(!empty($this_ordered_product['technical_code'])) {
 				send_email($order_object->email, '', '', 'confirm_ordered_'.$this_ordered_product['technical_code'], $custom_template_tags, null, $GLOBALS['support_commande']);
-				send_email($GLOBALS['support_commande'], '', '', 'confirm_ordered_'.$this_ordered_product['technical_code'], $custom_template_tags, null, $GLOBALS['support_commande']);
+				send_email($GLOBALS['support_commande'], '', '', 'confirm_ordered_'.$this_ordered_product['technical_code'], $custom_template_tags, null, $GLOBALS['support_commande'],true, false, true, null, $document_attachment);
 			}
 		}
 
 		$template_technical_codes_array = array('email_commande_' . $order_object->paiement, 'email_commande');
 	
 		send_email($order_object->email, '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
-		send_email($GLOBALS['support_commande'], '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande']);
+		send_email($GLOBALS['support_commande'], '', '', $template_technical_codes_array, $custom_template_tags, null, $GLOBALS['support_commande'],true, false, true, null, $document_attachment);
 		if(!defined('IN_PEEL_ADMIN') || (defined('IN_PEEL_ADMIN') && !empty($GLOBALS['site_parameters']['send_email_order_in_admin']))) {
 			// Envoi de l'email pour l'administrateur en plus de la copie de ce qui est envoyé au client. L'envoi de cet email si l'on est en back office est paramétrable.
 			send_mail_order_admin($order_id);
@@ -1189,8 +1204,8 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 	$add_for_free_delivery = array();
 	$treshold_reached = false;
 	// Frais de port gratuits si le total principal (TTC ou HT suivant configuration boutique) des produits est > au seuil.
-	if (!empty($GLOBALS['site_parameters']['nb_product']) && $GLOBALS['site_parameters']['nb_product'] <= $nb_product) {
-		// Frais de port gratuits si plus de nb_product commandés
+	if ((!empty($GLOBALS['site_parameters']['nb_product']) && $GLOBALS['site_parameters']['nb_product'] <= $nb_product) || (empty($total_weight) && empty($total_price))) {
+		// Frais de port gratuits si plus de nb_product commandés ou si aucun poids ni aucun montant
 		return null;
 	} elseif (!empty($GLOBALS['site_parameters']['nb_product'])) {
 		$add_for_free_delivery['products'] = $GLOBALS['site_parameters']['nb_product'] - $nb_product;
@@ -1203,19 +1218,26 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 		}
 	}
 	if (!empty($zone_id)) {
-		$query = query('SELECT z.on_franco, z.on_franco_amount, z.on_franco_reseller_amount, z.on_franco_nb_products
+		$query = query('SELECT z.*
 			FROM peel_zones z
 			WHERE id = "' . intval($zone_id) . '" AND ' . get_filter_site_cond('zones', 'z') . '
 			LIMIT 1');
 		$result_zones = fetch_assoc($query);
 		if (!empty($result_zones['on_franco'])) {
-			$amount_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $result_zones['on_franco_reseller_amount'] : $result_zones['on_franco_amount']);
-			// Zone franco de port
-			if ($amount_used <= round($total_price, 2)) {
-				$treshold_reached = true;
+			if ((empty($result_zones['applied_franco_mode']) || $result_zones['applied_franco_mode'] == 'amount')) {
+				$amount_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $result_zones['on_franco_reseller_amount'] : $result_zones['on_franco_amount']);
+				if ($amount_used <= round($total_price, 2)) {
+					$treshold_reached = true;
+				} else {
+					$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
+				}
 			} else {
-				$treshold_reached = false;
-				$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
+				if ($result_zones['on_franco_weight'] <= round($total_weight, 2)) {
+					$treshold_reached = true;
+				} else {
+					$treshold_reached = false;
+					$add_for_free_delivery['weight'] = $result_zones['on_franco_weight'] - round($total_weight, 2);
+				}
 			}
 		}
 		if (!empty($result_zones['on_franco_nb_products'])) {
@@ -1223,7 +1245,6 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 			if($result_zones['on_franco_nb_products'] <= $nb_product) {
 				$treshold_reached = true;
 			} else {
-				$treshold_reached = false;
 				$add_for_free_delivery['products'] = $result_zones['on_franco_nb_products'] - $nb_product;
 			}
 		}
@@ -1680,7 +1701,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		// In $com->payment_technical_code is stored the "technical_code" found in peel_paiement
 		$type = $com->paiement;
 	}
-	if (!empty($GLOBALS['site_parameters']['payment_multiple']) && String::strpos($type, '#')!==false) {
+	if (!empty($GLOBALS['site_parameters']['payment_multiple']) && StringMb::strpos($type, '#')!==false) {
 		// Si le paiement multiple est actif, et qu'il y a le caractère # dans le code technique du moyen de paiement, on récupère les informations pour faire un paiement partiel.
 		// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier réglement.
 		$payment_array = explode('#', $type);
@@ -1716,15 +1737,19 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 				}
 			}
 		}
-		return implode('<hr />', $output_array);
+		if (!empty($output_array)) {
+			return implode('<hr />', $output_array);
+		} else {
+			return null;
+		}
 	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('payment_form.tpl');
-	$tpl->assign('type', $type);
-	if ($type == 'transfer' && $com->paiement == '!atos' && !empty($com->campaign_id) && function_exists('get_public_campaign_id')) {
-		// Affichage d'une mention spéciale pour les virements dans le cadre d'une commande liée à lemonway
-		$tpl->assign('STR_MODULE_DREAMTAKEOFF_INSERT_CODE', $GLOBALS['STR_MODULE_DREAMTAKEOFF_INSERT_CODE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . get_campaign_wallet_id($com->campaign_id, $com->site_id) . '');
-		$payment_rib = 'payment_lemonway';
+	$hook_result = call_module_hook('payment_form', array('com'=>$com, 'type'=>$type), 'array');
+	foreach($hook_result as $this_key => $this_value) {
+		$tpl->assign($this_key, $this_value);
 	}
+	$tpl->assign('type', $type);
+
 	$tpl->assign('commande_pdf_href', get_site_wwwroot($com->site_id, $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $com->code_facture . '&mode=bdc');
 	$tpl->assign('amount_to_pay_formatted', fprix($amount_to_pay, true, $com->devise, true, get_float_from_user_input(vn($com->currency_rate))));
 	$tpl->assign('disable_address_payment_by_check', !empty($GLOBALS['site_parameters']['disable_address_payment_by_check']));
@@ -1742,7 +1767,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			break;
 
 		case 'transfer':
-			$tpl->assign('rib', print_rib(true, vb($payment_rib)));
+			$tpl->assign('rib', print_rib(true, vb($GLOBALS['payment_rib'])));
 			break;
 
 		case 'cmcic' :
@@ -1760,6 +1785,15 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 				$js_action = 'document.getElementById("PaymentRequest").submit()';
 				$tpl->assign('form', getCMCICForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 3, ''));
 				$send_admin_template_email = 'admin_info_payment_credit_card_3_times';
+			}
+			break;
+
+		case 'cmcic_by_4' :
+			if (file_exists($GLOBALS['fonctionscmcic'])) {
+				require_once($GLOBALS['fonctionscmcic']);
+				$js_action = 'document.getElementById("PaymentRequest").submit()';
+				$tpl->assign('form', getCMCICForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, 4, ''));
+				$send_admin_template_email = 'admin_info_payment_credit_card';
 			}
 			break;
 
@@ -1926,7 +1960,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 		default :
 			if (function_exists('get_payment_form_'.$type)) {
 				$function_name = 'get_payment_form_'.$type;
-				$standard_params = array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'societe_ship' => $com->societe_ship, 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship,'fullname_ship' => $com->prenom_ship . ' ' . $com->nom_ship, 'telephone_ship' => $com->telephone_ship, 'societe_bill' => $com->societe_bill,'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type, 'id_utilisateur' => $com->id_utilisateur);
+				$standard_params = array('order_id' => $order_id, 'lang' => $_SESSION['session_langue'], 'amount' => fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), 'currency_code' => $com->devise, 'user_email' => $com->email, 'payment_times' => 1, 'sTexteLibre' => '', 'societe_ship' => $com->societe_ship, 'prenom_ship' => $com->prenom_ship, 'nom_ship' => $com->nom_ship, 'adresse_ship' => $com->adresse_ship, 'zip_ship' => $com->zip_ship, 'ville_ship' => $com->ville_ship, 'pays_ship' => $com->pays_ship,'fullname_ship' => $com->prenom_ship . ' ' . $com->nom_ship, 'telephone_ship' => $com->telephone_ship, 'societe_bill' => $com->societe_bill,'prenom_bill' => $com->prenom_bill, 'nom_bill' => $com->nom_bill, 'adresse_bill' => $com->adresse_bill, 'zip_bill' => $com->zip_bill, 'ville_bill' => $com->ville_bill, 'pays_bill' => $com->pays_bill, 'fullname_bill' => $com->prenom_bill . ' ' . $com->nom_bill, 'telephone_bill' => $com->telephone_bill, 'type' => $type, 'id_utilisateur' => $com->id_utilisateur, 'site_id' => $com->site_id);
 				$params = array_merge_recursive_distinct($standard_params, $params);
 				$tpl->assign('form', $function_name($params));
 				$send_admin_template_email = 'admin_info_payment_credit_card';
@@ -2041,7 +2075,7 @@ function get_tarifs_sql()
 	$sqlType = 'SELECT DISTINCT(t.id), t.nom_' . $_SESSION['session_langue'] . '
 		FROM peel_tarifs tf
 		INNER JOIN peel_types t ON t.id = tf.type AND ' . get_filter_site_cond('types', 't') . '
-		WHERE t.etat = 1 AND ' . get_filter_site_cond('tarifs', 'tf') . ' AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0)
+		WHERE t.etat = 1 AND ' . get_filter_site_cond('tarifs', 'tf') . ' AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0) '.(!empty($_SESSION['session_caddie']->exapaq_order)?' AND (t.technical_code="exapaq" OR t.technical_code="icirelais")':'').'
 		ORDER BY t.position ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC';
 	return $sqlType;
 }

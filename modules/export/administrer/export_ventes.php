@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_ventes.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: export_ventes.php 58092 2018-09-07 08:56:26Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_sales,admin_webmastering");
+necessite_priv("admin_white_label,admin_sales,admin_webmastering");
 
 // On ne veut pas polluer le fichier exporté par un quelconque message d'erreur
 error_reporting(0);
@@ -65,6 +65,16 @@ if (!empty($_POST['export_selected_order']) && !empty($_POST['order_id'])) {
 } else {
 	$sql_cond = "AND c." . word_real_escape_string($_GET["date_field"]) . ">='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND c." . word_real_escape_string($_GET["date_field"]) . "<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra_sql . "";
 }
+if (!empty($_GET['zone_id'])) {
+	$zone_id = $_GET['zone_id'];
+	$res_zone = query("SELECT z.nom_" . $_SESSION['session_langue'] . " AS nom
+		FROM peel_zones z
+		WHERE " . get_filter_site_cond('zones', 'z', true) . " AND id = '" . intval($zone_id) . "'");
+	if($result = fetch_assoc($res_zone)){
+		$sql_cond .= " AND (c.zone = '" . intval($zone_id) . "' OR c.zone = '" . nohtml_real_escape_string($result['nom']) . "')";
+	}
+}
+		
 $sqlC = "SELECT *
 	FROM peel_commandes c
 	WHERE " . get_filter_site_cond('commandes', 'c', true) . " " . $sql_cond . " 
@@ -78,22 +88,24 @@ $sqlC = "SELECT *
 	$total_tva = 0;
 	$total = 0;
 	$netapayer = 0;
+	$small_order_overcost_amount=0;
+	$total_general_avoir = 0;
+	$total_general_code_promo = 0;
+	$total_general_transport = 0;
 
 	$ligne_total_produit_ht = $ligne_total_produit_ttc = 0;
 	$ligne_cout_transport_ht = $ligne_tva_cout_transport = $ligne_cout_transport = 0;
 	$ligne_tarif_paiement_ht = $ligne_tva_tarif_paiement = $ligne_tarif_paiement = 0;
 	if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
-		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
+		if (!empty($GLOBALS['site_parameters']['export_order_custom_field']) && is_array($GLOBALS['site_parameters']['export_order_custom_field']) && $mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
+			// $GLOBALS['site_parameters']['export_order_custom_field'] : array('nom_de_la_variable'=>'Nom du champ')
+			$output .= implode("\t", $GLOBALS['site_parameters']['export_order_custom_field']) . "\r\n";
+		} elseif($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
 			$output .= "Numéro commande\tDate de vente\tNom de l'acheteur\tSociété\tAdresse\tVille\tCode postal\tPays\tArticle\tQuantité\tPrix unitaire HT\tTotal HT\tTaux TVA\tTVA\tTotal TTC\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\r\n";
 		} elseif($mode == 'one_line_per_product') {
 			$output .= "Produit\tQuantite\r\n";
 		} elseif($mode != 'chronopost') {
-			if (!empty($GLOBALS['site_parameters']['export_order_custom_field']) && is_array($GLOBALS['site_parameters']['export_order_custom_field'])) {
-				// $GLOBALS['site_parameters']['export_order_custom_field'] : array('nom_de_la_variable'=>'Nom du champ')
-				$output .= implode("\t", $GLOBALS['site_parameters']['export_order_custom_field']) . "\r\n";
-			} else {
-				$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tSociété\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tAvoir client\tNet à payer\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
-			}
+			$output .= "Numéro commande\tNuméro de facture\tDate de vente\tNom de l'acheteur\tSociété\tAdresse\tVille\tCode postal\tPays\tTotal HT\tTaux TVA\tTotal TTC\tAvoir client\tNet à payer\tFrais port HT\tTVA Frais de port\tFrais port TTC\tTarif paiement HT\tTVA Tarif paiement\tTarif paiement\tMode de paiement\tTotal HT des produits\tTVA des produits\tTotal des produits\r\n";
 		}
 	} else {
 		$output .= "Journal;Date;Général;Auxiliaire;Référence;Libellé;Crédit;Débit\r\n";
@@ -126,13 +138,68 @@ $sqlC = "SELECT *
 		$total_ht += $commande['montant_ht'];
 		$total += $commande['montant']+$commande['avoir'];
 		$netapayer += $commande['montant'];
+		
+		// Totaux par moyen de paiement
+		if (!empty($commande['paiement'])) {
+			$paiement = $commande['paiement'];
+		} else {
+			$paiement = "Autres";
+		}
+		if (!isset($total_general_paiement[$paiement])) {
+			$total_general_paiement[$paiement] = 0;
+		}
+		$total_general_paiement[$paiement] += $commande['montant'];
+		$small_order_overcost_amount += $commande['small_order_overcost_amount'];
+		$total_general_avoir += $commande['avoir'];
+		$total_general_code_promo += $commande['valeur_code_promo'];
 
 		$vat_arrays[] = get_vat_array($commande['code_facture']);
-		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
+		
+		if (!empty($GLOBALS['site_parameters']['export_order_custom_field']) && $mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
+			if (in_array('peel_transactions', listTables()) && in_array('reglements', array_keys($GLOBALS['site_parameters']['export_order_custom_field']))) {
+				// La variable de réglements est à mettre dans $GLOBALS['site_parameters']['export_order_custom_field']. Elle sera utilisée dans $$this_var plus bas dans le code.
+				// Récupération des informations de règlement;
+				$sql = "SELECT id, AMOUNT, datetime, type AS payment_technical_code
+					FROM peel_transactions
+					WHERE ORDER_ID = ".intval($commande['id']);
+				$query = query($sql);
+				$reglement_array = array();
+				while ($result = fetch_assoc($query)) {
+					$reglement_array[] = '' . get_formatted_date($result['datetime']) . ' : ' . get_payment_name($result['payment_technical_code']) . ' - ' . $GLOBALS['STR_AMOUNT'] . ' : ' . fprix($result['AMOUNT'], true, $commande['devise'], true, $commande['currency_rate']) . '';
+				}
+				$reglements = implode('#', $reglement_array);
+			}	
 			$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
 			foreach ($product_infos_array as $this_ordered_product) {
+				$article = $this_ordered_product['nom_produit'];
+				$quantite = $this_ordered_product['quantite'];
+				$reference = $this_ordered_product['reference'];
+				$total_prix_ht = fxsl($this_ordered_product['total_prix_ht']);
+				$ligne_total_produit_ht += $this_ordered_product['total_prix_ht'];
+				$ligne_total_produit_ttc += $this_ordered_product['total_prix'];
+				$tva = fxsl($this_ordered_product['total_prix']-$this_ordered_product['total_prix_ht']);
+				$tva_percent = fxsl($this_ordered_product['tva_percent']);
+				if (!isset($total_general_tva[$this_ordered_product['tva_percent']])) {
+					// Génération des totaux par pourcentage de TVA.
+					$total_general_tva[$this_ordered_product['tva_percent']] = 0;
+				}
+				$total_general_tva[$this_ordered_product['tva_percent']] += $this_ordered_product['total_prix'] - $this_ordered_product['total_prix_ht'];
+				foreach(array_keys($GLOBALS['site_parameters']['export_order_custom_field']) as $this_var) {
+					// les index du tableau export_order_custom_field doivent avoir le même nom que les variables définies dans le fichier.
+					$output .= filtre_csv($$this_var) . "\t";
+				}
+				$output .= "\r\n";
+			}
+		} elseif ($mode != 'one_line_per_order' && $mode != 'one_line_per_product' && $mode != 'chronopost') {
+			$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
+			foreach ($product_infos_array as $this_ordered_product) {
+				if (!isset($total_general_tva[$this_ordered_product['tva_percent']])) {
+					// Génération des totaux par pourcentage de TVA.
+					$total_general_tva[$this_ordered_product['tva_percent']] = 0;
+				}
+				$total_general_tva[$this_ordered_product['tva_percent']] += $this_ordered_product['total_prix'] - $this_ordered_product['total_prix_ht'];
 				if ($this_ordered_product['quantite'] != 0) {
-					$article = $this_ordered_product['nom_produit'];
+
 
 					$cout_transport = ($i == 0) ? $commande['cout_transport'] : "";
 					$cout_transport_ht = ($i == 0) ? $commande['cout_transport_ht'] : "";
@@ -152,7 +219,7 @@ $sqlC = "SELECT *
 
 					$i++;
 					if (empty($GLOBALS['site_parameters']['cegid_order_export'])) {
-						$output .= intval($commande['id']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($article) . "\t" . filtre_csv($this_ordered_product['quantite']) . "\t" . fxsl($this_ordered_product['prix_ht']) . "\t" . fxsl($this_ordered_product['total_prix_ht']) . "\t" . fxsl($this_ordered_product['tva_percent']) . "\t" . fxsl($this_ordered_product['total_prix'] - $this_ordered_product['total_prix_ht']) . "\t" . fxsl($this_ordered_product['total_prix']) . "";
+						$output .= intval($commande['id']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($societe) . "\t". filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($article) . "\t" . filtre_csv($this_ordered_product['quantite']) . "\t" . fxsl($this_ordered_product['prix_ht']) . "\t" . fxsl($this_ordered_product['total_prix_ht']) . "\t" . fxsl($this_ordered_product['tva_percent']) . "\t" . fxsl($this_ordered_product['total_prix'] - $this_ordered_product['total_prix_ht']) . "\t" . fxsl($this_ordered_product['total_prix']) . "";
 						$output .= "\t" . vb(fxsl($cout_transport_ht)) . "\t" . vb(fxsl($tva_cout_transport)) . "\t" . vb(fxsl($cout_transport)) . "";
 						$output .= "\t" . vb(fxsl($tarif_paiement_ht)) . "\t" . vb(fxsl($tva_tarif_paiement)) . "\t" . vb(fxsl($tarif_paiement)) . "";
 						$output .= "\t" . filtre_csv($commande['paiement']);
@@ -175,32 +242,39 @@ $sqlC = "SELECT *
 				$output_array[$this_ordered_product['nom_produit']] += $this_ordered_product['quantite'];
 			}
 		} else {
-			if (!empty($GLOBALS['site_parameters']['export_order_custom_field'])) {
-				if (in_array('peel_transactions', listTables()) && in_array('reglements', array_keys($GLOBALS['site_parameters']['export_order_custom_field']))) {
-					// La variable de réglements est à mettre dans $GLOBALS['site_parameters']['export_order_custom_field']. Elle sera utilisée dans $$this_var plus bas dans le code.
-					// Récupération des informations de règlement;
-					$sql = "SELECT id, AMOUNT, datetime, type AS payment_technical_code
-						FROM peel_transactions
-						WHERE ORDER_ID = ".intval($commande['id']);
-					$query = query($sql);
-					$reglement_array = array();
-					while ($result = fetch_assoc($query)) {
-						$reglement_array[] = '' . get_formatted_date($result['datetime']) . ' : ' . get_payment_name($result['payment_technical_code']) . ' - ' . $GLOBALS['STR_AMOUNT'] . ' : ' . fprix($result['AMOUNT'], true, $commande['devise'], true, $commande['currency_rate']) . '';
-					}
-					$reglements = implode('#', $reglement_array);
-				}
-				foreach(array_keys($GLOBALS['site_parameters']['export_order_custom_field']) as $this_var) {
-					// les index du tableau export_order_custom_field doivent avoir le même nom que les variables définies dans le fichier. 
-					$output .= filtre_csv($$this_var) . "\t";
-				}
-				$output .= "\r\n";
-			} else {
-				$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($societe) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . filtre_csv($commande['montant_ht']) . "\t" . filtre_csv($commande['total_tva']) . "\t" . filtre_csv($commande['montant']+$commande['avoir'])  ."\t" . filtre_csv($commande['avoir']) . "\t"  . filtre_csv($commande['montant']) . "\t" .  filtre_csv($commande['cout_transport_ht']) . "\t" .  filtre_csv($commande['tva_cout_transport']) . "\t" .  filtre_csv($commande['cout_transport']) ."\t" .  filtre_csv($commande['tarif_paiement']) ."\t" .  filtre_csv($commande['tva_tarif_paiement']) . "\t" . filtre_csv($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . filtre_csv($commande['total_produit_ht']) . "\t" . filtre_csv($commande['tva_total_produit']) . "\t" . filtre_csv($commande['total_produit']) ."\r\n";
+			$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
+			foreach ($product_infos_array as $this_ordered_product) {
+				$ligne_total_produit_ht += $this_ordered_product['total_prix_ht'];
+				$ligne_total_produit_ttc += $this_ordered_product['total_prix'];
 			}
+			$output .= intval($commande['id']) . "\t" .filtre_csv($commande['numero']) . "\t" . filtre_csv($date_vente) . "\t" . filtre_csv($nom_acheteur) . "\t" . filtre_csv($societe) . "\t" . filtre_csv($adresse) . "\t" . filtre_csv($ville) . "\t" . filtre_csv($code_postal) . "\t" . filtre_csv($pays) . "\t" . fxsl($commande['montant_ht']) . "\t" . fxsl($commande['total_tva']) . "\t" . fxsl($commande['montant']+$commande['avoir'])  ."\t" . fxsl($commande['avoir']) . "\t"  . fxsl($commande['montant']) . "\t" .  fxsl($commande['cout_transport_ht']) . "\t" .  fxsl($commande['tva_cout_transport']) . "\t" .  fxsl($commande['cout_transport']) ."\t" .  fxsl($commande['tarif_paiement']) ."\t" .  fxsl($fxsl['tva_tarif_paiement']) . "\t" . fxsl($commande['tarif_paiement_ht']) ."\t" .  filtre_csv($commande['paiement']) . "\t" . fxsl($commande['total_produit_ht']) . "\t" . fxsl($commande['tva_total_produit']) . "\t" . fxsl($commande['total_produit']) ."\r\n";
 		}
 	}
 	if (empty($GLOBALS['site_parameters']['cegid_order_export']) && $mode!="chronopost") {
-		if ($mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
+		if (!empty($GLOBALS['site_parameters']['export_order_all_total_display']) && (empty($mode) || $mode == 'one_line_per_order')) {
+			$output .= "\r\n";
+			$output .= "\t\tTotal General vente produit H.T :\t" . fxsl($ligne_total_produit_ht) . "\n";
+			foreach($total_general_tva as $taux_tva => $montant) {
+				$output .= "\t\tTotal General TVA ".$taux_tva." :\t" . fxsl($montant) . "\n";
+			}
+			$output .= "\t\tTotal General vente produit T.T.C:\t" . fxsl($ligne_total_produit_ttc) . "\n";
+			$output .= "\r\n";
+			$output .= "\t\tTotal General du port H.T :\t" . fxsl($total_transport_ht) . "\n";
+			$output .= "\t\tTotal General TVA du port :\t" . fxsl($total_transport-$total_transport_ht) . "\n";
+			$output .= "\t\tTotal General du port TTC :\t" . fxsl($total_transport) . "\n";
+			$output .= "\r\n";
+			$output .= "\t\tMontant surcout petite commande :\t" . fxsl($small_order_overcost_amount) . "\n";
+			$output .= "\r\n";
+			$output .= "\t\tTotal General :\t" . fxsl($total) . "\n";
+			$output .= "\r\n";
+			$output .= "\t\tTotal General des avoirs TTC :\t" . fxsl($total_general_avoir) . "\n";
+			$output .= "\t\tTotal General des codes promos :\t" . fxsl($total_general_code_promo) . "\n";
+			$output .= "\r\n";
+			$output .= "\r\n";
+			foreach($total_general_paiement as $paiment => $montant) {
+				$output .= "\t\tTotal General par ".$paiment." :\t" . fxsl($montant) . "\n";
+			}
+		} elseif ($mode != 'one_line_per_order' && $mode != 'one_line_per_product') {
 			$output .= "\r\n\t\t\t\t\t\t\t\t\tTOTAUX :\t" . fxsl($ligne_total_produit_ht) . "\t\t" . fxsl($ligne_total_produit_ttc - $ligne_total_produit_ht) . "\t" . fxsl($ligne_total_produit_ttc) . "\t" . fxsl($ligne_cout_transport_ht) . "\t" . fxsl($ligne_tva_cout_transport) . "\t" . fxsl($ligne_cout_transport) . "\t" . fxsl($ligne_tarif_paiement_ht) . "\t" . fxsl($ligne_tva_tarif_paiement) . "\t" . fxsl($ligne_tarif_paiement) . "\r\n\r\n";
 
 			$output .= "\t\t\t\t\t\t\t\t\tTOTAL HT tout compris :\t" . fxsl($ligne_total_produit_ht + $ligne_cout_transport_ht + $ligne_tarif_paiement_ht) . "\r\n";

@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: articles.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_content,admin_communication,admin_finance');
+necessite_priv("admin_white_label,admin_content,admin_communication,admin_finance");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_ARTICLES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -158,6 +158,9 @@ function affiche_formulaire_ajout_article($rubriques = 0, &$frm, &$form_error_ob
 		$frm['tva'] = "";
 		$frm['on_special'] = "";
 		$frm['on_reseller'] = "";
+		if(!empty($GLOBALS['site_parameters']['articles_on_short_description_layout'])) {
+			$frm['on_layout'] = "";
+		}
 		$frm['on_rollover'] = "";
 		$frm['on_new'] = "";
 		$frm['on_focus'] = "";
@@ -273,6 +276,7 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 	$tpl->assign('STR_ADMIN_ARTICLES_FORM_MODIFY', $GLOBALS['STR_ADMIN_ARTICLES_FORM_MODIFY']);
 	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_ADMIN_ARTICLES_IS_ON_ROLLOVER', $GLOBALS['STR_ADMIN_ARTICLES_IS_ON_ROLLOVER']);
+	$tpl->assign('STR_ADMIN_ARTICLES_IS_ON_LAYOUT', $GLOBALS['STR_ADMIN_ARTICLES_IS_ON_LAYOUT']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
@@ -290,7 +294,7 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 		$tpl->assign('mode', $frm['nouveau_mode']);
 		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_articles'])));
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 		}
@@ -306,6 +310,10 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		$tpl->assign('is_on_rollover', !empty($frm['on_rollover']));
 		$tpl->assign('on_special', $frm['on_special']);
 		$tpl->assign('on_reseller', $frm['on_reseller']);
+		if(!empty($GLOBALS['site_parameters']['articles_on_short_description_layout'])) {
+			$tpl->assign('articles_on_short_description_layout', $GLOBALS['site_parameters']['articles_on_short_description_layout']);
+			$tpl->assign('on_layout', $frm['on_layout']);
+		}
 		if(!empty($GLOBALS['site_parameters']['article_focus_and_new_select_multiple'])) {
 			$tpl->assign('article_focus_and_new_select_multiple', $GLOBALS['site_parameters']['article_focus_and_new_select_multiple']);
 			$tpl->assign('new_site_id_select_options_multiple', get_site_id_select_options(vb($frm['on_new']), null, 'STR_ADMIN_ALL_SITES', false, true));
@@ -337,6 +345,10 @@ function affiche_formulaire_article(&$frm, &$form_error_object)
 		   WHERE " . get_filter_site_cond('marques', null, true) . "
 		   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
 		while ($nom = fetch_assoc($select)) {
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+				$nom = get_default_content($nom, intval($nom['id']), 'marques');
+			}
 			$tpl_marques_options[] = array('value' => intval($nom['id']),
 				'issel' => in_array($nom['id'], vb($frm['marques'], array())),
 				'name' => $nom['nom_' . $_SESSION['session_langue']] . (empty($nom['etat'])?' ('.$GLOBALS["STR_ADMIN_DEACTIVATED"].')':'')
@@ -395,7 +407,13 @@ function insere_article($frm)
 			, position
 			, site_id
 			, technical_code
-			, on_reseller
+			, on_reseller";
+	if(!empty($GLOBALS['site_parameters']['articles_on_short_description_layout'])) {
+		$sql .=	"
+			, on_layout 
+			";
+	}
+	$sql .=	"
 			, on_special
 			, on_rollover";
 	if(!empty($GLOBALS['site_parameters']['article_on_new_enable'])) {
@@ -431,7 +449,12 @@ function insere_article($frm)
 			, '" . intval($frm['position']) . "'
 			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, '" . nohtml_real_escape_string($frm['technical_code']) . "'
-			, '" . intval(vn($frm['on_reseller'])) . "'
+			, '" . intval(vn($frm['on_reseller'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['articles_on_short_description_layout'])) {
+		$sql .= "
+			, '" . intval(vn($frm['on_layout'])) . "'";
+	}
+	$sql .= "
 			, '" . intval(vn($frm['on_special'])) . "'
 			, '" . intval(vn($frm['on_rollover'])) . "'";
 	if(!empty($GLOBALS['site_parameters']['article_on_new_enable'])) {
@@ -508,8 +531,13 @@ function maj_article($id, $frm)
 			$sql .= "
 			, on_new = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['on_new'])) . "'";
 		}
+	$sql .= "
+		, on_reseller = '" . intval(vn($frm['on_reseller'])) . "'";
+	if(!empty($GLOBALS['site_parameters']['articles_on_short_description_layout'])) {
 		$sql .= "
-		, on_reseller = '" . intval(vn($frm['on_reseller'])) . "'
+		, on_layout = '" . intval(vn($frm['on_layout'])) . "'";
+	}
+	$sql .= "
 		, on_special = '" . intval(vn($frm['on_special'])) . "'
 		, on_rollover = '" . intval(vn($frm['on_rollover'])) . "'";
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {

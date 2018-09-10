@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 55637 2017-12-29 18:35:08Z gboussin $
+// $Id: display_article.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -27,11 +27,17 @@ if (!function_exists('get_article_details_html')) {
 	{
 		$output = '';
 		$article = charge_article($article_id);
+		//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+		if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+			$article = get_default_content($article, $article_id, 'articles');
+		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('article_details_html.tpl');
 		$tpl->assign('is_article', (bool)$article);
-		if (!$article)
+		if (!$article) {
 			$tpl->assign('STR_NO_FIND_ART', $GLOBALS['STR_NO_FIND_ART']);
-		else{
+		} else {
+			$custom_template_tags = call_module_hook('article_details_template_tags', array('id' => $article_id, 'rubrique_id' => $article['rubrique_id']), 'array');
+			
 			$tpl->assign('titre', $article['titre']);
 			$tpl->assign('is_offline', ($article['etat'] == 0));
 			$tpl->assign('STR_OFFLINE_ART', $GLOBALS['STR_OFFLINE_ART']);
@@ -46,7 +52,8 @@ if (!function_exists('get_article_details_html')) {
 			if(empty($GLOBALS['site_parameters']['chapo_in_article_page_disabled'])) {
 				$tpl->assign('chapo', $article['chapo']);
 			}
-			$tpl->assign('texte', $article['texte']);
+
+			$tpl->assign('texte', template_tags_replace($article['texte'],$custom_template_tags));
 			
 			if (function_exists('get_share_feature')) {
 				$tpl->assign('share_feature', get_share_feature());
@@ -63,6 +70,10 @@ if (!function_exists('get_article_details_html')) {
 					'modify_article_txt' => $GLOBALS['STR_MODIFY_ARTICLE']
 				));
 			}
+		}
+		$hook_result = call_module_hook('article_details_html_template_data', array('rubid'=>$article['rubrique_id'], 'id'=>$article_id), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
 		}
 		$output .= $tpl->fetch();
 		correct_output($output, true, 'html', $_SESSION['session_langue']);
@@ -82,7 +93,7 @@ if (!function_exists('get_rubriques_sons_html')) {
 		$output = '';
 		$qid_r = query("SELECT id, nom_" . $_SESSION['session_langue'] . ", description_" . $_SESSION['session_langue'] . ", parent_id, image
 			FROM peel_rubriques r
-			WHERE parent_id = '" . intval($rubid) . "' AND nom_" . $_SESSION['session_langue'] . "<>'' AND etat = 1 AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
+			WHERE parent_id = '" . intval($rubid) . "' AND etat = 1 AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
 			ORDER BY r.position " . (!empty($GLOBALS['site_parameters']['content_category_primary_order_by'])? ", r." . $GLOBALS['site_parameters']['content_category_primary_order_by']  : '') . "
 			");
 		if (num_rows($qid_r) > 0) {
@@ -90,6 +101,10 @@ if (!function_exists('get_rubriques_sons_html')) {
 			$tpl->assign('list_rubriques_txt', $GLOBALS['STR_LIST_RUBRIQUES'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			$data = array();
 			while ($rub = fetch_assoc($qid_r)) {
+				//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+				if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+					$rub = get_default_content($rub, $rub['id'], 'rubriques');
+				}
 				$tmp = array(
 					'href' => get_content_category_url($rub['id'], $rub['nom_' . $_SESSION['session_langue']]),
 					'name' => $rub['nom_' . $_SESSION['session_langue']]
@@ -149,10 +164,13 @@ if (!function_exists('get_articles_html')) {
 		$tpl->assign('haut_de_page_txt', $GLOBALS['STR_HAUT_DE_PAGE']);
 		$tpl->assign('haut_de_page_href', '#haut_de_page');
 		$tpl->assign('category_content_show_explicit_buttons_if_articles_more_to_read', vb($GLOBALS['site_parameters']['category_content_show_explicit_buttons_if_articles_more_to_read'], true));
+		$tpl->assign('articles_html_pages_nb_column', vb($GLOBALS['site_parameters']['articles_html_pages_nb_column'], true)); 
 		
 		if (!empty($results_array)) {
 			$data = array();
+			$i = 1;
 			foreach ($results_array as $art) {
+				$data['i'] = $i;
 				if ((!a_priv("admin_product") && !a_priv("reve")) && $art['on_reseller'] == 1) {
 					continue;
 				}
@@ -173,7 +191,9 @@ if (!function_exists('get_articles_html')) {
 					'chapo' => $chapo,
 					'texte' => $art['texte'],
 					'is_texte' => !empty($art['texte']),
+					'i' => $i,
 				);
+				$i++;
 			}
 			$tpl->assign('data', $data);
 		}
@@ -208,8 +228,12 @@ if (!function_exists('get_articles_list_brief_html')) {
 		$rowrub = fetch_assoc($resrub);
 		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_list_brief_html.tpl');
 		$tpl->assign('is_not_empty', !empty($rowrub));
-		$tpl->assign('title_article_disabled', empty($GLOBALS['site_parameters']['title_article_disabled'])?'':$GLOBALS['site_parameters']['title_article_disabled']);
+		$tpl->assign('title_article_disabled', !empty($GLOBALS['site_parameters']['title_article_disabled']));
 		if (!empty($rowrub)){
+			//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$rowrub = get_default_content($rowrub, $rowrub['id'], 'rubriques');
+			}
 			if($rowrub['technical_code'] == 'add_cart_by_reference') {
 				include($GLOBALS['dirroot'] . "/lib/fonctions/display_caddie.php");
 				$tpl->assign('add_cart_by_reference', add_cart_by_reference());
@@ -226,7 +250,10 @@ if (!function_exists('get_articles_list_brief_html')) {
 				));
 			}
 			$tpl->assign('technical_code', $rowrub['technical_code']);
-			$tpl->assign('description', StringMb::nl2br_if_needed($rowrub['description']));
+			$custom_template_tags = call_module_hook('rubrique_custom_template_tags', $rowrub, 'array');
+			$description = template_tags_replace($rowrub['description'], $custom_template_tags);
+			$tpl->assign('description', StringMb::nl2br_if_needed($description));
+			
 			if($rowrub['technical_code'] == 'clients' && check_if_module_active('clients')) {
 				$tpl->assign('descriptions_clients', affiche_descriptions_clients());
 			}
@@ -271,6 +298,10 @@ if (!function_exists('get_articles_list_brief_html')) {
 					'arts' => array()
 				);
 				while ($art = fetch_assoc($res)) {
+					//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+					if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+						$art = get_default_content($art, $art['id'], 'articles');
+					}
 					if ((!a_priv("admin_product") && !a_priv("reve")) && $art['on_reseller'] == 1) {
 						continue;
 					} else {
@@ -283,7 +314,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 				$tpl->assign('plus', $plus);
 			}
 		}
-		$hook_result = call_module_hook('articles_list_brief_html', array(), 'array');
+		$hook_result = call_module_hook('articles_list_brief_html', array('rubid'=>$rubid, 'technical_code'=>$rowrub['technical_code']), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}
@@ -307,6 +338,11 @@ if (!function_exists('affiche_arbre_rubrique')) {
 	{
 		static $tpl;
 		$output = '';
+		if (empty($GLOBALS['arbre_rubrique_iteration'])) {
+			$GLOBALS['arbre_rubrique_iteration'] = 1;
+		} else {
+			$GLOBALS['arbre_rubrique_iteration']++;
+		}
 		$qid = query('SELECT parent_id, nom_' . $_SESSION['session_langue'] . '
 			FROM peel_rubriques r
 			WHERE id = "' . intval($rubid) . '" AND etat = "1" AND r.technical_code NOT IN ("other", "iphone_content") AND ' . get_filter_site_cond('rubriques', 'r') . '');
@@ -317,6 +353,7 @@ if (!function_exists('affiche_arbre_rubrique')) {
 			}
 			$tpl->assign('href', get_content_category_url($rubid, $nom));
 			$tpl->assign('label', $nom);
+			$tpl->assign('arbre_rubrique_iteration', $GLOBALS['arbre_rubrique_iteration'] == 1 && !empty($GLOBALS['site_parameters']['ariane_last_element_link_disable']));
 			$tpl->assign('hidden', $hidden);
 			$tpl->assign('level', $level);
 			$nom = $tpl->fetch();

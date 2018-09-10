@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: couleurs.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: couleurs.php 57964 2018-08-29 09:45:17Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -34,6 +34,13 @@ switch (vb($_REQUEST['mode'])) {
 	case "suppr" :
 		$output .= supprime_couleur($_GET['id']);
 		$output .= affiche_liste_couleur();
+		break;
+	
+	case "supprfile" :
+		query("UPDATE peel_couleurs SET image = '' WHERE id = '" . intval($_GET['id']) . "'");
+		delete_uploaded_file_and_thumbs(vb($_GET['image']));
+		
+		$output .= affiche_formulaire_modif_couleur($_GET['id'], $frm);
 		break;
 
 	case "insere" :
@@ -166,6 +173,17 @@ function affiche_formulaire_couleur(&$frm)
 	$tpl->assign('STR_PRICE', $GLOBALS['STR_PRICE']);
 	$tpl->assign('STR_ADMIN_RESELLER_PRICE', $GLOBALS['STR_ADMIN_RESELLER_PRICE']);
 	$tpl->assign('STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE', $GLOBALS['STR_ADMIN_PRIX_POURCENTAGE_ENTER_PERCENTAGE_PRODUCT_PRICE']);
+	$tpl->assign('STR_IMAGE', $GLOBALS['STR_IMAGE']);
+	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
+	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
+	if (!empty($frm["image"])) {
+		$tpl->assign('image', array('src' => $GLOBALS['repertoire_upload'] . '/' . $frm["image"],
+				'nom' => $frm["image"],
+				'drop_href' => get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image&attid=' . vb($_GET['attid']),
+				'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
+				));
+		}
+	
 	return $tpl->fetch();
 }
 
@@ -196,12 +214,14 @@ function supprime_couleur($id)
  */
 function insere_couleur($frm)
 {
+		$frm['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 	$sql = "INSERT INTO peel_couleurs (
 			prix
 			, prix_revendeur
 			, percent
 			, site_id
 			, position
+			, image
 			";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
@@ -212,7 +232,8 @@ function insere_couleur($frm)
 		'" . nohtml_real_escape_string($frm['prix_revendeur']) . "',
 		'" . nohtml_real_escape_string($frm['percent']) . "',
 		'" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "',
-		'" . intval($frm['position']) . "'";
+		'" . intval($frm['position']) . "', 
+		'" . nohtml_real_escape_string($frm['image']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -230,6 +251,7 @@ function insere_couleur($frm)
  */
 function maj_couleur($id, $frm)
 {
+	$frm['image'] = upload('image', false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
 	/* Met à jour la table couleur */
 	$sql = "UPDATE peel_couleurs
 			SET site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "',
@@ -237,10 +259,13 @@ function maj_couleur($id, $frm)
 				prix = '" . nohtml_real_escape_string($frm['prix']) . "',
 				prix_revendeur = '" . nohtml_real_escape_string($frm['prix_revendeur']) . "',
 				percent = '" . nohtml_real_escape_string($frm['percent']) . "'";
+
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng . "='" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= "WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('couleurs', null, true);
+
+	$sql .= ", image='" . nohtml_real_escape_string(vb($frm['image'])) . "'";
+	$sql .= " WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('couleurs', null, true);
 	query($sql);
 }
 

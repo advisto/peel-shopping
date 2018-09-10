@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: article_details.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: article_details.php 57904 2018-08-27 11:05:50Z sdelaporte $
 
 define('IN_RUBRIQUE_ARTICLE', true);
 if (defined('PEEL_PREFETCH')) {
@@ -38,8 +38,12 @@ $sql = "SELECT p.technical_code, p.on_reseller, p.id, p.titre_" . $_SESSION['ses
 	WHERE p.id ='" . intval($_GET['id']) . "' AND " . get_filter_site_cond('articles', 'p') . "";
 
 $art_query = query($sql);
-;
+
 if ($art = fetch_assoc($art_query)) {
+	//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+	if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+		$art = get_default_content($art, $art['id'], 'articles');
+	}
 	if(!empty($art['technical_code']) && StringMb::strpos($art['technical_code'], 'R=') === 0) {
 		// redirection suivie que l'article soit actif ou non
 		$url_art = StringMb::substr($art['technical_code'], 2);
@@ -72,7 +76,7 @@ if ($art['technical_code'] == 'tradefair') {
 	$GLOBALS['main_div_id'] = 'tradefloor';
 }
 
-if (check_if_module_active('url_rewriting')) {
+if (check_if_module_active('url_rewriting') && empty($_GET['page_offline'])) {
 	// Attention la redirection ne sera effectuée que si il y a un / dans le REQUEST_URI (hormis le premier caractère) 
 	// => les URL courtes ne sont pas redirigées ici (cela permet de créer des urls courtes par le htaccess sans rediriger par la suite, exemple /patrocinador-categoría.html ne sera pas redirigé ici)
 	if (get_content_url($art['id'], $art["titre_" . $_SESSION['session_langue']], $art['rubrique_id'], $art["rubrique_nom"]) != get_current_url(false) && StringMb::strpos(substr($_SERVER['REQUEST_URI'], 1), '/') !== false) {

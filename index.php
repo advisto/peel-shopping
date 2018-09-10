@@ -3,15 +3,15 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 55332 2017-12-01 10:44:06Z sdelaporte $
-/*! \mainpage PEEL Shopping 9.0.0 - Open eCommerce
+// $Id: index.php 57719 2018-08-14 10:15:25Z sdelaporte $
+/*! \mainpage PEEL Shopping 9.1.0 - Open eCommerce
  * \section intro_sec PEEL Shopping
  * Visit <a href="https://www.peel.fr/">PEEL web site</a> to find more information about this open source ecommerce solution.
  * \section install_sec Installation
@@ -41,7 +41,8 @@ if(!empty($GLOBALS['site_parameters']['skip_home_categorie_accueil'])) {
 } else {
 	$tpl->assign('categorie_accueil', affiche_categorie_accueil(true));
 }
-
+//La variable de configuration home_modules_left_hidden_xs_sm (int) laisse la possibilité d'afficher l'emplacement des modules left en xs et sm
+$tpl->assign('home_modules_left_hidden_xs_sm', vn($GLOBALS['site_parameters']['home_modules_left_hidden_xs_sm']));
 if(!empty($GLOBALS['site_parameters']['skip_home_top_products'])) {
 	$tpl->assign('meilleurs_ventes', '');
 } else {
@@ -82,6 +83,9 @@ if(!empty($GLOBALS['site_parameters']['home_affiche_banner_ids'])) {
 		$tpl->assign('pub'.$this_id, affiche_banner($this_id, true));
 	}
 }
+if(!empty($GLOBALS['site_parameters']['display_notre_selection_side'])){
+	$tpl->assign('display_notre_selection_side', $GLOBALS['site_parameters']['display_notre_selection_side']);
+}
 
 $tpl->assign('actu', print_actu(true, 0));
 
@@ -99,6 +103,7 @@ $tpl->assign('home_middle', affiche_contenu_html('home_middle', true));
 $tpl->assign('website_type', vb($GLOBALS['site_parameters']['website_type']));
 
 $modules_left = get_modules('home_left', true, null, null);
+$tpl->assign('contenu_html_bottom', affiche_contenu_html("home_bottom", true));
 $tpl->assign('MODULES_LEFT', $modules_left);
 
 $hook_result = call_module_hook('index_form_template_data', array(), 'array');

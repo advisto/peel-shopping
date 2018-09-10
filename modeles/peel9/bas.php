@@ -3,18 +3,17 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: bas.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: bas.php 57904 2018-08-27 11:05:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
-
 $tpl = $GLOBALS['tplEngine']->createTemplate('bas.tpl');
 $tpl->assign('MODULES_BOTTOM_MIDDLE', get_modules('bottom_middle', true, null, vn($_GET['catid'])));
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
@@ -29,9 +28,15 @@ $tpl->assign('IN_HOME', defined('IN_HOME'));
 if (defined('IN_HOME')) {
 	$tpl->assign('CONTENT_HOME_BOTTOM', affiche_contenu_html("home_bottom", true));
 }
+if(empty($_COOKIE['footer_warning_close']) || $_COOKIE['footer_warning_close']!='closed') {
+	$tpl->assign('CONTENT_FOOTER', affiche_contenu_html("footer", true));
+} else {
+	$tpl->assign('CONTENT_FOOTER', null);
+}
 $tpl->assign('CONTENT_FOOTER', affiche_contenu_html("footer", true));
 if(!empty($GLOBALS['site_parameters']['display_footer_full_custom_html'])){
 	$custom_template_tags['NEWSLETTER_FORM'] = get_newsletter_form();
+
 	$tpl->assign('FOOTER_FULL_CUSTOM_HTML', affiche_contenu_html("footer_full_custom_html", true, $custom_template_tags));
 	$tpl->assign('display_footer_full_custom_html', $GLOBALS['site_parameters']['display_footer_full_custom_html']);
 }
@@ -85,9 +90,12 @@ $tpl->assign('DEBUG_TEMPLATES', defined('DEBUG_TEMPLATES') && DEBUG_TEMPLATES);
 $tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 // Si js_files pas mis dans haut.php (chargement asynchrone ou demandés entre temps dans la génération PHP)
 // Au cas où on veuille mettre les javascript en pied de <body> au lieu de head, pour plus de vitesse (mais moins conforme aux usages)
-$tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']), !empty($GLOBALS['site_parameters']['minify_js'])));
+$tpl->assign('js_output', get_javascript_output(!empty($GLOBALS['site_parameters']['load_javascript_async']) && empty($_GET['page_offline']), !empty($GLOBALS['site_parameters']['minify_js']) && empty($_GET['page_offline'])));
 
-$tpl->assign('rss', affiche_social_icons(true));
+if (!empty($GLOBALS['site_parameters']['affiche_social_icons_display_enable'])) {
+	$tpl->assign('rss', affiche_social_icons(true));
+}
+
 $tpl->assign('footer_link', affiche_contenu_html("footer_link", true));
 $tpl->assign('block_columns_width_sm', vb($GLOBALS['site_parameters']['block_columns_width_sm'], 4));
 $tpl->assign('block_columns_width_md', vb($GLOBALS['site_parameters']['block_columns_width_md'], 3));

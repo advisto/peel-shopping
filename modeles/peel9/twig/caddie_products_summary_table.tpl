@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -18,6 +18,7 @@
 		<thead>
 			<tr>
 				<th colspan="3" scope="col">{{ STR_PRODUCT }}</th>
+				{% if display_ligne_caddie_product_stock %}<th scope="col">{{ LANG.STR_STOCK }}</th>{% endif %}
 				<th scope="col">{{ STR_UNIT_PRICE }} {{ taxes_displayed }}</th>
 				{% if show_options_column %}<th scope="col">{{ STR_OPTION_PRICE }}</th>{% endif %}
 				<th scope="col">{{ STR_QUANTITY }}</th>
@@ -83,6 +84,7 @@
 					</div>
 					{% endif %}
 				</td>
+				{% if display_ligne_caddie_product_stock %}<td class="lignecaddie_stock_product center">{{ p.stock }}</td>{% endif %}
 				<td class="lignecaddie_prix_unitaire center">
 					{% if p.prix_promo and (p.prix_promo < p.prix) %}
 						<del>{{ p.prix }}</del><br />{{ p.prix_promo }}
@@ -179,7 +181,7 @@
 	{% endif %}
 	{% if (transport) %}
 	<p>
-		<label>{{ transport.shipping_text }} {{ taxes_displayed }}{{ STR_BEFORE_TWO_POINTS }}:</label> {{ transport.prix }}
+		<label>{{ transport.shipping_text }} {{ taxes_displayed }}{{ STR_BEFORE_TWO_POINTS }}:</label> {% if transport.shipping_not_set %}{{ STR_SHIPPING_TO_BE_DETERMINED }}{% else %}{{ transport.prix }}{% endif %}
 	</p>
 	{% endif %}
 	{% if (micro) %}

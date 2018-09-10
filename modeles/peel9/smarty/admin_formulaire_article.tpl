@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -85,6 +85,15 @@
 				<input type="radio" name="on_reseller" value="0"{if $on_reseller == '0' OR empty($on_reseller)} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
+		{if isset($articles_on_short_description_layout)}		
+		<tr>
+			<td class="title_label">{$STR_ADMIN_ARTICLES_IS_ON_LAYOUT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="on_layout" value="1"{if $on_layout == '1'} checked="checked"{/if} /> {$STR_YES}<br />
+				<input type="radio" name="on_layout" value="0"{if $on_layout == '0' OR empty($on_layout)} checked="checked"{/if} /> {$STR_NO}
+			</td>
+		</tr>
+		{/if}
 		<tr>
 			<td class="title_label" style="margin-top:5px;">{$STR_ADMIN_TECHNICAL_CODE}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>

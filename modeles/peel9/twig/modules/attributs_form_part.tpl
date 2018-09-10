@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -43,6 +43,9 @@
 				<option value="{{ o.value }}" {% if o.issel %} selected="selected"{% endif %}>{{ o.text }}</option>
 			{% endfor %}
 			</select>
+			{% for o in a.options %}
+			{%if o.image_src %}<img id="{{ o.id }}" {% if o.j == 0 %} style="display:block;" {% else %} style="display:none;" {% endif %} alt="{{ o.text }}" src="{{ o.image_src }}"/>{% endif %}
+			{% endfor %}
 		{% elseif a.input_type=='radio' or a.input_type=='checkbox' %}
 			{% for o in a.options %}
 			{% if a.max_label_length>=5 %}<br />{% endif %}<input type="{{ a.input_type }}" value="{{ o.value }}" id="{{ o.id }}" name="{{ o.name }}" {% if o.issel %} checked="checked"{% endif %} onclick="{{ o.onclick }}" /><label for="{{ o.id }}">{{ o.text }}</label>

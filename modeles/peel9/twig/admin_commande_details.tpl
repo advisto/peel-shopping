@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -85,6 +85,14 @@
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ order_id }}</td>
 		</tr>
+		{% if url_document %}
+		<tr>
+			<td>{{ LANG.STR_CERTIFICATE_OF_EXEMPTION}}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<a href="{{ url_document }}">{{ LANG.STR_MODULE_PROFIL_ADMIN_UPLOAD_DOCUMENT }}</a>
+			</td>
+		</tr>
+		{% endif %}
 		{% if is_kiala_module_active and shortkpid %}
 		<tr>
 			<td>{{ STR_MODULE_KIALA_TRACKING_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>

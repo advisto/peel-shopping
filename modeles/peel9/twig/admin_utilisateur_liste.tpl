@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -11,7 +11,26 @@
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
 // $Id: admin_utilisateur_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
-#}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
+#}
+{% if groupes_options_utilisateurs %}
+<div class="entete">{{ STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP }}</div>
+	<form method="post" action="{{ action|escape(html) }}">
+		<input type="hidden" name="mode" value="groupe_utilisateurs" />
+		<span class="normal">
+			<input type="radio" value="1" name="affected" checked="checked">{{ STR_ADMIN_ASSIGN }}
+			<input type="radio" value="0" name="affected">{{ STR_ADMIN_UNASSIGN }}
+		</span>
+		<select class="form-control" name="id_groupe">
+			<option value="">-------------------------------------------</option>
+			{% for o in groupes_options_utilisateurs %}
+			<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name|html_entity_decode_if_needed }} / - {{ o.remise }} %</option>
+			{% endfor %}
+		</select>
+	<br />
+	<input type="submit" value="Valider" class="btn btn-success" />
+	</form>
+{% endif %}
+<form id="search_form" class="entryform form-inline" role="form" method="get" action="{{ action|escape('html') }}">
 	<div class="entete">{{ STR_ADMIN_CHOOSE_SEARCH_CRITERIA }}</div>
 	<div class="row">
 				<div class="col-md-3 col-sm-4 col-xs-12 center">
@@ -360,7 +379,7 @@
 	<div class="entete">{{ STR_ADMIN_UTILISATEURS_USERS_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ nbRecord }}</div>
 	<div><span class="glyphicon glyphicon-plus"></span> <a href="{{ administrer_url }}/utilisateurs.php?mode=ajout">{{ STR_ADMIN_UTILISATEURS_CREATE }}</a></div>
 {% if (results) %}
-	<div><a href="{{ wwwroot_in_admin }}/modules/export/administrer/export_clients.php?priv={{ priv }}&amp;cle={{ cle }}">{{ STR_ADMIN_UTILISATEURS_EXCEL_EXPORT }}</a></div>
+	<div><a href="{{ wwwroot_in_admin }}/modules/export/administrer/export.php?type=clients&amp;priv={{ priv }}&amp;cle={{ cle }}">{{ STR_ADMIN_UTILISATEURS_EXCEL_EXPORT }}</a></div>
 	<div class="center">{{ link_multipage }}</div>
 	<div class="table-responsive">
 	<table id="tablesForm" class="table">

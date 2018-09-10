@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marque.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: marque.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_SEARCH_BRAND', true);
 include("../configuration.inc.php");
 if((!empty($GLOBALS['site_parameters']['price_hide_if_not_loggued']) && (!est_identifie() || (!a_priv('util*') && !a_priv('admin*') && !a_priv('reve*')) || a_priv('*refused') || a_priv('*wait'))) || !empty($GLOBALS['site_parameters']['brand_hide'])) {
@@ -30,6 +30,24 @@ if(!empty($_GET['brand'])) {
 		$id_marque = $result['id'];
 		// On défini le GET['id'] pour permettre la récupération du nom de la marque dans la fonction affiche_meta
 		$_GET['id'] = $id_marque;
+	} else {
+		if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+			// Récupération de la langue par défaut
+			$main_content_lang = $GLOBALS['site_parameters']['main_content_lang'];
+			$sql = "SELECT id
+					FROM peel_marques
+					WHERE nom_" . $main_content_lang . " LIKE '" . real_escape_string(str_replace('-', '_', $_GET['brand'])) . "' AND " . get_filter_site_cond('marques');
+			$query = query($sql);
+			if ($result = fetch_assoc($query)) {
+				$id_marque = $result['id'];
+				// On défini le GET['id'] pour permettre la récupération du nom de la marque dans la fonction affiche_meta
+				$_GET['id'] = $id_marque;
+			} else {
+				redirect_and_die(get_url('/achat/marque.php'), true);
+			}
+		} else {
+			redirect_and_die(get_url('/achat/marque.php'), true);
+		}
 	}
 } else {
 	$id_marque = vn($_GET['id']);

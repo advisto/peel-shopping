@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -83,6 +83,17 @@
 		  		<select class="form-control" name="cat_not_apply_code_promo[]" multiple="multiple">
 					<option value="" {{ none_is_selected }}>{{ STR_NONE|upper }}</option>
 						{{ cat_not_apply_code_promo_options }}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="title_label">{{ STR_ADMIN_BRANDS_TO_EXCLUDE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td colspan="2">
+				<select class="form-control" name="brand_not_apply_code_promo[]" style="width:100%" size="5" multiple> 
+					<option value="0">{{ STR_NONE|upper }}</option>
+					{% for o in marques_options %}
+					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name|html_entity_decode_if_needed }}</option>
+					{% endfor %}
 				</select>
 			</td>
 		</tr>

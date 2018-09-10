@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an     |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: export_produits.php 58066 2018-09-06 09:35:05Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_products,admin_webmastering");
+necessite_priv("admin_white_label,admin_products,admin_webmastering");
 $output = '';
 
 switch(vb($_POST['mode'])) {
@@ -107,7 +107,7 @@ switch(vb($_POST['mode'])) {
 		}
 
 		echo StringMb::convert_encoding($output, $page_encoding, GENERAL_ENCODING);
-	break;
+		break;
 
 	case 'export_pdf':
 		$this_line_output_html = "<table cellspacing='0' cellpadding='1' border='1'><tr>";
@@ -120,9 +120,9 @@ switch(vb($_POST['mode'])) {
 		$this_line_output_html .= '</tr>';
 		$where = '';
 		if (!empty(vn($_POST['categories']))) {
-			$where .= " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND " ;
+			$where .= " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND p.etat = 1 AND " ;
 		}
-		$q = "SELECT p.*, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS nom, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, p.image1
+		$q = "SELECT p.*, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS nom, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, p.image1, p.etat
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
 			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
@@ -155,8 +155,8 @@ switch(vb($_POST['mode'])) {
 					}
 				}
 			$this_line_output_html .= "<td>" . vb($result['nom']) . "</td>";
-			$this_line_output_html .= "<td>" . vb($result['descriptif']) . "</td>";
-			$this_line_output_html .= "<td>" . fprix($product_object->get_original_price(false, false, false), true) . "<br/><span style='font-size:10px;'>" . $GLOBALS["STR_ADMIN_ECOTAX"] .$GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '. fprix($product_object->get_ecotax(), true) . "</span></td>";
+			$this_line_output_html .= "<td style='width:260px;'>" . vb($result['descriptif']) . "</td>";
+			$this_line_output_html .= "<td>" . fprix($product_object->get_original_price(false, false, false), true) . "<br/><span style='font-size:8px;'>" . $GLOBALS["STR_ADMIN_ECOTAX"] .$GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '. fprix($product_object->get_ecotax(), true) . "</span></td>";
 			$this_line_output_html .= "<td>";
 			if (!empty($result['image1'])) {
 				$this_line_output_html .= "<img src='" . thumbs(vb($result['image1']), 80, 50, 'fit', null, null, true, true) . "'/>";
@@ -190,7 +190,8 @@ switch(vb($_POST['mode'])) {
 		// On envoie le PDF
 		echo $output;
 		die();
-	break;
+		break;
+
 
 	default:
 		$output = '

@@ -3,24 +3,37 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: caddie_ajout.php 57719 2018-08-14 10:15:25Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
 
+if(!empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
+	necessite_identification();
+}
 call_module_hook('cart_product_add', array('user_id' => vn($_SESSION['session_utilisateur']['id_utilisateur'])));
-
 if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	// L'utilisateur a chargé la page sans avoir déclaré dans sa requête HTTP de cookie de session.
 	// Donc c'est que ce n'est pas un utilisateur avec les sessions qui fonctionnent, ou c'est un robot qui appelle cette page
 	redirect_and_die(get_url('cookie'));
+} elseif (!empty($_POST) && !empty($_GET['from']) && $_GET['from'] == 'search_page' && isset($_POST['add_cart'])) {
+	foreach($_SESSION['session_search_product_list'] as $produit_id=>$quantite) {
+		$product_object = new Product($produit_id);
+		$_SESSION['session_caddie']->add_product($product_object, $quantite);
+		$_SESSION['session_show_caddie_popup'] = true;
+		unset($product_object);
+	}
+	$_SESSION['session_caddie']->update();
+	if(est_identifie() && !empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
+		preserve_cart();
+	}
 } elseif (!empty($_POST) && !empty($_GET)) {
 	if(!is_array($_POST['qte'])) {
 		// Dans la grande majorité des cas on ajoute les produits un par un, donc qte n'est pas un tableau.
@@ -168,9 +181,40 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					// Préparation par exemple de l'affichage d'une popup de confirmation de mise dans le panier dans le module cart_popup
 					call_module_hook('cart_product_added', array('quantite' => $added_quantity, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'product_object' => $product_object));
 					unset($_SESSION['session_taille_id']);
+
+					if(est_identifie() && !empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
+						$sql = "SELECT *
+							FROM peel_save_cart 
+							WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "'
+								AND produit_id = '" . intval($product_object->id) . "'
+								AND nom_produit = '" . nohtml_real_escape_string($product_object->name) . "'
+								AND couleur_id = '" . nohtml_real_escape_string($couleur_id) . "'
+								AND taille_id = '" . nohtml_real_escape_string($taille_id) . "'
+								AND products_list_name = '00panier'";
+						$query = query($sql);
+
+						if($result = fetch_assoc($query)) {
+							$sql = "UPDATE peel_save_cart SET
+								quantite = quantite+'" . nohtml_real_escape_string($added_quantity) . "'
+								WHERE id = ".intval($result['id'])."";
+						} else {
+							$sql = "INSERT INTO peel_save_cart SET
+								id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "',
+								produit_id = '" . intval($product_object->id) . "',
+								quantite = '" . nohtml_real_escape_string($quantite) . "',
+								nom_produit = '" . nohtml_real_escape_string($product_object->name) . "',
+								couleur_id = '" . nohtml_real_escape_string($couleur_id) . "',
+								taille_id = '" . nohtml_real_escape_string($taille_id) . "',
+								products_list_name = '00panier'";
+						}
+						query($sql);
+					}
 				} else {
 					$added_quantity = 0;
 				}
+				
+				unset($product_object);
+				
 				if ($added_quantity < $quantite && empty($_SESSION['session_display_popup']['error_text'])) {
 					// La quantité à ajouter est égale au maximum de la quantité commandable
 					if (!empty($order_only_if_offer_users)) {
@@ -191,9 +235,24 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 				}
 			}
 			$_SESSION['session_caddie']->update();
+			
+			if (!empty($GLOBALS['product_in_caddie_cookie']) && !empty($GLOBALS['site_parameters']['save_caddie_in_cookie']) && count($GLOBALS['product_in_caddie_cookie'])<=25) {
+				// on crée le cookie avec 1 an de vie
+				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+				// Un cookie ne peut faire que 4Ko. Donc le nombre de produit à retenir dans le cookie est d'environ 25 produits.
+				// On pourrait compresser le contenu dans le cookies en utilisant base64_encode(gzcompress(serialize($GLOBALS['product_in_caddie_cookie']))) mais il reste un problème de gestion des caractères =, il faudrait faire de la bidouille pour contourner le problème, donc on ne fait rien.
+				if($GLOBALS['site_parameters']['force_sessions_for_subdomains']){
+					@setcookie($GLOBALS['caddie_cookie_name'], serialize($GLOBALS['product_in_caddie_cookie']), time() + 365 * 24 * 60 * 60, '/', '.'.get_site_domain());
+				} else {
+					@setcookie($GLOBALS['caddie_cookie_name'], serialize($GLOBALS['product_in_caddie_cookie']), time() + 365 * 24 * 60 * 60, '/');
+				}
+			}
 		}
 	}
-	if (isset($_POST['save_product_list']) && !empty($articles_array)) {
+	if (isset($_POST['print_label']) && !empty($articles_array)) {
+		// Affichage des produits pour l'impression d'étiquette.
+		print_label($articles_array);
+	} elseif (isset($_POST['save_product_list']) && !empty($articles_array)) {
 		// Sauvgarde de la liste de produit
 		save_cart($articles_array);
 		// Les produits ont été sauvegardés, l'utilisateur est redirigé vers la page des produits sauvegardés
@@ -206,7 +265,6 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 		redirect_and_die($GLOBALS['wwwroot'] . '/modules/facture_advanced/genere_pdf.php?export_products_list_in_pdf_file=search_page');
 	}
 }
-
 if (!empty($_SERVER['HTTP_REFERER'])) {
 	redirect_and_die($_SERVER['HTTP_REFERER'] . "");
 } else {

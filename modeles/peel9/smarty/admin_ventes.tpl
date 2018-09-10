@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -25,6 +25,7 @@
 					<td class="center menu">{$STR_DATE}</td>
 					<td class="center menu">{$STR_ORDER_NAME}</td>
 					<td class="center menu">{$STR_STATUS}</td>
+					<td class="center menu">{$STR_ADMIN_PAIEMENT_PAYMENT_MEAN}</td>
 					<td class="center menu">{$STR_EMAIL}</td>
 					<td class="center menu">{$STR_AMOUNT} {$STR_HT}</td>
 					<td class="center menu">{$STR_VAT}</td>
@@ -41,6 +42,7 @@
 					<td>{$res.date}</td>
 					<td class="center">{$res.id} / <a href="{$res.modif_href|escape:'html'}">Voir</a></td>
 					<td class="center">{$res.statut_paiement}</td>
+					<td class="center">{$res.type_paiement}</td>
 					<td class="center"><a href="mailto:{$res.email}">{$res.email}</a></td>
 					<td class="center">{$res.montant_ht_prix} {$res.montant_ht_devise_commande}</td>
 					<td class="center">{$res.total_tva_prix} {$res.total_tva_devise_commande}</td>
@@ -51,7 +53,7 @@
 				</tr>
 				{/foreach}
 				<tr>
-					<td colspan="{if $is_module_export_ventes_active}5{else}4{/if}" class="title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$STR_ADMIN_BILL_TOTALS}</td>
+					<td colspan="{if $is_module_export_ventes_active}6{else}5{/if}" class="title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$STR_ADMIN_BILL_TOTALS}</td>
 					<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$totalVenteHt_prix} {$STR_HT}</td>
 					<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$totalTva_prix}</td>
 					<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$totalVente_prix} {$STR_TTC}</td>
@@ -62,13 +64,13 @@
 				{foreach $vats as $v}
 				<tr>
 					<td colspan="{if $is_module_export_ventes_active}9{else}8{/if}" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
-					<td class="title_label">{$STR_ADMIN_TOTAL_VAT} {if $v.rate == 'transport'}{$v.rate}{else}{$v.rate}%{/if}</td>
+					<td class="title_label" colspan="2">{$STR_ADMIN_TOTAL_VAT} {if $v.rate == 'transport'}{$v.rate}{else}{$v.rate}%{/if}</td>
 					<td class="center title_label">{$v.prix}</td>
 				</tr>
 				{/foreach}
 				<tr>
 					<td colspan="{if $is_module_export_ventes_active}9{else}8{/if}" class="title_label" style="border-top-width: 0px;">&nbsp;</td>
-					<td class="title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$STR_ADMIN_TOTAL_VAT}</td>
+					<td class="title_label"  colspan="2" style="border-top:solid 1px #000000; padding-bottom:15px">{$STR_ADMIN_TOTAL_VAT}</td>
 					<td class="center title_label" style="border-top:solid 1px #000000; padding-bottom:15px">{$totalTva_prix}</td>
 				</tr>
 			</tbody>
@@ -92,4 +94,26 @@
 {else}
 <p class="title_label center">{$period_text}</p>
 <div class="alert alert-warning center">{$STR_ADMIN_VENTES_NO_ORDER_FOUND}</div>
+{/if}
+{if isset($results_paiements)}
+<table class="table">
+	<thead>
+		<tr>
+			<td class="center menu">{$STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT}</td>
+			<td class="center menu">{$STR_ADMIN_PAIEMENT_PAYMENT_MEAN}</td>
+			<td class="center menu">{$STR_AMOUNT} {$STR_HT}</td>
+			<td class="center menu">{$STR_AMOUNT} {$STR_TTC}</td>
+		</tr>
+	</thead>
+	<tbody>
+	{foreach $results_paiements as $res}
+		{$res.tr_rollover}
+			<td class="center">{$res.nb_comandes}</td>
+			<td class="center">{$res.type_paiement}</td>
+			<td class="center">{$res.montant_ht}</td>
+			<td class="center">{$res.montant}</td>
+		</tr>
+	{/foreach}
+	</tbody>
+</table>
 {/if}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 55428 2017-12-07 16:06:06Z sdelaporte $
+// $Id: configuration.inc.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.0.0');
+define('PEEL_VERSION', '9.1.0');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -251,6 +251,7 @@ require($GLOBALS['dirroot'] . '/lib/fonctions/modules_handler.php');
 // Chargement de modules complémentaires
 if (!empty($GLOBALS['site_parameters']['load_site_specific_files_before_others'])) {
 	foreach($GLOBALS['site_parameters']['load_site_specific_files_before_others'] as $this_file_relative_path) {
+		$original_file = $this_file_relative_path;
 		if(file_exists($GLOBALS['dirroot'] . $this_file_relative_path)) {
 			include($GLOBALS['dirroot'] . $this_file_relative_path);
 			if(StringMb::strpos($this_file_relative_path, '/modules/') !==false) {
@@ -258,7 +259,7 @@ if (!empty($GLOBALS['site_parameters']['load_site_specific_files_before_others']
 				$temp2 = explode('/', $temp);
 			}
 			$GLOBALS['modules_installed'][$temp2[1]] = $temp2[1];
-			$GLOBALS['modules_loaded_functions'][] = $this_file_relative_path;
+			$GLOBALS['modules_loaded_functions'][] = $original_file;
 		}
 	}
 }
@@ -321,6 +322,7 @@ $GLOBALS['lang_flags'] = array(); // Variable globale récupérant l'URL des dra
 $GLOBALS['lang_names'] = array(); // Variable globale récupérant le nom de la langue dans sa propre langue
 $GLOBALS['langs_flags_correspondance'] = array(); // Possibilité de mettre correspondance entre langue et drapeau de pays si aucune image de langue n'existe. Par exemple : 'en'=>'uk.gif'
 $GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'] = null;
+$GLOBALS['error_text_to_display'] = '';
 // We get the activated languages
 load_active_languages_list(vb($GLOBALS['site_id']));
 
@@ -525,7 +527,16 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 			// session_admin_multisite permet de récupérer les données d'un site à administrer. Cette valeur est choisissable par l'admin dans la page administer/index.php.
 			$all_sites_name_array = get_all_sites_name_array(false, false, true);
 			if(count($all_sites_name_array)>1) {
-				$_SESSION['session_admin_multisite'] = $GLOBALS['site_id'];
+				if (empty($GLOBALS['site_parameters']['admin_default_multisite_enable'])){
+					$_SESSION['session_admin_multisite'] = $GLOBALS['site_id'];
+				} else {
+					//Si la variable de configuration admin_default_multisite_enable est renseignée, on configure le B.O sur site_id 0 si le site_id de l'utilisateur est à 0
+					if($_SESSION['session_utilisateur']['site_id'] == 0){
+						$_SESSION['session_admin_multisite'] = 0;
+					} else {
+						$_SESSION['session_admin_multisite'] = $GLOBALS['site_id'];
+					}
+				}
 			} else {
 				$_SESSION['session_admin_multisite'] = 0;
 			}
@@ -612,9 +623,9 @@ if (!isset($_SESSION['session_country_detected']) && !empty($_SERVER['REMOTE_ADD
 // Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
 if(isset($_GET['site_country'])) {
 	// L'utilisateur souhaite voir la version du site correspondant au pays $_GET['site_country']
-	if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && !empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
-		//  l'utilisateur est géolocalisé dans un pays qui est autorisé pour lui permettre de choisir son pays
-		// ET l'utilisateur n'a pas de pays forcé dans peel_utilisateurs
+	if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && a_priv('admin*')) {
+		// Condition par le passé pour afficher le select à des utilisateurs : l'utilisateur est géolocalisé dans un pays qui est autorisé pour lui permettre de choisir son pays ET l'utilisateur n'a pas de pays forcé dans peel_utilisateurs
+		// if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && !empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
 		if(in_array(strval($_GET['site_country']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			// Le choix en GET est autorisé => on le prend
 			set_session_site_country(intval($_GET['site_country']));
@@ -641,7 +652,7 @@ if(!isset($_SESSION['session_site_country'])) {
 		set_current_devise(null, $_SESSION['session_site_country']);
 	}
 }
-if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE') && !defined('IN_RPC')) {
+if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE') && !defined('IN_RPC') && !defined('HOME_CONTENT')) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true); 
 }
 account_update();

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: FormError.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: FormError.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -21,7 +21,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: FormError.php 55332 2017-12-01 10:44:06Z sdelaporte $
+ * @version $Id: FormError.php 57719 2018-08-14 10:15:25Z sdelaporte $
  * @access public
  */
 class FormError {
@@ -119,10 +119,15 @@ class FormError {
 		if(!empty($error_field_messages_array)) {
 			foreach($error_field_messages_array as $this_field => $this_message) {
 				if (((empty($frm[$this_field]) && vb($frm[$this_field]) !== '0') || (is_array($frm[$this_field]) && count($frm[$this_field]) == 0)) || (!empty($field_minimal_lengths_array[$this_field]) && StringMb::strlen($frm[$this_field])<$field_minimal_lengths_array[$this_field]) || (!empty($field_validation_function_names_array[$this_field]) && $field_validation_function_names_array[$this_field]($frm[$this_field]) === false)) {
-					if(StringMb::substr($this_message, 0, 4) == 'STR_' && isset($GLOBALS[$this_message])) {
-						$this_text = $GLOBALS[$this_message];
-					} else {
-						$this_text = $this_message;
+					// Pour permettre à un hook de personnaliser le message d'erreur.
+					$this_text = call_module_hook('form_error_valide_form_message', array('field'=>$this_field, 'frm'=>$frm), 'string');
+					if (empty($this_text)) {
+						// Rien de spécial pour ce champ, on applique le message configuré par error_field_messages_array
+						if(StringMb::substr($this_message, 0, 4) == 'STR_' && isset($GLOBALS[$this_message])) {
+							$this_text = $GLOBALS[$this_message];
+						} else {
+							$this_text = $this_message;
+						}
 					}
 					$this->add($this_field, $this_text);
 				} elseif (is_array($this_message)) {

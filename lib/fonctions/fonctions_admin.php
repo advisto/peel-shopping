@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 55792 2018-01-17 11:49:45Z sdelaporte $
+// $Id: fonctions_admin.php 58035 2018-09-03 13:29:55Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -47,8 +47,8 @@ function get_admin_menu()
 		$GLOBALS['main_menu_items']['home'] = array($GLOBALS['administrer_url'] . '/' => $GLOBALS["STR_ADMIN_MENU_HOME_TITLE"]);
 		$GLOBALS['menu_items']['home'][$GLOBALS['administrer_url'] . '/'] = $GLOBALS["STR_ADMIN_MENU_HOME_BACK"];
 		$GLOBALS['menu_items']['home'][$GLOBALS['wwwroot'] . '/'] = $GLOBALS["STR_ADMIN_MENU_HOME_FRONT"];
-		if (a_priv('admin_manage,admin_communication,admin_finance', true)) {
-			if (a_priv('admin_manage', true)) {
+		if (a_priv('admin_white_label,admin_manage,admin_communication,admin_finance', true)) {
+			if (a_priv('admin_white_label,admin_manage', true)) {
 				$this_url = $GLOBALS['administrer_url'] . '/sites.php';
 			} else {
 				$this_url = '#';
@@ -87,57 +87,62 @@ function get_admin_menu()
 		if (a_priv('admin_manage', true)) {
 			$GLOBALS['menu_items']['manage_delivery'][$GLOBALS['administrer_url'] . '/statut_livraison.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_STATUS"];
 		}
-		if(a_priv('admin_manage,admin_content,admin_communication,admin_finance', true) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
+		if(a_priv('admin_white_label,admin_manage,admin_content,admin_communication,admin_finance', true) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
 			// Dans le cas d'un site vitrine, on ne souhaite pas afficher le lien vers l'administration des emails.
 			$GLOBALS['menu_items']['manage']['manage_emails'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAILS_HEADER"];	
 			$GLOBALS['menu_items']['manage_emails'][$GLOBALS['administrer_url'] . '/email-templates.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_EMAIL"];
 		}
-		if (a_priv('admin_manage', true)) {
+		if (a_priv('admin_white_label,admin_manage', true)) {
 			if (check_if_module_active('bounces', 'bounce_driver.php')) {
 				$GLOBALS['menu_items']['manage_emails'][$GLOBALS['wwwroot_in_admin'] . '/modules/bounces/administrer/bad_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_BOUNCE"];
 			}
 		}
-		if (a_priv('admin_sales,admin_users,admin_content,admin_communication,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_users,admin_content,admin_communication,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
 			// Menu des utilisateurs
 			$GLOBALS['main_menu_items']['users'] = array($GLOBALS['administrer_url'] . '/utilisateurs.php' => $GLOBALS["STR_ADMIN_MENU_USERS_USERS"]);
 		}
-		if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_finance,admin_operations,admin_productsline', true)) {
 			$GLOBALS['menu_items']['users']['users_general'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS"];
 			$GLOBALS['menu_items']['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_LIST"];
 		}
-		if (a_priv('admin_users', true)) {
+		if (a_priv('admin_white_label,admin_users', true)) {
 			$GLOBALS['menu_items']['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_USERS_USER_CREATE"];
+		if (a_priv('admin_users', true)) {
 			$GLOBALS['menu_items']['users_general'][$GLOBALS['administrer_url'] . '/utilisateurs.php?mode=liste&priv=supplier'] = $GLOBALS["STR_ADMIN_MENU_USERS_SUPPLIERS_LIST"];
 		}
-		if (a_priv('admin_sales,admin_users,admin_content,admin_communication,admin_finance,admin_operations,admin_productsline', true)) {
+		}
+		if (check_if_module_active('pages_stats', 'administrer/pages_stats.php')) {
+			$GLOBALS['menu_items']['users_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/pages_stats/administrer/pages_stats.php'] = $GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"];
+		}
+		if (a_priv('admin_white_label,admin_sales,admin_users,admin_content,admin_communication,admin_finance,admin_operations,admin_productsline', true)) {
 			$GLOBALS['menu_items']['users']['users_retaining'] = $GLOBALS["STR_ADMIN_MENU_USERS_RETAINING"];
 		}
-		if (a_priv('admin_users,admin_content,admin_communication,admin_finance', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_content,admin_communication,admin_finance', true)) {
 			$GLOBALS['menu_items']['users_retaining'][$GLOBALS['administrer_url'] . '/newsletter.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_NEWSLETTER"];
 		}
-		if (a_priv('admin_sales,admin_users,admin_operations,admin_productsline', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_users,admin_operations,admin_productsline', true)) {
 			$GLOBALS['menu_items']['users_retaining'][$GLOBALS['administrer_url'] . '/codes_promos.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_CODE_PROMO"];
 		}
-		if (a_priv('admin_users,admin_finance,admin_operations,admin_productsline', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_finance,admin_operations,admin_productsline', true)) {
 			if (check_if_module_active('good_clients', 'administrer/bons_clients.php')) {
 				$GLOBALS['menu_items']['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/good_clients/administrer/bons_clients.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BEST_CLIENTS"];
 			}
 		}
-		if (a_priv('admin_users,admin_operations,admin_productsline', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_operations,admin_productsline', true)) {
 			if (check_if_module_active('birthday', 'administrer/bons_anniversaires.php')) {
 				$GLOBALS['menu_items']['users_retaining'][$GLOBALS['wwwroot_in_admin'] . '/modules/birthday/administrer/bons_anniversaires.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_BIRTHDAY"];
 			}
 		}
-		if (a_priv('admin_users_contact_form,admin_users,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
+		if (a_priv('admin_white_label,admin_users_contact_form,admin_users,admin_finance,admin_operations,admin_productsline,admin_funding', true)) {
 			// On affichera le menu relation client uniquement si $GLOBALS['menu_items']['users_sales'] n'est pas vide
 			$GLOBALS['menu_items']['users']['users_sales'] = $GLOBALS["STR_ADMIN_MENU_USERS_SALES_MANAGEMENT"];
 		}
-		if (a_priv('admin_users', true)) {
+		if (a_priv('admin_white_label,admin_users', true)) {
 			if (file_exists($GLOBALS['dirroot'] . '/modules/maps_users/administrer/map_google_search.php')) {
 				$GLOBALS['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/maps_users/administrer/map_google_search.php'] = $GLOBALS["STR_ADMIN_MENU_USERS_USERS_MAP"];
 			}
 		}
-		if (a_priv('admin_users', true)) {
+		if (a_priv('admin_white_label,admin_users', true)) {
 			if (check_if_module_active('offres')) {
 				$GLOBALS['menu_items']['users']['users_offre'] = $GLOBALS["STR_ADMIN_OFFRES"];
 				$GLOBALS['menu_items']['users_offre'][get_url('/modules/offres/administrer/offres.php')] = $GLOBALS["STR_ADMIN_ADMIN_OFFRES_ALL_LIST"];
@@ -145,7 +150,7 @@ function get_admin_menu()
 			}
 		}
 		if (a_priv('admin_products,admin_finance', true)) {
-			if (a_priv('admin_products', true)) {
+			if (a_priv('admin_white_label,admin_products', true)) {
 				$this_url = $GLOBALS['administrer_url'] . '/produits.php';
 			} else {
 				$this_url = '#';
@@ -171,24 +176,24 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['products_attributes'][$GLOBALS['administrer_url'] . '/couleurs.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_COLORS"];
 			$GLOBALS['menu_items']['products_attributes'][$GLOBALS['administrer_url'] . '/tailles.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_SIZES"];
 		}
-		if (a_priv('admin_sales,admin_finance,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_finance,admin_operations', true)) {
 			// Menu des ventes
-			if (a_priv('admin_sales,admin_finance,admin_operations', true)) {
+			if (a_priv('admin_white_label,admin_sales,admin_finance,admin_operations', true)) {
 				$this_url = $GLOBALS['administrer_url'] . '/commander.php';
 			} else {
 				$this_url = '#';
 			}
 			$GLOBALS['main_menu_items']['sales'] = array($this_url => $GLOBALS["STR_ADMIN_MENU_SALES_SALES_TITLE"]);
 		}
-		if (a_priv('admin_sales,admin_finance,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_finance,admin_operations', true)) {
 			$GLOBALS['menu_items']['sales']['sales_general'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_HEADER"];
 			$GLOBALS['menu_items']['sales_general'][$GLOBALS['administrer_url'] . '/commander.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDERS"];
 		}
-		if (a_priv('admin_sales,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_operations', true)) {
 			$GLOBALS['menu_items']['sales_general'][$GLOBALS['administrer_url'] . '/commander.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_SALES_ORDER_CREATION"];
 		}
-		if (a_priv('admin_sales', true)) {
-			if (check_if_module_active('export', 'administrer/export_ventes.php')) {
+		if (a_priv('admin_white_label,admin_sales', true)) {
+			if (check_if_module_active('export')) {
 				$GLOBALS['menu_items']['sales_general'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT_HEADER"];
 			} else {
 				$GLOBALS['menu_items']['sales_general'][$GLOBALS['administrer_url'] . '/ventes.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_SALES_REPORT"];
@@ -198,7 +203,7 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['sales_hosting'][$GLOBALS['wwwroot_in_admin'] . '/modules/hosting/administrer/hosting.php'] = $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING"];
 			}
 		}
-		if (a_priv('admin_sales,admin_finance,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin_sales,admin_finance,admin_operations', true)) {
 			// On affichera le menu relation client uniquement si $GLOBALS['menu_items']['users_sales'] n'est pas vide
 			$GLOBALS['menu_items']['sales']['sales_accounting'] = $GLOBALS["STR_ADMIN_MENU_SALES_ACCOUNTING_HEADER"];
 			if (check_if_module_active('statistiques')) {
@@ -211,43 +216,45 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['sales_accounting'][$GLOBALS['wwwroot_in_admin'] . '/modules/facture_advanced/administrer/genere_pdf.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PDF_BILLS"];
 			}
 		}
-		if (a_priv('admin_sales', true)) {
+		if (a_priv('admin_white_label,admin_sales', true)) {
 			$GLOBALS['menu_items']['sales']['sales_delivery'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_HEADER"];
-			if (check_if_module_active('export', 'administrer/export_livraisons.php')) {
+			if (check_if_module_active('export')) {
 				$GLOBALS['menu_items']['sales_delivery'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_EXPORT"];
 			} else {
 				$GLOBALS['menu_items']['sales_delivery'][$GLOBALS['administrer_url'] . '/livraisons.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_DELIVERY_REPORT"];
 			}
+			if (a_priv('admin_sales', true)) {
 			if (check_if_module_active('picking')) {
 				$GLOBALS['menu_items']['sales_delivery'][$GLOBALS['wwwroot_in_admin'] . '/modules/picking/administrer/picking.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_PICKING_LIST"];
+			}
 			}
 			if (check_if_module_active('exaprint')) {
 				$GLOBALS['menu_items']['sales_delivery'][$GLOBALS['wwwroot_in_admin'] . '/modules/exaprint/administrer/exaprint.php'] = $GLOBALS["STR_ADMIN_MENU_SALES_EXAPRINT"];
 			}
 		}
-		if (a_priv('admin_content,admin_communication,admin_finance,admin_productsline', true)) {
-			if (a_priv('admin_content,admin_communication,admin_finance', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication,admin_finance,admin_productsline', true)) {
+			if (a_priv('admin_white_label,admin_content,admin_communication,admin_finance', true)) {
 				$this_url = $GLOBALS['administrer_url'] . '/articles.php';
 			} else {
 				$this_url = '#';
 			}
 			$GLOBALS['main_menu_items']['content'] = array($this_url => $GLOBALS["STR_ADMIN_MENU_CONTENT_TITLE"]);
 		}
-		if (a_priv('admin_content,admin_communication,admin_finance', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication,admin_finance', true)) {
 			$GLOBALS['menu_items']['content']['content_articles'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_HEADER"];
 			$GLOBALS['menu_items']['content_articles'][$GLOBALS['administrer_url'] . '/articles.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLES_LIST"];
 			$GLOBALS['menu_items']['content_articles'][$GLOBALS['administrer_url'] . '/articles.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_ARTICLE_ADD"];
 			$GLOBALS['menu_items']['content_articles'][$GLOBALS['administrer_url'] . '/rubriques.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORIES_LIST"];
 			$GLOBALS['menu_items']['content_articles'][$GLOBALS['administrer_url'] . '/rubriques.php?mode=ajout'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CATEGORY_ADD"];
 		}
-		if (a_priv('admin_users,admin_content,admin_webmastering,admin_communication,admin_finance', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_content,admin_webmastering,admin_communication,admin_finance', true)) {
 			$GLOBALS['menu_items']['content']['content_general'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML_HEADER"];
 		}
-		if (a_priv('admin_content,admin_communication', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication', true)) {
 			$url_cgv = get_cgv_url(false);
 			$GLOBALS['menu_items']['content_general'][$GLOBALS['administrer_url'] . '/cgv.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS"];
 		}
-		if (a_priv('admin_content', true)) {
+		if (a_priv('admin_white_label,admin_content', true)) {
 			if (file_exists($GLOBALS['dirroot'] . '/modules/cgu-template/administrer/cgu-update.php')) {
 				$GLOBALS['menu_items']['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu-update.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_TEMPLATES"];
 			}
@@ -255,48 +262,48 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['content_general'][$GLOBALS['wwwroot_in_admin'] . '/modules/cgu-template/administrer/cgu.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_TERMS_GENERATE"];
 			}
 		}
-		if (a_priv('admin_content,admin_communication', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication', true)) {
 			$GLOBALS['menu_items']['content_general'][$GLOBALS['administrer_url'] . '/legal.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_LEGAL"];
 			$GLOBALS['menu_items']['content_general'][$GLOBALS['administrer_url'] . '/plan.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_GOOGLEMAP"];
 		}
-		if (a_priv('admin_users,admin_content,admin_webmastering', true)) {
+		if (a_priv('admin_white_label,admin_users,admin_content,admin_webmastering', true)) {
 			$GLOBALS['menu_items']['content_general'][$GLOBALS['administrer_url'] . '/contacts.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_CONTACTS"];
 		}
-		if (a_priv('admin_content,admin_communication,admin_finance,admin_productsline', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication,admin_finance,admin_productsline', true)) {
 			$GLOBALS['menu_items']['content']['content_various'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER"];
 		}
-		if (a_priv('admin_content,admin_communication,admin_finance', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_communication,admin_finance', true)) {
 			$GLOBALS['menu_items']['content_various'][$GLOBALS['administrer_url'] . '/html.php'] = $GLOBALS["STR_ADMIN_MENU_CONTENT_HTML"];
 		}
-		if (a_priv('admin*', true)) {
-			if (a_priv('admin_webmastering,admin_finance,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin*', true)) {
+			if (a_priv('admin_white_label,admin_webmastering,admin_finance,admin_operations', true)) {
 				$this_url = $GLOBALS['administrer_url'] . '/produits_achetes.php';
 			} else {
 				$this_url = '#';
 			}
 			$GLOBALS['main_menu_items']['webmastering'] = array($this_url => $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"]);
 		}
-		if (a_priv('admin_moderation', true)) {
+		if (a_priv('admin_white_label,admin_moderation', true)) {
 			$GLOBALS['menu_items']['webmastering']['moderation_various'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_TITLE"];
 			$GLOBALS['menu_items']['moderation_various'][$GLOBALS['administrer_url'] . '/list_admin_actions.php?action_cat=PHONE'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_PHONE_CALLS"];
 			$GLOBALS['menu_items']['moderation_various'][$GLOBALS['administrer_url'] . '/list_admin_actions.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_ADMIN_ACTIONS"];
 			$GLOBALS['menu_items']['moderation_various'][$GLOBALS['administrer_url'] . '/connexion_user.php'] = $GLOBALS["STR_ADMIN_MENU_MODERATION_USER_CONNEXIONS"];
 		}
-		if (a_priv('admin_webmastering,admin_finance,admin_operations', true)) {
+		if (a_priv('admin_white_label,admin_webmastering,admin_finance,admin_operations', true)) {
 			// Menu de webmastering
 			$GLOBALS['menu_items']['webmastering']['webmastering_marketing'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"];
 			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/produits_achetes.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"];
 		}
-		if (a_priv('admin_moderation,admin_communication', true)) {
+		if (a_priv('admin_white_label,admin_moderation,admin_communication', true)) {
 			$GLOBALS['menu_items']['webmastering']['webmastering_seo'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SEO_HEADER"];
 		}
-		if (a_priv('admin_moderation', true)) {
+		if (a_priv('admin_white_label,admin_moderation', true)) {
 			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/import_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
 			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/export_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"];
 			if (file_exists($GLOBALS['dirroot'] . '/modules/import/administrer/import_clients.php')) {
 				$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/import/administrer/import_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
 			}
-			if (check_if_module_active('export', 'export_clients.php')) {
+			if (check_if_module_active('export')) {
 				$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"];
 			}
 			if (check_if_module_active('expeditor')) {
@@ -311,10 +318,10 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['webmastering_seo'][$GLOBALS['administrer_url'] . '/urllist.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SITEMAP_URLLIST"];
 			}
 		}
-		if (a_priv('admin_content,admin_webmastering,admin_communication', true)) {
+		if (a_priv('admin_white_label,admin_content,admin_webmastering,admin_communication', true)) {
 			$GLOBALS['menu_items']['webmastering_seo'][$GLOBALS['administrer_url'] . '/meta.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_META"];
 		}
-		if (a_priv('admin_moderation', true)) {
+		if (a_priv('admin_white_label,admin_moderation', true)) {
 			if (file_exists($GLOBALS['dirroot'] . '/modules/projects_management/administrer/projects.php')) {
 				$GLOBALS['menu_items']['webmastering']['webmastering_projects'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_MANAGEMENT"];
 				$GLOBALS['menu_items']['webmastering_projects'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/projects.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_TASKS"];
@@ -585,7 +592,7 @@ function sendclient($commandeid, $prefered_mode = 'html', $mode = 'bdc', $partia
  * @param integer $delivery_tracking
  * @return
  */
-function send_avis_expedition($commandeid, $delivery_tracking)
+function send_avis_expedition($commandeid, $delivery_tracking, $email_template = null)
 {
 	$resCom = query("SELECT c.*, sp.technical_code AS statut_paiement". (check_if_module_active('tnt')?', t.is_tnt':'') . "
 		FROM peel_commandes c
@@ -593,6 +600,7 @@ function send_avis_expedition($commandeid, $delivery_tracking)
 		". (check_if_module_active('tnt')?'LEFT JOIN peel_types t ON t.id=c.typeId AND ' . get_filter_site_cond('types', 't') . '':'') . "
 		WHERE c.id='" . intval($commandeid) . "' AND " . get_filter_site_cond('commandes', 'c') . "");
 	$commande = fetch_object($resCom);
+	$user = get_user_information($commande->id_utilisateur);
 	if (!empty($commande->is_tnt) && check_if_module_active('tnt')) {
 		$delivery_tracking = '';
 		$sql = query("SELECT ca.tnt_parcel_number, ca.tnt_tracking_url
@@ -613,13 +621,20 @@ function send_avis_expedition($commandeid, $delivery_tracking)
 	$custom_template_tags['COUT_TRANSPORT'] = fprix($commande->cout_transport, true) . " " . $GLOBALS['STR_TTC'];
 
 	$custom_template_tags['SHIPPED_ITEMS'] = '';
+	
+	$custom_template_tags['CIVILITE'] = $user['civilite'];
+    $custom_template_tags['PAIEMENT'] = get_payment_name($commande->paiement);
+	
 	$product_infos_array = get_product_infos_array_in_order($commandeid, $commande->devise, $commande->currency_rate);
 	foreach ($product_infos_array as $this_ordered_product) {
 		$custom_template_tags['SHIPPED_ITEMS'] .= $this_ordered_product["product_text"] . "\n";
 		$custom_template_tags['SHIPPED_ITEMS'] .= $GLOBALS['STR_QUANTITY'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . $this_ordered_product["quantite"] . "\n";
 		$custom_template_tags['SHIPPED_ITEMS'] .= $GLOBALS['STR_PRICE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . fprix($this_ordered_product["total_prix"], true) . ' ' . $GLOBALS['STR_TTC'] . "\n\n";
 	}
-	$result = send_email($commande->email, '', '', 'send_avis_expedition', $custom_template_tags, null, $GLOBALS['support_commande']);
+	if (empty($email_template)) {
+		$email_template = 'send_avis_expedition';
+	}
+	$result = send_email($commande->email, '', '', $email_template, $custom_template_tags, null, $GLOBALS['support_commande']);
 	if($result) {
 		return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_DELIVERY_EMAIL_SENT'], $commande->email)))->fetch();
 	} else {
@@ -1233,7 +1248,6 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$date_facture = get_formatted_date(time());
 			$montant_displayed = 0;
 		}
-		// Affiche le modeles d'une commande en detail
 		$is_order_modification_allowed = is_order_modification_allowed(vb($commande['o_timestamp']));
 
 		if (!empty($user_id)) {
@@ -1328,8 +1342,11 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('action_name', $action);
 		$tpl->assign('id', vn($id));
 		$tpl->assign('order_id', vn($commande['order_id']));
+		if (!empty($commande['document'])) {
+			$tpl->assign('url_document', get_url_from_uploaded_filename($commande['document']));
+		}
 		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($commande['site_id']), null, null, true));
-		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_commandes'])));
 		$tpl->assign('internal_order_enable', vn($GLOBALS['site_parameters']['internal_order_enable']));
 		$tpl->assign('is_order_modification_allowed', $is_order_modification_allowed);
 
@@ -1573,7 +1590,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				$product_object = new Product($line_data['id'], null, false, null, true, !check_if_module_active('micro_entreprise'));
 				// Code pour recupérer select des tailles
 				$possible_sizes = $product_object->get_possible_sizes();
-				// traitement particulier pour le prix. L'utilisation de la fonction vb() n'est pas approprié car il faut permettre l'insertion de produit au montant égal à zero (pour offir.)
+				// traitement particulier pour le prix. L'utilisation de la fonction vb() n'est pas appropriée car il faut permettre l'insertion de produit au montant égal à zéro (pour offrir.)
 				$line_data['image'] = $product_object->get_product_main_picture();
 				$line_data['image_thumbs'] = StringMb::str_form_value(thumbs($product_object->get_product_main_picture(), 50, 50, 'fit', null, null, true, true));
 				$line_data['prix_cat'] = round($line_data['prix_cat'] * vn($commande['currency_rate']), 5);
@@ -1842,7 +1859,7 @@ function save_commande_in_database($frm)
 	if (empty($frm['lang'])) {
 		$frm['lang'] = $_SESSION['session_langue'];
 	}
-	if (empty($frm['site_id'])) {
+	if (!isset($frm['site_id'])) {
 		// Site id absent pour cette commande, il ne faut pas avoir de valeur vide ou à 0 pour une commande, elle est forcement associée à un site.
 		if (!empty($_SESSION['session_admin_multisite'])) {
 			// L'administrateur a choisi un site à administrer spécifiquement
@@ -2146,7 +2163,13 @@ function save_commande_in_database($frm)
 		$this_article['id_attribut'] = vn($frm['attributs_list_' . $i]);
 		$this_article['total_prix_attribut'] = vn($frm['total_prix_attribut_' . $i]);
 
-		$total_prix_attribut_ht = $this_article['total_prix_attribut'] / (1 + $tva / 100); // recupération du prix des attributs en ht pour utiliser dans le calcul de option_ht
+		if ($tva > 0) {
+			// recupération du prix des attributs en ht pour utiliser dans le calcul de option_ht
+			$total_prix_attribut_ht = $this_article['total_prix_attribut'] / (1 + $tva / 100); 
+		} else {
+			$total_prix_attribut_ht = $this_article['total_prix_attribut'];
+		}
+		
 		// Informations supplémentaires (non modifiable dans la mofification de la commande)
 		$this_article['delai_stock'] = $product_object->delai_stock;
 
@@ -2823,7 +2846,8 @@ function tab_followed_seg()
  */
 function tab_followed_newsletter()
 {
-	return array('1' => $GLOBALS["STR_YES"],
+	return array('2' => $GLOBALS["STR_YES_NOT_VALIDATE"],
+		'1' => $GLOBALS["STR_YES_VALIDATE"],
 		'0' => $GLOBALS["STR_NO"]);
 }
 
@@ -2938,6 +2962,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `image_header_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `alpha_' . word_real_escape_string($new_lang) . '` CHAR( 1 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `sentence_displayed_on_product_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+	$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD `nom_court_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	if(!in_array('nom_'.$new_lang, get_table_index('peel_categories', null, true))) {
 		$query_alter_table[] = 'ALTER TABLE `peel_categories` ADD INDEX (`nom_' . word_real_escape_string($new_lang) . '`)';
 	}
@@ -4640,7 +4665,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		// Recherche sur une id - si par exemple on cherche 22, on ne veut pas récupérer les emails contenant 22 => on ne cherche que sur l'id
 		$sql_where_array[] = 'u.id_utilisateur = "' . intval($frm['email']) . '"';
 	} elseif (!empty($frm['email'])) {
-		$sql_where_array[] = '(u.email LIKE "%' . nohtml_real_escape_string(trim($frm['email'])) . '%" OR u.pseudo LIKE "%' . nohtml_real_escape_string(trim($frm['email'])) . '%")';
+		$sql_where_array[] = '(u.email LIKE "%' . nohtml_real_escape_string(trim($frm['email'])) . '%" OR u.pseudo LIKE "%' . nohtml_real_escape_string(trim($frm['email'])) . '%" OR u.ip LIKE "%' . nohtml_real_escape_string(trim($frm['email'])) . '%" )';
 	}
 	if (!empty($frm['societe'])) {
 		$sql_where_array[] = '(u.societe LIKE "%' . nohtml_real_escape_string(trim($frm['societe'])) . '%" OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(u.siret,")",""),"(",""), ".",""), "-",""), " ","") LIKE "%' . nohtml_real_escape_string(str_replace(array('(', ')', '.', '-', ' '), '', trim($frm['societe']))) . '%" OR u.url LIKE "%' . nohtml_real_escape_string(trim($frm['societe'])) . '%")';
@@ -4723,10 +4748,24 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$sql_where_array[] = 'u.etat="' . nohtml_real_escape_string($frm['etat']) . '"';
 	}
 	if (isset($frm['newsletter']) && $frm['newsletter'] != '') {
-		$sql_where_array[] = 'u.newsletter="' . nohtml_real_escape_string($frm['newsletter']) . '"';
+		// Oui validé (1), Oui non validé (2), Non (0)
+		if ($frm['newsletter'] == 0) {
+			$sql_where_array[] = 'u.newsletter="0"';
+		} elseif ($frm['newsletter'] == 1) {
+			$sql_where_array[] = 'u.newsletter="1" AND newsletter_validation_date !="0000-00-00 00:00:00"';
+		}  elseif ($frm['newsletter'] == 2) {
+			$sql_where_array[] = 'u.newsletter="1" AND newsletter_validation_date ="0000-00-00 00:00:00"';
+		}
 	}
 	if (isset($frm['offre_commercial']) && $frm['offre_commercial'] != '') {
-		$sql_where_array[] = 'u.commercial="' . nohtml_real_escape_string($frm['offre_commercial']) . '"';
+		// Oui validé (1), Oui non validé (2), Non (0)
+		if ($frm['offre_commercial'] == 0) {
+			$sql_where_array[] = 'u.commercial="0"';
+		} elseif ($frm['offre_commercial'] == 1) {
+			$sql_where_array[] = 'u.commercial="1" AND commercial_validation_date != "0000-00-00 00:00:00"';
+		}  elseif ($frm['offre_commercial'] == 2) {
+			$sql_where_array[] = 'u.commercial="1" AND commercial_validation_date = "0000-00-00 00:00:00"';
+		}
 	}
 	if (!empty($frm['group'])) {
 		$sql_where_array[] = 'u.id_groupe="' . nohtml_real_escape_string(vb($frm['group'])) . '"';
@@ -4959,6 +4998,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$HeaderTitlesArray[] = $GLOBALS["STR_ADMIN_UTILISATEURS_HAS_SPONSOR"] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':';
 	}
 	$HeaderTitlesArray['site_id'] = $GLOBALS['STR_ADMIN_SITES_SITE_NAME'];
+	$HeaderTitlesArray['ip'] = $GLOBALS['STR_ADMIN_IP'];
 
 	// Ce hook permet de définir une nouvelle liste de titre pour le tableau HTML de liste d'utilisateur en fonction du contexte, et de donner le fichier tpl en relation avec cette liste
 	$hook_output = call_module_hook('user_admin_list_before', array('frm'=>$_GET), 'array');
@@ -4986,6 +5026,28 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			$file_name = 'admin_utilisateur_liste.tpl';
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate($file_name);
+		if (check_if_module_active('groups')) {
+			$resGroupe = query("SELECT *
+				FROM peel_groupes
+				WHERE " . get_filter_site_cond('groupes') . "
+				ORDER BY nom");
+			if (num_rows($resGroupe)) {
+				$tpl_groupes_options_utilisateurs = array();
+				while ($Groupe = fetch_assoc($resGroupe)) {
+					$tpl_groupes_options_utilisateurs[] = array('value' => $Groupe['id'],
+						'issel' => vb($frm['id_groupe']) == $Groupe['id'],
+						'name' => $Groupe['nom'],
+						'remise' => $Groupe['remise']
+						);
+				}
+				$tpl->assign('groupes_options_utilisateurs', $tpl_groupes_options_utilisateurs);
+			}
+			$tpl->assign('STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED', $GLOBALS['STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED']);
+         }
+		$tpl->assign('STR_ADMIN_ASSIGN', $GLOBALS['STR_ADMIN_ASSIGN']);
+		$tpl->assign('STR_ADMIN_UNASSIGN', $GLOBALS['STR_ADMIN_UNASSIGN']);
+		$tpl->assign('STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP', $GLOBALS['STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP']);
+		
 		$GLOBALS['js_ready_content_array'][] = '
 			display_input2_element("search_date_insert");
 			display_input2_element("search_date_last_paiement");
@@ -5010,6 +5072,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 		$tpl->assign('newsletter_options', formSelect('newsletter', tab_followed_newsletter(), vb($_GET['newsletter'])));
 		$tpl->assign('offre_commercial_options', formSelect('offre_commercial', tab_followed_newsletter(), vb($_GET['offre_commercial'])));
 		$tpl->assign('is_advanced_search', (count($sql_where_array) - $basic_search_where_count) > 0);
+		$tpl->assign('STR_ADMIN_IP', $GLOBALS['STR_ADMIN_IP']);
 
 		// sélection des commerciaux
 		$comm_query = query('SELECT u.id_utilisateur, u.prenom, u.nom_famille
@@ -5274,7 +5337,8 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 					'count_ordered' => $user['count_ordered'],
 					'compter_nb_commandes_parrainees' => $tpl_compter_nb_commandes_parrainees,
 					'recuperer_parrain' => $tpl_recuperer_parrain,
-					'site_name' => get_site_name($user['site_id'])
+					'site_name' => get_site_name($user['site_id']),
+					'ip' => $user['ip']
 					);
 					$hook_result = call_module_hook('user_admin_list_tpl_results', array('frm'=>$_GET, 'user'=>$user), 'array');
 
@@ -5545,6 +5609,138 @@ function preload_modules()
 }
 
 /**
+ * Programmation de l'envoi de la newsletter
+ *
+ * @param integer $id
+ * @param mixed $debut
+ * @param mixed $limit
+ * @param boolean $test
+ * @param mixed $id_utilisateur
+ * @param mixed $sql_select_users
+ * @return
+ */
+function send_newsletter($id, $debut, $limit, $test = false, $id_utilisateur=null, $sql_select_users=null)
+{
+	$sql_n = "SELECT *
+		FROM peel_newsletter
+		WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
+	$res_n = query($sql_n);
+	$news_infos = fetch_assoc($res_n);
+
+	$format = $news_infos['format'];
+	// Récupération du technical_code du template associé à la newsletter
+	$template_technical_code = $news_infos['template_technical_code'];
+	// Stockage des messages et sujets, selon les langues disponibles sur le site
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+		// Ajout des Custom template tag de la newsletter en fonction de la langue
+		$custom_template_tags[$this_lang] = null;
+		if (!empty($news_infos['product_ids'])) {
+			if (function_exists('affiche_produits_newsletter')) {
+				$custom_template_tags[$this_lang]['PRODUCT_LIST'] = affiche_produits_newsletter($news_infos['product_ids'], null, 'newsletter', 20, 'column', true, 0, 3);
+			} else {
+				$custom_template_tags[$this_lang]['PRODUCT_LIST'] = affiche_produits($news_infos['product_ids'], null, 'newsletter', 20, 'column', true, 0, 3);
+			}
+		}
+		if (!empty($news_infos['message_' . $this_lang])) {
+			// Récupération du template email associé à la newsletter en fonction des langues disponibles
+			if (!empty($template_technical_code)) {
+				// On a un modèle, qui contient un tag NEWSLETTER : on récupère son HTML, et on remplace [NEWSLETTER] par le texte de la newsletter
+				$template_infos = getTextAndTitleFromEmailTemplateLang($template_technical_code, $this_lang);
+				if (!empty($template_infos['image_haut'])) {
+					$custom_template_tags[$this_lang]['BANNIERE_HAUT'] = $GLOBALS['repertoire_upload'].'/'.$template_infos['image_haut'];
+				}
+				if (!empty($template_infos['image_bas'])) {
+					$custom_template_tags[$this_lang]['BANNIERE_BAS'] = $GLOBALS['repertoire_upload'].'/'.$template_infos['image_bas'];
+				}
+				$message[$this_lang] = $template_infos['text'];
+				$custom_template_tags[$this_lang]['NEWSLETTER'] = $news_infos['message_' . $this_lang];
+			} else {
+				$message[$this_lang] = $news_infos['message_' . $this_lang];
+			}
+			// Le sujet de la newsletter est prioritaire sur celui du template
+			$sujet[$this_lang] = $news_infos['sujet_' . $this_lang];
+		}
+	}
+
+	// Récupération de la liste des emails
+	if (!empty($message)) {
+		foreach(array_keys($message) as $this_lang) {
+			if (!empty($sql_select_users) && check_if_module_active('crons')) {
+				// uniquement dans le cas d'une programmation par cron, on peux prendre en compte le SQL en paramètre. Dans le cas où cette fonction est exécutée sans cron, il faudra gérer le paramètrage de LIMIT dans la requête pour prendre en compte le paramètre sql_select_users.
+				$sql_u = $sql_select_users;
+			} else {
+				$sql_cond = "etat='1' AND email_bounce NOT LIKE '5.%' AND email!='' AND " . get_filter_site_cond('utilisateurs', 'u') . " AND ";
+				if (!$test) {
+					$sql_cond .= "newsletter='1' AND (lang='" . nohtml_real_escape_string($this_lang) . "' OR lang='')";
+					if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
+						$sql_cond .= " AND newsletter_validation_date NOT LIKE '0000-00-00%'";
+					}
+				} else {
+					$sql_cond .= "priv LIKE '%admin%'";
+					$sujet[$this_lang] .= ' [envoyé aux administrateurs seulement]';
+				}
+				$sql_u = "SELECT *
+					FROM peel_utilisateurs u
+					WHERE  " . $sql_cond . " " . (!empty($id_utilisateur)? " AND id_utilisateur = " . intval($id_utilisateur).' ':'');	
+			}
+			// Le SQL suivant va permettre de récupérer des données utilisateurs pouvant servir dans des TAGS
+			// => il faut mettre tous les champs de la table utilisateurs
+			$message[$this_lang] .= "\r\n<a href=\"[DESINSCRIPTION_NEWSLETTER]\">".$GLOBALS['STR_DESINSCRIPTION_NEWSLETTER'].'</a>';
+			if (check_if_module_active('crons')) {
+				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
+				// Les emails seront envoyés a posteriori avec un cron
+				// Si nous avons des tags à remplacer dans le contenue
+				$message[$this_lang] = template_tags_replace($message[$this_lang], $custom_template_tags[$this_lang], true, null, $this_lang);
+				program_cron_email($sql_u, $message[$this_lang], $sujet[$this_lang], $_SESSION['session_utilisateur']['email'], null, $this_lang);
+				query("UPDATE peel_newsletter
+					SET statut='envoi ok', date_envoi='" . date('Y-m-d H:i:s', time()) . "'
+					WHERE id='" . intval($news_infos['id']) . "' AND " . get_filter_site_cond('newsletter', null, true));
+				$newsletter_name_info = $id . ' (' . $this_lang . ') "' . $sujet[$this_lang] . '"';
+				if (!$test) {
+					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_SUBSCRIBERS'];
+				} else {
+					$output = $GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SEND_ADMINISTRATORS'];
+				}
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($output, $newsletter_name_info)))->fetch();
+			} else {
+				// On envoi la newsletter, il faut envoyer l'email directement et pas une notification. Cette variable global sera utilisée dans la fonction send_email.
+				$GLOBALS['send_notification_disable'] = true;
+				$sql_u .= "
+					LIMIT " . intval($debut) . "," . intval($limit);
+				$res_u = query($sql_u);
+				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
+				$i = 0;
+				while ($row = fetch_assoc($res_u)) {
+					if (send_email($row['email'], $sujet[$this_lang], $message[$this_lang], '', $custom_template_tags[$this_lang], $format, $GLOBALS['support'])) {
+						$result = 'OK';
+					} else {
+						$result = 'NOK';
+					}
+					if (!$test) {
+						$fc = StringMb::fopen_utf8("sending.log", "ab");
+						$w = fwrite ($fc, "[" . $row['email'] . "]\t\t\t " . $result . "\n");
+						fclose($fc);
+					}
+					$i++;
+				}
+
+				if ($i >= $limit && $debut + $i < 250) {
+					// Si le nombre de personne a qui la newsletter vient d'être envoyé ($i) est supérieur ou égale au nombre $limit, ça veut dire qu'il y a encore des utilisateurs qui doivent recevoir la newsletter
+					// => On continue à envoyer la newsletter
+					sleep(1);
+					send_newsletter($id, $debut + $i, min($limit, 250 - ($debut + $i)), $test, $id_utilisateur);
+				} else {
+					query("UPDATE peel_newsletter
+						SET statut='envoi ok', date_envoi='" . date('Y-m-d H:i:s', time()) . "'
+						WHERE id='" . intval($news_infos['id']) . "' AND " . get_filter_site_cond('newsletter', null, true));
+					return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_NEWSLETTERS_MSG_SENT_OK'], $id, $sujet[$this_lang], $debut + $i)))->fetch();
+				}
+			}
+		}
+	}
+}
+
+/**
  *
  * Liste les founisseurs
  *
@@ -5562,3 +5758,1299 @@ function get_supplier_output()
 	}
 	return $output;
 }
+
+/**
+ * Gestion de l'import
+ *
+ * @param boolean $from_backoffice
+ * @return
+ */
+function handle_import($from_backoffice = false) {
+	// On isole le CSS pour pouvoir utiliser cette fonction éventuellement en front-office
+	// CSS pour le tableau de correspondance des imports
+	$output = '<style>
+#db_field_list table tr td {
+	height: 30px;
+	width: 200px;
+	padding: 5px;
+	border: 1px solid black;
+}
+#db_field_list table tr td span[draggable=true] {
+	display:block;
+	background-color: #d3f3db;
+	height: 100%;
+	width: 100%;
+}</style>';
+	// Drag and drop CSV import fields
+	$GLOBALS['js_ready_content_array'][] = '
+function drag_and_drop_fields(draggable, drop) {
+	var drag_from_type;
+	var drag_from_field;
+	$(draggable).on("dragstart", function (event) {
+		  var dt = event.originalEvent.dataTransfer;
+		  dt.setData("Text", $(this).attr("id"));
+		  drag_from_type = $(this).closest(".fields_div").attr("id");
+		  drag_from_field = $(this).closest("tr").attr("class");
+		});
+    $(drop).on("dragenter dragover drop", function (event) {	
+	   event.preventDefault();
+	   if (event.type === "drop") {
+		  var drag_from_new_content = $(this).html();
+		  var data = event.originalEvent.dataTransfer.getData("Text",$(this).attr("id"));
+		  if(data && $("#"+data).length > 0)
+		  {
+			de=$("#"+data).detach();
+			$(this).empty();
+			de.appendTo($(this));	
+			$("#"+drag_from_type+" ."+drag_from_field+" .content_draggable").html(drag_from_new_content);
+		  }
+	   }
+   });
+}
+
+drag_and_drop_fields(".field_draggable", "#db_field_list table td.content_draggable");
+';
+	
+	$products_specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock', 'Categorie', 'categorie_id');
+	$action = vb($_POST['action']);
+	$type = vb($_POST['type']);
+
+	// Récupère la liste des tables à importer
+	// Configuration des droits pour pouvoir procéder à l'import
+	// On a une liste générique par défaut dans PEEL, et on complète cette liste via un hook
+	$types_array = array();
+	if($from_backoffice && a_priv("admin_products,admin_webmastering")) {
+		$types_array['peel_produits'] = 'Produits';
+	}
+	if($from_backoffice && a_priv("admin_users,admin_webmastering")) {
+		$types_array['peel_utilisateurs'] = 'Utilisateurs';
+	}
+	$hook_result = call_module_hook('import_infos_template_data', array(), 'array');
+	$types_array = array_merge_recursive_distinct($types_array, $hook_result['type_list']);
+
+	// Récupère la liste des champs de toutes les tables succeptibles d'être importées
+	$table_field_names_by_type = array();
+	foreach($types_array as $type_key => $type_string)
+	{
+		$table_field_names_by_type[$type_key] = get_table_field_names($type_key);
+	}
+
+	// Sélection des attributs, actifs ou pas
+	$q_nom_attrib = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
+		FROM peel_nom_attributs
+		WHERE " . get_filter_site_cond('nom_attributs') . "
+		ORDER BY nom_" . $_SESSION['session_langue'] . "");
+	$attributs_array = array();
+	while ($attrib = fetch_assoc($q_nom_attrib)) {
+		$attributs_array[] = $attrib;
+	}
+	$columns_skipped = array();
+
+	switch ($action) {
+		case "import":
+			if (a_priv('demo')) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				break;
+			}
+			if(!array_key_exists($type, $types_array)) {
+				// L'utilisateur n'a pas le droit d'importer dans la table demandée
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				break;
+			}
+			$output .= $GLOBALS['tplEngine']->createTemplate('admin_import_produits_table.tpl')->fetch();
+			if (isset($_POST['on_update'][$type])) {
+				// TODO : mise à jour de "peel_import_field" pour que les champs des autres tables soient sauvegardés
+				//      : l'idée serait par exemple d'enregistrer les champs en y indiquant le nom de la table (ex : peel_produits|categorie_id)
+				// Mise à jour de la table de préférence des champs
+				query("UPDATE peel_import_field SET etat='0'");
+				foreach($_POST['on_update'][$type] as $this_id => $this_value) {
+					$output .= '<input type="hidden" name="on_update[' . $type . '][' . $this_id . ']" value="' . StringMb::str_form_value($this_value) . '" />';
+					query("UPDATE peel_import_field
+						SET etat='1'
+						WHERE champs='" . nohtml_real_escape_string($this_value) . "' AND " . get_filter_site_cond('import_field', null, true) . "");
+					if (!affected_rows()) {
+						// Comme etat valait 0 avant, c'est que la ligne n'existait pas, on va donc la créer
+						query("INSERT INTO peel_import_field
+							SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id']))."'");
+					}
+				}
+			}
+			if (!verify_token($_SERVER['PHP_SELF'] . $action)) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_INVALID_TOKEN']))->fetch();
+			} elseif (empty($_POST['type_import'])) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_TYPE_NOT_CHOSEN']))->fetch();
+			} elseif ($_POST['type_import'] == 'chosen_fields' && empty($_POST['on_update'][$type])) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN']))->fetch();
+			} else {
+				$fichier = upload('fichier', false, 'data', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+				if (empty($fichier) || !file_exists($GLOBALS['uploaddir'] . '/' . $fichier)) {
+					/* le fichier n'existe pas */
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND']))->fetch();
+				} else {
+					$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_produits_fichier.tpl');
+					$tpl->assign('href', get_url_from_uploaded_filename($fichier));
+					$tpl->assign('name', $fichier);
+					$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
+					$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+					$output .= $tpl->fetch();
+					if ($_POST['type_import'] == 'chosen_fields') {
+						foreach($_POST['on_update'][$type] as $this_field_name) {
+							// Sélection des colonnes souhaitées par l'utilisateur
+							$selected_field_names[] = $this_field_name;
+						}
+					}
+					$fp = StringMb::fopen_utf8($GLOBALS['uploaddir'] . '/' . $fichier, "rb");
+					$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
+					if (empty($_POST['columns_separator'])) {
+						// détection automatique
+						if (strpos($this_line, "\t") !== false) {
+							$separator = "\t";
+						} elseif (strpos($this_line, ";") !== false) {
+							$separator = ";";
+						} elseif (strpos($this_line, ",") !== false) {
+							$separator = ",";
+						} else {
+							$separator = "\t";
+						}
+					} elseif ($_POST['columns_separator'] == '\t') {
+						$separator = "\t";
+					} else {
+						$separator = $_POST['columns_separator'];
+					}
+					$field_names = explode($separator, $this_line);
+					$temp_trim_field_names = array();
+
+					foreach($field_names as $this_key => $this_field_name) {
+						$this_field_name = trim($this_field_name);
+						$field_names[$this_key] = $this_field_name;
+						if ($_POST['type_import'] == 'chosen_fields' && !in_array($this_field_name, $selected_field_names)) {
+							// Champ non sélectionné par l'utilisateur pour l'import
+							$columns_skipped[] = $this_field_name;
+							continue;
+						}
+						if($type == 'peel_produits') {
+							// Traitement spécifique pour la table produits
+							if (!in_array($this_field_name, $table_field_names_by_type['peel_produits']) && strpos($this_field_name, "#") === false && strpos($this_field_name, "§") === false) {
+								// Si le champ trouvé dans le fichier n'est pas dans la table produit, et que le nom du produit ne contient pas de séparateur (spécifique aux attributs).
+								if (in_array($this_field_name, $products_specific_fields_array)) {
+									if(!in_array($this_field_name, array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Stock', 'Categorie', 'categorie_id'))) {
+										// Les champs écartés dans la liste ci-dessus ici seront traités dans le script spécifiquement. Les autres champs spécifiques ne sont pas traités
+										$columns_skipped[] = $this_field_name;
+										$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
+									}
+								} else {
+									// Colonne inconnue
+									$columns_skipped[] = $this_field_name;
+									$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
+								}
+								continue;
+							}
+						} else {
+							if (!in_array($this_field_name, $table_field_names_by_type[$type])) {
+								// Colonne inconnue
+								$columns_skipped[] = $this_field_name;
+								$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
+							}
+						}
+						if (in_array($this_field_name, $temp_trim_field_names)) {
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS'], $this_field_name)))->fetch();
+							$skip_import = true;
+						}
+						$temp_trim_field_names[] = $this_field_name;
+					}
+					unset($temp_trim_field_names);
+					$line_number = 0;
+
+					if (empty($skip_import)) {
+						while (!StringMb::feof($fp)) {
+							unset($product_id);
+							unset($set_sql_fields);
+							unset($field_values);
+							$last_treated_columns = 0;
+							$line_number++;
+							// Si une valeur de cas contient des sauts de ligne, alors on prend quand même la ligne suivante comme si c'était la continuité de cette ligne
+							while (!StringMb::feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
+								// Tant qu'on n'atteint pas fin de fichier
+								$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
+								if (empty($this_line)) {
+									break;
+								}
+								// $output .= '<hr />Ligne Excel : $this_line';
+								$line_fields = explode($separator, $this_line);
+								foreach($line_fields as $key => $this_field) {
+									// On récupère les valeurs présentes dans la ligne en cours
+									if(isset($field_names[$key + $last_treated_columns])) {
+										if (!isset($field_values[$field_names[$key + $last_treated_columns]])) {
+											$field_values[$field_names[$key + $last_treated_columns]] = trim($this_field);
+										} else {
+											$field_values[$field_names[$key + $last_treated_columns]] .= trim($this_field);
+										}
+									} else {
+										$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $key + $last_treated_columns, $this_field)))->fetch();
+									}
+								}
+								$last_treated_columns += $key;
+							}
+							if (!empty($field_values) && count($field_values) > count($columns_skipped)) {
+								// On a trouvé au moins un champ à importer
+								if (empty($field_values['date_insere'])) {
+									$field_values['date_insere'] = date('Y-m-d H:i:s', time());
+								}
+								if (empty($field_values['date_maj'])) {
+									$field_values['date_maj'] = date('Y-m-d H:i:s', time());
+								}
+							} else {
+								// On n'a trouvé aucun champ sur la ligne en cours, on passe à la ligne suivante
+								continue;
+							}
+
+							$ErrFic = 0;
+							// Vérification que tous les champs obligatoires sont renseignés et avec des valeurs existantes dans les tables de référence (ligne 2209 du fichier Delphi ufrmImportFichiers.pas)
+							// Pour l'importation des temps, frais et factures, ne pas faire ces vérifications, car elles sont faites par la suite
+							// Les vérifications générales ne sont pas appliquées à ces tables : ITemps, ITempsBud, IFrais, IFactureLigne, IFraisBud, IFactureLigneBud + peel_produits + peel_utilisateurs
+							if(!in_array($type, array('tmppasse', 'budtemps', 'fraiseng', 'jourventlignes', 'budfrais', 'budfactlignes', 'peel_produits', 'peel_utilisateurs')))
+							{
+								$PInfoChampGlobal = table_details($type);
+								foreach($PInfoChampGlobal['fields'] as $PInfoChamp)
+								{
+								    // On a une correspondance avec la table destination, vérifier, si le champs fait référence
+								    // à une autre table, que toutes les valeurs renseignées existent dans cette table
+								    if ($PInfoChamp['TableRefName'] != '' or $PInfoChamp['Caption'] == 'Jour d\'échéance')
+								    {
+										// TODO : Traduire le code Delphi ci-dessous en PHP
+										//if (ListeDest.Items[i].Caption <> 'Jour d''échéance') then
+										// ChargeTableRef(PInfoChamp(ListeDest.Items[i].Data).TableRefName, ChampsRef(PInfoChamp(ListeDest.Items[i].Data).TableRefName, ListeDest.Items[i].Caption));
+
+										if($type == 'affaires')
+											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'];
+										elseif($type == 'pvcolaff')
+											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'].' - '.$field_values['Collaborateur'];
+										elseif($type == 'pvqaff')
+											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'].' - '.$field_values['Tac_Fact'];
+										elseif($type == 'evmntcli')
+											$ValeurCode = $field_values['Client'];
+										elseif($type == 'reglem')
+											$ValeurCode = $field_values['Client'];
+										else
+											$ValeurCode = $field_values[$PInfoChampGlobal['structure']['FChampsCode']];
+										$ValeurCode = trim($ValeurCode);
+
+								    	if ($PInfoChamp['Caption'] != 'Jour d\'échéance')
+								    	{
+											if(!CodeExiste(trim($field_values[$PInfoChamp['Caption']]), ChampsRef('', $PInfoChampGlobal['structure']['FieldRefName']), $type))
+											{
+												// Si un champs est obligatoire, sa valeur doit exister dans la table de référence.
+												// S'il ne l'est pas, on accepte qu 'il ne soit pas renseigné, mais s'il l'est la valeur doit exister
+												if ($PInfoChamp['Required']
+													or (!$PInfoChamp['Required'] /*and (DMImportFichiers.dxMemDest.Fields[0].AsString <> '')*/) // TODO : Ne sais pas à quoi correspond Fields[0] (voir ci-dessous la condition entière)
+												 and $field_values[$PInfoChamp['Caption']] != '')
+												 //if (PInfoChamp(ListeDest.Items[i].Data).Required) or
+									    		 // ((not PInfoChamp(ListeDest.Items[i].Data).Required) and (DMImportFichiers.dxMemDest.Fields[0].AsString <> ''))
+									    		 // and (DMImportFichiers.dxMemDest.FieldByName(ListeDest.Items[i].Caption).AsString <> '') then begin
+												{
+													$ErrFic++;
+													AjouterErr('La valeur "' . $field_values[$PInfoChamp['Caption']] . '" n\'existe pas dans la table ' . $PInfoChamp['TableRefName'] . ' pour le champs ' . $PInfoChamp['Caption'], $ValeurCode, $line_number);
+												}
+											}
+								    	}
+								    	else
+								    	{
+								    		$AllJoursEch = AllJoursEch($field_values['Societe']);
+											// Cas particulier des jours d'échéance dans la table société
+								    		if($AllJoursEch['Societe'])
+								    		{
+
+												if ($field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance1'] and $field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance2'] and $field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance3'])
+												{
+													$ErrFic++;
+													AjouterErr('La valeur "' . $field_values['Echeance_Mois'] . '" n\'existe pas dans la table Societes ' . $field_values['Societe'] . ' pour le champs ' . $PInfoChamp['Caption'], $ValeurCode, $line_number);
+												}
+								    		}
+											AjouterMessage('Vérification d\'intégrité pour le champ "' . $PInfoChampGlobal['structure']['FieldRefName'] . '"', $line_number);
+								    	}
+								    }
+
+								    // Champ obligatoire et valeur non renseignée
+								    if ($PInfoChamp['Required'] and trim($field_values[$PInfoChamp['Caption']]) == '')
+								    {
+										$ErrFic++;
+								    	AjouterErr('La valeur n\'est pas renseignée pour le champs ' . $PInfoChamp['Caption'] . ' (obligatoire)', $ValeurCode, $line_number);
+								    }
+								}
+
+							}
+
+							// Vérifications spécifiques à chaque table
+							/*if($type == 'tac_fact')
+								$ErrFic = $ErrFic + VerifieTacFact($PInfoChampGlobal, $field_values);
+							if($type == 'cod_ven')
+								$ErrFic = $ErrFic + VerifieCodeVen($PInfoChampGlobal, $field_values);
+							if($type == 'clients')
+								$ErrFic = $ErrFic + VerifieClients($PInfoChampGlobal, $field_values);
+							if($type == 'affaires')
+								$ErrFic = $ErrFic + VerifieAffaires($PInfoChampGlobal, $field_values);
+							if($type == 'collabor')
+								$ErrFic = $ErrFic + VerifieCollaborateurs($PInfoChampGlobal, $field_values);
+							if($type == 'pvcolaff')
+								$ErrFic = $ErrFic + VerifiePVColAffaires($PInfoChampGlobal, $field_values);
+							if($type == 'pvcolaff')
+								$ErrFic = $ErrFic + VerifiePVQAffaires($PInfoChampGlobal, $field_values);
+							if($type == 'evmntcli')
+								$ErrFic = $ErrFic + VerifieEvmntCli($PInfoChampGlobal, $field_values);*/
+							if($type == 'fam_clnt')
+								$ErrFic = $ErrFic + VerifieFamCli($PInfoChampGlobal, $field_values, $NumLig);
+							/*if($type == 'intervex')
+								$ErrFic = $ErrFic + VerifieCorrespondants($PInfoChampGlobal, $field_values);
+							if($type == 'tmppasse')
+								$ErrFic = $ErrFic + VerifieTempsPasses($PInfoChampGlobal, $field_values);
+							if($type == 'budtemps')
+								$ErrFic = $ErrFic + VerifieTempsBud($PInfoChampGlobal, $field_values);
+							if($type == 'fraiseng')
+								$ErrFic = $ErrFic + VerifieFraisEng($PInfoChampGlobal, $field_values);
+							if($type == 'budfrais')
+								$ErrFic = $ErrFic + VerifieFraisBud($PInfoChampGlobal, $field_values);
+							if($type == 'jourventlignes')
+								$ErrFic = $ErrFic + VerifieFactureLigne($PInfoChampGlobal, $field_values);
+							if($type == 'budfactlignes')
+								$ErrFic = $ErrFic + VerifieFactureLigneBud($PInfoChampGlobal, $field_values);
+							if($type == 'reglem')
+								$ErrFic = $ErrFic + VerifieReglCli($PInfoChampGlobal, $field_values);
+
+							//CompterEnregsCorrects(NbMaj, NbNouv, NbAnom, NbCreat);*/
+
+							if($type == 'peel_produits') {
+								// Mode admin à true pour create_or_update_product : 
+								$output .= create_or_update_product($field_values, $columns_skipped, $table_field_names_by_type['peel_produits'], $products_specific_fields_array, true);
+							} elseif($type == 'peel_utilisateurs') {
+								// Nettoyage des données
+								foreach($field_values as $this_key => $this_field) {
+									// On retire les mentions dans le fichier qui ne sont pas significatives
+									if(in_array($this_field, array('-', '?'))) {
+										$field_values[$this_key] = '';
+									}
+								}
+								if(!empty($field_values['email'])) {
+									if(StringMb::strpos($field_values['email'], ',')) {
+										$temp = explode(',', $field_values['email']);
+										$field_values['email'] = $temp[0];
+									}
+									if(!EmailOK($field_values['email'])){
+										unset($field_values['email']);
+									}
+								}
+								if(empty($field_values['email']) && empty($field_values['nom_famille']) && empty($field_values['societe'])) {
+									continue;
+								}
+								if(!empty($field_values['telephone'])) {
+									$field_values['telephone'] = str_ireplace(array('T : ', 'Tél. : ', 'Tél : ', 'Tel : ', 'Tel: ', 'Stdd : '), '', $field_values['telephone']);
+								}
+								$address_array = array();
+								foreach(array('adresse', 'adresse1', 'adresse2') as $this_key) {
+									if(!empty($field_values[$this_key])) {
+										$address_array[] = $field_values[$this_key];
+									}
+								}
+								$field_values['adresse'] = implode(' ', $address_array);
+								if(!empty($field_values['pays']) && !is_numeric($field_values['pays'])) {
+									$field_values['pays'] = get_country_id($field_values['pays']);
+								}
+								if(empty($field_values['priv'])) {
+									$field_values['priv'] = 'newsletter';
+								}
+								// Création de l'utilisateur
+								$this_id = insere_utilisateur($field_values, true, !empty($_POST['send_email']), false, false);
+								if(is_numeric($this_id)) {
+									echo 'Utilisateur importé n°' . vn($this_id) . ' - email : ' . vb($field_values['email']) . ' ';
+									if (!empty($this_id)) {
+										echo 'OK<br />';
+										$nb_insert++;
+									} else {
+										echo 'NOK<br />';
+									}
+								}
+
+							}
+							// Import des familles clients
+							elseif($type == 'fam_clnt') {
+								$output .= create_or_update_famille_clients($field_values, $columns_skipped);
+							}
+							else {
+								// TODO : pour toutes les autres tables à importer...
+								var_dump($field_values, $columns_skipped, $table_field_names_by_type[$type]);
+							}
+						}
+					}
+					fclose($fp);
+					if($type == 'peel_produits') {
+						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_IMPORTATION_OK'], vn($GLOBALS['nbprod_insert']) + vn($GLOBALS['nbprod_update']) + vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_update']), vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_insert']), vn($GLOBALS['nbprod_categorie_insert']))))->fetch();
+					} elseif($type == 'peel_utilisateurs') {
+						$output .= 'Fin de l\'import des ' . $nb_insert . ' utilisateurs<br />E-mails avec mot de passe générés envoyés.<br /><br />';
+					} else {
+						$output .= 'Fin de l\'import des ' . $nb_insert . ' lignes<br /><br />';
+					}
+				}
+			}
+			break;
+
+		default:
+			/* FORMULAIRE DE CHOIX D'IMPORTATION */
+			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_form.tpl');
+			$tpl->assign('action', get_current_url(false));
+			$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'import'));
+			$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
+			$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
+
+			$tpl->assign('type_list', $types_array);
+			
+			// Récupère le contenu des tables à importer
+			$type_fields = array();
+			foreach($types_array as $type_key => $value) {
+				$type_explode = explode('|', $type_key);
+				foreach($type_explode as $type) {
+					$type_fields[$type] = get_table_fields($type);
+				}
+			}
+			$tpl->assign('type_fields', $type_fields);
+			// -------------------------------------------------
+			$req = query("SELECT champs, etat, texte_" . $_SESSION['session_langue'] . "
+				FROM peel_import_field
+				WHERE " . get_filter_site_cond('import_field', null, true) . "");
+			while ($result = fetch_assoc($req)) {
+				$fields_explanations_arrays[$result['champs']] = $result;
+			}
+
+			// Pour afficher categorie_id dans la liste des champs importables
+			$table_field_names_by_type['peel_produits'][] = 'categorie_id';
+			$table_field_names_by_type['peel_produits']['Categorie'] = 'Categorie';
+			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'];
+			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'];
+			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'];
+			$table_field_names_by_type['peel_produits']['Stock'] = 'Stock';
+			$tpl_inputs = array();
+
+			foreach ($table_field_names_by_type as $type_key => $table_field_names) {
+				sort($table_field_names);
+				foreach ($table_field_names as $this_field) {
+					if ($this_field != 'stock') {
+						$tpl_inputs[$type_key][] = array('field' => $this_field,
+							'issel' => vb($fields_explanations_arrays[$this_field]['etat']) == 1,
+							'explanation' => vb($fields_explanations_arrays[$this_field]['texte']),
+							'is_important' => ($this_field == 'id' || $this_field == 'categorie_id')
+							);
+					}
+				}
+			}
+			$tpl->assign('inputs', $tpl_inputs);
+			$tpl->assign('uploaddir', $GLOBALS['uploaddir']);
+			$tpl->assign('import_encoding', vb($frm['import_encoding']));
+			$tpl->assign('example_href', 'import/exemple_prod.csv');
+			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
+			$tpl->assign('STR_ADMIN_IMPORT_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
+			$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
+			$tpl->assign('STR_ADMIN_IMPORT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_IMPORT_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_WARNING_ID']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
+			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
+			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
+			$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
+			$output .= $tpl->fetch();
+			break;
+	}
+	return $output;
+}
+
+/**
+ * Gestion de l'export
+ *
+ * @return
+ */
+function handle_export() {
+	$action = vb($_POST['action']);
+	$type = vb($_POST['type']);
+
+	// Configuration des droits pour pouvoir procéder à l'import
+	// On a une liste générique par défaut dans PEEL, et on complète cette liste via un hook
+	if(a_priv("admin_products,admin_webmastering")) {
+		$types_array = array('peel_produits' => 'Produits');
+	}
+	if(a_priv("admin_products,admin_webmastering")) {
+		$types_array = array('peel_utilisateurs' => 'Utilisateurs');
+	}
+	$hook_result = call_module_hook('import_infos_template_data', array(), 'array');
+	$types_array = array_merge_recursive_distinct($types_array, $hook_result['type_list']);
+			
+	switch ($action) {
+		case "export":
+			// FAIRE VERIFICATIONS DIVERSES
+			if(!in_array($type, $types_array)) {
+				// L'utilisateur n'a pas le droit d'importer dans la table demandée
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				break;
+			}
+			if(empty($output)) {
+				// Pas de problème
+				if(get_current_url(false, true) != '/modules/export/export.php') {
+					// On appelle la génération de l'export de l'extérieur du module, donc on redirige pour la génération
+					// On ne redirige que lorsqu'on a fait toutes les vérifications en amont, pour rester en dehors du module export si on le souhaite pour l'interfacec
+					redirect_and_die(get_url($GLOBALS['wwwwroot'] . '/modules/export/export.php', array('type' => $type, 'mode' => $mode, 'format' => $format, 'csv_separator' => $csv_separator, 'encoding' => $encoding)));
+				} else {
+					// Si on est dans /modules/export/export.php on va sortir de handle_export sans output, et on va générer le fichier via le code de /modules/export/export.php
+				}
+			}
+			
+		default:
+			echo 'A FAIRE : interface pour générer un export de manière générique avec choix de table';
+	
+			/* FORMULAIRE DE CHOIX D'EXPORTATION */
+			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_form.tpl');
+			$tpl->assign('action', get_current_url(false));
+			$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'export'));
+			$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
+			$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
+			$tpl->assign('type_list', $types_array);
+			$tpl->assign('uploaddir', $GLOBALS['uploaddir']);
+			$tpl->assign('export_encoding', vb($frm['export_encoding']));
+			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
+			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
+			$tpl->assign('STR_ADMIN_IMPORT_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
+			$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
+			$tpl->assign('STR_ADMIN_IMPORT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_IMPORT_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_WARNING_ID']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
+			$tpl->assign('STR_ADMIN_IMPORT_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
+			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
+			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
+			$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
+			$output .= $tpl->fetch();
+			break;
+	}
+	return $output;
+}
+
+// Détail ici chaque table temps2000
+function PInfoChampGlobal($type) {
+
+	$details = array();
+
+	// Structure de la table
+	if($type == 'tac_fact')
+	{
+		$details['structure']['Importation'] = 'ITacFact';
+		$details['structure']['NomTable'] = 'Tac_Fact';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Tac_Fact';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code tâche facturable';
+	}
+	elseif($type == 'cod_ven')
+	{
+		$details['structure']['Importation'] = 'ICodeVen';
+		$details['structure']['NomTable'] = 'Cod_Ven';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Code_Vente';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code vente';
+	}
+	elseif($type == 'collabor')
+	{
+		$details['structure']['Importation'] = 'IColl';
+		$details['structure']['NomTable'] = 'Collabor';
+		$details['structure']['NomCarac'] = 'ColParam';
+		$details['structure']['FChampsCode'] = 'Collaborateur';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code collaborateur';
+	}
+	elseif($type == 'intervex')
+	{
+		$details['structure']['Importation'] = 'ICorr';
+		$details['structure']['NomTable'] = 'Intervex';
+		$details['structure']['NomCarac'] = 'CorParam';
+		$details['structure']['FChampsCode'] = 'Intervex';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code correspondant';
+	}
+	elseif($type == 'clients')
+	{
+		$details['structure']['Importation'] = 'IClient';
+		$details['structure']['NomTable'] = 'Clients';
+		$details['structure']['NomCarac'] = 'ClnParam';
+		$details['structure']['FChampsCode'] = 'Client';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code client';
+	}
+	elseif($type == 'affaires')
+	{
+		$details['structure']['Importation'] = 'IPVQAff';
+		$details['structure']['NomTable'] = 'PVQAff';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Concat(Client,Affaire,Tac_Fact)';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même codes client, affaire et tâche facturable';
+	}
+	elseif($type == 'evmntcli')
+	{
+		$details['structure']['Importation'] = 'IEvmntCli';
+		$details['structure']['NomTable'] = 'EvmntCli';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = '';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'fam_clnt')
+	{
+		$details['structure']['Importation'] = 'IFamCli';
+		$details['structure']['NomTable'] = 'Fam_Clnt';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Famille';
+		$details['structure']['ActivePageIndex'] = 1;
+		$details['structure']['LblEnregExiste'] = 'même code famille';
+	}
+	elseif($type == 'tmppasse')
+	{
+		$details['structure']['Importation'] = 'ITemps';
+		$details['structure']['NomTable'] = 'TmpPasse';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Collaborateur';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'budtemps')
+	{
+		$details['structure']['Importation'] = 'ITempsBud';
+		$details['structure']['NomTable'] = 'BudTemps';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Collaborateur';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'fraiseng')
+	{
+		$details['structure']['Importation'] = 'IFrais';
+		$details['structure']['NomTable'] = 'FraisEng';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'C_I_S';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'budfrais')
+	{
+		$details['structure']['Importation'] = 'IFraisBud';
+		$details['structure']['NomTable'] = 'BudFrais';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'C_I_S';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'jourventlignes')
+	{
+		$details['structure']['Importation'] = 'IFactureLigne';
+		$details['structure']['NomTable'] = 'JourVentLignes';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Num_Fact';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'budfactlignes')
+	{
+		$details['structure']['Importation'] = 'IFactureLigneBud';
+		$details['structure']['NomTable'] = 'BudFactLignes';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'Num_Fact';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = '';
+	}
+	elseif($type == 'reglem')
+	{
+		$details['structure']['Importation'] = 'IReglCli';
+		$details['structure']['NomTable'] = 'Reglem';
+		$details['structure']['NomCarac'] = '';
+		$details['structure']['FChampsCode'] = 'C_I_S';
+		$details['structure']['ActivePageIndex'] = 0;
+		$details['structure']['LblEnregExiste'] = 'même code client, TTC et date d\'échéance';
+	}
+
+	$details['structure']['TableName'] = $details['structure']['NomTable'];
+	if($details['structure']['NomCarac'] != '')
+		$details['structure']['TableName'] = $details['structure']['NomCarac'];
+
+	// Champs de la table
+	$fields = get_table_field_types($type);
+	$i = 0;
+	foreach($fields as $field_name => $field_type)
+	{
+		// Si le champ est visible pour l'utilisateur et qu'il n'est pas interdit
+		if(PeutEtreVisible($type, $field_name) AND !ChampsInterdit($type, $field_name))
+		{
+			$details['fields'][$field_name]['FieldName'] = $field_name;
+			$details['fields'][$field_name]['Caption'] = $field_name;
+			if($details['fields'][$field_name]['Caption'] == 'Echeance_Mois')
+				$details['fields'][$field_name]['Caption'] = 'Jour d\'échéance';
+			if(ChampsObligatoire($type, $field_name))
+			{
+				// Delphi : Ligne.SubItems.Add('*'); 
+				$details['fields'][$field_name]['Caption'] .= '*';
+				$details['fields'][$field_name]['Required'] = true;
+			}
+			else
+			{
+				$details['fields'][$field_name]['Required'] = false;
+			}
+			$details['fields'][$field_name]['DataType'] = $field_type;
+			$details['fields'][$field_name]['DataSize'] = get_field_maxlength($field_type);
+			$details['fields'][$field_name]['TableName'] = $type;
+			$details['fields'][$field_name]['FieldIndex'] = $i;
+			$details['fields'][$field_name]['Unique'] = ChampsUnique($type, $field_name);
+			$details['fields'][$field_name]['TableRefName'] = TableRef($type, $field_name);
+			$details['fields'][$field_name]['FieldRefName'] = ChampsRef($type, $field_name);
+			$details['fields'][$field_name]['Condition'] = CondRef($type, $field_name);
+		}
+		$i++;
+	}
+
+	// TODO : récupérer la donnée TableCaracParam depuis Delphi : pas trouvé à quoi cela correspond
+	if($details['structure']['NomCarac'] != '' AND TableCaracParam())
+	{
+		// TODO : retranscrire le code Delphi ci-dessous en PHP
+	   /*TableCaracParam.Open;
+	   for i := 0 to TableCaracParam.FieldCount - 1 do begin
+	    if (PeutEtreVisible(TableCaracParam.Fields[i].FieldName)) and
+	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'client') and
+	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'affaire') and
+	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'collaborateur') and
+	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'correspondant') then begin
+	     if (not ChampsInterdit(NomCarac, TableCaracParam.Fields[i].FieldName))
+	     or (Importation = IAffaire) then begin
+	      Ligne := ListeDest.Items.Add;
+	      Ligne.Caption := TableCaracParam.Fields[i].FieldName;
+	      InfoChamp := New(PInfoChamp);
+	      if ChampsObligatoire(NomCarac, TableCaracParam.Fields[i].FieldName) then begin
+	       Ligne.SubItems.Add('*');
+	       InfoChamp.Required := true;
+	      end
+	      else begin
+	       Ligne.SubItems.Add('');
+	       InfoChamp.Required := false;
+	      end;
+	      Ligne.SubItems.Add('');
+	      Ligne.SubItems.Add('');
+	      InfoChamp.DataSize     := TableCaracParam.Fields[i].Size;
+	      InfoChamp.DataType := TableCaracParam.Fields[i].DataType;
+	      InfoChamp.TableName   := TableCaracParam.TableName;
+	      InfoChamp.FieldIndex   := i;
+	      InfoChamp.Unique     := ChampsUnique(NomCarac, TableCaracParam.Fields[i].FieldName);
+	      InfoChamp.TableRefName   := TableRef(NomCarac, TableCaracParam.Fields[i].FieldName);
+	      InfoChamp.FieldRefName  := ChampsRef(NomCarac, TableCaracParam.Fields[i].FieldName);
+	      InfoChamp.Condition  := CondRef(NomCarac, TableCaracParam.Fields[i].FieldName);
+	      Ligne.Data := InfoChamp;
+	     end;
+	    end;
+	   end;
+	   TableCaracParam.Close;*/
+	}
+
+	if($type == 'evmntcli')
+	{
+		// Ajouter les champs de la table documents
+		$field_name = 'Fichier';
+		$details['fields'][$field_name]['FieldName'] = $field_name;
+		$details['fields'][$field_name]['Caption'] = $field_name;
+		$details['fields'][$field_name]['Required'] = false;
+		$details['fields'][$field_name]['DataType'] = 'varchar(50)';
+		$details['fields'][$field_name]['DataSize'] = 50;
+		$details['fields'][$field_name]['TableName'] = 'documents'; // Attention : table liée
+		$details['fields'][$field_name]['FieldIndex'] = 5;
+		$details['fields'][$field_name]['Unique'] = false;
+		$details['fields'][$field_name]['TableRefName'] = '';
+		$details['fields'][$field_name]['FieldRefName'] = '';
+		$details['fields'][$field_name]['Condition'] = '';
+
+		$field_name = 'Chemin';
+		$details['fields'][$field_name]['FieldName'] = $field_name;
+		$details['fields'][$field_name]['Caption'] = $field_name;
+		$details['fields'][$field_name]['Required'] = false;
+		$details['fields'][$field_name]['DataType'] = 'varchar(50)';
+		$details['fields'][$field_name]['DataSize'] = 200;
+		$details['fields'][$field_name]['TableName'] = 'documents'; // Attention : table liée
+		$details['fields'][$field_name]['FieldIndex'] = 6;
+		$details['fields'][$field_name]['Unique'] = false;
+		$details['fields'][$field_name]['TableRefName'] = '';
+		$details['fields'][$field_name]['FieldRefName'] = '';
+		$details['fields'][$field_name]['Condition'] = '';
+	}
+
+	if($type == 'budfactlignes')
+	{
+		// Ajouter les champs A_Facturer et Facture
+		// TODO : vérifier que les champs à importer correspondent bien à "Facturee" et "Fact_Auto" du Delphi
+		$field_name = 'A_Facturer';
+		$details['fields'][$field_name]['FieldName'] = $field_name;
+		$details['fields'][$field_name]['Caption'] = $field_name;
+		$details['fields'][$field_name]['Required'] = false;
+		$details['fields'][$field_name]['DataType'] = 'tinyint(4)';
+		$details['fields'][$field_name]['DataSize'] = 4;
+		$details['fields'][$field_name]['TableName'] = 'budfact'; // Attention : table liée
+		$details['fields'][$field_name]['FieldIndex'] = 7;
+		$details['fields'][$field_name]['Unique'] = false;
+		$details['fields'][$field_name]['TableRefName'] = '';
+		$details['fields'][$field_name]['FieldRefName'] = '';
+		$details['fields'][$field_name]['Condition'] = '';
+
+		$field_name = 'Facture';
+		$details['fields'][$field_name]['FieldName'] = $field_name;
+		$details['fields'][$field_name]['Caption'] = $field_name;
+		$details['fields'][$field_name]['Required'] = false;
+		$details['fields'][$field_name]['DataType'] = 'tinyint(4)';
+		$details['fields'][$field_name]['DataSize'] = 4;
+		$details['fields'][$field_name]['TableName'] = 'budfact'; // Attention : table liée
+		$details['fields'][$field_name]['FieldIndex'] = 6;
+		$details['fields'][$field_name]['Unique'] = false;
+		$details['fields'][$field_name]['TableRefName'] = '';
+		$details['fields'][$field_name]['FieldRefName'] = '';
+		$details['fields'][$field_name]['Condition'] = '';
+	}
+
+	return $details;
+}
+
+function PeutEtreVisible($nomChamps)
+{
+	$nomChamps = strtolower($nomChamps);
+	if (($nomChamps = 'cptcaracparam') or
+		($nomChamps = 'cptcaracparam_1') or
+		($nomChamps = 'client_1') or
+		($nomChamps = 'affaire_1') or
+		($nomChamps = 'collaborateur_1') or
+		($nomChamps = 'societe_1')or
+		($nomChamps = 'client_2'))
+		return false;
+	else
+		return true;
+}
+
+function ChampsInterdit($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if (($Table == 'cod_ven') and (($Champ == 'calcule') or ($Champ == 'libelle') or ($Champ == 'arrondi') or ($Champ == 'mode_arrondi') or ($Champ == 'n_cpte_vente_c2000')))
+		$Result = true;
+	if (($Table == 'clients') and (($Champ == 'cptcaracparam') and ($Champ == 'nbech') or ($Champ == 'memo') or ($Champ == 'rib_ok') or ($Champ == 'iban_ok')))
+		$Result = true;
+	if ($Table == 'affaires')
+	{
+		if (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'titre') or
+		  ($Champ == 'societe') or ($Champ == 'collaborateur') or ($Champ == 'activite') or
+		  ($Champ == 'groupe') or ($Champ == 'coeff_facturation') or
+		  ($Champ == 'modele_facture') or ($Champ == 'exceptionnel') or ($Champ == 'coeff_facturation_frais') or
+		  ($Champ == 'coeff_fact_arrondi') or ($Champ == 'coeff_fact_supinf') or ($Champ == 'cv_refact_tp') or
+		  ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'avancement') or ($Champ == 'raf_pr') or
+		  ($Champ == 'raf_pvcol') or ($Champ == 'raf_pvtac') or ($Champ == 'raf_pvq') or ($Champ == 'unite_fact') or
+		  ($Champ == 'adrclientdefaut') or ($Champ == 'adrfactnom1') or ($Champ == 'adrfactnom2') or ($Champ == 'adrfact1') or
+		  ($Champ == 'adrfact2') or ($Champ == 'adrfact3') or ($Champ == 'adrfactcp') or ($Champ == 'adrfactville') or
+		  ($Champ == 'adrfactcedex') or ($Champ == 'adrfactpays') or ($Champ == 'cv_ajout_fact'))
+			$Result = false;
+		else
+			$Result = true;
+	}
+	if (($Table == 'collabor') and (($Champ == 'cptcaracparam') or ($Champ == 'Salaire_Brut_Annuel') or ($Champ == 'Charges_Pat_Annuelles') or
+	                          ($Champ == 'Tot_Ann_SC') or ($Champ == 'Tot_Ann_SCF') or ($Champ == 'Temps_Facturable_Annuel') or
+	                          ($Champ == 'PRH_Sal_CH_FG') or ($Champ == 'PRH_Sal_CH')))
+		$Result = true;
+	if (($Table == 'intervex') and (($Champ == 'cptcaracparam') or ($Champ == 'memo')))
+		$Result = true;
+	if (($Table == 'tmppasse') and (($Champ == 'compteur') or ($Champ == 'date_periode') or ($Champ == 'numintfacttamp') or ($Champ == 'fq')))
+		$Result = true;
+	if (($Table == 'budtemps') and (($Champ == 'compteur') or ($Champ == 'date_periode') or ($Champ == 'date_semaine') or ($Champ == 'date_quinzaine') or
+	                         ($Champ == 'exceptionnel') or ($Champ == 'facture') or ($Champ == 'fq') or
+	                         ($Champ == 'date_mois') or ($Champ == 'numintfact')))
+		$Result = true;
+	if (($Table == 'fraiseng') and (($Champ == 'compteur') or ($Champ == 'mois') or ($Champ == 'numintfacttamp') or ($Champ == 'ne')))
+		$Result = true;
+	if (($Table == 'budfrais') and (($Champ == 'compteur') or ($Champ == 'mois')))
+		$Result = true;
+	if (($Table == 'jourventlignes') and (($Champ == 'compteur') or ($Champ == 'mois') or ($Champ == 'calcule') or
+	                         ($Champ == 'libelle') or ($Champ == 'libelledetails') or
+	                         ($Champ == 'libelledetailsannexe') or ($Champ == 'origine') or ($Champ == 'annexe') or
+	                         ($Champ == 'libelledetailtitre') or ($Champ == 'rappellibellecv') or ($Champ == 'taux_tva')))
+		$Result = true;
+	if (($Table == 'budfactlignes') and (($Champ == 'compteur') or ($Champ == 'calcule') or ($Champ == 'num_int')))
+		$Result = true;
+	if (($Table == 'evmntcli') and (($Champ == 'numero') or ($Champ == 'type')))
+		$Result = true;
+	if (($Table == 'reglem') and (($Champ == 'id') or ($Champ == 'dernsaisie') or ($Champ == 'netttc') or
+	                        ($Champ == 'lettrage') or ($Champ == 'nettva') or ($Champ == 'tauxtva')))
+		$Result = true;
+
+	return $Result;
+}
+
+function ChampsObligatoire($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if (($Table == 'tac_fact') and ($Champ == 'tac_fact'))
+		$Result = true;
+	if (($Table == 'cod_ven') and (($Champ == 'code_vente') or ($Champ == 'code_tva') or ($Champ == 'temps_frais')))
+		$Result = true;
+	if (($Table == 'clients') and (($Champ == 'client') or ($Champ == 'societe') or ($Champ == 'groupe') or
+	                        ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'famille') or
+	                        ($Champ == 'mode_reglement') or ($Champ == 'echeance_mois')))
+		$Result = true;
+	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'societe') or
+	                          ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'groupe') or
+	                          ($Champ == 'famille') or ($Champ == 'modele_facture') or ($Champ == 'cv_refact_tp') or
+	                          ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq')))
+		$Result = true;
+	if (($Table == 'collabor') and (($Champ == 'collaborateur') or ($Champ == 'societe') or ($Champ == 'groupe') or
+	                        ($Champ == 'fonction') or ($Champ == 'niveau') or ($Champ == 'date_embauche') or
+	                        ($Champ == 'cat_charges_patronales')))
+		$Result = true;
+	if (($Table == 'pvcolaff') and (($Champ == 'collaborateur') or ($Champ == 'client') or ($Champ == 'affaire') or
+	                        ($Champ == 'pvcol')))
+		$Result = true;
+	if (($Table == 'pvqaff') and (($Champ == 'tac_fact') or ($Champ == 'client') or ($Champ == 'affaire') or
+	                        ($Champ == 'pvq')))
+		$Result = true;
+	if (($Table == 'intervex') and (($Champ == 'intervex') or ($Champ == 'societe') or ($Champ == 'categorie')))
+		$Result = true;
+	if (($Table == 'tmppasse') and (($Champ == 'collaborateur') or ($Champ == 'datel') or ($Champ == 'tac_fact') or
+	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'temps')))
+		$Result = true;
+	if (($Table == 'budtemps') and (($Champ == 'collaborateur') or ($Champ == 'datel') or ($Champ == 'tac_fact') or
+	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'temps')))
+		$Result = true;
+	if (($Table == 'fraiseng') and (($Champ == 'c_i_s') or ($Champ == 'datel') or ($Champ == 'frais') or
+	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'pr')))
+		$Result = true;
+	if (($Table == 'budfrais') and (($Champ == 'c_i_s') or ($Champ == 'datel') or ($Champ == 'frais') or
+	                         ($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'pr')))
+		$Result = true;
+	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'societe') or ($Champ == 'groupe') or
+	                          ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'famille')))
+		$Result = true;
+	if (($Table == 'jourventlignes') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'code_vente') or
+	                        ($Champ == 'code_tva') or ($Champ == 'num_fact') or ($Champ == 'datel') or ($Champ == 'ht_ligne')))
+		$Result = true;
+	if (($Table == 'budfactlignes') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'code_vente') or
+	                        ($Champ == 'mois') or ($Champ == 'ht_ligne')))
+		$Result = true;
+	if (($Table == 'evmntcli') and (($Champ == 'code_evmnt') or ($Champ == 'client') or ($Champ == 'col_prevu') or ($Champ == 'date_prevue')))
+		$Result = true;
+	if (($Table == 'fam_clnt') and ($Champ == 'famille'))
+		$Result = true;
+	if (($Table == 'reglem') and (($Champ == 'societe') or ($Champ == 'date_crea') or
+	                        ($Champ == 'client') or ($Champ == 'mode_reglement') or ($Champ == 'ttc') or ($Champ == 'banque')))
+		$Result = true;
+
+	return $Result;
+}
+
+function ChampsUnique($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if (($Table == 'tac_fact') and ($Champ == 'tac_fact')) $Result = true;
+	if (($Table == 'cod_ven') and ($Champ == 'code_vente')) $Result = true;
+	if (($Table == 'clients') and ($Champ == 'client')) $Result = true;
+	if (($Table == 'collabor') and ($Champ == 'collaborateur')) $Result = true;
+	if (($Table == 'intervex') and ($Champ == 'intervex')) $Result = true;
+	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire'))) $Result = true;
+	if (($Table == 'pvcolaff') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'collaborateur'))) $Result = true;
+	if (($Table == 'pvqaff') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'tac_fact'))) $Result = true;
+	if (($Table == 'fam_clnt') and ($Champ == 'famille')) $Result = true;
+
+	return $Result;
+}
+
+function TableRef($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else $Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if ($Table == 'cod_ven')
+	{
+		if ($Champ == 'code_tva')
+			$Result = 'tva';
+	}
+
+	if ($Table == 'clients')
+	{
+		if ($Champ == 'societe')  $Result = 'societes';
+		if ($Champ == 'collaborateur')  $Result = 'collabor';
+		if ($Champ == 'activite')  $Result = 'activite';
+		if ($Champ == 'famille')  $Result = 'fam_clnt';
+		if ($Champ == 'mode_reglement')  $Result = 'modereglement';
+		if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq'))  $Result = 'cod_ven';
+		if ($Champ == 'code_tva')  $Result = 'tva';
+		if ($Champ == 'groupe')  $Result = 'grpe_col';
+		if ($Champ == 'banque_def') $Result = 'banques';
+	}
+
+	if ($Table == 'affaires')
+	{
+		if ($Champ == 'client')  $Result = 'clients';
+		if ($Champ == 'societe')  $Result = 'societes';
+		if ($Champ == 'collaborateur')  $Result = 'collabor';
+		if ($Champ == 'activite')  $Result = 'activite';
+		if ($Champ == 'groupe')  $Result = 'grpe_col';
+		if ($Champ == 'famille')  $Result = 'fam_clnt';
+		if ($Champ == 'modele_facture')  $Result = 'modelfac';
+		if ($Champ == 'unite_fact')  $Result = 'unite_fact';
+		if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'cv_ajout_fact'))  $Result = 'cod_ven';
+	}
+
+	if ($Table == 'collabor')
+	{
+		if ($Champ == 'societe')  $Result = 'societes';
+		if ($Champ == 'groupe')  $Result = 'grpe_col';
+		if ($Champ == 'fonction')  $Result = 'fonc_col';
+		if ($Champ == 'niveau')  $Result = 'niv_col';
+		if ($Champ == 'cat_charges_patronales')  $Result = 'cat_col';
+	}
+
+	if ($Table == 'pvcolaff')
+	{
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'collaborateur') $Result = 'collabor';
+	}
+
+	if ($Table == 'pvqaff')
+	{
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'tac_fact') $Result = 'tac_fact';
+	}
+
+	if ($Table == 'evmntcli')
+	{
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'col_prevu') $Result = 'collabor';
+		if ($Champ == 'col_real') $Result = 'collabor';
+		if ($Champ == 'code_evmnt') $Result = 'codeevmnt';
+	}
+
+	if ($Table == 'intervex')
+	{
+		if ($Champ == 'societe') $Result = 'societes';
+		if ($Champ == 'categorie') $Result = 'cat_cor';
+	}
+
+	if ($Table == 'tmppasse')
+	{
+		if ($Champ == 'collaborateur') $Result = 'collabor';
+		if ($Champ == 'tac_fact') $Result = 'tac_fact';
+		if ($Champ == 'clt_tnf') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+	}
+
+	if ($Table == 'budtemps')
+	{
+		if ($Champ == 'collaborateur') $Result = 'collabor';
+		if ($Champ == 'tac_fact') $Result = 'tac_fact';
+		if ($Champ == 'clt_tnf') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+	}
+
+	if ($Table == 'fraiseng')
+	{
+		if ($Champ == 'frais') $Result = 'fra_eng';
+		if ($Champ == 'code_tva') $Result = 'tva';
+		if ($Champ == 'clt_tnf') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'c_i_s') $Result = 'collabor';
+	}
+
+	if ($Table == 'budfrais')
+	{
+		if ($Champ == 'frais') $Result = 'fra_eng';
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'c_i_s') $Result = 'collabor';
+	}
+
+	if ($Table == 'jourventlignes')
+	{
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'code_vente') $Result = 'cod_ven';
+		if ($Champ == 'code_tva') $Result = 'tva';
+	}
+
+	if ($Table == 'budfactlignes')
+	{
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'affaire') $Result = 'affaires';
+		if ($Champ == 'code_vente') $Result = 'cod_ven';
+	}
+
+	if ($Table == 'reglem')
+	{
+		if ($Champ == 'societe') $Result = 'societes';
+		if ($Champ == 'client') $Result = 'clients';
+		if ($Champ == 'banque') $Result = 'banques';
+		if ($Champ == 'code_tva') $Result = 'tva';
+		if ($Champ == 'mode_reglement') $Result = 'modereglement';
+	}
+
+	return $Result;
+}
+
+function ChampsRef($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else $Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'cv_ajout_fact')) $Result = 'code_vente';
+	else if ($Champ == 'cat_charges_patronales') $Result = 'categorie';
+	else if ($Champ == 'clt_tnf') $Result = 'client';
+	else if ($Champ == 'jour d\'échéance') $Result = 'echeance_mois';
+	else if ($Champ == 'unite_fact') $Result = 'unite';
+	else if ($Champ == 'code_evmnt') $Result = 'codeevmnt';
+	else if (($Champ == 'col_prevu') or ($Champ == 'col_real')) $Result = 'collaborateur';
+	else if ($Champ == 'banque_def') $Result = 'banque';
+	else $Result = $Champ;
+
+	return $Result;
+}
+
+function CondRef($NomTable, $NomChamps)
+{
+	$Result = false;
+	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
+	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
+	// else $Table := NomTable;
+	$Table = $NomTable;
+	$Table = strtolower($Table);
+	$Champ = strtolower($NomChamps);
+	if ($Table == 'clients' and $Champ == 'collaborateur') $Result = 'date_depart is null';
+	if ($Table == 'affaires' and $Champ == 'collaborateur') $Result = 'date_depart is null';
+	if ($Table == 'tmppasse' and $Champ == 'collaborateur') $Result = 'date_depart is null';
+	if ($Table == 'budtemps' and $Champ == 'collaborateur') $Result = 'date_depart is null';
+	if ($Table == 'pvcolaff' and $Champ == 'collaborateur') $Result = 'date_depart is null';
+	if ($Table == 'pvqaff' and $Champ == 'tac_fact') $Result = 'NPU = 0';
+
+	return $Result;
+}
+
+function CodeExiste($ValCode, $NomChampCode, $NomTable)
+{
+	$strSQL = 'SELECT COUNT(*) FROM '.$NomTable.' WHERE '.$NomChampCode.' = "' .$ValCode. '"';
+	$exist = (bool)query($strSQL);	
+ 
+	return $exist;
+}
+
+function AjouterErr($Msg, $Code, $NumLig)
+{
+	echo 'Ligne ' . ($NumLig /*+ $DecalNum*/) . '(' . $Code . '): ' . $Msg;
+}
+
+function AjouterMessage($Msg, $NumLig = 0)
+{
+	if($NumLig > 0)
+		echo 'Ligne ' . ($NumLig /*+ $DecalNum*/) . ': ';
+	echo $Msg;
+}
+
+function AllJoursEch($key)
+{
+	$strSQL = 'select Societe, Jour_Echeance1, Jour_Echeance2, Jour_Echeance3 from Societes where Societe = "' .$key. '"';
+	$resultat = query($strSQL);	
+	$data = fetch_assoc($resultat);
+}
+
+// Vérifie que les données sont correctes pour l'importation de familles clients
+//******************************************************************************
+function VerifieFamCli($PInfoChampGlobal, $field_values, $NumLig)
+{
+	global $ListeCodes;
+
+	$NbErr = 0;
+	AjouterMessage('Vérifications spécifiques aux familles de clients');
+	//Famille, il faut vérifier qu'elle ne soit pas vide !
+	if (!$field_values['Famille'])
+	{
+		$NbErr++;
+		AjouterErr('Le code famille doit être renseigné.', '', $NumLig);
+	}
+	// on vérifie les doublons dans ListeCodes et on stocke le code si inexistant
+	else
+	{
+		if(in_array(strtoupper($field_values['Famille']), $ListeCodes))
+		{
+			$NbErr++;
+			AjouterErr('Le code famille est dupliqué.', $field_values['Famille'], $NumLig);
+		}
+		else 
+			$ListeCodes[] = strtoupper($field_values['Famille']);
+	}
+	return $NbErr;
+}
+
+function create_or_update_famille_clients($field_values, $columns_skipped) {
+
+	// Vérification si la clé primaire est bien cochée
+	if(in_array('Famille', $columns_skipped))
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Vous devez au moins cocher la case Famille.'))->fetch();
+
+	// Vérification si la clé primaire est importée
+	if(!array_key_exists('Famille', $field_values))
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Vous devez importer au moins le champ Famille.'))->fetch();
+
+	// Vérification si la clé primaire est renseignée
+	if(!$field_values['Famille'])
+		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Le code famille doit être renseigné.'))->fetch();
+
+	$output = '';
+
+	$strSQL = 'select Famille from fam_clnt where Famille = "' .$field_values['Famille']. '"';
+	$resultat = query($strSQL);	
+	// Vérification si la famille existe déjà
+	if ($data = fetch_assoc($resultat)) {
+		query('UPDATE fam_clnt SET Titre = "' . $field_values['Titre'] . '" WHERE Famille="' .$field_values['Famille']. '"');
+	} else {
+		query('INSERT INTO fam_clnt (Famille, Titre) VALUES ("' .$field_values['Famille']. '", "' . $field_values['Titre'] . '")');
+				
+	}
+
+	// Affichage du message de succès
+	$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK !'))->fetch();
+	return $output;
+} 

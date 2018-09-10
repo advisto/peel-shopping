@@ -3,26 +3,42 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ventes.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: ventes.php 58092 2018-09-07 08:56:26Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_sales");
+necessite_priv("admin_white_label,admin_sales");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_VENTES_TITLE'];
 $output = '';
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_ventes_information_select.tpl');
+
+$sql_zone = "SELECT id, nom_" . $_SESSION['session_langue'] . " AS nom
+	FROM peel_zones
+	ORDER BY position, nom";
+$res_zone = query($sql_zone);
+
+while ($zones = fetch_assoc($res_zone)) {
+	$tpl_options_zones[] = array(
+		'value' => intval($zones['id']),
+		'name' => get_site_info($zones).$zones['nom'],
+		'issel' => ($zones['id'] == vb($_GET['zone']))
+	);
+}
 $tpl->assign('payment_status_options', get_payment_status_options(vb($_GET['statut'])));
 $tpl->assign('STR_ORDER_STATUT_PAIEMENT', $GLOBALS['STR_ORDER_STATUT_PAIEMENT']);
 $tpl->assign('STR_ADMIN_ALL_ORDERS', $GLOBALS['STR_ADMIN_ALL_ORDERS']);
+$tpl->assign('options', $tpl_options_zones);
+$tpl->assign('STR_ADMIN_ALL_ZONES', $GLOBALS['STR_ADMIN_ALL_ZONES']);
+$tpl->assign('STR_SHIPPING_ZONE', $GLOBALS['STR_SHIPPING_ZONE']);
 $information_select_html = $tpl->fetch();
 $output .= get_admin_date_filter_form($GLOBALS['STR_ADMIN_VENTES_RESULTS_TITLE'], $information_select_html);
 
@@ -48,6 +64,20 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		if (isset($_GET['statut']) && is_numeric($_GET['statut'])) {
 			$sql .= " AND c.id_statut_paiement = '" . intval($_GET['statut']) . "'";
 			$extra_csv_param .= "&id_statut_paiement=" . intval($_GET['statut']);
+			$where_paiment = " WHERE c." . $date_field . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . $date_field . "<='" . nohtml_real_escape_string($dateAdded2) . "' AND c.id_statut_paiement = '" . intval($_GET['statut'])."'";
+		} else {
+			$where_paiment = " WHERE c." . $date_field . ">='" . nohtml_real_escape_string($dateAdded1) . "' AND c." . $date_field . "<='" . nohtml_real_escape_string($dateAdded2) ."'";
+		}
+		if (!empty($_GET['zone'])) {
+			$zone_id = $_GET['zone'];
+			$res_zone = query("SELECT z.nom_" . $_SESSION['session_langue'] . " AS nom
+				FROM peel_zones z
+				WHERE " . get_filter_site_cond('zones', 'z', true) . " AND id = '" . intval($zone_id) . "'");
+			$result = fetch_assoc($res_zone);
+
+			$sql .= " AND (c.zone = '" . intval($zone_id) . "' OR c.zone = '" . nohtml_real_escape_string($result['nom']) . "')";
+			$where_paiment .= " AND (c.zone = '" . intval($zone_id) . "' OR c.zone = '" . nohtml_real_escape_string($result['nom']) . "')";
+			$extra_csv_param .= "&zone_id=" . intval($zone_id);
 		}
 		$sql .= "
 				ORDER BY c." . word_real_escape_string($date_field);
@@ -96,6 +126,7 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 					'id' => $result['id'],
 					'modif_href' => $GLOBALS['administrer_url'] . '/commander.php?commandeid=' . $result['id'] . '&mode=modif',
 					'statut_paiement' => get_payment_status_name($result['id_statut_paiement']),
+					'type_paiement' => $result['paiement'],
 					'email' => $result['email'],
 					'montant_ht_prix' => fprix($result['montant_ht'], true, $GLOBALS['site_parameters']['code'], false),
 					'montant_ht_devise_commande' => $montant_ht_devise_commande,
@@ -152,6 +183,27 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		} else {
 			$tpl->assign('are_results', false);
 		}
+		
+		$sql_paiment = "SELECT c.paiement, SUM(c.montant) AS count_montant_ttc, SUM(c.montant_ht) AS count_montant_ht, count(*) AS nb_commande
+			FROM peel_commandes c
+			LEFT JOIN peel_statut_paiement sp ON c.id_statut_paiement=sp.id
+			" . $where_paiment . "
+			GROUP BY c.paiement";
+		$query_paiment = query($sql_paiment);
+		$i = 1;
+		if (num_rows($query_paiment) > 0) {
+			while ($results_paiments = fetch_assoc($query_paiment)) {
+				$tpl_results_paiements[] = array('tr_rollover' => tr_rollover($i, true),
+					'nb_comandes' => $results_paiments['nb_commande'],
+					'type_paiement' => $results_paiments['paiement'],
+					'montant' => fprix($results_paiments['count_montant_ttc'], true, $GLOBALS['site_parameters']['code'], false),
+					'montant_ht' => fprix($results_paiments['count_montant_ht'], true, $GLOBALS['site_parameters']['code'], false),
+					);
+				$i++;
+			}
+			$tpl->assign('results_paiements', $tpl_results_paiements);
+		}
+		
 		$tpl->assign('only_delivered', false);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 		$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
@@ -177,6 +229,8 @@ if (isset($_GET['jour1']) or isset($dateAdded1)) {
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER', $GLOBALS['STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER']);
 		$tpl->assign('STR_ADMIN_VENTES_ALL_EXPORT_EXCEL', $GLOBALS['STR_ADMIN_VENTES_ALL_EXPORT_EXCEL']);
+		$tpl->assign('STR_ADMIN_PAIEMENT_PAYMENT_MEAN', $GLOBALS['STR_ADMIN_PAIEMENT_PAYMENT_MEAN']);
+		$tpl->assign('STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT', $GLOBALS['STR_ADMIN_COMMANDER_ORDERS_FOUND_COUNT']);
 		$output .= $tpl->fetch();
 	} else {
 		$output .= $check_admin_date_data;

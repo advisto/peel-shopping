@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: pt.php 57737 2018-08-17 08:32:59Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -42,7 +42,7 @@ $GLOBALS["STR_AFFILIATE_ACCOUNT_URL"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT"] = "";
 $GLOBALS["STR_AFFILIATE_STATUT"] = "Statuto";
 $GLOBALS["STR_AFFILIATE"] = "Ser filiado";
-$GLOBALS["STR_AFFILIATION"] = "Affiliation";
+$GLOBALS["STR_AFFILIATION"] = "";
 $GLOBALS["STR_AJOUT_PENSE_BETE"] = "";
 $GLOBALS["STR_ALL_BRAND"] = "";
 $GLOBALS["STR_ALL"] = "";
@@ -278,7 +278,7 @@ $GLOBALS["STR_ERR_TIME"] = "";
 $GLOBALS["STR_ERR_TOWN"] = "Não preenchou a sua localidade.\n";
 $GLOBALS["STR_ERR_TWOPASS"] = "Os dois passwords não correspondem.\n";
 $GLOBALS["STR_ERR_TYPE"] = "Não escolheu o tipo de expedição.\n";
-$GLOBALS["STR_ERR_URL"] = "";
+$GLOBALS["STR_ERR_URL"] = "Vous n\'avez pas précisé l\'url de votre site web.\n";
 $GLOBALS["STR_ERR_YOU_ARE"] = "";
 $GLOBALS["STR_ERR_ZIP"] = "Não preenchou o seu codigo postal.\n";
 $GLOBALS["STR_ERR_ZONE"] = "Não escolheu a zona / país de expedição.\n";
@@ -361,6 +361,7 @@ $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "";
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "";
 $GLOBALS["STR_INSTALLATION"] = "";
 $GLOBALS["STR_INTRACOM_FORM"] = "";
+$GLOBALS["STR_INTRACOM_FORM_ALERT"] = "";
 $GLOBALS["STR_INTRODUCTORY_TEXT"] = "";
 $GLOBALS["STR_INVALID_TOKEN"] = "";
 $GLOBALS["STR_INVOICE_ADDRESS"] = "Morada de facturação";
@@ -489,6 +490,7 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = " Cliquem aqui para voltar 
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Este e-mail não pode mais ser patrocinar porque figura já na nossa base de dados.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Obrigado preencher os campos obrigatórios para patrocinar os vossos amigos.\n\r<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Cliquem aqui</a> para voltar à página precedente.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Os vossos amigos receberam o seu pedido de patrocínio. Dados de validação da sua conta cliente, poderá beneficiar de um cheque prendas de %s € sobre a sua primeira encomenda. Poderão, eles beneficiar do seu cheque prendas de %s € a valer sobre a sua primeira encomenda.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND_SINGLE"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Obrigado confirmar a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail! Confirmando a vossa inscrição com os identificadores que foram-nos transmitidos por e-mail, poderá beneficiar de uma nota de credito de %s EUROS a valer sobre a vossa primeira encomenda sobre o nosso sítio Internet.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmação de inscrição ao programa de patrocínio do sítio {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "";
@@ -539,6 +541,7 @@ $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroo
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identificar-se.\n";
 $GLOBALS["STR_MSG_THANKS"] = "Obrigado da sua confiança, a sua encomenda foi registrada com sucesso.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "";
+$GLOBALS["STR_MY_DATA"] = "";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Meu Presente Pontos";
 $GLOBALS["STR_MY_ORDER"] = "Minhas encomendas";
 $GLOBALS["STR_MY_QUOTES"] = "";
@@ -668,6 +671,7 @@ $GLOBALS["STR_PERSON_TO_CONTACT"] = "";
 $GLOBALS["STR_PHOTO_NOT_AVAILABLE_ALT"] = "";
 $GLOBALS["STR_PHOTO"] = "fotografia";
 $GLOBALS["STR_PIECE"] = "";
+$GLOBALS["STR_PIECE"] = "";
 $GLOBALS["STR_PICTURE_SIZE_EXTENTION_ERROR"] = "";
 $GLOBALS["STR_PICTURE"] = "";
 $GLOBALS["STR_PLEASE_LOGIN"] = "";
@@ -697,6 +701,7 @@ $GLOBALS["STR_PROFORMA"] = "Nota de encomenda";
 $GLOBALS["STR_PROMO_CODE"] = "";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "preço incluindo uma promoção:";
 $GLOBALS["STR_PROMOTION"] = "Promoção";
+$GLOBALS["STR_PROMOTION_SHORT"] = "";
 $GLOBALS["STR_PROMOTIONS"] = "Promoções";
 $GLOBALS["STR_PROPULSE"] = "";
 $GLOBALS["STR_PSEUDO"] = "";
@@ -766,6 +771,7 @@ $GLOBALS["STR_SHIP_ADDRESS"] = "Morada de entrega";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Escolhe o seu modo de expedição";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "";
 $GLOBALS["STR_SHIPPING_COST"] = "Despesas de envio";
+$GLOBALS["STR_SHIPPING_TO_BE_DETERMINED"] = "";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Tipo de expedição";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Zona de expedição";
 $GLOBALS["STR_SHOPPING"] = "continuar as minhas compras";
@@ -889,6 +895,8 @@ $GLOBALS["STR_WORD_RESELLER"] = "";
 $GLOBALS["STR_WORD_SELLERS"] = "";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "";
 $GLOBALS["STR_YES"] = "";
+$GLOBALS["STR_YES_NOT_VALIDATE"] = "";
+$GLOBALS["STR_YES_VALIDATE"] = "";
 $GLOBALS["STR_YOU_ARE"] = "";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "";
@@ -903,3 +911,11 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "";
 $GLOBALS["STR_ZIP"] = "Código postal";
 $GLOBALS["STR_ZOOM"] = "";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_CARD_ESTIMATE"] = "";
+$GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
+$GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
+$GLOBALS["STR_PRIX_SEARCH_HT"] = "";
+$GLOBALS["STR_PRIX_SEARCH_TTC"] = "";
+$GLOBALS["STR_REGISER_CART_ALERT"] = "";

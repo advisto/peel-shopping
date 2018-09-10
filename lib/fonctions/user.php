@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 55806 2018-01-17 16:43:14Z sdelaporte $
+// $Id: user.php 58054 2018-09-04 16:11:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -304,8 +304,8 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 			" . implode(',', $sql_fields_array) . "";
 	query($sql);
 	
-	$frm['id'] = insert_id();
-	
+	// $frm['id_utilisateur'] est utilisé par create_or_update_comments.
+	$frm['id'] = $frm['id_utilisateur'] = insert_id();
 	if(empty($frm['code_client'])) {	
 		$code_client = "CLT" . date("Y") . $frm['id'];
 	} else {
@@ -336,16 +336,25 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 	}
 	if ($warn_admin_if_template_active) {
 		// Prévenir l'administrateur d'une création d'utilisateur
+		if ($frm['priv'] == "newsletter") {
+			$email_array = explode('@', $frm['email']);
+			$civilite = 'M.';
+			$prenom = $email_array[0];
+			$nom_famille = $email_array[1];
+		} else {
+			$civilite = $frm['civilite'];
+			$prenom = $frm['prenom'];
+			$nom_famille = $frm['nom_famille'];
+		}
 		$custom_template_tags['PRIV'] = get_profil(vb($frm['priv']), 'name');
-		$custom_template_tags['CIVILITE'] = vb($frm['civilite']);
-		$custom_template_tags['PRENOM'] = vb($frm['prenom']);
-		$custom_template_tags['NOM_FAMILLE'] = vb($frm['nom_famille']);
+		$custom_template_tags['CIVILITE'] = vb($civilite);
+		$custom_template_tags['PRENOM'] = vb($prenom);
+		$custom_template_tags['NOM_FAMILLE'] = vb($nom_famille);
 		$custom_template_tags['EMAIL'] = vb($frm['email']);
 		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
 		$custom_template_tags['SOCIETE'] = vb($frm['societe']);
 		$custom_template_tags['TELEPHONE'] = vb($frm['telephone']);
 		$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $frm['id'] . '&start=0';
-
 		if ($frm['priv'] == 'stop') {
 			$template_technical_code = 'warn_admin_reve_subscription';
 		} else {
@@ -353,6 +362,11 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 		}
 		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support_sav_client']);
 	}
+
+	if (isset($frm['comments'])) {
+		create_or_update_comments($frm);
+	}
+
 	call_module_hook('user_create', $frm);
 	return $frm['id'];
 }
@@ -464,6 +478,10 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "";
 		$qid = query($sql);
 		if($user_infos = fetch_assoc($qid)) {
+			$hook_result = call_module_hook('maj_user_maj_session', array('user_infos' => $user_infos), 'array');
+			foreach($hook_result as $this_key => $this_value) {
+				$_SESSION['session_utilisateur'][$this_key] = $this_value;
+			}
 			$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
 			$_SESSION['session_utilisateur']['civilite'] = vb($user_infos['civilite']);
 			$_SESSION['session_utilisateur']['prenom'] = $user_infos['prenom'];
@@ -479,10 +497,8 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
 			$_SESSION['session_utilisateur']['format'] = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
 			$_SESSION['session_utilisateur']['naissance'] = vb($user_infos['naissance']);
-			$_SESSION['session_utilisateur']['dream_ca'] = vb($user_infos['dream_ca']);
 			$_SESSION['session_utilisateur']['description'] = vb($user_infos['description']);
 			$_SESSION['session_utilisateur']['url'] = vb($user_infos['url']);
-			$_SESSION['session_utilisateur']['dream_societe_kbis'] = vb($user_infos['dream_societe_kbis']);
 		}
 	}
 
@@ -623,6 +639,8 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			unset($_SESSION['session_update_account']);
 			
 			$_SESSION['session_utilisateur'] = $utilisateur;
+			$_SESSION['session_ip'] = $_SERVER['REMOTE_ADDR'];
+			query("UPDATE peel_utilisateurs SET ip='".nohtml_real_escape_string($_SESSION['session_ip'])."' WHERE id_utilisateur = ".intval($utilisateur['id_utilisateur']));
 			// si $_SESSION['session_utilisateur']['parameters'] n'est pas vide, il a déjà été désérialisé dans verifier_authentification() ci-dessus
 			$_SESSION['session_ip'] = vb($_SERVER['REMOTE_ADDR']);
 			$_SESSION['session_url'] = $_SERVER['HTTP_HOST'];
@@ -679,12 +697,36 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 			$hook_result = call_module_hook('user_login_now', array(), 'array');
 			$_SESSION['session_utilisateur'] = array_merge_recursive_distinct($_SESSION['session_utilisateur'], vb($hook_result, array()));
 		}
-		if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']])) {
+		if (!empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
+			$sql = "SELECT *
+				FROM peel_save_cart 
+				WHERE id_utilisateur = '" . intval($_SESSION['session_utilisateur']['id_utilisateur']) . "' AND products_list_name='00panier'";
+			$query = query($sql);
+			while($result = fetch_assoc($query)) {
+				// Il ne faut pas mettre les données stocké dans le cookie directement dans le panier. Les données dans le cookies peuvent être erronées, ou frauduleuse.
+				$product_object = new Product($result['produit_id'], null, false, null, true, !is_user_tva_intracom_for_no_vat() && !is_micro_entreprise_module_active());
+				$product_object->set_configuration($result['couleur_id'], $result['taille_id'], $result['id_attribut'], is_reseller_module_active() && is_reseller());
+				$_SESSION['session_caddie']->add_product($product_object, $result['quantite'], null);
+				unset($product_object);
+			}
+			$_SESSION['session_caddie']->update();
+		}
+		$current_priv_array = explode('+', $utilisateur['priv']);
+		$redirect_user_url = false;
+		foreach($current_priv_array as $this_priv) {
+			if (!empty($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv])) {
+				// l'utilisateur à au moins un privilège concerné, on redirige.
+				$redirect_user_url = $GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$this_priv];
+				break;
+			}
+		}
+		if (!empty($redirect_user_url)) {
 			// Redirection vers une url administrable après la connexion réussie d'un utilisateur.
-			redirect_and_die($GLOBALS['site_parameters']['redirect_user_after_login_by_priv'][$utilisateur['priv']]);
+			redirect_and_die($redirect_user_url);
 		} else {
 			return $utilisateur;
 		}
+		
 	} else {
 		return null;
 	}
@@ -698,10 +740,13 @@ function user_login_now($email_or_pseudo, $mot_passe, $check_password = true, $p
 function user_logout()
 {
 	// Désaffecte la variable de session $_SESSION['session_utilisateur'] pour déconnecter l'utilisateur. On retire également les informations de pays et devise en session car pouvant être liées au compte utilisateur utilisé
+
+	$_SESSION['session_caddie']->init(false, false);
 	unset($_SESSION['session_utilisateur']);
 	unset($_SESSION['session_devise']);
 	unset($_SESSION['session_country_detected']);
 	unset($_SESSION['session_site_country']);
+	unset($_SESSION['session_redirect_after_login']);
 	
 	// Désaffecte la variable session_admin_multisite
 	unset($_SESSION['session_admin_multisite']);
@@ -709,7 +754,6 @@ function user_logout()
 	// de limitation de spam, le cookie qui conserve les produits dans le panier ou autres variables d'historique récent d'actions utilisateur
 	unset($_SESSION['session_download_rights']);
 	unset($_SESSION['session_form']);
-	$_SESSION['session_caddie']->init(false, false);
 	// On vient de se déconnecter volontairement, on ne veut donc pas se reconnecter automatiquement via Facebook - si on le veut, ce devra être une action manuelle
 	$_SESSION['disable_facebook_autologin'] = true;
 
@@ -1307,123 +1351,6 @@ function user_account_completion($user_infos) {
 		$percentage = '';
 	}
 	return $percentage;
-}
-
-/**
- * Affiche une vignette de présentation d'un profil
- *
- * @param array $user_infos
- * @param integer $ad_id
- * @param string $additional_text
- * @return
- */
-function get_profile_bloc($user_infos, $annonce_object = null, $additional_text = null, $message_id = null) {
-	if (!empty($user_infos['user_public_profil_url'])) {
-		$url = $user_infos['user_public_profil_url'];
-	} elseif(function_exists('get_vote_profil_url')) {
-		$url = get_vote_profil_url($user_infos['id_utilisateur'], $user_infos['pseudo']);
-	} elseif(function_exists('get_user_profil_link')) {
-		$url = get_user_profil_link($user_infos['id_utilisateur']);
-	} else {
-		$url = '#';
-	}
-	if (!empty($annonce_object->ref)) {
-		// Si présente : id de l'annonce relative à l'utilisateur, dans le cas où on affiche tous les profils par annonce
-		$url .= '?ad_related='.$annonce_object->ref.'&user_related='.$user_infos['id_utilisateur'];
-	}
-	if (!empty($message_id)) {
-		// Si présente : id du message relatif à la candidateur d'un utilisateur, dans le cas où on affiche tous les profils par annonce. Avec le message_id on peut récupérer la campagne associé, puisque cette info est stockée dans le champ dispo de peel_user_contacts
-		$url .= '&msgid='.intval($message_id);
-		$sql = "SELECT dispo, product_id
-			FROM peel_user_contacts
-			WHERE id = " . intval($message_id);
-		$query = query($sql);
-		if ($result_campaign_id = fetch_assoc($query)) {
-			$url .= '&campaign_id='.intval($result_campaign_id['dispo']);
-			if (!empty($result_campaign_id['product_id'])) {
-				$url .= '&product_id='.intval($result_campaign_id['product_id']);
-			}
-			// On va récupérer les infos sur la campagne, pour afficher le nom dans le bloc.
-			$sql = "SELECT *
-				FROM peel_ads_users_activity
-				WHERE id=".intval($result_campaign_id['dispo']);
-			$query = query($sql);
-			if ($result = fetch_assoc($query)) {
-				if(vb($result['activity_type']) == 'item_campaign_quote') {
-					$additional_text .= $GLOBALS['STR_QUOTE'] . ' - ';
-				} elseif(vb($result['activity_type']) == 'item_campaign_contest') {
-					$additional_text .= $GLOBALS['STR_CONTEST'] . ' - ';
-				} elseif(vb($result['activity_type']) == 'item_campaign_tender') {
-					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_TENDER'] . ' - ';
-				} elseif(vb($result['activity_type']) == 'item_campaign_contribution') {
-					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_INNOV_CONTRIBUTION_SEARCH'] . ' - ';
-				} elseif(vb($result['activity_type']) == 'item_campaign_avis') {
-					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_OPINION_CAMPAIGN'] . ' - ';
-				} elseif(vb($result['activity_type']) == 'campaign_search') {
-					$additional_text .= $GLOBALS['STR_MODULE_DREAMTAKEOFF_SEARCH_CAMPAIGN'] . ' - ';
-				}
-				$additional_text .= $result['title'];
-			}
-		}
-	}
-	if(empty($user_infos['logo'])) {
-		$user_infos['logo'] = $GLOBALS['site_parameters']['default_picture'];
-	}
-	if (!empty($annonce_object->ref)) {
-		$sql = 'SELECT user_id
-			FROM peel_ads_related
-			WHERE ad_id="' . intval($annonce_object->ref) . '" AND user_id='.intval($user_infos['id_utilisateur']);
-		if (!empty($result_campaign_id['dispo'])) {
-			$sql .= ' AND campaign_id = ' . intval($result_campaign_id['dispo']);
-		}
-		if (!empty($result_campaign_id['product_id'])) {
-			$sql .= ' AND product_id = ' . intval($result_campaign_id['product_id']);
-		}
-		if ($annonce_object->site_id == 5 && !empty($message_id)) {
-			$sql .= ' AND message_id = ' . intval($message_id);
-		}
-		$sql .= '
-			LIMIT 1';
-		$query_ads_related = query($sql);
-		if ($result=fetch_assoc($query_ads_related)) {
-			if ($GLOBALS['site_id'] == 2) {
-				$additional_text .= '
-				<h4>'. $GLOBALS["STR_MODULE_DREAMTAKEOFF_SELECTED_ENTRANT"] .'</h4>';
-			} else {
-				$additional_text .= '
-				<h4>'. $GLOBALS["STR_RECIPIENT_CHOSEN"] .'</h4>';
-			}
-		}
-	}
-	$output = '
-	<div class="user' . StringMb::substr($user_infos['civilite'], 0, 1) . '">
-		<table>
-			<tr>
-				<td class="center"><h3><a href="' . $url . '">' . (function_exists('get_user_picto')?get_user_picto($user_infos['civilite'],$user_infos['priv']):'') . (!empty($user_infos['pseudo'])?$user_infos['pseudo']:$user_infos['prenom'].' '.$user_infos['nom_famille']) . '</a></h3></td>
-			</tr>
-			<tr>
-				<td class="center">
-					<div class="img_link"><a href="' . $url . '"><img src="'. thumbs($user_infos['logo'], 150, 150, 'fit', null, null, true, true) . '" alt="" /></a></div>
-					' . (empty($GLOBALS['site_parameters']['groups_advanced_user_age_show_disable'])?'<div>' . userAgeFormat($user_infos['naissance']) . '</div>':'') . '
-					' . $additional_text . '
-				</td>
-			</tr>
-			<tr>
-				<td class="center">
-					<a class="btn btn-primary" href="' . $url . '">'.$GLOBALS['STR_MORE_DETAILS'].'</a>
-				</td>
-			</tr>
-		</table>
-	</div>
-';
-	$output = '
-<div class="col-sm-4 col-md-3 col-lg-3">
-	<div class="get_profile_user_bloc">
-		' . $output . '
-	</div>
-</div>
-';
-	return $output;
 }
 
 /* 

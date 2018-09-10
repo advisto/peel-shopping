@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -14,7 +14,7 @@
 *}{if $is_form}
 <form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}" id="{$form_id}">
 {/if}
-	<div class="affiche_critere_stock well {$update_class}">
+	<div class="affiche_critere_stock well pull-right {$update_class}">
 {if $is_form}
 	{if isset($affiche_attributs_form_part)}{$affiche_attributs_form_part}{/if}
 	{if isset($affiche_etat_stock)}{$affiche_etat_stock}{/if}
@@ -50,6 +50,11 @@
 						<option value="{$c.id|str_form_value}"{if $c.issel} selected="selected"{/if}{if !$c.isavailable} disabled="disabled"{/if}>{$c.name}{$c.suffix}{if !$c.isavailable} - {$STR_NO_AVAILABLE}{/if}</option>
 					{/foreach}
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="attribut-color">
+				{if !empty($src_img_color)}<img alt="" src="{$src_img_color}"/>{/if}
 				</td>
 			</tr>
 		</table>

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -106,18 +106,12 @@
 			{$STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD}{$STR_BEFORE_TWO_POINTS}: 
 			{if $search_form_category_display_mode == 'checkbox'}
 			<div class="row">
-				{foreach $cat_ann_opts as $cao}
-				<div class="col-sm-4 col-lg-3">
-					<input name="cat_select[]" type="checkbox" value="{$cao.value|str_form_value}"{if $cao.issel} checked="checked"{/if}> {$cao.name}
-				</div>
-				{/foreach}
+				{$cat_ann_opts}
 			</div>
 			{else}
 			<select class="form-control" name="cat_select">
 				<option value="">{$STR_MODULE_ANNONCES_AD_CATEGORY}</option>
-				{foreach $cat_ann_opts as $cao}
-					<option value="{$cao.value|str_form_value}"{if $cao.issel} selected="selected"{/if}>{$cao.name}</option>
-				{/foreach}
+				{$cat_ann_opts}
 			</select>
 			{/if}
 		</li>

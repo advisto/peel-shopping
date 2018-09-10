@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -27,7 +27,7 @@
 			{% if update_msg is defined %}
 			<div class="center" style="font-size:16px; font-weight:bold; padding:10px">{{ update_msg }}</div>
 			{% endif %}
-			{% if CONTENT_HEADER %}<div class="page_warning alert-dismissable"><div class="container"><div class="row"><div class="col-sm-12">{{ CONTENT_HEADER }} <button type="button" class="close remember-close" data-dismiss="alert" id="page_warning_close">×</button></div></div></div></div>{% endif %}
+			{% if CONTENT_HEADER %}<div class="page_warning alert-dismissable alert"><div class="container"><div class="row"><div class="col-sm-12">{{ CONTENT_HEADER }} <button type="button" class="close remember-close" data-dismiss="alert" id="page_warning_close">×</button></div></div></div></div>{% endif %}
 			<header id="main_header">
 				<div class="navbar yamm navbar-default navbar-static-top">
 					<div class="navbar-inner">
@@ -43,6 +43,7 @@
 										{% if header_custom_baseline_html is defined %}{{ header_custom_baseline_html }}{% endif %}</div>
 									{% endfor %}
  								{% endif %}
+								{% if site_offline is empty %}
 								{% if disable_navbar_toggle is empty %}
 								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 									<span class="icon-bar"></span>
@@ -58,6 +59,7 @@
 								</div>
 								{% endif %}
 								{% if not(disable_header_login) %}
+										{% if account_dropdown %}
 								<div id="header_login" class="pull-right">
 									{# {% if not est_identifie %}<a href="compte.php" class="btn btn-default"><span class="glyphicon glyphicon-user header_user"></span>{{ STR_LOGIN }}</a>{% else %}<span class="glyphicon glyphicon-user header_user"></span><a href="compte.php" class="btn btn-default">{{ session_utilisateur_email }} <span class="caret"></span>{% endif %}</a> #}
 									<div class="dropdown">
@@ -74,6 +76,11 @@
 										<a href="{{ messaging_url }}" class="dropdown-toggle btn btn-default fa fa-envelope fa-lg">{{ unread_messages_info }}</a>
 									</div>
 								</div>
+								{% endif %}
+										{% if (CONTENT_HEADER_LOGIN) %}
+											{{ CONTENT_HEADER_LOGIN }}
+										{% endif %}
+									{% endif %}
 								{% endif %}
 								{{ MODULES_HEADER }}
 								{{ header_custom_html }}
@@ -104,7 +111,7 @@
 				</div>
 				<!-- Fin above_middle -->   
 				{% endif %}
-				<div class="container">
+				<div class="{{ main_content_class }}">
 					<div class="row">
 						{% if MODULES_LEFT %}
 						<!-- Début left_column -->
@@ -121,7 +128,7 @@
 						<div class="middle_column {% if MODULES_LEFT and MODULES_RIGHT %}col-sm-6 col-lg-8{% elseif MODULES_LEFT or MODULES_RIGHT %}col-sm-9 col-lg-10{% else %}col-sm-12{% endif %}">
 					{% if (ariane_panier) %}{{ ariane_panier }}{% endif %}
 							<div class="middle_column_header">&nbsp;</div>
-							<div class="middle_column_repeat row">
+							<div class="middle_column_repeat">
 						{% if (CARROUSEL_CATEGORIE) %}{{ CARROUSEL_CATEGORIE }}{% endif %}
 								<a href="#" id="haut_de_page"></a>
 							{{ MODULES_TOP_MIDDLE }}

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 55514 2017-12-14 09:44:56Z sdelaporte $
+// $Id: format.php 57767 2018-08-20 13:51:27Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -135,7 +135,7 @@ function getPregConditionCompatAccents($string, $delimiter = '/')
 function url2Link($string)
 {
 	if(StringMb::strpos($string, '<a ') === false && StringMb::strpos($string, '<img ') === false) {
-		return preg_replace('/(http|mailto|news|ftp|https)\:\/\/(([-éa-z0-9\/\.\?_=#@:;,!~&%])*)/i', "<a href=\"$1://$2\" target=\"_blank\">$1://$2</a>", $string);
+		return preg_replace('/(http|mailto|news|ftp|https)\:\/\/(([-éa-z0-9\/\.\?_=#@:;,!~&%])*)/i', "<a href=\"$1://$2\" onclick=\"return(window.open(this.href)?false:true);\">$1://$2</a>", $string);
 	} else {
 		return $string;
 	}
@@ -234,7 +234,7 @@ function get_float_from_user_input($string, $from_currency_rate = 1)
  * @param boolean $inside_html
  * @return
  */
-function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true, $skip_endline = true, $inside_html = true)
+function filtre_javascript($string, $addslashes = true, $allow_escape_single_quote = true, $allow_escape_double_quote = true, $skip_endline = true, $inside_html = true, $allow_escape_backslash = true)
 {
 	if ($addslashes) {
 		$string = addslashes($string);
@@ -245,6 +245,9 @@ function filtre_javascript($string, $addslashes = true, $allow_escape_single_quo
 			$string = str_replace('\"', '"', $string);
 		} elseif($inside_html) {
 			$string = str_replace('\"', '&quot;', $string);
+		}
+		if (!$allow_escape_backslash) {
+			$string = str_replace("\\\\", "\\", $string);
 		}
 	}
 	if($skip_endline) {
@@ -504,7 +507,11 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 		}
 	}
 	if (empty($datetime_or_timestamp) || $datetime_or_timestamp==='0') {
-		$date = '';
+		if($mode == 'timestamp' || $mode == 'timestamp1000') { 
+			$date = 0;
+		} else {
+			$date = '';
+		}
 	} elseif (!is_numeric($datetime_or_timestamp)) {
 		if (substr($datetime_or_timestamp, 0, 10) == '0000-00-00') {
 			$date = '';
@@ -599,7 +606,16 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
 	$weeks = $total_seconds / (3600 * 24 * 7);
 	$months = $total_seconds / (3600 * 24 * 30);
 
-	if ($display_mode == 'month') {
+	if ($display_mode == 'day') {
+		$result[] = floor($days) . '' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
+	} elseif ($display_mode == 'minutes') {
+		$result[] = floor($total_seconds / 60) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
+	} elseif ($display_mode == 'hours') {
+		$result[] = floor($total_seconds / 3600) . '' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
+		if ($minutes >= 1) {
+			$result[] = floor($minutes) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
+		}
+	} elseif ($display_mode == 'month') {
 		if ($months >= 1) {
 			$result[] = floor($months) . ' ' . str_replace('(s)', ($months>1?'s':''), $GLOBALS['STR_MONTHS']);
 		} elseif ($weeks >= 1) {
@@ -779,6 +795,8 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 							if (empty($custom_template_tags['PSEUDO']) && !empty($_SESSION['session_utilisateur']['pseudo'])) {
 								$custom_template_tags['PSEUDO'] = $_SESSION['session_utilisateur']['pseudo'];
 							}
+							$custom_template_tags['WWWROOT_SITE2'] = get_configuration_variable('wwwroot', 2, $_SESSION['session_langue']);
+							$custom_template_tags['WWWROOT_SITE3'] = get_configuration_variable('wwwroot', 3, $_SESSION['session_langue']);
 							$template_tags[$this_tag] = affiche_contenu_html($this_arg, true, $custom_template_tags);
 						} 
 					}
@@ -790,8 +808,9 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			} elseif(StringMb::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
 				$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
 			} elseif(StringMb::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
-				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true);
-			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES]') !== false) {
+				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true, true);
+			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES]') !== false && check_if_module_active('references')) {
+				
 				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES_CARROUSEL]') !== false) {
 				$template_tags['CLIENT_REFERENCES_CARROUSEL'] = affiche_reference_carrousel(true,null, 1, 1, 12, 0);
@@ -1228,8 +1247,16 @@ function highlight_found_text($text, $terms, &$found_words_array, $found_tags = 
 	foreach ($terms as $this_term) {
 		if((StringMb::strlen($text)<80  && StringMb::strlen($this_term)>0) || StringMb::strlen($this_term)>=3) { 
 			$preg_condition = getPregConditionCompatAccents($this_term);
-			if (stripos($text, $this_term) !== false) {
-				$text = preg_replace('/' . $preg_condition . '/iu', $bbcode[0] . '$0' . $bbcode[1], $text, -1);
+			if (StringMb::strlen($text)<300 || stripos($text, $this_term) !== false) {
+				// Optimisation sur la vitesse : on ne fait le preg_replace que si texte assez court, ou si il y a une occurence exacte du terme recherché
+				// On sépare les tags HTML du reste si il y en a
+				$parts = preg_split('/(<(?:[^"\'>]|"[^"<]*"|\'[^\'<]*\')*>)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+				for ($i=0, $n=count($parts); $i<$n; $i+=2) {
+					// On remplace dans le texte en dehors des tags
+					$parts[$i] = preg_replace('/' . $preg_condition . '/iu', $bbcode[0] . '$0' . $bbcode[1], $parts[$i], -1);
+				}
+				// On remet les tags
+				$text = implode('', $parts);
 				$found_words_array[] = $this_term;
 			}
 		}
@@ -1266,6 +1293,11 @@ function userAgeFormat ($date)
 function get_formatted_phone_number($phone_number, $default_separator = ' ', $international_mode = false)
 {
 	$default_phone_number = $phone_number;
+	if($international_mode == 'auto' && (strpos($phone_number, '+') !== false || strpos($phone_number, '00') === 0 || strpos($phone_number, '33') === 0 )) {
+		$international_mode = 'plus';
+	} else {
+		$international_mode = false;
+	} 
 	$phone_number = str_replace(array(' ', '/', '.', '-', ')', '(', '_', '+'), "", $phone_number);
 	if(is_numeric($phone_number) && StringMb::strlen($phone_number) == 13 && StringMb::substr($phone_number, 0, 2) == '00') {
 		$phone_number = StringMb::substr($phone_number, 2);
@@ -1281,13 +1313,13 @@ function get_formatted_phone_number($phone_number, $default_separator = ' ', $in
 		$phone_number = str_replace(array('.', '-', '_'), " ", $default_phone_number);
 	}
 	if($international_mode) {
-		$phone_number = str_replace(array('+'), "", $phone_number);
-		if(StringMb::substr($output, 0, 2) == '00') {
+		$phone_number = str_replace(array('+','(0)'), array("", $default_separator), $phone_number);
+		if(StringMb::substr($phone_number, 0, 2) == '00') {
 			$phone_number = StringMb::substr($phone_number, 2);
 		}
-		if(StringMb::substr($output, 0, 1) == '0') {
+		if(StringMb::substr($phone_number, 0, 1) == '0') {
 			// Ajout de l'identifiant international du pays
-			$phone_number = '33'.StringMb::substr($phone_number, 1);
+			$phone_number = '33' . $default_separator . StringMb::substr($phone_number, 1);
 		}
 		if($international_mode === 'plus') {
 			$phone_number = '+'.$phone_number;
@@ -1447,16 +1479,16 @@ function array_merge_recursive_distinct() {
 
     foreach ($arrays as $array) {
 		foreach ($array as $key => $value) {
-			if (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
+			if(is_numeric($key)) {
+				// Clé numérique : ajout en fin de tableau, sans effacer ce qui existe déjà => comme array_merge ou array_merge_recursive
+				$merged[] = $value;
+			} elseif (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
 				// Merge récursif, comme array_merge_recursive et non pas comme array_merge
 				if (is_numeric($key)) {
 					$merged[] = array_merge_recursive_distinct($merged[$key], $value);
 				} else {
 					$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
 				}
-			} elseif(is_numeric($key)) {
-				// Clé numérique : ajout en fin de tableau, sans effacer ce qui existe déjà => comme array_merge ou array_merge_recursive
-				$merged[] = $value;
 			} else {
 				// Clé alphanumérique : efface toute autre version déjà présente dans le tableau (=> d'où le nom array_merge_recursive_distinct, contrairement à array_merge_recursive qui créerait un tableau)
 				$merged[$key] = $value;

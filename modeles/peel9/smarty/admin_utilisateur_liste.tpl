@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -11,11 +11,31 @@
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
 // $Id: admin_utilisateur_liste.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
-*}<form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
+*}
+
+{if isset($groupes_options_utilisateurs)}
+<div class="entete">{$STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP}</div>
+	<form method="post" action="{$action|escape:'html'}">
+		<input type="hidden" name="mode" value="groupe_utilisateurs" />
+		<span class="normal">
+			<input type="radio" value="1" name="affected" checked="checked">{$STR_ADMIN_ASSIGN}
+			<input type="radio" value="0" name="affected">{$STR_ADMIN_UNASSIGN}
+		</span>
+		<select class="form-control" name="id_groupe">
+			<option value="">-------------------------------------------</option>
+			{foreach $groupes_options_utilisateurs as $o}
+			<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed} / - {$o.remise} %</option>
+			{/foreach}
+		</select>
+	<br />
+	<input type="submit" value="Valider" class="btn btn-success" />
+	</form>
+{/if}
+<form id="search_form" class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div class="row">
 		<div class="col-md-3 col-sm-4 col-xs-12 center">
-			<label for="search_email">{$STR_ADMIN_ID} / {$STR_EMAIL}{if empty($pseudo_is_not_used)} / {$STR_PSEUDO}{/if} {$STR_BEFORE_TWO_POINTS}:</label>
+			<label for="search_email">{$STR_ADMIN_IP} / {$STR_ADMIN_ID} / {$STR_EMAIL}{if empty($pseudo_is_not_used)} / {$STR_PSEUDO}{/if} {$STR_BEFORE_TWO_POINTS}:</label>
 			<input type="text" class="form-control" id="search_email" name="email" value="{$email|str_form_value}" autocapitalize="none" />
 		</div>
 		<div class="col-md-3 col-sm-4 col-xs-12 center">
@@ -357,12 +377,12 @@
 		</div>
 	</div>
 </form>
-
+<div class="clearfix"></div>
 <form class="entryform form-inline" role="form" action="{$wwwroot}/modules/webmail/administrer/webmail_send.php" method="post" style="margin-top:10px">
 	<div class="entete">{$STR_ADMIN_UTILISATEURS_USERS_COUNT}{$STR_BEFORE_TWO_POINTS}: {$nbRecord}</div>
 	<div><span class="glyphicon glyphicon-plus"></span> <a href="{$administrer_url}/utilisateurs.php?mode=ajout">{$STR_ADMIN_UTILISATEURS_CREATE}</a></div>
 {if isset($results)}
-	<div><a href="{$wwwroot_in_admin}/modules/export/administrer/export_clients.php?priv={$priv}&amp;cle={$cle}">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a></div>
+	<div><a href="{$wwwroot_in_admin}/modules/export/administrer/export.php?type=clients&amp;priv={$priv}&amp;cle={$cle}">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a></div>
 	<div class="center">{$link_multipage}</div>
 	<div class="table-responsive">
 	<table id="tablesForm" class="table">
@@ -426,6 +446,7 @@
 			<td class="center">{$res.recuperer_parrain}</td>
 			{/if}
 			<td class="center">{$res.site_name}</td>
+			<td class="center">{$res.ip}</td>
 		</tr>
 	{/foreach}
 	</table>

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -15,6 +15,13 @@
 <div class="table-responsive">
 	<table class="full_width" cellpadding="3">
 		<caption></caption>
+		{% if is_devis %}
+			<tr>
+				<td colspan="2" class="link_quote">
+				<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ devis_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_QUOTATION }} PDF</a>
+				</td>
+			</tr>
+		{% endif %}
 		<tr>
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}: </td>
 			<td>{{ id }}</td>
@@ -37,10 +44,12 @@
 			<td>{{ ship_address|nl2br_if_needed }}</td>
 		</tr>
 	{% endif %}
+	{% if (payment) %}
 		<tr>
 			<td>{{ STR_PAYMENT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ payment }}</td>
 		</tr>
+	{% endif %}
 	{% if (shipping_type) %}
 		<tr>
 			<td>{{ STR_SHIPPING_TYPE }}{{ STR_BEFORE_TWO_POINTS }}:</td>

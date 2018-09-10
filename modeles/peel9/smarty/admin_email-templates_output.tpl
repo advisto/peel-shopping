@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -56,6 +56,27 @@
 						<tr>
 							<td>{$STR_TEXT}</td>
 							<td><textarea class="form-control" name="form_text" id="template_text" style="width:90%; height:300px;">{$text}</textarea></td>
+						</tr>
+						<tr>
+							<td class="title_label">Image haut{$STR_BEFORE_TWO_POINTS}:</td>
+							<td>
+							{if isset($image_haut)}
+								{include file="uploaded_file.tpl" f=$image_haut STR_DELETE=$STR_DELETE_THIS_FILE}
+							{else}
+								<input name="image_haut" type="file" value="" />
+							{/if}
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="title_label">Image bas{$STR_BEFORE_TWO_POINTS}:</td>
+							<td>
+							{if isset($image_bas)}
+								{include file="uploaded_file.tpl" f=$image_bas STR_DELETE=$STR_DELETE_THIS_FILE}
+							{else}
+								<input name="image_bas" type="file" value="" />
+							{/if}
+							</td>
 						</tr>
 						<tr>
 							<td>{$STR_ADMIN_LANGUAGE}</td>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: eo.php 57731 2018-08-16 16:43:07Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -353,6 +353,7 @@ $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "Klaku ĉi tion post la instal-dosie
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "Instala proceduro";
 $GLOBALS["STR_INSTALLATION"] = "Instalado";
 $GLOBALS["STR_INTRACOM_FORM"] = "Intracom-numero pri aldonvalora imposto<br />(nur por eŭropaj entreprenoj)";
+$GLOBALS["STR_INTRACOM_FORM_ALERT"] = "";
 $GLOBALS["STR_INTRODUCTORY_TEXT"] = "Enkonduka teksto";
 $GLOBALS["STR_INVALID_TOKEN"] = "Nevalida ĵetono: jam pritraktita aŭ via foliumilo ne indikis la HTTP-direktilon";
 $GLOBALS["STR_INVOICE_ADDRESS"] = "Faktura adreso";
@@ -481,6 +482,7 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Klaku ĉi tie por reviziti
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Ne eblas patroni ĉi retmesaĝadreson, kiu jam ĉeestas nian datumbazon";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Bonvolu plenigi la nefakultativajn kampojn por patroni viajn amikojn.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Ĉi klaku por reveni al la antaŭa paĝo</a>.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Viaj amikoj ricevis sian patron-peton. Post validigo de la klienta konto, vi povos profiti rabaton je %s ĉe ilia unua mendo. Ankaŭ ili povos profiti rabaton je %s ĉe sia unua mendo.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND_SINGLE"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Bonvolu konfirmi vian aliĝon per la salutinformoj, kiujn vi ricevis per remesaĝo! Post konfirmo, vi povos profiti rabaton je %s valora je via unua mendo ĉe nia retejo.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Konfirmo pri aliĝo al la partnera programo de la retejo {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "ENTUTE - ĉiuj impostoj inkluzitivitaj";
@@ -531,6 +533,7 @@ $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroo
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Ensalutu.";
 $GLOBALS["STR_MSG_THANKS"] = "Dankon pri via konfido, via mendo sukcese registriĝis.";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
+$GLOBALS["STR_MY_DATA"] = "";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Miaj donac-poentoj";
 $GLOBALS["STR_MY_ORDER"] = "Miaj mendoj";
 $GLOBALS["STR_MY_QUOTES"] = "";
@@ -610,7 +613,7 @@ $GLOBALS["STR_OUT_OF"] = "el";
 $GLOBALS["STR_PAGE"] = "Paĝo:";
 $GLOBALS["STR_PAIEMENT_SECURISE"] = "Sekur-pago";
 $GLOBALS["STR_PARAMETERS_SAVED"] = "";
-$GLOBALS["STR_PARAMETERS_COMPLEMENT"] = "";
+$GLOBALS["STR_PARAMETERS_COMPLEMENT"] = "Vous pouvez changer ce paramètre depuis la page de modification des paramètres : <a href='". get_url('/utilisateurs/change_params.php')."'>". get_url('/utilisateurs/change_params.php')."</a>";
 $GLOBALS["STR_PARRAIN_ENTETE"] = "Patronu viajn amikojn";
 $GLOBALS["STR_PARRAIN_TEXTE"] = "Patronu viajn amikojn por profitigu al ilin rabaton je %s ĉe unua mendo.<br />Kaj kion por vi? Ankaŭ rabaton je %s ĉe iliaj unuaj mendoj!";
 $GLOBALS["STR_PASS_PERDU"] = "Se vi perdis la pasvorton, ĉi klaku";
@@ -690,6 +693,7 @@ $GLOBALS["STR_PROFORMA"] = "Propona fakturo";
 $GLOBALS["STR_PROMO_CODE"] = "Rabata kodo";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "Prezo inkluzive de rabato je";
 $GLOBALS["STR_PROMOTION"] = "Rabato";
+$GLOBALS["STR_PROMOTION_SHORT"] = "";
 $GLOBALS["STR_PROMOTIONS"] = "Rabatoj";
 $GLOBALS["STR_PROPULSE"] = "Kreado de";
 $GLOBALS["STR_PSEUDO"] = "Kromnomo";
@@ -759,6 +763,7 @@ $GLOBALS["STR_SHIP_ADDRESS"] = "Livera adreso";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Elektu la liveran tipon";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Elektu la liveran areo";
 $GLOBALS["STR_SHIPPING_COST"] = "Liveraj kostoj";
+$GLOBALS["STR_SHIPPING_TO_BE_DETERMINED"] = "";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Liver-maniero";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Livera areo";
 $GLOBALS["STR_SHOPPING"] = "Daŭrigi butikumadon";
@@ -882,6 +887,8 @@ $GLOBALS["STR_WORD_RESELLER"] = "Revendistoj";
 $GLOBALS["STR_WORD_SELLERS"] = "Vendistoj";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "Enmetu ĉi tie vian retmesaĝadreson";
 $GLOBALS["STR_YES"] = "Jes";
+$GLOBALS["STR_YES_NOT_VALIDATE"] = "Jes, ne validigita";
+$GLOBALS["STR_YES_VALIDATE"] = "Jes validigita";
 $GLOBALS["STR_YOU_ARE"] = "Vi estas";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Ni peta vin eldoni vian fakturon ĉe via uzanto-konto.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Via rabata kodo";
@@ -896,3 +903,11 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "Neniu varo estis aldonita";
 $GLOBALS["STR_ZIP"] = "Poŝtkodo";
 $GLOBALS["STR_ZOOM"] = "Aligrandigi";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
+$GLOBALS["STR_CARD_ESTIMATE"] = "";
+$GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
+$GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
+$GLOBALS["STR_PRIX_SEARCH_HT"] = "Prezo sen imposto";
+$GLOBALS["STR_PRIX_SEARCH_TTC"] = "Prezo kun imposto";
+$GLOBALS["STR_REGISER_CART_ALERT"] = "";

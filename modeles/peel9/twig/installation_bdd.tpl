@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -58,8 +58,9 @@
 		<input type="radio" name="website_type" id="ad" {% if website_type_value == "ad"}checked="checked"{% endif %} {% if ad_site_disable is empty %}disabled="disabled"{% endif %} value="ad" /><label for="ad">{{ STR_ADMIN_INSTALL_WEBSITE_AD }}</label><br />
 	</p>
 	<h2>{{ STR_ADMIN_INSTALL_FILL_DB|escape('html') }}</h2>
-	<input type="radio" value="1" name="fill_db" id="filldb1" {% if fill_db == "1" %}checked="checked"{% endif %}/><label for="filldb1">Oui</label>
-	<input type="radio" value="0" name="fill_db" id="filldb0" {% if fill_db == "0" or fill_db is empty %}checked="checked"{% endif %} /><label for="filldb0">Non</label>
+	<p>{{ STR_ADMIN_INSTALL_FILL_DB_EXPLANATION|escape('html') }}</p>
+	<input type="radio" value="1" name="fill_db" id="filldb1" {% if fill_db == "1" || fill_db is empty}checked="checked"{% endif %}/><label for="filldb1">{{ LANG.STR_YES }}</label>
+	<input type="radio" value="0" name="fill_db" id="filldb0" {% if fill_db == "0" %}checked="checked"{% endif %} /><label for="filldb0">{{ LANG.STR_NO }}</label>
 
 	<h2>{{ STR_ADMIN_INSTALL_SSL_ADMIN|escape('html') }}</h2>
 	<p>

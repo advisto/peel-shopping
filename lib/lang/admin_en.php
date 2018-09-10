@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 55746 2018-01-15 17:18:01Z sdelaporte $
+// $Id: admin_en.php 58007 2018-08-31 16:00:35Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -41,8 +41,10 @@ $GLOBALS["STR_ADMIN_ADMINISTRATOR"] = "Administrator";
 $GLOBALS["STR_ADMIN_ALL_CATEGORIES"] = "All categories";
 $GLOBALS["STR_ADMIN_ALL_ORDERS"] = "All orders";
 $GLOBALS["STR_ADMIN_ALL_PRODUCTS"] = "All products";
+$GLOBALS["STR_ADMIN_ALL_ZONES"] = "All zones";
 $GLOBALS["STR_ADMIN_ALL"] = "All";
 $GLOBALS["STR_ADMIN_ALL_SITES"] = "All sites";
+$GLOBALS["STR_ADMIN_ALL_STATUS_DELIVERY"] = "All delivery statuses";
 $GLOBALS["STR_ADMIN_ANY"] = "Whatever";
 $GLOBALS["STR_ADMIN_ARTICLE_SHORT_DESCRIPTION"] = "Short description (may appear in the lists, with a link to access the full version)";
 $GLOBALS["STR_ADMIN_ARTICLES_ALL"] = "All articles";
@@ -55,6 +57,7 @@ $GLOBALS["STR_ADMIN_ARTICLES_ERR_NOT_FOUND"] = "No article found with the id #%s
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_ADD_BUTTON"] = "Add this article";
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_ADD"] = "Add an article";
 $GLOBALS["STR_ADMIN_ARTICLES_FORM_MODIFY"] = "Edit the article";
+$GLOBALS["STR_ADMIN_ARTICLES_IS_ON_LAYOUT"] = "Display layout short description";
 $GLOBALS["STR_ADMIN_ARTICLES_IS_ON_ROLLOVER"] = "Show in block \"Best articles\"";
 $GLOBALS["STR_ADMIN_ARTICLES_IS_ON_RESELLER"] = "This article is reserved for reseller";
 $GLOBALS["STR_ADMIN_ARTICLES_MSG_CREATED_OK"] = "The article %s has been created.";
@@ -62,6 +65,8 @@ $GLOBALS["STR_ADMIN_ARTICLES_MSG_DELETED"] = "The article %s has been deleted.";
 $GLOBALS["STR_ADMIN_ARTICLES_NOTHING_FOUND_FOR_LANG"] = "No article found in the database for the language";
 $GLOBALS["STR_ADMIN_ARTICLES_TITLE"] = "Manage the articles";
 $GLOBALS["STR_ADMIN_ASKED_STATUS"] = "Status requested";
+$GLOBALS["STR_ADMIN_ASSIGN"] = "Assign";
+$GLOBALS["STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP"] = "Assign or unassign users who do not have a group";
 $GLOBALS["STR_ADMIN_AT_ROOT"] = "At root";
 $GLOBALS["STR_ADMIN_ATTRIBUTE"] = "Attribute";
 $GLOBALS["STR_ADMIN_ATTRIBUT_STYLE_LINK"] = "Link towards the search engine";
@@ -71,6 +76,7 @@ $GLOBALS["STR_ADMIN_BACKGROUND_COLOR_FOR_MENU"] = "Background color of the menu 
 $GLOBALS["STR_ADMIN_BACKGROUND_COLOR"] = "Background color for the page in the format #RRGGBB (example: gray => #EEEEEE)";
 $GLOBALS["STR_ADMIN_BEGIN_DATE"] = "Start Date";
 $GLOBALS["STR_ADMIN_BILL_TOTALS"] = "TOTAL";
+$GLOBALS["STR_ADMIN_BRANDS_TO_EXCLUDE"] = "Brands to exclude";
 $GLOBALS["STR_ADMIN_CASE_NOT_FORECASTED"] = "Unscheduled cases";
 $GLOBALS["STR_ADMIN_CATEGORIES_ADD_PRODUCT"] = "Add product";
 $GLOBALS["STR_ADMIN_CATEGORIES_ADD_SUBCATEGORY"] = "Add a sub-category";
@@ -413,38 +419,41 @@ $GLOBALS["STR_ADMIN_HTML_DELETE_COOKIE_LINK"] = "Delete cookie interstitial and 
 $GLOBALS["STR_ADMIN_HTML_EXPLAIN"] = "This is always the most recent content that appears in the required position.";
 $GLOBALS["STR_ADMIN_HTML_UPDATE"] = "Edit this content";
 $GLOBALS["STR_ADMIN_ID"] = "Id";
+$GLOBALS["STR_ADMIN_IP"] = "IP";
 $GLOBALS["STR_ADMIN_IMAGE_SHORT_PATH"] = "Picture / Folder";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_COLUMN_NOT_HANDLED"] = "Column #%s unhandled import (purely descriptive when exporting): %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_COLUMN_NOT_KNOWN"] = "Column #%s not recognized and therefore not imported: %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_FIELDS_NOT_CHOSEN"] = "You must check at least one box.<br />Importing stopped.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_FILE_NOT_FOUND"] = "File not found!<br />Importing stopped.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_INCOHERENT_COLUMNS"] = "Problem while importing: there are several columns \"%s\" in the source file - not import.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_REFERENCE_DOES_NOT_EXIST"] = "The reference category %s does not exist";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_ERR_TYPE_NOT_CHOSEN"] = "The type of import has not been selected.<br />Importing stopped.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN"] = "- The first line MUST contain the column headers<br />- There should not be any formula in the CSV file<br />- The decimal separator must be the point the comma<br />- The separator used in the file, tab, semicolon or comma should only indicate a change in column<br />- The file can not be opened by your application to be able to download <br /> - The pictures correspond to the products to be managed separately to the FTP in the directory {$GLOBALS['uploaddir']}/<br />- <b> Before importing identifiers categories, make that you have previously created these categories with the administration</b><br />";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING"] = "Encoding data";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE"] = "Example file";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN"] = "separator columns allowed: semicolon, comma, tab, ...";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT"] = "File Format imperative";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME"] = "Data file";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE"] = "FILE IMPORT PRODUCTS";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_ALL_FIELDS"] = "Import all the fields found in the file";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_MODE"] = "Select the import mode";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_IMPORT_SELECTED_FIELDS"] = "Import only selected fields below";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_ATTRIBUTE_CREATED"] = "Creating attribute %s - created with id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_BRAND_CREATED"] = "Creation of the %s - created with id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_CATEGORY_CREATED"] = "Creating %s category - created with id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_IMPORTATION_OK"] = "Number of products imported successfully: %s in total, including: %s modified, %s unmodified and %s created.<br />Association between products and categories: %s added.";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_LINE_CREATED"] = "Import line %s - product created with id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_LINE_UPDATED"] = "Import %s line - updated product with the id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_OPTION_CREATED"] = "Creating the %s option - created with id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_CREATED"] = "Creation of the discount price (%s), prix_revendeur (%s) and amount (%s) for the product id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_MSG_TARIF_UPDATED"] = "Update the discount price (%s), prix_revendeur (%s) and amount (%s) for the product id = %s";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SELECT_FIELDS"] = "Select the fields you want to update";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN"] = "specify \\t for tab - leave blank for automatic detection";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR"] = "Column separator";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_TITLE"] = "Import Module";
-$GLOBALS["STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID"] = "Warning: if the column \"id\" is present in the file, the products found with these \"id\" will have their data changed.";
+$GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE"] = "Correspondence of the columns";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Column #%s unhandled import (purely descriptive when exporting): %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Column #%s not recognized and therefore not imported: %s";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "You must check at least one box.<br />Importing stopped.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND"] = "File not found!<br />Importing stopped.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS"] = "Problem while importing: there are several columns \"%s\" in the source file - not import.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_REFERENCE_DOES_NOT_EXIST"] = "The reference category %s does not exist";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_TYPE_NOT_CHOSEN"] = "The type of import has not been selected.<br />Importing stopped.";
+$GLOBALS["STR_ADMIN_IMPORT_EXPLAIN"] = "- The first line MUST contain the column headers<br />- There should not be any formula in the CSV file<br />- The decimal separator must be the point the comma<br />- The separator used in the file, tab, semicolon or comma should only indicate a change in column<br />- The file can not be opened by your application to be able to download <br /> - The pictures correspond to the products to be managed separately to the FTP in the directory {$GLOBALS['uploaddir']}/<br />- <b> Before importing identifiers categories, make that you have previously created these categories with the administration</b><br />";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_ENCODING"] = "Encoding data";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_EXAMPLE"] = "Example file";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN"] = "separator columns allowed: semicolon, comma, tab, ...";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT"] = "File Format imperative";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_NAME"] = "Data file";
+$GLOBALS["STR_ADMIN_IMPORT_FORM_TITLE"] = "FILE IMPORT PRODUCTS";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS"] = "Import all the fields found in the file";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_MODE"] = "Select the import mode";
+$GLOBALS["STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS"] = "Import only selected fields below";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_ATTRIBUTE_CREATED"] = "Creating attribute %s - created with id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_BRAND_CREATED"] = "Creation of the %s - created with id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_CATEGORY_CREATED"] = "Creating %s category - created with id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_IMPORTATION_OK"] = "Number of products imported successfully: %s in total, including: %s modified, %s unmodified and %s created.<br />Association between products and categories: %s added.";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_LINE_CREATED"] = "Import line %s - product created with id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_LINE_UPDATED"] = "Import %s line - updated product with the id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_OPTION_CREATED"] = "Creating the %s option - created with id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_CREATED"] = "Creation of the discount price (%s), prix_revendeur (%s) and amount (%s) for the product id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_UPDATED"] = "Update the discount price (%s), prix_revendeur (%s) and amount (%s) for the product id = %s";
+$GLOBALS["STR_ADMIN_IMPORT_SELECT_FIELDS"] = "Select the fields you want to update";
+$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN"] = "specify \\t for tab - leave blank for automatic detection";
+$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Column separator";
+$GLOBALS["STR_ADMIN_IMPORT_TITLE"] = "Import Module";
+$GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Warning: if the column \"id\" is present in the file, the products found with these \"id\" will have their data changed.";
+$GLOBALS["STR_ADMIN_IMPORT_TYPE"] = "Type of data to import";
 $GLOBALS["STR_ADMIN_IN_COLUMNS"] = "In column";
 $GLOBALS["STR_ADMIN_IN_LINES"] = "Online";
 $GLOBALS["STR_ADMIN_INCLUDING_DELIVERY_COST"] = "with Shipping";
@@ -717,7 +726,7 @@ $GLOBALS["STR_ADMIN_MSG_UPDATE_OK"] = "The update has been made.";
 $GLOBALS["STR_ADMIN_MUTIPLE_SENDING"] = "Sending multiple";
 $GLOBALS["STR_ADMIN_NAME"] = "Name";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE"] = "Choose a template";
-$GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE_INFO"] = "To customize your newsletter, you can create an email template that contains the tag [NEWSLETTER]. This tag will be replaced with the content specified in this page.";
+$GLOBALS["STR_ADMIN_NEWSLETTERS_CHOOSE_TEMPLATE_INFO"] = "To customize your newsletter, you can create an email template that contains the tag [NEWSLETTER]. This tag will be replaced with the content specified in this page.<br />If you want to add products to your newsletter, you will need to add the [PRODUCT_LIST] tag where you want the products to appear. The products to display are selectable from the search box at the bottom of this page";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CREATE"] = "Add a newsletter";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_SEND_CONFIRM"] = "¿Está seguro que quiere mandar este boletín";
 $GLOBALS["STR_ADMIN_NEWSLETTERS_CRON_ACTIVATED_EXPLAIN"] = "Note: The cron module is enabled, the number of users that can be sent the newsletter is not limited here, but can nevertheless be used by your host.";
@@ -996,7 +1005,7 @@ $GLOBALS["STR_ADMIN_SITEMAP_MSG_CREATED_OK"] = "The file has been generated.";
 $GLOBALS["STR_ADMIN_SITEMAP_OPEN"] = "Read the XML file";
 $GLOBALS["STR_ADMIN_SITEMAP_TITLE"] = "Creating XML sitemap";
 $GLOBALS["STR_ADMIN_SITES_ABOVE_MIDDLE"] = "Above the central content";
-$GLOBALS['STR_ADMIN_SITE_COUNTRY'] = "Visitor country";
+$GLOBALS['STR_ADMIN_SITE_COUNTRY'] = 'Visitor country';
 $GLOBALS["STR_ADMIN_SITE_ID"] = "Website id (0 for all)";
 $GLOBALS["STR_ADMIN_SITE_DUPLICATE_CONFIRM"] = "Confirm the duplication of site %s. Only the configuration will be duplicated.";
 $GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"] = "Confirm the deletion of the site %s";
@@ -1426,8 +1435,17 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_COUNT"] = "Number of<br />coupon cod
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_RECEIVED"] = "Received on";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_OFFER_TO_BEST_CLIENTS"] = "Offer coupon codes to the best customers";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_EXPLAIN"] = "Send the coupon code";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_CHOOSE_EXPLAIN"] = "Choose the promo code";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND"] = "Send this coupon code users checked above";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_TO_ALL"] = "Send this promotional code to all";
+$GLOBALS["STR_ADMIN_UTILISATEURS_CODE_PROMO_SEND_CHECKED_USERS"] = "Send this promotional code to users selected above";
+$GLOBALS["STR_ADMIN_UTILISATEURS_GROUP_SELECT_EXPLAIN"] = "If a group is selected, the recipients of the mailing will be members of the selected group only (in the case of sending to all)";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_TO_BEST_CLIENTS"] = "Send a newsletter to the best customers";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_CHOOSE_NEWSLETTER"] = "Choose the newsletter";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_CHECKED_USERS"] = "Send the newsletter to the users selected above";
+$GLOBALS["STR_ADMIN_UTILISATEURS_NEWSLETTER_SEND_TO_ALL"] = "Send the newsletter to all";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL_CHECKBOX"] = "Check this box to subscribe to commercial user";
+$GLOBALS["STR_ADMIN_UTILISATEURS_USERS_GROUP"] = "Users group";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL_OFFERS"] = "Trade Offer";
 $GLOBALS["STR_ADMIN_UTILISATEURS_COMMERCIAL"] = "Trade Offer";
 $GLOBALS["STR_ADMIN_UTILISATEURS_CONTACT_FORECASTED_DATE"] = "Date of contact provided";
@@ -1580,10 +1598,15 @@ $GLOBALS["STR_ADMIN_ZONES_DELIVERY_COSTS_EXPLAIN"] = "The exemption threshold sh
 $GLOBALS["STR_ADMIN_ZONES_DELIVERY_COSTS_IN_ZONE"] = "Activation calculations exemption shipping in the area";
 $GLOBALS["STR_ADMIN_ZONES_DOES_VAT_APPLY_IN_ZONE"] = "The VAT will apply it in this area?";
 $GLOBALS["STR_ADMIN_ZONES_FORM_TITLE"] = "Add or edit an area";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_FRANCO_MODE_ON"] = "Exemption from shipping applies";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_FRANCO_MODE_NO"] = "No exemption";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_MODE_ON_AMOUNT"] = "On the amount";
+$GLOBALS["STR_ADMIN_ZONES_APPLY_MODE_ON_WEIGHT"] = "On the weight";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT_EXPLAIN"] = "This value is used only if the activation is checked above.";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT"] = "amount from which the total exemption shipping applies";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS_EXPLAIN"] = "This number is used only if the activation is checked above. Inform 0 (zero) for not taking into account the number of product.";
 $GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_PRODUCTS"] = "Number of products purchased from which the exemption shipping applies";
+$GLOBALS["STR_ADMIN_ZONES_FRANCO_LIMIT_WEIGHT"] = "Total weight from which the shipping exemption applies";
 $GLOBALS["STR_ADMIN_ZONES_FREE_DELIVERY"] = "Franco port";
 $GLOBALS["STR_ADMIN_ZONES_MSG_CREATED_OK"] = "The delivery area <b>%s</b> has been created.";
 $GLOBALS["STR_ADMIN_ZONES_MSG_DELETED_OK"] = "The area <b>%s</b> has been deleted.";
@@ -1593,6 +1616,8 @@ $GLOBALS["STR_ADMIN_ZONES_NOTHING_FOUND"] = "No area recorded in the database.";
 $GLOBALS["STR_ADMIN_ZONES_TECHNICAL_CODE_EXPLAIN"] = "The code is technical information during the installation of Kwixo. Inform 'DOM' for the area and Dom-Tom, France, France for the area.";
 $GLOBALS["STR_ADMIN_ZONES_TITLE"] = "Zone Management";
 $GLOBALS["STR_ADMIN_ZONES_UPDATE"] = "Edit this zone";
+$GLOBALS["STR_ADMIN_SELECT_ICIRELAIS_SHIPPING"] = "Icirelais transport solution";
+$GLOBALS["STR_ADMIN_UNASSIGN"] = "de-allocate";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN"] = "The following options are possible values ​​of an attribute. Attribute When will be associated with a product, you can select the options allowed for this particular product from all of these options this attribute.";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST"] = "List of options associated with the attribute";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX"] = "Checkbox";
@@ -2006,6 +2031,7 @@ $GLOBALS["STR_ADMIN_TYPES_CREATE"] = "Add a shipping method";
 $GLOBALS["STR_ADMIN_TYPES_EXPLAIN"] = "You can set this page the names of the modes of delivery. These modes of delivery will then bind to the <a class='alert-link' href=\"{$GLOBALS['administrer_url']}/tarifs.php\">shipping rates</a>.";
 $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Add or edit a shipping method";
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "PAYMENT Kwixo";
+$GLOBALS["STR_ADMIN_TYPES_LINK_TO_DPD"] = "Link to this mode of delivery DPD";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Link to this mode of delivery ICI relay";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN"] = "1: Removing the product from the merchant<br />2: Using a network of third-withdrawal (type Kiala, Alveol, etc.).<br />3: Withdrawal in an airport, train station or travel agency<br />4: Carrier (La Poste Colissimo, UPS, DHL ... or private carrier)<br />5: Issuing an e-ticket, downloads ( this case is handled automatically)<br />";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO"] = "Asssocier transport type to one of the predefined types of transport Kwixo";
@@ -2027,3 +2053,5 @@ $GLOBALS["STR_ADMIN_ZONES_PAYMENT_METHOD"] = "Payment associated with the zone. 
 $GLOBALS["STR_ADMIN_SEPARATOR_PRICE"] = "Choice of price separator";
 $GLOBALS["STR_ADMIN_DECIMAL_SEPARATOR_PRICE"] = "Séparateur décimal";
 $GLOBALS["STR_ADMIN_THOUSANDS_SEPARATOR_PRICE"] = "Thousand separator";
+$GLOBALS["STR_ADMIN_NAME_SHORT"] = "Name short";
+$GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"] = "Statistics access website";

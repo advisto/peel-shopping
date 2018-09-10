@@ -1,1 +1,0 @@
-[void.tpl : showing not_found {{ missing_template_name }}]

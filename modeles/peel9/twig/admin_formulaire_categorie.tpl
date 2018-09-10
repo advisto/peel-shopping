@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -43,6 +43,15 @@
 		<tr>
 			<td class="top">{{ STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_carrousel" value="1"{% if is_on_carrousel %} checked="checked"{% endif %} /></td>
+		</tr>
+		{% endif %}
+		{% if cart_force_exapaq_delivery_mode %}
+		<tr>
+			<td class="top">{{ STR_ADMIN_SELECT_ICIRELAIS_SHIPPING }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="radio" name="on_exapaq_delivery" value="1" {% if on_exapaq_delivery == 1} checked="checked"{% endif %} /> {{ STR_YES }}
+				<input type="radio" name="on_exapaq_delivery" value="0" {% if on_exapaq_delivery == 0} checked="checked"{% endif %} /> {{ STR_NO }}
+			</td>
 		</tr>
 		{% endif %}
 		<tr>

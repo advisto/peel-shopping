@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -79,7 +79,7 @@
 			</div>
 			{% if STR_INTRACOM_FORM %}	
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+					<span class="enregistrementgauche"><label for="intracom_for_billing">{{ STR_INTRACOM_FORM }}<br/>{{ STR_INTRACOM_FORM_ALERT }}{% if mandatory_fields.intracom_for_billing %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite"><input type="text" class="form-control" id="intracom_for_billing" name="intracom_for_billing" value="{{ intracom_form|html_entity_decode_if_needed|str_form_value }}" /></span>{{ intracom_form_error }}
 				</div>
 			{% endif %}
@@ -163,7 +163,7 @@
 	{% endif %}
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="adresse">{{ STR_ADDRESS }}{% if mandatory_fields.adresse %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-				<span class="enregistrementdroite"><textarea class="form-control mono-colonne" rows="3" cols="54" id="adresse" name="adresse">{{ adresse|html_entity_decode_if_needed }}</textarea></span>{{ adresse_error }}
+				<span class="enregistrementdroite"><input class="form-control mono-colonne" id="adresse" name="adresse" value="{{ adresse|html_entity_decode_if_needed }}" /></span>{{ adresse_error }}
 			</div>
 	{% for f in specific_fields %}
 		{% if f.field_position=='adresse' %}

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -51,6 +51,20 @@
 			<td class="title_label">{$STR_ADMIN_POSITION}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" type="number" class="form-control" name="position" value="{$position|str_form_value}" /></td>
  		</tr>
+		<tr><td colspan="2" class="bloc">{$STR_ADMIN_FILE_NAME}</td></tr>
+		<td class="title_label">{$STR_IMAGE}{$STR_BEFORE_TWO_POINTS}:</td>
+		<tr>
+			<td>
+				{if isset($image)}
+				<img src="{$image.src|escape:'html'}" /><br />
+					{$STR_ADMIN_FILE_NAME}{$STR_BEFORE_TWO_POINTS}: {$image.nom}&nbsp;
+				<a href="{$image.drop_href|escape:'html'}"><img src="{$image.drop_src|escape:'html'}" width="16" height="16" alt="" />{$STR_ADMIN_DELETE_IMAGE}</a>
+				<input type="hidden" name="image" value="{$image.nom|str_form_value}" />
+				{else}
+				<input name="image" type="file" value="" />
+				{/if}
+			</td>
+		</tr>
 		<tr>
 			<td class="center" colspan="2"><p><input class="btn btn-primary" type="submit" value="{$titre_bouton|str_form_value}" /></p></td>
 		</tr>

@@ -3,21 +3,21 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an     |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import_produits.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: import_produits.php 57765 2018-08-20 13:14:35Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_products,admin_webmastering");
+necessite_priv("admin_white_label,admin_products,admin_webmastering");
 
 $specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock', 'Categorie', 'categorie_id');
-$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_TITLE'];
+$GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_IMPORT_TITLE'];
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
@@ -194,7 +194,25 @@ switch ($action) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_produits_form.tpl');
 		$tpl->assign('action', get_current_url(false));
 		$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'import'));
-		$tpl_inputs = array();
+		$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
+		$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
+		// Récupère la liste des tables à importer
+		// On a une liste générique par défaut dans PEEL, et on complète cette liste via un hook
+		$type_list = array('peel_produits' => 'Produits');
+		$hook_result = call_module_hook('import_infos_template_data', array(), 'array');
+		$fields_to_check_array = array_merge_recursive_distinct($type_list, vb($hook_result['type_list'], array()));
+		$tpl->assign('type_list', $fields_to_check_array);
+		
+		// Récupère le contenu des tables à importer
+		$type_fields = array();
+		foreach($fields_to_check_array as $type_key => $value) {
+			$type_explode = explode('|', $type_key);
+			foreach($type_explode as $type) {
+				$type_fields[$type] = get_table_fields($type);
+			}
+		}
+		$tpl->assign('type_fields', $type_fields);
+		// -------------------------------------------------
 		$req = query("SELECT champs, etat, texte_" . $_SESSION['session_langue'] . "
 			FROM peel_import_field
 			WHERE " . get_filter_site_cond('import_field', null, true) . "");
@@ -209,6 +227,7 @@ switch ($action) {
 		$product_field_names[$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'];
 		$product_field_names['Stock'] = 'Stock';
 		sort($product_field_names);
+		$tpl_inputs = array();
 		foreach ($product_field_names as $this_field) {
 			if ($this_field != 'stock') {
 				$tpl_inputs[] = array('field' => $this_field,
@@ -223,21 +242,21 @@ switch ($action) {
 		$tpl->assign('import_encoding', vb($frm['import_encoding']));
 		$tpl->assign('example_href', 'import/exemple_prod.csv');
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_IMPORT_MODE']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_IMPORT_ALL_FIELDS']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_IMPORT_SELECTED_FIELDS']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_SELECT_FIELDS']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
 		$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR']);
-		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_WARNING_ID']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
+		$tpl->assign('STR_ADMIN_IMPORT_PRODUCTS_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
 		$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
 		echo $tpl->fetch();
 		break;

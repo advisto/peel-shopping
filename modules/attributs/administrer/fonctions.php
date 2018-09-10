@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 58054 2018-09-04 16:11:50Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -428,7 +428,7 @@ function insere_attribut($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng;
 	}
-	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval($frm['mandatory']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval(vn($frm['mandatory'])) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['descriptif_' . $lng]) . "'";
 	}
@@ -452,7 +452,7 @@ function maj_attribut($id, $frm)
 		 ,  image = '" . nohtml_real_escape_string($frm['image']) . "'
 		 ,  prix = '" . nohtml_real_escape_string($prix) . "'
 		 ,  prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
-		 ,  mandatory = '" . intval($frm['mandatory']) . "'
+		 ,  mandatory = '" . intval(vn($frm['mandatory'])) . "'
 		 ,  site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		 ,  position = '" . intval($frm['position']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
@@ -713,16 +713,18 @@ function affiche_liste_attributs_by_id($id)
 						);
 				}
 			}
-			// NB : $this_attribut_infos est encore défini après la boucle foreach ci-dessus, donc on peut l'utiliser
-			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
-				'nom' => $this_attribut_infos['nom'],
-				'id' => $this_nom_attribut_id,
-				'texte_libre' => $this_attribut_infos['texte_libre'],
-				'upload' => $this_attribut_infos['upload'],
-				'issel' => !empty($product_attributs_array[$this_nom_attribut_id]),
-				'sub_res' => $tpl_sub_res
-				);
-			$i++;
+			if (!empty($this_attribut_infos)) {
+				// NB : $this_attribut_infos est encore défini après la boucle foreach ci-dessus, donc on peut l'utiliser
+				$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+					'nom' => $this_attribut_infos['nom'],
+					'id' => $this_nom_attribut_id,
+					'texte_libre' => $this_attribut_infos['texte_libre'],
+					'upload' => $this_attribut_infos['upload'],
+					'issel' => !empty($product_attributs_array[$this_nom_attribut_id]),
+					'sub_res' => $tpl_sub_res
+					);
+				$i++;
+			}
 		}
 	}
 	$tpl->assign('results', $tpl_results);

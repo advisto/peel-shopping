@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -16,7 +16,7 @@
 {% endif %}
 <h1 property="name" class="order_step1">{{ STR_STEP1 }}</h1>
 {% if STR_ADDRESS_TEXT %}<p><a href="{{ wwwroot }}/utilisateurs/adresse.php">{{ STR_ADDRESS_TEXT }}</a></p>{% endif %}
-<form class="entryform form-inline order_step1_form" role="form" id="entryformstep" method="post" action="{{ action|escape('html') }}">
+<form class="entryform form-inline order_step1_form" enctype="multipart/form-data" role="form" id="entryformstep" method="post" action="{{ action|escape('html') }}">
 	<div class="row formulaire-achat">
 		<div class="col-sm-6">
 			<fieldset>
@@ -78,6 +78,9 @@
 		<div class="col-sm-6">
 			<fieldset>
 				<legend>{{ STR_SHIP_ADDRESS }}{{ STR_BEFORE_TWO_POINTS }}:</legend>
+				{% if LANG.STR_DELIVERY_DPD_SHIP_ADDRESS %}
+					{{ LANG.STR_DELIVERY_DPD_SHIP_ADDRESS }}
+				{% endif %}
 				{% if (text_temp_STR_ADDRESS) %}{{ text_temp_STR_ADDRESS }}{% endif %}
 				<div>
 					<label for="personal_address_ship">{{ STR_CHOOSE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
@@ -140,6 +143,22 @@
 			<fieldset>
 				<legend>{{ STR_PAYMENT }}{{ STR_BEFORE_TWO_POINTS }}: </legend>{% if (STR_ERR_PAYMENT) %}<p class="alert alert-danger">{{ STR_ERR_PAYMENT }}</p>{% endif %}
 				<div>{{ payment_error }}{{ payment_select }}</div>
+			</fieldset>
+			{% endif %}
+			{% if is_vat_exemption %}
+			<fieldset>
+				<legend>{{ STR_VAT_EXEMPTION }}{{ STR_BEFORE_TWO_POINTS }}: </legend>{% if STR_ERR_VAT_EXEMPTION %}<p class="alert alert-danger">{{ STR_VAT_EXEMPTION }}</p>{% endif %}
+				<div><input {% if vat_exemption_error or document %} checked="checked" {% endif %} id ="vat_exemption" name="vat_exemption" value="1" type="checkbox"> {{ STR_NOT_SUBJECT_TO_VAT }}</div>
+				<div class="well" id="vat_exemption_file">{{ STR_CERTIFICATE_OF_EXEMPTION }}<span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}:
+					<div>{{ vat_exemption_error }}{{ STR_SELECT_FILE_VAT_EXEMPTION }}</div>
+					<div style="text-align: none;">
+						{% if document %}
+							{% include "uploaded_file.tpl" with {'f':document,'STR_DELETE':STR_DELETE_THIS_FILE } %}
+						{% else %}
+							<input name="document" type="file" value="" />
+						{% endif %}
+					</div>
+				</div>
 			</fieldset>
 			{% endif %}
 			<fieldset>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55792 2018-01-17 11:49:45Z sdelaporte $
+// $Id: fonctions.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,11 +23,11 @@ if (!defined('IN_PEEL')) {
  */
 function webmail_hook_admin_menu_items($params) {
 	$result = array();
-	if (a_priv('admin_users,admin_users_contact_form,admin_finance', true)) {
+	if (a_priv('admin_white_label,admin_users,admin_users_contact_form,admin_finance', true)) {
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/webmail_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_WEBMAIL_SEND"];
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails_send.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_SENT_EMAILS"];
 	}
-	if (a_priv('admin_users,admin_users_contact_form,admin_finance,admin_operations,admin_productsline', true)) {
+	if (a_priv('admin_white_label,admin_users,admin_users_contact_form,admin_finance,admin_operations,admin_productsline', true)) {
 		$result['menu_items']['users_sales'][$GLOBALS['wwwroot_in_admin'] . '/modules/webmail/administrer/list_mails.php'] = $GLOBALS["STR_ADMIN_MENU_MANAGE_LIST_EMAILS"];
 	}
 	return $result;
@@ -752,7 +752,7 @@ $output_array = '
 				' . get_site_name($message['site_id']) . '
 				</td>
 				<td class="center" style="width:15%">
-				' . get_formatted_date($message['update_datetime'], 'short', 'long') . '
+				' . (!empty($message['update_datetime'])?get_formatted_date($message['update_datetime'], 'short', 'long'):'-') . '
 				</td>
 				<td class="center" style="width:15%">';
 				if ($message['read'] == 'NO') {

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57999 2018-08-31 14:16:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -185,7 +185,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
-		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'').", na.disable_reductions
+		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'').", na.disable_reductions, a.image
 			".$sql_from_and_where."
 			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
@@ -209,6 +209,13 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 			$attributs_array[intval($result['nom_attribut_id'])][intval(vn($result['attribut_id']))] = $result;
 		}
 		foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
+			// Suppression des attribut vide dans le cas d'un affichage sous forme de select;
+			foreach($this_attribut_values_array as $attribut_id=>$attribut_array) {
+				if($attribut_array['type_affichage_attribut'] == 0 && empty($attribut_id) && empty($attribut_array['texte_libre']) && empty($attribut_array['upload'])) {
+					unset($attributs_array[$this_nom_attribut_id][0]);
+				}
+			}
+
 			if (!empty($this_attribut_values_array[0]) && count($this_attribut_values_array)==1) {
 				if (!empty($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array']) && !empty($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array'][$this_attribut_values_array[0]['technical_code']]) && function_exists($GLOBALS['site_parameters']['attribut_fictive_options_functions_by_technical_codes_array'][$this_attribut_values_array[0]['technical_code']])) {
 					// DEBUT de gestion d'attributs avec options fictives, n'utilisant pas peel_attributs pour les options mais d'autres sources d'information
@@ -256,15 +263,17 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		if($get_attributes_with_multiple_options_only || $get_attributes_with_single_options_only) {
 			// On retire les attributs qui ne respectent pas les conditions : unique ou multiple
 			foreach($attributs_array as $this_attribute => $this_options_array) {
-				if($get_attributes_with_multiple_options_only && (count($this_options_array)<=1 && $this_options_array[key($this_options_array)]['type_affichage_attribut']!=2)) {
-					// Cet attribut n'est pas une checkbox et a strictement moins de 2 valeurs
-					if(empty($attributs_list) && key($this_options_array) && empty($this_options_array[key($this_options_array)]['texte_libre']) && empty($this_options_array[key($this_options_array)]['upload'])) {
-						// attribut_id est différent de 0 et ce n'est pas un attribut avec options fictives
-						// => il s'agit bien d'une option qu'on peut afficher dans la description produit
+				if(!empty($this_options_array)) {
+					if($get_attributes_with_multiple_options_only && (count($this_options_array)<=1 && $this_options_array[key($this_options_array)]['type_affichage_attribut']!=2)) {
+						// Cet attribut n'est pas une checkbox et a strictement moins de 2 valeurs
+						if(empty($attributs_list) && key($this_options_array) && empty($this_options_array[key($this_options_array)]['texte_libre']) && empty($this_options_array[key($this_options_array)]['upload'])) {
+							// attribut_id est différent de 0 et ce n'est pas un attribut avec options fictives
+							// => il s'agit bien d'une option qu'on peut afficher dans la description produit
+							unset($attributs_array[$this_attribute]);
+						}
+					} elseif($get_attributes_with_single_options_only  && key($this_options_array) && (count($this_options_array)>1 || $this_options_array[key($this_options_array)]['type_affichage_attribut']==2)) {
 						unset($attributs_array[$this_attribute]);
 					}
-				} elseif($get_attributes_with_single_options_only && (count($this_options_array)>1 || $this_options_array[key($this_options_array)]['type_affichage_attribut']==2)) {
-					unset($attributs_array[$this_attribute]);
 				}
 			}
 		}
@@ -355,7 +364,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				} else {
 					$reseller_mode = (check_if_module_active('reseller') && is_reseller());
 				}
-				$show_additionnal_price = true;
+				$show_additionnal_price = empty($product_object->on_gift);
 				if(!empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code']) && !empty($GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$this_attribut_infos['technical_code']])) {
 					$prices_list_by_elements_count = explode(',',$GLOBALS['site_parameters']['attribut_decreasing_prices_per_technical_code'][$this_attribut_infos['technical_code']]);
 					$additional_price_ttc = (isset($prices_list_by_elements_count[$j])?$prices_list_by_elements_count[$j]:$prices_list_by_elements_count[0]) - $attribut_additional_price_ttc;
@@ -462,9 +471,13 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						}
 						$input_id = $form_id . '_custom_attribut' . $this_nom_attribut_id;
 						$input_type = 'select';
+						$this_thumb = thumbs(vb($this_attribut_infos['image']), 80, 50, 'fit');
 						$options[] = array(
 								'value' => $this_value,
 								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
+								'image_src' => (!empty($this_thumb)?$GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb:null),
+								'id' =>  'image_attribut_'. $this_attribut_id,
+								'j' =>  $j,
 								'issel' => in_array($this_value, $attributs_list_array)
 							);
 					} elseif ($type_affichage_attribut == 1) {
@@ -518,7 +531,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'input_class' => $input_class,
 						'options' => $options,
 						'max_label_length' => $max_label_length,
-						'onchange' => (empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
+						'onchange' => 'display_image_attribut(\''.$input_id.'\');'.(empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
 					);
 			}
 		}
@@ -528,6 +541,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 		$tpl->assign('STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS', $GLOBALS['STR_MODULE_ATTRIBUTS_OPTIONS_ATTRIBUTS']);
 		$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('STR_BEFORE_TWO_POINTS_HTML', $GLOBALS['STR_BEFORE_TWO_POINTS_HTML']);
 		$tpl->assign('attributes_text_array', $attributes_text_array);
 		$tpl->assign('display_mode', $display_mode);
 		$tpl->assign('input_name', $input_name);
@@ -926,7 +940,7 @@ function attributes_create_or_update($this_field_name, $this_field_value, $produ
 				SET site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . "', id=" . intval($nom_attrib[1]) . ", nom_" . $_SESSION['session_langue'] . "='" . nohtml_real_escape_string($nom_attrib[0]) . "', etat='1'");
 			$nom_attrib[1] = insert_id();
 			if($admin_mode) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_ATTRIBUTE_CREATED'], $nom_attrib[0], $nom_attrib[1])))->fetch();
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_ATTRIBUTE_CREATED'], $nom_attrib[0], $nom_attrib[1])))->fetch();
 			}
 		}
 		// Pour chaque attribut
@@ -988,7 +1002,7 @@ function attributes_create_or_update($this_field_name, $this_field_value, $produ
 						}
 						$attribute_ids[] = $this_id;
 						if($admin_mode) {
-							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_PRODUCTS_MSG_OPTION_CREATED'], $desc_option[1], $this_id)))->fetch();
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_OPTION_CREATED'], $desc_option[1], $this_id)))->fetch();
 						}
 					}
 				}

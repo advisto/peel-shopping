@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: caddie_affichage.php 57719 2018-08-14 10:15:25Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -18,6 +18,7 @@ define('IN_CADDIE', true);
 $GLOBALS['DOC_TITLE'] =  $GLOBALS['STR_CADDIE'];
 $form_error_object = new FormError();
 $cart_measurement_max_reached = vb($_GET['cart_measurement_max_reached']);
+
 
 if (isset($_POST['pays_zone'])) {
 	$_SESSION['session_caddie']->set_zone($_POST['pays_zone']);
@@ -27,13 +28,15 @@ if (empty($_SESSION['session_caddie']->zoneId) && !empty($_SESSION['session_util
 	$_SESSION['session_caddie']->set_zone($_SESSION['session_utilisateur']['zoneId']);
 }
 // On ne met volontairement pas ici de else
-if (empty($_SESSION['session_caddie']->zoneId) && !empty($GLOBALS['site_parameters']['default_delivery_zone_id'])) {
-	// Force le zone au chargement du panier, si aucun choix n'a été fait avant.
-	$_SESSION['session_caddie']->set_zone($GLOBALS['site_parameters']['default_delivery_zone_id']);
-} elseif (!empty($_SESSION['session_utilisateur']['zoneId'])) {
-	// L'utilisateur vient d'arriver sur la page de caddie : on présélectionne la zone liée à l'adresse de son compte
-	$_SESSION['session_caddie']->set_zone($_SESSION['session_utilisateur']['zoneId']);
-	$_SESSION['session_caddie']->update();
+if (empty($_SESSION['session_caddie']->zoneId)) {
+	if (!empty($GLOBALS['site_parameters']['default_delivery_zone_id'])) {
+		// Force le zone au chargement du panier, si aucun choix n'a été fait avant.
+		$_SESSION['session_caddie']->set_zone($GLOBALS['site_parameters']['default_delivery_zone_id']);
+	} elseif (!empty($_SESSION['session_utilisateur']['zoneId'])) {
+		// L'utilisateur vient d'arriver sur la page de caddie : on présélectionne la zone liée à l'adresse de son compte
+		$_SESSION['session_caddie']->set_zone($_SESSION['session_utilisateur']['zoneId']);
+		$_SESSION['session_caddie']->update();
+	}
 }
 if (isset($_POST['type'])) {
 	$typeId = intval($_POST['type']);
@@ -63,7 +66,7 @@ if (!empty($_GET['code_promo']) && $_GET['code_promo'] == 'delete') {
 }
 $form_error_object = new FormError();
 $short_order_process = false;
-if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && is_tnt_module_active() && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
+if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && check_if_module_active('tnt') && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
 	$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
 	if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
 		// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
@@ -97,6 +100,9 @@ if ($mode) {
 			if (!empty($_COOKIE[$GLOBALS['caddie_cookie_name']])) {
 				// Il faut supprimer le cookie qui contient les produits du panier, sinon le caddie est automatiquement rechargé dans init().
 				unset($_COOKIE[$GLOBALS['caddie_cookie_name']]);
+			}
+			if(est_identifie() && !empty($GLOBALS['site_parameters']['save_cart_auto_enable'])) {
+				query("DELETE FROM peel_save_cart WHERE id_utilisateur = '".intval($_SESSION['session_utilisateur']['id_utilisateur'])."' AND products_list_name='00panier'");
 			}
 			$_SESSION['session_caddie']->init();
 			break;
@@ -154,12 +160,20 @@ if (!empty($redirect_next_step)) {
 			redirect_and_die(get_url('achat_maintenant'));
 		}
 	}
+} else {
+	if (count($_SESSION['session_caddie']->articles) >= 25 && !empty($GLOBALS['site_parameters']['save_caddie_in_cookie'])) {
+		// Plus de 25 références dans le panier, on invite les utilisateurs à sauvegarder leur panier dans la BDD
+		$GLOBALS['error_text_to_display'] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_REGISER_CART_ALERT']))->fetch();
+	}
 }
 
+if(!empty($GLOBALS['site_parameters']['save_cart_auto_enable']) && !empty($_POST)) {
+	necessite_identification();
+	preserve_cart();
+}
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['caddie_affichage_page_columns_count'];
+$output = get_caddie_content_html($form_error_object, vn($GLOBALS['site_parameters']['mode_transport']));
 include($GLOBALS['repertoire_modele'] . "/haut.php");
-
-echo get_caddie_content_html($form_error_object, vn($GLOBALS['site_parameters']['mode_transport']));
-
+echo $output;
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 

@@ -3,16 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: achat_maintenant.php 58031 2018-09-03 09:52:46Z sdelaporte $
 include("../configuration.inc.php");
+$GLOBALS['allow_fineuploader_on_page'] = true;
 
+$form_error_object = new FormError();
 $output = '';
 if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
 	// Test sur l'identification, il faut obligatoirement être connecté à son compte pour renseigner un code promo. Les utilisateurs 'stop' (attente revendeur) ou 'stand' (attente affiliation) ne peuvent pas se connecter à leur compte, ne peuvent donc pas passer commande et ne bénéficient donc pas des avantages liés au statut final 'reve' (revendeur confirmé) ou 'affi' (affilié confirmé). Les utilisateurs 'load' (téléchargement) ou 'newsletter' (abonné newsletter) ne peuvent pas se connecter, et donc ne peuvent pas non plus passer commande.
@@ -29,7 +31,7 @@ $short_order_process = vb($_GET['short_order_process']);
 // Il faut vérifier la cohérence du panier, dans le cas où la quantité de produit a été mise à jour sans que le panier est été rafraichi.
 if (!empty($_SESSION['session_caddie']->typeId)) {
 	$_SESSION['session_caddie']->update();
-	if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && is_tnt_module_active() && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
+	if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && check_if_module_active('tnt') && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
 		$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
 		if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
 			// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
@@ -84,9 +86,6 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 	}
 	if(empty($address_change_type)) {
 		// On traite le formulaire
-		if (!isset($form_error_object)) {
-			$form_error_object = new FormError();
-		}
 		$check_fields = array('nom1' => $GLOBALS['STR_ERR_NAME'],
 			'prenom1' => $GLOBALS['STR_ERR_FIRSTNAME'],
 			'contact1' => $GLOBALS['STR_ERR_TEL'],
@@ -98,9 +97,18 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			$check_fields['cgv'] = $GLOBALS['STR_ERR_CGV'];
 		}
 		// Le moyen de paiement n'est pas sélectionnable si la commande est égale à 0
-		if ($_SESSION['session_caddie']->total > 0) {
+		$payment_select = get_payment_select($_SESSION['session_caddie']->payment_technical_code, false, false, $form_error_object, null, vb($_SESSION['session_caddie']->payment_multiple));
+		if ($_SESSION['session_caddie']->total > 0 && !empty($payment_select)) {
 			$check_fields['payment_technical_code'] = $GLOBALS['STR_ERR_PAYMENT'];
 		}
+
+		// Le fichier joint n'est pas valide ou manquant
+		if (empty($_POST['vat_exemption']) && (!empty($_POST['document']))) {
+			$check_fields['vat_exemption_technical_code'] = $GLOBALS['STR_ERR_VALIDATE_VAT_EXEMPTION'];
+		} elseif (!empty($_POST['vat_exemption']) && (empty($_POST['document']))) {
+			$check_fields['vat_exemption_technical_code'] = $GLOBALS['STR_ERR_VAT_EXEMPTION'];
+		}
+		
 		if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId)) && (!check_if_module_active('socolissimo') || empty($_SESSION['session_commande']['is_socolissimo_order']))) {
 			// Si l'on vient de So Colissimo, on ne veut pas, sur /achat/achat_maintenant.php, revérifier les infos de livraison
 			$check_fields['nom2'] = $GLOBALS['STR_ERR_NAME'];
@@ -110,24 +118,7 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			$check_fields['adresse2'] = $GLOBALS['STR_ERR_ADDRESS'];
 			$check_fields['code_postal2'] = $GLOBALS['STR_ERR_ZIP'];
 			$check_fields['ville2'] = $GLOBALS['STR_ERR_TOWN'];
-			$q_check_country_to_zone = query('SELECT zone
-				FROM peel_pays
-				WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($_SESSION['session_commande']['pays2'])) . '" AND ' . get_filter_site_cond('pays'));
-			if ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
-				// Code compatible si zone sous forme d'entier ou de liste (stocké en SET)
-				$zone_ok = false;
-				foreach(explode(',', $r_check_country_to_zone['zone']) as $this_zone) {
-					if ($this_zone != '-1' && $this_zone == $_SESSION['session_caddie']->zoneId) {
-						// Le pays est bien associé à la zone choisie préalablement
-						// PS : la zone est égale à -1 lorsque le pays est associé à une zone spécifique, non prévue par le code par défaut (dans le cadre du module départements par exemple.)
-						$zone_ok = true;
-					}
-				}
-				if(!$zone_ok) {
-					// Nous sommes dans le cas où la zone existe mais pas celle choisie dans l'étape précédente => ça ne va donc pas (même si l'interface ne permet normalement pas d'avoir ce pays, ici c'est une protection supplémentaire si on chercher à manipuler le POST directement)
-					$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
-				}
-			}
+
 			if (!empty($GLOBALS['site_parameters']['order_mandatory_fields'])) {
 				$check_fields = array_merge($check_fields, $GLOBALS['site_parameters']['order_mandatory_fields']);
 			}
@@ -274,6 +265,44 @@ foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_ad
 	}
 }
 
+// il faut déterminer le pays de livraison de l'utilisateur
+if (!empty($_SESSION['session_commande']['pays2'])) {
+	$checked_country = $_SESSION['session_commande']['pays2'];
+} elseif (empty($_SESSION['session_commande']['pays2'])) {
+	// C'est la première fois que l'on accède à la page, on récupère la configuration d'adresse de livraison.
+	if($_SESSION['session_utilisateur']["address_ship_default"] == 'original_address') {
+		// On recherche le pays de l'utilisateur 
+		$checked_country = get_country_name($_SESSION['session_utilisateur']['pays']);
+	} else {
+		// Recherche des informations de l'adresse choisie
+		$sql = 'SELECT pays 
+			FROM peel_adresses 
+			WHERE id="'.intval($_SESSION['session_utilisateur']["address_ship_default"]).'"';
+		$query = query($sql);
+		if ($result = fetch_assoc($query)) {
+			$checked_country = get_country_name($result['pays']);
+		}
+	}
+}
+$sql_country = 'SELECT zone
+	FROM peel_pays
+	WHERE pays_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(vb($checked_country)) . '" AND ' . get_filter_site_cond('pays');
+$q_check_country_to_zone = query($sql_country);
+$zone_ok = false;
+while ($r_check_country_to_zone = fetch_assoc($q_check_country_to_zone)) {
+	// Code compatible si zone sous forme d'entier ou de liste (stocké en SET)
+	foreach(explode(',', $r_check_country_to_zone['zone']) as $this_zone) {
+		if ($this_zone != '-1' && $this_zone == $_SESSION['session_caddie']->zoneId) {
+			// Le pays est bien associé à la zone choisie préalablement
+			// PS : la zone est égale à -1 lorsque le pays est associé à une zone spécifique, non prévue par le code par défaut (dans le cadre du module départements par exemple.)
+			$zone_ok = true;
+		}
+	}
+}
+if(!$zone_ok) {
+	// Nous sommes dans le cas où la zone existe mais pas celle choisie dans l'étape précédente => ça ne va donc pas (même si l'interface ne permet normalement pas d'avoir ce pays, ici c'est une protection supplémentaire si on chercher à manipuler le POST directement)
+	$form_error_object->add('pays2', $GLOBALS['STR_ERR_INFO_NEEDED_TO_CADDIE']);
+}
 // Adresse de facturation :
 // Pour un mode de livraison rattaché ou non à SoColissimo : elle est préremplie en STEP 1 avec les infos du compte utilisateur
 // En STEP 2, on la récupere après traitement du formulaire dans $_SESSION['session_commande']
@@ -376,9 +405,14 @@ if (empty($short_order_process) && !empty($GLOBALS['site_parameters']['mode_tran
 			}
 			
 			// Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
-			$_SESSION['session_caddie']->init();
+			$custom_template_tags['ORDER_ID'] = $commandeid;
+			$custom_template_tags['EDIT_ORDER_LINK'] = $GLOBALS['administrer_url'].'/commander.php?mode=modif&commandeid='.$commandeid;
+			send_email($GLOBALS['support'],'','','short_order_process', $custom_template_tags);
 			$output .= affiche_contenu_html('short_order_process', true);
 			$output .= get_order_step3($commandeid, empty($GLOBALS['site_parameters']['order_process_short_payment_method_disable']));
+
+			$_SESSION['session_caddie']->init();
+			unset($_SESSION['session_commande']);
 		} else {
 			redirect_and_die(get_url('/'));
 		}
@@ -392,9 +426,6 @@ if (empty($short_order_process) && !empty($GLOBALS['site_parameters']['mode_tran
 		}  elseif (check_if_module_active('ups') && is_type_linked_to_ups($_SESSION['session_caddie']->typeId) && empty($_SESSION['session_commande']['client2']) && empty($_SESSION['session_commande']['is_ups_order'])) {
 			$output .= getUpsForm($_SESSION['session_utilisateur'], $_SESSION['session_caddie']);
 		} else {
-			if (!isset($form_error_object)) {
-				$form_error_object = new FormError();
-			}
 			$output .= get_order_step1($frm, $form_error_object, $GLOBALS['site_parameters']['mode_transport']);
 		}
 	} else {

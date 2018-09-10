@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -159,6 +159,13 @@
 							</td>
 						</tr>
 					{/if}
+					{if !empty($add_cart_to_comparator_url)}
+						<tr>
+							<td colspan="2">
+								{$add_cart_to_comparator_url}
+							</td>
+						</tr>
+					{/if}
 					{if $export_product_list_to_pdf}
 						<tr>
 							<td colspan="2">
@@ -174,6 +181,14 @@
 								<a href="{$empty_list_href|escape:'html'}" data-confirm="{$STR_EMPTY_CART|str_form_value}" class="caddie_link btn btn-warning"><span class="glyphicon glyphicon-remove"></span> {$STR_EMPTY_LIST}</a>
 							</td>
 						</tr>
+						{if isset($short_order_process_by_estimate)}
+						<tr>
+							<td colspan="2">
+								<a class="cart_preservation_link btn btn-info" style="background-color: #999;
+border-color: #999;" href="{$shopping_href|escape:'html'}achat_maintenant.php?short_order_process=1" ><span class="glyphicon glyphicon-save"></span> {$STR_CARD_ESTIMATE}</a>
+							</td>
+						</tr>
+						{/if}
 					</table>
 				</div>
 			</div>

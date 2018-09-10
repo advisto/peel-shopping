@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -111,17 +111,11 @@ function search_hook_search_form_template_data(&$params) {
 		}
 	}
 	if(check_if_module_active('annonces') && $params['display'] != 'module_products') {
-		$tpl_f_cat_ann_opts = array();
-		$ad_categories = get_ad_categories();
-		foreach ($ad_categories as $this_category_id => $this_category_name) {
-			$tpl_f_cat_ann_opts[] = array('value' => $this_category_id,
-				'issel' => (!empty($_GET['cat_select']) && ($_GET['cat_select'] == $this_category_id || (is_array($_GET['cat_select']) && in_array($this_category_id, $_GET['cat_select'])))),
-				'name' => $this_category_name
-				);
-		}
 		// Possibilités : option ou checkbox
 		$results['search_form_category_display_mode'] = vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option');
-		$results['cat_ann_opts'] = $tpl_f_cat_ann_opts;
+
+		$results['cat_ann_opts'] = get_categories_output(null, 'categories_annonces', vb($_GET['cat_select']), vb($GLOBALS['site_parameters']['search_form_category_display_mode'], 'option'), '&nbsp;&nbsp;', "cat_select");
+		
 		$results['display_city_zip'] = empty($GLOBALS['site_parameters']['disable_city_zip_input_on_search_form']);
 		// Définit le type d'annonce détail,gros, etc.. Cependant il y a deux filtres sur Destockplus, d'où le test sur les deux get
 		if (!empty($params['frm']['cat_statut_detail'])) {

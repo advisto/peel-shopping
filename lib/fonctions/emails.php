@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: emails.php 58054 2018-09-04 16:11:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -72,10 +72,12 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
 	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
 	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
-	$query = query('SELECT *
+	$sql = 'SELECT *
 		FROM peel_utilisateurs
 		WHERE email="' . real_escape_string(current($recipient_array)) . '"
-		LIMIT 1');
+		LIMIT 1';
+	$query = query($sql);
+
 	if($result = fetch_assoc($query)) {
 		foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
 			if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
@@ -349,7 +351,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 						break;
 					}
 				}
-				$custom_template_tags_warn['TEXTE'] =  $mail_content .'<br /><a href="'.get_url('/modules/messaging/messaging.php').'">'. $GLOBALS['STR_MODULE_DREAMTAKEOFF_MESSAGING_MORE_DETAIL'] . '</a>';
+				$custom_template_tags_warn['TEXTE'] =  $mail_content .'<br /><a href="'.get_url('/modules/messaging/messaging.php').'">'. $GLOBALS['STR_MODULE_MESSAGING_MORE_DETAIL'] . '</a>';
 				// On désactive le paramètre d'envoi d'un nouveau message 
 				if (!empty($GLOBALS['site_parameters']['email_new_message_sender_is_support_email'])) {
 					$sender = $GLOBALS['support'];

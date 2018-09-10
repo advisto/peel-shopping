@@ -39,7 +39,6 @@ label {
 	/* Pour permettre à des div larges à l'intérieur de déclencher leur overflow:scroll */
 	table-layout: fixed;
 }
-
 .input_search {
 	text-align:center;
 }
@@ -85,6 +84,9 @@ label {
 	cursor:pointer;
 }
 .full_width {
+	width: 100%;
+}
+.form-inline .form-control {
 	width: 100%;
 }
 /* Tables */

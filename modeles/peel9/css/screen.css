@@ -57,6 +57,9 @@ input.form-control[type="file"] {
 .inline-block {
 	display: inline-block;
 }
+.form-inline .form-control {
+	width: 100%;
+}
 /* Header */
 .main_logo {
 	position: relative;
@@ -685,7 +688,7 @@ a:hover .minicaddie_md {
 	text-align: left;
 }
 
-/*caddie.php */
+/* caddie.php */
 div.totalcaddie h2 {
 	padding: 0px;
 }
@@ -748,6 +751,12 @@ a.caddie_link, a.cart_preservation_link{
 #step2caddie p {
 	text-align: right;
 	margin-bottom: 2px;
+}
+.button_order {
+	margin:5px;
+}
+table.table_order td{
+	padding:1px;
 }
 table.table_order {
 	text-align: center;
@@ -855,7 +864,7 @@ table.table_order .btn-primary {
 		padding-right: 0;
 	}
 	.yamm .dropdown-menu > li > ul {
-		/*display: block;*/
+		/* display: block; */
 	}
 }
 
@@ -874,6 +883,7 @@ table.table_order .btn-primary {
 .ui-menu .ui-menu-item a {
 	padding-left: 2px;
 	padding-right: 2px;
+	display:block;
 }
 .ui-menu .ui-menu-item a:hover {
 	color: #FFFFFF !important;
@@ -1657,6 +1667,9 @@ a.carousel-control:hover, a.carousel-control:focus {
     top: 17px;
     z-index: -10;
 }
+.below_main_menu_container {
+	margin-bottom: 15px;
+}
 /* Styles responsive */
 @media (max-width: 1199px) {
 	.table-responsive {
@@ -1786,6 +1799,9 @@ a.carousel-control:hover, a.carousel-control:focus {
 	}
 	.footer{
 		padding-bottom:30px;
+	}
+	.footer_copyright {
+		text-align: center;
 	}
 }
 @media (max-width: 419px) {
@@ -2016,7 +2032,7 @@ a.carousel-control:hover, a.carousel-control:focus {
 	}
 }
 
-/***** PEEL 9 - Css spécifique *****/
+/* CSS spécifique */
 body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 	font-family: roboto, sans-serif;
 }
@@ -2138,9 +2154,7 @@ h1.products_list_brief {
 	border-bottom: 1px solid #ff6600;
 	margin-bottom: 14px;
 }
-.fc_image img, .fp_image_grande img {
-	width: 100%; /* Nécessaire pour IE qui ne comprend pas max-width: 100%, il a besoin qu'une width soit paramétrée */
-}
+
 #main_content h1 {
 	margin-top: 10px;
 }
@@ -2180,10 +2194,10 @@ h1.products_list_brief {
 }
 .produit_catalogue .affiche_critere_stock { /*Pour ne cibler qu'en cas d'affichage sur la home et pas sur la page détail produit*/
 	margin: 10px 10px 0px 10px;
-	width: auto;
+	width: 92%;
 }
 .fp_produit .affiche_critere_stock {
-	min-width: 0px;
+	width: 100%;
 	border-radius: 0px;
 }
 .fp_produit .affiche_critere_stock .product_affiche_prix .prix { /*Pour ne cibler que sur la page détail produit et pas en cas d'affichage en home*/
@@ -2197,9 +2211,6 @@ span.prix, div.on_estimate_information, .title_price_free {
 }
 .affiche_critere_stock .btn-primary, .affiche_critere_stock .form-control {
 	border-radius: 0px;
-}
-div.fp_image_grande {
-	width: auto;
 }
 .product_link_to_modules {
 	margin: inherit;
@@ -2253,8 +2264,7 @@ a.lightbox:hover {
 	padding-bottom: 30px;
 }
 
-/* Blocs zones personnalisés Home PEEL 9 site ecommerce */
-
+/* Blocs zones personnalisés Home site ecommerce */
 .btn_personnalized_two_lines {
 	font-size: 16px;
 	line-height: 18px;
@@ -2438,7 +2448,7 @@ a.lightbox:hover {
 		color: #ffffff;
 	}
 }
-/***** Css Spécifique PEEL 9 Vitrine *****/
+/* CSS Spécifique Vitrine */
 
 #simplified_header_html .navbar-brand {
 	margin: 0 auto;
@@ -2598,7 +2608,5 @@ a.lightbox:hover {
 	#simplified_header_html #flags, #flags_xs {
 		position: initial;
 	}
-	.footer_copyright {
-		text-align: center;
-	}
 }
+/* Fin CSS spécifique Vitrine */

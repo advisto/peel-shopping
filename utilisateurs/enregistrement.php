@@ -3,19 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: enregistrement.php 57825 2018-08-23 09:49:50Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
-
 $GLOBALS['allow_fineuploader_on_page'] = true;
 if (est_identifie()) {
 	if (!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
@@ -29,7 +28,6 @@ if (est_identifie()) {
 		redirect_and_die(get_url("/utilisateurs/change_params.php"));
 	}
 }
-
 $GLOBALS['page_name'] = 'enregistrement';
 $GLOBALS['DOC_TITLE'] = $GLOBALS["STR_OPEN_ACCOUNT"];
 
@@ -91,7 +89,7 @@ if(!empty($GLOBALS['site_parameters']['add_b2b_form_inputs'])) {
 	$mandatory_fields['activity'] = 'STR_ERR_ACTIVITY';
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
 }
-if(!empty($frm['user_type']) && $frm['user_type'] == 'company') {
+if(!empty($frm['user_type']) && $frm['user_type'] == 'company' && empty($GLOBALS['site_parameters']['user_company_standard_mandatory_fields_disable'])) {
 	$mandatory_fields['societe'] = 'STR_ERR_SOCIETY';
 	$mandatory_fields['siret'] = 'STR_ERR_SIREN';
 
@@ -191,10 +189,11 @@ if (!empty($frm)) {
 		$form_error_object->add('intracom_for_billing', $GLOBALS['STR_MODULE_VATLAYER_ERR_INTRACOM']);
 	}
 	if (!$form_error_object->count()) {
-		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
-		if (!empty($frm['dream_societe_kbis'])) {
-			$frm['dream_societe_kbis'] = upload('dream_societe_kbis', false, 'dream_societe_kbis', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
+		$hook_result = call_module_hook('create_account_frm', array('frm' => $frm), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$frm[$this_key] = $this_value;
 		}
+		$frm['logo'] = upload('logo', false, 'any', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['logo']));
 		if (!empty($frm['naissance_company'])) {
 			$frm['naissance'] = $frm['naissance_company'];
 		}
@@ -297,7 +296,7 @@ if ($form_error_object->has_error('token')) {
 	echo $form_error_object->text('token');
 }
 
-echo get_user_register_form($frm, $form_error_object, !empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis'), false, null, $mandatory_fields);
+echo get_user_register_form($frm, $form_error_object, !empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis'), !empty($GLOBALS['site_parameters']['short_register_form']), null, $mandatory_fields);
 
 include($GLOBALS['repertoire_modele'] . "/bas.php");
 

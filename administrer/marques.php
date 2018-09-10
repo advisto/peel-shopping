@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: marques.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: marques.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -140,6 +140,10 @@ function affiche_formulaire_modif_marque($id, &$frm, &$form_error_object)
 			FROM peel_marques
 			WHERE id = " . intval($id) . " AND " . get_filter_site_cond('marques', null, true));
 		if ($frm = fetch_assoc($qid)) {
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+				$frm = get_default_content($frm, intval($id), 'marques');
+			}
 			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 				$frm['site_country'] = explode(',', vb($frm['site_country']));
 			}
@@ -444,7 +448,7 @@ function affiche_formulaire_marque(&$frm, &$form_error_object)
 	}
 	$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_marques'])));
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));

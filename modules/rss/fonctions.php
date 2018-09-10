@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -100,15 +100,17 @@ function echo_rss_and_die($category_id = null, $seller_id = null) {
 			$category_cond = " AND " . get_filter_site_cond('categories', 'c') . "";
 			$product_cond = " AND " . get_filter_site_cond('produits', 'p') . "";
 		}
-		$sql = "SELECT p.*, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.description_" . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']) . " AS description, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
+		$sql = "SELECT p.*, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS nom, p.description_" . (!empty($GLOBALS['site_parameters']['product_description_forced_lang'])?$GLOBALS['site_parameters']['product_description_forced_lang']:$_SESSION['session_langue']) . " AS description" . (!empty($category_id)?", c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie":"") . "
 			FROM peel_produits p
-			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
-			INNER JOIN peel_categories c ON c.id = pc.categorie_id" . $category_cond . "
+			" . (!empty($category_id)?"INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id" . $category_cond . "":"") . "
 			WHERE p.etat='1'" . $product_cond . " " . (!empty($category_id)?" AND pc.categorie_id='" . intval($category_id) . "'":"") . "
-			GROUP BY p.id
+			" . (!empty($category_id)?"GROUP BY p.id":"") . "
 			ORDER BY p.date_maj DESC, p.id DESC
 			LIMIT " . intval($limit);
 		$query = query($sql);
+		// Le SQL ci-dessus est optimisé si pas de catégorie choisie : on évite de faire la jointure avec les catégories et c'est plus rapide
+		// A FAIRE : si on a besoin des informations sur la catégorie pour l'affichage, rajouter une boucle d'abord pour construire la liste des produits, et une requête pour récupérer les catégories de ces produits, avant la boucle ci-dessous
 		while ($prod = fetch_assoc($query)) {
 			if (!isset($last_site_id) || (isset($last_site_id) && $prod['site_id'] != $last_site_id)) {
 				// Premier passage ou changement de site_id (les résultats sont triés par site_id)

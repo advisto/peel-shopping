@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: membre.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: membre.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_ACCES_ACCOUNT', true);
 include("configuration.inc.php");
 
@@ -42,7 +42,9 @@ if (!empty($_POST)) {
 	if (!$form_error_object->count()) {
 		$utilisateur = user_login_now($_POST['email'], $_POST['mot_passe']);
 		if ($utilisateur) {
-			if (!empty($_SESSION['session_redirect_after_login']) && strpos($_SESSION['session_redirect_after_login'], $GLOBALS['wwwroot']) === 0) {
+			if (!empty($_SESSION['session_redirect_after_login'])) {
+				// && strpos($_SESSION['session_redirect_after_login'], $GLOBALS['wwwroot']) === 0 : Comme cette variable est défini par la fonction get_current_url(true); et ne vient ni de POST ni de GET 
+				// => Donc on peut se permettre de se passer de cette condition, ce qui évite les problèmes avec un site multi-domaine
 				// Pour éviter que des spammeurs n'utilisent referer, on vérifie que l'URL de redirection contient wwwroot
 				$goto = $_SESSION['session_redirect_after_login'];
 				unset($_SESSION['session_redirect_after_login']);

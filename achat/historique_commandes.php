@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: historique_commandes.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: historique_commandes.php 57719 2018-08-14 10:15:25Z sdelaporte $
 include("../configuration.inc.php");
 necessite_identification();
 if (!empty($GLOBALS['site_parameters']['order_history_for_user_disable']) && empty($_SESSION['session_utilisateur']['access_history'])) {
@@ -52,7 +52,7 @@ switch (vb($_REQUEST['mode'])) {
 			} else {
 				$allow_status_change = !in_array($this_order['statut_paiement'], $payment_status_forbid_payment);
 			}
-			$output .= affiche_resume_commande(intval($_GET['id']), true, true, $allow_status_change);
+			$output .= affiche_resume_commande(intval($_GET['id']), empty($GLOBALS['site_parameters']['payment_and_delivery_status_in_order_history_display_disable']), true, $allow_status_change);
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('global_error.tpl');
 			$tpl->assign('message', $GLOBALS['STR_AUTH_DENIAL']);
@@ -63,7 +63,7 @@ switch (vb($_REQUEST['mode'])) {
 	case "product_ordered_history" :
 		// Récupération des produits des commandes réglées par l'utilisateur
 		$tpl = $GLOBALS['tplEngine']->createTemplate('products_ordered_history.tpl');
-		$sql = "SELECT ca.id AS ca_id, ca.nom_produit, ca.reference, ca.produit_id , ca.quantite, p.nb_view, c.o_timestamp, c.order_id, c.id, c.email, ca.attributs_list, c.nom_bill, p.technical_code
+		$sql = "SELECT ca.id AS ca_id, ca.nom_produit, ca.reference, ca.produit_id , ca.quantite" . (empty($GLOBALS['site_parameters']['avoid_increment_products_nb_view']) ? ", p.nb_view" : ""). ", c.o_timestamp, c.order_id, c.id, c.email, ca.attributs_list, c.nom_bill, p.technical_code
 			FROM peel_commandes_articles ca
 			INNER JOIN peel_commandes c ON ca.commande_id = c.id AND " . get_filter_site_cond('commandes', 'c') . "
 			LEFT JOIN peel_produits p ON p.id = ca.produit_id AND " . get_filter_site_cond('produits', 'p') . "

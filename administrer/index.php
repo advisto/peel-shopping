@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 55371 2017-12-04 14:43:39Z sdelaporte $
+// $Id: index.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin*");
+necessite_priv("admin_white_label,admin*");
 
 if (file_exists($GLOBALS['dirroot'] . '/' . $GLOBALS['site_parameters']['backoffice_directory_name'] . '/install.php')) {
 	redirect_and_die($GLOBALS['administrer_url'] . '/install.php');
@@ -36,6 +36,8 @@ if (isset($_POST['admin_multisite'])){
 	if($_SESSION['session_utilisateur']['site_id'] == 0 || $_POST['admin_multisite'] == $_SESSION['session_utilisateur']['site_id']) {
 		$_SESSION['session_admin_multisite'] = intval($_POST['admin_multisite']);
 	}
+	// On rafraichit la page pour charger les paramètres du bon site.
+	redirect_and_die(get_current_url());
 }
 $q = query("SELECT COUNT(*) AS this_count
 	FROM peel_produits p
@@ -69,7 +71,7 @@ $paid_orders_delivered_count_object = fetch_object($q);
 $tpl = $GLOBALS['tplEngine']->createTemplate('admin_index.tpl');
 
 $tpl->assign('site_id_select_options', get_site_id_select_options(vb($_SESSION['session_admin_multisite'])));
-$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['session_admin_multisite'])));
 	
 if (check_if_module_active('phone_cti')) {
 	// Il y a deux types de sites avec le module phone_cti :
@@ -389,4 +391,3 @@ function get_home_block_content($content_code)
 	}
 	return $block_content;
 }
-

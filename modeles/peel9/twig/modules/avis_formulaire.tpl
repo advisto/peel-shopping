@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -30,7 +30,7 @@
 		</tr>
 		<tr>
 			<td class="title_label top"> {{ STR_PSEUDO }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><input type="text" class="form-control" name="pseudo" value="{% if not (pseudo) %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}" maxlength="50" /></td>
+			<td>{% if pseudo is empty %}{{ pseudo_ses }}{% else %}{{ pseudo|str_form_value }}{% endif %}</td>
 		</tr>
 	{% endif %}
 		<tr>

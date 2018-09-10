@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: index.php 57904 2018-08-27 11:05:50Z sdelaporte $
 include("../configuration.inc.php");
 
 if (isset($_GET['catid']) && empty($_GET['catid'])) {
@@ -38,7 +38,11 @@ if (!empty($catid)) {
 		WHERE c.id='" . intval($catid) . "' AND " . get_filter_site_cond('categories', 'c') . "" . (!a_priv("admin_products", false)?' AND c.etat = "1"':'');
 	$cat_query = query($sql);
 	if ($cat = fetch_assoc($cat_query)) {
-		if (check_if_module_active('url_rewriting') && get_product_category_url($catid, $cat['nom']) != get_current_url(false)) {
+		// get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+		if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+			$cat = get_default_content($cat, intval($catid), 'categories');
+		}
+		if (check_if_module_active('url_rewriting') && get_product_category_url($catid, $cat['nom']) != get_current_url(false) && empty($_GET['page_offline'])) {
 			// L'URL sans le get n'est pas comme elle est censée être => on redirige avec une 301
 			$theoretical_current_url = (!empty($_GET['page'])?get_product_category_url($catid, $cat['nom'], true, true) . 'page=' . intval($_GET['page']):get_product_category_url($catid, $cat['nom']));
 			redirect_and_die($theoretical_current_url, true);

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -145,7 +145,7 @@
 {% endif %}
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="adresse">{{ STR_ADDRESS }} {% if mandatory.adresse %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
-		<span class="enregistrementdroite"><textarea class="form-control" cols="30" rows="2" name="adresse" id="adresse" {{ content_rows_info }}>{{ adresse|html_entity_decode_if_needed }}</textarea></span>{{ adresse_error }}
+		<span class="enregistrementdroite"><input class="form-control" name="adresse" id="adresse" value="{{ adresse|html_entity_decode_if_needed }}" {{ content_rows_info }} /></span>{{ adresse_error }}
 	</div>
 	<div class="enregistrement">
 		<span class="enregistrementgauche"><label for="code_postal">{{ STR_ZIP }} {% if mandatory.code_postal %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>

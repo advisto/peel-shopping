@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: produits.php 57988 2018-08-31 07:56:50Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -612,7 +612,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('prix_revendeur', vn($prix_revendeur));
 
 		$tpl->assign('prix_achat', vn($prix_achat));
-		$tpl->assign('vat_select_options', get_vat_select_options(vb($frm['tva'])));
+		$tpl->assign('vat_select_options', get_vat_select_options(vb(empty($GLOBALS['site_parameters']['add_product_vat_select_options'])?vb($frm['tva']):vb($GLOBALS['site_parameters']['add_product_vat_select_options']))));
 
 		$tpl->assign('is_module_ecotaxe_active', check_if_module_active('ecotaxe'));
 		$tpl_ecotaxe_options = array();
@@ -642,7 +642,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_gifts_module_active', check_if_module_active('gifts'));
 		$tpl->assign('points', vn($frm['points']));
 		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_produits'])));
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 			$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
@@ -765,6 +765,10 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		   WHERE " . get_filter_site_cond('marques') . "
 		   ORDER BY position, nom_" . $_SESSION['session_langue'] . " ASC");
 		while ($nom = fetch_assoc($select)) {
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+				$nom = get_default_content($nom, intval($nom['id']), 'marques');
+			}
 			$tpl_marques_options[] = array('value' => intval($nom['id']),
 				'issel' => $nom['id'] == vb($frm['id_marque']),
 				'name' => $nom['nom_' . $_SESSION['session_langue']] . (empty($nom['etat'])?' ('.$GLOBALS["STR_ADMIN_DEACTIVATED"].')':'')
@@ -1264,19 +1268,21 @@ function insere_produit($frm)
 		if (!empty($frm['categories'][$i])) {
 		$qid = query("INSERT INTO peel_produits_categories (categorie_id, produit_id)
 			VALUES ('" . nohtml_real_escape_string($frm['categories'][$i]) . "', '" . intval($product_id) . "')");
+		}
 	}
-	}
-
+	
 	/* ajoute les références associées */
 	for ($i = 0; $i < count(vn($frm['references'])); $i++) {
 		if (!empty($frm['references'][$i])) {
-			$query = query("SELECT reference_id
+			$sql = "SELECT reference_id
 				FROM peel_produits_references 
-				WHERE produit_id = " . intval($product_id) ." AND " . nohtml_real_escape_string($frm['references'][$i]));
+				WHERE produit_id = " . intval($product_id) ." AND reference_id = " . nohtml_real_escape_string($frm['references'][$i]);
+			$query = query($sql);
 			if (!$result = fetch_assoc($query)) {
+				$sql_produits_references = "INSERT INTO peel_produits_references (reference_id, produit_id)
+					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($product_id) . "')";
 				// Association de produit non présente.
-				$qid = query("INSERT INTO peel_produits_references (reference_id, produit_id)
-					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($product_id) . "')");
+				$qid = query($sql_produits_references);
 			}
 		}
 	}
@@ -1427,8 +1433,12 @@ function maj_produit($id, $frm)
 	if (check_if_module_active('flash')) {
 		$product_fields[] = "prix_flash = '" . nohtml_real_escape_string($prix_flash) . "'";
 		$product_fields[] = "on_flash = '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'";
-		$product_fields[] = "flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'";
-		$product_fields[] = "flash_end = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_end'])) . "'";
+		if (!empty($frm['flash_start'])) {
+			$product_fields[] = "flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'";
+		}
+		if (!empty($frm['flash_end'])) {
+			$product_fields[] = "flash_end = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_end'])) . "'";
+		}
 	}
 	if (check_if_module_active('best_seller')) {
 		$product_fields[] = "on_top = '" . nohtml_real_escape_string(vn($frm['on_top'])) . "'";

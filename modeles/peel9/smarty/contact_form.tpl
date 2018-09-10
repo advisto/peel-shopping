@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -23,6 +23,16 @@
 			<input type="hidden" id="product_info_id" name="product_info_id" value="{$product_info_id|str_form_value}" />
 			{$extra_field}
 			<table style="width:75%">
+{if !empty($STR_CONTACT_SOCIETE)}
+				<tr>
+					<td><label for="contact_company">{$STR_CONTACT_SOCIETE}{$STR_BEFORE_TWO_POINTS}:</label></td>
+					<td>
+						<select class="form-control" id="contact_company" name="contact_company" style="">
+							{html_options options=$societe_options selected=$societe_options_selected}
+						</select>
+					</td>
+				</tr>
+{/if}
 {if !empty($site_configured_array)}
 				<tr>
 					<td><label for="sujet">{$STR_WEBSITE} <span class="etoile{if $short_form} no-display{/if}">*</span>{$STR_BEFORE_TWO_POINTS}:</label></td>

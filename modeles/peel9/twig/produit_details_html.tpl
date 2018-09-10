@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -35,12 +35,8 @@
 		<p colspan="6"><a href="{{ modify_product_by_owner.href|escape('html') }}" class="title_label">{{ modify_product_by_owner.label }}</a></p>
 	{% endif %}
 	
-	<div class="col-md-12">
-		<h1 property="name" class="titre_produit">{{ product_name }}</h1>
-		<div class="row">
-			<div class="fp_produit">
-				<div class="col-md-5 col-sm-6">
-					<div class="fp_image_grande">
+	<div class="fp_produit">
+			<div class="fp_image_grande">
 						<div class="image_grande" id="slidingProduct{{ product_id }}">
 							{% if main_image is defined %}
 								{% if main_image.file_type != 'image' %}
@@ -152,8 +148,33 @@
 						</div>
 						{% endif %}
 					</div> <!-- fin fp_image_grande -->
-				</div> <!-- fin col-m-5 image -->
-				<div class="col-md-4 col-sm-6 col-xs-12">
+					<h1 property="name" class="titre_produit">{{ product_name }}</h1>
+					{% if subscribe_trip_form is defined %}
+						{{ subscribe_trip_form }}
+					{% endif %}
+					{% if display_registred_user is defined %}
+						{{ display_registred_user }}
+					{% endif %}
+					{% if check is defined %}
+						{{ check }}
+					{% elseif critere_stock is defined %}
+						{% if product_disable_ad_cart_if_user_not_logged is empty %}
+						{{ critere_stock }}
+						{% else %}
+						<div class="affiche_critere_stock well  pull-right">
+						{{ STR_MSG_NEW_CUSTOMER }}
+						</div>
+						{% endif %}
+					{% elseif on_estimate %}
+						<div class="on_estimate well  pull-right">
+							<div class="center">
+								<span style="font-size: 20px;">{{ on_estimate.label }}</span><br />
+								<form class="entryform form-inline" role="form" method="post" action="{{ on_estimate.action }}">
+									<input class="btn btn-primary btn-lg" type="submit" value="{{ on_estimate.contact_us|str_form_value }}">
+								</form>
+							</div>
+						</div>
+					{% endif %}
 					{% if reference is defined %}
 						<h4 property="mpn">{{ reference.label }} <span id="reference_{{ product_id }}">{{ reference.txt }}</span></h4>
 					{% endif %}
@@ -171,60 +192,28 @@
 					{% if points is defined %}
 						<p>{{ points.label }}: {{ points.txt }}</p>
 					{% endif %}
-						<div class="description" property="description">
-							{% if descriptif %}<p>{{ descriptif }}</p>{% endif %}
-							{% if description %}<div>{{ description }}</div>{% endif %}
-						</div>
+					<div class="description" property="description">
+						{% if descriptif %}<p>{{ descriptif }}</p>{% endif %}
+						{% if description %}<div>{{ description }}</div>{% endif %}
+					</div>
 					
 					{% if qrcode_image_src %}<div class="qrcode"><img src="{{ qrcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
 					{% if barcode_image_src %}<div class="qrcode"><img src="{{ barcode_image_src|escape('html') }}" alt="" /></div>{% endif %}
-					
+		
 					{% if extra_link %}
 						<p class="extra_link"><a href="{{ extra_link }}" onclick="return(window.open(this.href)?false:true);">{{ extra_link }}</a></p>
 					{% endif %}
-					{% if categorie_sentence_displayed_on_product %}
+					{% if (categorie_sentence_displayed_on_product) %}
 						<p class="categorie_sentence_displayed_on_product">{{ categorie_sentence_displayed_on_product }}</p>
 					{% endif %}
-					{% if explanation_table is defined %}
+					{% if (explanation_table) %}
 						{{ explanation_table }}
 					{% endif %}
-				</div> <!-- fin col-md-4 description-->
-				<div class="clearfix visible-sm visible-xs"></div>
-				<div class="col-md-3 col-sm-6">
-					{% if subscribe_trip_form is defined %}
-						{{ subscribe_trip_form }}
-					{% endif %}
-					{% if display_registred_user is defined %}
-						{{ display_registred_user }}
-					{% endif %}
-					{% if check is defined %}
-						{{ check }}
-					{% elseif critere_stock is defined %}
-						{% if product_disable_ad_cart_if_user_not_logged is empty %}
-						{{ critere_stock }}
-						{% else %}
-						<div class="affiche_critere_stock well">
-						{{ STR_MSG_NEW_CUSTOMER }}
-						</div>
-						{% endif %}
-					{% elseif on_estimate %}
-						<div class="on_estimate well">
-							<div class="center">
-								<span style="font-size: 20px;">{{ on_estimate.label }}</span><br />
-								<form class="entryform form-inline" role="form" method="post" action="{{ on_estimate.action }}">
-									<input class="btn btn-primary btn-lg" type="submit" value="{{ on_estimate.contact_us|str_form_value }}">
-								</form>
-							</div>
-						</div>
-					{% endif %}
-				</div> <!-- fin col-md-3 ajout panier-->
-			</div> <!-- fin fp_produit -->
+			</div>
 	
 	
 {% if tabs is defined %}
 			<br />
-			<div class="clearfix"></div>
-			<div class="col-md-12">
 				<div class="tabbable">
 					<ul class="nav nav-tabs">
 				{% for tab in tabs %}
@@ -237,10 +226,7 @@
 				{% endfor %}
 					</div>
 				</div>
-			</div>
 {% endif %}
-		</div> <!-- fin row -->
-	</div> <!-- fin col-md-12 -->
 	{% if youtube_code is defined %}
 	{{ youtube_code }}
 	{% endif %}

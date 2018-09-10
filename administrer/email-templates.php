@@ -3,25 +3,27 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: email-templates.php 57742 2018-08-17 10:06:19Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_manage,admin_content,admin_communication,admin_finance");
+necessite_priv("admin_white_label,admin_manage,admin_content,admin_communication,admin_finance");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_TITLE'];
 
 $form_error_object = new FormError();
 $report = '';
 $output = '';
-
+if (vb($_GET['mode'])=='supprfile' ) {
+        supprime_fichier($_GET['id'], $_GET['file']);
+}
 // Modification d'un template
 if (!empty($_GET['id'])) {
 	if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'])) {
@@ -29,6 +31,7 @@ if (!empty($_GET['id'])) {
 		if (empty($_POST['form_name'])) $form_error_object->add('form_name');
 		if (empty($_POST['form_subject'])) $form_error_object->add('form_subject');
 		if (!verify_token('email-templates.php?id=' . $_GET['id'])) $form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+
 		if (empty($_POST['form_text'])) {
 			$form_error_object->add('form_text');
 		} elseif (strip_tags($_POST['form_text']) != $_POST['form_text']) {
@@ -53,21 +56,25 @@ if (!empty($_GET['id'])) {
 			}
 			$ok = false;
 		} else {
+			$image_haut = upload('image_haut', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image_haut']));
+			$image_bas = upload('image_bas', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image_bas']));
 			query('UPDATE peel_email_template SET
-					site_id="' . intval(vn($_POST['site_id'])) . '",
-					technical_code="' . nohtml_real_escape_string(trim($_POST['form_technical_code'])) . '",
-					name="' . nohtml_real_escape_string(trim($_POST['form_name'])) . '",
-					subject="' . real_escape_string(trim($_POST['form_subject'])) . '",
-					text="' . real_escape_string($_POST['form_text']) . '",
-					id_cat="' .intval($_POST['form_id_cat']) . '",
-					lang="' . nohtml_real_escape_string(trim($_POST['form_lang'])) . '",
-					default_signature_code ="' . nohtml_real_escape_string($_POST['default_signature_code']) . '"
+				site_id="' . intval(vn($_POST['site_id'])) . '",
+				technical_code="' . nohtml_real_escape_string(trim($_POST['form_technical_code'])) . '",
+				name="' . nohtml_real_escape_string(trim($_POST['form_name'])) . '",
+				subject="' . real_escape_string(trim($_POST['form_subject'])) . '",
+				text="' . real_escape_string($_POST['form_text']) . '",
+				id_cat="' .intval($_POST['form_id_cat']) . '",
+				lang="' . nohtml_real_escape_string(trim($_POST['form_lang'])) . '",
+				default_signature_code ="' . nohtml_real_escape_string($_POST['default_signature_code']) . '",
+				image_haut ="' . nohtml_real_escape_string($image_haut) . '",
+				image_bas ="' . nohtml_real_escape_string($image_bas) . '"
 				WHERE id="' . intval($_GET['id']) . '"');
 			$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_MSG_UPDATED"]))->fetch();
 		}
 	}
 
-	$query_update = query('SELECT id, technical_code, name, subject, text, lang, id_cat, default_signature_code, site_id
+	$query_update = query('SELECT *
 		FROM peel_email_template
 		WHERE id="' . intval($_GET['id']) . '" AND ' . get_filter_site_cond('email_template', null, true) . '
 		LIMIT 1');
@@ -91,6 +98,9 @@ if (!empty($_GET['id'])) {
 	$categories_list = $tpl_categories_list->fetch();
 
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_email-templates_output.tpl');
+	$tpl->assign('image_haut', get_uploaded_file_infos("image_haut" , $template_infos["image_haut"], get_current_url(false) . '?mode=supprfile&id=' . vb($template_infos['id']) . '&file=image_haut'));
+    $tpl->assign('image_bas', get_uploaded_file_infos("image_bas" , $template_infos["image_bas"], get_current_url(false) . '?mode=supprfile&id=' . vb($template_infos['id']) . '&file=image_bas'));
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
 	$tpl->assign('action_html', (isset($action) ? $action : ''));
 	$tpl->assign('href', $GLOBALS['administrer_url'] . '/email-templates.php');
 	$tpl->assign('id', $_GET['id']);
@@ -148,7 +158,9 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 		$form_error_object->add('form_text');
 	}
 	if (!$form_error_object->count()) {
-		query('INSERT INTO peel_email_template (site_id, technical_code, name, subject, text, lang, id_cat, default_signature_code ) VALUES(
+		$image_haut = upload('image_haut', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image_haut']));
+		$image_bas = upload('image_bas', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($_POST['image_bas']));
+		query('INSERT INTO peel_email_template (site_id, technical_code, name, subject, text, lang, id_cat, default_signature_code, image_haut, image_bas ) VALUES(
 			"' . nohtml_real_escape_string(trim($_POST['site_id'])) . '",
 			"' . nohtml_real_escape_string(trim($_POST['form_technical_code'])) . '",
 			"' . nohtml_real_escape_string(trim($_POST['form_name'])) . '",
@@ -156,7 +168,9 @@ if (isset($_POST['form_name'], $_POST['form_subject'], $_POST['form_text'], $_PO
 			"' . real_escape_string(trim($_POST['form_text'])) . '",
 			"' . nohtml_real_escape_string(trim($_POST['form_lang'])) . '",
 			"' . intval($_POST['form_id_cat']) . '",
-			"' . nohtml_real_escape_string(trim($_POST['default_signature_code'])) . '")');
+			"' . nohtml_real_escape_string(trim($_POST['default_signature_code'])) . '",
+			"' . nohtml_real_escape_string($image_haut) . '",
+			"' . nohtml_real_escape_string($image_bas) . '")');
 		$action = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_EMAIL_TEMPLATES_MSG_TEMPLATE_CREATED']))->fetch();
 	}
 }
@@ -389,3 +403,42 @@ function emailLinksExplanations()
 	return $tpl->fetch();
 }
 
+/**
+ * Supprime le produit spécificié par $id. Il faut supprimer le produit puis les entrées correspondantes de la table produits_categories
+ *
+ * @param integer $id
+ * @param mixed $file
+ * @return
+ */
+function supprime_fichier($id, $file)
+{
+    /* Charge les infos du produit. */
+    switch ($file) {
+        case "image_haut":
+            $sql = "SELECT image_haut AS image
+                FROM peel_email_template
+                WHERE id = '" . intval($id) . "'";
+            $res = query($sql);
+            $file = fetch_assoc($res);
+            query("UPDATE peel_email_template
+                SET image_haut = ''
+                WHERE id = '" . intval($id) . "'");
+            break;
+
+            case "image_bas":
+            $sql = "SELECT image_bas AS image
+                FROM peel_email_template
+                WHERE id = '" . intval($id) . "'";
+            $res = query($sql);
+            $file = fetch_assoc($res);
+            query("UPDATE peel_email_template
+                SET image_bas = ''
+                WHERE id = '" . intval($id) . "'");
+            break;
+            
+    }
+    @unlink($GLOBALS['uploaddir'] . '/' . $file['image']);
+
+    echo '<p class="global_success">Le fichier ' . $file['image'] . ' a été effacé du serveur.'; 
+
+}

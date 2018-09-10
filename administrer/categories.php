@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: categories.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv('admin_products,admin_finance');
+necessite_priv("admin_products,admin_finance");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_CATEGORIES_TITLE'];
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
@@ -48,6 +48,10 @@ switch (vb($_REQUEST['mode'])) {
 	case "insere" :
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
+		}
+		if (empty($frm['nom_' . $_SESSION['session_langue']]) && empty($frm['nom_court_' . $_SESSION['session_langue']]) ) {
+			$form_error_object->add('nom_' . $_SESSION['session_langue'], $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE']);
+			$form_error_object->add('nom_court_' . $_SESSION['session_langue'], $GLOBALS['STR_ADMIN_ERR_CHOOSE_TITLE']);
 		}
 		if (!$form_error_object->count()) {
 			insere_categorie($_POST);
@@ -149,14 +153,14 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 {
 	static $tpl;
 
-	$sql = "SELECT c.id, c.reference, c.nom_" . $_SESSION['session_langue'] . ", c.etat, c.site_id, c.position, c.nb, c.image_" . $_SESSION['session_langue'] . "";
+	$main_content = (!empty($GLOBALS['site_parameters']['get_default_content_enable'])?$GLOBALS['site_parameters']['main_content_lang']:$_SESSION['session_langue']);
+	$sql = "SELECT c.id, c.reference, c.nom_" . $_SESSION['session_langue'] . ", c.nom_court_" . $_SESSION['session_langue'] . ", c.nom_" . $main_content . ", c.nom_court_" . $main_content . ", c.etat, c.site_id, c.position, c.nb, c.image_" . $_SESSION['session_langue'] . "";
 	if (check_if_module_active('category_promotion')) {
 		$sql .= ", c.promotion_devises, c.promotion_percent";
 	}
 	$sql .= ' FROM peel_categories c
 		WHERE c.parent_id = "' . intval($parent_id) . '" AND ' . get_filter_site_cond('categories', 'c', true) . '
-		ORDER BY c.position' . (!empty($GLOBALS['site_parameters']['category_primary_order_by'])? ", c." . $GLOBALS['site_parameters']['category_primary_order_by']  : '') . '';
-
+		ORDER BY c.position' . (!empty($GLOBALS['site_parameters']['category_primary_order_by'])? ", " . $GLOBALS['site_parameters']['category_primary_order_by']  : '') . '';
 	$qid = query($sql);
 	while ($cat = fetch_assoc($qid)) {
 		if(empty($tpl)){
@@ -169,6 +173,17 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		}else{
 			$tpl->assign('image', null);
 		}
+		if(!empty($cat['nom_court_' . $_SESSION['session_langue']])){
+			$cat_name = $cat['nom_court_' . $_SESSION['session_langue']];
+		} elseif(!empty($cat['nom_' . $_SESSION['session_langue']])) {
+			$cat_name = $cat['nom_' . $_SESSION['session_langue']];
+		} elseif(!empty($cat['nom_' . $main_content])) {
+			$cat_name = $cat['nom_' . $main_content];
+		} elseif(!empty($cat['nom_court_' . $main_content])) {
+			$cat_name = $cat['nom_court_' . $main_content];
+		} else {
+			$cat_name = '['.$cat['id'].']';
+		}
 		$tpl->assign('tr_rollover', tr_rollover($first_line, true));
 		$tpl->assign('ajout_cat_href', get_current_url(false) . "?mode=ajout&id=" . $cat['id']);
 		$tpl->assign('ajout_cat_src', $GLOBALS['administrer_url'] . '/images/rubrique-24.gif');
@@ -179,7 +194,7 @@ function affiche_arbo_categorie(&$sortie, $selectionne, $parent_id = 0, $indent 
 		$tpl->assign('cat_id', $cat['id']);
 		$tpl->assign('indent', $indent);
 		$tpl->assign('modif_href', get_current_url(false) . "?mode=modif&id=" . $cat['id']);
-		$tpl->assign('cat_nom', (!empty($cat['nom_' . $_SESSION['session_langue']])?$cat['nom_' . $_SESSION['session_langue']]:'['.$cat['id'].']'));
+		$tpl->assign('cat_nom', $cat_name);
 		$tpl->assign('nb', $cat['nb']);
 		$tpl->assign('site_name', get_site_name($cat['site_id']));
 		if (check_if_module_active('category_promotion')) {
@@ -262,6 +277,7 @@ function affiche_formulaire_ajout_produits_categorie($id, &$frm)
 		}
 	}
 	$frm['parent_id'] = $id;
+	$frm['franco'] = '';
 	$frm['site_id'] = '';
 	$frm['site_country'] =  vb($GLOBALS['site_parameters']['site_country_allowed_array'], array());
 	$frm['nouveau_mode'] = "insere";
@@ -346,6 +362,7 @@ function insere_categorie(&$frm)
 			, etat
 			, on_special
 			, technical_code
+			, franco
 			, date_insere
 			, date_maj';
 		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
@@ -364,6 +381,10 @@ function insere_categorie(&$frm)
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$sql .= ", site_country
 			";
+		}	
+		if(!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
+			$sql .= ", on_exapaq_delivery
+			";
 		}
 		if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
 			$sql .= ", poids
@@ -378,6 +399,7 @@ function insere_categorie(&$frm)
 			$sql .= "
 			, alpha_" . $lng . "
 			, nom_" . $lng . "
+		, nom_court_" . $lng . "
 			, description_" . $lng . '
 			, meta_titre_' . $lng . '
 			, meta_key_' . $lng . '
@@ -391,6 +413,7 @@ function insere_categorie(&$frm)
 			, '" . intval($frm['etat']) . "'
 			, '" . intval(vn($frm['on_special'])) . "'
 			, '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
+			, '" . nohtml_real_escape_string(vb($frm['franco'])) . "'
 			, '" . date('Y-m-d H:i:s', time()) . "'
 			, '" . date('Y-m-d H:i:s', time()) . "'";
 		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
@@ -409,6 +432,10 @@ function insere_categorie(&$frm)
 		if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			$sql .= ", '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 			";
+		}	
+		if(!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
+			$sql .= ", '" . nohtml_real_escape_string($frm['on_exapaq_delivery']) . "'
+			";
 		}
 		if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
 			$sql .= ", '" . nohtml_real_escape_string($frm['poids']) . "'";
@@ -422,6 +449,7 @@ function insere_categorie(&$frm)
 			$sql .= "
 			, '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 			, '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'
+		, '" . nohtml_real_escape_string($frm['nom_court_' . $lng]) . "'
 			, '" . real_escape_string($frm['description_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_titre_' . $lng]) . "'
 			, '" . nohtml_real_escape_string($frm['meta_key_' . $lng]) . "'
@@ -471,6 +499,7 @@ function maj_produits_categorie($id, $frm)
 		, etat = '" . intval($frm['etat']) . "'
 		, position = '" . intval($frm['position']) . "'
 		, on_special = '" . intval(vn($frm['on_special'])) . "'
+		, franco = '" . nohtml_real_escape_string(vb($frm['franco'])) . "'
 		, technical_code = '" . nohtml_real_escape_string(vb($frm['technical_code'])) . "'
 		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
 		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
@@ -489,6 +518,11 @@ function maj_produits_categorie($id, $frm)
 		, site_country = '" . nohtml_real_escape_string(implode(',',vb($frm['site_country'], array()))) . "'
 		";
 	}
+	if(!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
+		$sql .= "
+		, on_exapaq_delivery = '" . nohtml_real_escape_string($frm['on_exapaq_delivery']) . "'
+		";
+	}
 	if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
 		$sql .= "
 		, poids = '" . nohtml_real_escape_string($frm['poids']) . "'";
@@ -502,6 +536,7 @@ function maj_produits_categorie($id, $frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(StringMb::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
 		, nom_" . $lng . "='" . real_escape_string($frm['nom_' . $lng]) . "'
+		, nom_court_" . $lng . "='" . real_escape_string($frm['nom_court_' . $lng]) . "'
 		, image_header_" . $lng . "='" . real_escape_string($frm['image_header_' . $lng]) . "'
 		, image_" . $lng . "='" . real_escape_string($frm['image_' . $lng]) . "'
 		, description_" . $lng . "='" . real_escape_string($frm['description_' . $lng]) . "'
@@ -581,6 +616,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
 	$tpl->assign('nom', $frm['nom_' . $_SESSION['session_langue']]);
+	$tpl->assign('nom_court', vb($frm['nom_court_' . $_SESSION['session_langue']]));
 	if ($frm['nouveau_mode'] == "maj") {
 		$tpl->assign('cat_href', get_product_category_url($frm['id'], $frm['nom_' . $_SESSION['session_langue']]), false, false, vb($frm['site_id']));
 	}
@@ -595,15 +631,21 @@ function affiche_formulaire_produits_categorie(&$frm)
 	if(!empty($GLOBALS['site_parameters']['categorie_weight_enable'])) {
 		$tpl->assign('poids', $frm['poids']);
 	}
+	$tpl->assign('franco', vb($frm['franco']));
 	$tpl->assign('etat', $frm['etat']);
 	$tpl->assign('site_id_select_options', get_site_id_select_options(vb($frm['site_id'])));
-	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_categories'])));
 	if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 		$tpl->assign('site_country_checkboxes', get_site_country_checkboxes(vb($frm['site_country'], array())));
 		$tpl->assign('STR_ADMIN_SITE_COUNTRY', $GLOBALS['STR_ADMIN_SITE_COUNTRY']);
 	}
 	$tpl->assign('type_affichage', $frm['type_affichage']);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
+	$tpl->assign('cart_force_exapaq_delivery_mode', !empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode']));
+	if (!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
+		$tpl->assign('on_exapaq_delivery', $frm['on_exapaq_delivery']);
+	}
+	$tpl->assign('STR_ADMIN_SELECT_ICIRELAIS_SHIPPING', $GLOBALS['STR_ADMIN_SELECT_ICIRELAIS_SHIPPING']);
 
 	$tpl_langs = array();
 	$tpl->assign('is_lot_module_active', check_if_module_active('lot'));
@@ -619,6 +661,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
 			'nom' => $frm['nom_' . $lng],
+			'nom_court' => vb($frm['nom_court_' . $lng]),
 			'description_te' => getTextEditor('description_' . $lng, '100%', 500, StringMb::html_entity_decode_if_needed(vb($frm['description_' . $lng]))),
 			'meta_titre' => $frm['meta_titre_' . $lng],
 			'meta_key' => $frm['meta_key_' . $lng],
@@ -643,6 +686,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 	$tpl->assign('STR_ADMIN_AT_ROOT', $GLOBALS['STR_ADMIN_AT_ROOT']);
+	$tpl->assign('STR_ADMIN_ZONES_FREE_DELIVERY', $GLOBALS['STR_ADMIN_ZONES_FREE_DELIVERY']);
 	$tpl->assign('STR_ADMIN_CATEGORIES_FORM_MODIFY', $GLOBALS['STR_ADMIN_CATEGORIES_FORM_MODIFY']);
 	$tpl->assign('STR_ADMIN_SEE_RESULT_IN_REAL', $GLOBALS['STR_ADMIN_SEE_RESULT_IN_REAL']);
 	$tpl->assign('STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON', $GLOBALS['STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON']);
@@ -690,6 +734,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT', $GLOBALS['STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT']);
+	$tpl->assign('STR_ADMIN_NAME_SHORT', $GLOBALS['STR_ADMIN_NAME_SHORT']);
 	$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT']);
 	echo $tpl->fetch();
 }

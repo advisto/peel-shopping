@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 55512 2017-12-13 17:28:58Z sdelaporte $
+// $Id: Caddie.php 58057 2018-09-05 13:30:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,7 +20,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 55512 2017-12-13 17:28:58Z sdelaporte $
+ * @version $Id: Caddie.php 58057 2018-09-05 13:30:06Z sdelaporte $
  * @access public
  */
 class Caddie {
@@ -316,12 +316,14 @@ class Caddie {
 	{
 		if (count($this->message_caddie) > 0) {
 			if (!empty($this->message_caddie['ERROR_CODE_PROMO'])) {
-				echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => StringMb::html_entity_decode_if_needed($this->message_caddie['ERROR_CODE_PROMO'])))->fetch();
+				$message_caddie = $this->message_caddie['ERROR_CODE_PROMO'];
 				unset($this->message_caddie['ERROR_CODE_PROMO']);
+				return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => StringMb::html_entity_decode_if_needed($message_caddie)))->fetch();
 			}
 			if (!empty($this->message_caddie['SUCCES_CODE_PROMO'])) {
-				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => StringMb::html_entity_decode_if_needed($this->message_caddie['SUCCES_CODE_PROMO'])))->fetch();
+				$message_caddie = $this->message_caddie['SUCCES_CODE_PROMO'];
 				unset($this->message_caddie['SUCCES_CODE_PROMO']);
+				return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => StringMb::html_entity_decode_if_needed($message_caddie)))->fetch();
 			}
 		}
 	}
@@ -776,13 +778,19 @@ class Caddie {
 			} else {
 				$code_only_for_one_cat_and_sons = false;
 			}
+			if(!empty($code_infos['brand_not_apply_code_promo'])){
+				$code_only_for_one_brand = true;
+			} else {
+				$code_only_for_one_brand = false;
+			}
+			$not_apply_to_any_products = true;
 			foreach ($this->articles as $numero_ligne => $product_id) {
 				// On cherche le montant par catégorie de produit pour pouvoir appliquer ensuite
 				// des codes promos avec des seuils minimum sur une catégorie donnée
 				// On fait la somme des produits en faisant attention à ce qu'un produit pourrait apparaître dans plusieurs catégories donc on peut sommer les montants
 				$found_cat = null;
 				$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, true, false, true);
-				$apply_code_on_this_product = $product_object->is_code_promo_applicable($code_infos['id_categorie'], $code_infos['product_filter'], $found_cat, $code_infos['cat_not_apply_code_promo'], $code_infos['promo_code_combinable']);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($code_infos['id_categorie'], $code_infos['product_filter'], $found_cat, $code_infos['cat_not_apply_code_promo'], $code_infos['promo_code_combinable'], $code_infos['brand_not_apply_code_promo']);
 				unset($product_object);
 				if($apply_code_on_this_product) {
 					// ATTENTION : la somme de $this->total_produit_related_to_code_promo n'est pas égale au total du caddie si des produits se retrouvent dans plusieurs catégories
@@ -794,10 +802,12 @@ class Caddie {
 						$this->total_produit_related_to_code_promo += $this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne];
 						// On calcule l'écotaxe car on doit la retirer du montant sur lequel on applique un pourcentage de réduction
 						$this->total_ecotaxe_ttc_related_to_code_promo += $this->ecotaxe_ttc[$numero_ligne] * $this->quantite[$numero_ligne];
+						$not_apply_to_any_products = false;
 					}
 				}
 			}
-			if ($this->total_produit_related_to_code_promo > 0 && ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat)))) {
+
+			if (empty($not_apply_to_any_products) && $this->total_produit_related_to_code_promo > 0 && ($code_only_for_one_cat_and_sons == false || ($code_only_for_one_cat_and_sons == true && !empty($found_cat)) || $code_only_for_one_brand)) {
 				// Il y a des produits qui s'applique au code promo
 				// Si le code s'applique à toutes les catégories OU si le code s'applique à une seule catégorie et qu'il y a au moins un article de la catégorie correspondante dans le panier
 				// On vérifie maintenant que le code est bien valide pour l'utilisateur qui veut l'utiliser
@@ -1124,7 +1134,7 @@ class Caddie {
 		$this->update_code_promo();
 
 		if (empty($this->code_infos) && !empty($GLOBALS['site_parameters']['cart_offer_products_for_each_lot_count'])) {
-			// L'exonération de produits en fonction du nombre ajouté au panier est active. Il faut mettre à 0 le montant des produits les moins chères si les conditions sont réunis pour le faire :
+			// L'exonération de produits en fonction du nombre ajouté au panier est active. Il faut mettre à 0 le montant des produits les moins chers si les conditions sont réunies pour le faire :
 			// Sur N produits achetés, le moins cher des N est offert. Cette opération est cumulable : pour 2*N produits / 2 offerts, etc.
 			// On commence par calculer le nombre de produits à offrir, puis on regarde les moins chers du caddie en tenant compte des quantités dans le panier.
 			$free_cost_cart_nb_product = floor($this->count_products()/$GLOBALS['site_parameters']['cart_offer_products_for_each_lot_count']);
@@ -1153,10 +1163,10 @@ class Caddie {
 			if (!empty($this->total_produit_related_to_code_promo) && !empty($this->code_infos)) {
 				$found_cat = null;
 				$product_object = new Product($this->articles[$numero_ligne], null, false, null, true, true, false, true);
-				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo'], $this->code_infos['promo_code_combinable']);
+				$apply_code_on_this_product = $product_object->is_code_promo_applicable($this->code_infos['id_categorie'], $this->code_infos['product_filter'], $found_cat, $this->code_infos['cat_not_apply_code_promo'], $this->code_infos['promo_code_combinable'], $this->code_infos['brand_not_apply_code_promo']);
 				unset($product_object);
 				if ($apply_code_on_this_product) {
-					// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles qui concernent au moins un produit du panier
+					// Panier au montant non nul et code promo s'appliquant au total du panier ou à une catégorie et ses filles ou à une marque qui concernent au moins un produit du panier
 					$promotion_ventile_ttc = $this->total_reduction_code_promo * ($this->prix_avant_code_promo[$numero_ligne] * $this->quantite[$numero_ligne]) / $this->total_produit_related_to_code_promo;
 				}
 			} elseif (!empty($prices_offered_array)) {
@@ -1244,7 +1254,26 @@ class Caddie {
 		}
 		// ETAPE 4 : Calcul des frais de port
 		if (!empty($this->typeId) && !empty($this->zoneId)) {
-			$delivery_cost_infos = get_delivery_cost_infos($this->total_poids, $this->total_produit, $this->typeId, $this->zoneId, $this->count_products());
+			$delivery_total_amount = $this->total_produit;
+			$delivery_total_weight = $this->total_poids;
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				// Récupération des franco de port par catégorie. Si le produit est associé à plusieurs catégories, on prends le franco de port le moins élevé (avantage pour le client final).
+				$sql = "SELECT c.franco
+					FROM peel_categories c
+					INNER JOIN peel_produits_categories pc ON pc.categorie_id = c.id
+					WHERE pc.produit_id = '".intval($product_id)."' AND c.franco>0
+					ORDER BY c.franco ASC
+					LIMIT 1";
+				$query = query($sql);
+				if ($result = fetch_assoc($query)) {
+					if ($this->total_produit>=$result['franco']) {
+						// Le seuil du franco de port pour cette catégorie est dépassée, on supprime le produit du total qui servira pour le calcul des frais de port
+						$delivery_total_amount -= $this->total_prix[$numero_ligne];
+						$delivery_total_weight -= $this->poids[$numero_ligne];
+					}
+				}
+			}
+			$delivery_cost_infos = get_delivery_cost_infos($delivery_total_weight, $delivery_total_amount, $this->typeId, $this->zoneId, $this->count_products());
 		}
 		if(!empty($GLOBALS['site_parameters']['user_offers_table_enable']) && !empty($_SESSION['session_utilisateur']['id_utilisateur'])) {
 			foreach ($this->articles as $numero_ligne => $product_id) {
@@ -1325,6 +1354,32 @@ class Caddie {
 				$GLOBALS['product_in_caddie_cookie'][] = array('quantite'=>$this->quantite[$numero_ligne],'product_id'=>$product_id,'couleurId'=>$this->couleurId[$numero_ligne],'tailleId'=>$this->tailleId[$numero_ligne],'id_attribut'=>$this->id_attribut[$numero_ligne]);
 			}
 			
+		}
+		
+		if (!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
+			$this->exapaq_order = false;
+			foreach ($this->articles as $numero_ligne => $product_id) {
+				// Recalcul du type de livraison preséléctionné en fonction des produits du panier, si le type n'est pas exapaq ou icirelais
+				$product_object = new Product($product_id, null, false, null, true, $this->zoneTva && !is_user_tva_intracom_for_no_vat() && check_if_module_active('micro_entreprise'));
+				$q = query('SELECT on_exapaq_delivery
+					FROM peel_categories
+					WHERE id='.intval($product_object->categorie_id));
+				$result = fetch_assoc($q);
+				if (!empty($result['on_exapaq_delivery'])) {
+					// La catégorie du produit est une catégorie lié à exapaq. Il faut que les modes de livraions proposé soienti uniquement exapaq (a domicile ou en relais colis). La variable exapaq_order permet de gérer la condition qui affiche les modes de livraison dans get_caddie_content_html.
+					// Catégorie trouvée, il faut forcer la valeur du mode de livraison avec le mode icirelais.
+					$sqlType = 'SELECT DISTINCT(t.id) as id, t.nom_' . $_SESSION['session_langue'] . '
+						FROM peel_tarifs tf
+						INNER JOIN peel_types t ON t.id = tf.type
+						WHERE tf.zone = "' . intval($this->zoneId) . '" AND (poidsmax>="' . floatval($this->total_poids) . '" OR poidsmax=0) AND (totalmax>="' . floatval($this->total_produit) . '" OR totalmax=0) AND (t.technical_code = "icirelais" OR t.technical_code = "exapaq")';
+					$q = query($sqlType);
+					if (num_rows($q)>1) {
+						$result = fetch_assoc($q);
+						$this->exapaq_order = true;
+					}
+				}
+				unset($product_object);
+			}
 		}
 		// FIN
 		$update_in_process = false;
@@ -1482,8 +1537,17 @@ class Caddie {
 			}
 			$articles[$numero_ligne]['prix'] = $this->prix[$numero_ligne];
 			$articles[$numero_ligne]['prix_ht'] = $this->prix_ht[$numero_ligne];
-			$articles[$numero_ligne]['prix_cat'] = $this->prix_cat[$numero_ligne];
-			$articles[$numero_ligne]['prix_cat_ht'] = $this->prix_cat_ht[$numero_ligne];
+			if ($this->prix_cat[$numero_ligne]>0) {
+				$articles[$numero_ligne]['prix_cat'] = $this->prix_cat[$numero_ligne];
+			} else {
+				$articles[$numero_ligne]['prix_cat'] = $this->prix[$numero_ligne];
+			}
+			if ($this->prix_cat_ht[$numero_ligne]>0) {
+				$articles[$numero_ligne]['prix_cat_ht'] = $this->prix_cat_ht[$numero_ligne];
+			} else {
+				$articles[$numero_ligne]['prix_cat_ht'] = $this->prix_ht[$numero_ligne];
+			}
+			
 			$articles[$numero_ligne]['total_prix'] = $this->total_prix[$numero_ligne];
 			$articles[$numero_ligne]['total_prix_ht'] = $this->total_prix_ht[$numero_ligne];
 			$articles[$numero_ligne]['tva_percent'] = $this->tva_percent[$numero_ligne];
@@ -1594,4 +1658,3 @@ class Caddie {
 		return $this->global_promotion;
 	}
 }
-

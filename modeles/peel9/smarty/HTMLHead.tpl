@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -18,26 +18,27 @@
 	<link rel="shortcut icon" type="image/x-icon" href="{$favicon_href}" />{/if}
 	{if isset($link_rss_html)}{$link_rss_html}{/if}
 {foreach $css_files as $css_href}
-	<link rel="stylesheet" media="all" href="{$css_href|escape:'html'}" />
+	<link rel="stylesheet" href="{$css_href|escape:'html'}" {if $css_href|strpos:'.print.'!==false}media="print"{else}media="all"{/if} />
 {/foreach}
-	{if !empty($background_banner)}
 	<style>
+	{if !empty($background_banner)}
 	{foreach $background_banner as $this_background}
 	#main_content{ldelim}
 		background:url('{$this_background.url_img}') no-repeat scroll top center rgba(0, 0, 0, 0);
-		background-size: cover;
+		cursor:pointer;
 	{rdelim}
 	{/foreach}
-	</style>
 	{elseif isset($bg_colors)}
-	<style>
 		body {ldelim} background-color:{$bg_colors.body}; {rdelim}
 		#menu1 li, .main_menu_wide {ldelim} background-color:{$bg_colors.menu}; {rdelim}
 		<!--[if IE]>
 			#contact_form{ldelim}height:100% !important;{rdelim}
 		<![endif]-->
-	</style>
 	{/if}
+	{if !empty($site_static_css_style)}
+		{$site_static_css_style}
+	{/if}
+	</style>
 	{$js_output}
 	<!--[if lt IE 9]>
 	<script src="{$wwwroot}/lib/js/html5shiv.js"></script>

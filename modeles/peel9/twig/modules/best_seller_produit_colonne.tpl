@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -12,6 +12,7 @@
 // +----------------------------------------------------------------------+
 // $Id: best_seller_produit_colonne.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
 #}
+<div class="row">
 <h2 class="products_title">{{ STR_TOP }}</h2>
 {% if (products) %}
 	{% if (module_best_sellers_return_result_as_link) %}
@@ -20,7 +21,7 @@
 	{% endfor %}
 	
 	{% else %}
-	<div id="carousel_best_seller" class="carousel slide row" data-ride="carousel" data-interval="10000">
+	<div id="carousel_best_seller" class="carousel slide col-md-12" data-ride="carousel" data-interval="10000">
 	  <!-- Indicators -->
 	  {#<ol class="carousel-indicators">
 		{% for i in 0..(((products|length)-1) // nb_col_md) %}
@@ -55,3 +56,4 @@
 	</div>
 	{% endif %}
 {% endif %}
+</div>

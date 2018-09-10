@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: database.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -168,7 +168,7 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 		// L'utilisateur ayant le profil "demo" ne peut pas faire de modification des données
 		return false;
 	}
-	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || strpos(strtolower($query), 'union all') !== false || strpos(strtolower($query), 'union select') !== false) || strpos(strtolower($query), 'benchmark(') !== false) {
+	if ($security_sql_filter && (strpos(strtolower($query), 'information_schema') !== false || strpos(strtolower($query), 'loadfile') !== false || (empty($GLOBALS['site_parameters']['security_sql_filter_union_skip']) && (strpos(strtolower($query), 'union all') !== false || strpos(strtolower($query), 'union select') !== false))) || strpos(strtolower($query), 'benchmark(') !== false) {
 		// On empêche l'exécution de requêtes contenant certains mots clé
 		return false;
 	}
@@ -497,39 +497,42 @@ function create_sql_from_array($array)
  * @param string $table_name
  * @param mixed $database_object
  * @param boolean $silent_if_error
- * @param array $fields_filtered
+ * @param array $fields_allowed : si non nul, On ne garde que les champs présents dans $fields_allowed
  * @return
  */
-function get_table_fields($table_name, $database_object = null, $silent_if_error = false, $fields_filtered = null)
+function get_table_fields($table_name, $database_object = null, $silent_if_error = false, $fields_allowed = null)
 {
-	$sql = "SHOW COLUMNS FROM `" . word_real_escape_string($table_name) . "`";
-	$query = query($sql, false, $database_object, $silent_if_error);
-	while ($result = fetch_assoc($query)) {
-		$fields[] = $result;
-		$field_names[] = $result['Field'];
-	}
-	if($fields_filtered !== null && !empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
-		// D'abord on nettoie le tableau $fields_filtered
-		foreach($fields_filtered as $this_key => $this_field) {
-			$temp = explode(' ', trim($this_field));
-			$this_field = $temp[0];
-			if(StringMb::strpos($this_field, '.') !== false) {
-				$temp = explode('.', $this_field);
-				$this_field = $temp[1];
-			}
-			$fields_filtered[$this_key] = $this_field;
+	static $fields;
+	$cache_id = $table_name . '_' . serialize($fields_allowed);
+	if(!isset($fields[$cache_id])) {
+		$sql = "SHOW COLUMNS FROM `" . word_real_escape_string($table_name) . "`";
+		$query = query($sql, false, $database_object, $silent_if_error);
+		while ($result = fetch_assoc($query)) {
+			$fields[$cache_id][] = $result;
 		}
-		// On ne garde que les champs de $fields présents dans $fields_filtered
-		foreach($fields as $this_key => $this_field) {
-			if(!in_array($this_field, $fields_filtered)) {
-				unset($fields[$this_key]);
+		if(!empty($fields[$cache_id]) && $fields_allowed !== null && !empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
+			// D'abord on nettoie le tableau $fields_allowed
+			foreach($fields_allowed as $this_key => $this_field) {
+				$temp = explode(' ', trim($this_field));
+				$this_field = $temp[0];
+				if(StringMb::strpos($this_field, '.') !== false) {
+					$temp = explode('.', $this_field);
+					$this_field = $temp[1];
+				}
+				$fields_allowed[$this_key] = $this_field;
+			}
+			// On ne garde que les champs de $fields présents dans $fields_allowed
+			foreach($fields[$cache_id] as $this_key => $this_field) {
+				if(!in_array($this_field['Field'], $fields_allowed)) {
+					unset($fields[$cache_id][$this_key]);
+				}
 			}
 		}
 	}
-	if (empty($fields)) {
+	if (empty($fields[$cache_id])) {
 		return null;
 	} else {
-		return $fields;
+		return $fields[$cache_id];
 	}
 }
 
@@ -539,45 +542,42 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
  * @param string $table_name
  * @param mixed $link_identifier
  * @param boolean $silent_if_error
- * @param array $fields_filtered
+ * @param array $fields_to_be_filtered_array : tableau des champs souhaités. Chaque champ peut être un simple nom de champ, mais aussi "p.meta_desc_fr AS meta_desc"
  * @return
  */
-function get_table_field_names($table_name, $link_identifier = null, $silent_if_error = false, $fields_filtered = null)
+function get_table_field_names($table_name, $link_identifier = null, $silent_if_error = false, $fields_to_be_filtered_array = null)
 {
-	static $fields;
-	if(!isset($fields[$table_name])) {
-		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error);
-	}
-	if (empty($fields[$table_name])) {
-		return null;
-	} else {
-		foreach($fields[$table_name] as $this_field) {
-			$results[] = $this_field['Field'];
-		}
-		if($fields_filtered !== null) {
-			if (!empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
-				foreach($fields_filtered as $this_key => $this_field) {
-					// D'abord on extrait les noms de champs du tableau $fields_filtered
-					$temp = explode(' ', trim(str_replace('=', ' = ', $this_field)));
-					$this_field = $temp[0];
-					if(StringMb::strpos($this_field, '.') !== false) {
-						$temp = explode('.', $this_field);
-						$this_field = $temp[1];
+	static $field_names;
+	$cache_id = $table_name . '_' . serialize($fields_to_be_filtered_array);
+	if(!isset($field_names[$cache_id])) {
+		$fields = get_table_fields($table_name, $link_identifier, $silent_if_error);
+		if (!empty($fields)) {
+			foreach($fields as $this_field) {
+				$field_names[$cache_id][] = $this_field['Field'];
+			}
+			if($fields_to_be_filtered_array !== null) {
+				if (!empty($GLOBALS['site_parameters']['products_check_existing_fields'])) {
+					foreach($fields_to_be_filtered_array as $this_key => $this_field) {
+						// D'abord on extrait les noms de champs du tableau $fields_to_be_filtered_array
+						$temp = explode(' ', trim(str_replace('=', ' = ', $this_field)));
+						$this_field = $temp[0];
+						if(StringMb::strpos($this_field, '.') !== false) {
+							$temp = explode('.', $this_field);
+							$this_field = $temp[1];
+						}
+						// On ne garde que les champs de $fields_to_be_filtered_array correspondant à des champs de $field_names
+						if(!in_array($this_field, $field_names)) {
+							unset($fields_to_be_filtered_array[$this_key]);
+						}
 					}
-					// On ne garde que les champs de $fields_filtered présents dans $results
-					if(!in_array($this_field, $results)) {
-						unset($fields_filtered[$this_key]);
-					}
+				} else {
+					// Si products_check_existing_fields est vide, alors on retourne la liste passée en paramètre tel quel
 				}
-				$results = $fields_filtered;
-				return $results;
-			} else {
-				// Si products_check_existing_fields est vide, alors on retourne la liste passée en paramètre tel quel
-				return $fields_filtered;
+				$field_names[$cache_id] = $fields_to_be_filtered_array;
 			}
 		}
-		return $results;
 	}
+	return $field_names[$cache_id];
 }
 
 /**
@@ -586,14 +586,14 @@ function get_table_field_names($table_name, $link_identifier = null, $silent_if_
  * @param mixed $table_name
  * @param mixed $link_identifier
  * @param boolean $silent_if_error
- * @param array $fields_filtered
+ * @param array $fields_allowed
  * @return
  */
-function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false, $fields_filtered = null)
+function get_table_field_types($table_name, $link_identifier = null, $silent_if_error = false, $fields_allowed = null)
 {
 	static $fields;
 	if(!isset($fields[$table_name])) {
-		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error, $fields_filtered);
+		$fields[$table_name] = get_table_fields($table_name, $link_identifier, $silent_if_error, $fields_allowed);
 	}
 	if (empty($fields[$table_name])) {
 		return null;
@@ -603,6 +603,23 @@ function get_table_field_types($table_name, $link_identifier = null, $silent_if_
 		}
 		return $results;
 	}
+}
+
+/**
+ * get_field_maxlength()
+ *
+ * @param string $field_type
+ * @return
+ */
+function get_field_maxlength($field_type) {
+	if(strpos($field_type, 'int(') !== false || strpos($field_type, 'text(') !== false || strpos($field_type, 'char(') !== false) {
+		$temp = explode('(', $field_type);
+		$temp2 = explode(')', $temp[1]);
+		$maxlength = $temp2[0];
+	} else {
+		$maxlength = null;
+	}
+	return $maxlength;
 }
 
 /**

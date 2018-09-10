@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 55482 2017-12-11 14:58:04Z sdelaporte $
+# $Id: peel.sql 58057 2018-09-05 13:30:06Z sdelaporte $
 #
 
 --
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS `peel_avis` (
 
 CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_categorie` int(11) NOT NULL DEFAULT '0',
+  `id_categorie` TEXT NOT NULL,
   `description` varchar(255) NOT NULL DEFAULT '',
   `image` varchar(255) NOT NULL DEFAULT '',
   `date_debut` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -233,6 +233,7 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `keywords` mediumtext NOT NULL,
   `list_id` varchar(255) NOT NULL DEFAULT '',
   `pages_allowed` enum('all','odd','even') NOT NULL DEFAULT 'all',
+  `screen_size` varchar(255) NOT NULL DEFAULT '',
   `do_not_display_on_pages_related_to_user_ids_list` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -259,6 +260,7 @@ CREATE TABLE IF NOT EXISTS `peel_categories` (
   `lang` varchar(2) NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `on_special` tinyint(1) NOT NULL DEFAULT '0',
+  `franco` FLOAT(15,5) NOT NULL DEFAULT '0.00000',
   `position` int(11) NOT NULL DEFAULT '0',
   `nb` int(11) NOT NULL DEFAULT '0',
   `color` varchar(255) NOT NULL DEFAULT '',
@@ -321,7 +323,6 @@ CREATE TABLE IF NOT EXISTS `peel_codes_promos` (
   `email_acheteur` varchar(255) NOT NULL DEFAULT '',
   `on_check` tinyint(1) NOT NULL DEFAULT '0',
   `promo_code_combinable` tinyint(1) NOT NULL DEFAULT '0',
-  `id_site` int(11) NOT NULL DEFAULT '0',
   `id_categorie` int(11) NOT NULL DEFAULT '0',
   `nombre_prevue` int( 11 ) NOT NULL DEFAULT '0',
   `compteur_utilisation` int( 11 ) NOT NULL DEFAULT '0',
@@ -329,6 +330,7 @@ CREATE TABLE IF NOT EXISTS `peel_codes_promos` (
   `site_id` int(11) NOT NULL DEFAULT '0',
   `product_filter` varchar(255) NOT NULL DEFAULT '',
   `cat_not_apply_code_promo` TEXT NOT NULL,
+  `brand_not_apply_code_promo` TEXT NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `id_utilisateur` (`id_utilisateur`),
   KEY `nom` (`nom`),
@@ -575,6 +577,7 @@ CREATE TABLE IF NOT EXISTS `peel_couleurs` (
   `prix` float(15,5) NOT NULL default '0.00000',
   `prix_revendeur` float(15,5) NOT NULL DEFAULT '0.00000',
   `percent` float(15,5) NOT NULL DEFAULT '0.00000',
+  `image` varchar(255) NOT NULL DEFAULT '',
   `position` int(11) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) unsigned NOT NULL DEFAULT '0',
@@ -650,7 +653,6 @@ CREATE TABLE IF NOT EXISTS `peel_ecotaxes` (
 -- Structure de la table `peel_email_template`
 --
 
-
 CREATE TABLE IF NOT EXISTS `peel_email_template` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `technical_code` varchar(255) NOT NULL DEFAULT '',
@@ -661,6 +663,8 @@ CREATE TABLE IF NOT EXISTS `peel_email_template` (
   `active` enum('TRUE','FALSE') NOT NULL DEFAULT 'TRUE',
   `id_cat` int(11) NOT NULL DEFAULT '1',
   `default_signature_code` varchar(255) NOT NULL DEFAULT '',
+  `image_haut` varchar(255) NOT NULL DEFAULT '',
+  `image_bas` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `site_id` (`site_id`)
@@ -862,6 +866,7 @@ CREATE TABLE IF NOT EXISTS `peel_newsletter` (
   `template_technical_code` varchar(255) NOT NULL DEFAULT '',
   `statut` varchar(100) NOT NULL DEFAULT '',
   `date_envoi` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `product_ids` VARCHAR(255) NOT NULL DEFAULT '',
   `site_id` int( 11 ) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)
@@ -1528,6 +1533,7 @@ CREATE TABLE IF NOT EXISTS `peel_utilisateurs` (
   `on_client_module` tinyint(1) NOT NULL DEFAULT '0',
   `on_photodesk` tinyint(1) NOT NULL DEFAULT '0',
   `access_history` tinyint(1) NOT NULL DEFAULT '0',
+  `ip` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   `parameters` TEXT NOT NULL,
   PRIMARY KEY  (`id_utilisateur`),
@@ -1617,9 +1623,11 @@ CREATE TABLE IF NOT EXISTS `peel_zones` (
   `tva` int(11) NOT NULL DEFAULT '0',
   `position` int(11) NOT NULL DEFAULT '0',
   `on_franco` tinyint(1) NOT NULL DEFAULT '0',
+  `on_franco_weight` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_reseller_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `on_franco_nb_products` int(5) NOT NULL DEFAULT '0',
+  `applied_franco_mode` varchar(255) NOT NULL DEFAULT '',
   `payment_technical_code` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),

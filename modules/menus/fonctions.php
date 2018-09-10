@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -141,6 +141,10 @@ function get_on_rollover_articles_html()
 	$query = query($sql);
 	$i = 0;
 	while ($article = fetch_assoc($query)) {
+		//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+		if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+			$article = get_default_content($article, $article['id'], 'articles');
+		}
 		if ((!a_priv("admin_product") && !a_priv("reve")) && $article['on_reseller'] == 1) {
 			continue;
 		} else {

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -43,6 +43,10 @@
 			<td class="title_label">{$STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input style="width:100px" type="text" class="form-control" name="on_franco_amount" value="{$on_franco_amount|str_form_value}" /></td>
    	 	</tr>
+		<tr>
+			<td class="title_label">{$STR_ADMIN_TECHNICAL_CODE}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="technical_code" value="{$technical_code|str_form_value}" /></td>
+		</tr>
 		<tr>
 			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td>
@@ -90,6 +94,15 @@
 			<td>
 				<input type="radio" name="is_icirelais" value="1" {if $is_icirelais == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="is_icirelais" value="0" {if $is_icirelais == 0} checked="checked"{/if} /> {$STR_NO}
+			</td>
+		</tr>
+		{/if}
+		{if $is_dpd_module_active}
+		<tr>
+			<td>{$STR_ADMIN_TYPES_LINK_TO_DPD}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="is_dpd" value="1" {if $is_dpd == 1} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="is_dpd" value="0" {if $is_dpd == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
 		{/if}

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -592,16 +592,13 @@
 		{% if is_vitrine_module_active and is_id_utilisateur %}
 		<tr><td colspan="2"><br />{{ vitrine_admin }}</td></tr>
 		{% endif %}
-		<tr>
-			<td colspan="2">
-				{{ hook_output }}
-			</td>
-		</tr>
+	</table>
+		{{ hook_output }}
+	<table>
 		<tr>
 			<td colspan="2"><p class="center"><input class="btn btn-primary" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>
 		</tr>
 	</table>
-	{{ hook_output }}
 </form>
 {% if is_abonnement_module_active and is_id_utilisateur %}
 <table class="full_width">

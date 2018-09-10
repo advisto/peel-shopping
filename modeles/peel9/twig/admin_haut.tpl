@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -23,7 +23,7 @@
 	<link rel="shortcut icon" type="image/x-icon" href="{{ favicon_href }}" />{% endif %}
 {% if (css_files) %}
 	{% for css_href in css_files %}
-	<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" />
+	<link rel="stylesheet" media="all" href="{{ css_href|escape('html') }}" {% if (css_href|strpos(print)) %}media="print"{% else %}media="all"{% endif %}  />
 	{% endfor %}
 {% endif %}
 {% if (js_files) %}

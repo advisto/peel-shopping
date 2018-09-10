@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: rpc.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 define('LOAD_NO_OPTIONAL_MODULE', true);
@@ -143,6 +143,8 @@ if (StringMb::strlen($search)>0) {
 			$results_array[] = $result;
 		}
 	}
+	$hook_result = call_module_hook('admin_rpc_post', array('mode' => $mode, 'search' => $search, 'maxRows' => $maxRows, 'results_array' => $results_array), 'array');
+	$results_array = array_merge_recursive_distinct($results_array, $hook_result);
 }
 if (!empty($_POST['return_json_array_with_raw_information'])) {
 	$output = json_encode($results_array);

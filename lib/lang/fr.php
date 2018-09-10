@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fr.php 55718 2018-01-12 09:39:32Z sdelaporte $
+// $Id: fr.php 57992 2018-08-31 08:27:28Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "Gérer mes adresses de facturation et de livrais
 $GLOBALS["STR_ADDRESS_NAME"] = "Titre de l'adresse";
 $GLOBALS["STR_ADMIN"] = "Administration";
 $GLOBALS["STR_ADMINISTRATION"] = "Administration";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "Recherche avancée";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "Accéder à la recherche avancée";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Voir les bannières à insérer sur votre site";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "Vous êtes affilié au site {$GLOBALS['site']}.\n\nActuellement, nous vous reversons <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> du Chiffre d'Affaires HT généré par votre compte.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Générer un code HTML pour les produits affiliés";
@@ -242,8 +244,8 @@ $GLOBALS["STR_ERR_FILL_IN_ALL"] = "Veuillez remplir tous les champs";
 $GLOBALS["STR_ERR_FIRST_CHOICE"] = "Vous devez choisir au moins une catégorie favorite.\n";
 $GLOBALS["STR_ERR_FIRSTNAME"] = "Vous n'avez pas précisé votre prénom.\n";
 $GLOBALS["STR_ERR_FORM"] = "Votre formulaire est incomplet ou comporte des erreurs.";
-$GLOBALS["STR_ERR_HASH"] = "Le lien n'est pas valide. Aucune modification n'a été effectué.";
-$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "Vous n'avez pas choisi votre pays, votre zone ou votre type de livraison.<br /><br />Merci de renseigner les informations demandées.";
+$GLOBALS["STR_ERR_HASH"] = "Le lien n'est pas valide. Aucune modification n'a été effectuée.";
+$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "Vous n'avez pas choisi votre pays ou votre type de livraison, ou votre zone de livraison n'est pas cohérente avec le pays de livraison de l'adresse utilisée.<br /><br />Merci de renseigner les informations demandées.";
 $GLOBALS["STR_ERR_KEYB"] = "Appuyez sur la touche <b>x</b> du clavier pour fermer";
 $GLOBALS["STR_ERR_LOGIN"] = "Vous n'avez pas précisé votre pseudo.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Vous n'avez pas précisé votre message.\n";
@@ -353,6 +355,7 @@ $GLOBALS["STR_INSTALLATION_DELETED_LINK"] = "Cliquez ici une fois le répertoire
 $GLOBALS["STR_INSTALLATION_PROCEDURE"] = "Procédure d'installation";
 $GLOBALS["STR_INSTALLATION"] = "Installation";
 $GLOBALS["STR_INTRACOM_FORM"] = "N° TVA Intracom <br />(Sociétés européennes uniquement)";
+$GLOBALS["STR_INTRACOM_FORM_ALERT"] = "NE PAS REMPLIR SI FRANCE OU EN DEHORS DE L’EUROPE";
 $GLOBALS["STR_INTRODUCTORY_TEXT"] = "Texte d'introduction";
 $GLOBALS["STR_INVALID_TOKEN"] = "Token invalide : Cookies désactivés, traitement déjà réalisé ou Referer HTTP non renseigné par votre navigateur";
 $GLOBALS["STR_INVOICE_ADDRESS"] = "Adresse de facturation";
@@ -382,13 +385,13 @@ $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Identifiez-vous pour bénéficier de votre r
 $GLOBALS["STR_LOGIN_OK"] = "Merci de votre confiance.";
 $GLOBALS["STR_LOGIN_OK2"] = "Afin de finaliser votre inscription, un email de validation a été envoyé à l'adresse %s. Nous vous invitons à cliquer sur le lien présent dans cet email pour valider cette inscription";
 $GLOBALS["STR_LOGIN_OK3"] = "Votre inscription est bien prise en compte, vous pouvez dès à présent accéder à votre compte en consultant <a href='%s'>%s</a> ou visiter le site via <a href='%s'>%s</a>";
-$GLOBALS["STR_LOGIN"] = "S'identifier";
+$GLOBALS["STR_LOGIN"] = "Se connecter";
 $GLOBALS["STR_LOGO"] = "Logo";
 $GLOBALS["STR_LOGOUT"] = "Se déconnecter";
 $GLOBALS["STR_M"] = "M. ";
 $GLOBALS["STR_MAIL_SENDED"] = "L'email contenant le lien de téléchargement a été envoyé à";
 $GLOBALS["STR_MANAGER"] = "Manager / Cadre";
-$GLOBALS["STR_MANDATORY_FIELDS"] = "Champs Obligatoires";
+$GLOBALS["STR_MANDATORY_FIELDS"] = "Champs obligatoires";
 $GLOBALS["STR_MANDATORY"] = "Les champs marqués d'un astérisque sont obligatoires";
 $GLOBALS["STR_MEMBER_REGISTERED_SINCE"] = "Inscrit le";
 $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Mes codes promotionnels utilisés :";
@@ -481,6 +484,7 @@ $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_BACK_COMPTE"] = "Cliquez ici pour revenir �
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR_DEJA_INSCRIT"] = "Cet email ne peut plus être parrainé car il figure déjà dans notre base de données";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_ERR"] = "Merci de remplir les champs obligatoires pour parrainer vos amis.\r\n<a href=\"{$GLOBALS['wwwroot']}/modules/parrainage/parrain.php\">Cliquez ici pour revenir à la page précédente</a>.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND"] = "Vos amis ont reçu leur demande de parrainage. Dès validation de leur compte client, vous pourrez bénéficier d'un avoir de %s sur leur première commande. Ils pourront, eux-aussi bénéficier de leur avoir de %s à valoir sur leur première commande.";
+$GLOBALS["STR_MODULE_PREMIUM_PARRAIN_MSG_SEND_SINGLE"] = "Votre ami a reçu la demande de parrainage. Dès validation de leur compte client, vous pourrez bénéficier d'un avoir de %s sur leur première commande. Il pourra, lui-aussi bénéficier d'un avoir de %s à valoir sur sa première commande.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER_MSG"] = "Merci de confirmer votre inscription avec les identifiants qui vous ont été transmis par email ! En confirmant votre inscription avec ces identifiants, vous pourrez bénéficier d'un avoir de %s à valoir sur votre première commande sur notre site internet.";
 $GLOBALS["STR_MODULE_PREMIUM_PARRAIN_REGISTER"] = "Confirmation d'inscription au programme de parrainage du site {$GLOBALS['site']}";
 $GLOBALS["STR_MODULE_PREMIUM_PDF_TTC"] = "TOTAL TTC :";
@@ -531,6 +535,7 @@ $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroo
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Identifiez-vous ci-dessous.";
 $GLOBALS["STR_MSG_THANKS"] = "Merci de votre confiance, votre commande a été enregistrée avec succès. ";
 $GLOBALS["STR_MULTIPAGE_SEPARATOR"] = "&nbsp;-&nbsp;";
+$GLOBALS["STR_MY_DATA"] = "Mes informations";
 $GLOBALS["STR_MY_GIFT_POINT"] = "Mes points cadeaux";
 $GLOBALS["STR_MY_ORDER"] = "Mes commandes";
 $GLOBALS["STR_MY_QUOTES"] = "Mes devis";
@@ -690,6 +695,7 @@ $GLOBALS["STR_PROFORMA"] = "Facture proforma";
 $GLOBALS["STR_PROMO_CODE"] = "Code promo";
 $GLOBALS["STR_PROMOTION_INCLUDE"] = "Prix incluant une promotion de";
 $GLOBALS["STR_PROMOTION"] = "Promotion";
+$GLOBALS["STR_PROMOTION_SHORT"] = "Promo";
 $GLOBALS["STR_PROMOTIONS"] = "Promotions";
 $GLOBALS["STR_PROPULSE"] = "Une création";
 $GLOBALS["STR_PSEUDO"] = "Pseudo";
@@ -733,6 +739,7 @@ $GLOBALS["STR_RSS_TITLE"] = "Flux RSS du site {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "Notre Flux RSS";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Conditions de vente";
 $GLOBALS["STR_SAVE_CART"] = "Enregistrer le panier";
+$GLOBALS['STR_SCREEN_SIZE'] = "Taille d'écran";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "Tous les mots";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "N'importe quel mot";
 $GLOBALS["STR_SEARCH_BRAND"] = "Recherche par marque";
@@ -759,6 +766,7 @@ $GLOBALS["STR_SHIP_ADDRESS"] = "Adresse de livraison";
 $GLOBALS["STR_SHIP_TYPE_CHOOSE"] = "Choisissez votre type d'expédition";
 $GLOBALS["STR_SHIP_ZONE_CHOOSE"] = "Choisissez votre zone d'expédition";
 $GLOBALS["STR_SHIPPING_COST"] = "Frais de port";
+$GLOBALS["STR_SHIPPING_TO_BE_DETERMINED"] = "à déterminer";
 $GLOBALS["STR_SHIPPING_TYPE"] = "Mode de livraison";
 $GLOBALS["STR_SHIPPING_ZONE"] = "Zone d'expédition";
 $GLOBALS["STR_SHOPPING"] = "Continuer mes achats";
@@ -864,7 +872,7 @@ $GLOBALS["STR_VAT_INTRACOM"] = "TVA Intracommunautaire";
 $GLOBALS["STR_VAT"] = "TVA";
 $GLOBALS["STR_VIA"] = "Via";
 $GLOBALS["STR_VOIR_LISTE_CADEAU"] = "Consulter ma liste de cadeaux";
-$GLOBALS["STR_VOIR_PENSE_BETE"] = "Consulter ma liste d'achat";
+$GLOBALS["STR_VOIR_PENSE_BETE"] = "Consulter ma liste de pense-bête";
 $GLOBALS["STR_VOTE"] = "Voter";
 $GLOBALS["STR_WARNING"] = "Attention";
 $GLOBALS["STR_WEBSITE"] = "Site web";
@@ -882,6 +890,8 @@ $GLOBALS["STR_WORD_RESELLER"] = "Revendeurs";
 $GLOBALS["STR_WORD_SELLERS"] = "Vendeurs";
 $GLOBALS["STR_WRITE_EMAIL_HERE"] = "Inscrivez votre email ici";
 $GLOBALS["STR_YES"] = "Oui";
+$GLOBALS["STR_YES_NOT_VALIDATE"] = "Oui, non validé";
+$GLOBALS["STR_YES_VALIDATE"] = "Oui, validé";
 $GLOBALS["STR_YOU_ARE"] = "Vous êtes";
 $GLOBALS["STR_YOU_CAN_EDIT_YOUR_ORDER"] = "Nous vous invitons à éditer votre facture à partir de votre compte utilisateur.";
 $GLOBALS["STR_YOUR_CODE_PROMO"] = "Votre code promo";
@@ -896,3 +906,11 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "Modification de l'adresse effectu�
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "Aucun produit n'a été ajouté";
 $GLOBALS["STR_ZIP"] = "Code postal";
 $GLOBALS["STR_ZOOM"] = "Zoom";
+$GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select du fichier";
+$GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
+$GLOBALS["STR_CARD_ESTIMATE"] = "Transformer ce panier en devis";
+$GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "Ouvrir un compte pro";
+$GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/modules/reseller/retailer.php\">Pour ouvrir un compte pro, cliquez ici</a>.";
+$GLOBALS["STR_PRIX_SEARCH_HT"] = "Prix HT";
+$GLOBALS["STR_PRIX_SEARCH_TTC"] = "Prix TTC";
+$GLOBALS["STR_REGISER_CART_ALERT"] = "Le panier contient plus de 25 produits, il ne sera donc pas enregistré automatiquement. Pour enregistrer votre panier, vous pouvez cliquer sur le lien 'Enregistrer la liste des produits' de la page du panier.";

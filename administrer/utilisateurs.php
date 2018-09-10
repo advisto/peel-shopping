@@ -3,18 +3,18 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 55928 2018-01-26 17:31:15Z sdelaporte $
+// $Id: utilisateurs.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
-necessite_priv("admin_users,admin_finance,admin_operations,admin_productsline");
+necessite_priv("admin_white_label,admin_users,admin_finance,admin_operations,admin_productsline");
 
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_ADMIN_UTILISATEURS_TITLE'];
 /* Initialisation des variables */
@@ -624,6 +624,16 @@ switch (vb($_REQUEST['mode'])) {
 		call_module_hook('user_send_email_alert_admin', array('id_utilisateur'=>$_GET['id_utilisateur']));
 		$output .= affiche_formulaire_modif_utilisateur($_GET['id_utilisateur']);
 		break;
+	
+	case "groupe_utilisateurs" :
+        if (!empty(intval(vn($_REQUEST['affected'])))){
+            $qid = query("UPDATE peel_utilisateurs SET id_groupe = '" . intval(vn($_REQUEST['id_groupe'])) . "' WHERE id_groupe = '0'");
+        } else {
+            $qid = query("UPDATE peel_utilisateurs SET id_groupe = '0' WHERE id_groupe = '" . intval(vn($_REQUEST['id_groupe'])) . "'");
+        }
+        $output .= afficher_liste_utilisateurs($priv, $cle);
+        break; 
+	
 	default :
 		if (!empty($_GET['commercial_contact_id']) && check_if_module_active('commerciale')) {
 			$output .= afficher_liste_utilisateurs($priv, $cle, null, 'date_insert', $_GET['commercial_contact_id']);
@@ -791,7 +801,7 @@ function afficher_formulaire_utilisateur(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id_utilisateur', vb($frm['id_utilisateur']));
 	$tpl->assign('site_id_select_options', get_site_id_select_options(isset($frm['site_id'])?$frm['site_id']:null));
-	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']));
+	$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_utilisateurs'])));
 	$tpl->assign('remise_valeur', vb($frm['remise_valeur']));
 	$tpl->assign('administrer_url', $GLOBALS['administrer_url']);
 	$tpl->assign('wwwroot_in_admin', $GLOBALS['wwwroot_in_admin']);

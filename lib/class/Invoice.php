@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Invoice.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: Invoice.php 57719 2018-08-14 10:15:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ define('FPDF_FONTPATH', $GLOBALS['dirroot'] . '/lib/class/pdf/font/');
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Invoice.php 55332 2017-12-01 10:44:06Z sdelaporte $
+ * @version $Id: Invoice.php 57719 2018-08-14 10:15:25Z sdelaporte $
  * @access public
  */
 class Invoice extends TCPDF {
@@ -198,10 +198,10 @@ class Invoice extends TCPDF {
 		if (!empty($logo) && empty($GLOBALS['site_parameters']['invoice_pdf_logo_display_disable'])) {
 			if (StringMb::strpos($logo, '://') !== false) {
 				// Le fichier est hébergé sur un autre serveur que celui-ci, sinon la fonction getSocieteLogoPath aurait changé le lien URL en chemin serveur
-				$logo = thumbs($logo, 125, 80, 'fit', null, null, true, true);
+				$logo = thumbs($logo, vn($GLOBALS['site_parameters']['invoice_pdf_logo_width'],125), vn($GLOBALS['site_parameters']['invoice_pdf_logo_height'],80), 'fit', null, null, true, true);
 				$this->Image($logo, $x1 + vb($GLOBALS['site_parameters']['logo_pdf_locationX'], 45), $y1 + vb($GLOBALS['site_parameters']['logo_pdf_locationY'], 0));
 			} else {
-				$destinationW = vb($GLOBALS['site_parameters']['logo_pdf_destinationW'], 35); // Espace max disponible en largeur pour le logo
+				$destinationW = vb($GLOBALS['site_parameters']['logo_pdf_destinationW'], 40); // Espace max disponible en largeur pour le logo
 				$destinationH = vb($GLOBALS['site_parameters']['logo_pdf_destinationH'], 35); // Espace max disponible en hauteur pour le logo
 				$imgInfo = @getimagesize($logo);
 				$sourceW = $imgInfo[0];
@@ -239,7 +239,7 @@ class Invoice extends TCPDF {
 	 * @param booelan $change_background_color_by_type
 	 * @return
 	 */
-	function fact_dev($libelle, $num, $change_background_color_by_type = false, $bill_mode = null)
+	function fact_dev($libelle, $num, $change_background_color_by_type = false, $bill_mode = null, $first_order = false)
 	{
 		if ($bill_mode == 'user_custom_products_list') {
 			$y1 = 25;
@@ -255,6 +255,9 @@ class Invoice extends TCPDF {
 		$mid = ($r1 + $r2) / 2;
 
 		$texte = $libelle . " N° : " . $num;
+		if(!empty($first_order)) {
+			$texte .= ' *';
+		}
 		$szfont = 12;
 		$loop = 0;
 
@@ -1046,7 +1049,7 @@ class Invoice extends TCPDF {
 					$file_name .= '.pdf';
 				} else {
 					// Plusieurs factures
-					$file_name = 'F-' . md5($sql_bills) . '.pdf';
+					$file_name = 'F-' . substr(md5($sql_bills. $GLOBALS['wwwroot']), 0, 16) . '.pdf';
 				}
 				$i++;
 			}
@@ -1190,7 +1193,22 @@ class Invoice extends TCPDF {
 							$this->backgoundBigWatermark($GLOBALS['STR_INVOICE'], 80, 200);
 						}
 					}
-					$this->fact_dev($this->document_name, $this->document_id, false, $bill_mode);
+					$first_order = false;
+					if (!empty($GLOBALS['site_parameters']['invoice_tag_first_order'])) {
+						// Il faut determiner si la commande est la première du client
+						$sql = 'SELECT c.id
+							FROM peel_commandes c
+							LEFT JOIN peel_statut_paiement sp ON sp.id=c.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'sp') . '
+							WHERE id_utilisateur = '.intval($order_object->id_utilisateur).' AND sp.technical_code IN ("being_checked","completed")
+							ORDER BY c.o_timestamp ASC
+							LIMIT 1';
+						$query = query($sql);
+						$result = fetch_assoc($query);
+						if ($result['id'] == $order_object->id) {
+							$first_order = true;
+						}
+					}
+					$this->fact_dev($this->document_name, $this->document_id, false, $bill_mode, $first_order);
 					if ($bill_mode != "user_custom_products_list") {
 						if(in_array($order_object->statut_paiement, array('cancelled', 'refunded'))) { 
 							$this->backgoundBigWatermark(get_payment_status_name($order_object->id_statut_paiement), 65, 470); 
@@ -1393,6 +1411,7 @@ class Invoice extends TCPDF {
 	function getSocieteLogoPath($lang = null)
 	{
 		$pdf_logo = '';
+		$wwwroot = get_configuration_variable('wwwroot', 1, $_SESSION['session_langue']);
 		if (!empty($lang)) {
 			if (!empty($GLOBALS['site_parameters']['logo_bill_'.$lang])) {
 				$pdf_logo = $GLOBALS['site_parameters']['logo_bill_'.$lang];
@@ -1406,7 +1425,7 @@ class Invoice extends TCPDF {
 		if(!empty($pdf_logo) && strpos($pdf_logo, $GLOBALS['dirroot']) === false) {
 			// on découpe le contenu du champs à la recherche du non de l'image fixe
 			// ceci évitera d'envoyer la transmition du logo avec un chemin en http://
-			$pdf_logo = StringMb::rawurldecode(str_replace($GLOBALS['wwwroot'], $GLOBALS['dirroot'], $pdf_logo));
+			$pdf_logo = StringMb::rawurldecode(str_replace($wwwroot, $GLOBALS['dirroot'], $pdf_logo));
 			if (!empty($pdf_logo) && file_exists($GLOBALS['dirroot'] . '/' . $pdf_logo)) {
 				// le logo existe sur le serveur
 				$pdf_logo = $GLOBALS['dirroot'] . '/' . $pdf_logo;

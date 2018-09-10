@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 55727 2018-01-12 14:11:33Z sdelaporte $
+// $Id: display_user_forms.php 57845 2018-08-23 13:04:43Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -401,6 +401,7 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('STR_NAME', $GLOBALS['STR_NAME']);
 		$tpl->assign('STR_SOCIETE', $GLOBALS['STR_SOCIETE']);
 		$tpl->assign('STR_INTRACOM_FORM', $GLOBALS['STR_INTRACOM_FORM']);
+		$tpl->assign('STR_INTRACOM_FORM_ALERT', $GLOBALS['STR_INTRACOM_FORM_ALERT']);
 		$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
 		$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
 		$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
@@ -451,7 +452,7 @@ if (!function_exists('get_user_register_success')) {
 	function get_user_register_success(&$frm, $mode = null)
 	{
 		$output = '
-<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . StringMb::html_entity_decode_if_needed($frm['prenom']) . '</h1>';
+<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . StringMb::html_entity_decode_if_needed(vb($frm['pseudo'])) . '</h1>';
 		if ($mode=='retailer') {
 			$output .= '<p>' . StringMb::nl2br_if_needed($GLOBALS['STR_MODULE_PREMIUM_MSG_RETAILER']) . '</p>';
 		} else  {
@@ -575,6 +576,9 @@ if (!function_exists('get_access_account_form')) {
 		if(empty($forced_new_client_area_html)){
 			$forced_new_client_area_html = '' . StringMb::nl2br_if_needed($GLOBALS['STR_MSG_NEW_CUSTOMER']) . '<br />';
 		}
+		if (!empty($GLOBALS['site_parameters']['register_button_on_reseller_form'])) {
+			$forced_new_client_area_html .= '' . StringMb::nl2br_if_needed($GLOBALS['STR_MSG_NEW_RESELLER_CUSTOMER']) . '<br />';
+		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('access_account_form.tpl');
 		if(!$skip_title) {
 			$tpl->assign('acces_account_txt', $GLOBALS['STR_ACCES_ACCOUNT']);
@@ -640,7 +644,11 @@ if (!function_exists('get_contact_form')) {
 		} else {
 			$tpl->assign('action', get_current_url(true).(!empty($GLOBALS['main_div_id'])?'?ctx='.$GLOBALS['main_div_id']:''));
 		}
-		$tpl->assign('extra_field', get_contact_extra_field());		
+		if (function_exists('get_contact_extra_field')) {
+			$tpl->assign('extra_field', get_contact_extra_field());		
+		} else {
+			$tpl->assign('extra_field', '');	
+		}
 		$sujet_options = array(
 			'' => $GLOBALS['STR_CONTACT_LB']);
 		for($i=1; isset($GLOBALS['STR_CONTACT_SELECT'.$i]); $i++) {
@@ -655,7 +663,14 @@ if (!function_exists('get_contact_form')) {
 		$tpl->assign('sujet_options', $sujet_options);
 		$tpl->assign('sujet_options_selected', vb($frm['sujet']));
 		$tpl->assign('sujet_error', $form_error_object->text('sujet'));
-		
+		if (!empty($GLOBALS['site_parameters']['contact_by_company'])) {
+			$tpl->assign('STR_CONTACT_SOCIETE', $GLOBALS['STR_CONTACT_SOCIETE']);
+			foreach ($GLOBALS['site_parameters']['contact_by_company'] as $this_technical_code => $this_company_name) {
+				$societe_options[$this_technical_code]=$this_company_name;
+			}
+			$tpl->assign('societe_options', $societe_options);
+			$tpl->assign('sujet_options_selected', vb($frm['societe']));
+		}
 		$tpl->assign('commande_id', vb($frm['commande_id']));
 		$tpl->assign('commande_error', $form_error_object->text('commande_id'));
 		$tpl->assign('email_value', vb($frm['email']));
@@ -706,10 +721,6 @@ if (!function_exists('get_contact_form')) {
 			$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
 			$tpl->assign('this_upload_html', $this_upload_html);
 		}
-		if (!empty($GLOBALS['site_parameters']['site_configured_array'])) {
-			$tpl->assign('site_configured_array', vb($GLOBALS['site_parameters']['site_configured_for_display_array'], $GLOBALS['site_parameters']['site_configured_array']));
-			$tpl->assign('STR_WEBSITE', $GLOBALS['STR_WEBSITE']);
-		}
 		if (check_if_module_active('captcha')) {
 			// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
 			$tpl->assign('captcha', array(
@@ -750,6 +761,10 @@ if (!function_exists('get_contact_form')) {
 		$tpl->assign('STR_DAY_PM', $GLOBALS['STR_DAY_PM']);
 		$tpl->assign('STR_MANDATORY', $GLOBALS['STR_MANDATORY']);
 		$tpl->assign('STR_PROFESSION', $GLOBALS['STR_PROFESSION']);
+		$hook_result = call_module_hook('get_contact_form', array('frm' => $frm, 'form_error_object' => $form_error_object), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -774,16 +789,6 @@ if (!function_exists('get_contact_success')) {
 	}
 }
 
-if (!function_exists('get_contact_extra_field')) {
-	/**
-	 *
-	 * @return
-	 */
-	function get_contact_extra_field()
-	{
-		return '';
-	}
-}
 
 if (!function_exists('js_password_control')) {
 	/**
@@ -841,7 +846,7 @@ if (!function_exists('get_address_form')) {
 		} else {
 			$options .= '<option value="bill" ' . frmvalide(vb($frm['address_type']) == "bill", ' selected="selected"') . '>' . $GLOBALS['STR_INVOICE_ADDRESS']  . '</option>';
 		}
-		if (!empty($GLOBALS['site_parameters']['ads_specific_address'])) {
+		if (!empty($GLOBALS['site_parameters']['ads_specific_address']) && check_if_module_active('annonces')) {
 			$options .= '<option value="ad" ' . frmvalide(vb($frm['address_type']) == "ad", ' selected="selected"') . '>' . $GLOBALS['STR_MODULE_ANNONCES_AD']  . '</option>';
 		}
 		$output .= '
@@ -905,7 +910,7 @@ if (!function_exists('get_address_form')) {
 					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_TELEPHONE'] . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['portable']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" '.(!$in_admin?'required="required"':'').' /></span>
 				</div>
-				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
+				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn_p1 btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
 			</fieldset>
 			<p><span class="form_mandatory">(*) ' . $GLOBALS['STR_MANDATORY'] . '</span></p>
 		</form>

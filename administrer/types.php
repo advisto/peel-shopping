@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: types.php 57719 2018-08-14 10:15:25Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -96,6 +96,7 @@ function affiche_formulaire_ajout_type(&$frm)
 		$frm['without_delivery_address'] = 0;
 		$frm['is_socolissimo'] = 0;
 		$frm['is_icirelais'] = 0;
+		$frm['is_dpd'] = 0;
 		$frm['tnt_threshold'] = 0;
 		$frm['is_tnt'] = 0;
 		$frm['fianet_type_transporteur'] = 0;
@@ -151,6 +152,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('mode', vb($frm['nouveau_mode']));
 	$tpl->assign('id', intval(vb($frm['id'])));
 	$tpl->assign('on_franco_amount', vb($frm['on_franco_amount']));
+	$tpl->assign('technical_code', vb($frm['technical_code']));
 	$tpl_langs = array();
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$tpl_langs[] = array('lng' => $lng,
@@ -168,6 +170,10 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('is_icirelais_module_active', check_if_module_active('icirelais'));
 	if (check_if_module_active('icirelais')) {
 		$tpl->assign('is_icirelais', $frm['is_icirelais']);
+	}
+	$tpl->assign('is_dpd_module_active', check_if_module_active('dpd'));
+	if (check_if_module_active('dpd')) {
+		$tpl->assign('is_dpd', $frm['is_dpd']);
 	}
 	$tpl->assign('is_kiala_module_active', check_if_module_active('kiala'));
 	if(check_if_module_active('kiala')) {
@@ -198,6 +204,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 	$tpl->assign('STR_ADMIN_TYPES_NO_DELIVERY', $GLOBALS['STR_ADMIN_TYPES_NO_DELIVERY']);
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
+	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_DPD', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_DPD']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
 	$tpl->assign('STR_ADMIN_TYPES_TNT', $GLOBALS['STR_ADMIN_TYPES_TNT']);
@@ -209,6 +216,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT', $GLOBALS['STR_ADMIN_ZONES_FRANCO_LIMIT_AMOUNT']);
+	$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 	if (check_if_module_active('ups')) {
 		$tpl->assign('STR_ADMIN_TYPES_LINK_TO_UPS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_UPS']);
 	}
@@ -238,7 +246,7 @@ function supprime_type($id)
 function insere_type($frm)
 {
 	$sql = "INSERT INTO peel_types (position, on_franco_amount, site_id
-		, without_delivery_address, etat";
+		, without_delivery_address, etat, technical_code";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
@@ -250,6 +258,9 @@ function insere_type($frm)
 	}
 	if (check_if_module_active('ups')) {
 		$sql .= ", is_ups";
+	}
+	if (check_if_module_active('dpd')) {
+		$sql .= ", is_dpd";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur";
@@ -264,7 +275,8 @@ function insere_type($frm)
 	$sql .= "
 	) VALUES ('" . intval($frm['position']) . "', '" . nohtml_real_escape_string($frm['on_franco_amount']) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, '" . intval($frm['without_delivery_address']) . "'
-		, '" . intval($frm['etat']) . "'";
+		, '" . intval($frm['etat']) . "'
+		, '" . nohtml_real_escape_string($frm['technical_code']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
@@ -276,6 +288,9 @@ function insere_type($frm)
 	}
 	if (check_if_module_active('ups')) {
 		$sql .= ", '" . intval($frm['is_ups']) . "'";
+	}
+	if (check_if_module_active('dpd')) {
+		$sql .= ", '" . intval($frm['is_dpd']) . "'";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", '" . intval($frm['fianet_type_transporteur']) . "'";
@@ -303,6 +318,7 @@ function maj_type($id, $frm)
 {
 	$sql = "UPDATE peel_types SET position = '" . nohtml_real_escape_string($frm['position']) . "'
 		, on_franco_amount = '" . nohtml_real_escape_string($frm['on_franco_amount']) . "'
+		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 		, without_delivery_address='" . intval($frm['without_delivery_address']) . "'
 		, etat='" . intval(vn($frm['etat'])) . "'";
@@ -314,6 +330,9 @@ function maj_type($id, $frm)
 	}
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais = '" . intval(vn($frm['is_icirelais'])) . "'";
+	}
+	if (check_if_module_active('dpd')) {
+		$sql .= ", is_dpd = '" . intval(vn($frm['is_dpd'])) . "'";
 	}
 	if (check_if_module_active('fianet')) {
 		$sql .= ", fianet_type_transporteur = '" . intval($frm['fianet_type_transporteur']) . "'";

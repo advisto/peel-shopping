@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: modules_handler.php 57719 2018-08-14 10:15:25Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -43,6 +43,14 @@ function load_modules($technical_code = null) {
 					if(!empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 						foreach(explode(',', $GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module]) as $this_file) {
 							if(StringMb::strpos($this_file, '.php') !== false && !in_array($this_file, vb($GLOBALS['modules_loaded_functions'], array()))) {
+								//On remplace le ficher d'origine de l'include par celui défini par la variable de configuration replace_specific_files_by_user_[USER_ID]
+								if(est_identifie() && !empty($GLOBALS['site_parameters']['replace_specific_files_by_user_'.$_SESSION['session_utilisateur']['id_utilisateur']]) && str_replace("replace_specific_files_by_user_", "", "replace_specific_files_by_user_".$_SESSION['session_utilisateur']['id_utilisateur']) == $_SESSION['session_utilisateur']['id_utilisateur']){
+									foreach($GLOBALS['site_parameters']['replace_specific_files_by_user_'.$_SESSION['session_utilisateur']['id_utilisateur']] as $this_file_origin => $this_file_replace){
+										if ($this_file == $this_file_origin && file_exists($GLOBALS['dirroot'] . $this_file_replace)){
+											$this_file = $this_file_replace;
+										}
+									}
+								}
 								if(StringMb::strpos($this_file, 'administrer/') === false || StringMb::strpos($this_file, 'admin/') === false || (defined('IN_PEEL_ADMIN') || defined('IN_CRON'))) {
 									include($GLOBALS['dirroot'] . $this_file);
 								}
@@ -141,6 +149,7 @@ function check_if_module_active($module_name, $specific_file_name = null, $skip_
  * @return
  */
 function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_default = false) {
+	static $hook_function_exists_array;
 	if($mode == 'boolean') {
 		$output_default = true;
 	} elseif($mode == 'array') {
@@ -152,18 +161,31 @@ function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_d
 	if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
 		$start_time = microtime_float();
 	}
-	foreach(vb($GLOBALS['modules_installed'], array()) as $this_module) {
+	if(!isset($hook_function_exists_array[$hook])) {
+		$modules_array = vb($GLOBALS['modules_installed'], array());
+		$hook_function_exists_array[$hook] = array();
+	} else {
+		$modules_array = array_keys($hook_function_exists_array[$hook]);
+	}
+	foreach($modules_array as $this_module) {
 		// On charge le hook, soit en tant que fonction, soit en tant que méthode de la classe du module
 		$function_name = $this_module . '_hook_' . $hook;
 		$class_name = StringMb::ucfirst($this_module);
 		$method_name = 'hook_' . $hook;
 		unset($result);
-		if(!empty($GLOBALS['site_parameters'][$method_name.'_skip_modules_array']) && in_array($this_module, $GLOBALS['site_parameters'][$method_name.'_skip_modules_array'])) {
-			continue;
-		}
-		if(function_exists($function_name)) {
+		if(!isset($hook_function_exists_array[$hook][$this_module])) {
+			if(!empty($GLOBALS['site_parameters'][$method_name.'_skip_modules_array']) && in_array($this_module, $GLOBALS['site_parameters'][$method_name.'_skip_modules_array'])) {
+				continue;
+			}
+			if(function_exists($function_name)) {
+				$hook_function_exists_array[$hook][$this_module][$function_name] = true;
+			} elseif(class_exists($class_name) && method_exists($class_name, $method_name)) {
+				$hook_function_exists_array[$hook][$this_module][$method_name] = true;
+			}
+		} 
+		if(!empty($hook_function_exists_array[$hook][$this_module][$function_name])) {
 			$result = $function_name($params);
-		} elseif(class_exists($class_name) && method_exists($class_name, $method_name)) {
+		} elseif(!empty($hook_function_exists_array[$hook][$this_module][$method_name])) {
 			// La syntaxe $class_name::$method_name($params) n'est pas valide pour PHP<5.3 => on utilise call_user_func_array
 			$result = call_user_func_array(array($class_name, $method_name), array($params));
 		}

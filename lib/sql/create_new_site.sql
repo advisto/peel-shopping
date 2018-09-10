@@ -2,14 +2,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.0.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 55931 2018-01-29 08:37:36Z sdelaporte $
+# $Id: create_new_site.sql 58058 2018-09-05 14:28:17Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -103,7 +103,6 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('module_devise', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('devise_defaut', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('module_nuage', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
-('module_flash', 'core', 'integer', '0', '', NOW(), '', 1, "[SITE_ID]"),
 ('module_cart_preservation', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('module_vacances', 'core', 'integer', '0', '', NOW(), '', 1, "[SITE_ID]"),
 ('module_vacances_type', 'core', 'integer', '0', '', NOW(), '', 1, "[SITE_ID]"),
@@ -308,6 +307,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('skip_home_register_form', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('skip_home_affiche_compte', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('scroll_to_top', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
+('products_in_newsletter', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
 ('anim_loading_page', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]");
 
 -- --------------------------------------------------------

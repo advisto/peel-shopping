@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.0.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 55332 2017-12-01 10:44:06Z sdelaporte $
+// $Id: fonctions.php 58057 2018-09-05 13:30:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -92,9 +92,9 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 			$disable_cache = true;
 		}
 		if(!empty($cat_id)){
-			$sql_cond .= ' AND id_categorie IN ("0", "' . intval($cat_id) . '")';
+			$sql_cond .= ' AND IF (id_categorie!=0,FIND_IN_SET(' . intval($cat_id) . ', id_categorie), 1)';
 		}else{
-			$sql_cond .= ' AND id_categorie="0"';
+			$sql_cond .= ' AND (id_categorie="0" OR id_categorie="")';
 		}
 		if (!empty($this_annonce_number)) {
 			// annonce_number indique la position de la publicité dans une liste d'annonces
@@ -276,7 +276,12 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 						// On préserve le HTML mais on corrige les & isolés
 						$banner_html = StringMb::htmlentities($banner['tag_html'], ENT_COMPAT, GENERAL_ENCODING, false, true);
 					}
-					$output .= '<div class="ba_pu" style="margin-top:3px;">' . $banner_html . '</div>';
+					$screen_size = '';
+					$screen_size_array = explode(',',$banner['screen_size']);
+					foreach($screen_size_array as $this_screen_size) {
+						$screen_size .= 'visible-'.$this_screen_size.' ';
+					}
+					$output .= '<div class="ba_pu '.$screen_size.'">' . $banner_html . '</div>';
 					$last_rang = $banner['rang'];
 				}
 				// Attention : these_banners_id_array est local, alors que viewed_banners_array est global et contient les autres bannières de la page
@@ -351,7 +356,7 @@ function get_possible_banner_positions_between_ads($position, $cat_id, $page, $p
 	// Si le champ catégorie est renseigné, alors on prend les bannières pour la catégorie définie OU sans catégorie définie
 	// Par la suite dans le tri, on sélectionne en priorité les bannières avec id_catégorie précisée
 	if(!empty($cat_id)){
-		$sql_cond .= ' AND id_categorie IN ("0", "' . intval($cat_id) . '")';
+		$sql_cond .= ' AND IF (id_categorie!=0,FIND_IN_SET(' . intval($cat_id) . ', id_categorie), 1)';
 	}else{
 		$sql_cond .= ' AND id_categorie="0"';
 	}
@@ -532,5 +537,19 @@ function google_get_ad_url() {
  * @return
  */
 function banner_hook_front_html_header_template_data () {
-    return array('background_banner' => affiche_banner(null, true, null, null, 0, "background_site", null, null, true));
+    if ((!empty($GLOBALS['site_parameters']['display_background_banner_on_home_page_only']) && defined('IN_HOME')) || empty($GLOBALS['site_parameters']['display_background_banner_on_home_page_only'])) {
+		$this_banner = affiche_banner(null, true, null, vn($_GET['catid']), 0, "background_site", null, null, true);
+		
+		if (!empty($this_banner)) {
+			$GLOBALS['js_ready_content_array'][] = '
+			$(\'#main_content\').on(\'click\', function(event) {
+			  if(event.target == event.currentTarget) {
+				window.open(\''.$this_banner[0]['url'].'\',\'_blank\');
+			  }
+			});';
+			return array('background_banner' => $this_banner);
+		} else {
+			return array();
+		}
+	}
 }

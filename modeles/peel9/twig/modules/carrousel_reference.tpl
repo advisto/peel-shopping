@@ -23,7 +23,7 @@
 	<div id="carrousel_reference" class="col-md-8 carousel slide" data-ride="carousel" data-interval="10000">
 	  <!-- Indicators -->
 	  {*<ol class="carousel-indicators">
-		{for $i=0 to floor((count($references)-1)/$nb_col_md)}
+		{for $i=0 to ((count($references)-1)/$nb_col_md|floor)}
 			<li data-target="#carrousel_reference" data-slide-to="{$i}" class="{if $i==0}active{/if}"></li>
 		{/for}
 	  </ol>*}
@@ -36,14 +36,14 @@
 			</div>
 			<div class="item">
 			{/if}
-				<div class="center col-sm-{floor(12/$nb_col_sm)} col-md-{floor(12/$nb_col_md)}{if ($ref.i-1)%$nb_col_md>$nb_col_xs-1} hidden-xs{/if}{if ($ref.i-1)%$nb_col_md>$nb_col_sm-1} hidden-sm{/if}">
+				<div class="center col-sm-{(12/$nb_col_sm|floor)} col-md-{(12/$nb_col_md|floor)}{if ($ref.i-1)%$nb_col_md>$nb_col_xs-1} hidden-xs{/if}{if ($ref.i-1)%$nb_col_md>$nb_col_sm-1} hidden-sm{/if}">
 					{$ref.html}
 				</div>
 		{/foreach}
 			</div>
 		</div>
 
-		{if floor((count($references)-1)/$nb_col_md)>0}
+		{if ((count($references)-1|floor)/$nb_col_md)>0}
 		<!-- Controls -->
 		<a class="left carousel-control" href="#carrousel_reference" data-slide="prev">
 			<span class="glyphicon glyphicon-chevron-left"></span>
