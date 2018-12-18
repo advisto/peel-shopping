@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 57738 2018-08-17 08:50:39Z sdelaporte $
+// $Id: search.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -39,8 +39,12 @@ if (!empty($GLOBALS['site_parameters']['search_default_display_show_no_result'])
 	$launch_search = false;
 }
 
+call_module_hook('search_pre', array());
 if (!empty($_GET['type']) && $_GET['type'] == 'unset_quick_add_product_from_search_page') {
 	unset($_SESSION['session_search_product_list']);
+}
+if (!empty($GLOBALS['site_parameters']['search_page_needs_authentification'])) {
+	necessite_identification();
 }
 if (!empty($_GET['type']) && $_GET['type'] == 'quick_add_product_from_search_page' && !empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
 	necessite_identification();

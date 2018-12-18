@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_params.php 57825 2018-08-23 09:49:50Z sdelaporte $
+// $Id: change_params.php 59053 2018-12-18 10:20:50Z sdelaporte $
 define('IN_CHANGE_PARAMS', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -149,7 +149,11 @@ if (a_priv('demo')) {
 			$frm[$this_key] = $this_value;
 		}
 		$noticemsg = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_MSG_CHANGE_PARAMS'], 'list_content' => $GLOBALS['STR_CHANGE_PARAMS_OK']))->fetch();
-		
+		$hook_result = call_module_hook('change_params_frm', array('frm' => $frm), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$frm[$this_key] = $this_value;
+		}
+
 		if (!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation']) && ((!empty($frm['newsletter']) && empty($_SESSION['session_utilisateur']['newsletter'])) || (!empty($frm['commercial']) && empty($_SESSION['session_utilisateur']['commercial'])))) {
 			$noticemsg .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REGISTER_NEWLSETTER_COMMERCIAL_YES']))->fetch();
 		}

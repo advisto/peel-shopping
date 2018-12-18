@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 58057 2018-09-05 13:30:06Z sdelaporte $
+// $Id: update.php 59053 2018-12-18 10:20:50Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -1608,10 +1608,6 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('insert_article_categories_in_menu', 'core', 'boolean', 'true', '', NOW(), '', 1),
 ('only_show_articles_with_picture_in_containers', 'core', 'boolean', 'true', '', NOW(), '', 1);
 ";
-if($current_version<='7.1.0') {
-		$sql_update_array['6.4.2'] .= "
-INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`) VALUES ('wwwroot', 'core', 'string', '".real_escape_string($GLOBALS['wwwroot'])."', '', NOW(), '', 1);";
-}
 $sql_update_array['7.1.4'] = "
 -- FAIT APRES VERSION 7.1.X
 -- Ajout du champ site_id pour la gestion multisite.

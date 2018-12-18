@@ -396,10 +396,6 @@ input.form-control[type="file"] {
 		/* Empêcher changement de taille par Chrome */
 		font-size: 18px !important;
 	}
-	input:focus, textarea:focus, select:focus {
-		/* Empêcher changement de taille par Chrome */
-		font-size: inherit !important;
-	}
 }
 .label_checkbox input[type=checkbox] {
 	margin-right: 7px;

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 57988 2018-08-31 07:56:50Z sdelaporte $
+// $Id: produits.php 59053 2018-12-18 10:20:50Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -612,8 +612,14 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('prix_revendeur', vn($prix_revendeur));
 
 		$tpl->assign('prix_achat', vn($prix_achat));
-		$tpl->assign('vat_select_options', get_vat_select_options(vb(empty($GLOBALS['site_parameters']['add_product_vat_select_options'])?vb($frm['tva']):vb($GLOBALS['site_parameters']['add_product_vat_select_options']))));
-
+		
+		if (!empty($GLOBALS['site_parameters']['add_product_vat_select_options'])) {
+			$selected_vat = $GLOBALS['site_parameters']['add_product_vat_select_options'];
+		} else {
+			$selected_vat = vb($frm['tva']);
+		}
+		$tpl->assign('vat_select_options', get_vat_select_options($selected_vat));
+		
 		$tpl->assign('is_module_ecotaxe_active', check_if_module_active('ecotaxe'));
 		$tpl_ecotaxe_options = array();
 		if (check_if_module_active('ecotaxe')) {

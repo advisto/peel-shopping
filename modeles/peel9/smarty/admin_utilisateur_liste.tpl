@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -382,7 +382,7 @@
 	<div class="entete">{$STR_ADMIN_UTILISATEURS_USERS_COUNT}{$STR_BEFORE_TWO_POINTS}: {$nbRecord}</div>
 	<div><span class="glyphicon glyphicon-plus"></span> <a href="{$administrer_url}/utilisateurs.php?mode=ajout">{$STR_ADMIN_UTILISATEURS_CREATE}</a></div>
 {if isset($results)}
-	<div><a href="{$wwwroot_in_admin}/modules/export/administrer/export.php?type=clients&amp;priv={$priv}&amp;cle={$cle}">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a></div>
+	<div><a href="{$wwwroot_in_admin}/modules/export/administrer/export_clients.php?priv={$priv}&amp;cle={$cle}">{$STR_ADMIN_UTILISATEURS_EXCEL_EXPORT}</a></div>
 	<div class="center">{$link_multipage}</div>
 	<div class="table-responsive">
 	<table id="tablesForm" class="table">

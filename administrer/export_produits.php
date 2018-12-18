@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an     |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: export_produits.php 58066 2018-09-06 09:35:05Z sdelaporte $
+// $Id: export_produits.php 59053 2018-12-18 10:20:50Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -119,7 +119,7 @@ switch(vb($_POST['mode'])) {
 		$this_line_output_html .= "<td>" . $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_SIZES"] . "</td>" ;
 		$this_line_output_html .= '</tr>';
 		$where = '';
-		if (!empty(vn($_POST['categories']))) {
+		if (!empty($_POST['categories'])) {
 			$where .= " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND p.etat = 1 AND " ;
 		}
 		$q = "SELECT p.*, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS nom, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, p.image1, p.etat
