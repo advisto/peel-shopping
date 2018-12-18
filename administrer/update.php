@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: update.php 59059 2018-12-18 11:20:35Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -2622,6 +2622,7 @@ foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 	$sql_update_array['9.0.0'] .= "
 	ALTER TABLE `peel_categories` ADD `nom_court_".$this_lang."` VARCHAR(255) NOT NULL;";
 }
+$sql_update_array['9.1.0'] = "";
 // FIN du SQL par version
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	

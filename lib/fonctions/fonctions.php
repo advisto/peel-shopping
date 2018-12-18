@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 58060 2018-09-05 15:14:51Z sdelaporte $
+// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -4765,9 +4765,10 @@ function get_configuration_variable($technical_code, $site_id, $lang)
  * @param array $frm Array with all fields data
  * @param boolean $update_if_technical_code_exists
  * @param boolean $allow_create
+ * @param boolean $allow_html
  * @return
  */
-function set_configuration_variable($frm, $update_if_technical_code_exists = false, $allow_create = true)
+function set_configuration_variable($frm, $update_if_technical_code_exists = false, $allow_create = true, $allow_html = true)
 {
 	if(!isset($frm['etat'])) {
 		$frm['etat'] = 1;
@@ -4806,7 +4807,7 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
 		// On cherche d'abord si cette configuration demandée est la même qu'une configuration publique
 		$sql_items[] = "etat = '" . intval($frm['etat']) . "'";
 		$sql_items[] = "technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'";
-		$sql_items[] = "string = '" . real_escape_string($frm['string']) . "'";
+		$sql_items[] = "string = '" . ($allow_html?real_escape_string($frm['string']):nohtml_real_escape_string($frm['string'])) . "'";
 		$sql_items[] = "lang = '" . nohtml_real_escape_string(vb($frm['lang'])) . "'";
 		$sql = "SELECT id
 			FROM peel_configuration
@@ -6361,7 +6362,7 @@ function handle_specific_fields(&$frm, $form_usage = 'user') {
 			}
 		
 			$frm['specific_field_values'][$this_field] = $frm[$this_field];
-			if(strpos($this_field, 'tag') !== false || strpos($this_field, 'html') !== false || strpos($this_field, 'description') !== false) {
+			if(strpos($this_field, 'video') !== false || strpos($this_field, 'tag') !== false || strpos($this_field, 'html') !== false || strpos($this_field, 'description') !== false) {
 				// HTML autorisé qu'on corrige et on filtre
 				$frm[$this_field] = StringMb::getCleanHTML($frm[$this_field], null, true, true, true, null, vb($GLOBALS['site_parameters']['handle_specific_field_clean_html_safe_mode'], false));
 				$frm['specific_field_sql_set'][$this_field] = word_real_escape_string($this_field) . '="' . real_escape_string($frm[$this_field]) . '"';

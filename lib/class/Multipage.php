@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 57904 2018-08-27 11:05:50Z sdelaporte $
+// $Id: Multipage.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 57904 2018-08-27 11:05:50Z sdelaporte $
+ * @version $Id: Multipage.php 59053 2018-12-18 10:20:50Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -213,8 +213,8 @@ class Multipage {
 	{
 		$results_array = array();
 		if ($this->ResultPerPage !='*') {
-			$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning));
-			$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - count($this->external_results_to_merge_at_beginning)));
+			$lines_begin = max(0, intval($this->ResultPerPage * ($this->page - 1)) - (!empty($this->external_results_to_merge_at_beginning)?count($this->external_results_to_merge_at_beginning):0));
+			$lines_count = max(0, intval($this->ResultPerPage) + min(0, intval($this->ResultPerPage * ($this->page - 1)) - (!empty($this->external_results_to_merge_at_beginning)?count($this->external_results_to_merge_at_beginning):0)));
 		}
 		$this->LimitSQL = $this->sqlRequest;
 		if((isset($lines_count) && $lines_count > 0) || $this->ResultPerPage =='*') {
@@ -284,6 +284,7 @@ class Multipage {
 	 */
 	function Calcul($query_without_error = true, $forced_nbRecord = null)
 	{
+		$this->nbRecord = (!empty($this->external_results_to_merge_at_beginning)?count($this->external_results_to_merge_at_beginning):0);
 		if($query_without_error) {
 			// Compte le nombre de liens qu'il y aura (= nombre de page)
 			if($this->sql_count === null) {
@@ -294,11 +295,8 @@ class Multipage {
 			} elseif(!empty($this->sql_count)) {
 				$query_count_rs = query($this->sql_count);
 				$query_count_row = fetch_assoc($query_count_rs);
-				$this->nbRecord = $query_count_row['rows_count'];
+				$this->nbRecord += $query_count_row['rows_count'];
 			}
-			$this->nbRecord += count($this->external_results_to_merge_at_beginning);
-		} else {
-			$this->nbRecord = count($this->external_results_to_merge_at_beginning);
 		}
 		if ($this->ResultPerPage != '*' && !empty($this->ResultPerPage) && ($this->ResultPerPage < $this->nbRecord)) {
 			$this->pages_count = ceil($this->nbRecord / $this->ResultPerPage);

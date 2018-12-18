@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 57992 2018-08-31 08:27:28Z sdelaporte $
+// $Id: display.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -3210,10 +3210,14 @@ if (!function_exists('affiche_contenu_html')) {
 			$last_emplacement = $obj->emplacement;
 			$GLOBALS['affiche_contenu_html_last_found'] = true;
 		}
-		if(!empty($output)) {
+		$zone_html_custom_template_tags = call_module_hook('zone_html_custom_template_tags', array(), 'array');
+		if (!empty($custom_template_tags)) {
+			$custom_template_tags = array_merge($custom_template_tags, $zone_html_custom_template_tags);
+		} else {
+			$custom_template_tags = $zone_html_custom_template_tags;
+		}
 			$output = template_tags_replace($output, $custom_template_tags, false, 'html');
 			correct_output($output, false, 'html', $_SESSION['session_langue']);
-		}
 		if ($return_mode) {
 			return $output;
 		} else {

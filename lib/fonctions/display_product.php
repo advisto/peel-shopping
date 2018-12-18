@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: display_product.php 57999 2018-08-31 14:16:39Z sdelaporte $
+// $Id: display_product.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -603,7 +603,15 @@ if (!function_exists('get_products_list_brief_html')) {
 		}
 		$additional_sql_cond = '';
 		$tpl->assign('associated_products', affiche_produits($catid, 2, $type, vn($GLOBALS['site_parameters']['nb_produit_page']), $products_display_mode, true, null, $nb_colonnes, !empty($GLOBALS['site_parameters']['no_display_if_empty']), vn($GLOBALS['site_parameters']['always_show_multipage_footer']), null, $additional_sql_cond));
-		$tpl->assign('breadcrumb', affiche_ariane(true, null, null, true));
+		
+		$module_ariane_active = get_modules_array(true,null,'ariane');
+		if (empty($module_ariane_active)) {
+			// Utilisation exceptionnelle d'un élément
+			// Le module ariane n'est pas actif, donc on affiche quand même pour le produit
+			$tpl->assign('breadcrumb', affiche_ariane(true, null, null));
+		} else {
+			$tpl->assign('breadcrumb', "");
+		}
 		$module_ariane_active = get_modules_array(true,null,'ariane');
 		if (empty($module_ariane_active)) {
 			// Utilisation exceptionnelle d'un élément
@@ -869,7 +877,7 @@ if (!function_exists('affiche_produits')) {
 			}
 			$tpl->assign('show_all_sons_products_url', $show_all_sons_products_url);
 		}
-		if(defined("IN_CATALOGUE") && !empty(vn($_GET['catid'])) && empty($_GET['page_offline'])) {
+		if(defined("IN_CATALOGUE") && !empty($_GET['catid']) && empty($_GET['page_offline'])) {
 			$tpl->assign('menu_recherche', affiche_menu_recherche(true, 'category'));
 		}
 		$tpl->assign('is_associated_product', ((!$no_display_if_empty || !empty($results_array)) AND $type == 'associated_product'));

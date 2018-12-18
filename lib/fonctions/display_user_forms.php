@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 57845 2018-08-23 13:04:43Z sdelaporte $
+// $Id: display_user_forms.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -765,6 +765,10 @@ if (!function_exists('get_contact_form')) {
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}
+		$hook_result = call_module_hook('get_contact_form', array('frm' => $frm, 'form_error_object' => $form_error_object), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -910,7 +914,7 @@ if (!function_exists('get_address_form')) {
 					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_TELEPHONE'] . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['portable']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" '.(!$in_admin?'required="required"':'').' /></span>
 				</div>
-				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn_p1 btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
+				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg btn_p1 btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
 			</fieldset>
 			<p><span class="form_mandatory">(*) ' . $GLOBALS['STR_MANDATORY'] . '</span></p>
 		</form>

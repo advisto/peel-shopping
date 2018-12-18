@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
 # | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.1.0, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.1.1, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 58057 2018-09-05 13:30:06Z sdelaporte $
+# $Id: peel.sql 59053 2018-12-18 10:20:50Z sdelaporte $
 #
 
 --
@@ -233,6 +233,8 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `keywords` mediumtext NOT NULL,
   `list_id` varchar(255) NOT NULL DEFAULT '',
   `pages_allowed` enum('all','odd','even') NOT NULL DEFAULT 'all',
+  `appearance` enum('FIRST_PAGE_ONLY','ALL_BUT_FIRST','ALL') NOT NULL DEFAULT 'FIRST_PAGE_ONLY',
+  `on_ad_creation_page` TINYINT( 1 ) NOT NULL DEFAULT '0',
   `screen_size` varchar(255) NOT NULL DEFAULT '',
   `do_not_display_on_pages_related_to_user_ids_list` varchar(255) NOT NULL DEFAULT '',
   `site_id` int(11) NOT NULL DEFAULT '0',

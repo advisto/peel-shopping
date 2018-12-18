@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 58035 2018-09-03 13:29:55Z sdelaporte $
+// $Id: fonctions_admin.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -294,7 +294,7 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['webmastering']['webmastering_marketing'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"];
 			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/produits_achetes.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"];
 		}
-		if (a_priv('admin_white_label,admin_moderation,admin_communication', true)) {
+		if (a_priv('admin_white_label,admin_moderation,admin_communication,admin_webmastering', true)) {
 			$GLOBALS['menu_items']['webmastering']['webmastering_seo'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SEO_HEADER"];
 		}
 		if (a_priv('admin_white_label,admin_moderation', true)) {
@@ -1311,7 +1311,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 				}
 			}
 			if ($commande['cout_transport_ht'] > 0) {
-				$commande['tva_transport'] = vn(round(($commande['tva_cout_transport'] / $commande['cout_transport_ht'] * 100), 2));
+				$commande['tva_transport'] = round(($commande['tva_cout_transport'] / $commande['cout_transport_ht'] * 100), 2);
 			} else {
 				$commande['tva_transport'] = null;
 			}
@@ -2173,7 +2173,7 @@ function save_commande_in_database($frm)
 		// Informations supplémentaires (non modifiable dans la mofification de la commande)
 		$this_article['delai_stock'] = $product_object->delai_stock;
 
-		$product_object->set_configuration($this_article['couleurId'], $this_article['tailleId'], null, check_if_module_active('reseller') && is_reseller()); // on fixe les options
+		$product_object->set_configuration($this_article['couleurId'], $this_article['tailleId'], $this_article['id_attribut'], check_if_module_active('reseller') && is_reseller()); // on fixe les options
 		$this_article['poids'] = ($product_object->poids + $product_object->configuration_overweight) * $this_article['quantite'];
 		$frm['total_poids'] += $this_article['poids'];
 		$this_article['option'] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, $frm['apply_vat'], false, false, false) + $this_article['total_prix_attribut'];
@@ -4417,10 +4417,18 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 			if(empty($skip)) {
 				// Insertion (ou mise à jour) dans la BDD
 				$configuration_variable_array = array('technical_code' => $this_key, 'string' => $this_value, 'site_id' => $site_id, 'origin' => 'sites.php');
-				if(StringMb::substr($this_key, 0, StringMb::strlen('module_') == 'module_')) {
+				if(StringMb::substr($this_key, 0, StringMb::strlen('module_')) == 'module_') {
 					$configuration_variable_array['type'] = 'integer';
 				}
-				set_configuration_variable($configuration_variable_array, true, true);
+				$allow_html = true;
+				// Github 16/12/2018 : XSS report on nom_en
+				// ANSWER : PEEL is a multisite ecommerce. It is designed to allow one administrator to handle multiple websites. Fore example a general presentation website, and various eshops related. It is not designed to give administration rights to people with whom your are not confident. An administrator can configure environment variables, and setup multiples things that can execute javascript.
+				// In this regard, this XSS is not a problem in itself. However, it is trus that it is not clean to allow HTML inside "Site Name EN" and we will change real_escape_string in the code into nohtml_real_escape_string in the database save of this information.
+				// => Hereunder, protection on some variables to have something cleaner.
+				if((StringMb::substr($this_key, 0, StringMb::strlen('nom_')) == 'nom_' && StringMb::strlen($this_key) == 6) || in_array($this_key, array('template_directory', 'template_multipage', 'favicon', 'pays_exoneration_tva'))) {
+					$allow_html = false;
+				}
+				set_configuration_variable($configuration_variable_array, true, true, $allow_html);
 			}
 			unset($skip);
 		}

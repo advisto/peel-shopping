@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 58057 2018-09-05 13:30:06Z sdelaporte $
+// $Id: order.php 59053 2018-12-18 10:20:50Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -765,7 +765,7 @@ function create_or_update_order($order_infos, $articles_array)
 	}
 	$order_id = $order_infos['commandeid'];
 
-	if(!empty($order_infos['numero']) && $order_infos['numero']!=vb(get_configuration_variable('format_numero_facture', vn($order_infos['site_id']), $_SESSION['session_langue']))) {
+	if(!empty($order_infos['numero']) && $order_infos['numero']!=get_configuration_variable('format_numero_facture', vn($order_infos['site_id']), $_SESSION['session_langue'])) {
 		// Si un numéro est spécifié par l'admin (donc n'est pas le format par défaut), alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
 		$numero = get_bill_number($order_infos['numero'], $order_id, false);
 	} else {
