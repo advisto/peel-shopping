@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: utilisateurs.php 59184 2019-01-03 08:53:53Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -626,7 +626,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 	
 	case "groupe_utilisateurs" :
-        if (!empty(intval(vn($_REQUEST['affected'])))){
+        if (!empty($_REQUEST['affected'])) {
             $qid = query("UPDATE peel_utilisateurs SET id_groupe = '" . intval(vn($_REQUEST['id_groupe'])) . "' WHERE id_groupe = '0'");
         } else {
             $qid = query("UPDATE peel_utilisateurs SET id_groupe = '0' WHERE id_groupe = '" . intval(vn($_REQUEST['id_groupe'])) . "'");
