@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: ecotaxes.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: ecotaxes.php 59227 2019-01-08 09:19:39Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -149,7 +149,7 @@ function affiche_formulaire_ecotaxes(&$frm)
 		$result = fetch_assoc($query);
 		$frm["prix_ht"] = $result['prix_ht'];
 		$prix_ttc = $result['prix_ttc'];
-		if(!empty(intval($frm["prix_ht"])))
+		if(!empty($frm["prix_ht"]))
 		{
 			$calculated_vat = round(($prix_ttc - $frm["prix_ht"]) / $frm["prix_ht"] * 100 * 100) / 100;
 		} else {
