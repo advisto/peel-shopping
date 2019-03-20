@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: clean_folders.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: clean_folders.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -26,7 +26,6 @@ $form_values['enlighten'] = '';
 $form_values['size_ko'] = 500;
 $accepted_formats['form_image'] = array('jpg', 'JPG', 'jpeg', 'JPEG');
 
-include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $output = '';
 // si un clic a été fait sur le bouton supprimer alors on vide le réperoire
@@ -72,14 +71,14 @@ if (isset($_POST['file_shortpath']) && isset($_POST['tx_qualite'])) {
 						$array = explode('.', $filename);
 						$extension = $array[count($array) - 1];
 						if (in_array(StringMb::strtolower($extension), $accepted_formats['form_image'])) {
-							echo filesize($chemin_final . '/' . $filename) . ' - ' . $chemin_final . '/' . $filename;
+							$output .=  filesize($chemin_final . '/' . $filename) . ' - ' . $chemin_final . '/' . $filename;
 							image_resize($chemin_final . '/' . $filename, $chemin_final . '/' . $filename, $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], false, true, vn($_POST['size_ko']) * 1024, $_POST['tx_qualite'], (vb($_POST['enlighten']) == 'on'?1.6:1.0));
 							$i++;
 						}
 					} else {
 						$j++;
 						if ($j % 100 == 0) {
-							echo $j . '... ';
+							$output .=  $j . '... ';
 							// Force l'envoi du HTML juste généré au navigateur, pour que l'utilisateur suive en temps réel l'avancée
 							flush();
 						}
@@ -108,7 +107,7 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 				if ($filename != '.' && $filename != '..' && is_file($folder_origin . '/' . $filename)) {
 					$filename_no_ext = pathinfo($filename, PATHINFO_FILENAME);
 					if(StringMb::substr($filename_no_ext, -5, 1) != '-') {
-						echo '<b>' . $filename . ' NOK nom</b><br />';
+						$output .=  '<b>' . $filename . ' NOK nom</b><br />';
 					} else {
 						if(!empty($_GET['create_thumbs_subfolders'])) {
 							$folder1 = StringMb::substr($filename_no_ext, -4, 2);
@@ -123,23 +122,23 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 								if(empty($_GET['test'])) {
 									copy($folder_origin . '/' . $filename, $folder . '/' . $folder1.'/' . (!empty($folder2) ? $folder2 . '/':'') . $filename);
 								}
-								echo '' . $filename . ' copied<br />';
+								$output .=  '' . $filename . ' copied<br />';
 							} else {
-								echo '' . $filename . ' already exists<br />';
+								$output .=  '' . $filename . ' already exists<br />';
 							}
 						}
 						if(!empty($_GET['delete_thumbs_not_in_subfolders']) && !empty($filename)) {
 							if(empty($_GET['test'])) {
 								unlink($folder_origin . '/' . $filename);
 							}
-							echo '' . $filename . ' deleted<br />';
+							$output .=  '' . $filename . ' deleted<br />';
 						}
 					}
 				}
 				$i++;
 				if($i==100) {
 					// On recharge la page pour recommencer
-					echo '<meta http-equiv="refresh" content="1; url='.get_current_url(true).'">';
+					$output .=  '<meta http-equiv="refresh" content="1; url='.get_current_url(true).'">';
 					die();
 				}
 				if($i%20==0) {
@@ -149,9 +148,9 @@ if (!empty($_GET['create_thumbs_subfolders']) || !empty($_GET['delete_thumbs_not
 			closedir($dir_pointer);
 		}
 	} else {
-		echo $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf('%s not found', $folder)))->fetch();
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf('%s not found', $folder)))->fetch();
 	}
-	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'FINISHED'))->fetch();
+	$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'FINISHED'))->fetch();
 }
 
 if ($show_form) {
@@ -180,6 +179,7 @@ if ($show_form) {
 	$tpl->assign('STR_REFRESH', $GLOBALS['STR_REFRESH']);
 	$output .= $tpl->fetch();
 }
+include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
 

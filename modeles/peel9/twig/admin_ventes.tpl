@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -81,7 +81,7 @@
 		<a href="{{ export_href_chronopost|escape('html') }}" class="title_label"><img src="{{ excel_src|escape('html')" align="absmiddle" alt="" />&nbsp;{{ STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST }}</a><br />
 		<input type="radio" name="mode" value="standard" />&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL }}.</span><a href="{{ export_href|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a><br />
 		<input type="radio" name="mode" value="one_line_per_order"/>&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER }}.</span><a href="{{ export_href_one_line_per_order|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a><br />
-		<input type="radio" name="mode" value="one_line_per_product" />&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT }}.</span><a href="{{ export_href_one_line_per_product|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a>
+		<input type="radio" name="mode" value="one_line_per_product" />&nbsp;<img src="{{ excel_src|escape('html') }}" align="absmiddle" alt="" />&nbsp;<span class="title_label">{{ STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT }}.</span><a href="{{ export_href_one_line_per_product|escape('html') }}">{{ STR_ADMIN_VENTES_ALL_EXPORT_EXCEL }}</a>&nbsp;<br/>
 	</div>
 	<input type="submit" class="btn btn-primary" name="export_selected_order" value="{{ STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER }}" />
 </form>

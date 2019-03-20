@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: order.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -265,7 +265,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		if ($result = fetch_assoc($query) ) {
 			$statut_livraison_new = $result['technical_code'];
 		} else {
-			$livraison_status_by_legacy_id_compatibility_array = array(0 => "discussed", 1 => "processing", 3 => "dispatched", 6 => "cancelled", 9 => "waiting_for_supply");
+			$livraison_status_by_legacy_id_compatibility_array = array(0 => "discussed", 1 => "processing", 3 => "dispatched", 6 => "cancelled", 9 => "waiting_for_supply", 101 => "processing2");
 			$statut_livraison_new = $livraison_status_by_legacy_id_compatibility_array[intval($statut_livraison_new)];
 		}
 	}
@@ -351,7 +351,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 			$sql_set_array[] = "e_datetime='" . date('Y-m-d H:i:s', time()) . "'";
 			// On envoie l'email d'expédition (avec ou sans les infos de delivery_tracking qui peut être vide)
 			// Si on veut désactiver cet email, désactiver le tempate d'email "send_avis_expedition"
-			$output .= send_avis_expedition($order_id, $delivery_tracking);
+			$output .= send_avis_expedition($order_id, (empty($delivery_tracking)?vb($commande['delivery_tracking']):$delivery_tracking));
 		}
 		if ($delivery_tracking !==null) {
 			// Attention, il faut pouvoir forcer la mise à "" => ne pas faire de test !empty
@@ -366,7 +366,7 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
 		}
 		$output .= call_module_hook('update_order_payment_status', array('no_stock_decrement_already_done' => $no_stock_decrement_already_done,'order_id' => $order_id, 'commande' => $commande, 'statut_paiement_new' => $statut_paiement_new, 'statut_livraison_new' => $statut_livraison_new), 'string');
 		if ($statut_livraison_new == 'pending' && $commande['statut_livraison'] != $statut_livraison_new) {
-			$custom_template_tags['ORDER_ID'] = $order_id;
+			$custom_template_tags['ORDER_ID'] = $commande['order_id'];
 			$custom_template_tags['NOM_FAMILLE'] = $commande['nom_bill'];
 			$custom_template_tags['PRENOM'] = $commande['prenom_bill'];
 			$custom_template_tags['EMAIL'] = $commande['email'];
@@ -385,31 +385,31 @@ function update_order_payment_status($order_id, $status_or_is_payment_validated,
  * @param array $frm Array with all fields data
  * @return
  */
-function put_session_commande(&$frm)
+function put_session_commande(&$frm, $session_commande_name="session_commande")
 {
-	$_SESSION['session_commande']['societe1'] = vb($frm['societe1']);
-	$_SESSION['session_commande']['client1'] = vb($frm['client1']);
-	$_SESSION['session_commande']['nom1'] = vb($frm['nom1']);
-	$_SESSION['session_commande']['prenom1'] = vb($frm['prenom1']);
-	$_SESSION['session_commande']['email1'] = vb($frm['email1']);
-	$_SESSION['session_commande']['contact1'] = vb($frm['contact1']);
-	$_SESSION['session_commande']['adresse1'] = vb($frm['adresse1']);
-	$_SESSION['session_commande']['code_postal1'] = vb($frm['code_postal1']);
-	$_SESSION['session_commande']['ville1'] = vb($frm['ville1']);
-	$_SESSION['session_commande']['pays1'] = vb($frm['pays1']);
+	$_SESSION[$session_commande_name]['societe1'] = vb($frm['societe1']);
+	$_SESSION[$session_commande_name]['client1'] = vb($frm['client1']);
+	$_SESSION[$session_commande_name]['nom1'] = vb($frm['nom1']);
+	$_SESSION[$session_commande_name]['prenom1'] = vb($frm['prenom1']);
+	$_SESSION[$session_commande_name]['email1'] = vb($frm['email1']);
+	$_SESSION[$session_commande_name]['contact1'] = vb($frm['contact1']);
+	$_SESSION[$session_commande_name]['adresse1'] = vb($frm['adresse1']);
+	$_SESSION[$session_commande_name]['code_postal1'] = vb($frm['code_postal1']);
+	$_SESSION[$session_commande_name]['ville1'] = vb($frm['ville1']);
+	$_SESSION[$session_commande_name]['pays1'] = vb($frm['pays1']);
 
 	if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId))) {
-		if (empty($_SESSION['session_commande']['is_socolissimo_order'])) {
+		if (empty($_SESSION[$session_commande_name]['is_socolissimo_order'])) {
 			// Quand on vient de SoColissimo, on ne change pas les variables de livraison
-			$_SESSION['session_commande']['societe2'] = vb($frm['societe2']);
-			$_SESSION['session_commande']['nom2'] = (empty($frm['nom2'])? $frm['nom1']:$frm['nom2']);
-			$_SESSION['session_commande']['prenom2'] = (empty($frm['prenom2'])? $frm['prenom1']:$frm['prenom2']);
-			$_SESSION['session_commande']['contact2'] = (empty($frm['contact2'])? $frm['contact1']:$frm['contact2']);
-			$_SESSION['session_commande']['email2'] = (empty($frm['email2'])? $frm['email1']:$frm['email2']);
-			$_SESSION['session_commande']['adresse2'] = (empty($frm['adresse2'])? $frm['adresse1']:$frm['adresse2']);
-			$_SESSION['session_commande']['code_postal2'] = (empty($frm['code_postal2'])? $frm['code_postal1']:$frm['code_postal2']);
-			$_SESSION['session_commande']['ville2'] = (empty($frm['ville2'])? $frm['ville1']:$frm['ville2']);
-			$_SESSION['session_commande']['pays2'] = (empty($frm['pays2'])? $frm['pays1']:$frm['pays2']);
+			$_SESSION[$session_commande_name]['societe2'] = vb($frm['societe2']);
+			$_SESSION[$session_commande_name]['nom2'] = (empty($frm['nom2'])? $frm['nom1']:$frm['nom2']);
+			$_SESSION[$session_commande_name]['prenom2'] = (empty($frm['prenom2'])? $frm['prenom1']:$frm['prenom2']);
+			$_SESSION[$session_commande_name]['contact2'] = (empty($frm['contact2'])? $frm['contact1']:$frm['contact2']);
+			$_SESSION[$session_commande_name]['email2'] = (empty($frm['email2'])? $frm['email1']:$frm['email2']);
+			$_SESSION[$session_commande_name]['adresse2'] = (empty($frm['adresse2'])? $frm['adresse1']:$frm['adresse2']);
+			$_SESSION[$session_commande_name]['code_postal2'] = (empty($frm['code_postal2'])? $frm['code_postal1']:$frm['code_postal2']);
+			$_SESSION[$session_commande_name]['ville2'] = (empty($frm['ville2'])? $frm['ville1']:$frm['ville2']);
+			$_SESSION[$session_commande_name]['pays2'] = (empty($frm['pays2'])? $frm['pays1']:$frm['pays2']);
 		}
 	}
 
@@ -417,23 +417,25 @@ function put_session_commande(&$frm)
 		foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
 			if (isset($frm[$this_field])) {
 				// On a ajouté dans la table utilisateurs un champ qui concerne l'adresse de facturation => Il faut préremplir les champs du formulaire d'adresse de facturation avec ces infos.
-				$_SESSION['session_commande'][$this_field] = $frm[$this_field];
+				$_SESSION[$session_commande_name][$this_field] = $frm[$this_field];
 			}
 		}
 	}
-	$_SESSION['session_commande']['commande_interne'] = vb($frm['commande_interne']);
-	$_SESSION['session_commande']['commentaires'] = vb($frm['commentaires']);
+	$_SESSION[$session_commande_name]['commande_interne'] = vb($frm['commande_interne']);
+	$_SESSION[$session_commande_name]['commentaires'] = vb($frm['commentaires']);
 	if(!empty($frm['order_form_payment_methods'])) {
-		$_SESSION['session_commande']['commentaires'] = $GLOBALS['STR_ORDER_FORM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] .': '. $frm['order_form_payment_methods'] . "\n" . $_SESSION['session_commande']['commentaires'];
+		$_SESSION[$session_commande_name]['commentaires'] = $GLOBALS['STR_ORDER_FORM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] .': '. $frm['order_form_payment_methods'] . "\n" . $_SESSION[$session_commande_name]['commentaires'];
 	}
-	$_SESSION['session_commande']['payment_technical_code'] = vb($frm['payment_technical_code']);
-	if ($_SESSION['session_commande']['payment_technical_code'] == 'moneybookers') {
-		$_SESSION['session_commande']['moneybookers_payment_methods'] = vb($frm['moneybookers_payment_methods']);
+	$_SESSION[$session_commande_name]['payment_technical_code'] = vb($frm['payment_technical_code']);
+	if ($_SESSION[$session_commande_name]['payment_technical_code'] == 'moneybookers') {
+		$_SESSION[$session_commande_name]['moneybookers_payment_methods'] = vb($frm['moneybookers_payment_methods']);
 	} else {
-		$_SESSION['session_commande']['moneybookers_payment_methods'] = '';
+		$_SESSION[$session_commande_name]['moneybookers_payment_methods'] = '';
 	}
-	$_SESSION['session_commande']['cgv'] = vn($frm['cgv']);
-	$_SESSION['session_commande']['document'] = vn($frm['document']);
+	$_SESSION[$session_commande_name]['cgv'] = vn($frm['cgv']);
+	$_SESSION[$session_commande_name]['document'] = vn($frm['document']);
+	$_SESSION[$session_commande_name]['numero'] = vn($frm['numero']);
+	$_SESSION[$session_commande_name]['date_fin_validite'] = vn($frm['date_fin_validite']);
 }
 
 /**
@@ -462,7 +464,7 @@ function create_or_update_order($order_infos, $articles_array)
 	if (empty($articles_array)) {
 		$articles_array = array();
 	}
-	// Verifie si id statut existe
+	// Vérifie si id statut existe
 	if (!isset($order_infos['statut_paiement'])) {
 		$order_infos['statut_paiement'] = 'pending';
 	}
@@ -480,22 +482,21 @@ function create_or_update_order($order_infos, $articles_array)
 		}
 	}
 	handle_specific_fields($order_infos, 'order');
-	foreach(vb($order_infos['adresses_fields_array'], array()) as $this_item) {
-		// En complément de name_compatibility_array
-		if ($this_item == 'zip') {
-			$this_field = 'code_postal';
-		} elseif($this_item == 'telephone') {
-			$this_field = 'contact';
+	
+	// On veut que les données de l'adresse dans le tableau $order_info porte le même nom que les champs dans peel_commandes
+	foreach (array('societe','nom','prenom','email','contact','adresse','code_postal','ville','pays') as $this_item) {
+		if ($this_item == 'code_postal') {
+			$this_field = 'zip';
+		} elseif($this_item == 'contact') {
+			$this_field = 'telephone';
 		} else {
 			$this_field = $this_item;
 		}
-		if (!empty($order_infos[$this_item . '_bill'])) {
-			$order_infos[$this_field . '1'] = $order_infos[$this_item . '_bill'];
-		} elseif (!empty($order_infos[$this_item]) && !isset($order_infos[$this_field . '1'])) {
-			$order_infos[$this_field . '1'] = $order_infos[$this_item];
+		if (!empty($order_infos[$this_item . '1'])) {
+			$order_infos[$this_field . '_bill'] = $order_infos[$this_item . '1'];
 		}
-		if (!empty($order_infos[$this_item . '_ship'])) {
-			$order_infos[$this_field . '2'] = $order_infos[$this_item . '_ship'];
+		if (!empty($order_infos[$this_item . '2'])) {
+			$order_infos[$this_field . '_ship'] = $order_infos[$this_item . '2'];
 		}
 	}
 	// On complète les données si nécessaire
@@ -542,8 +543,10 @@ function create_or_update_order($order_infos, $articles_array)
 		// Si pas de site_id précisé (problème de paramétrage), alors la valeur du champ site_id sera celle du site en cours de consultation
 		$order_infos['site_id'] = $GLOBALS['site_id'];
 	}
-	$set_sql = "email = '" . nohtml_real_escape_string(vb($order_infos['email'])) . "'
-		";
+
+	$order_infos['zone_tva'] = (!empty($order_infos['apply_vat'])?1:0);
+	$order_infos['zone'] = $order_infos['zoneId'];
+	$order_infos['delivery_orderid'] = vb($_SESSION['session_caddie']->delivery_orderid);
 	if(!empty($order_infos['email1'])){
 		// Si on change l'email associé à une commande, et qu'il correspond à un utilisateur en BDD, on ajuste l'id_utilisateur
 		// Sinon, on laisse l'id_utilisateur comme il était (0 si la commande avait préalablement été créée sans association à un utilisateur, ou l'id d'un compte quelconque dont l'email n'est peut-être pas à jour)
@@ -552,453 +555,284 @@ function create_or_update_order($order_infos, $articles_array)
 			$order_infos['id_utilisateur'] = $searched_id_utilisateur;
 		}
 	}
-	if (isset($order_infos['campaign_id'])) {
-		$set_sql .= ", campaign_id = '" . real_escape_string(vb($order_infos['campaign_id'])) . "'";
-	}
-	if (isset($order_infos['marketplace_orderid'])) {
-		$set_sql .= ", marketplace_orderid = '" . real_escape_string(vb($order_infos['marketplace_orderid'])) . "'";
-	}
-	if (isset($order_infos['commande_interne'])) {
-		$set_sql .= ", commande_interne = '" . nohtml_real_escape_string($order_infos['commande_interne']) . "'";
-	}
-	if (isset($order_infos['id_utilisateur'])) {
-		$set_sql .= ", id_utilisateur = '" . nohtml_real_escape_string($order_infos['id_utilisateur']) . "'";
-	}
-	if (isset($order_infos['commentaires'])) {
-		$set_sql .= ", commentaires = '" . nohtml_real_escape_string($order_infos['commentaires']) . "'";
-	}
-	if (isset($order_infos['commentaires_admin'])) {
-		$set_sql .= ", commentaires_admin = '" . nohtml_real_escape_string($order_infos['commentaires_admin']) . "'";
-	}
-	$set_sql .= ", montant = '" . nohtml_real_escape_string($order_infos['montant']) . "'
-		, montant_ht = '" . nohtml_real_escape_string($order_infos['montant_ht']) . "'";
-	if (isset($order_infos['total_option'])) {
-		$set_sql .= ", total_option = '" . nohtml_real_escape_string(vb($order_infos['total_option'])) . "'";
-	}
-	if (isset($order_infos['a_timestamp'])) {
-		$set_sql .= ", a_timestamp = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($order_infos['a_timestamp']))) . "'";
-	}
-	if (isset($order_infos['e_datetime'])) {
-		$set_sql .= ", e_datetime = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($order_infos['e_datetime']))) . "'";
-	}
-	if (isset($order_infos['f_datetime'])) {
-		$set_sql .= ", f_datetime = '" . nohtml_real_escape_string(get_mysql_date_from_user_input(vb($order_infos['f_datetime']))) . "'";
-	}
-	if (isset($order_infos['tva_total_option'])) {
-		$set_sql .= ", tva_total_option = '" . nohtml_real_escape_string(vb($order_infos['tva_total_option'])) . "'";
-	}
-	$set_sql .= ", total_produit = '" . nohtml_real_escape_string($order_infos['total_produit']) . "'
-		, total_produit_ht = '" . nohtml_real_escape_string($order_infos['total_produit_ht']) . "'
-		, tva_total_produit = '" . nohtml_real_escape_string($order_infos['tva_total_produit']) . "'";
-	if (isset($order_infos['code_promo'])) {
-		$set_sql .= ", code_promo = '" . nohtml_real_escape_string(vb($order_infos['code_promo'])) . "'";
-	}
-	if (isset($order_infos['percent_remise_user'])) {
-		$set_sql .= ", percent_remise_user = '" . nohtml_real_escape_string(vb($order_infos['percent_remise_user'])) . "'";
-	}
-	if (isset($order_infos['percent_code_promo'])) {
-		$set_sql .= ", percent_code_promo = '" . nohtml_real_escape_string(vb($order_infos['percent_code_promo'])) . "'";
-	}
-	if (isset($order_infos['valeur_code_promo'])) {
-		$set_sql .= ", valeur_code_promo = '" . nohtml_real_escape_string(vb($order_infos['valeur_code_promo'])) . "'";
-	}
-	if (isset($order_infos['total_remise'])) {
-		$set_sql .= ", total_remise = '" . nohtml_real_escape_string(vb($order_infos['total_remise'])) . "'";
-	}
-	if (isset($order_infos['total_remise_ht'])) {
-		$set_sql .= ", total_remise_ht = '" . nohtml_real_escape_string(vb($order_infos['total_remise_ht'])) . "'";
-	}
-	if (isset($order_infos['tva_total_remise'])) {
-		$set_sql .= ", tva_total_remise = '" . nohtml_real_escape_string(vb($order_infos['tva_total_remise'])) . "'";
-	}
-	$set_sql .= ", total_tva = '" . nohtml_real_escape_string($order_infos['total_tva']) . "'";
-	if (isset($order_infos['transport'])) {
-		$set_sql .= ", transport = '" . nohtml_real_escape_string(vb($order_infos['transport'])) . "'";
-	}
-	$set_sql .= ", cout_transport = '" . nohtml_real_escape_string(vn($order_infos['cout_transport'])) . "'
-		, cout_transport_ht = '" . nohtml_real_escape_string(vn($order_infos['cout_transport_ht'])) . "'
-		, tva_cout_transport = '" . nohtml_real_escape_string(vn($order_infos['tva_cout_transport'])) . "'
-		, lang = '" . nohtml_real_escape_string($order_infos['lang']) . "'";
-	if (isset($order_infos['total_points'])) {
-		$set_sql .= ", total_points = '" . nohtml_real_escape_string(vb($order_infos['total_points'])) . "'";
-	}
-	if (isset($order_infos['total_poids'])) {
-		$set_sql .= ", total_poids = '" . nohtml_real_escape_string(vb($order_infos['total_poids'])) . "'";
-	}
-	if (isset($order_infos['affilie'])) {
-		$set_sql .= ", affilie = '" . nohtml_real_escape_string(vb($order_infos['affilie'])) . "'";
-	}
-	if (isset($order_infos['montant_affilie'])) {
-		$set_sql .= ", montant_affilie = '" . nohtml_real_escape_string(vb($order_infos['montant_affilie'])) . "'";
-	}
-	if (isset($order_infos['statut_affilie'])) {
-		$set_sql .= ", statut_affilie = '" . nohtml_real_escape_string(vb($order_infos['statut_affilie'])) . "'";
-	}
-	if (isset($order_infos['id_affilie'])) {
-		$set_sql .= ", id_affilie = '" . nohtml_real_escape_string(vb($order_infos['id_affilie'])) . "'";
-	}
-	$set_sql .= "
-		, total_ecotaxe_ttc = '" . nohtml_real_escape_string(vb($order_infos['total_ecotaxe_ttc'])) . "'
-		, total_ecotaxe_ht = '" . nohtml_real_escape_string(vb($order_infos['total_ecotaxe_ht'])) . "'
-		, tva_total_ecotaxe = '" . nohtml_real_escape_string(vb($order_infos['tva_total_ecotaxe'])) . "'";
-	if (isset($order_infos['avoir'])) {
-		$set_sql .= ", avoir = '" . nohtml_real_escape_string(vb($order_infos['avoir'])) . "'";
-	}
-	if (!empty($order_infos['payment_technical_code'])) {
-		$set_sql .= ", paiement = '" . nohtml_real_escape_string(vb($order_infos['payment_technical_code'])) . "'";
-	}
-	$set_sql .= "
-		, tarif_paiement = '" . nohtml_real_escape_string(vb($order_infos['tarif_paiement'])) . "'
-		, tarif_paiement_ht = '" . nohtml_real_escape_string(vb($order_infos['tarif_paiement_ht'])) . "'
-		, tva_tarif_paiement = '" . nohtml_real_escape_string(vb($order_infos['tva_tarif_paiement'])) . "'
-		, prenom_bill = '" . nohtml_real_escape_string(vb($order_infos['prenom1'])) . "'
-		, nom_bill = '" . nohtml_real_escape_string(vb($order_infos['nom1'])) . "'
-		, societe_bill = '" . nohtml_real_escape_string(vb($order_infos['societe1'])) . "'
-		, adresse_bill = '" . nohtml_real_escape_string(vb($order_infos['adresse1'])) . "'
-		, zip_bill = '" . nohtml_real_escape_string(vb($order_infos['code_postal1'])) . "'
-		, ville_bill = '" . nohtml_real_escape_string(vb($order_infos['ville1'])) . "'
-		, pays_bill = '" . nohtml_real_escape_string(vb($order_infos['pays1'])) . "'
-		, email_bill = '" . nohtml_real_escape_string(vb($order_infos['email1'])) . "'
-		, telephone_bill = '" . nohtml_real_escape_string(vb($order_infos['contact1'])) . "'
-		, prenom_ship = '" . nohtml_real_escape_string(vb($order_infos['prenom2'])) . "'";
-	if (isset($order_infos['nom2'])) {
-		$set_sql .= ", nom_ship = '" . nohtml_real_escape_string(vb($order_infos['nom2'])) . "'";
-	}
-	if (isset($order_infos['societe2'])) {
-		$set_sql .= ", societe_ship = '" . nohtml_real_escape_string(vb($order_infos['societe2'])) . "'";
-	}
-	if (isset($order_infos['adresse2'])) {
-		$set_sql .= ", adresse_ship = '" . nohtml_real_escape_string(vb($order_infos['adresse2'])) . "'";
-	}
-	if (isset($order_infos['code_postal2'])) {
-		$set_sql .= ", zip_ship = '" . nohtml_real_escape_string(vb($order_infos['code_postal2'])) . "'";
-	}
-	if (isset($order_infos['ville2'])) {
-		$set_sql .= ", ville_ship = '" . nohtml_real_escape_string(vb($order_infos['ville2'])) . "'";
-	}
-	if (isset($order_infos['pays2'])) {
-		$set_sql .= ", pays_ship = '" . nohtml_real_escape_string(vb($order_infos['pays2'])) . "'";
-	}
-	if (isset($order_infos['email2'])) {
-		$set_sql .= ", email_ship = '" . nohtml_real_escape_string(vb($order_infos['email2'])) . "'";
-	}
-	if (isset($order_infos['contact2'])) {
-		$set_sql .= ", telephone_ship = '" . nohtml_real_escape_string(vb($order_infos['contact2'])) . "'";
-	}
-	if (isset($order_infos['id_parrain'])) {
-		$set_sql .= ", id_parrain = '" . nohtml_real_escape_string(vn($order_infos['id_parrain'])) . "'";
-	}
-	if (isset($order_infos['parrain'])) {
-		$set_sql .= ", parrain = '" . nohtml_real_escape_string(vb($order_infos['parrain'])) . "'";
-	}
-	$set_sql .= "
-		, currency_rate = '" . nohtml_real_escape_string($order_infos['currency_rate']) . "'
-		, zone_tva = '" . nohtml_real_escape_string(!empty($order_infos['apply_vat'])?1:0) . "'";
-	if (isset($order_infos['zoneFranco'])) {
-		$set_sql .= ", zone_franco = '" . nohtml_real_escape_string($order_infos['zoneFranco']) . "'";
-	}
-	$set_sql .= "
-		, small_order_overcost_amount = '" . nohtml_real_escape_string(vb($order_infos['small_order_overcost_amount'])) . "'
-		, tva_small_order_overcost = '" . nohtml_real_escape_string(vb($order_infos['tva_small_order_overcost'])) . "'
-		, pays = '" . nohtml_real_escape_string($order_infos['pays']) . "'
-		, zone = '" . nohtml_real_escape_string($order_infos['zoneId']) . "'
-		, type = '" . nohtml_real_escape_string(vb($order_infos['type'])) . "'
-		, typeId = '" . intval(vn($order_infos['typeId'])) . "'
-		, delivery_orderid = '" . nohtml_real_escape_string(vb($_SESSION['session_caddie']->delivery_orderid)) . "'
-		, devise = '" . nohtml_real_escape_string($order_infos['devise']) . "'";
-	if (isset($order_infos['moneybookers_payment_methods'])) {
-		$set_sql .= ", moneybookers_payment_methods = '" . real_escape_string(vb($order_infos['moneybookers_payment_methods'])) . "'";
-	}
-	$set_sql .= ", delivery_infos = '" . real_escape_string(vb($order_infos['delivery_infos'])) . "'
-		, delivery_locationid = '" . nohtml_real_escape_string(vb($order_infos['delivery_locationid'])) . "'
-		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value(vn($order_infos['site_id']))) . "'";
 	if (check_if_module_active('tnt')) {
-		if(!empty($_SESSION['session_commande']['xETTCode'])) {
-			$set_sql .= ", xETTCode = '" . word_real_escape_string(vb($_SESSION['session_commande']['xETTCode'])) . "'";		
-		}
-		$set_sql .= "
-		, expedition_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'
-		, shipping_date = '" . nohtml_real_escape_string(vb($GLOBALS['web_service_tnt']->shippingDate)) . "'";
+		$order_infos['xETTCode'] = vb($_SESSION['session_commande']['xETTCode']);
+		$order_infos['expedition_date'] = $GLOBALS['web_service_tnt']->shippingDate;
+		$order_infos['shipping_date'] = $GLOBALS['web_service_tnt']->shippingDate;
 	}
-	if (!empty($order_infos['shortkpid']) && check_if_module_active('kiala')) {
-		$set_sql .= ", shortkpid = '" . nohtml_real_escape_string(vb($order_infos['shortkpid'])) . "'";
-	}
-	if(!empty($order_infos['appuId'])) {
-		$set_sql .= ", appuId = '" . nohtml_real_escape_string(vb($order_infos['appuId'])) . "'";
-	}
-	if (!empty($order_infos['document'])) {
-		$set_sql .= ", document = '" . nohtml_real_escape_string(vb($order_infos['document'])) . "'";
-	}
-	
-	if (!empty($order_infos['specific_field_sql_set'])) {
-		$set_sql .= ',' . implode(',', $order_infos['specific_field_sql_set']);
-	}
-	
-	if (!empty($order_infos['commandeid'])) {
-		// On met à jour la commande
-		$sql = "UPDATE peel_commandes
-			SET " . $set_sql . "
-			WHERE id_utilisateur='" . intval($old_id_utilisateur) . "' AND id='" . intval($order_infos['commandeid']) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "";
-		$order_infos['o_timestamp'] = $order_infos_ex['o_timestamp'];
-	} else {
-		// On crée la commande - pour cela, on définit le code facture, et l'id utilisateur
-		$code_facture = vb($order_infos['code_facture']);
-		while (empty($code_facture) || (isset($qid_commande) && num_rows($qid_commande))) {
-			// On s'assure que le code facture généré n'existe pas encore
-			$code_facture = MDP(10);
-			$qid_commande = query("SELECT *
-				FROM peel_commandes
-				WHERE code_facture = '" . nohtml_real_escape_string($code_facture) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "");
-		}
-		// Attention : on ne doit pas mettre de "a_timestamp" ici, car ça dépend de si la commande est à passer en payer ou non => c'est géré dans update_order_payment_status
-		$sql = "INSERT INTO peel_commandes
-			SET " . $set_sql . "
-			, order_id = '" . intval(get_order_id(null, vn($order_infos['site_id']))) . "'
-			, code_facture = '" . nohtml_real_escape_string($code_facture) . "'
-			, o_timestamp = '" . date('Y-m-d H:i:s', time()) . "' ";
-			// var_dump($sql);die();
-		$order_infos['o_timestamp'] = date('Y-m-d H:i:s', time());
-	}
-	query($sql);
-	if (empty($order_infos['commandeid'])) {
-		$order_infos['commandeid'] = insert_id();
-	}
-	$order_id = $order_infos['commandeid'];
 
-	if(!empty($order_infos['numero']) && $order_infos['numero']!=get_configuration_variable('format_numero_facture', vn($order_infos['site_id']), $_SESSION['session_langue'])) {
-		// Si un numéro est spécifié par l'admin (donc n'est pas le format par défaut), alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
-		$numero = get_bill_number($order_infos['numero'], $order_id, false);
-	} else {
-		$numero = '';
+	// Appel du hook qui viendra potentiellement remplacer le tableau de correspondance des champs de la table qui stock les commandes.
+	$hook_result = call_module_hook('order_table_and_fields',array('order_infos'=>$order_infos), 'array');
+	if (!empty($hook_result['order_infos'])) {
+		$order_infos = $hook_result['order_infos'];
 	}
-	// Qu'il soit vide ou non, on met à jour la colonne numero
-	query("UPDATE peel_commandes
-		SET numero = '" . nohtml_real_escape_string($numero) . "'
-		WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "");
-	// On va enregistrer l'ensemble des produits commandés pour la commande $order_id
-	// Tout d'abord on supprime ce qui existait en BDD pour cette commande
-	if (!empty($order_infos_ex)) {
-		if(check_if_module_active('stock_advanced')) {
-			// On réincrémente les stocks si il y avait des articles précédemment stockés, puisqu'on fait comme si les produits commandés étaient tous annulés
-			// On gèrera plus tard les stocks dans update_order_payment_status() appelé à la fin de cette fonction
-			$product_infos_array = get_product_infos_array_in_order($order_id);
-			foreach ($product_infos_array as $this_ordered_product) {
-				// On réincrémente le stock uniquement pour les articles onstock=1, c'est-à-dire dont le stock est géré
-				if(vb($GLOBALS['site_parameters']['stock_update_on_event'], 'order_payment') == 'order_delivery') {
-					$status_decrement_stock = $GLOBALS['site_parameters']['delivery_status_decrement_stock'];
-					$statut = $order_infos_ex['statut_livraison'];
-				} else {
-					$status_decrement_stock = $GLOBALS['site_parameters']['payment_status_decrement_stock'];
-					$statut = $order_infos_ex['statut_paiement'];
-				}
-				if ($this_ordered_product['etat_stock'] == 1 && in_array($statut, explode(',', $status_decrement_stock))) {
-					incremente_stock($this_ordered_product['quantite'] - $this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
-					// On initialise les demande de réassort de stock lié à ce produit commandé en supprimant ensuite les lignes de peel_commandes_articles, donc pas besoin de faire :
-					// query("UPDATE peel_commandes_articles
-					// 	SET order_stock='0'
-					// 	WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles') . "");
-				}
-			}
-		}
-		if(check_if_module_active('gifts')) {
-			// On retire les points attribués préalablement, pour redonner les nouveaux points ensuite
-			update_points($order_infos['total_points'], vn($order_infos['points_etat']), $order_id, null);
+	$set_sql = array();
+	$commandes_fields = get_table_field_names('peel_commandes', null, true);
+	foreach($order_infos as $peel_field=>$value_field) {
+		if ($peel_field == 'specific_field_sql_set') {
+			$set_sql[] = implode(',', $value_field);
+		} elseif(in_array($peel_field, $commandes_fields)) {
+			$set_sql[] = $peel_field." = '" . nohtml_real_escape_string($order_infos[$peel_field]) . "'";
 		}
 	}
-	query("DELETE FROM peel_commandes_articles
-		WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles'));
-	// On ajoute les articles à la table commandes_articles
-	foreach ($articles_array as $article_infos) {
-		// On rend compatible des entrées du tableau 
-		foreach($name_compatibility_array as $key => $value) {
-			// On rend compatible des entrées du tableau article_infos
-			if (isset($article_infos[$key])) {
-				// Nécessite une conversion du nom de l'index.
-				$article_infos[$value] = $article_infos[$key];
-				// On ne laisse pas d'index inutile, ça complique la lecture lors du déboguage;
-				unset($article_infos[$key]);
-			}
-		}
-		// On construit un objet product à partir des informations de $article_infos.
-		// On l'utilise pour des informations diverses, mais surtout pas pour les prix par exemple, qui doivent être ceux imposés par $article_infos
-		// L'objet produit n'a pas besoin d'être initialisé avec toute les informations de $article_infos car on ne l'utilise que pour les parties sur lesquelles on n'a pas d'information dans $article_infos
-		$product_infos = null;
-		if (!empty($article_infos["data_check"])) {
-			$product_infos['on_check'] = 1;
+
+	// Hook qui gère l'intertion de commande n'utilisant pas l'architecture PEEL.
+	// Le hook retourne le numéro de commande généré
+	// si aucun hook n'existe, la fonction call_module_hook retourne le boolean true.
+	$hook_result = call_module_hook('create_or_update_order', array('order_infos'=> $order_infos, 'articles_array'=> $articles_array), 'string');
+	if(empty($hook_result) || !is_numeric($hook_result)) {
+		// le hook n'a pas retourné de valeur indiquant une éventuelle action en BDD, donc on gère la commande avec PEEL.
+		if (!empty($order_infos['commandeid'])) {
+			// On met à jour la commande
+			$sql = "UPDATE peel_commandes
+				SET " . implode(',',$set_sql) . "
+				WHERE id_utilisateur='" . intval($old_id_utilisateur) . "' AND id='" . intval($order_infos['commandeid']) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "";
+			$order_infos['o_timestamp'] = $order_infos_ex['o_timestamp'];
 		} else {
-			$product_infos['on_check'] = 0;
-		}
-		$product_object = new Product($article_infos['product_id'], $product_infos, false, null, true, !check_if_module_active('micro_entreprise'));
-		// On n'a pas à indiquer si l'utilisateur est un revendeur ou non car on ne va pas utiliser les prix des configurations ci-après, on utilisera $article_infos
-		$product_object->set_configuration(vn($article_infos['couleurId']), vn($article_infos['tailleId']), vb($article_infos['id_attribut']), false, true);
-		// Dans le cas d'une création de commande, l'id attribut est renseigné dans la session caddie => On peut configurer les attributs de ce produit avec la classe Product.
-		// En revanche, dans le cas d'une modification d'une commande existante, l'id de l'attribut n'est pas disponible, car elle n'est pas sauvegardée lors du passage de la commande.
-		// Le nom de l'attribut est stocké dans la table peel_commandes_articles pour que cette information n'évolue pas dans le temps.
-		if (!empty($article_infos['id_attribut'])) {
-			$attribut = $product_object->configuration_attributs_description;
-		} elseif (!empty($article_infos['nom_attribut'])) {
-			$attribut = $article_infos['nom_attribut'];
-		} else {
-			$attribut = '';
-		}
-		if (empty($prod_download_data[$product_object->id]['statut_envoi'])) {
-			// Si on est dans le cadre de la création de commande
-			$statut_envoi = ($product_object->on_download == 1) ? "En attente" : "";
-		} else {
-			$statut_envoi = $prod_download_data[$product_object->id]['statut_envoi'];
-		}
-		// Il faut que la couleur et la taille soient gardés tels quels lorsqu'une commande est éditée
-		// et que la couleur et la taille ne sont plus disponibles => get_color et get_size ne pourraient pas les donner
-		// => dans ce cas ces informations sont dans $article_infos['couleur'] et $article_infos['taille']
-		if (empty($article_infos['couleur'])) {
-			$article_infos['couleur'] = $product_object->get_color();
-		}
-		if (empty($article_infos['taille'])) {
-			$article_infos['taille'] = $product_object->get_size();
-		}
-		if (!empty($article_infos['nom_produit'])) {
-			$article_infos['product_name'] = $article_infos['nom_produit'];
-		}
-		if (empty($article_infos['product_name'])) {
-			$article_infos['product_name'] = $product_object->name;
-		}
-		if (check_if_module_active('product_references_by_options')) {
-			// On utilise get_possible_attributs pour récupèrer les attributs associés au produit pour pouvoir récupérer l'id de l'option d'attribut
-			$possible_attributes_with_single_options = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, false, true); 
-			foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
-				foreach($this_options_array as $this_attribut_id) {
-					if($this_attribut_id) {
-						// on récupère la référence de l'option d'attribut
-						$article_infos['reference'] = get_reference_option_attribut($this_attribut_id);
-					}
-				}
+			// On crée la commande - pour cela, on définit le code facture, et l'id utilisateur
+			$code_facture = vb($order_infos['code_facture']);
+			while (empty($code_facture) || (isset($qid_commande) && num_rows($qid_commande))) {
+				// On s'assure que le code facture généré n'existe pas encore
+				$code_facture = MDP(10);
+				$qid_commande = query("SELECT *
+					FROM  peel_commandes
+					WHERE code_facture = '" . nohtml_real_escape_string($code_facture) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "");
 			}
-			if (empty($article_infos['reference'])) {
-				// On utilise configuration_attributs_list pour récupèrer l'id des options d'attributs associés quand le produit en a plusieurs
-				if (!empty($product_object->configuration_attributs_list)) {
-					$attributs_list_array = explode('§', vb($product_object->configuration_attributs_list));
-					foreach($attributs_list_array as $this_attributs_list) {
-						$this_attributs_list_array = explode("|", $this_attributs_list);
-						// On récupère l'id de l'option sélectionnée si format est attribut_id|option_id, ou le texte si le format est attribut_id|0|texte
-						$article_infos['reference'] = get_reference_option_attribut(end($this_attributs_list_array));
-					}
-				}
+			// La recherche du numéro dans la commande n'a rien donnée, ou $id est vide.
+			// Récuperation du numéro de commande le plus élevé pour le site. 
+			$order_id_sql = 'SELECT MAX(c.order_id) as max_order_id
+				FROM peel_commandes c
+				WHERE ';
+			if(!empty($GLOBALS['site_parameters']['multisite_disable']) || (!empty($GLOBALS['site_parameters']['multisite_disable_commandes']) && empty($GLOBALS['site_parameters']['multisite_forced_numbering_commandes']))) {
+				// Pas de multisite : tous les site_id sont traités sans distinction
+				// La ligne suivant est a priori inutile, mais c'est standard de le mettre quand même pour que ce soit propre au niveau de la sécurité d'accès aux données en cas de développements spécifiques
+				$order_id_sql .= "" . get_filter_site_cond('commandes','c') . "";
+			} elseif(empty($GLOBALS['site_parameters']['bill_number_regroup_sites_array']) || !isset($GLOBALS['site_parameters']['bill_number_regroup_sites_array'][$order_infos['site_id']])) {
+				// Cas normal : chaque site_id a un enchainement de numérotation indépendant des autres site_id
+				$order_id_sql .= "c.site_id='" . intval($order_infos['site_id']) . "' AND " . get_filter_site_cond('commandes', 'c', false, $order_infos['site_id']) . "";
+			} else {
+				// Cas inhabituel : regroupement de plusieurs site_id pour des sociétés
+				$order_id_sql .= "c.site_id IN (" . real_escape_string(vb($GLOBALS['site_parameters']['bill_number_regroup_sites_array'][$order_infos['site_id']])) . ")";
 			}
-			if (empty($article_infos['reference'])) {
-				$article_infos['reference'] = get_product_reference_by_option($product_object);
-			}
+			
+			// Attention : on ne doit pas mettre de "a_timestamp" ici, car ça dépend de si la commande est à passer en payer ou non => c'est géré dans update_order_payment_status
+			$sql = "INSERT INTO peel_commandes
+				SET " . implode(',',$set_sql) . "
+				, order_id = 1+COALESCE((".$order_id_sql."),0)
+				, code_facture = '" . nohtml_real_escape_string($code_facture) . "'
+				, o_timestamp = '" . date('Y-m-d H:i:s', time()) . "' ";
+			$order_infos['o_timestamp'] = date('Y-m-d H:i:s', time());
 		}
-		if (empty($article_infos['reference'])) {
-			$article_infos['reference'] = $product_object->reference;
-		}
-		$sql = "INSERT INTO peel_commandes_articles SET
-			site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($order_infos['site_id'])) . "'
-			, commande_id = '" . intval($order_id) . "'
-			, produit_id = '" . intval($product_object->id) . "'
-			, categorie_id = '" . intval($product_object->categorie_id) . "'";
-		if (isset($article_infos['reference'])) {
-			$sql .= ", reference = '" . nohtml_real_escape_string($article_infos['reference']) . "'";
-		}
-		$sql .= "
-			, nom_produit = '" . nohtml_real_escape_string($article_infos['product_name']) . "'";
-		if (isset($article_infos['couleur'])) {
-			$sql .= ", couleur = '" . nohtml_real_escape_string($article_infos['couleur']) . "'";
-		}
-		if (isset($article_infos['taille'])) {
-			$sql .= ", taille = '" . nohtml_real_escape_string($article_infos['taille']) . "'";
-		}
-		if (isset($article_infos['couleurId'])) {
-			$sql .= ", couleur_id = '" . nohtml_real_escape_string($article_infos['couleurId']) . "'";
-		}
-		if (isset($article_infos['tailleId'])) {
-			$sql .= ", taille_id = '" . nohtml_real_escape_string($article_infos['tailleId']) . "'";
-		}
-		$sql .= "
-			, prix_cat = '" . nohtml_real_escape_string(vb($article_infos['prix_cat'])) . "'
-			, prix_cat_ht = '" . nohtml_real_escape_string(vb($article_infos['prix_cat_ht'])) . "'
-			, prix = '" . nohtml_real_escape_string($article_infos['prix']) . "'
-			, prix_ht = '" . nohtml_real_escape_string($article_infos['prix_ht']) . "'
-			, prix_achat_ht = '" . nohtml_real_escape_string($product_object->get_supplier_price(false)) . "'";
-		if (isset($article_infos['percent_remise_produit'])) {
-			$sql .= ", percent_remise_produit = '" . nohtml_real_escape_string(vn($article_infos['percent_remise_produit'])) . "'";
-		}
-		if (isset($article_infos['remise'])) {
-			$sql .= ", remise = '" . nohtml_real_escape_string(vn($article_infos['remise'])) . "'";
-		}
-		if (isset($article_infos['remise_ht'])) {
-			$sql .= ", remise_ht = '" . nohtml_real_escape_string(vn($article_infos['remise_ht'])) . "'";
-		}
-		$sql .= "
-			, total_prix = '" . nohtml_real_escape_string($article_infos['total_prix']) . "'
-			, total_prix_ht = '" . nohtml_real_escape_string($article_infos['total_prix_ht']) . "'
-			, quantite = '" . nohtml_real_escape_string($article_infos['quantite']) . "'
-			, tva = '" . nohtml_real_escape_string($article_infos['tva']) . "'
-			, tva_percent = '" . nohtml_real_escape_string($article_infos['tva_percent']) . "'";
-		if (isset($article_infos['points'])) {
-			$sql .= ", points = '" . nohtml_real_escape_string(vn($article_infos['points'])) . "'";
-		}
-		if (isset($article_infos['poids'])) {
-			$sql .= ", poids = '" . nohtml_real_escape_string(vn($article_infos['poids'])) . "'";
-		}
-		// data_check correspond au tableau qui contient l'email d'envoi, le nom et le prénom du destinataire du chèque cadeau qui peut être différent
-		if (isset($article_infos['data_check'])) {
-			$sql .= ", email_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['email_check'])) . "'";
-			$sql .= ", nom_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['nom_check'])) . "'";
-			$sql .= ", prenom_check = '" . nohtml_real_escape_string(vb($article_infos['data_check']['prenom_check'])) . "'";
-		}
-		if (isset($product_object->on_download)) {
-			$sql .= ", on_download = '" . intval($product_object->on_download) . "'
-			, statut_envoi = '" . nohtml_real_escape_string($statut_envoi) . "'
-			, nb_envoi = '" . nohtml_real_escape_string(vn($prod_download_data[$product_object->id]['nb_envoi'])) . "'
-			, nb_download = '" . nohtml_real_escape_string(vn($prod_download_data[$product_object->id]['nb_download'])) . "'";
-		}
-		$sql .= "
-			, ecotaxe_ttc = '" . nohtml_real_escape_string(vb($article_infos['ecotaxe_ttc'])) . "'
-			, ecotaxe_ht = '" . nohtml_real_escape_string(vb($article_infos['ecotaxe_ht'])) . "'
-			, prix_option = '" . nohtml_real_escape_string(vn($article_infos['option'])) . "'
-			, prix_option_ht = '" . nohtml_real_escape_string(vn($article_infos['option_ht'])) . "'";
-		if (check_if_module_active('stock_advanced')) {
-			$sql .= "
-			, etat_stock = '" . nohtml_real_escape_string(vb($article_infos['etat_stock'])) . "'
-			, delai_stock = '" . nohtml_real_escape_string(vb($article_infos['delai_stock'])) . "'
-			, commentaires_admin = '" . nohtml_real_escape_string(vb($article_infos['commentaires_admin'])) . "'";
-		}
-		if (check_if_module_active('listecadeau') && !empty($article_infos['giftlist_owners'])) {
-			$sql .= "
-			, listcadeaux_owner = '" . nohtml_real_escape_string(vn($article_infos['giftlist_owners'])) . "'";
-		}
-		if (check_if_module_active('conditionnement')) {
-			// Les produits sont conditionnés sous forme de lot => ici on sauvegarde la taille des lots de conditionnement
-			$sql .= "
-			, conditionnement = '" . nohtml_real_escape_string(vb($product_object->conditionnement)) . "'";
-		}
-		if (check_if_module_active('tnt')) {
-			$sql .= "
-			, tnt_parcel_number = '" . nohtml_real_escape_string(vb($article_infos['tnt_parcel_number'])) . "'
-			, tnt_tracking_url = '" . nohtml_real_escape_string(vb($article_infos['tnt_tracking_url'])) . "'";
-		}
-		$sql .= "
-			, attributs_list = '" . nohtml_real_escape_string(vb($article_infos['id_attribut'])) . "'
-			, nom_attribut = '" . nohtml_real_escape_string(str_replace('<br />', "\r\n", $attribut)) . "'
-			, total_prix_attribut = '" . nohtml_real_escape_string(vb($article_infos['total_prix_attribut'])) . "'";
 		query($sql);
+		if (empty($order_infos['commandeid'])) {
+			$order_infos['commandeid'] = insert_id();
+		}
+		$order_id = $order_infos['commandeid'];
 
-		unset($product_object);
+		if(!empty($order_infos['numero']) && $order_infos['numero']!=get_configuration_variable('format_numero_facture', vn($order_infos['site_id']), $_SESSION['session_langue'])) {
+			// Si un numéro est spécifié par l'admin (donc n'est pas le format par défaut), alors on le met ici, sinon la création de numéro sera gérée dans update_order_payment_status car dépendant du status
+			$numero = get_bill_number($order_infos['numero'], $order_id, false);
+		} else {
+			$numero = '';
+		}
+		// Qu'il soit vide ou non, on met à jour la colonne numero
+		query("UPDATE peel_commandes
+			SET numero = '" . nohtml_real_escape_string($numero) . "'
+			WHERE id = '" . intval($order_id) . "' AND " . get_filter_site_cond('commandes', null, false, $order_infos['site_id'], true) . "");
+		// On va enregistrer l'ensemble des produits commandés pour la commande $order_id
+		// Tout d'abord on supprime ce qui existait en BDD pour cette commande
+		if (!empty($order_infos_ex)) {
+			if(check_if_module_active('stock_advanced')) {
+				// On réincrémente les stocks si il y avait des articles précédemment stockés, puisqu'on fait comme si les produits commandés étaient tous annulés
+				// On gèrera plus tard les stocks dans update_order_payment_status() appelé à la fin de cette fonction
+				$product_infos_array = get_product_infos_array_in_order($order_id);
+				foreach ($product_infos_array as $this_ordered_product) {
+					// On réincrémente le stock uniquement pour les articles onstock=1, c'est-à-dire dont le stock est géré
+					if(vb($GLOBALS['site_parameters']['stock_update_on_event'], 'order_payment') == 'order_delivery') {
+						$status_decrement_stock = $GLOBALS['site_parameters']['delivery_status_decrement_stock'];
+						$statut = $order_infos_ex['statut_livraison'];
+					} else {
+						$status_decrement_stock = $GLOBALS['site_parameters']['payment_status_decrement_stock'];
+						$statut = $order_infos_ex['statut_paiement'];
+					}
+					if ($this_ordered_product['etat_stock'] == 1 && in_array($statut, explode(',', $status_decrement_stock))) {
+						incremente_stock($this_ordered_product['quantite'] - $this_ordered_product['order_stock'], $this_ordered_product['produit_id'], $this_ordered_product['couleur_id'], $this_ordered_product['taille_id']);
+						// On initialise les demande de réassort de stock lié à ce produit commandé en supprimant ensuite les lignes de peel_commandes_articles, donc pas besoin de faire :
+						// query("UPDATE peel_commandes_articles
+						// 	SET order_stock='0'
+						// 	WHERE id='" . intval($this_ordered_product['id']) . "' AND " . get_filter_site_cond('commandes_articles') . "");
+					}
+				}
+			}
+			if(check_if_module_active('gifts')) {
+				// On retire les points attribués préalablement, pour redonner les nouveaux points ensuite
+				update_points($order_infos['total_points'], vn($order_infos['points_etat']), $order_id, null);
+			}
+		}
+		// Appel du hook qui viendra potentiellement remplacer le tableau de correspondance des champs de la table qui stock les produits commandés.
+		$hook_result = call_module_hook('product_order_table_and_fields',array('order_infos'=>$order_infos), 'array');
+		if (!empty($hook_result['articles_array'])) {
+			$articles_array = $hook_result['articles_array'];
+		}
+		// le hook n'a pas retourner de valeur indiquant une éventuelle action en BDD, donc on gère la commande avec PEEL.
+		query("DELETE FROM peel_commandes_articles
+			WHERE commande_id='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes_articles'));
+		// On ajoute les articles à la table commandes_articles
+		foreach ($articles_array as $article_infos) {
+			// On rend compatible des entrées du tableau 
+			foreach($name_compatibility_array as $key => $value) {
+				// On rend compatible des entrées du tableau article_infos
+				if (isset($article_infos[$key])) {
+					// Nécessite une conversion du nom de l'index.
+					$article_infos[$value] = $article_infos[$key];
+					// On ne laisse pas d'index inutile, ça complique la lecture lors du déboguage;
+					unset($article_infos[$key]);
+				}
+			}
+			// On construit un objet product à partir des informations de $article_infos.
+			// On l'utilise pour des informations diverses, mais surtout pas pour les prix par exemple, qui doivent être ceux imposés par $article_infos
+			// L'objet produit n'a pas besoin d'être initialisé avec toute les informations de $article_infos car on ne l'utilise que pour les parties sur lesquelles on n'a pas d'information dans $article_infos
+			$product_infos = null;
+			if (!empty($article_infos["data_check"])) {
+				$product_infos['on_check'] = 1;
+			} else {
+				$product_infos['on_check'] = 0;
+			}
+			$product_object = new Product($article_infos['product_id'], $product_infos, false, null, true, !check_if_module_active('micro_entreprise'));
+			// On n'a pas à indiquer si l'utilisateur est un revendeur ou non car on ne va pas utiliser les prix des configurations ci-après, on utilisera $article_infos
+			$product_object->set_configuration(vn($article_infos['couleurId']), vn($article_infos['tailleId']), vb($article_infos['id_attribut']), false, true);
+			// Dans le cas d'une création de commande, l'id attribut est renseigné dans la session caddie => On peut configurer les attributs de ce produit avec la classe Product.
+			// En revanche, dans le cas d'une modification d'une commande existante, l'id de l'attribut n'est pas disponible, car elle n'est pas sauvegardée lors du passage de la commande.
+			// Le nom de l'attribut est stocké dans la table peel_commandes_articles pour que cette information n'évolue pas dans le temps.
+			if (!empty($article_infos['id_attribut'])) {
+				$attribut = $product_object->configuration_attributs_description;
+			} elseif (!empty($article_infos['nom_attribut'])) {
+				$attribut = $article_infos['nom_attribut'];
+			} else {
+				$attribut = '';
+			}
+			if (empty($prod_download_data[$product_object->id]['statut_envoi'])) {
+				// Si on est dans le cadre de la création de commande
+				$statut_envoi = ($product_object->on_download == 1) ? "En attente" : "";
+			} else {
+				$statut_envoi = $prod_download_data[$product_object->id]['statut_envoi'];
+			}
+			// Il faut que la couleur et la taille soient gardés tels quels lorsqu'une commande est éditée
+			// et que la couleur et la taille ne sont plus disponibles => get_color et get_size ne pourraient pas les donner
+			// => dans ce cas ces informations sont dans $article_infos['couleur'] et $article_infos['taille']
+			if (empty($article_infos['couleur'])) {
+				$article_infos['couleur'] = $product_object->get_color();
+			}
+			if (empty($article_infos['taille'])) {
+				$article_infos['taille'] = $product_object->get_size();
+			}
+			if (!empty($article_infos['nom_produit'])) {
+				$article_infos['product_name'] = $article_infos['nom_produit'];
+			}
+			if (empty($article_infos['product_name'])) {
+				$article_infos['product_name'] = $product_object->name;
+			}
+			if (check_if_module_active('product_references_by_options')) {
+				// On utilise get_possible_attributs pour récupèrer les attributs associés au produit pour pouvoir récupérer l'id de l'option d'attribut
+				$possible_attributes_with_single_options = $product_object->get_possible_attributs('infos', false, get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), true, true, false, true); 
+				foreach($possible_attributes_with_single_options as $this_nom_attribut_id => $this_options_array) {
+					foreach($this_options_array as $this_attribut_id) {
+						if($this_attribut_id) {
+							// on récupère la référence de l'option d'attribut
+							$article_infos['reference'] = get_reference_option_attribut($this_attribut_id);
+						}
+					}
+				}
+				if (empty($article_infos['reference'])) {
+					// On utilise configuration_attributs_list pour récupèrer l'id des options d'attributs associés quand le produit en a plusieurs
+					if (!empty($product_object->configuration_attributs_list)) {
+						$attributs_list_array = explode('§', vb($product_object->configuration_attributs_list));
+						foreach($attributs_list_array as $this_attributs_list) {
+							$this_attributs_list_array = explode("|", $this_attributs_list);
+							// On récupère l'id de l'option sélectionnée si format est attribut_id|option_id, ou le texte si le format est attribut_id|0|texte
+							$article_infos['reference'] = get_reference_option_attribut(end($this_attributs_list_array));
+						}
+					}
+				}
+				if (empty($article_infos['reference'])) {
+					$article_infos['reference'] = get_product_reference_by_option($product_object);
+				}
+			}
+			if (empty($article_infos['reference'])) {
+				$article_infos['reference'] = $product_object->reference;
+			}
+			if (empty($article_infos['categorie_id'])) {
+				$article_infos['categorie_id'] = $product_object->categorie_id;
+			}
+			if (empty($article_infos['produit_id'])) {
+				$article_infos['produit_id'] = $product_object->id;
+			}
+			if (check_if_module_active('conditionnement')) {
+				// Les produits sont conditionnés sous forme de lot => ici on sauvegarde la taille des lots de conditionnement
+				$article_infos['conditionnement'] = $product_object->conditionnement;
+			}		
+			if (check_if_module_active('tnt')) {
+				$article_infos['tnt_parcel_number'] = vb($article_infos['tnt_parcel_number']);
+				$article_infos['tnt_tracking_url'] = vb($article_infos['tnt_tracking_url']);
+			}
+			$article_infos['nom_attribut'] = str_replace('<br />', "\r\n", $attribut);
+			$article_infos['attributs_list'] = vb($article_infos['id_attribut']);
+			if(check_if_module_active('listecadeau') && !empty($article_infos['giftlist_owners'])) {
+				$article_infos['listcadeaux_owner'] = vn($article_infos['giftlist_owners']);
+			}
+			$article_infos['prix_option_ht'] = vb($article_infos['option_ht']);
+			$article_infos['prix_option'] = vb($article_infos['option']);
+			
+			if(isset($article_infos['data_check'])) {
+				$article_infos['email_check'] = vb($article_infos['data_check']['email_check']);
+				$article_infos['nom_check'] = vb($article_infos['data_check']['nom_check']);
+				$article_infos['prenom_check'] = vb($article_infos['data_check']['prenom_check']);
+			}	
+			$article_infos['on_download'] = intval($product_object->on_download);
+			$article_infos['statut_envoi'] = $statut_envoi;
+			$article_infos['nb_envoi'] = vn($prod_download_data[$product_object->id]['nb_envoi']);
+			$article_infos['nb_download'] = vn($prod_download_data[$product_object->id]['nb_download']);
+			$article_infos['prix_achat_ht'] = $product_object->get_supplier_price(false);
+			if (isset($article_infos['tailleId'])) {
+				$article_infos['taille_id'] = vn($article_infos['tailleId']);
+			}	
+			if (isset($article_infos['couleurId'])) {
+				$article_infos['couleur_id'] = vn($article_infos['couleurId']);
+			}
+			$article_infos['nom_produit'] = vn($article_infos['product_name']);
+			$article_infos['commande_id'] = intval($order_id);
+			$article_infos['site_id'] = intval(get_site_id_sql_set_value($order_infos['site_id']));
+
+			$set_sql = array();
+			$commandes_produits_fields = get_table_field_names('peel_commandes_articles', null, true);
+			foreach($article_infos as $peel_field=>$value) {
+				if(in_array($peel_field, $commandes_produits_fields)) {
+					$set_sql[] = $peel_field." = '" . nohtml_real_escape_string($value) . "'";
+				}
+			}
+			$sql = "INSERT INTO peel_commandes_articles SET ";
+			$sql .= implode(',',$set_sql);
+			query($sql);
+
+			unset($product_object);
+		}
+		if (is_numeric($order_infos['statut_livraison'])) {
+			// conversion de l'id du statut de livraison par son technical_code pour sa bonne prise en compte par update_order_payment_status
+			$sql = 'SELECT l.technical_code
+				FROM peel_statut_livraison l
+				WHERE id=' . intval($order_infos['statut_livraison']) . ' AND ' . get_filter_site_cond('statut_livraison', 'l');
+			$query = query($sql);
+			$result = fetch_assoc($query);
+			$order_infos['statut_livraison'] = $result['technical_code'];
+		}
+		// Tout est maintenant en BDD, sauf les statuts qui n'ont pas été modifiés
+		// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
+		// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
+		// output_create_or_update_order sera afficher dans le fichier admin_haut.
+		$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], defined('IN_PEEL_ADMIN'), $order_infos['statut_livraison'], vb($order_infos['delivery_tracking']), true, vb($order_infos['payment_technical_code']));
+	} else {
+		$order_id = $hook_result;
 	}
-	if (is_numeric($order_infos['statut_livraison'])) {
-		// conversion de l'id du statut de livraison par son technical_code pour sa bonne prise en compte par update_order_payment_status
-		$sql = 'SELECT l.technical_code
-			FROM peel_statut_livraison l
-			WHERE id=' . intval($order_infos['statut_livraison']) . ' AND ' . get_filter_site_cond('statut_livraison', 'l');
-		$query = query($sql);
-		$result = fetch_assoc($query);
-		$order_infos['statut_livraison'] = $result['technical_code'];
-	}
-	// Tout est maintenant en BDD, sauf les statuts qui n'ont pas été modifiés
-	// On met à jour les status, ET on incrémente ou décremente les stocks en fonction des id's (il fallait attendre d'avoir bien les produits mis en BDD ci-dessus)
-	// NB : delivery_tracking vaut null habituellement, et n'est pas null que si la demande de modification vient de l'administration => ne pas mettre de vb() sur delivery_tracking
-	// output_create_or_update_order sera afficher dans le fichier admin_haut.
-	$GLOBALS['output_create_or_update_order'] = update_order_payment_status($order_id, $order_infos['statut_paiement'], defined('IN_PEEL_ADMIN'), $order_infos['statut_livraison'], vb($order_infos['delivery_tracking']), true, vb($order_infos['payment_technical_code']));
 	if(check_if_module_active('nexway')) {
 		include_once($GLOBALS['dirroot'] . '/modules/nexway/fonctions.php');
 		Nexway::create_order($order_infos, $articles_array);
@@ -1022,7 +856,7 @@ function email_commande($order_id)
 		$order_infos = get_order_infos_array($order_object);
 		$user = get_user_information($order_object->id_utilisateur);
 
-		$custom_template_tags['ORDER_ID'] = $order_id;
+		$custom_template_tags['ORDER_ID'] = $order_object->order_id;
 		$custom_template_tags['NOM_FAMILLE'] = StringMb::htmlspecialchars_decode($user['nom_famille'], ENT_QUOTES);
 		$custom_template_tags['CIVILITE'] = $user['civilite'];
 		$custom_template_tags['PRENOM'] = StringMb::htmlspecialchars_decode($user['prenom'], ENT_QUOTES);
@@ -1079,7 +913,7 @@ function send_mail_order_admin($order_id)
 		FROM peel_commandes
 		WHERE id ='" . intval($order_id) . "' AND " . get_filter_site_cond('commandes') . "");
 	$order_object = fetch_object($result);
-	$custom_template_tags['ORDER_ID'] = $order_id;
+	$custom_template_tags['ORDER_ID'] = $order_object->order_id;
 	$custom_template_tags['EMAIL'] = $order_object->email;
 	$custom_template_tags['SITE'] = $GLOBALS['site'];
 	$custom_template_tags['MONTANT'] = fprix($order_object->montant, true);
@@ -1202,7 +1036,7 @@ function get_delivery_type_name($id)
 function get_needed_for_free_delivery($total_weight, $total_price, $type_id = null, $zone_id = null, $nb_product = 1)
 {
 	$add_for_free_delivery = array();
-	$treshold_reached = false;
+	$threshold_reached = false;
 	// Frais de port gratuits si le total principal (TTC ou HT suivant configuration boutique) des produits est > au seuil.
 	if ((!empty($GLOBALS['site_parameters']['nb_product']) && $GLOBALS['site_parameters']['nb_product'] <= $nb_product) || (empty($total_weight) && empty($total_price))) {
 		// Frais de port gratuits si plus de nb_product commandés ou si aucun poids ni aucun montant
@@ -1210,13 +1044,12 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 	} elseif (!empty($GLOBALS['site_parameters']['nb_product'])) {
 		$add_for_free_delivery['products'] = $GLOBALS['site_parameters']['nb_product'] - $nb_product;
 	}
-	if (check_if_module_active('tnt') && !empty($_SESSION['session_caddie']->typeId) && !empty($GLOBALS['site_parameters']['tnt_treshold']) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
-		$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
-		if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
+	$cart_measurement_max_reached = get_cart_measurement_max($_SESSION['session_caddie']);
+		if (!empty($cart_measurement_max_reached)) {
 			// dans ce cas les frais de port sont spécifique, et ne sont pas calculé par la boutique.
 			return null;
 		}
-	}
+	
 	if (!empty($zone_id)) {
 		$query = query('SELECT z.*
 			FROM peel_zones z
@@ -1227,15 +1060,15 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 			if ((empty($result_zones['applied_franco_mode']) || $result_zones['applied_franco_mode'] == 'amount')) {
 				$amount_used = floatval((check_if_module_active('reseller') && is_reseller()) ? $result_zones['on_franco_reseller_amount'] : $result_zones['on_franco_amount']);
 				if ($amount_used <= round($total_price, 2)) {
-					$treshold_reached = true;
+					$threshold_reached = true;
 				} else {
 					$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
 				}
 			} else {
 				if ($result_zones['on_franco_weight'] <= round($total_weight, 2)) {
-					$treshold_reached = true;
+					$threshold_reached = true;
 				} else {
-					$treshold_reached = false;
+					$threshold_reached = false;
 					$add_for_free_delivery['weight'] = $result_zones['on_franco_weight'] - round($total_weight, 2);
 				}
 			}
@@ -1243,8 +1076,9 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 		if (!empty($result_zones['on_franco_nb_products'])) {
 			// Zone franco de port
 			if($result_zones['on_franco_nb_products'] <= $nb_product) {
-				$treshold_reached = true;
+				$threshold_reached = true;
 			} else {
+				$threshold_reached = false;
 				$add_for_free_delivery['products'] = $result_zones['on_franco_nb_products'] - $nb_product;
 			}
 		}
@@ -1260,14 +1094,14 @@ function get_needed_for_free_delivery($total_weight, $total_price, $type_id = nu
 			$amount_used = floatval($result_types['on_franco_amount']);
 			// Zone franco de port
 			if ($amount_used <= round($total_price, 2)) {
-				$treshold_reached = true;
+				$threshold_reached = true;
 			} else {
-				$treshold_reached = false;
+				$threshold_reached = false;
 				$add_for_free_delivery['amount'] = $amount_used - round($total_price, 2);
 			}
 		}
 	}
-	if (!empty($treshold_reached)) {
+	if (!empty($threshold_reached)) {
 		// Le seuil d'exonération a été atteint pour le franco par zone ou par type de livraison. On retourne null pour signifier qu'il faut exonérer les frais de port.
 		return null;
 	}
@@ -1620,6 +1454,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		$reference_text = (!empty($prod['reference']) ? "\r\n" . $GLOBALS['STR_REFERENCE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::htmlspecialchars_decode($prod["reference"], ENT_QUOTES) : "");
 		$couleur_text = (!empty($prod['couleur']) ? "\r\n" . $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::html_entity_decode_if_needed($prod['couleur']) : "");
 		$taille_text = (!empty($prod['taille']) ? "\r\n" . $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::html_entity_decode_if_needed($prod['taille']) : "");
+		$poids_text = (!empty($prod['poids'] && $prod['poids']>0) ? "\r\n" . $GLOBALS['STR_WEIGHT_SHORT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::htmlspecialchars_decode($prod["poids"], ENT_QUOTES) . ' ' . $GLOBALS["STR_GRAMMES"] : "");
 		if ($prod['nom_attribut'] != '') {
 			$attribut_text = "\r\n" . trim(StringMb::html_entity_decode_if_needed($prod['nom_attribut']));
 			if($add_total_prix_attribut) {
@@ -1646,7 +1481,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 			}
 		}
 		$prod['product_technical_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text));
-		$prod['product_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text) . vb($commentaires_admin));
+		$prod['product_text'] = StringMb::html_entity_decode_if_needed($prod['nom_produit'] . vb($category_text) . vb($brand_text) . vb($reference_text) . vb($couleur_text) . vb($taille_text) . vb($attribut_text) . vb($option_text) . vb($remise_text) . vb($ecotaxe_text) . vb($delai_text) . vb($commentaires_admin) . vb($poids_text));
 		$product_infos_array[] = $prod;
 	}
 	return $product_infos_array;
@@ -1861,6 +1696,14 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 			}
 			break;
 
+        case 'paybox_3x' :
+            if (check_if_module_active('paybox')) {
+                require_once($GLOBALS['fonctionspaybox']);
+                $js_action = 'document.TheForm.submit()';
+                $tpl->assign('form', givePayboxForm($order_id, $_SESSION['session_langue'], fprix($amount_to_pay, false, $com->devise, true, $com->currency_rate, false, false), $com->devise, $com->email, vn($GLOBALS['site_parameters']['paybox_payment_count'], 1), '', vb($GLOBALS['site_parameters']['paybox_cgi']), vb($GLOBALS['site_parameters']['paybox_site']), vb($GLOBALS['site_parameters']['paybox_rang']), vb($GLOBALS['site_parameters']['paybox_identifiant'])));
+                $send_admin_template_email = 'admin_info_payment_credit_card';
+            }
+            break;
 		case 'bluepaid' :
 			if (check_if_module_active('bluepaid')) {
 				require_once($GLOBALS['fonctionsbluepaid']);
@@ -1970,7 +1813,7 @@ function get_payment_form($order_id, $forced_type = null, $send_admin_email = fa
 	if ($send_admin_email && !empty($send_admin_template_email) && empty($admin_email_sent)) {
 		// On n'envoie qu'un seul email de ce type à l'admin même si $forced_type="" et boucle sur tous les moyens de paiement 
 		unset($custom_template_tags);
-		$custom_template_tags['ORDER_ID'] = $order_id;
+		$custom_template_tags['ORDER_ID'] = $com->order_id;
 		send_email($GLOBALS['support_commande'], '', '', $send_admin_template_email, $custom_template_tags, null, $GLOBALS['support_commande']);
 		$admin_email_sent = true;
 	}
@@ -2015,7 +1858,7 @@ function is_order_modification_allowed($order_datetime)
 }
 
 /**
- * Fonction qui génère le numéro de commande comptable
+ * Fonction qui récupère le numéro de commande comptable
  *
  * @param integer $id id technique de la commande qui correspond au champ id de peel_commandes
  * @param integer $site_id site_id de la commande qui correspond au champ site_id de peel_commandes
@@ -2040,30 +1883,6 @@ function get_order_id($id = null, $site_id = null)
 			return false;
 		}
 	}
-	if (empty($order_infos['order_id']) || empty($id)) {
-		// La recherche du numéro dans la commande n'a rien donnée, ou $id est vide.
-		// Récuperation du numéro de commande le plus élevé pour le site. 
-		$sql = 'SELECT MAX(order_id) as max_order_id
-			FROM peel_commandes
-			WHERE ';
-		if(!empty($GLOBALS['site_parameters']['multisite_disable']) || (!empty($GLOBALS['site_parameters']['multisite_disable_commandes']) && empty($GLOBALS['site_parameters']['multisite_forced_numbering_commandes']))) {
-			// Pas de multisite : tous les site_id sont traités sans distinction
-			// La ligne suivant est a priori inutile, mais c'est standard de le mettre quand même pour que ce soit propre au niveau de la sécurité d'accès aux données en cas de développements spécifiques
-			$sql .= "" . get_filter_site_cond('commandes') . "";
-		} elseif(empty($GLOBALS['site_parameters']['bill_number_regroup_sites_array']) || !isset($GLOBALS['site_parameters']['bill_number_regroup_sites_array'][$site_id])) {
-			// Cas normal : chaque site_id a un enchainement de numérotation indépendant des autres site_id
-			$sql .= "site_id='" . intval($site_id) . "' AND " . get_filter_site_cond('commandes', null, false, $site_id) . "";
-		} else {
-			// Cas inhabituel : regroupement de plusieurs site_id pour des sociétés
-			$sql .= "site_id IN (" . real_escape_string(vb($GLOBALS['site_parameters']['bill_number_regroup_sites_array'][$site_id])) . ")";
-		}
-		$query = query($sql);
-		if($result = fetch_assoc($query)) {
-			return $result['max_order_id']+1;
-		} else {
-			return null;
-		}
-	}
 }
 /**
  * Fonction qui génère la requête SQL de sélection du mode de transport
@@ -2078,4 +1897,78 @@ function get_tarifs_sql()
 		WHERE t.etat = 1 AND ' . get_filter_site_cond('tarifs', 'tf') . ' AND tf.zone = "' . intval($_SESSION['session_caddie']->zoneId) . '" AND (poidsmin<="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmin=0) AND (poidsmax>="' . floatval($_SESSION['session_caddie']->total_poids) . '" OR poidsmax=0) AND (totalmin<="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmin=0) AND (totalmax>="' . floatval($_SESSION['session_caddie']->total_produit) . '" OR totalmax=0) '.(!empty($_SESSION['session_caddie']->exapaq_order)?' AND (t.technical_code="exapaq" OR t.technical_code="icirelais")':'').'
 		ORDER BY t.position ASC, t.nom_' . $_SESSION['session_langue'] . ' ASC';
 	return $sqlType;
+}
+
+
+/** 
+ * Fonction qui permet de récupérer les dimensions ou le poids maximum des colis du panier 
+ *
+ * @param array $product_ids_array
+ * @return array
+ */
+function get_cart_measurement_max($session_caddie) {
+	if (empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) || empty($session_caddie->type_technical_code)) {
+		return false;
+	}
+    // On initialise les 3 variables qui stockeront les valeurs max :
+    $max_width = 0;
+    $max_length = 0;
+    $max_depth = 0;
+	$total_size = 0;
+	$this_product_total_size = 0;
+	$a3_size_reached = false;
+    foreach($session_caddie->articles as $numero_ligne => $this_article) {
+        // On recherche les dimensions du produit dans la table des produits :
+        $sql = "SELECT width, length, depth, technical_code
+            FROM peel_produits
+            WHERE id = " . intval($this_article);
+        $query = query($sql);
+        if ($result = fetch_assoc($query)) {
+			$text_array = array();
+			if ($result['technical_code'] == 'surface') {
+				// Pour les produits "surface", les dimensions du produit a été inséré depuis la page produit en front office par l'utilisateur.
+				$product_object = new Product($this_article);
+				$product_object->set_configuration(null, null, $session_caddie->id_attribut[$numero_ligne]);
+				$attributs_form_part = affiche_attributs_form_part($product_object, 'selected_text', null, null, null, array('dimension'));
+				$text_array_tmp = explode("<br />", $attributs_form_part);
+				foreach($text_array_tmp as $this_text_tmp) {
+					$this_sentences_array = explode(":", $this_text_tmp); 
+					$text_array[] = trim(vb($this_sentences_array[1]));
+				}
+				// Concernant les produits dont le code technique est "surface", ajouter 4cm (40mm) à l'épaisseur, la largeur et la longueur pour calculer automatiquement les dimensions du colis correspondant
+				// largeur
+				$max_width = vb($text_array[0]) + 40;
+				// longueur
+				$max_length = vb($text_array[1]) + 40;
+				// Epaisseur
+				$max_depth = vb($text_array[2]) + 40;
+			} else {
+				$max_width = $result['width'];
+				$max_length = $result['length'];
+				$max_depth = $result['depth'];
+			}
+			$this_product_total_size = $max_width + $max_length + $max_depth;
+			if ($max_width>$max_length) {
+				// portrait
+				if($max_width > 420 || $max_length > 297) {
+					$a3_size_reached = true;
+				}
+			} else {
+				// paysage
+				if ($max_length > 420 || $max_width > 297) {
+					$a3_size_reached = true;
+				}
+			}
+        }
+		if ($this_product_total_size>$total_size) {
+			// le but est de récupérer le colis le plus grand
+			$total_size = $this_product_total_size;
+		}
+    }
+	if (check_if_module_active('tnt') && $session_caddie->type_technical_code == 'tnt') {
+		// On a passé tous les produits du panier en revu, et rempli la variable avec la valeur max. Donc on a les dimensions maximum, tous produits confondus. On retourne le résulat
+		return ($total_size > $GLOBALS['site_parameters']['tnt_treshold']) || ($session_caddie->total_poids > vn($GLOBALS['site_parameters']['tnt_weight_treshold']));
+	} elseif($session_caddie->type_technical_code == 'colissimo') {
+		return $a3_size_reached || ($session_caddie->total_poids > vn($GLOBALS['site_parameters']['colissimo_weight_treshold']));
+	}
 }

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_commandes.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
+// $Id: liste_commandes.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<h1 property="name" class="liste_commandes">{$STR_ORDER_HISTORY}</h1>
 {if isset($STR_NO_ORDER)}
 <div><p>{$STR_NO_ORDER}</p></div>
@@ -23,8 +23,10 @@
 			<th class="center" scope="col" style="width:60px">&nbsp;</th>
 			<th class="center" scope="col">{$STR_ORDER_NUMBER}</th>
 			<th class="center" scope="col">{$STR_DATE}</th>
+		{if empty($history_order_status_display_disable)}
 			<th class="center" scope="col">{$STR_ORDER_STATUT_PAIEMENT}</th>
 			<th class="center" scope="col">{$STR_ORDER_STATUT_LIVRAISON}</th>
+		{/if}
 			<th class="center" scope="col">{if $display_prices_with_taxes_active}{$STR_AMOUNT} {$STR_TTC}{else}{$STR_AMOUNT} {$STR_HT}{/if}</th>
 		</tr>
 	</thead>
@@ -34,13 +36,15 @@
 		<td class="center">
 			<a href="{$o.href|escape:'html'}"><img src="{$o.info_src|escape:'html'}" width="21" height="21" alt="info" /></a>
 		{if !empty($o.facture_href)}
-			<br /><a onclick="return(window.open(this.href)?false:true);" href="{$o.facture_href|escape:'html'}" style="white-space: nowrap;"><img src="{$o.pdf_src|escape:'html'}" width="8" height="11" alt="" />&nbsp;{$STR_PDF_BILL}</a>
+			<br /><a onclick="return(window.open(this.href)?false:true);" href="{$o.facture_href|escape:'html'}" style="white-space: nowrap;"><img src="{$o.pdf_src|escape:'html'}" width="8" height="11" alt="" />&nbsp;{$o.STR_PDF_BILL}</a>
 		{/if}
 		</td>
 		<td class="center">{$o.order_id}</td>
 		<td class="center">{$o.date}</td>
+		{if empty($history_order_status_display_disable)}
 		<td class="center">{if !$o.paid}<a href="{$o.href|escape:'html'}">{$o.payment_status_name}</a>{else}{$o.payment_status_name}{/if}</td>
 		<td class="center">{$o.delivery_status_name}</td>
+		{/if}
 		<td class="center">{$o.prix}</td>
 	</tr>
 	{/foreach}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fin.php 60162 2019-03-20 14:53:54Z sdelaporte $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 
@@ -34,6 +34,7 @@ if(empty($_SESSION['session_install_finished'])) {
 	unset($_SESSION['session_peel_sql']);
 	unset($_SESSION['session_peel_sql_premium']);
 	unset($_SESSION['session_peel_sql_website_type']);
+	unset($_SESSION['session_peel_sql_website_content']);
 
 	ob_start();
 	$new_user_infos = array('priv' => 'admin',

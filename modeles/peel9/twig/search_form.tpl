@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -103,12 +103,17 @@
 	{% endif %}
 	{% if is_annonce_module_active and display != 'module_products' %}
 		<li class="select_categorie_annonce">
-			{{ STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD }}{{ STR_BEFORE_TWO_POINTS }}: <select class="form-control" name="cat_select">
+			{{ STR_MODULE_ANNONCES_SEARCH_CATEGORY_AD }}{{ STR_BEFORE_TWO_POINTS }}: 
+			{% if search_form_category_display_mode == 'checkbox' %}
+			<div class="row">
+				{{ cat_ann_opts }}
+			</div>
+			{else}
+			<select class="form-control" name="cat_select">
 				<option value="">{{ STR_MODULE_ANNONCES_AD_CATEGORY }}</option>
-				{% for cao in cat_ann_opts %}
-					<option value="{{ cao.value|str_form_value }}"{% if cao.issel %} selected="selected"{% endif %}>{{ cao.name }}</option>
-				{% endfor %}
+				{{ cat_ann_opts }}
 			</select>
+			{% endif %}
 		</li>
 	{% if additional_fields_form %}
 		<li class="search_additional_field_form">

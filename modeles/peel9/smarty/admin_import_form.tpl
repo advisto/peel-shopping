@@ -1,167 +1,187 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_import_form.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
-*}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" name="categories" enctype="multipart/form-data">
+// $Id: admin_import_form.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
+*}{if $mode == 'import' && $general_configuration_is_valid}
+<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" id="import_export_form" enctype="multipart/form-data">
  	{$form_token}
-	<input type="hidden" name="action" value="import" />
-	<input type="hidden" name="nomtable" value="peel_produits" />
-	<table class="full_width">
-		<tr><td class="entete">{$STR_ADMIN_IMPORT_FORM_TITLE}</td></tr>
-		<tr>
-			<td>
-				<div class="alert alert-info">
-					<b>{$STR_ADMIN_IMPORT_FILE_FORMAT}</b>{$STR_BEFORE_TWO_POINTS}: CSV
-					<br />
-					{$STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN}<br />
-					{$STR_ADMIN_IMPORT_FILE_EXAMPLE}{$STR_BEFORE_TWO_POINTS}: <a href="{$example_href|escape:'html'}" class="alert-link">exemple_prod.csv</a><br />
+	<h2>{if !empty($test_mode)}{$STR_ADMIN_CHECK_DATA}{else}{$STR_ADMIN_IMPORT_STATUS}{/if}</h2>
+	{if $error}<div class="alert alert-danger"><p><b>{$STR_ADMIN_CHECK_DATA_BEFORE_IMPORT}{$STR_BEFORE_TWO_POINTS}:</b></p><br />{$error}</div>
+	{else}<p>{$STR_FILE}{$STR_BEFORE_TWO_POINTS}: <a href="{$import_file.url|escape:'html'}">{$import_file.form_value}</a></p>{/if}
+	{if $import_output}<div class="well">{$import_output}</div>{/if}
+	{if !empty($test_mode)}
+	<input type="hidden" name="type" value="{$type}" />
+		{if !empty($import_file)}
+	<input type="hidden" name="import_file" value="{$import_file.form_value}" />
+		{/if}
+	<input type="hidden" name="correspondance" value="{$correspondance}" />
+	<input type="hidden" name="default_fields" value="{$default_fields}" />
+		{foreach $defaults as $this_key => $this_value}
+	<input type="hidden" name="{$this_key}" value="{$this_value}" />
+		{/foreach}			
+	<input type="hidden" name="separator" value="{$separator}" />
+	<input type="hidden" name="data_encoding" value="{$data_encoding}" />
+		{if empty($error)}
+	<input type="hidden" name="mode" value="import" />
+	<input type="hidden" name="test_mode" value="0" />
+	<p class="center"><input type="submit" name="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></p>
+		{else}
+	<input type="hidden" name="mode" value="" />
+	<p class="center"><input type="submit" name="submit" value="{$STR_BACK|str_form_value}" class="btn btn-danger" /></p>
+		{/if}
+	{/if}
+</form>
+{else}{if $error}{include file="global_error.tpl" text=$error}{/if}
+<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" id="import_export_form" enctype="multipart/form-data">
+ 	{$form_token}
+	<input type="hidden" name="mode" value="{$next_mode}" />
+	<input type="hidden" name="test_mode" value="1" />
+	<input type="hidden" id="correspondance_type" name="correspondance_type" value="{$type}" />
+	<input type="hidden" id="correspondance" name="correspondance" value="{$correspondance}" />
+	<input type="hidden" id="default_fields" name="default_fields" value="{$default_fields}" />
+	<div>
+		<div class="entete">{$STR_ADMIN_IMPORT_FORM_TITLE}</div>
+		<div class="alert alert-info">
+			<b>{$STR_ADMIN_IMPORT_FILE_FORMAT}</b>{$STR_BEFORE_TWO_POINTS}: CSV
+			<br />
+			{$STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN}<br />
+			{$STR_ADMIN_IMPORT_FILE_EXAMPLE}{$STR_BEFORE_TWO_POINTS}: <a href="{$example_href|escape:'html'}" class="alert-link">exemple.csv</a><br />
+			<br />
+			<b>{$STR_WARNING}{$STR_BEFORE_TWO_POINTS}:</b><br />{$STR_ADMIN_IMPORT_EXPLAIN}
+		</div>
+		<p class="alert alert-warning">{$STR_ADMIN_IMPORT_WARNING_ID}</p>
+	</div>
+
+	<h2>{$STR_ADMIN_IMPORT_FILE_NAME}{$STR_BEFORE_TWO_POINTS}:</h2>
+	<div class="center">
+		{if !empty($import_file)}
+			{include file="uploaded_file.tpl" f=$import_file STR_DELETE=$STR_DELETE_THIS_FILE}
+		{else}
+			<input name="import_file" type="file" value="" />
+		{/if}
+		<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="data_encoding" style="width: 150px">
+				<option value="utf-8"{if $data_encoding == 'utf-8'} selected="selected"{/if}>UTF-8</option>
+				<option value="iso-8859-1"{if $data_encoding == 'iso-8859-1'} selected="selected"{/if}>ISO 8859-1</option>
+			</select></p>
+		<p>{$STR_ADMIN_IMPORT_SEPARATOR}{$STR_BEFORE_TWO_POINTS}: <input style="width:50px" type="text" id="separator" class="form-control" name="separator" value="{$separator}" /> ({$STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN})</p>
+
+	</div>
+	<h2>{$STR_ADMIN_IMPORT_TYPE}{$STR_BEFORE_TWO_POINTS}:</h2>
+	<div>
+		<select name="type" class="form-control" id="import_export_type" onchange="change_import_type()" {$type_disabled}>
+			<option value=""> -- </option>
+			{foreach $types_array as $this_type => $this_title}
+				<option value="{$this_type}" {if $type == $this_type}selected="selected"{/if}>{$this_title}</option>
+			{/foreach}
+		</select>
+
+		<div class="row" id="fields_rules" style="display:none;">
+			<div class="col-lg-12">
+				<div class="row">
+					<div class="col-sm-9 col-lg-9">
+						<div class="pull-right" style="margin:5px">
+							<table>
+								<tr>
+									<td style="padding:5px;">
+										<div class="input-group">
+											<div id="load_rule_container">
+												<select name="load_rule" class="form-control" id="load_rule">
+													<option value=""> -- </option>
+													{foreach $rules_array as $this_rule}
+														<option value="{$this_rule}">{$this_rule}</option>
+													{/foreach}
+												</select>
+											</div>
+											<div class="input-group-btn">
+												<a href="#" onclick="return false;" class="btn btn-primary" data-target="basic" id="rules_get">{$STR_LOAD_RULES}</a>
+												<a href="#" onclick="return false;" class="btn btn-danger" data-target="basic" id="rules_delete">{$STR_DELETE}</a>
+											</div>
+										</div>
+									</td>
+									<td style="padding:5px;">
+										<div class="input-group">
+											<input type="text" id="rule_name" name="rule_name" class="form-control"/>
+											<span class="input-group-btn">
+												<a href="#" onclick="return false;" class="btn btn-success" data-target="basic" id="rules_set">{$STR_SAVE_RULES}</a>
+											</span>
+										</div>
+									</td>
+									<td style="padding:5px;">
+										<a href="#" onclick="return false;" class="btn btn-warning" data-target="basic" id="rules_reset">{$STR_INIT_FILTER}</a>
+									</td>
+								  </tr>
+							  </table>
+						</div>
+					</div>
 				</div>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<br />
-				<div class="alert alert-info">
-					<b>{$STR_WARNING}{$STR_BEFORE_TWO_POINTS}:</b><br />{$STR_ADMIN_IMPORT_EXPLAIN}
+			</div>
+		</div>
+
+		<br />
+	</div>
+	<h2>{$STR_ADMIN_IMPORT_CORRESPONDANCE}{$STR_BEFORE_TWO_POINTS}:</h2>
+	<div class="well">
+		<div id="div_correspondance" class="collapse">
+			<div class="row">
+				<div class="col-sm-3" style="margin-right:20px">
+					<table class="fields_table">
+						<tr>
+							<td><h3 class="center" style="margin-top: 10px;">{$STR_ADMIN_SOURCE_FILE}</h3></td>
+						</tr>
+						<tr>
+							<td class="contains_draggable"><div style="padding:5px"><i>{$STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP}{$STR_BEFORE_TWO_POINTS}:</i></div></td>
+						</tr>
+					</table>
 				</div>
-			</td>
-		</tr>
-		<tr>
-		  	<td class="center">
-				<p class="alert alert-danger">{$STR_ADMIN_IMPORT_WARNING_ID}</p>
-				<p>{$STR_ADMIN_IMPORT_FILE_NAME}{$STR_BEFORE_TWO_POINTS}: <input type="file" name="fichier" onchange="test_files(this)" /></p>
-				<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="import_encoding" style="width: 150px">
-						<option value="utf-8"{if $import_encoding == 'utf-8'} selected="selected"{/if}>UTF-8</option>
-						<option value="iso-8859-1"{if $import_encoding == 'iso-8859-1'} selected="selected"{/if}>ISO 8859-1</option>
-					</select></p>
-				<p>{$STR_ADMIN_IMPORT_SEPARATOR}{$STR_BEFORE_TWO_POINTS}: <input style="width:50px" type="text" class="form-control" name="columns_separator" value="" /> ({$STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN})</p>
-				
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<h2>{$STR_ADMIN_IMPORT_TYPE}{$STR_BEFORE_TWO_POINTS}:</h2>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select name="type" class="form-control" onchange="change_import_type(this)">
-					<option value=""> -- </option>
-					{foreach $type_list as $type_key => $type}
-						<option value="{$type_key}">{$type}</option>
+				{foreach $inputs as $this_type => $fields}
+				<div style="display:none" class="fields_div" id="fields_{$this_type}">
+					<div class="col-sm-1">
+						<div class="btn btn-default" onclick="move_draggable_fields('.contains_draggable', '#fields_{$this_type} .container_drop_draggable', '#fields_{$this_type}')">&gt;&gt;</div>
+						<div class="btn btn-default" onclick="move_draggable_fields('#fields_{$this_type} .container_drop_draggable', '.contains_draggable')">&lt;&lt;</div>
+					</div>
+					<div class="col-sm-7">
+						<table class="fields_table">
+							<tr>
+								<td colspan="4"><h3 class="center" style="margin-top: 10px;">{$site_name}</h3></td>
+							</tr>
+							<tr>
+								<td class="center">{$STR_ADMIN_SITE_COLUMN_IN_DATABASE}</td>
+								<td class="center">{$STR_ADMIN_TYPE}</td>
+								<td class="center">{$STR_ADMIN_IMPORTED_COLUMN}</td>
+								<td class="center">{$STR_ADMIN_DEFAULT_VALUE}</td>
+							</tr>
+					{foreach $fields as $field_key => $field}
+							<tr class="{if $field.primary}bg-primary{else}{if $field.required}bg-info{/if}{/if}">
+								<td><span{if !empty($field.explanation)} data-toggle="tooltip" title="{$field.explanation|escape:'html'}"{/if}>{$field.field}{if $field.primary} **{else}{if $field.required} *{/if}{/if}</span></td>
+								<td>{$field.type}</td>
+								<td id="fields_{$this_type}_{$field.field}" class="container_drop_draggable"></td>
+								<td><input type="text" id="default_{$this_type}_{$field.field}" name="default_{$this_type}_{$field.field}" value="{$field.default}" class="form-control"{if !empty($field.maxlength)} maxlength="{$field.maxlength}{/if}" /></td>
+							</tr>
 					{/foreach}
-				</select>
-			</td>
-		</tr>
-		{* Outil visuel d'attribution des colonnes *}
-		{* TODO : récupérer les positions choisies par le client pour ensuite importer les colonnes dans le bon ordre *}
-		{*<tr>
-			<td>
-				<h2>{$STR_ADMIN_IMPORT_CORRESPONDANCE}{$STR_BEFORE_TWO_POINTS}:</h2>
-			</td>
-		</tr>
-		<tr>
-			<td id="db_field_list">
-				{foreach $type_fields as $type_key => $fields}
-					<div style="display:none" class="fields_div" id="fields_{$type_key}">
-						<table>
-							{foreach $fields as $field_key => $field}
-								<tr class="{$field.Field}">
-									<td>{$field.Field}</td>
-									<td>{$field.Type}</td>
-									<td class="fields_{$type_key}_csv content_draggable"><span class="field_draggable" id="fields_{$type_key}_{$field_key}"></span></td>
-								</tr>
-							{/foreach}
 						</table>
 					</div>
+				</div>
 				{/foreach}
-			</td>
-		</tr>*}
-		<tr>
-			<td>
-				<h2>{$STR_ADMIN_IMPORT_IMPORT_MODE}{$STR_BEFORE_TWO_POINTS}:</h2>
-			</td>
-		</tr>
-		<tr>
-			<td style="border-bottom:1px solid black;">
-				<p><input type="radio" name="type_import" value="all_fields" /> <label for="import">{$STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS}</label></p>
-			</td>
-		</tr>
-		<tr>
-			<td style="border-bottom:1px solid black;">
-				<p><input type="radio" name="type_import" value="chosen_fields" /> <label for="import">{$STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS}</label></p>
-				<p><label for="select">{$STR_ADMIN_IMPORT_SELECT_FIELDS}{$STR_BEFORE_TWO_POINTS}:</label></p>
-
-				{foreach $inputs as $type_key => $inputs_list}
-					<div style="display:none" class="fields_input_div" id="fields_input_{$type_key}">
-						{foreach $inputs_list as $in}
-						<input type="checkbox" name="on_update[{$type_key}][]" value="{$in.field|str_form_value}"{if $in.issel} checked="checked"{/if} /> {if $in.is_important}<b>{/if}{$in.field}{if !empty($in.explanation)}{$STR_BEFORE_TWO_POINTS}: {$in.explanation}{/if}{if $in.is_important}</b>{/if}<br />
-						{/foreach}
-					</div>
-				{/foreach}
-				<br />
-			</td>
-		</tr>
-		<tr>
-		  	<td class="center">
-				<div id="email_users" class="hidden"><input type="checkbox" name="send_email" value="1" /> Envoyer des emails aux utilisateurs</div>
-				<p><input type="submit" name="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></p>
-			</td>
-		</tr>
-	 </table>
+			</div>
+			<br /><i>{$STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE}</i>
+		</div>
+		<div id="div_correspondance_explain">
+			<p>{$STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE}</p>
+		</div>
+	</div>
+	<div class="center">
+		<br />
+		<div id="email_users" class="hidden"><input type="checkbox" name="send_email" value="1" /> {$STR_ADMIN_SEND_EMAIL_TO_USERS}</div>
+		<p><input type="submit" name="submit" value="{$STR_VALIDATE|str_form_value}" class="btn btn-primary" /></p>
+	</div>
 </form>
-<script type="text/javascript">
-	// Affiche la div de correspondance des champs en fonction du type d'import sélectionné
-	function change_import_type(selectObject)
-	{
-		// Div correspondant aux champs drag&drop en mode tableau
-		$('.fields_div').hide();
-		// Découpe la valeur de l'objet : utile lorsqu'un import concerne plusieurs tables
-		var type = selectObject.value.split('|');
-		$.each(type, function( key, value ) {
-			// Affiche div correspondant à la table sélectionnée
-			var div_id = 'fields_'+value;
-			$('#'+div_id).show();
-			// Récupère la première ligne du fichier CSV
-			var first_line;
-			$.get($('input[name=fichier]').val(), function(data) {
-				var lines = data.split("\n");
-				first_line = lines[0].split(";");
-				// Positionne les colonnes du csv téléchargé dans le tableau de correspondance
-				$.each(first_line, function(keyfield, field) {
-					$('.'+div_id+'_csv').eq(keyfield).children('span').attr('draggable', 'true').html(field);
-				});
-			});
-		});
-
-		// Div correspondant aux champs avec les input checkbox
-		$('.fields_input_div').hide();
-		// Découpe la valeur de l'objet : utile lorsqu'un import concerne plusieurs tables
-		var type = selectObject.value.split('|');
-		$.each(type, function( key, value ) {
-			// Affiche div correspondant à la table sélectionnée
-			var div_id = 'fields_input_'+value;
-			$('#'+div_id).show();
-			// Récupère la première ligne du fichier CSV
-			var first_line;
-			$.get($('input[name=fichier]').val(), function(data) {
-				var lines = data.split("\n");
-				first_line = lines[0].split(";");
-				// Positionne les colonnes du csv téléchargé dans le tableau de correspondance
-				$.each(first_line, function(keyfield, field) {
-					$('.'+div_id+'_csv').eq(keyfield).children('span').attr('draggable', 'true').html(field);
-				});
-			});
-		});
-	}
-
-</script>
+{/if}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: rubriques.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -56,6 +56,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
+			$frm['image_head'] = upload('image_head', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_head']));
 			insere_sous_rubrique($frm);
 			echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_ACHETES_MSG_CREATED_OK'], vb($_POST['nom_' . $_SESSION['session_langue']]))))->fetch();
 			affiche_formulaire_liste_rubrique($rubid);
@@ -71,6 +72,8 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		if (!$form_error_object->count()) {
 			$frm['image'] = upload('image', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image']));
+
+			$frm['image_head'] = upload('image_head', false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, vb($frm['image_head']));
 			maj_rubrique($rubid, $frm);
 
 			if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
@@ -314,6 +317,7 @@ function insere_sous_rubrique($frm)
 	$sql = 'INSERT INTO peel_rubriques (
 		parent_id
 		, image
+		, image_head
 		, date_insere
 		, date_maj';
 		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
@@ -339,6 +343,7 @@ function insere_sous_rubrique($frm)
 	) VALUES (
 		" . intval($frm['parent_id']) . "
 		, '" . nohtml_real_escape_string($frm['image']) . "'
+		, '" . nohtml_real_escape_string($frm['image_head']) . "'
 		, '" . date('Y-m-d H:i:s', time()) . "'
 		, '" . date('Y-m-d H:i:s', time()) . "'";
 		if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
@@ -394,6 +399,7 @@ function maj_rubrique($id, $frm)
 	}
 
 	$sql .= ", image = '" . nohtml_real_escape_string($frm['image']) . "'
+		, image_head = '" . nohtml_real_escape_string($frm['image_head']) . "'
 		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
 	if(!empty($GLOBALS['site_parameters']['admin_save_name_modify_or_create_content'])) {
 		$sql .= "
@@ -496,6 +502,9 @@ function affiche_formulaire_rubrique(&$frm)
 	if (!empty($frm["image"])) {
 		$tpl->assign('image', get_uploaded_file_infos('image', $frm['image'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image'));
 	}
+	if (!empty($frm["image_head"])) {
+		$tpl->assign('image_head', get_uploaded_file_infos('image_head', $frm['image_head'], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&file=image_head'));
+	}
 	if (!empty($GLOBALS['site_parameters']['display_content_category_diaporama'])) {
 		$tpl_diapo = array();
 		$i = 1;
@@ -541,6 +550,7 @@ function affiche_formulaire_rubrique(&$frm)
 	$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
 	$tpl->assign('STR_ADMIN_FILE_NAME', $GLOBALS['STR_ADMIN_FILE_NAME']);
 	$tpl->assign('STR_ADMIN_DELETE_IMAGE', $GLOBALS['STR_ADMIN_DELETE_IMAGE']);
+	$tpl->assign('STR_ADMIN_HEADING', $GLOBALS['STR_ADMIN_HEADING']);
 	echo $tpl->fetch();
 }
 
@@ -565,8 +575,24 @@ function supprime_fichier_rubrique($id, $file)
 				SET image = '' 
 				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
 			break;
+			
+		case "image_head":
+			$sql = "SELECT image_head
+				FROM peel_rubriques 
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "";
+			$res = query($sql);
+			$file = fetch_assoc($res);
+			query("UPDATE peel_rubriques 
+				SET image_head = '' 
+				WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
+			break;
 	}
-	delete_uploaded_file_and_thumbs($file['image']);
+	if(!empty($file['image'])){
+		delete_uploaded_file_and_thumbs(vb($file['image']));
+	}
+	if(!empty($file['image_head'])){
+		delete_uploaded_file_and_thumbs(vb($file['image_head']));
+	}
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_RUBRIQUES_MSG_DELETED_OK'], $file['image'])))->fetch();
 }
 

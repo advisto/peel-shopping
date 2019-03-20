@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -22,8 +22,10 @@
 		<th class="center" scope="col" style="width:60px">&nbsp;</th>
 		<th class="center" scope="col">{{ STR_ORDER_NUMBER }}</th>
 		<th class="center" scope="col">{{ STR_DATE }}</th>
-		<th class="center" scope="col">{{ STR_ORDER_STATUT_PAIEMENT }}</th>
-		<th class="center" scope="col">{{ STR_ORDER_STATUT_LIVRAISON }}</th>
+		{% if history_order_status_display_disable is empty %}
+			<th class="center" scope="col">{{ STR_ORDER_STATUT_PAIEMENT }}</th>
+			<th class="center" scope="col">{{ STR_ORDER_STATUT_LIVRAISON }}</th>
+		{% endif %}
 		<th class="center" scope="col">{% if display_prices_with_taxes_active %} {{ STR_AMOUNT }}{{ STR_TTC }}{% else %}{{ STR_AMOUNT }}{{ STR_HT }}{% endif %}</th>
 	</tr>
 	{% for o in orders %}
@@ -31,13 +33,15 @@
 		<td class="center">
 			<a href="{{ o.href|escape('html') }}"><img src="{{ o.info_src|escape('html') }}" width="21" height="21" alt="info" /></a><br /><img src="{{ o.pdf_src|escape('html') }}" width="8" height="11" alt="" />&nbsp;
 		{% if o.facture_href %}
-			<br /><a onclick="return(window.open(this.href)?false:true);" href="{{ o.facture_href|escape('html') }}">{{ STR_PDF_BILL }}</a>
+			<br /><a onclick="return(window.open(this.href)?false:true);" href="{{ o.facture_href|escape('html') }}">{{ o.STR_PDF_BILL }}</a>
 		{% endif %}
 		</td>
 		<td class="center">{{ o.id }}</td>
 		<td class="center">{{ o.date }}</td>
+		{% if history_order_status_display_disable is empty %}
 		<td class="center">{% if not(o.paid) %}<a href="{{ o.href|escape('html') }}">{{ o.payment_status_name }}</a>{% else %}{{ o.payment_status_name }}{% endif %}</td>
 		<td class="center">{{ o.delivery_status_name }}</td>
+		{% endif %}
 		<td class="center">{{ o.prix }}</td>
 	</tr>
 	{% endfor %}

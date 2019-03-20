@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin_commande.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fin_commande.php 59873 2019-02-26 14:47:11Z sdelaporte $
 
 include("../configuration.inc.php");
 if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
@@ -40,18 +40,18 @@ $total_caddie = $_SESSION['session_caddie']->total;
  */
 // La commande est créée en BDD pour que la confirmation du paiement de serveur à serveur
 // puisse bien trouver la commande, ou pour les modes de paiements intervenant plus tard
-$commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['fin_commande_page_columns_count'];
-
-$output .= call_module_hook('cart_order_step3_after_save', array('order_id' => $commandeid, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'frm' => vb($_POST)), 'string');
-
-$result = query("SELECT *
+if (empty($_POST['order_id'])) {
+	// order_id est envoyé en POST dans le cas d'un paiement avec Authorize. On ne veut pas créer une deuxième fois la commande lorsque l'on soumet le formulaire pour payer
+	$commandeid = $_SESSION['session_caddie']->save_in_database($_SESSION['session_commande']);
+	$output .= call_module_hook('cart_order_step3_after_save', array('order_id' => $commandeid, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'frm' => vb($_POST)), 'string');
+	$result = query("SELECT *
 	FROM peel_commandes
 	WHERE id='" . intval($commandeid) . "' AND " . get_filter_site_cond('commandes') . "");
-$com = fetch_object($result);
+	$com = fetch_object($result);
 
 		
-switch ($com->paiement) {
+	switch ($com->paiement) {
 	// In $com->payment_technical_code is stored the "technical_code" found in peel_paiement
 	case 'check':
 	case 'transfer':
@@ -78,8 +78,10 @@ switch ($com->paiement) {
 
 	default :
 		break;
+	}
+} else {
+	$commandeid = $_POST['order_id'];
 }
-
 $output .= get_order_step3($commandeid, ($total_caddie > 0 && !empty($payment_select)));
 
 include($GLOBALS['repertoire_modele'] . "/haut.php");

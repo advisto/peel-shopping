@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: display_caddie.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -82,7 +82,8 @@ if (!function_exists('get_caddie_content_html')) {
 		$tpl->assign('enable_code_promo', empty($GLOBALS['site_parameters']['discount_codes_disabled']));
 		$tpl->assign('export_product_list_to_pdf', $_SESSION['session_caddie']->count_products() > 0 && check_if_module_active('facture_advanced', 'administrer/genere_pdf.php') && !empty($GLOBALS['site_parameters']['export_product_list_to_pdf']));
 		$tpl->assign('genere_pdf_href', $GLOBALS['wwwroot'] . '/modules/facture_advanced/genere_pdf.php?export_products_list_in_pdf_file=caddie');
-
+		$tpl->assign('shipping_type_display_mode', vb($GLOBALS['site_parameters']['shipping_type_display_mode']));
+		$tpl->assign('shipping_zone_display_mode', vb($GLOBALS['site_parameters']['shipping_zone_display_mode']));
 		if(!($_SESSION['session_caddie']->count_products() == 0)){
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			if (check_if_module_active('vacances') && get_vacances_type() == 1) {
@@ -124,7 +125,10 @@ if (!function_exists('get_caddie_content_html')) {
 						'value' => vb($frm['code'])
 					));
 				}
-		
+			if(check_if_module_active('devis') && (a_priv('util') || a_priv('admin*')) && !empty($_SESSION['session_caddie']->typeId) && !empty($GLOBALS['site_parameters']['online_quote_enable'])) {
+					$tpl->assign('STR_DEVIS', $GLOBALS['STR_MODULE_DEVIS_DEVIS_ON_LINE']);
+					$tpl->assign('devis_url', get_url('/modules/devis/devis.php?online_quote=1'));
+				}
 			} else {
 				$tpl->assign('membre_href', get_url('membre'));
 				$tpl->assign('STR_LOGIN_FOR_REBATE', $GLOBALS['STR_LOGIN_FOR_REBATE']);
@@ -147,7 +151,7 @@ if (!function_exists('get_caddie_content_html')) {
 				// il faut demander la zone afin de pouvoir identifier les modes de livraison possibles
 				$sqlZone = 'SELECT id, nom_' . $_SESSION['session_langue'] . ' AS nom
 					FROM peel_zones z
-					WHERE ' . get_filter_site_cond('zones', 'z') . '
+					WHERE ' . get_filter_site_cond('zones', 'z') . ' AND technical_code != "filter_geoip"
 					ORDER BY position, nom';
 				$resZone = query($sqlZone);
 				$zone_options = array();
@@ -230,15 +234,15 @@ if (!function_exists('get_caddie_content_html')) {
 				$tpl->assign('STR_SUGGEST', $GLOBALS['STR_SUGGEST']);
 
 			if(check_if_module_active('reseller') && is_reseller()) {
-				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
+				$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 			} else {
-				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
+				$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
 			}	
 
-			if ($treshold_to_use > $_SESSION['session_caddie']->total_produit) {
+			if ($threshold_to_use > $_SESSION['session_caddie']->total_produit) {
 				$tpl->assign('is_minimum_error', true);
 				$tpl->assign('STR_MINIMUM_PURCHASE_OF', $GLOBALS['STR_MINIMUM_PURCHASE_OF']);
-				$tpl->assign('minimum_prix', fprix($treshold_to_use, true));
+				$tpl->assign('minimum_prix', fprix($threshold_to_use, true));
 				$tpl->assign('STR_REQUIRED_VALIDATE_ORDER', $GLOBALS['STR_REQUIRED_VALIDATE_ORDER']);
 			} elseif (!empty($GLOBALS['site_parameters']['minimal_product_to_order']) && $GLOBALS['site_parameters']['minimal_product_to_order'] > $_SESSION['session_caddie']->count_products()) {
 				$tpl->assign('is_minimum_error', true);
@@ -585,14 +589,12 @@ if (!function_exists('affiche_resume_commande')) {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('resume_commande.tpl');
 
 			$quote_link_display = true;
-			if (check_if_module_active('tnt')) {
-				$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
-				if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
-					// Dépassement du seuil de commande pour TNT, on n'affiche pas le lien vers le devis
-					$quote_link_display = false;
-				}
+			$cart_measurement_max_reached = get_cart_measurement_max($_SESSION['session_caddie']);
+			if (!empty($cart_measurement_max_reached)) {
+				// Dépassement du seuil de commande pour TNT, on n'affiche pas le lien vers le devis
+				$quote_link_display = false;
 			}
-			
+
 			$sqlType = get_tarifs_sql();
 			$resType = query($sqlType);
 			$type_array = array();
@@ -819,6 +821,7 @@ if (!function_exists('affiche_liste_commandes')) {
 		if (empty($results_array)) {
 			$tpl->assign('STR_NO_ORDER', $GLOBALS['STR_NO_ORDER']);
 		} else {
+			$tpl->assign('history_order_status_display_disable', !empty($GLOBALS['site_parameters']['history_order_status_display_disable']));
 			$tpl->assign('STR_TABLE_SUMMARY_ORDERS', $GLOBALS['STR_TABLE_SUMMARY_ORDERS']);
 			$tpl->assign('STR_ORDER_NUMBER', $GLOBALS['STR_ORDER_NUMBER']);
 			$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
@@ -829,16 +832,29 @@ if (!function_exists('affiche_liste_commandes')) {
 			$tpl->assign('STR_HT', $GLOBALS['STR_HT']);
 			$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
 
-			$tpl->assign('STR_PDF_BILL', $GLOBALS['STR_PDF_BILL']);
 			$orders = array();
 			foreach ($results_array as $order) {
-				// Si le numéro de facture a été créé (ce moment est paramétrable dans la page de configuration du site), alors on transmet l'information sur la facture
+				if (check_if_module_active('devis') && !empty($order['date_fin_validite']) && $order['date_fin_validite']!="0000-00-00 00:00:00") {
+						// Une date de fin de validité a été fixé pour cette commande => C'est un devis.
+					if(!empty($order['numero'])) {
+						// il y a un numéro de facture, c'est un devis spécial
+						$facture_href= $GLOBALS['wwwroot'].'/modules/devis/devis_pdf.php?commandeid='.$order['id'];
+					} else {
+						// devis standard, on n'affiche pas le lien
+						$facture_href= false;
+					}
+					$STR_PDF_BILL = $GLOBALS['STR_PDF_QUOTATION'];
+				} else {
+					$facture_href= (!empty($order['numero'])? get_site_wwwroot($order['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $order['code_facture'] . '&mode=facture':'');
+					$STR_PDF_BILL = $GLOBALS['STR_PDF_BILL'];
+				}
 				$orders[] = array(
 					'href' =>  get_current_url(false) . '?mode=details&id=' . $order['id'] . '&timestamp=' . urlencode($order['o_timestamp']),
 					'info_src' => get_url('/icones/info.gif'),
 					'pdf_src' => get_url('/images/view_pdf.gif'),
-					'facture_href' => (!empty($order['numero'])? get_site_wwwroot($order['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . $order['code_facture'] . '&mode=facture':''),
+					'facture_href' => $facture_href,
 					'order_id' => $order['order_id'],
+					'STR_PDF_BILL' => $STR_PDF_BILL,
 					'numero' => $order['numero'],
 					'id' => $order['id'],
 					'date' => get_formatted_date($order['o_timestamp']),
@@ -1201,12 +1217,12 @@ if (!function_exists('get_caddie_products_summary_table')) {
 				}
 			}
 			if(check_if_module_active('reseller') && is_reseller()) {
-				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
+				$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 			} else {
-				$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
+				$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
 			}
 			// Attention : un test !empty ne marche pas sur $GLOBALS['site_parameters']['small_order_overcost_limit'] car au format "0.00"
-			if ($GLOBALS['site_parameters']['small_order_overcost_limit'] != 0 && $_SESSION['session_caddie']->total >= $treshold_to_use) {
+			if ($GLOBALS['site_parameters']['small_order_overcost_limit'] != 0 && $_SESSION['session_caddie']->total >= $threshold_to_use) {
 				$tpl->assign('sool', array(
 					'prix' => fprix($small_order_overcost_displayed, true),
 					'limit_prix' => fprix($GLOBALS['site_parameters']['small_order_overcost_limit'], true)

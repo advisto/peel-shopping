@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -134,7 +134,18 @@
 							}
 						}
 						//--><!]]></script>
-						<input type="submit" class="btn btn-primary" onclick="if (verif_form{{ save_suffix_id }}({{ color_array_result }}, {{ sizes_infos_array_result }}) == true) { {{ anim_prod_var }} } else { return false; }" value="{{ STR_ADD_CART|str_form_value }}" />
+						{% if is_quote is empty %}
+							<input type="submit" class="btn btn-primary submit-once-only" onclick="{% if popup_stock_alert %}alert('{{ popup_stock_alert }}');return false;{% endif %}if (verif_form{{ save_suffix_id }}({{ color_array_result }}, {{ sizes_infos_array_result }}) == true) { {{ anim_prod_var }} } else { return false; }" value="{{ STR_ADD_CART|str_form_value }}" />
+						{% else %}
+							<input onclick="get_quote_form('{{ product_id }}', '{{ LANG.STR_CANCEL|filtre_javascript(true,true,false) }}'); return false;" type="submit" class="btn btn-primary btn-line" value="{{ LANG.STR_PDF_QUOTATION }}" align="absmiddle" />
+						{% endif %}
+						{% if add_cart_disable and is_quote is empty %}
+							<tr>
+								<td>
+									<p class="alert alert-danger fade in">{{ STR_PRODUCT_NOT_AVAILABLE_CONTACT_SELL_SERVICE }}</p>
+								</td>
+							</tr>
+						{% endif %}
 					</div>
 				</td>
 			</tr>

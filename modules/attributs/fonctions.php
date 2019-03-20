@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 60033 2019-03-12 10:38:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -144,6 +144,7 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 	$attributs_array = array();
 	// $attributs_list permet de sélectionner uniquement certains attributs et leurs options
 	// Ceci évite notamment dans certains cas de récupérer des informations inutiles
+
 	if(!empty($attributs_list)) {
 		$attributs_list_array = explode('§', $attributs_list);
 		foreach($attributs_list_array as $this_attributs_list) {
@@ -175,19 +176,19 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 			$sql_from_and_where = "FROM peel_produits_attributs pa
 				LEFT JOIN peel_attributs a ON a.id = pa.attribut_id AND " . get_filter_site_cond('attributs', 'a') . "
 				INNER JOIN peel_nom_attributs na ON na.id = pa.nom_attribut_id AND na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na') . "
-				WHERE pa.produit_id = '" . intval($product_id) . "'";
+				WHERE ".(!defined("IN_PEEL_ADMIN")?"IF(na.texte_libre=0 AND upload=0, a.etat=1, 1) AND":"")." pa.produit_id = '" . intval($product_id) . "'";
 		} else {
 			$sql_select = 'a.id AS attribut_id';
 			$sql_from_and_where = "FROM peel_nom_attributs na
 				LEFT JOIN peel_attributs a ON a.id_nom_attribut=na.id AND " . get_filter_site_cond('attributs', 'a') . "
-				WHERE na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na');
+				WHERE ".(!defined("IN_PEEL_ADMIN")?"IF(na.texte_libre=0 AND upload=0, a.etat=1, 1) AND":"")." na.etat = '1' AND " . get_filter_site_cond('nom_attributs', 'na');
 		}
 		if(!empty($sql_cond_array)) {
 			$sql_from_and_where .= " AND (".implode(' OR ', $sql_cond_array).")";
 		}
 		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'').", na.disable_reductions, a.image
 			".$sql_from_and_where."
-			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
+			ORDER BY IF(na.position IS NULL,9999999,na.position) ASC, IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			if ($result['type_affichage_attribut'] == 3) {
@@ -339,6 +340,19 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 	if (!empty($attributs_array)) {
 		// On affiche la liste des attributs
 		foreach ($attributs_array as $this_nom_attribut_id => $this_attribut_values_array) {
+			$sql_nom_attribut = "SELECT *
+				FROM peel_nom_attributs
+				WHERE id = ".intval($this_nom_attribut_id);
+			$query_nom_attribut = query($sql_nom_attribut);
+			$nom_attribut_values_array = fetch_assoc($query_nom_attribut);
+			if (empty($combine_attribut)) {
+				$options = array();
+			}
+			if (!empty($GLOBALS['site_parameters']['combine_attribut_display'])) {
+				$combine_attribut = in_array($nom_attribut_values_array['technical_code'], $GLOBALS['site_parameters']['combine_attribut_display']);
+			} else {
+				$combine_attribut = false;
+			}
 			$j = 0;
 			$attribut_text = '';
 			$input_id = '';
@@ -347,12 +361,12 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 			$input_name = '';
 			$input_class = '';
 			$input_on_change = '';
-			$options = array();
 			$max_label_length=0;
 			$preselected_value = vb($attribut_preselect_infos[$this_nom_attribut_id]);
 			unset($type_affichage_attribut);
 			$attribut_additional_price_ttc = 0;
 			foreach ($this_attribut_values_array as $this_attribut_id => $this_attribut_infos) {
+				
 				if (!empty($technical_code_array) && !in_array($this_attribut_infos['technical_code'], $technical_code_array)) {
 					break;
 				}
@@ -372,7 +386,12 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				} elseif ($reseller_mode && $this_attribut_infos['prix_revendeur'] != 0) {
 					$additional_price_ttc = vn($this_attribut_infos['prix_revendeur']);
 				} else {
-					$additional_price_ttc = vn($this_attribut_infos['prix']);
+					$hook_additional_price_ttc = call_module_hook('attribut_price', array('this_attribut_infos'=>$this_attribut_infos, 'product_object' => $product_object), 'string');
+					if (!empty($hook_additional_price_ttc)) {
+						$additional_price_ttc = vn($hook_additional_price_ttc);
+					} else {
+						$additional_price_ttc = vn($this_attribut_infos['prix']);
+					}
 				}
 				if ($reseller_mode && isset($GLOBALS['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id])) {
 					$additional_price_ttc += $GLOBALS['site_parameters']['attribut_prix_revendeur'][$this_nom_attribut_id];
@@ -474,7 +493,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$this_thumb = thumbs(vb($this_attribut_infos['image']), 80, 50, 'fit');
 						$options[] = array(
 								'value' => $this_value,
-								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
+								'text' => (!empty($combine_attribut)?$this_attribut_infos['nom'] . ' ':'').StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
 								'image_src' => (!empty($this_thumb)?$GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb:null),
 								'id' =>  'image_attribut_'. $this_attribut_id,
 								'j' =>  $j,
@@ -518,7 +537,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				}
 				$j++;
 			}
-			if(isset($type_affichage_attribut)) {
+			if(isset($type_affichage_attribut) && empty($combine_attribut)) {
 				$attributes_text_array[] = array(
 						'text' => $attribut_text,
 						'technical_code' => $this_attribut_infos['technical_code'],
@@ -531,10 +550,28 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						'input_class' => $input_class,
 						'options' => $options,
 						'max_label_length' => $max_label_length,
+						'update_product_price' => $input_on_change . ' update_product_price' . $save_suffix_id.'();',
 						'onchange' => 'display_image_attribut(\''.$input_id.'\');'.(empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
 					);
 			}
 		}
+		if(!empty($combine_attribut)) {
+			$attributes_text_array[] = array(
+					'text' => $attribut_text,
+					'technical_code' => $this_attribut_infos['technical_code'],
+					'name' => '',
+					'type_affichage_attribut' => $type_affichage_attribut,
+					'input_id' => $input_id,
+					'input_name' => $input_name,
+					'input_value' => $input_value,
+					'input_type' => $input_type,
+					'input_class' => $input_class,
+					'options' => $options,
+					'max_label_length' => $max_label_length,
+					'onchange' => (empty($GLOBALS['site_parameters']['ads_disable_product_attributes_price_total'])?$input_on_change . ' update_product_price' . $save_suffix_id . '();':'')
+				);
+		}
+		unset($combine_attribut);
 	}
 	if(!empty($attributes_text_array)) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributs_form_part.tpl');
@@ -673,7 +710,7 @@ function get_option_combination_name_from_value($attributs_infos_array, $combina
  * @param string $form_id
  * @return
  */
-function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
+function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id, $product_object)
 {
 	$attributs_infos_array_count = count($attributs_infos_array);
 	$output = '' . $attr_var_name . '="";
@@ -682,10 +719,10 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id)
 		$this_attributs_infos = current($this_attributs_array_infos);
 		if(empty($this_attributs_infos['attribut_id'])) {
 			// Champ texte libre ou upload, sans options à choisir
-			continue;
-		}
-		// type_affichage_attribut vaut 0, 1 ou 2 et jamais 3. En effet 3 est une configuration par produit pour dire : prendre la valeur générale du site, et est déjà remplacé par la vraie valeur retenue qui est <=2.
-		if ($this_attributs_infos['type_affichage_attribut'] == 0) {
+			$output .= '
+			' . $attr_var_name . '+= "§'.$this_nom_attribut_id.'|0|"+$("#detailsajout'.$product_object->id.'_custom_attribut'.$this_nom_attribut_id.'").val();';
+		} elseif($this_attributs_infos['type_affichage_attribut'] == 0) {
+			// type_affichage_attribut vaut 0, 1 ou 2 et jamais 3. En effet 3 est une configuration par produit pour dire : prendre la valeur générale du site, et est déjà remplacé par la vraie valeur retenue qui est <=2.
 			// Affichage sous forme de select
 			$output .= '
 	' . $attr_var_name . '+= "§"+document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '").options[document.getElementById("' . $form_id . '_custom_attribut' . $this_nom_attribut_id . '").selectedIndex].value;';
@@ -1024,4 +1061,52 @@ function attributes_create_or_update($this_field_name, $this_field_value, $produ
 		}
 	}
 	return $output;
+}
+
+/*
+ * @param string $this_field_name
+ * @param string $this_field_value
+ * @param integer $product_id
+*/
+function custom_attributes_create_or_update($this_field_name, $this_field_value, $product_id) {
+    $code_technique_attrib = explode('#', $this_field_name);
+    $sql_nom_attribut = 'SELECT id
+        FROM peel_nom_attributs
+        WHERE technical_code="' . nohtml_real_escape_string(trim($code_technique_attrib[1])) . '"';
+    $q_nom_attribut = query($sql_nom_attribut);
+    $result_nom_attribut = fetch_assoc($q_nom_attribut);
+    if (!empty($this_field_value)) {
+        // On récupère toutes les options de cet attribut
+        $id_options = explode('§', $this_field_value);
+        // Pour chaque option de cet attribut
+		$i = 0;
+        foreach($id_options as $nom_option) {
+            $sql = 'SELECT id, id_nom_attribut
+                FROM peel_attributs
+                WHERE id_nom_attribut="'.intval($result_nom_attribut['id']).'" AND descriptif_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string(trim($nom_option)) . '"';
+            $q = query($sql);
+			
+            // Option existante
+            while ($attribut = fetch_assoc($q)) {
+                // Vérification que l'association entre les attributs, les options d'attributs et les produits existe, sinon, on l'ajoute
+                $query = query('SELECT produit_id
+                    FROM peel_produits_attributs
+                    WHERE produit_id="' . intval($product_id) . '"
+                        AND nom_attribut_id="' . intval($result_nom_attribut['id']) . '"
+                        AND attribut_id="' . intval($attribut['id']) . '"');
+                if (!num_rows($query)) {
+					//On supprime au préalable les options attributs associés au produit avant l'insertion
+					if ($i < 1) {
+						query('DELETE FROM peel_produits_attributs 
+								WHERE produit_id="' . intval($product_id) . '" AND nom_attribut_id="' . intval($result_nom_attribut['id']) . '"');
+					}
+                    query('INSERT INTO peel_produits_attributs
+                        SET produit_id="' . intval($product_id) . '",
+                            nom_attribut_id="' . intval($result_nom_attribut['id']) . '",
+                            attribut_id="' . intval($attribut['id']) . '"');
+					$i++;
+                }
+            }
+        }
+    }
 }

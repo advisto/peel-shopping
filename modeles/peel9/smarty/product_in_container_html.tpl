@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: product_in_container_html.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: product_in_container_html.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<table class="full_width center product_in_container">
 	{if isset($src)}
 	<tr>
@@ -32,7 +32,7 @@
 		</td>
 	</tr>
 	{/if}
-	{if isset($on_estimate)}
+	{if isset($on_estimate) && empty($product_estimate_product_in_container_disabled)}
 	<tr>
 			<td>{$on_estimate}</td>
 	</tr>

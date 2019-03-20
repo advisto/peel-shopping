@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: zones.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: zones.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -102,6 +102,7 @@ function affiche_formulaire_ajout_zone(&$frm)
 		$frm['on_franco_weight'] = "";
 		$frm['on_franco_nb_products'] = "";
 		$frm['position'] = "";
+		$frm['applied_franco_mode'] = "";
 		$frm['site_id'] = "";
 		$frm['technical_code'] = "";
 		$frm['payment_method'] = "";

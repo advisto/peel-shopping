@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: admin_fr.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -113,6 +113,8 @@ $GLOBALS["STR_ADMIN_CHART_DATA_MESSAGES_NUMBER_TITLE"] = "Répartition par jour 
 $GLOBALS["STR_ADMIN_CHART_DATA_USERS_BY_COUNTRY"] = "Répartition des utilisateurs par pays";
 $GLOBALS["STR_ADMIN_CHART_DATA_USERS_BY_SEX"] = "Répartition H/F";
 $GLOBALS["STR_ADMIN_CHECK_ALL"] = "Tout cocher";
+$GLOBALS["STR_ADMIN_CHECK_DATA"] = "Vérification des anomalies avant import";
+$GLOBALS["STR_ADMIN_CHECK_DATA_BEFORE_IMPORT"] = "Corrigez les anomalies ci-dessous pour pouvoir ensuite importer vos données";
 $GLOBALS["STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES"] = "Choisissez les 3 catégories favorites parmi les catégories proposées.";
 $GLOBALS["STR_ADMIN_CHOOSE_SITE_TO_MODIFY"] = "Choisir un site à administrer (il sera possible d'éditer uniquement le contenu du site sélectionné)";
 $GLOBALS["STR_ADMIN_CHOOSE_SEARCH_CRITERIA"] = "Choisir vos critères de recherche";
@@ -182,6 +184,7 @@ $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_INFORMATION"] = "Informations client";
 $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_UPDATED_ICON_EXPLAIN"] = "indique les commandes pour lesquelles le compte client a été mis à jour depuis la date de commande";
 $GLOBALS["STR_ADMIN_COMMANDER_COUPON_USED"] = "Code promotionnel utilisé";
 $GLOBALS["STR_ADMIN_COMMANDER_CREATE"] = "Création d'une commande";
+$GLOBALS["STR_ADMIN_COMMANDER_QUOTE_CREATE_OR_UPDATE_TITLE"] = "Créer ou modifier un devis";
 $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"] = "Créer ou modifier une commande";
 $GLOBALS["STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED"] = "Taux de change appliqué à la commande (par rapport à %s)";
 $GLOBALS["STR_ADMIN_COMMANDER_DOWNLOADS_LIST_TITLE"] = "Liste des téléchargements en cours";
@@ -334,6 +337,7 @@ $GLOBALS["STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND"] = "Aucune écotaxe enregistrée d
 $GLOBALS["STR_ADMIN_ECOTAXES_TITLE"] = "Gestion des barêmes ECOTAXE d'écoparticipation";
 $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Ajouter ou modifier une écotaxe";
 $GLOBALS["STR_ADMIN_EXPORT_CSV"] = "Export CSV";
+$GLOBALS["STR_ADMIN_EXPORT_PDF"] = "Export PDF";
 $GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Ne pas exporter les tarifs (pour l'export CSV)";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Choisissez vos critères d'export";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "Modèle d'email";
@@ -367,6 +371,7 @@ $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "Impossible de trouver l'élément demand�
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "Aucun utilisateur n'a été sélectionné.";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "Impossible de trouver la page !";
 $GLOBALS["STR_ADMIN_EXPORT"] = "Exporter";
+$GLOBALS["STR_ADMIN_EXPORT_COLUMNS"] = "Choix et ordre des colonnes";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "Mode d'export";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Produits associés";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Marque";
@@ -375,6 +380,8 @@ $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_COLORS"] = "Couleurs";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT"] = "Prix HT hors réduction";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT"] = "Prix TTC hors réduction";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_SIZES"] = "Tailles";
+$GLOBALS["STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN"] = "indiquez \\t pour tabulation";
+$GLOBALS["STR_ADMIN_EXPORT_TYPE"] = "Type de données à exporter";
 $GLOBALS["STR_ADMIN_FILE_DELETED"] = "Le fichier %s a été effacé du serveur.";
 $GLOBALS["STR_ADMIN_FILE_NAME"] = "Nom du fichier";
 $GLOBALS["STR_ADMIN_FLAG"] = "Drapeau";
@@ -422,9 +429,10 @@ $GLOBALS["STR_ADMIN_ID"] = "Id";
 $GLOBALS["STR_ADMIN_IP"] = "IP";
 $GLOBALS["STR_ADMIN_IMAGE_SHORT_PATH"] = "Image / Répertoire";
 $GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE"] = "Correspondance des colonnes";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND"] = "Colonne choisie non trouvée dans le fichier : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Colonne n°%s non gérée à l'import (purement descriptive lors de l'export) : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Colonne n°%s non reconnue et donc non importée : %s";
-$GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "Vous devez cocher au moins une case.<br />Importation stoppée.";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "Vous devez faire au moins une correspondance de champs.<br />Importation stoppée.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND"] = "Fichier introuvable !<br />Importation stoppée.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS"] = "Problème lors de l'importation : il existe plusieurs colonnes \"%s\" dans le fichier source - pas d'importation effectuée.";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_REFERENCE_DOES_NOT_EXIST"] = "La catégorie de référence %s n'existe pas";
@@ -435,7 +443,7 @@ $GLOBALS["STR_ADMIN_IMPORT_FILE_EXAMPLE"] = "Fichier exemple";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN"] = "Séparateur de colonnes autorisé : point virgule, virgule, tabulation, ...";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_FORMAT"] = "Format impératif du fichier";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_NAME"] = "Fichier de données";
-$GLOBALS["STR_ADMIN_IMPORT_FORM_TITLE"] = "IMPORTER UN FICHIER DE DONNES";
+$GLOBALS["STR_ADMIN_IMPORT_FORM_TITLE"] = "IMPORTER UN FICHIER DE DONNEES";
 $GLOBALS["STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS"] = "Import de tous les champs trouvés dans le fichier";
 $GLOBALS["STR_ADMIN_IMPORT_IMPORT_MODE"] = "Sélection du mode d'import";
 $GLOBALS["STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS"] = "Import seulement des champs sélectionnés ci-dessous";
@@ -450,9 +458,10 @@ $GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_CREATED"] = "Création du tarif dégressif 
 $GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_UPDATED"] = "Mise à jour du tarif dégressif prix (%s), prix_revendeur (%s) et quantite (%s) pour le produit id=%s";
 $GLOBALS["STR_ADMIN_IMPORT_SELECT_FIELDS"] = "Sélectionner les champs que vous souhaitez mettre à jour";
 $GLOBALS["STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN"] = "indiquez \\t pour tabulation - ne rien indiquer pour détection automatique";
-$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Séparateur de colonne";
+$GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Séparateur de colonnes";
+$GLOBALS["STR_ADMIN_IMPORT_STATUS"] = "Fin de l'importation";
 $GLOBALS["STR_ADMIN_IMPORT_TITLE"] = "Module d'importation";
-$GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Attention : si la colonne \"id\" est présente dans le fichier, les produits trouvés avec ces \"id\" auront leurs données modifiées.";
+$GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Attention : sauvegardez vos données avant de procéder à un import !<br />Si une ligne importée a la même clé primaire qu'une ligne en base de données, les données de la ligne seront modifiées, sinon elles seront ajoutées.";
 $GLOBALS["STR_ADMIN_IMPORT_TYPE"] = "Type de données à importer";
 $GLOBALS["STR_ADMIN_IN_COLUMNS"] = "En colonne";
 $GLOBALS["STR_ADMIN_IN_LINES"] = "En ligne";
@@ -682,6 +691,8 @@ $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"] = "Webmastering";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"] = "MARKETING";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"] = "Gestion des avis d'internautes";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"] = "Meilleurs produits";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT"] = "Import";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT"] = "Export";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"] = "Import des produits";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"] = "Export des produits";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"] = "Export des clients";
@@ -700,7 +711,7 @@ $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_MANAGEMENT"] = "GESTION DE PROJET"
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_TASKS"] = "Tâches à réaliser";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_SOLD"] = "Projets vendus";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_CONTENT"] = "Décomposition des projets";
-$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"] = "OUTILS DIVERS";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"] = "OUTILS";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"] = "Calculatrice";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_TITLE"] = "Modération";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADS_HEADER"] = "ANNONCES";
@@ -879,6 +890,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_EAN_CODE"] = "Code EAN 8/13 ou code UPC";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY"] = "Vous devez choisir au moins une catégorie à votre produit.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_NAME"] = "Vous devez insérer un nom de produit.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_NOT_FOUND"] = "Le produit n'a pas été trouvé.";
+$GLOBALS["STR_ADMIN_PRODUITS_ESTIMATE_PRICE"] = "Prix estimation";
 $GLOBALS["STR_ADMIN_PRODUITS_EXTRA_LINK"] = "URL d'un éventuel lien supplémentaire sur la page produit en dessous de la description (inactif si vide)";
 $GLOBALS["STR_ADMIN_PRODUITS_FILE_FOR_COLOR"] = "Fichiers pour la couleur";
 $GLOBALS["STR_ADMIN_PRODUITS_FILE_NAME"] = "Nom du fichier complet";
@@ -976,7 +988,7 @@ $GLOBALS["STR_ADMIN_RUBRIQUES_ALL"] = "Toutes les rubriques";
 $GLOBALS["STR_ADMIN_RUBRIQUES_CREATE"] = "Ajouter cette rubrique";
 $GLOBALS["STR_ADMIN_RUBRIQUES_DELETE_CATEGORY"] = "Supprimer la rubrique";
 $GLOBALS["STR_ADMIN_RUBRIQUES_DISPLAY_NO_SUMMARY"] = "Ne pas afficher de lien vers les articles dans la page de la rubrique";
-$GLOBALS["STR_ADMIN_RUBRIQUES_DISPLAY_SUMMARIES"] = "Afficher les chapeaux et des liens vers articles de cette rubrique";
+$GLOBALS["STR_ADMIN_RUBRIQUES_DISPLAY_SUMMARIES"] = "Afficher les chapeaux et des liens vers les articles de cette rubrique";
 $GLOBALS["STR_ADMIN_RUBRIQUES_ERR_NOT_FOUND"] = "La rubrique n'a pas été trouvée.";
 $GLOBALS["STR_ADMIN_RUBRIQUES_LIST_TITLE"] = "LISTE DES RUBRIQUES";
 $GLOBALS["STR_ADMIN_RUBRIQUES_MSG_CREATED_OK"] = "La rubrique %s a été effacée. Tous ses articles et sous-rubriques ont été réassignés à la rubrique supérieure.";
@@ -1279,7 +1291,7 @@ $GLOBALS["STR_ADMIN_SITES_THUMBS_SIZE"] = "Taille des vignettes (page catalogue)
 $GLOBALS["STR_ADMIN_SITES_TITLE"] = "Configuration du site";
 $GLOBALS["STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER"] = "Numéro de compte de transport TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_EXPEDITION_DELAY"] = "Délai entre la prise de commande et l'expédition du colis";
-$GLOBALS["STR_ADMIN_SITES_TNT_TRESHOLD"] = "Seuil de dimension maximum de colis (Longueur + largeur + profondeur) en mm";
+$GLOBALS["STR_ADMIN_SITES_TNT_THRESHOLD"] = "Seuil de dimension maximum de colis (Longueur + largeur + profondeur) en mm";
 $GLOBALS["STR_ADMIN_SITES_TNT_MODULE"] = "Livraison TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_PASSWORD"] = "Mot de passe TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_USERNAME"] = "Nom d'utilisateur TNT";
@@ -1372,6 +1384,8 @@ $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Gestion des tarifs d'expédition par mode 
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "Modifier ce tarif";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "Code technique";
 $GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "Numéro technique de la commande";
+$GLOBALS["STR_ADMIN_TEXT_HEADER_FOR_REPORT"] = "Texte en haut de rapport";
+$GLOBALS["STR_ADMIN_TEXT_FOOTER_FOR_REPORT"] = "Texte en bas de rapport";
 $GLOBALS["STR_ADMIN_TEXT_FOR_PDF_EXPORT"] = "Texte en bas de page pour l'export PDF";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "Titre - Ce titre ne sera pas visible sur le site";
 $GLOBALS["STR_ADMIN_TITLE"] = "Titre";
@@ -1619,6 +1633,9 @@ $GLOBALS["STR_ADMIN_ZONES_UPDATE"] = "Modifier cette zone";
 $GLOBALS["STR_ADMIN_SELECT_ICIRELAIS_SHIPPING"] = "Sélection icirelais transport";
 $GLOBALS["STR_ADMIN_UNASSIGN"] = "Désaffecter";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN"] = "Les options ci-dessous sont les valeurs que peut prendre un attribut. Lorsqu'un attribut sera associé à un produit, vous pourrez sélectionner les options autorisées pour ce produit en particulier parmi toutes ces options possibles de cet attribut.";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_ALREADY_EXIST"] = "Association entre l'attribut %s et le produit %s déjà existante";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_DELETED"] =  "Suppression de l'association entre l'attribut %s et le produit %s effectué";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_OK"] =  "Association entre l'attribut %s et le produit %s effectué";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST"] = "Liste des options associées à l'attribut";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX"] = "Checkbox";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION"] = "Ajouter une option à l'attribut";
@@ -1665,6 +1682,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE"] = "Ajouter ou modifier un at
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPDATE"] = "Modifier cet attribut";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE"] = "Champs d'upload d'image sur la fiche produit";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD"] = "Champs d'upload";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS"] = "les attributs cochés aux produits de la catégorie";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_AD"] = "Ajouter un avis sur une annonce";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT"] = "Ajouter un avis sur un produit";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED"] = "L'avis n'a pas été ajouté : Problème technique";
@@ -2055,3 +2073,69 @@ $GLOBALS["STR_ADMIN_DECIMAL_SEPARATOR_PRICE"] = "Séparateur décimal";
 $GLOBALS["STR_ADMIN_THOUSANDS_SEPARATOR_PRICE"] = "Séparateur de millier";
 $GLOBALS["STR_ADMIN_NAME_SHORT"] = "Nom court";
 $GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"] = "Statistiques accès site internet";
+$GLOBALS["STR_ADMIN_ASSOCIATED"] = "Associer";
+$GLOBALS["STR_ADMIN_DISASSOCIATED"] = "Désassocier";
+
+$GLOBALS["STR_ADMIN_ONLY_INLINE_QUANTITY_ORDER"] = "Exporter le détail des commandes au format CSV avec une ligne par produit commandé";
+
+$GLOBALS["STR_ADMIN_CARROUSEL_CATEGORY"] = "Carrousel de la catégorie";
+$GLOBALS["STR_ADMIN_ACTIF"] = "Actif";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE"] = "Administrer les prix des attributs associé au produit";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BACK_TO_LIST_ATTRIBUTS"] = "Revenir à la liste des attributs";
+
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MOTTE"] = "Motte";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BAC"] = "Bac";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NOT_CONDITION"] = "Pas de Cond";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_LIGNE"] = "Nouvelle ligne";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_GROUP"] = "Nouveau groupe";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] = "Groupe";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_STATUS"] = "Status";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CONDIT"] = "Condit";
+$GLOBALS["STR_ADMIN_HEADING"] = "entête";
+$GLOBALS["STR_ADMIN_PRIMARY_KEY_MANDATORY"] = "La clé primaire '%s' doit être renseignée.";
+$GLOBALS["STR_ADMIN_FIELD_VALUE_MANDATORY"] = "La valeur du champ '%s' doit être renseignée pour une insertion.";
+$GLOBALS["STR_ADMIN_CODE_MAX_CHAR_REACHED"] = "Le code '%s' fait %s caractères au lieu de %s caractères maximum autorisés.";
+$GLOBALS["STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE"] = "La valeur '%s' n'existe pas dans la table '%s' pour le champ '%s'";
+$GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "La colonne '%s' doit contenir au choix : %s";
+$GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "La valeur du champ '%s' doit être unique.";
+$GLOBALS["STR_ADMIN_IMPORT_USER_END"] = "Fin de l'import des utilisateurs : %s insérés, %s MAJ<br />E-mails avec mot de passe générés envoyés.";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_END"] = "Fin de l'import du fichier : %s lignes insérées, %s MAJ";
+$GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"] = "Pas d'anomalie trouvée, vous pouvez valider ci-dessous pour réaliser l'import";
+$GLOBALS["STR_ADMIN_LINE"] = "Ligne";
+$GLOBALS["STR_ADMIN_SIMULATION"] = "Simulation";
+$GLOBALS["STR_ADMIN_CHOOSE_COLUMN"] = "Vous devez choisir des colonnes à exporter";
+$GLOBALS["STR_ADMIN_PRODUCT_ID_MANDATORY_IN_URL"] = "Vous devez définir une id de produit dans l'URL";
+$GLOBALS["STR_ADMIN_TOTAL_HT_ALL_INCLUDE"] = "TOTAL HT tout compris";
+$GLOBALS["STR_ADMIN_TOTAL_TVA_ALL_INCLUDE"] = "TVA tout compris";
+$GLOBALS["STR_ADMIN_TOTAL_TTC_ALL_INCLUDE"] = "TOTAL TTC tout compris";
+$GLOBALS["STR_ADMIN_PRICE_HT_WITHOUT_REDUCTION"] = "Prix HT hors réduction";
+$GLOBALS["STR_ADMIN_PRICE_TTC_WITHOUT_REDUCTION"] = "Prix TTC hors réduction";
+$GLOBALS["STR_ADMIN_PRICE"] = "prix";
+$GLOBALS["STR_ADMIN_COLUMN_TTTLE_FIRST_LINE"] = "Mettre les titres de colonnes en première ligne (si disponible pour le type d'export choisi)";
+$GLOBALS["STR_ADMIN_ADD_FOOTER_FILE_EXPORT"] = "Mettre un footer contenant les totaux à la fin du fichier d'export (la colonne montant_ht doit être présente dans le fichier)";
+$GLOBALS["STR_ADMIN_COLUMN_AVAILABLE"] = "Colonnes disponibles";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE"] = "Vous devez déplacer avec drag&drop les colonnes que vous souhaitez exclure du fichier d'export vers ce tableau";
+$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "Fichier à générer";
+$GLOBALS["STR_ADMIN_FILE_COLUMN_EXPORTED"] = "Colonnes du fichier qui seront exportées";
+$GLOBALS["STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT"] = "Après le choix du type de données ci-dessus, dans cette section vous pourrez sélectionner et ordonner les colonnes que vous souhaitez exporter.";
+$GLOBALS["STR_ADMIN_SOURCE_FILE"] = "Fichier Source";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP"] = "Colonnes à déplacer avec drag&drop vers le tableau de correspondance";
+$GLOBALS["STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE"] = "* Champs obligatoires pour insertions : associez avec une colonne ou indiquez une valeur par défaut &nbsp; &nbsp; ** Clé primaire obligatoire et unique";
+$GLOBALS["STR_ADMIN_SITE_COLUMN_IN_DATABASE"] = "Colonne %s en base de données";
+$GLOBALS["STR_ADMIN_TYPE"] = "Type";
+$GLOBALS["STR_ADMIN_IMPORTED_COLUMN"] = "Colonne importée (faire drag&drop)";
+$GLOBALS["STR_ADMIN_DEFAULT_VALUE"] = "Valeur par défaut";
+$GLOBALS["STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE"] = "Après le choix du type de données à importer, dans cette section vous pourrez faire la correspondance entre les colonnes de votre fichier et les colonnes gérées par %s.";
+$GLOBALS["STR_ADMIN_SEND_EMAIL_TO_USERS"] = "Envoyer des emails aux utilisateurs";
+$GLOBALS["STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER"] = "Bas de page produit";
+$GLOBALS["STR_ADMIN_HTML_HOME_HEADER"] = "Sous le menu de la page d'accueil";
+
+
+
+
+
+
+
+
+
+

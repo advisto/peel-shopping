@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database_email_template_text_es.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: database_email_template_text_es.php 59873 2019-02-26 14:47:11Z sdelaporte $
 
 if (!defined("IN_PEEL")) {
 	die();
@@ -123,7 +123,7 @@ Tenemos el placer de confirmarle la preparación y la próxima entrega del pedid
 Los artículos enviados:
 [SHIPPED_ITEMS]
 La forma de entrega que ha escogido al realizar un pedido es: [TYPE]
-Referencias del envío: le No. del paquete es [COLIS]. Por correo, puede seguir su paquete haciendo clic en el siguiente enlace: http://www.coliposte.fr/
+Referencias del envío: le No. del paquete es [COLIS]. Por correo, puede seguir su paquete haciendo clic en el siguiente enlace: https://www.laposte.fr/particulier/outils/suivre-vos-envois
 
 Dirección de envío:
 [CLIENT_INFOS_SHIP]

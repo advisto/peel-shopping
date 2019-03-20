@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: en.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: en.php 59883 2019-02-27 14:08:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -245,8 +245,7 @@ $GLOBALS["STR_ERR_FIRST_CHOICE"] = "You must choose at least one favorite catego
 $GLOBALS["STR_ERR_FIRSTNAME"] = "Please fill in your first name.\n";
 $GLOBALS["STR_ERR_FORM"] = "Your form is incomplete or comprises errors";
 $GLOBALS["STR_ERR_HASH"] = "The link is not valid. No changes were made.";
-$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "You haven't yet chosen your country, or your delivery information, or your delivery area is not consistent with the country of delivery of the address used
-.<br /><br />Please fill in the missing fields.";
+$GLOBALS["STR_ERR_INFO_NEEDED_TO_CADDIE"] = "You haven't yet chosen your country, or your delivery information, or your delivery area is not consistent with the country of delivery of the address used.<br /><br />Please fill in the missing fields.";
 $GLOBALS["STR_ERR_KEYB"] = "Press the <b>x</b> key to close";
 $GLOBALS["STR_ERR_LOGIN"] = "Please fill in your login.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Please fill in your message.\n";
@@ -322,6 +321,8 @@ $GLOBALS["STR_GET_MY_POSITION"] = "Get my position (mandatory for this query)";
 $GLOBALS["STR_GET_PASSWORD"] = "Forgot password?";
 $GLOBALS["STR_GIFT_POINTS"] = "Gift points";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "General promotion";
+$GLOBALS["STR_GRAMMES"] = "grams";
+$GLOBALS["STR_GROUP_BY"] = "Group by";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Compressed file opening failed";
 $GLOBALS["STR_HALF_WHOLESALER"] = "Half Wholesaler";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "has been deleted";
@@ -344,6 +345,7 @@ $GLOBALS["STR_INCLUDING"] = "including";
 $GLOBALS["STR_INFO_ADDRESS"] = "When checking out, we will ask you to specify the delivery address and the billing address";
 $GLOBALS["STR_INFORMATIONS"] = "Informations";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Information non disponible";
+$GLOBALS["STR_INIT_FILTER"] = "reset";
 $GLOBALS["STR_INSCRIPTION_NEWSLETTER_AND_COMMERCIAL_OFFER"] = "Subscribe to the newsletter and commercial offers";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Insert a Logo";
 $GLOBALS["STR_INSERT_EMAIL"] = "Please fill in the e-mail address you used for registration and you will receive a new password by e-mail.";
@@ -381,9 +383,10 @@ $GLOBALS["STR_LIST"] = "List";
 $GLOBALS["STR_LIST_PRODUCT"] = "List of the products";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "List of headings";
 $GLOBALS["STR_LISTE_CADEAU"] = "My gift list";
+$GLOBALS["STR_LOAD_RULES"] = "Load";
 $GLOBALS["STR_LOCATION"] = "Location";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Please log in to receive your coupon";
-$GLOBALS["STR_LOGIN_OK"] = "Thanks for your confidence.";
+$GLOBALS["STR_LOGIN_OK"] = "Thank you for your confidence.";
 $GLOBALS["STR_LOGIN_OK2"] = "In order to finalize your registration, a validation email has been sent to the address %s. We invite you to click on the link in this email to validate this registration.";
 $GLOBALS["STR_LOGIN_OK3"] = "Your subscription is taken into account, you can now access your account by clicking on this link: <a href='%s'>%s</a> or consult the list of products for sale by clicking on this link: <a href='%s'>%s</a>";
 $GLOBALS["STR_LOGIN"] = "Log in";
@@ -399,6 +402,8 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "My used promotional codes:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "My current promotional codes:";
 $GLOBALS["STR_MESSAGE"] = "Message";
 $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"] = "The product in the selected size is out of stock but it will be delivered within a period of between 10 and 15 days maximum";
+$GLOBALS["STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "Deletion done.";
+$GLOBALS["STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "Your configuration is saved.";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "A minimum purchase of ";
 $GLOBALS["STR_MINIMUM_PRODUCT"] = " minimum products are required to finalize the order";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "field %s is mandatory";
@@ -542,6 +547,7 @@ $GLOBALS["STR_MY_ORDER"] = "My orders";
 $GLOBALS["STR_MY_QUOTES"] = "My quotes";
 $GLOBALS["STR_NAISSANCE"] = "Date of birth";
 $GLOBALS["STR_NAME"] = "Surname";
+$GLOBALS["STR_NB_MAX_SUBTOTAL"] = "MAX levels of subtotals";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "At less than %s km from my position";
 $GLOBALS["STR_NET"] = "Net to pay";
 $GLOBALS["STR_NEW_CUSTOMER"] = "New customer?";
@@ -593,6 +599,7 @@ $GLOBALS["STR_OR_COORDINATION"] = "or";
 $GLOBALS["STR_OR"] = "or";
 $GLOBALS['STR_ORDER_BY_BUTTON'] = "Sort out";
 $GLOBALS["STR_ORDER_DETAIL"] = "Order details";
+$GLOBALS["STR_ORDER_BY"] = "Order by";
 $GLOBALS["STR_ORDER_FORM"] = "Order form";
 $GLOBALS["STR_ORDER_HISTORY"] = "Follow-up of orders";
 $GLOBALS['STR_ORDER_MIN'] = "Minimum order";
@@ -608,6 +615,7 @@ $GLOBALS["STR_ORDER_STATUT"] = "Order status";
 $GLOBALS["STR_ORDER"] = "Complete your order";
 $GLOBALS["STR_ORIGIN"] = "Origin";
 $GLOBALS["STR_OTHER"] = "Other";
+$GLOBALS["STR_OVERWRITE_SAVE"] = "Overwrite the existing configuration";
 $GLOBALS["STR_OUR_OTHER_SERVICES"] = "Our other services";
 $GLOBALS["STR_OUR_PARTNER"] = "Our partners";
 $GLOBALS["STR_OUR_SERVICES"] = "Our services";
@@ -690,7 +698,7 @@ $GLOBALS["STR_PRODUCT"] = "Product";
 $GLOBALS["STR_PRODUCT_ORDER_ONCE_ERR"] = "The product has already been ordered.";
 $GLOBALS["STR_PRODUCTS_PURCHASED"] = "products purchased";
 $GLOBALS["STR_PRODUCTS_PURCHASED_LIST"] = "Products purchased list";
-$GLOBALS["STR_PRODUCTS"] = "Our products";
+$GLOBALS["STR_PRODUCTS"] = "products";
 $GLOBALS["STR_PROFESSION"] = "Profession";
 $GLOBALS["STR_PROFORMA"] = "Proforma invoice";
 $GLOBALS["STR_PROMO_CODE"] = "promo code";
@@ -740,6 +748,7 @@ $GLOBALS["STR_RSS_TITLE"] = "RSS feed of the website {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "Our RSS Feed";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Terms and conditions";
 $GLOBALS["STR_SAVE_CART"] = "Save Cart";
+$GLOBALS["STR_SAVE_RULES"] = "Save";
 $GLOBALS['STR_SCREEN_SIZE'] = "Screen size";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "All words";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "Any word";
@@ -881,6 +890,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "No website";
 $GLOBALS["STR_WEEK"] = "Week(s)";
 $GLOBALS["STR_WEIGHT"] = "Weight of the order";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "What do you want to do with this list?";
+$GLOBALS["STR_WEIGHT_SHORT"] = "Weight";
 $GLOBALS["STR_WHOLESALER"] = "Wholesaler";
 $GLOBALS["STR_WITH_ECOTAX"] = "including ecotaxe";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "including the promotional code";
@@ -915,3 +925,7 @@ $GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBAL
 $GLOBALS["STR_PRIX_SEARCH_HT"] = "Price Bef. VAT";
 $GLOBALS["STR_PRIX_SEARCH_TTC"] = "Price Aft. VAT";
 $GLOBALS["STR_REGISER_CART_ALERT"] = "There are more than 25 products in the cart, so it will not be saved automatically. To save your basket you can click on the link 'Save the product list' of the basket page";
+$GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "Price request";
+$GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "Please send me the price for the product code";
+$GLOBALS["STR_ON_REQUEST"] = "On request";
+$GLOBALS["STR_ESTIMATE"] = "estimate";

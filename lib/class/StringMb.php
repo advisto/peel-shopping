@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: StringMb.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: StringMb.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ $GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: StringMb.php 59053 2018-12-18 10:20:50Z sdelaporte $
+ * @version $Id: StringMb.php 59873 2019-02-26 14:47:11Z sdelaporte $
  * @access public
  */
 class StringMb {
@@ -54,6 +54,7 @@ class StringMb {
 	public static function strpos($haystack, $needle, $offset = 0)
 	{
 		if(is_array($haystack) && defined('PEEL_DEBUG')) {
+			echo 'Array instead of string : ' . print_r($haystack);
 			var_dump(debug_backtrace());
 		}
 		if($needle!=='' && $needle!== null) {
@@ -669,7 +670,7 @@ class StringMb {
 	 * @param boolean $safe
 	 * @param string $additional_elements
 	 * @param integer $max_caracters_length On coupe le texte si le nombre de caractères dépasse la valeur autorisée ads_max_caracters_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - En cas de langue avec beaucoup de caractères spéciaux, cette valeur doit être fortement inférieure à la taille du champ en base de données
-	 * @param integer $max_octets_length On coupe sans ménagement le texte si la taille en octets dépasse la valeur autorisée ads_max_octets_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - ads_max_caracters_length doit être inférieur à la taille du champs en base de données en laissant la place pour les balises de cloture (champ TEXT = 65 536 octets)
+	 * @param integer $max_octets_length On coupe sans ménagement le texte si la taille en octets dépasse la valeur autorisée ads_max_octets_length de 10%, avant de le passer dans getCleanHTML qui va regénérer les balises de cloture manquantes - ads_max_caracters_length doit être inférieur à la taille du champ en base de données en laissant la place pour les balises de cloture (champ TEXT = 65 536 octets)
 	 * @param integer $max_word_and_url_length
 	 * @return
 	 */

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: sites.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: sites.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -348,7 +348,7 @@ function affiche_formulaire_ajout_site(&$frm)
 		$frm['tnt_username'] = 0;
 		$frm['tnt_password'] = 0;
 		$frm['tnt_account_number'] = 0;
-		$frm['tnt_treshold'] = 0;
+		$frm['tnt_threshold'] = 0;
 		$frm['expedition_delay'] = 0;
 		$frm['export_encoding'] = 0;
 		$frm['category_count_method'] = 0;
@@ -813,7 +813,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('tnt_username', vn($frm['tnt_username']));
 	$tpl->assign('tnt_password', vn($frm['tnt_password']));
 	$tpl->assign('tnt_account_number', vn($frm['tnt_account_number']));
-	$tpl->assign('tnt_treshold', vn($frm['tnt_treshold']));
+	$tpl->assign('tnt_threshold', vn($frm['tnt_threshold']));
 	$tpl->assign('expedition_delay', vn($frm['expedition_delay']));
 	$tpl->assign('act_on_top', vn($frm['act_on_top']));
 	$tpl->assign('auto_promo', vn($frm['auto_promo']));
@@ -1110,7 +1110,7 @@ function affiche_formulaire_site(&$frm, $frm_modules)
 	$tpl->assign('STR_ADMIN_SITES_TNT_USERNAME', $GLOBALS['STR_ADMIN_SITES_TNT_USERNAME']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_PASSWORD', $GLOBALS['STR_ADMIN_SITES_TNT_PASSWORD']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER', $GLOBALS['STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER']);
-	$tpl->assign('STR_ADMIN_SITES_TNT_TRESHOLD', $GLOBALS['STR_ADMIN_SITES_TNT_TRESHOLD']);
+	$tpl->assign('STR_ADMIN_SITES_TNT_THRESHOLD', $GLOBALS['STR_ADMIN_SITES_TNT_THRESHOLD']);
 	$tpl->assign('STR_ADMIN_SITES_TNT_EXPEDITION_DELAY', $GLOBALS['STR_ADMIN_SITES_TNT_EXPEDITION_DELAY']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_CERTIFICATE', $GLOBALS['STR_ADMIN_SITES_SIPS_CERTIFICATE']);
 	$tpl->assign('STR_ADMIN_SITES_SIPS_EXPLAIN', $GLOBALS['STR_ADMIN_SITES_SIPS_EXPLAIN']);

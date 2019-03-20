@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions_admin.php 60050 2019-03-13 08:38:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -298,10 +298,9 @@ function get_admin_menu()
 			$GLOBALS['menu_items']['webmastering']['webmastering_seo'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_SEO_HEADER"];
 		}
 		if (a_priv('admin_white_label,admin_moderation', true)) {
-			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/import_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
-			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/export_produits.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"];
-			if (file_exists($GLOBALS['dirroot'] . '/modules/import/administrer/import_clients.php')) {
-				$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/import/administrer/import_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
+			$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/import.php?type=produits'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"];
+			if (file_exists($GLOBALS['dirroot'] . '/modules/import')) {
+				$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['administrer_url'] . '/import.php?type=clients'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_IMPORT"];
 			}
 			if (check_if_module_active('export')) {
 				$GLOBALS['menu_items']['webmastering_marketing'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_clients.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"];
@@ -329,8 +328,12 @@ function get_admin_menu()
 				$GLOBALS['menu_items']['webmastering_projects'][$GLOBALS['wwwroot_in_admin'] . '/modules/projects_management/administrer/project-events.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_CONTENT"];
 			}
 		}
+		$GLOBALS['menu_items']['webmastering']['webmastering_various'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"];
+		$GLOBALS['menu_items']['webmastering_various'][$GLOBALS['administrer_url'] . '/import.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT"];
+		if (check_if_module_active('export')) {
+			$GLOBALS['menu_items']['webmastering_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT"];
+		}
 		if (check_if_module_active('calc')) {
-			$GLOBALS['menu_items']['webmastering']['webmastering_various'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"];
 			$GLOBALS['menu_items']['webmastering_various'][$GLOBALS['wwwroot_in_admin'] . '/modules/calc/calc.php'] = $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"];
 		}
 		$hook_result = call_module_hook('admin_menu_items', array(), 'array');
@@ -568,7 +571,7 @@ function sendclient($commandeid, $prefered_mode = 'html', $mode = 'bdc', $partia
 	$query = query($sql);
 	$commande = fetch_assoc($query);
 
-	$custom_template_tags['ORDER_ID'] = $commandeid;
+	$custom_template_tags['ORDER_ID'] = $commande['order_id'];
 	$custom_template_tags['MODE'] = $mode;
 	if ($prefered_mode == 'html' && check_if_module_active('factures', 'commande_html.php')) {
 		if(!empty($partial)) {
@@ -612,7 +615,7 @@ function send_avis_expedition($commandeid, $delivery_tracking, $email_template =
 	}
 	$order_infos = get_order_infos_array($commande);
 
-	$custom_template_tags['ORDER_ID'] = $commandeid;
+	$custom_template_tags['ORDER_ID'] = $commande->order_id;
 	$custom_template_tags['TYPE'] = $commande->type;
 	$custom_template_tags['COLIS'] = $delivery_tracking;
 	$custom_template_tags['NOM_FAMILLE'] = $commande->nom_bill;
@@ -812,7 +815,7 @@ function execute_sql($file_path, $max_sql_lines_at_once = 10000, $disable_echo =
 		for ($i = 0; $i < count($tab); $i++) {
 			// Remplacement des tags dans la ligne.
 			if($replace_tags) {
-				// 3ème argument $replace_only_custom_tags à true. On ne veut pas remplacer tous les tags, seulement site_id. En effet des tags comme CLOSE_MAIN_CONTAINER ou REOPEN_MAIN_CONTAINER qui sont présent dans le SQL d'installation ne doivent pas être remplacée. Ces tags sont fait pour être remplacé lors de la lecture des informations, pas lors de l'intertion en BDD. La valeur de ces tags dépend de la page sur laquelle ils sont lu
+				// 3ème argument $replace_only_custom_tags à true. On ne veut pas remplacer tous les tags, seulement site_id. En effet des tags comme CLOSE_MAIN_CONTAINER ou REOPEN_MAIN_CONTAINER qui sont présent dans le SQL d'installation ne doivent pas être remplacée. Ces tags sont fait pour être remplacé lors de la lecture des informations, pas lors de l'insertion en BDD. La valeur de ces tags dépend de la page sur laquelle ils sont lu
 				$tab[$i] = template_tags_replace($tab[$i], $custom_template_tags, true);
 			}
 			if(StringMb::strpos($tab[$i], 'DELETE') === 0 || StringMb::strpos($tab[$i], 'DROP TABLE') === 0 || (StringMb::strpos($tab[$i], 'ALTER TABLE') === 0 && StringMb::strpos($tab[$i], 'DROP INDEX') !== false && StringMb::strpos($tab[$i], 'ADD INDEX') === false)) {
@@ -1005,6 +1008,7 @@ function envoie_client_code_promo($id_utilisateur, $id_codepromo)
 					$custom_template_tags['REMISE'] .= $GLOBALS['STR_ON_CATEGORY'] . ' ' . $cp['nom_cat'];
 				}
 				$custom_template_tags['DATE_FIN'] = $cp['date_fin'];
+				$custom_template_tags['MONTANT_MIN'] = fprix($cp['montant_min'],true);
 				send_email($email, '', '', 'envoie_client_code_promo', $custom_template_tags, null, $GLOBALS['support_sav_client']);
 				return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_CODES_PROMOS_MSG_SENT_OK"], $cp['nom'], $user_infos['civilite'] . ' ' . $user_infos['prenom'] . ' ' . $user_infos['nom_famille'], $email)))->fetch();
 			} else {
@@ -1054,7 +1058,12 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 			$sql_cond .= ' AND c.id_statut_livraison="' . nohtml_real_escape_string($frm['statut_livraison']) . '"';
 		}
 		if (!empty($frm['id'])) {
-			$sql_cond .= ' AND (c.id="' . intval($frm['id']) . '" OR c.numero="' . nohtml_real_escape_string($frm['id']) . '")';
+			if(!empty($GLOBALS['site_parameters']['order_list_use_order_id'])) {
+				$this_order_id_field = "order_id";
+			} else {
+				$this_order_id_field = "id";
+			}
+			$sql_cond .= ' AND (c.'.$this_order_id_field.'="' . intval($frm['id']) . '" OR c.numero="' . nohtml_real_escape_string($frm['id']) . '")';
 		}
 		if (!empty($frm['affi'])) {
 			$sql_cond .= ' AND affilie = "1"';
@@ -1148,7 +1157,7 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
 				}
 			}
 			$tpl_array= array('tr_rollover' => tr_rollover($i, true),
-				'id' => $order['id'],
+				'id' => $order["id"],
 				'order_id' => $order['order_id'],
 				'numero' => $order['numero'],
 				'date' => get_formatted_date($order['o_timestamp']),
@@ -1218,16 +1227,23 @@ function affiche_liste_commandes_admin($frm = null, $return = 'full_html')
  * @param integer $id
  * @param string $action Du type 'insere' ou 'ajout'
  * @param integer $user_id
+ * @param string $page
  * @return
  */
-function affiche_details_commande($id, $action, $user_id = 0)
+function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander')
 {
 	$output = '';
 	if(!empty($id)){
-		$qid_commande = query("SELECT *
-			FROM peel_commandes
-			WHERE " . get_filter_site_cond('commandes', null, true) . " AND id = '" . intval($id) . "'");
-		$commande = fetch_assoc($qid_commande);
+		$hook_result = call_module_hook('affiche_details_commande_begin', array('order_id'=>$id, 'bill_mode'=>$page), 'array');
+		if(!empty($hook_result)) {
+			$commande = $hook_result;
+		} else {
+			$sql = "SELECT *
+				FROM peel_commandes
+				WHERE " . get_filter_site_cond('commandes', null, true) . " AND id = '" . intval($id) . "'";	
+			$qid_commande = query($sql);
+			$commande = fetch_assoc($qid_commande);		
+		}
 	}
 	if (!empty($commande) || $action == 'insere' || $action == 'ajout') {
 		// Si nous somme en mode modif, alors on cherche les details de la commande
@@ -1310,8 +1326,8 @@ function affiche_details_commande($id, $action, $user_id = 0)
 					$commande['payment_technical_code'] = $result['technical_code'];
 				}
 			}
-			if ($commande['cout_transport_ht'] > 0) {
-				$commande['tva_transport'] = round(($commande['tva_cout_transport'] / $commande['cout_transport_ht'] * 100), 2);
+			if (vn($commande['cout_transport_ht']) > 0) {
+				$commande['tva_transport'] = round((vn($commande['tva_cout_transport']) / $commande['cout_transport_ht'] * 100), 2);
 			} else {
 				$commande['tva_transport'] = null;
 			}
@@ -1339,6 +1355,18 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$default_vat = 0;
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_commande_details.tpl');
+		if ($page == 'bill_edit') {
+			$tpl->assign('action', get_current_url(false) . '?mode=bill_edit&commandeid=' . vn($id));
+		} elseif ($page == 'bill_prepare') {
+			$tpl->assign('action', get_current_url(false) . '?mode=bill_prepare&commandeid=' . vn($id));
+		} elseif ($page == 'quote_prepare') {
+			$tpl->assign('action', get_current_url(false) . '?mode=quote_prepare&commandeid=' . vn($id));
+		} else {
+			$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
+		}
+		$tpl->assign('rpc_path', $GLOBALS['wwwroot'] . '/' . $GLOBALS['site_parameters']['backoffice_directory_name'] . '/rpc.php');
+		$tpl->assign('tva_options_html', get_vat_select_options());
+		$tpl->assign('this_page', $page);
 		$tpl->assign('action_name', $action);
 		$tpl->assign('id', vn($id));
 		$tpl->assign('order_id', vn($commande['order_id']));
@@ -1348,8 +1376,25 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('site_id_select_options', get_site_id_select_options(vb($commande['site_id']), null, null, true));
 		$tpl->assign('site_id_select_multiple', !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && vb($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_commandes'])));
 		$tpl->assign('internal_order_enable', vn($GLOBALS['site_parameters']['internal_order_enable']));
+		if ($page != 'commander' && !empty($GLOBALS['site_parameters']['order_detail_fields_disable'])) {
+			// On ne veut pas que cette variable soit active en back office. Si besoin il faudra créer une autre variable spécifiquement pour le back office
+			// format de order_detail_fields_disable : 'site_id' => 'true','payment_select' => 'true','statut_paiement' => 'true', etc ...
+			$order_detail_fields_disable = $GLOBALS['site_parameters']['order_detail_fields_disable'];
+		} else {
+			$order_detail_fields_disable = array();
+		}
+		$tpl->assign('order_detail_fields_disable', $order_detail_fields_disable);
+		$tpl->assign('information_on_this_order_disabled', vb($GLOBALS['site_parameters']['information_on_this_order_disabled']));
 		$tpl->assign('is_order_modification_allowed', $is_order_modification_allowed);
-
+		$tpl->assign('order_specific_field_titles', !empty($GLOBALS['site_parameters']['order_specific_field_titles']));
+		$tpl->assign('STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER', $GLOBALS['STR_ADMIN_MENU_CONTENT_VARIOUS_HEADER']);
+		if(!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
+			$order_specific_fields = array();
+			foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_key => $this_value) {
+				$order_specific_fields[] = array('title' => $this_value, 'name' => $this_key, 'value' => vb($frm[$this_key]), 'type' => vb($GLOBALS['site_parameters']['order_specific_field_types'][$this_key], 'text'));
+			}
+			$tpl->assign('order_table_additionnal_fields_array', $order_specific_fields);
+		}
 		$tpl->assign('is_kiala_module_active', check_if_module_active('kiala'));
 		if (check_if_module_active('kiala')) {
 			$tpl->assign('shortkpid',vb($commande['shortkpid']));
@@ -1364,16 +1409,36 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('pdf_src', $GLOBALS['wwwroot_in_admin'] . '/images/view_pdf.gif');
 		if ($action != "insere" && $action != "ajout") {
 			$tpl->assign('allow_display_invoice_link', !empty($commande['numero']));
-			$tpl->assign('facture_pdf_href', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture');
-			$tpl->assign('sendfacture_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=facture');
-			$tpl->assign('proforma_pdf_href', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=proforma');
-			$tpl->assign('sendproforma_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=proforma');
-			$tpl->assign('devis_pdf_href', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=devis');
-			$tpl->assign('senddevis_pdf_href', $GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=devis');
-			$tpl->assign('bdc_pdf_href', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
-			$tpl->assign('duplicate', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
-			$tpl->assign('bdc_pdf_href', get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc');
-			
+
+			$default_order_pdf_link_array = array(
+				'facture_pdf_href'=>get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=facture',
+				'sendfacture_pdf_href'=>$GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=facture',
+				'proforma_pdf_href'=>get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=proforma',
+				'sendproforma_pdf_href'=>$GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=proforma',
+				'devis_pdf_href'=>get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=devis',
+				'senddevis_pdf_href'=>$GLOBALS['administrer_url'] . '/commander.php?mode=sendfacturepdf&id=' . vn($commande['id']) . '&code_facture=' . vb($commande['code_facture']) . '&bill_type=devis',
+				'bdc_pdf_href'=>get_site_wwwroot($commande['site_id'], $_SESSION['session_langue']) . '/factures/commande_pdf.php?code_facture=' . vb($commande['code_facture']) . '&mode=bdc'
+			);
+			$hook_result = call_module_hook('affiche_details_commande_order_pdf_link_array', array('commande'=>$commande, 'bill_mode'=>$page), 'array');
+			if (!empty($hook_result)) {
+				// Les liens issues du hook sont prioritaires sur le lien par défaut;
+				$default_order_pdf_link_array = $hook_result;
+			}
+			foreach($default_order_pdf_link_array as $this_tpl_var=>$this_link) {
+				$tpl->assign($this_tpl_var, $this_link);
+			}
+			if (empty($hook_result['bill_anchor'])) {
+				// si le hook n'a pas défini cette variable
+				$tpl->assign('bill_anchor', $GLOBALS['STR_PROFORMA']);				
+			}
+			if (empty($hook_result['bill_send_pdf_anchor'])) {
+				// si le hook n'a pas défini cette variable
+				$tpl->assign('bill_send_pdf_anchor', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL']);
+			}
+			if (empty($hook_result['bill_send_pdf_anchor_confirm'])) {
+				// si le hook n'a pas défini cette variable
+				$tpl->assign('bill_send_pdf_anchor_confirm', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL_CONFIRM']);
+			}
 			$tpl->assign('is_duplicate_module_active', check_if_module_active('duplicate'));
 			$tpl->assign('dup_href', get_current_url(false) . '?mode=duplicate&id=' . $commande['id']);
 			$tpl->assign('dup_src', $GLOBALS['administrer_url'] . '/images/duplicate.png');
@@ -1399,11 +1464,22 @@ function affiche_details_commande($id, $action, $user_id = 0)
 					WHERE is_tnt="1" AND ' . get_filter_site_cond('types') . ' AND id = "' . nohtml_real_escape_string($commande['typeId']) . '"');
 				if ($result = fetch_assoc($q_type)) {
 					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b><a target="_blank" href="' . $GLOBALS['wwwroot'] . '/modules/tnt/administrer/etiquette.php?order_id='.$commande['id'] .'">Imprimer l\'étiquette tnt (ouvre une nouvelle fenêtre)</a>');
+					//Dans le cas d'une mise à jour d'une commande créée en B.O on génére l'url de tracking TNT
+					$q_tnt_tracking = query('SELECT tnt_parcel_number, tnt_tracking_url
+						FROM peel_commandes_articles
+						WHERE commande_id="' . intval($commande['id']) . '"');
+					$result_tnt_tracking = fetch_assoc($q_tnt_tracking);
+					if (!empty($result_tnt_tracking)) {
+						//On vérifie si l'url de tracking a déjà été généré
+						if (empty($result_tnt_tracking['tnt_parcel_number']) && empty($result_tnt_tracking['tnt_tracking_url'])) {
+							$tpl->assign('trackingCreation', trackingCreation($commande['id']));
+						}
+					}
 				} else {
 					$tpl->assign('etiquette_tnt', '<b>ETIQUETTE TNT : </b> Ce n\'est pas une commande liée au type de livraison TNT');
 				}
 			}
-			$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
+
 			$tpl->assign('date_facture', (empty($date_facture) ? "" : vb($date_facture)));
 			$tpl->assign('e_datetime', (empty($e_datetime) ? "" : vb($e_datetime)));
 			$tpl->assign('f_datetime', (empty($f_datetime) ? "" : vb($f_datetime)));
@@ -1412,7 +1488,15 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			$tpl->assign('email_href', $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . vn($commande['id_utilisateur']));
 			$tpl->assign('email', vb($commande['email']));
 		} else {
-			$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
+			if ($page == 'bill_prepare') {
+				$tpl->assign('action', get_current_url(false) . '?mode=bill_prepare');
+			} elseif ($page == 'bill_edit') {
+				$tpl->assign('action', get_current_url(false) . '?mode=bill_edit');
+			} elseif ($page == 'quote_prepare') {
+				$tpl->assign('action', get_current_url(false) . '?mode=quote_prepare');
+			} else {
+				$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
+			}
 		}
 
 		$tpl->assign('numero', $numero);
@@ -1449,7 +1533,7 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_SHIP_TYPE_CHOOSE', $GLOBALS["STR_SHIP_TYPE_CHOOSE"]);
 		if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 			$tpl->assign('delivery_type_options', get_delivery_type_options(vb($commande['typeId'])));
-			$tpl->assign('vat_select_options', get_vat_select_options(vb($commande['tva_transport']), true));
+			$tpl->assign('vat_select_options', get_vat_select_options(vb($commande['tva_transport']), true, true));
 		} else {
 			$tpl->assign('tva_transport', vb($commande['tva_transport']));
 			$tpl->assign('type_transport', vb($commande['type_transport']));
@@ -1514,14 +1598,22 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		}
 		$tpl->assign('commentaires', vb($commande['commentaires']));
 		$tpl->assign('commentaires_admin', vb($commande['commentaires_admin']));
-		$tpl->assign('specific_fields', get_specific_field_infos($commande, null, 'order'));
-
+		// on passe $page dans le tableau $commande pour permettre la gestion de champs spécifiques (via get_specific_field_infos) pour un type de commande donné.
+		$specific_fields = array();
+		if ((empty($GLOBALS['site_parameters']['order_specific_field_disable_in_admin']) && $page == 'commander') || $page != 'commander') {
+			$commande['bill_mode'] = $page;
+			$specific_fields = get_specific_field_infos($commande, null, 'order');
+		}
+		$tpl->assign('specific_fields', $specific_fields);
 		$tpl_client_infos = array();
 		for ($i = 1; $i < 3; $i++) {
 			if ($i == 1) {
 				$value = (empty($GLOBALS['site_parameters']['order_ship_before_bill'])?'bill':'ship');
 			} else {
 				$value = (empty($GLOBALS['site_parameters']['order_ship_before_bill'])?'ship':'bill');
+			}
+			if($value == 'ship' && empty($GLOBALS['site_parameters']['mode_transport'])) {
+				continue;
 			}
 			$tpl_client_infos[] = array('value' => $value,
 				'i' => $i,
@@ -1539,46 +1631,59 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('client_infos', $tpl_client_infos);
 
 		$tpl_order_lines = array();
+		// Le hook retourne un tableau de variable permettant de modifier les fonctions de récupération et d'affichage des produits commandés.
+		$hook_result = call_module_hook('order_lines_parameters', array('order_id'=>$id, 'bill_mode'=>$page), 'array');
+		if (!empty($hook_result['order_line_parameters_for_js'])) {
+			$order_line_parameters_for_js = $hook_result['order_line_parameters_for_js'];
+			$tpl->assign('hook_order_line_html_head', $hook_result['order_line_html_head']);
+		}
+		// Si aucun hook ne gère la récupération des lignes de commandes, on prends les valeurs PEEL par défaut
 		if (!empty($id)) {
-			if(!empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'name') {
-				$order_by = 'oi.nom_produit ASC';
-			} elseif(!empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'reference') {
-				$order_by = 'oi.reference ASC';
+			if (empty($hook_result['order_lines_sql'])) {
+				if(!empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'name') {
+					$order_by = 'oi.nom_produit ASC';
+				} elseif(!empty($GLOBALS['site_parameters']['order_article_order_by']) && $GLOBALS['site_parameters']['order_article_order_by'] == 'reference') {
+					$order_by = 'oi.reference ASC';
+				} else {
+					$order_by = 'oi.id ASC';
+				}
+				$sql = "SELECT
+					oi.reference AS ref
+					, oi.nom_produit AS nom
+					, oi.prix AS purchase_prix
+					, oi.prix_ht AS purchase_prix_ht
+					, oi.prix_cat
+					, oi.prix_cat_ht
+					, oi.quantite
+					, oi.poids
+					, oi.tva
+					, oi.tva_percent
+					, oi.produit_id AS id
+					, oi.attributs_list
+					, oi.nom_attribut
+					, oi.total_prix_attribut
+					, oi.couleur
+					, oi.taille
+					, oi.couleur_id
+					, oi.taille_id
+					, oi.remise
+					, oi.remise_ht
+					, oi.percent_remise_produit AS percent
+					, oi.on_download ";
+				if( check_if_module_active('listecadeau') ) {
+					$sql .= ", oi.listcadeaux_owner ";
+				}
+				if( check_if_module_active('tnt') ) {
+					$sql .= ", oi.tnt_parcel_number ";
+					$sql .= ", oi.tnt_tracking_url ";
+				}
+				$sql .= "FROM peel_commandes_articles oi
+					WHERE commande_id = '" . intval($id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi', true) . "
+					ORDER BY ".$order_by;
 			} else {
-				$order_by = 'oi.id ASC';
+				// SQL de sélection de produit qui vient du hook, pour gérer la liste de produit sur une autre table que peel_commandes_articles.
+				$sql = $hook_result['order_lines_sql'];
 			}
-			$sql = "SELECT
-				oi.reference AS ref
-				, oi.nom_produit AS nom
-				, oi.prix AS purchase_prix
-				, oi.prix_ht AS purchase_prix_ht
-				, oi.prix_cat
-				, oi.prix_cat_ht
-				, oi.quantite
-				, oi.tva
-				, oi.tva_percent
-				, oi.produit_id AS id
-				, oi.attributs_list
-				, oi.nom_attribut
-				, oi.total_prix_attribut
-				, oi.couleur
-				, oi.taille
-				, oi.couleur_id
-				, oi.taille_id
-				, oi.remise
-				, oi.remise_ht
-				, oi.percent_remise_produit AS percent
-				, oi.on_download ";
-			if( check_if_module_active('listecadeau') ) {
-				$sql .= ", oi.listcadeaux_owner ";
-			}
-			if( check_if_module_active('tnt') ) {
-				$sql .= ", oi.tnt_parcel_number ";
-				$sql .= ", oi.tnt_tracking_url ";
-			}
-			$sql .= "FROM peel_commandes_articles oi
-				WHERE commande_id = '" . intval($id) . "' AND " . get_filter_site_cond('commandes_articles', 'oi', true) . "
-				ORDER BY ".$order_by;
 			$query = query($sql);
 			$nb_produits = num_rows($query);
 		} else {
@@ -1587,45 +1692,54 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$i = 1;
 		if (!empty($query)) {
 			while ($line_data = fetch_assoc($query)) {
-				$product_object = new Product($line_data['id'], null, false, null, true, !check_if_module_active('micro_entreprise'));
-				// Code pour recupérer select des tailles
-				$possible_sizes = $product_object->get_possible_sizes();
-				// traitement particulier pour le prix. L'utilisation de la fonction vb() n'est pas appropriée car il faut permettre l'insertion de produit au montant égal à zéro (pour offrir.)
-				$line_data['image'] = $product_object->get_product_main_picture();
-				$line_data['image_thumbs'] = StringMb::str_form_value(thumbs($product_object->get_product_main_picture(), 50, 50, 'fit', null, null, true, true));
-				$line_data['prix_cat'] = round($line_data['prix_cat'] * vn($commande['currency_rate']), 5);
-				$line_data['prix_cat_ht'] = round($line_data['prix_cat_ht'] * vn($commande['currency_rate']), 5);
-				$line_data['purchase_prix'] = round($line_data['purchase_prix'] * vn($commande['currency_rate']), 5);
-				$line_data['purchase_prix_ht'] = round($line_data['purchase_prix_ht'] * vn($commande['currency_rate']), 5);
-				$line_data['remise'] = round($line_data['remise'] * vn($commande['currency_rate']), 5);
-				$line_data['remise_ht'] = round($line_data['remise_ht'] * vn($commande['currency_rate']), 5);
-				if (!empty($line_data['taille']) && !in_array($line_data['taille'], $possible_sizes)) {
-					$possible_sizes[$line_data['taille_id']] = $line_data['taille'];
-				}
+				// var_dump($line_data);
 				$size_options_html = '';
-				if (!empty($possible_sizes)) {
-					foreach ($possible_sizes as $this_size_id => $this_size_name) {
-						$size_options_html .= '<option value="' . intval($this_size_id) . '" ' . frmvalide($this_size_name == $line_data['taille'], ' selected="selected"') . '>' . $this_size_name . '</option>';
-					}
-				}
-				$possible_colors = $product_object->get_possible_colors();
-				if (!empty($line_data['couleur']) && !in_array($line_data['couleur'], $possible_colors)) {
-					$possible_colors[$line_data['couleur_id']] = $line_data['couleur'];
-				}
 				$color_options_html = '';
-				if (!empty($possible_colors)) {
-					foreach ($possible_colors as $this_color_id => $this_color_name) {
-						$color_options_html .= '<option value="' . intval($this_color_id) . '" ' . frmvalide($this_color_name == $line_data['couleur'], ' selected="selected"') . '>' . $this_color_name . '</option>';
+				if (!empty($line_data['id'])) {
+					$product_object = new Product($line_data['id'], null, false, null, true, !check_if_module_active('micro_entreprise'));
+				}
+				if(!empty($product_object)) {
+					// traitement particulier pour le prix. L'utilisation de la fonction vb() n'est pas appropriée car il faut permettre l'insertion de produit au montant égal à zéro (pour offrir.)
+					$line_data['image'] = $product_object->get_product_main_picture();
+					$line_data['image_thumbs'] = StringMb::str_form_value(thumbs($product_object->get_product_main_picture(), 50, 50, 'fit', null, null, true, true));
+					$line_data['prix_cat'] = round($line_data['prix_cat'] * vn($commande['currency_rate']), 5);
+					$line_data['prix_cat_ht'] = round($line_data['prix_cat_ht'] * vn($commande['currency_rate']), 5);
+					$line_data['purchase_prix'] = round($line_data['purchase_prix'] * vn($commande['currency_rate']), 5);
+					$line_data['purchase_prix_ht'] = round($line_data['purchase_prix_ht'] * vn($commande['currency_rate']), 5);
+					$line_data['remise'] = round($line_data['remise'] * vn($commande['currency_rate']), 5);
+					$line_data['remise_ht'] = round($line_data['remise_ht'] * vn($commande['currency_rate']), 5);
+					
+					// Code pour recupérer select des tailles
+					$possible_sizes = $product_object->get_possible_sizes();				
+					if (!empty($line_data['taille']) && !in_array($line_data['taille'], $possible_sizes)) {
+						$possible_sizes[$line_data['taille_id']] = $line_data['taille'];
+					}
+					if (!empty($possible_sizes)) {
+						foreach ($possible_sizes as $this_size_id => $this_size_name) {
+							$size_options_html .= '<option value="' . intval($this_size_id) . '" ' . frmvalide($this_size_name == $line_data['taille'], ' selected="selected"') . '>' . $this_size_name . '</option>';
+						}
+					}
+					$possible_colors = $product_object->get_possible_colors();
+					if (!empty($line_data['couleur']) && !in_array($line_data['couleur'], $possible_colors)) {
+						$possible_colors[$line_data['couleur_id']] = $line_data['couleur'];
+					}
+					if (!empty($possible_colors)) {
+						foreach ($possible_colors as $this_color_id => $this_color_name) {
+							$color_options_html .= '<option value="' . intval($this_color_id) . '" ' . frmvalide($this_color_name == $line_data['couleur'], ' selected="selected"') . '>' . $this_color_name . '</option>';
+						}
 					}
 				}
-				$tva_options_html = get_vat_select_options($line_data['tva_percent']);
-				// print_r($line_data); die();
-				$tpl_order_lines[] = get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i);
+				$tva_options_html = get_vat_select_options(vb($line_data['tva_percent']));
+				$tpl_order_lines[] = get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page);
 				$i++;
-				unset($product_object);
+				if(!empty($product_object)) {
+					unset($product_object);
+				}
 			}
 		}
-		if(($commande['zip_bill'] != $commande['zip_ship'] || $commande['adresse_bill'] != $commande['adresse_ship'] || $commande['ville_bill'] != $commande['ville_ship']) && !empty($GLOBALS['site_parameters']['order_adresse_difference_color'])) {
+
+
+		if(($commande['zip_bill'] != vb($commande['zip_ship']) || $commande['adresse_bill'] != vb($commande['adresse_ship']) || $commande['ville_bill'] != vb($commande['ville_ship'])) && !empty($GLOBALS['site_parameters']['order_adresse_difference_color'])) {
 			$tpl->assign('order_adresse_difference_color', true);
 		}
 		$tpl->assign('order_lines', $tpl_order_lines);
@@ -1642,7 +1756,15 @@ function affiche_details_commande($id, $action, $user_id = 0)
 
 		$tpl->assign('get_mode', $_GET['mode']);
 
-		$GLOBALS['js_content_array'][] = "new_order_line_html='".filtre_javascript(get_order_line(array('id' => '[id]', 'ref' => '[ref]', 'nom' => '[nom]', 'image_thumbs' => '[image_thumbs]', 'image' => '[image_large]', 'quantite' => '[quantite]', 'remise' => '[remise]', 'remise_ht' => '[remise_ht]', 'percent' => '[percent]', 'purchase_prix' => '[purchase_prix]', 'purchase_prix_ht' => '[purchase_prix_ht]', 'tva_percent' => '[tva_percent]', 'prix_cat' => '[prix_cat]', 'prix_cat_ht' => '[prix_cat_ht]'), '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]'), true, true, false, true, false)."';";
+		if (!empty($order_line_parameters_for_js)) {
+			// Le paramétrage de la fonction get_order_line vient du hook
+			// Cela permet de gérer un formulaire de produit différent de celui par défaut.
+			$order_lines_parameters_for_js_array = $order_line_parameters_for_js;
+		} else {
+			// cas standard
+			$order_lines_parameters_for_js_array = array('id' => '[id]', 'ref' => '[ref]', 'nom' => '[nom]', 'image_thumbs' => '[image_thumbs]', 'image' => '[image_large]', 'quantite' => '[quantite]', 'remise' => '[remise]', 'remise_ht' => '[remise_ht]', 'percent' => '[percent]', 'purchase_prix' => '[purchase_prix]', 'purchase_prix_ht' => '[purchase_prix_ht]', 'tva_percent' => '[tva_percent]', 'prix_cat' => '[prix_cat]', 'prix_cat_ht' => '[prix_cat_ht]');
+		}
+		$GLOBALS['js_content_array'][] = "new_order_line_html='".filtre_javascript(get_order_line($order_lines_parameters_for_js_array, '[color_options_html]', '[size_options_html]', '[tva_options_html]', '[i]', $page), true, true, false, true, false)."';";
 
 		$tpl->assign('site_avoir', $GLOBALS['site_parameters']['avoir']);
 		if (check_if_module_active('parrainage')) {
@@ -1662,6 +1784,11 @@ function affiche_details_commande($id, $action, $user_id = 0)
 			require_once($GLOBALS['fonctionsfianet_sac']);
 			$tpl->assign('fianet_analyse_commandes', get_sac_order_link($id));
 		}
+		if ($page == 'quote_prepare') {
+			$create_or_update_title = $GLOBALS['STR_ADMIN_COMMANDER_QUOTE_CREATE_OR_UPDATE_TITLE'];
+		} else {
+			$create_or_update_title = $GLOBALS['STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE'];
+		}
 		$tpl->assign('is_order_modification_allowed', $is_order_modification_allowed);
 		$tpl->assign('zone_tva', vb($commande['zone_tva']));
 		$tpl->assign('default_vat_select_options', get_vat_select_options($default_vat));
@@ -1671,10 +1798,9 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES', $GLOBALS['STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES']);
 		$tpl->assign('STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED', $GLOBALS['STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED']);
-		$tpl->assign('STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE', $GLOBALS['STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE']);
+		$tpl->assign('STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE', $create_or_update_title);
 		$tpl->assign('STR_INVOICE', $GLOBALS['STR_INVOICE']);
 		$tpl->assign('STR_ADMIN_CREATE_BILL_NUMBER_BEFORE', $GLOBALS['STR_ADMIN_CREATE_BILL_NUMBER_BEFORE']);
-		$tpl->assign('STR_PROFORMA', $GLOBALS['STR_PROFORMA']);
 		$tpl->assign('STR_QUOTATION', $GLOBALS['STR_QUOTATION']);
 		$tpl->assign('STR_ORDER_FORM', $GLOBALS['STR_ORDER_FORM']);
 		$tpl->assign('STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL', $GLOBALS['STR_ADMIN_SEND_TO_CLIENT_BY_EMAIL']);
@@ -1733,11 +1859,8 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED', $GLOBALS['STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED']);
 		$tpl->assign('STR_ADMIN_COMMANDER_OPEN_IN_BROWSER', $GLOBALS['STR_ADMIN_COMMANDER_OPEN_IN_BROWSER']);
 		$tpl->assign('STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM', $GLOBALS['STR_ADMIN_COMMANDER_SEND_BY_EMAIL_CONFIRM']);
-		$tpl->assign('STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE', $GLOBALS['STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE']);
 		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL']);
 		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM']);
-		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL']);
-		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL_CONFIRM', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL_CONFIRM']);
 		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL']);
 		$tpl->assign('STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM', $GLOBALS['STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM']);
 		$tpl->assign('STR_ADMIN_COMMANDER_WITH_PARTIAL_AMOUNT', $GLOBALS['STR_ADMIN_COMMANDER_WITH_PARTIAL_AMOUNT']);
@@ -1780,6 +1903,11 @@ function affiche_details_commande($id, $action, $user_id = 0)
 		$tpl->assign('STR_ADMIN_UTILISATEURS_CREATE_ORDER', $GLOBALS["STR_ADMIN_UTILISATEURS_CREATE_ORDER"]);
 		$tpl->assign('STR_ADMIN_FORM_SAVE_CHANGES', $GLOBALS["STR_ADMIN_FORM_SAVE_CHANGES"]);
 		
+		// Hook pour ajouter des variables smarty à utiliser dans le fichier admin_commande_details.tpl
+		$hook_result = call_module_hook('affiche_details_commande_tpl', array('order_infos' => vb($commande), 'order_lines' => $tpl_order_lines, 'bill_mode'=>$page), 'array');
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
 		$output .= call_module_hook('affiche_details_commande', array('order_infos' => vb($commande), 'order_lines' => $tpl_order_lines), 'string');
 		$output .= $tpl->fetch();
 	} elseif (!empty($id)) {
@@ -1914,11 +2042,18 @@ function save_commande_in_database($frm)
 		}
 	} else {
 		// Recherche d'information sur la commande avant modification
-		$query = query('SELECT email
+		$query = query('SELECT email, zone, zone_franco, zone_tva, pays_ship AS pays
 			FROM peel_commandes
 			WHERE ' . get_filter_site_cond('commandes') . ' AND id = ' . intval(vn($frm['commandeid'])));
-		$result = fetch_assoc($query);
-		if((!empty($frm['autocomplete_order_adresses_with_account_info_if_order_email_change']) && $result['email'] != $frm['email']) || !empty($frm['autocomplete_order_adresses_with_account_info'])) {
+		$existing_order_infos = fetch_assoc($query);
+		
+		// informations liées à la zone récupérées de peel_commandes déjà existant pour éviter toute discordance par rapport aux données déjà sauvegardées si plusieurs zones sont rattachées au même pays et au même site
+		$frm['zoneId'] = $existing_order_infos['zone'];
+		$frm['zoneFranco'] = $existing_order_infos['zone_franco'];
+		$frm['apply_vat'] = $existing_order_infos['zone_tva'];
+		$frm['pays'] = $existing_order_infos['pays'];
+		
+		if((!empty($GLOBALS['site_parameters']['autocomplete_order_adresses_with_account_info_if_order_email_change']) && $existing_order_infos['email'] != $frm['email']) || !empty($frm['autocomplete_order_adresses_with_account_info'])) {
 			// L'auteur de la commande a changé. On change les informations relative à l'utilisateur de cette commande.
 			// Utile pour modifier une commande après une duplication de commande (module duplicate du module premium.)
 			$query = query('SELECT societe, prenom, nom_famille AS nom, adresse, code_postal AS zip, ville, pays, email, telephone
@@ -1937,6 +2072,11 @@ function save_commande_in_database($frm)
 						}
 						$frm[$this_frm_item . '1'] = $result[$this_item];
 						$frm[$this_frm_item . '2'] = $result[$this_item];
+					}
+				} else {
+					foreach($result as $key => $data){
+						$frm[$key . '1'] = $result[$key];
+						$frm[$key . '2'] = $result[$key];
 					}
 				}
 			}
@@ -1958,28 +2098,39 @@ function save_commande_in_database($frm)
 			$frm['currency_rate'] = $GLOBALS['site_parameters']['conversion'];
 		}
 	}
-	// On récupère les informations sur les zones
-	$sqlPays = 'SELECT p.id, p.pays_' . $frm['lang'] . ' as pays, p.zone, z.tva, z.on_franco
-		FROM peel_pays p
-		LEFT JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z') . '
-		WHERE p.etat = "1" AND p.pays_' . $frm['lang'] . '="' . nohtml_real_escape_string($frm['pays2']) . '"  AND ' . get_filter_site_cond('pays', 'p') . '
-		LIMIT 1';
-	$query = query($sqlPays);
-	if ($result = fetch_assoc($query)) {
-		$frm['pays'] = $result['pays'];
-		$frm['zoneId'] = $result['zone'];
-		if(!isset($frm['apply_vat'])){
-			// Si $frm['apply_vat'] est déjà défini, alors on garde la valeur qui a priorité sur la configuration du pays en BDD
-			$frm['apply_vat'] = ($result['tva'] && !is_user_tva_intracom_for_no_vat($frm['id_utilisateur']) && !check_if_module_active('micro_entreprise'));
+	
+	if(empty($frm['zoneId']) && !empty($frm['pays2'])) {
+		// On récupère les informations sur les zones
+		$sqlPays = 'SELECT p.id, p.pays_' . $frm['lang'] . ' as pays, z.id AS zone, z.tva, z.on_franco
+			FROM peel_pays p
+			' . (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id'])?'
+			INNER JOIN peel_zones z ON FIND_IN_SET(z.id,p.zone) AND ' . get_filter_site_cond('zones', 'z') . '':'
+			INNER JOIN peel_zones z ON z.id=p.zone AND ' . get_filter_site_cond('zones', 'z') . '') . '
+			WHERE p.etat = "1" AND p.pays_' . $frm['lang'] . '="' . nohtml_real_escape_string($frm['pays2']) . '"  AND ' . get_filter_site_cond('pays', 'p') . '
+			ORDER BY z.on_franco DESC, z.tva ASC
+			LIMIT 1';
+		$query = query($sqlPays);
+		if ($result = fetch_assoc($query)) {
+			$frm['pays'] = $result['pays'];
+			$frm['zoneId'] = $result['zone'];
+			if(!isset($frm['apply_vat'])){
+				// Si $frm['apply_vat'] est déjà défini, alors on garde la valeur qui a priorité sur la configuration du pays en BDD
+				$frm['apply_vat'] = ($result['tva'] && !is_user_tva_intracom_for_no_vat($frm['id_utilisateur']) && !check_if_module_active('micro_entreprise'));
+			}
+			$frm['zoneFranco'] = $result['on_franco'];
+		} else {
+			$frm['zoneId'] = false;
+			$frm['pays'] = '';
+			if(!isset($frm['apply_vat'])){
+				// Si $frm['apply_vat'] est déjà défini, alors on garde la valeur qui a priorité sur la configuration du pays en BDD
+				$frm['apply_vat'] = false;
+			}
+			$frm['zoneFranco'] = '';
 		}
-		$frm['zoneFranco'] = $result['on_franco'];
-	} else {
+	} elseif(empty($GLOBALS['site_parameters']['mode_transport'])) {
+		// Si pas de livraison on fixe des valeurs par défaut.
 		$frm['zoneId'] = false;
-		$frm['pays'] = '';
-		if(!isset($frm['apply_vat'])){
-			// Si $frm['apply_vat'] est déjà défini, alors on garde la valeur qui a priorité sur la configuration du pays en BDD
-			$frm['apply_vat'] = false;
-		}
+		$frm['apply_vat'] = true;
 		$frm['zoneFranco'] = '';
 	}
 	// L'ordre des produits a peut-être été modifié par l'administrateur, donc on prend les produits dans l'ordre du POST. Le tableau product_order_array sert à faire un mappage de l'ordre des produits tel qu'affichée sur la page de détail de commade et les numéros de ligne. product_order_array contient les numéros des lignes de produit, mais dans l'ordre que l'admin a choisi.
@@ -2162,7 +2313,7 @@ function save_commande_in_database($frm)
 		$this_article['nom_attribut'] = vn($frm['nom_attribut_' . $i]);
 		$this_article['id_attribut'] = vn($frm['attributs_list_' . $i]);
 		$this_article['total_prix_attribut'] = vn($frm['total_prix_attribut_' . $i]);
-
+		$this_article['id_attribut'] = vb($frm['attributs_list_' . $i]);
 		if ($tva > 0) {
 			// recupération du prix des attributs en ht pour utiliser dans le calcul de option_ht
 			$total_prix_attribut_ht = $this_article['total_prix_attribut'] / (1 + $tva / 100); 
@@ -2175,6 +2326,9 @@ function save_commande_in_database($frm)
 
 		$product_object->set_configuration($this_article['couleurId'], $this_article['tailleId'], $this_article['id_attribut'], check_if_module_active('reseller') && is_reseller()); // on fixe les options
 		$this_article['poids'] = ($product_object->poids + $product_object->configuration_overweight) * $this_article['quantite'];
+		if (empty($this_article['poids']) && !empty($frm['poids_' . $i])) {
+			$this_article['poids'] = $frm['poids_' . $i];
+		}
 		$frm['total_poids'] += $this_article['poids'];
 		$this_article['option'] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, $frm['apply_vat'], false, false, false) + $this_article['total_prix_attribut'];
 		$this_article['option_ht'] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false) + $total_prix_attribut_ht;
@@ -2217,17 +2371,17 @@ function save_commande_in_database($frm)
 		$frm['typeId'] = $frm['type_transport'];
 	}
 	if(check_if_module_active('reseller') && is_reseller()) {
-		$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
+		$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 	} else {
-		$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
+		$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order'];
 	}
-    if ($frm['small_order_overcost_amount'] == '') {
-        if($total_produit < $GLOBALS['site_parameters']['small_order_overcost_limit'] && $total_produit >= $treshold_to_use) {
+    if (!isset($frm['small_order_overcost_amount']) || (isset($frm['small_order_overcost_amount']) && $frm['small_order_overcost_amount'] == '')) {
+        if($total_produit < $GLOBALS['site_parameters']['small_order_overcost_limit'] && $total_produit >= $threshold_to_use) {
             $small_order_overcost_amount = $GLOBALS['site_parameters']['small_order_overcost_amount'];
         } else {
             $small_order_overcost_amount = 0;
         }
-    }  else {
+    } else {
 		$small_order_overcost_amount = get_float_from_user_input(vn($frm['small_order_overcost_amount']), $frm['currency_rate']);
     }
 	$tva_small_order_overcost = get_float_from_user_input(vn($frm['tva_small_order_overcost']), $frm['currency_rate']);
@@ -2264,6 +2418,13 @@ function save_commande_in_database($frm)
 	$frm['tva_cout_transport'] = vn($cout_transport) - vn($cout_transport_ht);
 	$frm['avoir'] = $avoir;
 	// On crée la commande ou on la met à jour si elle existe déjà
+		
+	$hook_output = call_module_hook('get_order_data', array('articles'=>$articles, 'frm'=>$frm), 'array');
+	if (!empty($hook_output)) {
+		$frm = $hook_output['frm'];
+		$articles = $hook_output['articles'];
+	}
+	
 	$order_id = create_or_update_order($frm, $articles);
 	return $order_id;
 }
@@ -2278,7 +2439,7 @@ function save_commande_in_database($frm)
  * @param integer $i
  * @return
  */
-function get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i)
+function get_order_line($line_data, $color_options_html, $size_options_html, $tva_options_html, $i, $page)
 {
 	if (empty($size_options_html)) {
 		$size_options_html = '<option value="">-</option>';
@@ -2290,38 +2451,48 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 		$tva_options_html = '<option value="">-</option>';
 	}
 
-	if (display_prices_with_taxes_in_admin()) {
-		$prix_cat_displayed = $line_data['prix_cat'];
-		$purchase_prix_displayed = $line_data['purchase_prix'];
-		$unit_fixed_remise_displayed = $line_data['remise'];
+	if (!is_numeric($i)) {
+		// $i peut contenir le tag [i] qui est automatiquement remplacé lors de l'ajout dynamique de la ligne
+		$line_style_id = 1;
 	} else {
-		$prix_cat_displayed = $line_data['prix_cat_ht'];
-		$purchase_prix_displayed = $line_data['purchase_prix_ht'];
-		$unit_fixed_remise_displayed = $line_data['remise_ht'];
+		$line_style_id = $i;
 	}
-	// Si nous sommes en mode édition de la commande et nous souhaitons réafficher les données sur les produits
-	if (is_numeric($purchase_prix_displayed)) {
-		// Prix tout taxe avant remise = prix remisé + remise
-		// On détermine le montant de la remise fixe en euro($remise_fixed). Pour cela on déduit le montant de la remise % du montant de la remise globale (limite a deux chiffre apres la virgule)
-		$unit_fixed_remise_displayed = round($unit_fixed_remise_displayed / $line_data['quantite'],2);
-	}
-	if (check_if_module_active('attributs')) {
-		$attribute_display = str_replace("\n", '<br />', display_option_image(vb($line_data['nom_attribut']), true));
-	}
-
-	$output =  tr_rollover($i, true, null, null, 'sortable_'.$i) .'
+	$hook_output = call_module_hook('get_order_line_html', array('line_style_id'=>$line_style_id, 'i'=>$i, 'line_data'=>$line_data, 'page'=>$page), 'string');
+	if (!empty($hook_output)) {
+		$output = $hook_output;
+	} else {
+		if (display_prices_with_taxes_in_admin()) {
+			$prix_cat_displayed = $line_data['prix_cat'];
+			$purchase_prix_displayed = $line_data['purchase_prix'];
+			$unit_fixed_remise_displayed = $line_data['remise'];
+		} else {
+			$prix_cat_displayed = $line_data['prix_cat_ht'];
+			$purchase_prix_displayed = $line_data['purchase_prix_ht'];
+			$unit_fixed_remise_displayed = $line_data['remise_ht'];
+		}
+		// Si nous sommes en mode édition de la commande et nous souhaitons réafficher les données sur les produits
+		if (is_numeric($purchase_prix_displayed)) {
+			// Prix tout taxe avant remise = prix remisé + remise
+			// On détermine le montant de la remise fixe en euro($remise_fixed). Pour cela on déduit le montant de la remise % du montant de la remise globale (limite a deux chiffre apres la virgule)
+			$unit_fixed_remise_displayed = round($unit_fixed_remise_displayed / $line_data['quantite'],2);
+		}
+		if (check_if_module_active('attributs')) {
+			$attribute_display = str_replace("\n", '<br />', display_option_image(vb($line_data['nom_attribut']), true));
+		}
+		$output = tr_rollover($line_style_id, true, null, null, 'sortable_'.$i) .'
 					<td>
-						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.StringMb::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {admin_delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . StringMb::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer" />
+						<img src="' . $GLOBALS['administrer_url'] . '/images/b_drop.png" alt="'.StringMb::str_form_value($GLOBALS['STR_DELETE']) . '" onclick="bootbox.confirm(\''.filtre_javascript($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE_CONFIRM"], true, true, true) .'\', function(result) {if(result) {admin_delete_products_list_line(' . $i . ', \'order\');}}); return false;" title="' . StringMb::str_form_value($GLOBALS["STR_ADMIN_PRODUCT_ORDERED_DELETE"]) . '" style="cursor:pointer;max-width: none;" />
 						<input name="giftlist_owners_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['listcadeaux_owner'])) . '" />
 						<input name="nom_attribut_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['nom_attribut'])) . '" />
-						<input name="attributs_list_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['attributs_list'])) . '" />';
-	if (check_if_module_active('tnt')) {
-		$output .= '
+						<input name="attributs_list_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['attributs_list'])) . '" />
+						<input name="poids_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['poids'])) . '" />';
+		if (check_if_module_active('tnt')) {
+			$output .= '
 						<input name="tnt_parcel_number_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['tnt_parcel_number'])) . '" />
 						<input name="tnt_tracking_url_' . $i . '" type="hidden" value="' . StringMb::str_form_value(vb($line_data['tnt_tracking_url'])) . '" />
 						';
-	}
-	$output .= '
+		}
+		$output .= '
 					</td>
 					<td>
 						<input class="form-control" name="id' . $i . '" style="width:100%" type="number" value="' . StringMb::str_form_value(vb($line_data['id'])) . '" />
@@ -2349,12 +2520,11 @@ function get_order_line($line_data, $color_options_html, $size_options_html, $tv
 			$output .= '
 						<a target="_image" href="' . StringMb::str_form_value($GLOBALS['repertoire_upload'].'/'.$line_data['image']) . '"><img src="' . $line_data['image_thumbs'] . '" alt="'.StringMb::str_form_value($line_data['nom']) . '" /></a>';
 		}
-	$output .= '
-					</td>
+		$output .= '
+						</td>
+					</tr>
 ';
-	$output .= '
-				</tr>
-';
+	}
 
 	return $output;
 }
@@ -2941,6 +3111,7 @@ function insere_langue($frm, $try_alter_table_even_if_modules_not_active = true,
 	}
 	if ($try_alter_table_even_if_modules_not_active || check_if_module_active('attributs')) {
 		$query_alter_table[] = 'ALTER TABLE `peel_attributs` ADD `descriptif_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
+		$query_alter_table[] = 'ALTER TABLE `peel_attributs` ADD `description_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	}
 	$query_alter_table[] = 'ALTER TABLE `peel_articles` ADD `surtitre_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
 	$query_alter_table[] = 'ALTER TABLE `peel_articles` ADD `titre_' . word_real_escape_string($new_lang) . '` VARCHAR( 255 ) NOT NULL DEFAULT ""';
@@ -3334,13 +3505,17 @@ if (!function_exists('get_admin_date_filter_form')) {
 	 * @param mixed $submit_html
 	 * @return
 	 */
-	function get_admin_date_filter_form($form_title, $information_select_html, $submit_html=null, $only_information_select_html_displayed = false)
+	function get_admin_date_filter_form($form_title, $information_select_html, $submit_html=null, $only_information_select_html_displayed = false, $standalone_form = true)
 	{
 		$output = '';
 		$nowDay = date('d');
 		$nowMonth = date('m');
 		$nowYear = date('Y');
-
+		if(isset($_POST['jour1'])) {
+			$frm = &$_POST;
+		} else {
+			$frm = &$_GET;
+		}
 		// Génération de la liste des années de 2004 à maintenant
 		for ($i = 2004; $i <= date('Y'); $i++) {
 			$years1[]=$i;
@@ -3348,6 +3523,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_date_filter_form.tpl');
 		$tpl->assign('only_information_select_html_displayed', $only_information_select_html_displayed);
 		$tpl->assign('action', get_current_url(false));
+		$tpl->assign('standalone_form', $standalone_form);
 		$tpl->assign('form_title', $form_title);
 		$tpl->assign('date', get_formatted_date(time()));
 		$tpl->assign('information_select_html', $information_select_html);
@@ -3359,7 +3535,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 			$days_options[] = array(
 				'value' => $c,
 				'name' => $c,
-				'issel' => ((isset($_GET['jour1']) && $c == $_GET['jour1']) || (!isset($_GET['jour1']) && $c == $nowDay))
+				'issel' => ((isset($frm['jour1']) && $c == $frm['jour1']) || (!isset($frm['jour1']) && $c == $nowDay))
 			);
 		}
 		$tpl->assign('days_options', $days_options);
@@ -3370,7 +3546,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 				$months_options[] = array(
 					'value' => $this_month_number,
 					'name' => StringMb::ucfirst($this_month),
-					'issel' => ((isset($_GET['mois1']) && $this_month_number == $_GET['mois1']) || (!isset($_GET['mois1']) && $this_month_number == date('m', mktime(0, 0, 0, date('m') - 1, date('d'), date('Y')))))
+					'issel' => ((isset($frm['mois1']) && $this_month_number == $frm['mois1']) || (!isset($frm['mois1']) && $this_month_number == date('m', mktime(0, 0, 0, date('m') - 1, date('d'), date('Y')))))
 				);
 			}
 		}
@@ -3381,7 +3557,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 			$years_options[] = array(
 				'value' => $years1[$x3],
 				'name' => $years1[$x3],
-				'issel' => ((isset($_GET['an1']) && $years1[$x3] == $_GET['an1']) || (!isset($_GET['an1']) && $years1[$x3] == $nowYear))
+				'issel' => ((isset($frm['an1']) && $years1[$x3] == $frm['an1']) || (!isset($frm['an1']) && $years1[$x3] == date('Y', mktime(0, 0, 0, date('m') - 1, date('d'), date('Y')))))
 			);
 		}
 		$tpl->assign('years_options', $years_options);
@@ -3391,7 +3567,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 			$days2_options[] = array(
 				'value' => $c,
 				'name' => $c,
-				'issel' => ((isset($_GET['jour2']) && $c == $_GET['jour2']) || (!isset($_GET['jour2']) && $c == $nowDay))
+				'issel' => ((isset($frm['jour2']) && $c == $frm['jour2']) || (!isset($frm['jour2']) && $c == $nowDay))
 			);
 		}
 		$tpl->assign('days2_options', $days2_options);
@@ -3402,7 +3578,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 				$months2_options[] = array(
 					'value' => $this_month_number,
 					'name' => StringMb::ucfirst($this_month),
-					'issel' => ((isset($_GET['mois2']) && $this_month_number == $_GET['mois2']) || (!isset($_GET['mois2']) && $this_month_number == $nowMonth))
+					'issel' => ((isset($frm['mois2']) && $this_month_number == $frm['mois2']) || (!isset($frm['mois2']) && $this_month_number == $nowMonth))
 				);
 			}
 		}
@@ -3413,7 +3589,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 			$years2_options[] = array(
 				'value' => $years1[$x],
 				'name' => $years1[$x],
-				'issel' => ((isset($_GET['an2']) && $years1[$x] == $_GET['an2']) || (!isset($_GET['an2']) && $years1[$x] == $nowYear))
+				'issel' => ((isset($frm['an2']) && $years1[$x] == $frm['an2']) || (!isset($frm['an2']) && $years1[$x] == $nowYear))
 			);
 		}
 		$order_date_field_array = array($GLOBALS['STR_ADMIN_PAIEMENT_DATE']=>'a_timestamp',$GLOBALS['STR_ADMIN_ORDER_CREATION_DATE']=>'o_timestamp',$GLOBALS['STR_ADMIN_COMMANDER_INVOICE_DATE']=>'f_datetime',$GLOBALS['STR_EXPEDITION_DATE']=>'e_datetime');
@@ -3421,7 +3597,7 @@ if (!function_exists('get_admin_date_filter_form')) {
 			$order_date_field_options[] = array(
 					'value' => $this_field,
 					'name' => $name,
-					'issel' => ((isset($_GET['order_date_field_filter']) && $this_field == $_GET['order_date_field_filter']))
+					'issel' => ((isset($frm['order_date_field_filter']) && $this_field == $frm['order_date_field_filter']))
 				);
 		}
 		$tpl->assign('order_date_field_options', $order_date_field_options);
@@ -3447,16 +3623,20 @@ if (!function_exists('check_admin_date_data')) {
 	function check_admin_date_data(&$form_data)
 	{
 		$output = '';
-		if (!checkdate(str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT), $_GET['jour1'], $_GET['an1'])) {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour1'] . '-' . str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['an1'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
-		} elseif (!checkdate(str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT), $_GET['jour2'], $_GET['an2'])) {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $_GET['jour2'] . '-' . str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['an2'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
-		} else {
-			$dateAdded1 = $_GET['an1'] . '-' . str_pad($_GET['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
-			$dateAdded2 = $_GET['an2'] . '-' . str_pad($_GET['mois2'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($_GET['jour2'], 2, 0, STR_PAD_LEFT) . " 23:59:59";
-			if ($dateAdded2 < $dateAdded1) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($dateAdded1) . '&nbsp;' . $GLOBALS['strTillDay'] . '  ' . get_formatted_date($dateAdded2) . ' => ' . $GLOBALS["STR_ADMIN_DATE1_DATE2_INCOHERENT"]))->fetch();
+		if (!empty($form_data['an1'])) {
+			if (!checkdate(str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT), $form_data['jour1'], $form_data['an1'])) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_data['jour1'] . '-' . str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT) . '-' . $form_data['an1'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
+			} elseif (!checkdate(str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT), $form_data['jour2'], $form_data['an2'])) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_data['jour2'] . '-' . str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT) . '-' . $form_data['an2'] . ' => '.$GLOBALS["STR_ERR_DATE_BAD"]))->fetch();
+			} else {
+				$dateAdded1 = $form_data['an1'] . '-' . str_pad($form_data['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($form_data['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
+				$dateAdded2 = $form_data['an2'] . '-' . str_pad($form_data['mois2'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($form_data['jour2'], 2, 0, STR_PAD_LEFT) . " 23:59:59";
+				if ($dateAdded2 < $dateAdded1) {
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['strStartingOn'] . ' ' . get_formatted_date($dateAdded1) . '&nbsp;' . $GLOBALS['strTillDay'] . '  ' . get_formatted_date($dateAdded2) . ' => ' . $GLOBALS["STR_ADMIN_DATE1_DATE2_INCOHERENT"]))->fetch();
+				}
 			}
+		} else {
+			$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_EMPTY_FIELD']))->fetch();
 		}
 		if(!empty($output)) {
 			return $output;
@@ -3475,7 +3655,7 @@ if (!function_exists('affiche_liste_produits')) {
 	 */
 	function affiche_liste_produits($frm)
 	{		
-		$categorie_options = get_categories_output(null, 'categories', vb($_GET['cat_search']));
+		$categorie_options = get_categories_output(null, 'categories', vb($_GET['cat_search']), 'option', '&nbsp;&nbsp;', null, null, true);
 		$supplier_options = get_supplier_output();
 		$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_produits.tpl');
 		if (empty($categorie_options)) {
@@ -3696,7 +3876,19 @@ function get_admin_products_search_sql($frm, $delete = false, $get_only_product_
 			$where .= " AND p.reference = '" . nohtml_real_escape_string($frm['reference_search']) . "'";
 		}
 		if (isset($frm['name_search']) && !empty($frm['name_search'])) {
-			$where .= " AND p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " LIKE '%" . nohtml_real_escape_string($frm['name_search']) . "%'";
+			if(!empty($GLOBALS['site_parameters']['quick_search_results_main_search_field'])) {
+				$name_field_array = $GLOBALS['site_parameters']['quick_search_results_main_search_field'];
+			} else {
+				$name_field_array = "nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])."";
+			}
+			if (!is_array($name_field_array)) {
+				$name_field_array = array($name_field_array);
+			}
+			$where_array = array();
+			foreach($name_field_array as $name_field) {
+				$where_array[] = $name_field . " LIKE '%" . nohtml_real_escape_string($frm['name_search']) . "%'";
+			}
+			$where .= " AND (" .implode(' OR ', $where_array).")";
 		}
 		if (!empty($frm['brand_search'])) {
 			$where .= " AND p.id_marque = '" . nohtml_real_escape_string($frm['brand_search']) . "'";
@@ -4104,7 +4296,7 @@ function get_tag_function_site_options_values_list($params = array()) {
  * @return
  */
 function get_tag_function_site_options_titles_list() {
-	return get_tag_function_site_options_values_list(array('mode'=>'name'));
+	return get_tag_function_site_options_values_list(array('mode' => 'name'));
 }
 
 /**
@@ -4177,7 +4369,7 @@ function fill_other_language_content($frm, $mode=null){
 		} elseif ($mode == "categories") {
 			$this_form_fields = array('nom_', 'description_');
 		} elseif ($mode == "rubriques") {
-			$this_form_fields = array('description_','nom_');
+			$this_form_fields = array('description_', 'nom_');
 		}
 		if (!empty($this_form_fields)) {
 			// Le paramètre pour remplir le contenu d'une langue à partir d'une autre 
@@ -4289,7 +4481,7 @@ function get_payment_status_options($selected_status_id = null)
  * @param mixed $approximative_amount_selected
  * @return
  */
-function get_vat_select_options($selected_vat = null, $approximative_amount_selected = false)
+function get_vat_select_options($selected_vat = null, $approximative_amount_selected = false, $option_vat_choice_null = false)
 {
 	$output = '';
 	$sql_paiement = 'SELECT id, tva, site_id
@@ -4311,11 +4503,27 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 		if($is_selected) {
 			$selected_vat_found = true;
 		}
-		$tpl_options[] = array(
-			'value' => $tab_paiement['tva'],
-			'name' => get_site_info($tab_paiement).$tab_paiement['tva'],
-			'issel' => $is_selected
-		);
+		if(!$option_vat_choice_null) {
+			$tpl_options[] = array(
+				'value' => $tab_paiement['tva'],
+				'name' => $tab_paiement['tva'] . ' ' . get_site_info($tab_paiement),
+				'issel' => $is_selected
+			);
+		} else {
+			if($is_selected && $tab_paiement['tva'] == 0) {
+				$tpl_options[] = array(
+					'value' => $tab_paiement['tva'],
+					'name' => '----',
+					'issel' => $is_selected
+				);
+			} else {
+				$tpl_options[] = array(
+					'value' => $tab_paiement['tva'],
+					'name' => $tab_paiement['tva'] . ' ' . get_site_info($tab_paiement),
+					'issel' => $is_selected
+				);
+			}
+		}
 	}
 	if(!empty($selected_vat) && empty($selected_vat_found)) {
 		// Valeur cherchée non trouvée (par exemple valeur en base de données qui n'est plus disponible dans les choix de TVA autorisés) : on la rajoute à la liste du select
@@ -4522,7 +4730,7 @@ function create_or_update_site($frm, $update_module = true, $mode, $available_la
 		}
 		// Traitement spécifique pour le remplissage des zones lors de la création du site 
 		// Création du tableau de correspondance entre les zones et les pays pour faire le lien entre les données qui ont été rentrée lors de l'exécution de create_new_site.sql et les pays qu'il faut maintenant modifier
-		$zone_to_coutry = array('france_mainland' => array('FRA'), 'europe'=> array('DEU','AUT','BEL','BGR','DNK','ESP','FIN','GRC','HUN','IRL','ITA','NLD','POL','PRT','CZE','ROU','GBR','SWE','CYP','EST','LVA','LTU','LUX','MLT','SVK','SVN'), 'france_and_overseas' => array('GUF','PYF','ATF','GLP','MTQ','MYT','NCL','REU','SPM','WLF'), 'world'=>array('AFG','ZAF','ALB','DZA','SAU','ARG','AUS','BRA','CAN','CHL','CHN','COL','KOR','CRI','HRV','EGY','ARE','ECU','USA','SLV','HKG','IND','IDN','ISR','JPN','JOR','LBN','MYS','MAR','MEX','NOK','NZL','PER','PAK','PHL','PRI','RUS','SGP','CHE','TWN','THA','TUR','UKR','VEN','SRB','WSM','AND','AGO','AIA','ATA','ATG','ARM','ABW','AZE','BHS','BHR','BGD','BLR','BLZ','BEN','BMU','BTN','BOL','BIH','BWA','BVT','IOT','VGB','BRN','BFA','BDI','KHM','CMR','CPV','CYM','CAF','TCD','CXR','CCK','COM','COG','COK','CUB','DJI','DMA','DOM','TLS','GNQ','ERI','ETH','FLK','FRO','FJI','GAB','GMB','GEO','GHA','GIB','GRL','GRD','GUM','GTM','GIN','GNB','HTI','HMD','HND','ISL','IRN','IRQ','CIV','JAM','KAZ','KEN','KIR','KOR','KWT','KGZ','LAO','LSO','LBR','LBY','LIE','MAC','MKD','MDG','MWI','MDV','MLI','MHL','MRT','MUS','FSM','MDA','MCO','MNG','MSR','MOZ','MMR','NAM','NRU','NPL','NIC','NER','NGA','NIU','NFK','MNP','OMN','PLW','PAN','PNG','PRY','PCN','QAT','RWA','SGS','KNA','LCA','VCT','WSM','SMR','STP','SEN','SYC','SLE','SOM','LKA','SHN','SDN','SUR','SJM','SWZ','SYR','TJK','TZA','TGO','TKL','TON','TTO','TUN','TKM','TCA','TUV','UMI','UGA','URY','UZB','VUT','VAT','VNM','VIR','ESH','YEM','COD','ZMB','ZWE','BRB','MNE'));
+		$zone_to_coutry = array('france_mainland' => array('FRA'), 'europe' => array('DEU', 'AUT', 'BEL', 'BGR', 'DNK', 'ESP', 'FIN', 'GRC', 'HUN', 'IRL', 'ITA', 'NLD', 'POL', 'PRT', 'CZE', 'ROU', 'GBR', 'SWE', 'CYP', 'EST', 'LVA', 'LTU', 'LUX', 'MLT', 'SVK', 'SVN'), 'france_and_overseas' => array('GUF', 'PYF', 'ATF', 'GLP', 'MTQ', 'MYT', 'NCL', 'REU', 'SPM', 'WLF'), 'world' => array('AFG', 'ZAF', 'ALB', 'DZA', 'SAU', 'ARG', 'AUS', 'BRA', 'CAN', 'CHL', 'CHN', 'COL', 'KOR', 'CRI', 'HRV', 'EGY', 'ARE', 'ECU', 'USA', 'SLV', 'HKG', 'IND', 'IDN', 'ISR', 'JPN', 'JOR', 'LBN', 'MYS', 'MAR', 'MEX', 'NOK', 'NZL', 'PER', 'PAK', 'PHL', 'PRI', 'RUS', 'SGP', 'CHE', 'TWN', 'THA', 'TUR', 'UKR', 'VEN', 'SRB', 'WSM', 'AND', 'AGO', 'AIA', 'ATA', 'ATG', 'ARM', 'ABW', 'AZE', 'BHS', 'BHR', 'BGD', 'BLR', 'BLZ', 'BEN', 'BMU', 'BTN', 'BOL', 'BIH', 'BWA', 'BVT', 'IOT', 'VGB', 'BRN', 'BFA', 'BDI', 'KHM', 'CMR', 'CPV', 'CYM', 'CAF', 'TCD', 'CXR', 'CCK', 'COM', 'COG', 'COK', 'CUB', 'DJI', 'DMA', 'DOM', 'TLS', 'GNQ', 'ERI', 'ETH', 'FLK', 'FRO', 'FJI', 'GAB', 'GMB', 'GEO', 'GHA', 'GIB', 'GRL', 'GRD', 'GUM', 'GTM', 'GIN', 'GNB', 'HTI', 'HMD', 'HND', 'ISL', 'IRN', 'IRQ', 'CIV', 'JAM', 'KAZ', 'KEN', 'KIR', 'KOR', 'KWT', 'KGZ', 'LAO', 'LSO', 'LBR', 'LBY', 'LIE', 'MAC', 'MKD', 'MDG', 'MWI', 'MDV', 'MLI', 'MHL', 'MRT', 'MUS', 'FSM', 'MDA', 'MCO', 'MNG', 'MSR', 'MOZ', 'MMR', 'NAM', 'NRU', 'NPL', 'NIC', 'NER', 'NGA', 'NIU', 'NFK', 'MNP', 'OMN', 'PLW', 'PAN', 'PNG', 'PRY', 'PCN', 'QAT', 'RWA', 'SGS', 'KNA', 'LCA', 'VCT', 'WSM', 'SMR', 'STP', 'SEN', 'SYC', 'SLE', 'SOM', 'LKA', 'SHN', 'SDN', 'SUR', 'SJM', 'SWZ', 'SYR', 'TJK', 'TZA', 'TGO', 'TKL', 'TON', 'TTO', 'TUN', 'TKM', 'TCA', 'TUV', 'UMI', 'UGA', 'URY', 'UZB', 'VUT', 'VAT', 'VNM', 'VIR', 'ESH', 'YEM', 'COD', 'ZMB', 'ZWE', 'BRB', 'MNE'));
 		$query = query('SELECT *
 			FROM peel_zones
 			WHERE technical_code!="" AND ' . get_filter_site_cond('zones', null, false, $site_id));
@@ -4623,8 +4831,8 @@ function affiche_liste_clients_par_produit($id, $array_output_mode=false)
 		} else {
 			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_liste_clients_par_produit.tpl');
 			$tpl->assign('nom', $produit->nom);
-			$tpl->assign('is_module_export_ventes_active', check_if_module_active('export', 'administrer/export_ventes.php'));
-			$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export_ventes.php?mode=affiche_liste_clients_par_produit&id=' . $id);
+			$tpl->assign('is_module_export_ventes_active', check_if_module_active('export'));
+			$tpl->assign('export_href', $GLOBALS['wwwroot_in_admin'] . '/modules/export/administrer/export.php?type=ventes_clients_par_produit&id=' . $id);
 			$tpl->assign('excel_src', $GLOBALS['administrer_url'] . '/images/excel.jpg');
 			$tpl->assign('clients', $clients_array);
 			$tpl->assign('STR_LAST_NAME', $GLOBALS['STR_LAST_NAME']);
@@ -4844,7 +5052,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 			$sql_where_array[] = 'pga.actif="' . nohtml_real_escape_string($frm['with_gold_ad']) . '"';
 		}
 	}
-	foreach(array('ads_count' => 'ads_count', 'date_last_paiement' => 'MAX(cdlt.a_timestamp)', 'date_derniere_connexion' => 'date', 'date_insert' => 'u.date_insert', 'date_statut_commande' => 'c2.o_timestamp', 'date_contact_prevu' => 'pacp.timestamp') as $this_get => $this_sql_field) {
+	foreach(array('ads_count' => 'ads_count', 'date_last_paiement' => 'cdlt.a_timestamp', 'date_derniere_connexion' => 'date', 'date_insert' => 'u.date_insert', 'date_statut_commande' => 'c.o_timestamp', 'date_contact_prevu' => 'pacp.timestamp') as $this_get => $this_sql_field) {
 		if (!empty($frm[$this_get])) {
 			if (substr($this_get, 0, 5) == 'date_') {				
 				if(vb($frm[$this_get . '_input1'])=='') {
@@ -4913,7 +5121,8 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 						FROM peel_commandes cdlt
 						INNER JOIN peel_statut_paiement spdlt ON spdlt.id=cdlt.id_statut_paiement AND ' . get_filter_site_cond('statut_paiement', 'spdlt') . ' AND spdlt.technical_code IN ("being_checked","completed")
 						WHERE ' . get_filter_site_cond('commandes', 'cdlt', true) . '
-						HAVING ' . $this_cond_temp_expression . ')';
+						AND ' . $this_cond_temp_expression . '
+						HAVING MAX(' . $this_cond_temp_expression . '))';
 			} elseif ($this_get == 'date_statut_commande') {
 				if ($frm['date_statut_commande'] == '5') {
 					// Pas de commande entre x et y (payée ou non)
@@ -5644,7 +5853,7 @@ function send_newsletter($id, $debut, $limit, $test = false, $id_utilisateur=nul
 		$custom_template_tags[$this_lang] = null;
 		if (!empty($news_infos['product_ids'])) {
 			if (function_exists('affiche_produits_newsletter')) {
-				$custom_template_tags[$this_lang]['PRODUCT_LIST'] = affiche_produits_newsletter($news_infos['product_ids'], null, 'newsletter', 20, 'column', true, 0, 3);
+				$custom_template_tags[$this_lang]['PRODUCT_LIST'] = affiche_produits_newsletter($news_infos['product_ids'], null, 'newsletter', '*', 'column', true, 0, 3);
 			} else {
 				$custom_template_tags[$this_lang]['PRODUCT_LIST'] = affiche_produits($news_infos['product_ids'], null, 'newsletter', 20, 'column', true, 0, 3);
 			}
@@ -5693,7 +5902,6 @@ function send_newsletter($id, $debut, $limit, $test = false, $id_utilisateur=nul
 			}
 			// Le SQL suivant va permettre de récupérer des données utilisateurs pouvant servir dans des TAGS
 			// => il faut mettre tous les champs de la table utilisateurs
-			$message[$this_lang] .= "\r\n<a href=\"[DESINSCRIPTION_NEWSLETTER]\">".$GLOBALS['STR_DESINSCRIPTION_NEWSLETTER'].'</a>';
 			if (check_if_module_active('crons')) {
 				// Envoi de la newsletter dans la langue définie par l'utilisateur lors de son inscription ou modification de ces paramètres
 				// Les emails seront envoyés a posteriori avec un cron
@@ -5768,509 +5976,1411 @@ function get_supplier_output()
 }
 
 /**
- * Gestion de l'import
+ * Récupère les informations d'initialisation du formulaire d'import ou d'export
  *
- * @param boolean $from_backoffice
+ * @param string $import_or_export
+ * @param array $params
  * @return
- */
-function handle_import($from_backoffice = false) {
-	// On isole le CSS pour pouvoir utiliser cette fonction éventuellement en front-office
-	// CSS pour le tableau de correspondance des imports
-	$output = '<style>
-#db_field_list table tr td {
-	height: 30px;
+*/
+function import_export_init($import_or_export, &$params) {
+	$output = '';
+	
+	$GLOBALS['database_fields_default_by_type_array'] = array();
+	
+	if(!isset($params['type'])) {
+		if(!empty($_POST['type'])) {
+			$params['type'] = $_POST['type'];
+		} elseif(!empty($_GET['type'])) {
+			$params['type'] = $_GET['type'];
+		} else {
+			$params['type'] = '';
+		}
+	}
+	
+	// Gestion des demandes AJAX
+	if(!empty($_POST['ajax']) && !empty($_POST['mode'])) {
+		if(function_exists('t2web_database_connect')) {
+			// En cas de gestion de connexion à une bdd différente pour les données sources par rapport aux données de configuration
+			// => on bascule vers la connexion aux données de configuration
+			t2web_database_connect();
+		}
+		$var_name = 'import_config';
+		if (!empty($_SESSION['client_database']['code_client'])) {
+			$var_name .= '_'.$_SESSION['client_database']['code_client'];
+		}
+		if($_POST['mode'] == 'set_rules') {
+			// on récupère le paramètre en base de données
+			$get_configuration_variable = get_configuration_variable($var_name, 1, $_SESSION['session_langue']);
+			$output_array = get_array_from_string($get_configuration_variable);
+			// On parcourt le tableau à la recherche de la liste enregistrée
+			$_POST['rule_name'] = StringMb::strtolower($_POST['rule_name']);
+			foreach ($output_array as $this_config_name=>$this_config_array) {
+				if ($this_config_name == $_POST['rule_name']) {
+					// La liste existe déjà, donc on supprime la ligne dans le tableau pour mettre les nouvelles données 
+					unset($output_array[$this_config_name]);
+				}
+			}
+			// On insère les données dans le tableau que l'on va passer à set_configuration_variable
+			$output_array[$_POST['rule_name']] = serialize(array('correspondance'=>$_POST['correspondance'], 'default_fields'=>$_POST['default_fields'], 'data_encoding'=>$_POST['data_encoding'], 'separator'=>$_POST['separator'], 'header'=>$_POST['header'], 'mode'=>$import_or_export));
+
+			set_configuration_variable(array('technical_code' => $var_name, 'string' => $output_array, 'type' => 'array', 'site_id' => 0, 'origin' => $import_or_export), true, true);
+			$output = 'ok';
+		} elseif($_POST['mode'] == 'get_rules') {
+			// le nom de la liste à charger est récupérée du menu déroulant listant les configurations sauvegardée
+			// D'abord on récupère toute les config
+			$get_configuration_variable = get_configuration_variable($var_name, 1, $_SESSION['session_langue']);
+			$output_array = get_array_from_string($get_configuration_variable);
+
+			foreach ($output_array as $this_config_name=>$this_serialized_config_array) {
+				// le résultat est un tableau, il faut boucler pour charger uniquement la liste qui nous interresse.
+				if ($this_config_name == $_POST['load_rule']) {
+					$output = unserialize($this_serialized_config_array);
+					break;
+		}
+			}
+		} elseif($_POST['mode'] == 'delete_select_rules') {
+			// Il faut parcourir le tableau des configurations sauvegardées, 
+			$get_configuration_variable = get_configuration_variable($var_name, 1, $_SESSION['session_langue']);
+			$output_array = get_array_from_string($get_configuration_variable);
+			 // retirer la configuration choisie. 
+			unset($output_array[$_POST['rule_to_delete']]);
+			// Ensuite il faut enregistrer le tableau dans la base
+			set_configuration_variable(array('technical_code' => $var_name, 'string' => $output_array, 'type' => 'array', 'site_id' => 0, 'origin' => $import_or_export), true, true);
+			
+			// et recomposer select HTML pour l'affichage.
+			$rules_array = get_import_export_saved_configuration($import_or_export);
+			$output = '
+			<select name="load_rule" class="form-control" id="load_rule">
+				<option value=""> -- </option>';
+			foreach ($rules_array as $this_rule) {
+					$output .= '
+					<option value="'.$this_rule.'">'.$this_rule.'</option>';
+			}
+			$output .= '
+			</select>';
+			$json_encoding_not_needed = true;
+		} elseif($_POST['mode'] == 'get_select_rules') {
+			$rules_array = get_import_export_saved_configuration($import_or_export);
+			$output = '
+			<select name="load_rule" class="form-control" id="load_rule">
+				<option value=""> -- </option>';
+			foreach ($rules_array as $this_rule) {
+					$output .= '
+					<option value="'.$this_rule.'">'.$this_rule.'</option>';
+			}
+			$output .= '
+			</select>';
+			$json_encoding_not_needed = true;
+		}
+		output_general_http_header('utf-8');
+		if (!empty($json_encoding_not_needed)) {
+			die($output);
+		} else {
+			die(json_encode($output));
+		}
+	}
+	
+	if($import_or_export == 'import') {
+		// Récupération des valeurs par défaut des colonnes (input sur chaque ligne de correspondance), qui permet d'éviter d'avoir besoin d'associer avec une colonne du fichier importé
+		foreach($_POST as $this_key => $this_value) {
+			if(strpos($this_key, 'default_') === 0) {
+				$params['defaults'][$this_key] = $this_value;
+			}
+		}
+	} else {
+		foreach(array('page_bottom', 'report_header', 'report_footer', 'data_details', 'data_subtotals', 'data_total') as $this_key) {
+			if(isset($_POST[$this_key])) {
+				$params[$this_key] = $_POST[$this_key];
+			}
+		}
+	}
+	
+	// Création si nécessaire de la table peel_import_field (nécessaire sur architectures particulières, pas dans le cas général)
+	if($import_or_export != 'report') {
+		// $import_or_export == 'report' est exclu, et correspond aux tableaux croisés dynamiques
+		// Les autres cas sont import ou global_report (pour rapports HTML) ou export_xxxx
+
+		// CSS spécifique (en dehors de admin.css volontairement pour compatibilité avec cas particuliers appelant l'import / export en front-office)
+		$GLOBALS['header_css_output_array'][] = '
+.contains_draggable tr td {
+	height: 200px;
 	width: 200px;
 	padding: 5px;
 	border: 1px solid black;
 }
-#db_field_list table tr td span[draggable=true] {
+.fields_table tr td {
+	height: 32px;
+	padding: 2px;
+	border: 1px solid black;
+}
+.fields_table .form-control {
+	height: 26px;
+}
+.field_draggable {
 	display:block;
-	background-color: #d3f3db;
-	height: 100%;
-	width: 100%;
-}</style>';
-	// Drag and drop CSV import fields
-	$GLOBALS['js_ready_content_array'][] = '
-function drag_and_drop_fields(draggable, drop) {
-	var drag_from_type;
-	var drag_from_field;
-	$(draggable).on("dragstart", function (event) {
-		  var dt = event.originalEvent.dataTransfer;
-		  dt.setData("Text", $(this).attr("id"));
-		  drag_from_type = $(this).closest(".fields_div").attr("id");
-		  drag_from_field = $(this).closest("tr").attr("class");
+	color: #ffffff;
+	background-color: #009900;
+	height: 20px;
+	margin: 3px;
+	padding-left: 3px;
+	border: 1px outset #999999;
+}';
+		// JQuery pour gestion du Drag and drop
+		$GLOBALS['js_content_array'][] = '
+window.drag_and_drop_fields = function(contains_draggable, draggable, droppable) {
+	$(draggable).draggable({
+		stack: "span",
+		start: function( event ) { $(this).css("backgroundColor", "#dd7700"); }
 		});
-    $(drop).on("dragenter dragover drop", function (event) {	
-	   event.preventDefault();
-	   if (event.type === "drop") {
-		  var drag_from_new_content = $(this).html();
-		  var data = event.originalEvent.dataTransfer.getData("Text",$(this).attr("id"));
-		  if(data && $("#"+data).length > 0)
-		  {
-			de=$("#"+data).detach();
-			$(this).empty();
-			de.appendTo($(this));	
-			$("#"+drag_from_type+" ."+drag_from_field+" .content_draggable").html(drag_from_new_content);
-		  }
-	   }
+	$(droppable).droppable({
+		activate: function( event, ui ) {},
+		dragenter: function( event, ui ) { event.preventDefault(); },
+		dragover: function( event, ui ) { event.preventDefault(); },
+		drop: function( event, ui ) {	
+			event.preventDefault();
+			drop_pos = ui.offset.top - $(this).offset().top;
+			var id_dropped = ui.draggable;
+			if(ui.draggable && ui.draggable.length > 0) {
+				' . ($import_or_export == 'import'?'
+				$(this).children(draggable).detach().appendTo($(contains_draggable));
+				ui.draggable.detach().appendTo($(this));
+				':'   
+				last_pos = 0;
+				$(this).children(draggable).each(function() {
+					if(drop_pos && ui.draggable.attr("id")!=$(this).attr("id")) {
+						if(last_pos==0) { parent_pos = $(this).position().top; }
+						var pos = $(this).position().top;
+						if(drop_pos<=0 || (drop_pos<pos-parent_pos && drop_pos>last_pos-parent_pos)) { ui.draggable.detach().insertBefore($(this)); drop_pos=0; return false; }
+						last_pos = pos;
+					}
+				});
+				if(drop_pos) {
+					ui.draggable.detach().appendTo($(this));
+				}
+				') . '
+				ui.draggable.css("top", 0).css("left", 0); 
+				ui.draggable.css("backgroundColor", "#009900");
+			}
+		}
    });
 }
 
-drag_and_drop_fields(".field_draggable", "#db_field_list table td.content_draggable");
+window.move_draggable_fields = function(origin, destination, mode="basic") {
+	if(mode=="basic") { 
+		$(origin+" .field_draggable").detach().appendTo($(destination)); 
+	} else {
+		// Association si nom de champ correspond
+		$(origin+" .field_draggable").each(function( index, element ) {
+			cell = $(mode+"_"+$(this).attr("id").replace("filecol_",""));
+			if(cell.length) {
+				$(this).detach().appendTo(cell);
+			}
+		});
+	}
+}
 ';
+		if($import_or_export == 'import') {
+			// Affiche la div de correspondance des champs en fonction du type d\'import sélectionné
+			// NB : correspondance_type est un champ hidden utilisé pour gérer quand on revient en arrière dans le formulaire, pour se souvenir du type utilisé pour une correspondance donnée sans que le changement à l'instant t du type ne nous gêne
+			$GLOBALS['js_content_array'][] = '
+window.change_import_type = function() {
+	import_type = $("#import_export_type").val();
+	$(".fields_div").hide();
+	$(".container_drop_draggable").empty();
+	$(".field_draggable").remove();
+	file=$("input[name=import_file]").val();
+	if(file) { 
+		if(file.substr(0,1)!="/") {
+			file="' . $GLOBALS['repertoire_upload'] . '/' . '"+file;
+		}
+		$.get(file, function(data) {
+			if(data.length) {
+				var lines = data.split("\n");
+				var separator = $("#separator").val();
+				if (separator == "") {
+					window.cols_array = lines[0].split(";");
+				} else if (separator == "\\\t") {
+					window.cols_array = lines[0].split("\t");
+				} else {
+					window.cols_array = lines[0].split(separator);
+				}
+				
+				if (import_type.length) {
+					$("#fields_rules").show();
+					$("#div_correspondance").show();
+					$("#div_correspondance_explain").hide();
+					// gestion d\'un import concerne plusieurs tables
+					var type = import_type.split("|");
+					$.each(type, function( key, value ) {
+						// Affiche div correspondant à la table sélectionnée
+						div_id = "fields_"+value;
+						$("#"+div_id).show();
+						// Récupère la première ligne du fichier CSV
+						// Crée des span pour chaque colonne du CSV téléchargé 
+						$.each(cols_array, function(key, field) {
+							field = field.trim();
+							cols_array[key]=field;
+							$(".contains_draggable").append("<span class=\'field_draggable\' id=\'filecol_"+field+"\' draggable=\'true\'>"+field+"<br /></span>");
+						});
+						drag_and_drop_fields(".contains_draggable", ".field_draggable", "#"+div_id+" .container_drop_draggable, .contains_draggable");
+						if($("#correspondance_type").val()==value) {
+							corresp=$("#correspondance").val();
+							if(corresp) {
+								load_fields_correspondance(corresp);
+							}
+						}
+					});
+				} else {
+					$("#div_correspondance").hide();
+					$("#div_correspondance_explain").show();
+				}	
+			}
+		});
+	}
+}';		
+			$GLOBALS['js_fineuploader_complete'] = '
+if($("input[name=import_file]").val()) {
+	$("#import_export_type").prop("disabled", false);
+	change_import_type();
+} else {
+	$("#import_export_type").val("");
+	$("#import_export_type").prop("disabled", true);
+}
+';
+		} else {
+			// EXPORT
+			// Affiche la div de sélection des champs en fonction du type d\'export sélectionné
+			// on ne réinitialise pas les associations avec $(".contains_draggable .field_draggable").detach().appendTo($(".container_drop_draggable"));	
 	
-	$products_specific_fields_array = array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock', 'Categorie', 'categorie_id');
-	$action = vb($_POST['action']);
-	$type = vb($_POST['type']);
+			$GLOBALS['js_content_array'][] = '
+window.display_new_select = function(id, this_type, mode) {
+	id++;
+	$("#new_"+mode+"_"+this_type+"_"+id).show();
+}
 
-	// Récupère la liste des tables à importer
-	// Configuration des droits pour pouvoir procéder à l'import
-	// On a une liste générique par défaut dans PEEL, et on complète cette liste via un hook
-	$types_array = array();
-	if($from_backoffice && a_priv("admin_products,admin_webmastering")) {
-		$types_array['peel_produits'] = 'Produits';
-	}
-	if($from_backoffice && a_priv("admin_users,admin_webmastering")) {
-		$types_array['peel_utilisateurs'] = 'Utilisateurs';
-	}
-	$hook_result = call_module_hook('import_infos_template_data', array(), 'array');
-	$types_array = array_merge_recursive_distinct($types_array, $hook_result['type_list']);
 
-	// Récupère la liste des champs de toutes les tables succeptibles d'être importées
-	$table_field_names_by_type = array();
-	foreach($types_array as $type_key => $type_string)
-	{
-		$table_field_names_by_type[$type_key] = get_table_field_names($type_key);
+window.change_export_type = function() {
+	export_type = $("#import_export_type").val();
+	if(export_type == "peel_produits") { 
+		$("#form_produits").show(); 
+	} else { 
+		$("#form_produits").hide(); 
 	}
-
-	// Sélection des attributs, actifs ou pas
-	$q_nom_attrib = query("SELECT id, nom_" . $_SESSION['session_langue'] . "
-		FROM peel_nom_attributs
-		WHERE " . get_filter_site_cond('nom_attributs') . "
-		ORDER BY nom_" . $_SESSION['session_langue'] . "");
-	$attributs_array = array();
-	while ($attrib = fetch_assoc($q_nom_attrib)) {
-		$attributs_array[] = $attrib;
+	if(export_type == "livraisons" || export_type == "ventes" || export_type == "one_line_per_product" || export_type == "one_line_per_order" || export_type == "ventes_chronopost" || export_type == "ventes_cegid") {
+		$("#date_filter_form").show(); 
+	} else { 
+		$("#date_filter_form").hide(); 
 	}
-	$columns_skipped = array();
+	$(".fields_div").hide();
+	$("#group_by_"+export_type).show();
+	$("#order_by_"+export_type).show();
+	$("#footer_"+export_type).show();
+	if (export_type.length) {
+		$("#div_correspondance").show();
+		$("#fields_rules").show();
+		$("#div_correspondance_explain").hide();
+		var type = export_type.split("|");
+		$.each(type, function( key, value ) {
+			// Affiche div correspondant à la table sélectionnée
+			div_id = "fields_"+value;
+			$("#"+div_id).show();
+			drag_and_drop_fields("#"+div_id+" .contains_draggable", ".field_draggable", "#"+div_id+" .container_drop_draggable, #"+div_id+" .contains_draggable");
+		});
+	} else {
+		$("#div_correspondance").hide();
+		$("#div_correspondance_explain").show();
+	}
+}';		
+	}
+	$GLOBALS['js_content_array'][] = '
+window.cols_array = [];
+window.load_fields_correspondance = function(data_array) {
+	if(data_array["correspondance"]) {
+		var type = $("#import_export_type").val().split("|");
+		$.each(type, function(key, value) {
+			div_id = "fields_"+value;
+			$("#"+div_id+" .container_drop_draggable .field_draggable").detach().appendTo($("#"+div_id+" .contains_draggable"));
+			$.each(data_array["correspondance"].split("&"), function(this_key,this_col_corresp) {
+				temp=this_col_corresp.split("=");
+				field=temp[0];
+				filecol=temp[1];
+				' . ($import_or_export == 'import'?'
+				$(".contains_draggable #filecol_"+filecol+".field_draggable").detach().appendTo($("#"+div_id+" #fields_"+value+"_"+field+".container_drop_draggable"));
+					':'
+				$("#"+div_id+" .contains_draggable #filecol_"+field+".field_draggable").detach().appendTo($("#"+div_id+" .container_drop_draggable"));
+					') . '
+			});	
 
-	switch ($action) {
-		case "import":
-			if (a_priv('demo')) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
-				break;
+			' . ($import_or_export == 'import'?'
+			$.each(data_array["default_fields"].split("&"), function(this_key,this_col_corresp) {
+				temp=this_col_corresp.split("=");
+				field=temp[0];
+				filevalue=temp[1];
+				$("#"+field).val(filevalue);
+			});':'
+			$("#data_encoding").val(data_array["data_encoding"]);
+			$("#separator").val(data_array["separator"]);
+			if (data_array["header"] == "false") {
+				$("#header").prop("checked", false);
+			} else {
+				$("#header").prop("checked", true);				
 			}
-			if(!array_key_exists($type, $types_array)) {
-				// L'utilisateur n'a pas le droit d'importer dans la table demandée
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
-				break;
+			') .'
+				
+		});
+	}
+}
+window.set_correspondance = function() {
+	var correspondance_array = [];
+	var default_fields_array = [];
+' . ($import_or_export == 'import'?'
+	$("#fields_"+$("#import_export_type").val()+" .container_drop_draggable").find(".field_draggable").each(function( index, element ) {
+		var db_col;
+		db_col = $(this).parent(".container_drop_draggable").attr("id").replace("fields_"+$("#import_export_type").val()+"_","");
+		correspondance_array.push(db_col+"="+$(this).attr("id").replace("filecol_",""));
+	});
+		
+	var type = $("#import_export_type").val();
+	if (type!="") {
+		$("#fields_"+type+" input[type=text]").each(function( index ) {
+			var input = $(this);
+			if(input.val() !="") {
+				default_fields_array.push(input.attr(\'name\')+"="+input.val());
 			}
-			$output .= $GLOBALS['tplEngine']->createTemplate('admin_import_produits_table.tpl')->fetch();
-			if (isset($_POST['on_update'][$type])) {
-				// TODO : mise à jour de "peel_import_field" pour que les champs des autres tables soient sauvegardés
-				//      : l'idée serait par exemple d'enregistrer les champs en y indiquant le nom de la table (ex : peel_produits|categorie_id)
-				// Mise à jour de la table de préférence des champs
-				query("UPDATE peel_import_field SET etat='0'");
-				foreach($_POST['on_update'][$type] as $this_id => $this_value) {
-					$output .= '<input type="hidden" name="on_update[' . $type . '][' . $this_id . ']" value="' . StringMb::str_form_value($this_value) . '" />';
-					query("UPDATE peel_import_field
-						SET etat='1'
-						WHERE champs='" . nohtml_real_escape_string($this_value) . "' AND " . get_filter_site_cond('import_field', null, true) . "");
-					if (!affected_rows()) {
-						// Comme etat valait 0 avant, c'est que la ligne n'existait pas, on va donc la créer
-						query("INSERT INTO peel_import_field
-							SET etat='1', champs='" . nohtml_real_escape_string($this_value) . "', site_id='" . nohtml_real_escape_string(get_site_id_sql_set_value($GLOBALS['site_id']))."'");
+		});
+		$("#default_fields").val(default_fields_array.join("&"));
+	}
+':'   
+	$("#fields_"+$("#import_export_type").val()+" .container_drop_draggable").find(".field_draggable").each(function( index, element ) {
+		correspondance_array.push($(this).attr("id").replace("filecol_",""));
+	});
+') . '
+	$("#correspondance").val(correspondance_array.join("&"));
+}
+window.reset_fields = function() {
+	$("#fields_"+$("#import_export_type").val()+" .container_drop_draggable").children(".field_draggable").detach().appendTo($(".contains_draggable"));
+	$("#fields_"+$("#import_export_type").val()+" input[type=text]").each(function( index ) {
+		$(this).val("");
+	});
+}
+
+$("#rules_reset").on("click", function() {
+	reset_fields();
+});
+$("#import_export_form").on("submit", function(e){ set_correspondance(); });
+
+
+$(\'#rules_delete\').on(\'click\', function() {
+	bootbox.confirm("'.$GLOBALS['STR_DELETE_CART_TITLE'].' " + $("#load_rule").val() + "?", function(result) {if(result) {
+		$.ajax({
+			url: \'' . get_current_url() . '\',
+			dataType : \'text\',
+			type : \'POST\',
+			data : {
+				mode: \'delete_select_rules\',
+				rule_to_delete: $(\'#load_rule\').val(),
+				ajax: true
+			},
+			success: function( data ) {
+				$("#load_rule").remove();
+				$("#load_rule_container").append(data);
+				reset_fields();
+				bootbox.alert({message: \'' . $GLOBALS['STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE'] . '\',size: \'small\'});
+			}
+		});
+	}});
+});
+
+$(\'#rules_get\').on(\'click\', function() {
+	reset_fields();
+  $.ajax({
+		url: \'' . get_current_url() . '\',
+		dataType : \'text\',
+		type : \'POST\',
+		data : {
+			mode: \'get_rules\',
+			load_rule: $(\'#load_rule\').val(),
+			ajax: true
+		},
+		success: function( data ) {
+			data_array = JSON.parse(data);
+			load_fields_correspondance(data_array);
+		}
+	});
+});
+window.set_rules = function() {
+	if ($("#rule_name").val() !="") {
+		set_correspondance();
+		$.ajax({
+			url: \'' . get_current_url() . '\',
+			dataType : \'json\',
+			type : \'POST\',
+			data : {
+				mode: \'set_rules\',
+				rule_name: $("#rule_name").val(),
+				correspondance: $("#correspondance").val(),
+				default_fields: $("#default_fields").val(),
+				header: $("#header").is(":checked"),
+				separator: $("#separator").val(),
+				data_encoding: $("#data_encoding").val(),
+				ajax: true
+			},
+			success: function( data ) {
+			}
+		});
+		bootbox.alert({message: \'' . $GLOBALS['STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE'] . '\',size: \'small\'});
+		$("#rule_name").val("");
+	}
+}
+$(\'#rules_set\').on(\'click\', function() {
+	var rules_already_exist = "";
+	var existig_rules = ["'.implode('","',get_import_export_saved_configuration(false)).'"]
+	existig_rules.forEach(function(item, index, array) {
+	  if (item == $("#rule_name").val().toLowerCase()) {
+		  rules_already_exist = 1;
+	  }
+	});
+	if (rules_already_exist == "1") {
+		// le nom de la sauvegarde existe déjà, donc on demande confirmation avant de réécrire la règle
+		bootbox.confirm("'.$GLOBALS['STR_OVERWRITE_SAVE'].'" + $("#rule_name").val() + "?", function(result) {if(result) {
+			set_rules();
+		}});
+	} else {
+		// pas de correspondance trouvée, on sauvegarde la nouvelle règle
+		set_rules();
+		// il faut rafraichir le select des configurations avec la nouvelle qui vient d\'être créée
+		$.ajax({
+			url: \'' . get_current_url() . '\',
+			dataType : \'text\',
+			type : \'POST\',
+			data : {
+				mode: \'get_select_rules\',
+				ajax: true
+			},
+			success: function( data ) {
+				$("#load_rule").remove();
+				$("#load_rule_container").append(data);
+			}
+		});
+		
+	}
+});
+
+';
+	}
+
+	// On a maintenant une liste générique par défaut dans PEEL, et on complète cette liste via un hook
+	$params['import_or_export'] = $import_or_export;
+	$hook_result = call_module_hook('import_export_init', $params, 'array');
+	if(empty($hook_result['cancel_default_types'])) {
+		// Liste des tables à importer ou exporter
+		$GLOBALS['database_user_rights_by_type_array']['peel_utilisateurs'] = 'admin_users,admin_webmastering';
+		$GLOBALS['database_user_rights_by_type_array']['peel_produits'] = 'admin_products,admin_sales,admin_webmastering';
+
+		$GLOBALS['database_import_export_type_names_array'] = array('peel_utilisateurs' => 'Utilisateurs', 'peel_produits' => 'Produits');
+
+		$GLOBALS['database_field_titles_by_table_array']['peel_utilisateurs'] = array('email' => 'Email', 'nom_famille' => 'Nom', 'prenom' => 'Prénom', 'societe' => 'Société', 'adresse' => 'Adresse', 'code_postal' => 'Code postal', 'ville' => 'Ville', 'telephone' => 'Téléphone');
+
+		// La colonne stock dans peel_produits ne sert pas, donc l'exporter induit en confusion
+		$GLOBALS['database_field_excluded_by_type_array']['peel_produits'] = array('stock');
+
+		// Configuration de l'ajout de colonnes
+		if($import_or_export == 'import') {
+			$GLOBALS['database_field_additional_by_type_array']['peel_produits'] = array('Sizes' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], 'Colors' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Category' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock' => 'Stock', 'Categorie' => 'Categorie', 'categorie_id' => 'categorie_id');
+		} else {
+			$GLOBALS['database_field_additional_by_type_array']['peel_produits'] = array('Listed_price_including_vat' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT'], 'Listed_price_excluding_vat' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT'], 'Sizes' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], 'Colors' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Brand' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_BRAND'], 'Associated_products' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS'], 'Category' => $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], 'Stock' => 'Stock', 'Categorie' => 'Categorie', 'categorie_id' => 'categorie_id');
+		}
+		
+		if($import_or_export == 'export') {
+			// Définition de types spécifiques
+			$GLOBALS['database_user_rights_by_type_array']['livraisons'] = 'admin_sales,admin_webmastering';
+			$GLOBALS['database_user_rights_by_type_array']['ventes'] = 'admin_sales,admin_webmastering';
+			$GLOBALS['database_import_export_type_names_array']['livraisons'] = 'Livraisons';
+			$GLOBALS['database_import_export_type_names_array']['ventes'] = 'Ventes';
+
+			$GLOBALS['database_footer_by_type_array']['ventes'] = true;
+
+			$GLOBALS['database_mode_by_type_array']['livraisons'] = 'virtual';
+			$GLOBALS['database_field_titles_by_type_array']['livraisons'] = array('nom_ship' => 'Nom', 'prenom_ship' => 'Prénom', 'societe_ship' => 'Société', 'adresse_ship' => 'Adresse', 'zip_ship' => 'Code postal', 'ville_ship' => 'Ville', 'commentaires' => 'Etages', 'pays_ship' => 'Pays', 'poids_calc' => 'Poids', 'article_calc' => 'Article', 'quantite' => 'Quantité', 'transport' => 'Transport', 'id' => 'Commande', 'o_timestamp' => 'Date');
+
+			$GLOBALS['database_import_export_type_names_array']['one_line_per_product'] = 'Ventes avec une ligne par produit';
+			$GLOBALS['database_mode_by_type_array']['one_line_per_product'] = 'virtual';
+			$GLOBALS['database_user_rights_by_type_array']['one_line_per_product'] = 'admin_products,admin_sales,admin_webmastering';
+			$GLOBALS['database_field_titles_by_type_array']['one_line_per_product'] = array('product_name' => 'Produit', 'quantity_by_product' => 'Quantite'); // Mode simplifié : une ligne par produit commandé
+
+			$GLOBALS['database_import_export_type_names_array']['one_line_per_order'] = 'Ventes avec une ligne par commande';
+			$GLOBALS['database_mode_by_type_array']['one_line_per_order'] = 'virtual';
+			$GLOBALS['database_user_rights_by_type_array']['one_line_per_order'] = 'admin_products,admin_sales,admin_webmastering';
+			$GLOBALS['database_field_titles_by_type_array']['one_line_per_order'] = array('id' => 'Numéro commande', 'numero' => 'Numéro de facture', 'o_timestamp' => 'Date de vente', 'nom_bill' => 'Nom de l\'acheteur', 'societe_bill' => 'Société', 'adresse_bill' => 'Adresse', 'ville_bill' => 'Ville', 'zip_bill' => 'Code postal', 'pays_bill' => 'Pays', 'montant_ht' => 'Total HT', 'tva_percent' => 'Taux TVA', 'montant_avec_avoir' => 'Total TTC', 'avoir' => 'Avoir client', 'montant' => 'Net à payer', 'cout_transport_ht' => 'Frais port HT', 'tva_cout_transport' => 'TVA Frais de port', 'cout_transport' => 'Frais port TTC', 'tarif_paiement_ht' => 'Tarif paiement HT', 'tva_tarif_paiement' => 'TVA Tarif paiement', 'tarif_paiement' => 'Tarif paiement', 'paiement' => 'Mode de paiement', 'total_produit_ht' => 'Total HT des produits', 'tva_total_produit' => 'TVA des produits', 'total_produit' => 'Total des produits');
+
+			$GLOBALS['database_mode_by_type_array']['ventes'] = 'virtual';
+			$GLOBALS['database_field_titles_by_type_array']['ventes'] = array('id' => 'Numéro commande', 'numero' => 'Numéro de facture', 'o_timestamp' => 'Date de vente', 'nom_bill' => 'Nom de l\'acheteur', 'societe_bill' => 'Société', 'adresse_bill' => 'Adresse', 'ville_bill' => 'Ville', 'zip_bill' => 'Code postal', 'pays_bill' => 'Pays', 'nom_produit' => 'Article', 'quantite' => 'Quantité', 'prix_ht' => 'Prix unitaire HT', 'montant_ht' => 'Total HT', 'tva_percent' => 'Taux TVA', 'total_tva' => 'TVA', 'montant_avec_avoir' => 'Total TTC', 'cout_transport_ht' => 'Frais port HT', 'tva_cout_transport' => 'TVA Frais de port', 'cout_transport' => 'Frais port TTC', 'tarif_paiement' => 'Tarif paiement HT', 'tva_tarif_paiement' => 'TVA Tarif paiement', 'tarif_paiement_ht' => 'Tarif paiement', 'paiement' => 'Mode de paiement');
+
+			$GLOBALS['database_import_export_type_names_array']['ventes_chronopost'] = 'Ventes au format Chronopost';
+			$GLOBALS['database_mode_by_type_array']['ventes_chronopost'] = 'virtual';
+			$GLOBALS['database_display_forced_header_in_export_by_type_array']['ventes_chronopost'] = 0;
+			$GLOBALS['database_display_forced_separator_in_export_by_type_array']['ventes_chronopost'] = ';';
+			$GLOBALS['database_user_rights_by_type_array']['ventes_chronopost'] = 'admin_products,admin_sales,admin_webmastering';
+			$GLOBALS['database_field_titles_by_type_array']['ventes_chronopost'] = array('unused1', 'societe', 'nom', 'prenom', 'adresse', 'unused2', 'unused3', 'unused4', 'zip', 'ville', 'pays', 'telephone', 'email', 'id', 'unused5', 'unused6', 'export_default_product', 'contract_number', 'sub_account_contract_number', 'unused7', 'unused8', 'M', 'unused9', 'unused10', 'unused11', 'total_poids', 'unused12', 'unused13', 'unused14', 'unused15', 'unused16', 'delivery_date', 'unused17', 'unused18', 'unused19', 'unused20', 'unused21', 'unused22', 'unused23', 'unused24');
+
+			if(!empty($GLOBALS['site_parameters']['cegid_order_export'])) {
+				$GLOBALS['database_import_export_type_names_array']['ventes_cegid'] = 'Ventes au format Cegid';
+				$GLOBALS['database_mode_by_type_array']['ventes_cegid'] = 'virtual';
+				$GLOBALS['database_display_forced_separator_in_export_by_type_array']['ventes_cegid'] = ';';
+				$GLOBALS['database_user_rights_by_type_array']['ventes_cegid'] = 'admin_products,admin_sales,admin_webmastering';
+				$GLOBALS['database_field_titles_by_type_array']['ventes_cegid'] = array('journal' => 'Journal', 'date' => 'Date', 'general' => 'Général', 'auxiliaire' => 'Auxiliaire', 'reference' => 'Référence', 'libelle' => 'Libellé', 'credit' => 'Crédit', 'debit' => 'Débit');
+			}
+			$GLOBALS['database_import_export_type_names_array']['ventes_clients_par_produit'] = 'Clients avec produits achetés';
+			$GLOBALS['database_mode_by_type_array']['ventes_clients_par_produit'] = 'virtual';
+			$GLOBALS['database_user_rights_by_type_array']['ventes_clients_par_produit'] = 'admin_products,admin_sales,admin_webmastering';
+			$GLOBALS['database_field_titles_by_type_array']['ventes_clients_par_produit'] = array('nom_famille' => $GLOBALS['STR_LAST_NAME'], 'prenom' => $GLOBALS['STR_FIRST_NAME'], 'adresse' => $GLOBALS['STR_ADDRESS'], 'ville' => $GLOBALS['STR_TOWN'], 'email' => $GLOBALS['STR_EMAIL'], 'telephone' => $GLOBALS['STR_TELEPHONE']);
+
+			$GLOBALS['database_import_export_type_names_array']['formatted_produits'] = 'Produits avec informations formattées';
+			$GLOBALS['database_mode_by_type_array']['formatted_produits'] = 'virtual';
+			$GLOBALS['database_user_rights_by_type_array']['formatted_produits'] = 'admin_products,admin_sales,admin_webmastering';
+			$GLOBALS['database_field_titles_by_type_array']['formatted_produits'] = array('nom' => $GLOBALS["STR_PRODUCT_NAME"], 'descriptif' => $GLOBALS["STR_ADMIN_SHORT_DESCRIPTION"], 'formatted_prix' => $GLOBALS["STR_PDF_PRIX_HT"], 'image1' => $GLOBALS["STR_IMAGE"], 'formatted_colors' => $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_COLORS"], 'formatted_sizes' => $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_SIZES"]);
+		}
+	}
+
+	if($import_or_export == 'export') {
+		// Gestion historiquement spécifique de la table produits
+		$hook_result = call_module_hook('export_products_get_configuration_array', array(), 'array');
+		$GLOBALS['database_field_additional_by_type_array']['peel_produits'] = array_merge_recursive_distinct(vb($GLOBALS['database_field_additional_by_type_array']['peel_produits'], array()), vb($hook_result['product_field_names'], array()));
+	}
+	
+	// Hook générique
+	$hook_result = call_module_hook('import_export_get_configuration_array', array('import_or_export' => $import_or_export), 'array');
+	$GLOBALS['database_field_additional_by_type_array'] = array_merge_recursive_distinct(vb($GLOBALS['database_field_additional_by_type_array'], array()), vb($hook_result['field_names_by_table_array'], array()));
+
+	// Configuration des droits pour pouvoir procéder à l'import ou à l'export
+	foreach(array_keys($GLOBALS['database_import_export_type_names_array']) as $this_type) {
+		if(!empty($GLOBALS['database_user_rights_by_type_array'][$this_type]) && !a_priv($GLOBALS['database_user_rights_by_type_array'][$this_type])) {
+			// On ne garde que les types d'export auxquels on a le droit d'accès pour toutes les tables concernées par le $type
+			unset($GLOBALS['database_import_export_type_names_array'][$this_type]);
+			continue;
+		}
+		// On complète $GLOBALS['database_field_titles_by_type_array']
+		foreach (vb($GLOBALS['database_field_titles_by_type_array'][$this_type], array()) as $this_field => $this_title) {
+			// On corrige le format si on a mis des titres sans nom de champ : on passe au format nom => titre
+			if(is_numeric($this_field)) {
+				unset($GLOBALS['database_field_titles_by_type_array'][$this_type][$this_field]);
+				$GLOBALS['database_field_titles_by_type_array'][$this_type][$this_title] = $this_title;
+			}
+		}
+		if(empty($GLOBALS['database_mode_by_type_array'][$this_type]) || $GLOBALS['database_mode_by_type_array'][$this_type] != 'virtual') {
+			// Type correspondant à 1 ou plusieurs tables réelles
+			if(!empty($GLOBALS['database_fields_by_type_array'][$this_type])) {
+				if(!is_array($GLOBALS['database_fields_by_type_array'][$this_type])) {
+					$GLOBALS['database_fields_by_type_array'][$this_type] = get_array_from_string($GLOBALS['database_fields_by_type_array'][$this_type]);
+				}
+			} else {
+				// Si on n'a pas défini explicitement la liste des champs correspondant à un type donné : on génère la liste à partir de la structure de la table (ou des tables) correspondant au type
+				$GLOBALS['database_fields_by_type_array'][$this_type] = array();
+				$GLOBALS['database_field_infos_by_type_array'][$this_type] = array();
+				foreach(explode('|', $this_type) as $this_table) {
+					if(!empty($GLOBALS['database_import_export_table_by_type_array']) && !empty($GLOBALS['database_import_export_table_by_type_array'][$this_table])) {
+						$this_table = $GLOBALS['database_import_export_table_by_type_array'][$this_table];
 					}
+					if(function_exists('get_ordered_table_fields')) {
+						// On récupère les noms des champs de la table avec les informations, et les champs joints
+						$field_infos_array = get_ordered_table_fields($this_table, $import_or_export, 'simple', false, false);
+						// On ne trie pas ces champs //sort($database_field_names);
+						$GLOBALS['database_fields_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], array_keys($field_infos_array));
+						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], $field_infos_array);
+					} else {
+						// Sans la gestion automatique des jointures (get_ordered_table_fields), on fait plus basiquement
+						$database_field_names = get_table_field_names($this_table);
+						$GLOBALS['database_fields_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], $database_field_names);
+						$GLOBALS['database_field_infos_by_type_array'][$this_type] = array_merge_recursive_distinct($GLOBALS['database_fields_by_type_array'][$this_type], get_table_field_types($this_table));
+					}	
 				}
 			}
-			if (!verify_token($_SERVER['PHP_SELF'] . $action)) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_INVALID_TOKEN']))->fetch();
-			} elseif (empty($_POST['type_import'])) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_TYPE_NOT_CHOSEN']))->fetch();
-			} elseif ($_POST['type_import'] == 'chosen_fields' && empty($_POST['on_update'][$type])) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN']))->fetch();
+		} else {
+			// Type correspondant à une gestion spécifique, et pas à une table de BDD
+			if(empty($GLOBALS['database_fields_by_type_array'][$this_type]) && !empty($GLOBALS['database_field_titles_by_type_array'][$this_type])) {
+				$GLOBALS['database_fields_by_type_array'][$this_type] = array_keys($GLOBALS['database_field_titles_by_type_array'][$this_type]);
+			}
+		}
+		if(!empty($GLOBALS['database_fields_by_type_array'][$this_type])) {
+			// On retire les colonnes non désirées
+			foreach($GLOBALS['database_fields_by_type_array'][$this_type] as $this_key => $this_field) {
+				if ((function_exists('get_field_skipped') && get_field_skipped($this_field, $this_type, $import_or_export)) || in_array($this_field, vb($GLOBALS['database_field_excluded_by_type_array'][$this_type], array()))) {
+					unset($GLOBALS['database_fields_by_type_array'][$this_type][$this_key]);
+				}	
+			}
+		}
+		// On rajoute ensuite des colonnes additionnelle (calculées ou générées spécifiquement en PHP)
+		foreach (vb($GLOBALS['database_field_additional_by_type_array'][$this_type], array()) as $this_field => $this_title) {
+			if(is_numeric($this_field)) {
+				// On n'a pas le couple champ => titre, mais le nom du champ
+				$this_field = $this_title;
+				$this_title = get_field_title($this_field, $this_type);
+			}
+			$GLOBALS['database_fields_by_type_array'][$this_type][$this_field] = $this_title;
+		}
+		if(empty($GLOBALS['database_fields_default_by_type_array'][$this_type])) {
+			// Permet l'export sans interface : on exporte toutes les colonnes
+			$GLOBALS['database_fields_default_by_type_array'][$this_type] = array(); // vb($GLOBALS['database_fields_by_type_array'][$this_type]);
+		} elseif(!is_array($GLOBALS['database_fields_default_by_type_array'][$this_type])) {
+			$GLOBALS['database_fields_default_by_type_array'][$this_type] = get_array_from_string($GLOBALS['database_fields_default_by_type_array'][$this_type]);
+		}
+	}
+	// Filtre pour l'export des commandes pour certains types d'exports qui peuvent être virtuel
+	if (!empty($_POST['an1'])) {
+		$frm = $_POST;
+	} elseif(!empty($_GET['an1'])) {
+		$frm = $_GET;
+	} else {
+		$frm = null;
+	}
+	if (!empty($frm)) {
+		if (!empty($frm['dateadded1'])) {
+			$params['dateadded1'] = $frm['dateadded1'];
+			$params['dateadded2'] = $frm['dateadded2'];
+			$params['date_field'] = $frm['date_field'];
+		} else {
+			$check_admin_date_data = check_admin_date_data($frm);
+			if (empty($check_admin_date_data)) {
+				$params['dateadded1'] = $frm['an1'] . '-' . str_pad($frm['mois1'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($frm['jour1'], 2, 0, STR_PAD_LEFT) . " 00:00:00";
+				$params['dateadded2'] = $frm['an2'] . '-' . str_pad($frm['mois2'], 2, 0, STR_PAD_LEFT) . '-' . str_pad($frm['jour2'], 2, 0, STR_PAD_LEFT) . " 23:59:59";
+				$params['date_field'] = $frm['order_date_field_filter'];
 			} else {
-				$fichier = upload('fichier', false, 'data', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
-				if (empty($fichier) || !file_exists($GLOBALS['uploaddir'] . '/' . $fichier)) {
-					/* le fichier n'existe pas */
-					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND']))->fetch();
+				$output .= $check_admin_date_data;
+			}
+		}
+		$params['id_statut_paiement'] = vn($frm['statut']);
+	}
+	if(!empty($_POST['import_file']) && file_exists($GLOBALS['uploaddir'] . '/' . $_POST['import_file'])) {
+		$params['import_file'] = $_POST['import_file'];
+	}
+	if (isset($GLOBALS['database_display_forced_header_in_export_by_type_array'][vb($params['type'])])) {
+		// On utilise en priorité la configuration pour le type demandé, si cette configuration existe
+		$params['header'] = $GLOBALS['database_display_forced_header_in_export_by_type_array'][vb($params['type'])];
+	} else {
+		if(!empty($_POST['header'])) {
+			$params['header'] = $_POST['header'];
+		} elseif(!isset($params['header'])) {
+			$params['header'] = true;
+		}
+	}
+	if(!empty($_POST['footer'])) {
+		$params['footer'] = $_POST['footer'];
+	} elseif(!isset($params['footer'])) {
+		$params['footer'] = true;
+	}
+	if(!empty($_POST['mode'])) {
+		// ne pas utiliser GET['mode'], qui est utilisé par data.php du module temps.
+		$params['mode'] = $_POST['mode'];
+	} elseif(empty($params['mode'])) {
+		$params['mode'] = '';
+	}
+	if (!empty($_POST['data_encoding'])) {
+		$params['data_encoding'] = $_POST['data_encoding'];
+	} elseif (!empty($_GET['data_encoding'])) {
+		$params['data_encoding'] = $_GET['data_encoding'];
+	}
+	if (empty($params['data_encoding'])) {
+		if (!empty($GLOBALS['site_parameters']['export_encoding'])) {
+			$params['data_encoding'] = $GLOBALS['site_parameters']['export_encoding'];
+		} else {
+			$params['data_encoding'] = 'utf-8';
+		}
+	}
+	if (!empty($GLOBALS['database_display_forced_separator_in_export_by_type_array'][vb($params['type'])])) {
+		$params['separator'] = $GLOBALS['database_display_forced_separator_in_export_by_type_array'][vb($params['type'])];
+	} elseif(!empty($_POST['separator'])) {
+		// Priorité aux données du formulaire envoyé
+		$params['separator'] = vb($_POST['separator']);
+	} elseif(!empty($_GET['separator'])) {
+		$params['separator'] = vb($_GET['separator']);
+	} elseif($import_or_export == 'import') {
+		// On autorise '' pour l'import pour la détection automatique du séparateur
+		$params['separator'] = '';
+	} else {
+		// Dans les divers cas d'export : Tabulation par défaut
+		$params['separator'] = "\t";
+	} 
+	if (vb($params['separator']) == '\t') {
+		$params['separator'] = "\t";
+	}
+	if(!empty($_POST['correspondance'])) {
+		$params['correspondance'] = $_POST['correspondance'];
+	}
+	if(!empty($params['correspondance'])) {
+		// Si on avait passé en paramètre les associations colonnes / champs, c'est moins prioritaire que la correspondance définie par l'utilisateur
+		$params['ordered_fields_selected'] = array(); 
+		// Sélection des colonnes souhaitées par l'utilisateur
+		// => Décodage du champ "correspondance" créé en javascript
+		//    $params['ordered_fields_selected'] est créé au format : champ de bdd => titre de colonne du fichier uploadé
+		foreach(explode('&', $params['correspondance']) as $val) {
+			if(!empty($val)) {
+				if($import_or_export == 'import') {
+					// ordered_fields_selected va contenir la correspondance entre champs en BDD et colonnes du fichier
+					$this_corresp = explode('=', $val);
+					$params['ordered_fields_selected'][$this_corresp[0]] = vb($this_corresp[1]);
 				} else {
-					$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_produits_fichier.tpl');
-					$tpl->assign('href', get_url_from_uploaded_filename($fichier));
-					$tpl->assign('name', $fichier);
-					$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
-					$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-					$output .= $tpl->fetch();
-					if ($_POST['type_import'] == 'chosen_fields') {
-						foreach($_POST['on_update'][$type] as $this_field_name) {
-							// Sélection des colonnes souhaitées par l'utilisateur
-							$selected_field_names[] = $this_field_name;
-						}
-					}
-					$fp = StringMb::fopen_utf8($GLOBALS['uploaddir'] . '/' . $fichier, "rb");
-					$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
-					if (empty($_POST['columns_separator'])) {
-						// détection automatique
-						if (strpos($this_line, "\t") !== false) {
-							$separator = "\t";
-						} elseif (strpos($this_line, ";") !== false) {
-							$separator = ";";
-						} elseif (strpos($this_line, ",") !== false) {
-							$separator = ",";
-						} else {
-							$separator = "\t";
-						}
-					} elseif ($_POST['columns_separator'] == '\t') {
-						$separator = "\t";
-					} else {
-						$separator = $_POST['columns_separator'];
-					}
-					$field_names = explode($separator, $this_line);
-					$temp_trim_field_names = array();
+					// ordered_fields_selected est fait pour contenir la liste des champs à exporter dans l'ordre
+					$params['ordered_fields_selected'][] = $val;
+				}
+			}
+		}
+	}
+	if($import_or_export == 'import') {
+		// Import 
+		if(!empty($params['type'])) {
+			// Pour l'import spécifiquement, on gère les valeurs par défaut des champs (des inputs mis sur chaque ligne)
+			foreach($GLOBALS['database_fields_by_type_array'][$params['type']] as $this_field) {
+				if(empty($params['ordered_fields_selected'][$this_field]) && isset($params['defaults']['default_'.$params['type'].'_'.$this_field]) && $params['defaults']['default_'.$params['type'].'_'.$this_field] !== '') {
+					// On ajoute cette colonne pour l'import
+					$params['ordered_fields_selected'][$this_field] = true;
+				}
+			}
+		}
+	} else {
+		// Export et rapports
+	}
+	$hook_result = call_module_hook('import_export_init_post', $params, 'array');
+	return $output;
+}
 
-					foreach($field_names as $this_key => $this_field_name) {
-						$this_field_name = trim($this_field_name);
-						$field_names[$this_key] = $this_field_name;
-						if ($_POST['type_import'] == 'chosen_fields' && !in_array($this_field_name, $selected_field_names)) {
-							// Champ non sélectionné par l'utilisateur pour l'import
-							$columns_skipped[] = $this_field_name;
+/**
+ * Génère les tableaux d'information des champs
+ *
+ * @param array $params
+ * @return
+ */
+function get_database_field_properties(&$params) {
+	$tpl_inputs = array();
+	
+	$sql = "SELECT *
+		FROM peel_import_field
+		WHERE " . get_filter_site_cond('import_field', null, true) . "";
+	// Si table absente, pas d'erreur remontée
+	$req = query($sql, false, null, true);
+	while ($result = fetch_assoc($req)) {
+		$fields_explanations_arrays[$result['champs']] = $result;
+	}
+
+	// On génère des tableaux avec les tables contenant les champs importables, pour permettre à l'utilisateur de faire des concordances avec des drag & drop
+	foreach ($GLOBALS['database_fields_by_type_array'] as $this_type => &$table_field_names) {
+		//sort($table_field_names);
+		$this_table = vb($GLOBALS['database_import_export_table_by_type_array'][$this_type], $this_type);
+		unset($selected_array);
+		if($this_type == $params['type'] && !empty($params['ordered_fields_selected'])) {
+			$selected_array = &$params['ordered_fields_selected'];
+		} elseif(!empty($GLOBALS['database_fields_default_by_type_array'][$this_type])) {
+			$selected_array = &$GLOBALS['database_fields_default_by_type_array'][$this_type];
+		} else {
+			$selected_array = &$table_field_names;
+		}
+		$temp_inputs = array(0 => array(), 1 => array(), 2 => array());
+		$primary_key_array = array();
+		if(empty($GLOBALS['database_mode_by_type_array'][$this_type]) || $GLOBALS['database_mode_by_type_array'][$this_type] != 'virtual') {
+			foreach(explode('|', $this_type) as $this_table2) {
+				$this_table2 = vb($GLOBALS['database_import_export_table_by_type_array'][$this_table2], $this_table2);
+				//$primary_key_array = array_merge_recursive_distinct($primary_key_array, get_array_from_string(get_primary_key($this_table2)));
+			}
+		}
+		foreach ($table_field_names as $this_field) {
+			// On construit la liste des champs, qu'on va ordonner ensuite
+			if(empty($GLOBALS['database_mode_by_type_array'][$this_type]) || $GLOBALS['database_mode_by_type_array'][$this_type] != 'virtual') {
+				$required = get_field_required($this_field, $this_table);
+			} else {
+				$required = false;
+			}
+			$primary = in_array($this_field, $primary_key_array);
+			$type = str_replace(',', ', ', vb($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]));
+			if(!empty($params['simplified_type_presentation'])) {
+				if(strpos($type, 'blob') !== false || strpos($type, 'text') !== false) {
+					$type = 'texte';
+				} elseif(strpos($type, 'char') !== false) {
+					$type = get_field_maxlength($type) . '&nbsp;car.';
+				} elseif(strpos($type, 'tinyint') !== false) {
+					$type = '0&nbsp;ou&nbsp;1';
+				} elseif(strpos($type, 'int') !== false) {
+					$type = 'entier';
+				} elseif(strpos($type, 'double') !== false || strpos($type, 'float') !== false || strpos($type, 'decimal') !== false) {
+					$type = '#.##';
+				}
+			}
+			$temp_inputs[($required?($primary?0:1):2)][] = array('field' => $this_field,
+				'selected' => in_array($this_field, $selected_array),
+				'explanation' => vb($fields_explanations_arrays[$this_field]['texte'], get_field_title($this_field, $this_table)),
+				'primary' => $primary,
+				'required' => $required,
+				'default' => vb($params['defaults']['default_'.$this_type.'_'.$this_field]),
+				'maxlength' => (!empty($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field])?get_field_maxlength($GLOBALS['database_field_infos_by_type_array'][$this_type][$this_field]):null),
+				'type' => $type);
+		}
+		foreach(array(0,1,2) as $this_required) {
+			// On met d'abord les champs requis dans la liste
+			foreach($temp_inputs[$this_required] as $this_array) {
+				$tpl_inputs[$this_type][] = $this_array;
+			}
+		}
+	}
+	return $tpl_inputs;
+}
+
+/**
+ * Gestion de l'import
+ *
+ * @param boolean $check_access_rights
+ * @param array $params
+ * @return
+ */
+function handle_import($check_access_rights = true, $params = array()) {
+	// On isole le CSS pour pouvoir utiliser cette fonction éventuellement en front-office
+	// CSS pour le tableau de correspondance des imports
+	$disable_tokens = false; // Pour debug
+		
+	$output = import_export_init('import', $params);
+	
+	$type = $params['type'];
+	$error_output = array();
+	$mode = vb($params['mode']);
+
+	// NB : $GLOBALS['database_fields_by_type_array'][$type] contient la liste des champs de toutes les tables susceptibles d'être importées (déjà filtrée avec les droits de l'utilisateur)
+
+	switch ($mode) {
+		case "import":
+			$test_mode = !empty($_POST['test_mode']);
+			$GLOBALS['nb_insert'] = 0;
+			$GLOBALS['nb_update'] = 0;
+			if($check_access_rights) {
+				if (a_priv('demo')) {
+					$error_output[] = sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']));
+					break;
+				}
+				if(empty($GLOBALS['database_import_export_type_names_array'][$type])) {
+					// L'utilisateur n'a pas le droit d'importer dans la table demandée
+					$error_output[] = sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']));
+					break;
+				}
+			}
+			if(empty($params['import_file'])) {
+				$params['import_file'] = upload('import_file', false, 'data', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+			}
+			if (!$disable_tokens && !verify_token($_SERVER['PHP_SELF'] . $mode)) {
+				$error_output[] = $GLOBALS['STR_INVALID_TOKEN'];
+			} elseif (empty($params['type'])) {
+				$error_output[] = $GLOBALS['STR_ADMIN_IMPORT_ERR_TYPE_NOT_CHOSEN'];
+			} elseif (empty($params['ordered_fields_selected'])) {
+				$error_output[] = $GLOBALS['STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN'];
+			} elseif (empty($params['import_file']) || !file_exists($GLOBALS['uploaddir'] . '/' . $params['import_file'])) {
+				// le fichier n'existe pas
+				$error_output[] = $GLOBALS['STR_ADMIN_IMPORT_ERR_FILE_NOT_FOUND'];
+				unset($params['import_file']);
+			} else {
+				// Tout semble configuré et OK
+				// On commence l'import
+
+				// On ouvre le fichier pour charger la première ligne avec les titres de colonnes
+				if($fp = StringMb::fopen_utf8($GLOBALS['uploaddir'] . '/' . $params['import_file'], "rb")) {
+					$general_configuration_is_valid = true;
+					$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $params['data_encoding']);
+					if (empty($params['separator'])) {
+						// détection automatique du séparateur dans le fichier
+						if (strpos($this_line, "\t") !== false) {
+							$params['separator'] = "\t";
+						} elseif (strpos($this_line, ";") !== false) {
+							$params['separator'] = ";";
+						} elseif (strpos($this_line, ",") !== false) {
+							$params['separator'] = ",";
+						} else {
+							$params['separator'] = "\t";
+						}
+					}
+					$file_columns = explode($params['separator'], $this_line);
+
+					// Vérification de cohérence entre $params['ordered_fields_selected'] et les colonnes réellement disponibles dans le fichier (normalement le traitement en AJAX gère déjà cela, mais il faut vérifier le $_POST quoiqu'il arrive)
+					foreach($file_columns as $this_key => $this_field) {
+						$file_columns[$this_key] = str_replace(array("\n","\r","\r\n","\n\r"), '', trim($this_field));
+					}
+					foreach($params['ordered_fields_selected'] as $this_bdd_field => $this_file_field) {
+						// NB : $this_file_field vaut true quand on a une valeur par défaut pour un champ et aucune correspondance avec le fichier importé
+						if ($this_file_field !== true && (!in_array($this_file_field, $file_columns) || !in_array($this_bdd_field, $GLOBALS['database_fields_by_type_array'][$type]))) {
+							// var_dump($this_file_field, $file_columns, $this_bdd_field, $GLOBALS['database_fields_by_type_array'][$type]);
+							// Champ non présent dans le fichier
+							// OU champ non existant en BDD, ou non défini pour un type virtuel
+							unset($params['ordered_fields_selected'][$this_bdd_field]);
+							if (!in_array($this_file_field, $file_columns)) {
+								$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND'], $this_file_field);
+								continue;
+							} else {
+								$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED'], array_search($this_file_field, $file_columns), (!empty($this_file_field)?$this_file_field:'[-]'));
+							}
 							continue;
 						}
-						if($type == 'peel_produits') {
-							// Traitement spécifique pour la table produits
-							if (!in_array($this_field_name, $table_field_names_by_type['peel_produits']) && strpos($this_field_name, "#") === false && strpos($this_field_name, "§") === false) {
-								// Si le champ trouvé dans le fichier n'est pas dans la table produit, et que le nom du produit ne contient pas de séparateur (spécifique aux attributs).
-								if (in_array($this_field_name, $products_specific_fields_array)) {
-									if(!in_array($this_field_name, array($GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'], $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'], 'Stock', 'Categorie', 'categorie_id'))) {
-										// Les champs écartés dans la liste ci-dessus ici seront traités dans le script spécifiquement. Les autres champs spécifiques ne sont pas traités
-										$columns_skipped[] = $this_field_name;
-										$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
-									}
-								} else {
-									// Colonne inconnue
-									$columns_skipped[] = $this_field_name;
-									$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
-								}
-								continue;
-							}
-						} else {
-							if (!in_array($this_field_name, $table_field_names_by_type[$type])) {
-								// Colonne inconnue
-								$columns_skipped[] = $this_field_name;
-								$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $this_key, (!empty($this_field_name)?$this_field_name:'[-]'))))->fetch();
-							}
-						}
-						if (in_array($this_field_name, $temp_trim_field_names)) {
-							$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_INCOHERENT_COLUMNS'], $this_field_name)))->fetch();
-							$skip_import = true;
-						}
-						$temp_trim_field_names[] = $this_field_name;
 					}
-					unset($temp_trim_field_names);
-					$line_number = 0;
+					$GLOBALS['line_number'] = 0;
 
-					if (empty($skip_import)) {
+					if(!empty($params['ordered_fields_selected']) && count($params['ordered_fields_selected'])){
+						// On importe au moins un champ
+						// Initialisations diverses
+						// A FAIRE : gérer les types qui correspondent à plusieurs tables
+						$table_name = $type;
+						$primary_key_auto_increment = null;
+						if(empty($GLOBALS['database_mode_by_type_array'][$type]) || $GLOBALS['database_mode_by_type_array'][$type] != 'virtual') {
+							foreach($GLOBALS['database_field_infos_by_type_array'][$type] as $this_field => $this_field_type) {
+								$field_maxlength_array[$this_field] = get_field_maxlength($this_field_type);
+							}
+							$primary_key = get_primary_key($table_name);
+							$table_fields = get_table_fields($table_name);
+							foreach($table_fields as $this_column) {
+								if(in_array($this_column['Field'], get_array_from_string($primary_key))) {
+									if($this_column['Extra'] == 'auto_increment') {
+										$primary_key_auto_increment = true;
+									} else {
+										$primary_key_auto_increment = false;
+										break;
+									}
+								}
+							}
+						}
+						// On commence l'import des données
 						while (!StringMb::feof($fp)) {
+							// On passe ici pour chaque insertion ou MAJ
 							unset($product_id);
 							unset($set_sql_fields);
 							unset($field_values);
-							$last_treated_columns = 0;
-							$line_number++;
+							$last_treated_column = 0;
+							$GLOBALS['line_number']++;
+							$error_primary = null;
+							$error_output_line_array = array();
+							$primary_key_values = array();
+							$line_in_database_infos = null;
+							// On récupère une ligne de données :
 							// Si une valeur de cas contient des sauts de ligne, alors on prend quand même la ligne suivante comme si c'était la continuité de cette ligne
-							while (!StringMb::feof($fp) && (empty($field_values) || count($field_values) < count($field_names) - count($columns_skipped))) {
+							while (!StringMb::feof($fp) && $last_treated_column < count($file_columns)) {
 								// Tant qu'on n'atteint pas fin de fichier
-								$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $_POST['import_encoding']);
+								$this_line = StringMb::convert_encoding(fgets($fp, 16777216), GENERAL_ENCODING, $params['data_encoding']);
 								if (empty($this_line)) {
-									break;
-								}
-								// $output .= '<hr />Ligne Excel : $this_line';
-								$line_fields = explode($separator, $this_line);
-								foreach($line_fields as $key => $this_field) {
-									// On récupère les valeurs présentes dans la ligne en cours
-									if(isset($field_names[$key + $last_treated_columns])) {
-										if (!isset($field_values[$field_names[$key + $last_treated_columns]])) {
-											$field_values[$field_names[$key + $last_treated_columns]] = trim($this_field);
-										} else {
-											$field_values[$field_names[$key + $last_treated_columns]] .= trim($this_field);
-										}
-									} else {
-										$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], $key + $last_treated_columns, $this_field)))->fetch();
-									}
-								}
-								$last_treated_columns += $key;
-							}
-							if (!empty($field_values) && count($field_values) > count($columns_skipped)) {
-								// On a trouvé au moins un champ à importer
-								if (empty($field_values['date_insere'])) {
-									$field_values['date_insere'] = date('Y-m-d H:i:s', time());
-								}
-								if (empty($field_values['date_maj'])) {
-									$field_values['date_maj'] = date('Y-m-d H:i:s', time());
-								}
-							} else {
-								// On n'a trouvé aucun champ sur la ligne en cours, on passe à la ligne suivante
-								continue;
-							}
-
-							$ErrFic = 0;
-							// Vérification que tous les champs obligatoires sont renseignés et avec des valeurs existantes dans les tables de référence (ligne 2209 du fichier Delphi ufrmImportFichiers.pas)
-							// Pour l'importation des temps, frais et factures, ne pas faire ces vérifications, car elles sont faites par la suite
-							// Les vérifications générales ne sont pas appliquées à ces tables : ITemps, ITempsBud, IFrais, IFactureLigne, IFraisBud, IFactureLigneBud + peel_produits + peel_utilisateurs
-							if(!in_array($type, array('tmppasse', 'budtemps', 'fraiseng', 'jourventlignes', 'budfrais', 'budfactlignes', 'peel_produits', 'peel_utilisateurs')))
-							{
-								$PInfoChampGlobal = table_details($type);
-								foreach($PInfoChampGlobal['fields'] as $PInfoChamp)
-								{
-								    // On a une correspondance avec la table destination, vérifier, si le champs fait référence
-								    // à une autre table, que toutes les valeurs renseignées existent dans cette table
-								    if ($PInfoChamp['TableRefName'] != '' or $PInfoChamp['Caption'] == 'Jour d\'échéance')
-								    {
-										// TODO : Traduire le code Delphi ci-dessous en PHP
-										//if (ListeDest.Items[i].Caption <> 'Jour d''échéance') then
-										// ChargeTableRef(PInfoChamp(ListeDest.Items[i].Data).TableRefName, ChampsRef(PInfoChamp(ListeDest.Items[i].Data).TableRefName, ListeDest.Items[i].Caption));
-
-										if($type == 'affaires')
-											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'];
-										elseif($type == 'pvcolaff')
-											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'].' - '.$field_values['Collaborateur'];
-										elseif($type == 'pvqaff')
-											$ValeurCode = $field_values['Client'].' - '.$field_values['Affaire'].' - '.$field_values['Tac_Fact'];
-										elseif($type == 'evmntcli')
-											$ValeurCode = $field_values['Client'];
-										elseif($type == 'reglem')
-											$ValeurCode = $field_values['Client'];
-										else
-											$ValeurCode = $field_values[$PInfoChampGlobal['structure']['FChampsCode']];
-										$ValeurCode = trim($ValeurCode);
-
-								    	if ($PInfoChamp['Caption'] != 'Jour d\'échéance')
-								    	{
-											if(!CodeExiste(trim($field_values[$PInfoChamp['Caption']]), ChampsRef('', $PInfoChampGlobal['structure']['FieldRefName']), $type))
-											{
-												// Si un champs est obligatoire, sa valeur doit exister dans la table de référence.
-												// S'il ne l'est pas, on accepte qu 'il ne soit pas renseigné, mais s'il l'est la valeur doit exister
-												if ($PInfoChamp['Required']
-													or (!$PInfoChamp['Required'] /*and (DMImportFichiers.dxMemDest.Fields[0].AsString <> '')*/) // TODO : Ne sais pas à quoi correspond Fields[0] (voir ci-dessous la condition entière)
-												 and $field_values[$PInfoChamp['Caption']] != '')
-												 //if (PInfoChamp(ListeDest.Items[i].Data).Required) or
-									    		 // ((not PInfoChamp(ListeDest.Items[i].Data).Required) and (DMImportFichiers.dxMemDest.Fields[0].AsString <> ''))
-									    		 // and (DMImportFichiers.dxMemDest.FieldByName(ListeDest.Items[i].Caption).AsString <> '') then begin
-												{
-													$ErrFic++;
-													AjouterErr('La valeur "' . $field_values[$PInfoChamp['Caption']] . '" n\'existe pas dans la table ' . $PInfoChamp['TableRefName'] . ' pour le champs ' . $PInfoChamp['Caption'], $ValeurCode, $line_number);
-												}
-											}
-								    	}
-								    	else
-								    	{
-								    		$AllJoursEch = AllJoursEch($field_values['Societe']);
-											// Cas particulier des jours d'échéance dans la table société
-								    		if($AllJoursEch['Societe'])
-								    		{
-
-												if ($field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance1'] and $field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance2'] and $field_values['Echeance_Mois'] != $AllJoursEch['Jour_Echeance3'])
-												{
-													$ErrFic++;
-													AjouterErr('La valeur "' . $field_values['Echeance_Mois'] . '" n\'existe pas dans la table Societes ' . $field_values['Societe'] . ' pour le champs ' . $PInfoChamp['Caption'], $ValeurCode, $line_number);
-												}
-								    		}
-											AjouterMessage('Vérification d\'intégrité pour le champ "' . $PInfoChampGlobal['structure']['FieldRefName'] . '"', $line_number);
-								    	}
-								    }
-
-								    // Champ obligatoire et valeur non renseignée
-								    if ($PInfoChamp['Required'] and trim($field_values[$PInfoChamp['Caption']]) == '')
-								    {
-										$ErrFic++;
-								    	AjouterErr('La valeur n\'est pas renseignée pour le champs ' . $PInfoChamp['Caption'] . ' (obligatoire)', $ValeurCode, $line_number);
-								    }
-								}
-
-							}
-
-							// Vérifications spécifiques à chaque table
-							/*if($type == 'tac_fact')
-								$ErrFic = $ErrFic + VerifieTacFact($PInfoChampGlobal, $field_values);
-							if($type == 'cod_ven')
-								$ErrFic = $ErrFic + VerifieCodeVen($PInfoChampGlobal, $field_values);
-							if($type == 'clients')
-								$ErrFic = $ErrFic + VerifieClients($PInfoChampGlobal, $field_values);
-							if($type == 'affaires')
-								$ErrFic = $ErrFic + VerifieAffaires($PInfoChampGlobal, $field_values);
-							if($type == 'collabor')
-								$ErrFic = $ErrFic + VerifieCollaborateurs($PInfoChampGlobal, $field_values);
-							if($type == 'pvcolaff')
-								$ErrFic = $ErrFic + VerifiePVColAffaires($PInfoChampGlobal, $field_values);
-							if($type == 'pvcolaff')
-								$ErrFic = $ErrFic + VerifiePVQAffaires($PInfoChampGlobal, $field_values);
-							if($type == 'evmntcli')
-								$ErrFic = $ErrFic + VerifieEvmntCli($PInfoChampGlobal, $field_values);*/
-							if($type == 'fam_clnt')
-								$ErrFic = $ErrFic + VerifieFamCli($PInfoChampGlobal, $field_values, $NumLig);
-							/*if($type == 'intervex')
-								$ErrFic = $ErrFic + VerifieCorrespondants($PInfoChampGlobal, $field_values);
-							if($type == 'tmppasse')
-								$ErrFic = $ErrFic + VerifieTempsPasses($PInfoChampGlobal, $field_values);
-							if($type == 'budtemps')
-								$ErrFic = $ErrFic + VerifieTempsBud($PInfoChampGlobal, $field_values);
-							if($type == 'fraiseng')
-								$ErrFic = $ErrFic + VerifieFraisEng($PInfoChampGlobal, $field_values);
-							if($type == 'budfrais')
-								$ErrFic = $ErrFic + VerifieFraisBud($PInfoChampGlobal, $field_values);
-							if($type == 'jourventlignes')
-								$ErrFic = $ErrFic + VerifieFactureLigne($PInfoChampGlobal, $field_values);
-							if($type == 'budfactlignes')
-								$ErrFic = $ErrFic + VerifieFactureLigneBud($PInfoChampGlobal, $field_values);
-							if($type == 'reglem')
-								$ErrFic = $ErrFic + VerifieReglCli($PInfoChampGlobal, $field_values);
-
-							//CompterEnregsCorrects(NbMaj, NbNouv, NbAnom, NbCreat);*/
-
-							if($type == 'peel_produits') {
-								// Mode admin à true pour create_or_update_product : 
-								$output .= create_or_update_product($field_values, $columns_skipped, $table_field_names_by_type['peel_produits'], $products_specific_fields_array, true);
-							} elseif($type == 'peel_utilisateurs') {
-								// Nettoyage des données
-								foreach($field_values as $this_key => $this_field) {
-									// On retire les mentions dans le fichier qui ne sont pas significatives
-									if(in_array($this_field, array('-', '?'))) {
-										$field_values[$this_key] = '';
-									}
-								}
-								if(!empty($field_values['email'])) {
-									if(StringMb::strpos($field_values['email'], ',')) {
-										$temp = explode(',', $field_values['email']);
-										$field_values['email'] = $temp[0];
-									}
-									if(!EmailOK($field_values['email'])){
-										unset($field_values['email']);
-									}
-								}
-								if(empty($field_values['email']) && empty($field_values['nom_famille']) && empty($field_values['societe'])) {
 									continue;
 								}
-								if(!empty($field_values['telephone'])) {
-									$field_values['telephone'] = str_ireplace(array('T : ', 'Tél. : ', 'Tél : ', 'Tel : ', 'Tel: ', 'Stdd : '), '', $field_values['telephone']);
+								if(StringMb::substr($this_line, -1) == "\r" || StringMb::substr($this_line, -1) == "\n") {
+									$this_line = StringMb::substr($this_line , 0, StringMb::strlen($this_line) - 1);
 								}
-								$address_array = array();
-								foreach(array('adresse', 'adresse1', 'adresse2') as $this_key) {
-									if(!empty($field_values[$this_key])) {
-										$address_array[] = $field_values[$this_key];
+								// $output .= '<hr />Ligne du fichier CSV : $this_line';
+								$line_values = explode($params['separator'], $this_line);
+								$text_in_wait = '';
+								// En cas de séparateur qui se retrouve dans des champs qui sont identifiés par des guillemets au début et à la fin, $line_values va contenir une colonne scindée en N morceaux. Donc $key va être incrémentée à chaque fois qu'un champ est complètement chargé
+								foreach($line_values as $this_value) {
+									// On récupère les valeurs présentes dans la ligne en cours. Pour gérer correctement les colonnes contenant un séparateur, il faut s'occuper de toutes les lignes, même si on n'en a sélectionné que quelques unes
+
+									// Suppression de guillemets indésirables. Les guillemets avant et après une valeur sont supprimé. Ils peuvent être ajoutés à l'insu de créateur du fichier en éditant le fichier avec excel.
+									$this_value = $text_in_wait . trim($this_value);
+									$text_in_wait = '';
+									if ($this_value == '""') {
+										$this_value = '';
+									} elseif (StringMb::substr($this_value, 0, 1) == '"' && StringMb::substr($this_value, -1) == '"') {
+										// Il faut traiter l'escape de guillemets dans les champs
+										$this_value = str_replace('""', '"', StringMb::substr($this_value, 1, StringMb::strlen($this_value) - 2));
+									} elseif(StringMb::substr($this_value, 0, 1) == '"') {
+										// Guillemet au début => on attend le guillemet de fin
+										// => on fusionne ce champ avec la suite, et on remet le séparateur qui n'aurait pas dû être retiré
+										$text_in_wait = $this_value . $params['separator'];
+										continue;
+									}
+									if(isset($file_columns[$last_treated_column])) {
+										// Remarque : $file_columns[$last_treated_column] correspond au nom de champ de fichier
+										if(in_array($file_columns[$last_treated_column], $params['ordered_fields_selected'], true)) {
+											// On a sélectionné ce champ pour l'import
+											$this_bdd_field = array_search($file_columns[$last_treated_column], $params['ordered_fields_selected'], true);
+											if (!isset($field_values[$this_bdd_field])) {
+												// On va fusionner des colonnes si pluiseurs ont le même nom
+												$field_values[$this_bdd_field] = '';
+											}
+											$field_values[$this_bdd_field] .= $this_value;
+										}
+									} else {
+										// Colonne n'existe pas (problème)
+										$error_output[] = sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN'], ($last_treated_column+1), $this_value);
+									}
+									$last_treated_column++;
+								}
+							}
+							// On a chargé toutes les colonnes sélectionnées dans $field_values, après avoir étudié toutes les colonnes (c'est nécessaire pour bien gérer les cas de sauts de ligne avec gestion des guillemets).
+							if (!empty($field_values)) {
+								// On décode le format des dates si nécessaire
+								$field_types = get_table_field_types($table_name);
+								foreach($field_values as $this_field_name => $this_value) {
+									if($field_types[$this_field_name] == 'date' || $field_types[$this_field_name] == 'datetime' ) {
+										$field_values[$this_field_name] = get_mysql_date_from_user_input($this_value);
 									}
 								}
-								$field_values['adresse'] = implode(' ', $address_array);
-								if(!empty($field_values['pays']) && !is_numeric($field_values['pays'])) {
-									$field_values['pays'] = get_country_id($field_values['pays']);
+							}
+							// On rajoute les valeurs par défaut (soit colonne sans correspondance, soit avec correspondance mais ligne avec case vide)
+							foreach($params['ordered_fields_selected'] as $this_field_name => $this_value) {
+								if ((isset($params['defaults']['default_'.$type.'_'.$this_field_name]) && $params['defaults']['default_'.$type.'_'.$this_field_name] !== '') && (!isset($field_values[$this_field_name]) || $field_values[$this_field_name] === '')) {
+									// Il y a une valeur par défaut de disponible pour cette colonne, et la case est vide (car pas de correspondance de colonne, ou car valeur dans le fichier est vide)
+									$field_values[$this_field_name] = $params['defaults']['default_'.$type.'_'.$this_field_name];
 								}
-								if(empty($field_values['priv'])) {
-									$field_values['priv'] = 'newsletter';
+							}
+							// On a lu une ligne du fichier, et on a fait la correspondance avec les noms de champs internes à PEEL pour pouvoir remplir proprement $field_values
+							if (!empty($field_values)) {
+								// PRET POUR LE TRAITEMENT de l'import d'une ligne
+								// On a trouvé au moins un champ à importer
+
+								// Vérifications générales avant les traitements spécifiques
+								$set_field_values = $field_values; // On ne va garder dans $set_field_values que les champs qui ne sont pas primaires
+								if(!empty($primary_key)) {
+									// On gère les clés primaires qui doivent avoir été sélectionnées dans les colonnes à importer
+									// (en cas de clé primaire composée de plusieurs colonnes, pas besoin non plus de remplir database_fields_required_array ou database_fields_required_by_table_array)
+									foreach(explode(',', $primary_key) as $this_field_name) {
+										if(empty($field_values[$this_field_name])) {
+											if(!$primary_key_auto_increment) {
+												$error_output_line_array[$this_field_name] = sprintf($GLOBALS['STR_ADMIN_PRIMARY_KEY_MANDATORY'], $this_field_name);
+												$error_primary = true;
+											}
+										} else {
+											// Gestion de l'unicité de la clé primaire simple ou multiple
+											$primary_key_values[$this_field_name] = $field_values[$this_field_name];
+											unset($set_field_values[$this_field_name]);
+										}
+									}
+									if(!$error_primary && !empty($primary_key_values)) {
+										// On cherche si la ligne existe déjà dans la BDD
+										$line_in_database_infos = get_table_rows($table_name, null, null, true, 1, null, false, create_sql_from_array($primary_key_values, ' AND '));
+										/*if(!empty($line_in_database_infos)) {
+											// comme on autorise les insertions et les mises à jour, on désactive ce bloc de code qui empêcherait l'utilisation de clé primaire existante dans le fichier d'import.
+											$error_output_line_array[] = 'Le code "' . implode('" / "', explode(',', $primary_key)) . '" de "' . $table_name . '" existe déjà par ailleurs et ne peut pas être dupliqué.';
+										}*/
+									}
+									if(!$line_in_database_infos) {
+										// SEULEMENT SI c'est pour une insertion : Vérification que tous les champs obligatoires sont renseignés 
+										foreach($GLOBALS['database_fields_by_type_array'][$type] as $this_field_name) {
+											// On exclue les clés primaires ici, car gérées plus haut
+											if(empty($primary_key) || !in_array($this_field_name, explode(',', $primary_key))) {
+												if(get_field_required($this_field_name, $type) && empty($field_values[$this_field_name])) {
+													// Vérifie que les champs obligatoires sont bien remplies et non vide
+													// On a géré les clé primaires plus haut
+													$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_FIELD_VALUE_MANDATORY'], $this_field_name);
+												}
+											}
+										}
+									}
 								}
-								// Création de l'utilisateur
-								$this_id = insere_utilisateur($field_values, true, !empty($_POST['send_email']), false, false);
-								if(is_numeric($this_id)) {
-									echo 'Utilisateur importé n°' . vn($this_id) . ' - email : ' . vb($field_values['email']) . ' ';
-									if (!empty($this_id)) {
-										echo 'OK<br />';
-										$nb_insert++;
-									} else {
-										echo 'NOK<br />';
+								foreach($field_values as $this_field_name => $this_value) {
+									$select_infos = get_select_infos($table_name, $this_field_name);
+									if(!empty($select_infos)) {
+										// On peut importer la clé, ou le titre d'un choix du select
+										if(!isset($select_infos[$this_value])) {
+											if(in_array($this_value, $select_infos, true)) {
+												// On remplace la titre d'un choix par son code technique
+												$field_values[$this_field_name] = $this_value = array_search($this_value, $select_infos, true);
+											} else {
+												// On explique que les clés ou les titres sont possibles
+												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_COLUMN_CONTAINS_CHOICE'], get_field_title($this_field_name, $table_name), implode('" / "', array_keys($select_infos)) . ' ' . $GLOBALS['STR_OR'] . ' ' . implode('" / "', $select_infos));
+											}
+										}
+									}
+									
+									if (!empty($field_maxlength_array[$this_field_name]) && StringMb::strlen($this_value)>$field_maxlength_array[$this_field_name]) {
+										$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_CODE_MAX_CHAR_REACHED'], $this_value, StringMb::strlen($this_value), $field_maxlength_array[$this_field_name]);
+									}
+
+									// on traite les champs de jointure avec une autre table
+									$join_infos = get_join_infos($table_name, $this_field_name);
+									if(!empty($join_infos)) {
+										// Vérification des valeurs existantes dans les tables de référence (équivalent de CodeExiste en Delphi - ligne 2209 du fichier Delphi ufrmImportFichiers.pas)
+										if($this_value) {
+											$sql_cond = word_real_escape_string($join_infos['target_field']) . '="' .real_escape_string($this_value). '"';
+											if($join_infos['target_field'] == 'Affaire') {
+												// Si clé primaire multiple
+												$sql_cond .= ' AND '. word_real_escape_string('Client') . '="' .real_escape_string(vb($field_values['Client'],$field_values['CLT_TNF'])). '"'; //  AND Etat<>"O"
+											}
+											$joined_table_infos = get_table_rows($join_infos['target_table'], null, null, true, 1, null, false, $sql_cond);
+											if(empty($joined_table_infos)) {
+												$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE'], $this_value, $join_infos['target_table'], $join_infos['target_field']);
+											} 
+										}
+									}
+									// Vérifie que les champs uniques (vides ou non) des colonnes importées sont bien uniques
+									if(get_field_unique($this_field_name, $type) && get_table_rows($table_name, null, null, true, 1, null, false, ' NOT (' . create_sql_from_array($primary_key_values, ' AND ') . ') AND ' . word_real_escape_string($this_field_name) . '="' .real_escape_string($this_value). '"')) {
+										$error_output_line_array[] = sprintf($GLOBALS['STR_ADMIN_FIELD_UNIQUE'], $this_field_name);
+									}
+								}
+								$error_output_line = implode(' ', $error_output_line_array);
+								// On traite l'import de la ligne, soit ci-dessous, soit dans le hook juste après
+
+								if($type == 'peel_produits') {
+									// Mode admin à true pour create_or_update_product : 
+									$output .= create_or_update_product($field_values, true, true, $test_mode);
+								} elseif($type == 'peel_utilisateurs') {
+									$output .= create_or_update_user($field_values, $test_mode);
+								} else {
+									if(!$error_primary) {
+										// On gère les erreurs, comme ce qui est déjà fait pour datatables avec des hooks
+										$error_output_line .= call_module_hook('import_line_pre', array('type' => $type, 'table_values' => vb($field_values), 'field_infos' => $GLOBALS['database_field_infos_by_type_array'][$type], 'ordered_fields_selected' => $params['ordered_fields_selected'], 'existing_row' => $line_in_database_infos, 'test_mode' => $test_mode), 'string');
+										// Gérer la création ou la mise à jour
+										$set_sql = create_sql_from_array($set_field_values);
+										if ($line_in_database_infos) {
+											if(empty($test_mode)) {
+												$sql = 'UPDATE ' . $table_name . ' 
+													SET ' . $set_sql . '
+													WHERE ' . create_sql_from_array($primary_key_values, ' AND ');
+												query($sql);
+											}
+											$GLOBALS['nb_update']++;
+										} else {
+											if(empty($test_mode)) {
+												if(!empty($primary_key_values)) {
+													// On rajoute les champs primaires
+													$set_sql .= ', ' . create_sql_from_array($primary_key_values, ', ');
+												}
+												query('INSERT INTO ' . $table_name . '
+													SET ' . $set_sql . '');
+											}
+											$GLOBALS['nb_insert']++;
+										}
+										if(empty($test_mode)) {
+											// On fait aussi des traitements dans les données après mise à jour, comme le fait de mettre des codes en majuscules, etc
+											$error_output_line .= call_module_hook('import_line_post', array('type' => $type, 'field_values' => vb($field_values), 'field_infos' => $GLOBALS['database_field_infos_by_type_array'][$type], 'ordered_fields_selected' => $params['ordered_fields_selected'], 'test_mode' => $test_mode), 'string');
+										}
 									}
 								}
 
-							}
-							// Import des familles clients
-							elseif($type == 'fam_clnt') {
-								$output .= create_or_update_famille_clients($field_values, $columns_skipped);
-							}
-							else {
-								// TODO : pour toutes les autres tables à importer...
-								var_dump($field_values, $columns_skipped, $table_field_names_by_type[$type]);
+								// Affichage du message de succès
+								//$output_line .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK !'))->fetch();
+								if(!empty($error_output_line)) {
+									$error_output[] = $GLOBALS["STR_ADMIN_LINE"] . ' ' . $GLOBALS['line_number'] . ' : ' . $error_output_line;
+								}
 							}
 						}
+					} else {
+						$error_output[] = 'ATTENTION : Problème apparemment dans ce fichier - Donc pas d\'action effectuée';
 					}
 					fclose($fp);
-					if($type == 'peel_produits') {
-						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_IMPORTATION_OK'], vn($GLOBALS['nbprod_insert']) + vn($GLOBALS['nbprod_update']) + vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_update']), vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_insert']), vn($GLOBALS['nbprod_categorie_insert']))))->fetch();
-					} elseif($type == 'peel_utilisateurs') {
-						$output .= 'Fin de l\'import des ' . $nb_insert . ' utilisateurs<br />E-mails avec mot de passe générés envoyés.<br /><br />';
-					} else {
-						$output .= 'Fin de l\'import des ' . $nb_insert . ' lignes<br /><br />';
+					if(empty($error_output)) {
+						if(!empty($test_mode)) {
+							$output .= '<b>'.StringMb::strtoupper($GLOBALS['STR_ADMIN_SIMULATION']).'</b> : ';
+						}
+						if($type == 'peel_produits') {
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_IMPORTATION_OK'], vn($GLOBALS['nbprod_insert']) + vn($GLOBALS['nbprod_update']) + vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_update']), vn($GLOBALS['nbprod_update_null']), vn($GLOBALS['nbprod_insert']), vn($GLOBALS['nbprod_categorie_insert']))))->fetch();
+						} elseif($type == 'peel_utilisateurs') {
+							$output .= sprintf($GLOBALS['STR_ADMIN_IMPORT_USER_END'], vn($GLOBALS['nb_insert']),vn($GLOBALS['nb_update'])).'<br /><br />';
+						} else {
+							$output .= sprintf($GLOBALS['STR_ADMIN_IMPORT_FILE_END'], vn($GLOBALS['nb_insert']),vn($GLOBALS['nb_update'])).'<br /><br />';
+						}
 					}
+				} else {		
+					$error_output[] = sprintf('Ouverture impossible de %s', $params['import_file']);
 				}
+			}
+			$next_mode = 'import';
+			if(!empty($test_mode) && empty($error_output)) {
+				$output .= '<p>'.$GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"].'</p>'; 
+				// On va mettre test_mode à 1 dans le .tpl
+			} else {
+				// On va mettre un bouton pour revenir en arrière dans le .tpl
 			}
 			break;
 
 		default:
-			/* FORMULAIRE DE CHOIX D'IMPORTATION */
-			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_form.tpl');
-			$tpl->assign('action', get_current_url(false));
-			$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'import'));
-			$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
-			$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
-
-			$tpl->assign('type_list', $types_array);
-			
-			// Récupère le contenu des tables à importer
-			$type_fields = array();
-			foreach($types_array as $type_key => $value) {
-				$type_explode = explode('|', $type_key);
-				foreach($type_explode as $type) {
-					$type_fields[$type] = get_table_fields($type);
-				}
-			}
-			$tpl->assign('type_fields', $type_fields);
-			// -------------------------------------------------
-			$req = query("SELECT champs, etat, texte_" . $_SESSION['session_langue'] . "
-				FROM peel_import_field
-				WHERE " . get_filter_site_cond('import_field', null, true) . "");
-			while ($result = fetch_assoc($req)) {
-				$fields_explanations_arrays[$result['champs']] = $result;
-			}
-
-			// Pour afficher categorie_id dans la liste des champs importables
-			$table_field_names_by_type['peel_produits'][] = 'categorie_id';
-			$table_field_names_by_type['peel_produits']['Categorie'] = 'Categorie';
-			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CATEGORY'];
-			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES'];
-			$table_field_names_by_type['peel_produits'][$GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']] = $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS'];
-			$table_field_names_by_type['peel_produits']['Stock'] = 'Stock';
-			$tpl_inputs = array();
-
-			foreach ($table_field_names_by_type as $type_key => $table_field_names) {
-				sort($table_field_names);
-				foreach ($table_field_names as $this_field) {
-					if ($this_field != 'stock') {
-						$tpl_inputs[$type_key][] = array('field' => $this_field,
-							'issel' => vb($fields_explanations_arrays[$this_field]['etat']) == 1,
-							'explanation' => vb($fields_explanations_arrays[$this_field]['texte']),
-							'is_important' => ($this_field == 'id' || $this_field == 'categorie_id')
-							);
-					}
-				}
-			}
-			$tpl->assign('inputs', $tpl_inputs);
-			$tpl->assign('uploaddir', $GLOBALS['uploaddir']);
-			$tpl->assign('import_encoding', vb($frm['import_encoding']));
-			$tpl->assign('example_href', 'import/exemple_prod.csv');
-			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-			$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
-			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
-			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
-			$tpl->assign('STR_ADMIN_IMPORT_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
-			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
-			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
-			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
-			$tpl->assign('STR_ADMIN_IMPORT_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
-			$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
-			$tpl->assign('STR_ADMIN_IMPORT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
-			$tpl->assign('STR_ADMIN_IMPORT_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_WARNING_ID']);
-			$tpl->assign('STR_ADMIN_IMPORT_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
-			$tpl->assign('STR_ADMIN_IMPORT_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
-			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
-			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
-			$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
-			$output .= $tpl->fetch();
+			$next_mode = 'import';
 			break;
+	}
+	// FORMULAIRE DE CHOIX D'IMPORTATION
+	// 1ère étape : formulaire brut
+	// OU Seconde étape : on affiche les anomalies et on demande de valider ou retour en arrière
+	// OU Troisième étape : affichage des informations sur import réellement réalisé
+	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_form.tpl');
+	if(!empty($params['import_file'])) {
+		// On crée un titre pour afficher à l'utilisateur le nom du fichier utilisé
+		$tpl->assign('import_file', get_uploaded_file_infos('import_file', $params['import_file'],'javascript:reinit_upload_field("import_file","[DIV_ID]");'));
+	}
+	if(!empty($params['defaults'])) {
+		// A FAIRE : on pourrait faire une gestion générique d'autocomplete pour les champs par défaut si ils sont liés à des jointures
+		$tpl->assign('defaults', $params['defaults']);
+	}
+
+	$tpl->assign('rules_array', get_import_export_saved_configuration('import'));
+
+	$tpl->assign('action', get_current_url(true));
+	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'import'));
+	$tpl->assign('types_array', $GLOBALS['database_import_export_type_names_array']);
+	$tpl->assign('inputs', get_database_field_properties($params));
+	$tpl->assign('uploaddir', $GLOBALS['uploaddir']);
+	$tpl->assign('data_encoding', $params['data_encoding']);
+	$tpl->assign('import_output', $output);
+	$tpl->assign('mode', $mode);
+	$tpl->assign('next_mode', $next_mode);
+	$tpl->assign('error', implode('<br />', $error_output));
+	$tpl->assign('type', vb($type));
+	if($mode == '' || empty($general_configuration_is_valid)) {
+		if(!empty($type) || !empty($params['import_file'])) {
+			$tpl->assign('type_disabled', '');
+			if(!empty($type)) {
+				$GLOBALS['js_ready_content_array'][] = 'change_import_type();';
+			}
+		} else {
+			$tpl->assign('type_disabled', ' disabled="disabled"');
+		}
+	}
+	$tpl->assign('default_fields', vb($params['default_fields']));
+	$tpl->assign('correspondance', vb($params['correspondance']));
+	$tpl->assign('test_mode', vb($test_mode));
+	$tpl->assign('general_configuration_is_valid', !empty($general_configuration_is_valid));
+	$tpl->assign('separator', str_replace("\t", '\t', $params['separator']));
+	$tpl->assign('example_href', $GLOBALS['administrer_url'] . '/import/exemple_prod.csv');
+	$tpl->assign('site_name', $GLOBALS['site']);
+	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_SEND_EMAIL_TO_USERS', $GLOBALS['STR_ADMIN_SEND_EMAIL_TO_USERS']);
+	$tpl->assign('STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE', sprintf($GLOBALS['STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE'], $GLOBALS['site']));
+	$tpl->assign('STR_ADMIN_DEFAULT_VALUE', $GLOBALS['STR_ADMIN_DEFAULT_VALUE']);
+	$tpl->assign('STR_ADMIN_IMPORTED_COLUMN', $GLOBALS['STR_ADMIN_IMPORTED_COLUMN']);
+	$tpl->assign('STR_ADMIN_TYPE', $GLOBALS['STR_ADMIN_TYPE']);
+	$tpl->assign('STR_ADMIN_SITE_COLUMN_IN_DATABASE', sprintf($GLOBALS['STR_ADMIN_SITE_COLUMN_IN_DATABASE'], $GLOBALS['site']));
+	$tpl->assign('STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE', $GLOBALS['STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE']);
+	$tpl->assign('STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP', $GLOBALS['STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP']);
+	$tpl->assign('STR_ADMIN_SOURCE_FILE', $GLOBALS['STR_ADMIN_SOURCE_FILE']);
+	$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
+	$tpl->assign('STR_ADMIN_CHECK_DATA', $GLOBALS['STR_ADMIN_CHECK_DATA']);
+	$tpl->assign('STR_ADMIN_CHECK_DATA_BEFORE_IMPORT', $GLOBALS['STR_ADMIN_CHECK_DATA_BEFORE_IMPORT']);
+	$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
+	$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
+	$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
+	$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
+	$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_IMPORT_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
+	$tpl->assign('STR_ADMIN_IMPORT_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
+	$tpl->assign('STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
+	$tpl->assign('STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
+	$tpl->assign('STR_ADMIN_IMPORT_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
+	$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
+	$tpl->assign('STR_ADMIN_IMPORT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_IMPORT_WARNING_ID', $GLOBALS['STR_ADMIN_IMPORT_WARNING_ID']);
+	$tpl->assign('STR_ADMIN_IMPORT_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
+	$tpl->assign('STR_ADMIN_IMPORT_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
+	$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
+	$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
+	$tpl->assign('STR_ADMIN_IMPORT_STATUS', $GLOBALS['STR_ADMIN_IMPORT_STATUS']);
+	$tpl->assign('STR_INIT_FILTER', $GLOBALS['STR_INIT_FILTER']);
+	$tpl->assign('STR_LOAD_RULES', $GLOBALS['STR_LOAD_RULES']);
+	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+	$tpl->assign('STR_SAVE_RULES', $GLOBALS['STR_SAVE_RULES']);
+	$tpl->assign('STR_BACK', $GLOBALS['STR_BACK']);
+	$tpl->assign('STR_FILE', $GLOBALS['STR_FILE']);
+	$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
+	$hook_result = call_module_hook('import_form_template_data', array(), 'array');
+	foreach($hook_result as $this_key => $this_value) {
+		$tpl->assign($this_key, $this_value);
+	}
+	return $tpl->fetch();
+}
+
+/**
+ * Création ou MAJ d'un utilisateur
+ *
+ * @param array $field_values
+ * @param boolean $test_mode
+ * @return
+ */
+function create_or_update_user($field_values, $test_mode = false) {
+	$output = '';
+	if(!isset($GLOBALS['nb_insert'])) {
+		$GLOBALS['nb_insert'] = 0;
+		$GLOBALS['nb_update'] = 0;
+	}
+	// Nettoyage des données
+	foreach($field_values as $this_key => $this_field) {
+		// On retire les mentions dans le fichier qui ne sont pas significatives
+		if(in_array($this_field, array('-', '?'))) {
+			$field_values[$this_key] = '';
+		}
+	}
+	// traitement spécifique enligne
+	if (!empty($field_values['enligne']) && $field_values['enligne'] != 'OK') {
+		$field_values['enligne'] = ($field_values['enligne'] == 'yes' ? 'OK':'NO');
+	}
+	if (!empty($field_values['gps'])) {
+		// Données GPS latitude et longitude à convertir pour mettre dans les bonnes colonnes
+		$gps = explode(',', $field_values['gps']);
+		$field_values['latitude'] = trim(get_float_from_user_input($gps[0]));
+		$field_values['longitude'] = trim(get_float_from_user_input($gps[1]));
+		$field_values['address_hash'] = 'zz'; // Valeur particulière pour dire que la géolocalisation est forcée => ne sera pas regéocodé par le cron du module maps
+	}
+	// On rend priv cohérent et propre, et on rajoute $GLOBALS['users_imported_basic_right'] si demandé
+	if(isset($field_values['priv'])) {
+		$field_values['priv'] = explode('+', str_replace(',', '+', $field_values['priv']));
+	}
+	if(!empty($GLOBALS['users_imported_basic_right'])) {
+		if(!isset($field_values['priv'])) {
+			$field_values['priv'] = array();
+		}
+		$field_values['priv'][] = $GLOBALS['users_imported_basic_right'];
+	}
+	if(!empty($field_values['priv'])) {
+		$field_values['priv'] = implode('+', array_unique($field_values['priv']));
+	}
+	// On ne garde que le dernier email d'une liste
+	if(!empty($field_values['email'])) {
+		$temp = explode(';', str_replace(',', ';', $field_values['email']));
+		$field_values['email'] = end($temp);
+	}
+	$field_values['pseudo'] = str_replace(array('@', ' ', '.', '&'), '_', vb($field_values['pseudo']));
+	$field_values['code_client'] = $field_values['pseudo'];
+	$field_values['email_bounce'] = (!empty($field_values['email'])?'':'5.X.X migrated');
+	if(!empty($field_values['email']) && !EmailOK($field_values['email'])){
+		unset($field_values['email']);
+	}
+	if(empty($field_values['email']) && empty($field_values['nom_famille']) && empty($field_values['societe'])) {
+		return null;
+	}
+	if(!empty($field_values['telephone'])) {
+		$field_values['telephone'] = str_ireplace(array('T : ', 'Tél. : ', 'Tél : ', 'Tel : ', 'Tel: ', 'Stdd : '), '', $field_values['telephone']);
+	}
+	$address_array = array();
+	foreach(array('adresse', 'adresse1', 'adresse2') as $this_key) {
+		if(!empty($field_values[$this_key])) {
+			$address_array[] = $field_values[$this_key];
+		}
+	}
+	$field_values['adresse'] = implode(' ', $address_array);
+	if(!empty($field_values['pays']) && !is_numeric($field_values['pays'])) {
+		$field_values['pays'] = get_country_id($field_values['pays']);
+	}
+	$insert_field_values = $field_values;
+	// On complète les données si nécessaire, uniquement pour l'insertion
+	// date_insert et date_insert sont gérés dans insere_utilisateur et maj_utilisateur
+	if(empty($insert_field_values['etat'])) {
+		// on importe des comptes qu'on active par défaut
+		$insert_field_values['etat'] = '1';
+	}
+	if(empty($insert_field_values['priv'])) {
+		$insert_field_values['priv'] = 'newsletter';
+	}
+	// On cherche l'utilisateur et on le crée si nécessaire
+	$this_result = insere_utilisateur($insert_field_values, true, !empty($_POST['send_email']), false, false, false, $test_mode);
+
+	if(is_numeric($this_result)) {
+		if(!$test_mode) {
+			$output .= 'OK : Utilisateur créé n°' . $this_result . ' - email : ' . $field_values['email'] . ' <br />';
+		}
+		$GLOBALS['nb_insert']++;
+	} else {
+		if(!empty($GLOBALS['user_insert_existing_user'])) {
+			// Utilisateur existe déjà
+			$field_values['id_utilisateur'] = $this_result['id_utilisateur'];
+			unset($field_values['date_insert']);
+			unset($field_values['pays']);
+			unset($field_values['etat']);
+			if(strpos($this_result['priv'], 'admin') !== false) {
+				// On ne modifie pas les droits si admin
+				unset($field_values['priv']);
+			}
+			maj_utilisateur($field_values, false, $test_mode);
+			unset($GLOBALS['user_insert_existing_user']);
+			if(!$test_mode) {
+				$output .= 'OK : Utilisateur MAJ  n°' . $this_result['id_utilisateur'] . ' - email : ' . $field_values['email'] . '<br /> ';
+			}
+			$GLOBALS['nb_update']++;
+		} else {
+			if(!$test_mode) {
+				$output .= 'NOK : Utilisateur déjà existant pas modifié - email : ' . $field_values['email'] . '<br />';
+			}
+		}			
 	}
 	return $output;
 }
@@ -6278,62 +7388,622 @@ drag_and_drop_fields(".field_draggable", "#db_field_list table td.content_dragga
 /**
  * Gestion de l'export
  *
+ * @param boolean $check_access_rights
+ * @param array $params
  * @return
  */
-function handle_export() {
-	$action = vb($_POST['action']);
-	$type = vb($_POST['type']);
+function handle_export($check_access_rights = true, $params = array()) {
+	$output = import_export_init('export', $params);
 
-	// Configuration des droits pour pouvoir procéder à l'import
-	// On a une liste générique par défaut dans PEEL, et on complète cette liste via un hook
-	if(a_priv("admin_products,admin_webmastering")) {
-		$types_array = array('peel_produits' => 'Produits');
+	$error_output = '';
+	
+	$type = $params['type'];
+	if($check_access_rights) {
+		if(empty($type)) {
+			necessite_priv("admin*");
+		} else {
+			if(empty($GLOBALS['database_user_rights_by_type_array'][$type])) {
+				// On autorise si pas de contrainte d'accès
+				// die();
+			} else {
+				necessite_priv($GLOBALS['database_user_rights_by_type_array'][$type]);
+			}
+		}			
 	}
-	if(a_priv("admin_products,admin_webmastering")) {
-		$types_array = array('peel_utilisateurs' => 'Utilisateurs');
+	// Format généré : CSV, HTML ou PDF
+	// On donne priorité à format dans GET pour permettre notamment des tests
+	$format = vb($_GET['format'], vb($params['format'], 'csv'));
+	$mode = vb($params['mode']);
+	if($mode == 'export' && in_array($type, array('ventes', 'one_line_per_product', 'one_line_per_order', 'ventes_chronopost', 'ventes_cegid')) && !empty($_GET['dateadded1']) && !empty($_GET['dateadded2'])) {
+		// export direct à partir d'un lien
+		$params['ordered_fields_selected'] = $GLOBALS['database_fields_by_type_array'][$type];
 	}
-	$hook_result = call_module_hook('import_infos_template_data', array(), 'array');
-	$types_array = array_merge_recursive_distinct($types_array, $hook_result['type_list']);
-			
-	switch ($action) {
+	
+	$table_name = vb($GLOBALS['database_import_export_table_by_type_array'][$type], $type);
+	if (empty($params['ordered_fields_selected']) && $mode == 'export') {
+		$mode = '';
+		$error_output .= $GLOBALS['STR_ADMIN_CHOOSE_COLUMN'];
+	} elseif ($type == "ventes_clients_par_produit" && empty($_GET['id']) && $mode == 'export') {
+		$mode = '';
+		$error_output .= $GLOBALS['STR_ADMIN_PRODUCT_ID_MANDATORY_IN_URL'];
+	}
+	
+	switch ($mode) {
 		case "export":
-			// FAIRE VERIFICATIONS DIVERSES
-			if(!in_array($type, $types_array)) {
+			$next_mode = 'export';
+			// PREAMBULE : FAIRE VERIFICATIONS DIVERSES
+			
+			if(empty($GLOBALS['database_import_export_type_names_array'][$type])) {
 				// L'utilisateur n'a pas le droit d'importer dans la table demandée
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				$error_output .= sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']));
 				break;
 			}
-			if(empty($output)) {
-				// Pas de problème
-				if(get_current_url(false, true) != '/modules/export/export.php') {
-					// On appelle la génération de l'export de l'extérieur du module, donc on redirige pour la génération
-					// On ne redirige que lorsqu'on a fait toutes les vérifications en amont, pour rester en dehors du module export si on le souhaite pour l'interfacec
-					redirect_and_die(get_url($GLOBALS['wwwwroot'] . '/modules/export/export.php', array('type' => $type, 'mode' => $mode, 'format' => $format, 'csv_separator' => $csv_separator, 'encoding' => $encoding)));
+
+		/*
+			// Morceau de code désactivé, la gestion de l'export dans le fichier export.php est différente de celle faite ici
+			// Pas de problème
+			if(get_current_url(false, true) != '/modules/export/administrer/export.php') {
+				// On appelle la génération de l'export de l'extérieur du module, donc on redirige pour la génération
+				// On ne redirige que lorsqu'on a fait toutes les vérifications en amont, pour rester en dehors du module export si on le souhaite pour l'interface
+				redirect_and_die(get_url($GLOBALS['wwwwroot'] . '/modules/export/export.php', array('type' => $type, 'mode' => $mode, 'format' => $format, 'separator' => $params['separator'], 'data_encoding' => $data_encoding)));
+			} 
+		*/
+
+			// On va procéder à l'export :
+			// ETAPE 1 : on va remplir les lignes de données à partir de la BDD, et de calculs
+			// ETAPE 2 : on prendra uniquement les champs qu'on veut et dans le bon ordre, en mettant au bon format d'export
+			$results_array = array();
+
+			if(empty($_GET['debug'])) {
+				// On ne veut pas polluer le fichier exporté par un quelconque message d'erreur
+				@ini_set('display_errors', 0);
+			}
+			if($type == 'peel_utilisateurs') {
+				// CLIENTS
+				$cle = trim(vb($_GET['cle']));
+				$priv = trim(vb($_GET['priv']));
+				if (!empty($_GET['export']) && $_GET['export'] == 'search_user') {
+					$sql_csv = afficher_liste_utilisateurs($priv, $cle, $_GET, 'date_insert', false, true);
 				} else {
-					// Si on est dans /modules/export/export.php on va sortir de handle_export sans output, et on va générer le fichier via le code de /modules/export/export.php
+					$sql_csv = "SELECT u.*
+						FROM peel_utilisateurs u
+						WHERE " . get_filter_site_cond('utilisateurs', 'u', true) . "";
+					if (!empty($_GET['priv'])) {
+						$sql_csv .= " AND CONCAT('+',u.priv,'+') LIKE '%+" . nohtml_real_escape_string($_GET['priv']) . "+%'";
+					}
+					if (!empty($cle)) {
+						$sql_csv .= " AND (u.code_client LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.email LIKE '%" . nohtml_real_escape_string($cle) . "%' OR u.ville LIKE  '%" . nohtml_real_escape_string($cle) . "%' OR u.nom_famille LIKE  '%" . nohtml_real_escape_string($cle) . "%' OR " . get_zip_cond($cle, 'u', false) . ")";
+					}
+				}	
+				// **********
+			} elseif($type == 'livraisons') {
+				// LIVRAISONS
+				if (empty($params["dateadded1"]) || empty($params["dateadded2"])) {
+					$error_output .= 'Dates non définies';
+				} else {
+					if (!empty($params["id_statut_livraison"])) {
+						$extra_sql = "AND id_statut_livraison = '" . intval($_GET["id_statut_livraison"]) . "'";
+					} else {
+						$extra_sql = "";
+					}
+					$sql_csv = "SELECT *, poids*quantite AS poids_calc, CONCAT('reference', ' - ', nom_produit) AS article_calc
+						FROM peel_commandes c
+						LEFT JOIN peel_commandes_articles ca ON ca.commande_id = c.id AND quantite!=0 AND " . get_filter_site_cond('commandes_articles', null, true) . "
+						WHERE o_timestamp>='" . nohtml_real_escape_string($params["dateadded1"]) . "' AND o_timestamp<='" . nohtml_real_escape_string($params["dateadded2"]) . "' AND " . get_filter_site_cond('commandes', null, true) . " " . $extra_sql . "
+						ORDER BY o_timestamp";
+					// **********
+				}
+			} elseif ($type == "ventes_clients_par_produit") {
+				// Export des clients qui ont acheté le produit $_GET['id']
+				// Format du nom de fichier adapté pour Cegid, utilisé dans tous les cas
+				$filename = "jdv_" . StringMB::strtolower(StringMb::substr(date('F', strtotime($_GET["dateadded1"])),0,4)).date('y', time()) . ".csv";
+				$results_array = affiche_liste_clients_par_produit($_GET['id'], true);
+				// **********
+			} elseif(in_array($type, array('ventes', 'one_line_per_product', 'one_line_per_order', 'ventes_chronopost', 'ventes_cegid'))) {
+				// Export des ventes selon un filtre de date et de statut de paiement
+				if (empty($params["dateadded1"]) || empty($params["dateadded2"])) {
+					$error_output .= 'Dates non définies';
+				} else {
+					if (!empty($params["id_statut_paiement"])) {
+						$extra_sql = "AND id_statut_paiement = '" . intval($params["id_statut_paiement"]) . "'";
+					} else {
+						$extra_sql = "";
+					}
+					if (!empty($_POST['export_selected_order']) && !empty($_POST['order_id'])) {
+						$sql_cond = "AND c.id IN (".implode(',', nohtml_real_escape_string($_POST['order_id'])).")";
+					} else {
+						$sql_cond = "AND c." . word_real_escape_string($params["date_field"]) . ">='" . nohtml_real_escape_string($params["dateadded1"]) . "' AND c." . word_real_escape_string($params["date_field"]) . "<='" . nohtml_real_escape_string($params["dateadded2"]) . "' " . $extra_sql . "";
+					}
+					$sql_csv = "SELECT *
+						FROM peel_commandes c
+						WHERE " . get_filter_site_cond('commandes', 'c', true) . " " . $sql_cond . " 
+						ORDER BY c." . word_real_escape_string(vb($params["date_field"], 'o_timestamp')) . "";
+					$total_cout_transport = 0;
+					$total_cout_transport_ht = 0;
+					$total_ht = 0;
+					$total_tva = 0;
+					$total = 0;
+					$total_netapayer = 0;
+					$total_total_produit_ht = 0;
+					$total_total_produit = 0;
+					$total_tarif_paiement_ht = 0;
+					$total_tarif_paiement = 0;
+					$query_csv = query($sql_csv);
+					unset($sql_csv);
+					$output_array = array();
+					while ($commande = fetch_assoc($query_csv)) {
+						if($type == 'one_line_per_product') {
+							// Export simplifié avec liste des noms de produits et quantité
+							$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
+							foreach ($product_infos_array as $this_ordered_product) {
+								if (!isset($output_array[$this_ordered_product['nom_produit']])) {
+									$output_array[$this_ordered_product['nom_produit']] = 0;
+								}
+								$output_array[$this_ordered_product['nom_produit']] += $this_ordered_product['quantite'];
+							}
+							if(!empty($output_array)) {
+								foreach($output_array as $product_name => $total_quantity) {
+									$results_array[] = array('product_name' => $product_name, 'quantity_by_product' => intval($total_quantity));
+								}
+								unset($output_array);
+							} 
+						} else {
+							// Préparation des données complémentaires à la commande
+							$commande['numero'] = $commande['id'];
+							if (!empty($commande['numero'])) {
+								$commande['numero_facture'] = $commande['numero'];
+							} else {
+								$commande['numero_facture'] = $commande['id'];
+							}
+
+							$commande['date_vente'] = get_formatted_date($commande['o_timestamp'], 'short', 'long');
+							$commande['date_achat'] = get_formatted_date($commande['a_timestamp'], 'short', 'long');
+
+							// Compatibilité avec anciens PEEL : décodage des entités HTML stockées en BDD
+							// Pas besoin de protégé du séparateur CSV, car on applique filtre_csv tout à la fin
+							$commande['nom_bill'] = StringMb::htmlspecialchars_decode($commande['nom_bill'], ENT_QUOTES);
+							$commande['societe_bill'] = StringMb::htmlspecialchars_decode($commande['societe_bill'], ENT_QUOTES);
+							$commande['adresse_bill'] = StringMb::htmlspecialchars_decode($commande['adresse_bill'], ENT_QUOTES);
+							$commande['ville_bill'] = StringMb::htmlspecialchars_decode($commande['ville_bill'], ENT_QUOTES);
+							$commande['pays_bill'] = StringMb::htmlspecialchars_decode($commande['pays_bill'], ENT_QUOTES);
+
+							$commande['montant_avec_avoir'] = $commande['montant']+$commande['avoir'];
+							$commande['tva_produit'] = $commande['total_produit']-$commande['total_produit_ht'];
+
+							$total_cout_transport += $commande['cout_transport'];
+							$total_cout_transport_ht += $commande['cout_transport_ht'];
+							$total_tva += $commande['total_tva'];
+							$total_ht += $commande['montant_ht'];
+							$total += $commande['montant']+$commande['avoir'];
+							$total_netapayer += $commande['montant'];
+
+							$commande['vat_arrays'][] = get_vat_array($commande['code_facture']);
+
+							if (in_array('peel_transactions', listTables()) && in_array('reglements', $params['ordered_fields_selected'], true)) {
+								// La variable de réglements est à mettre dans $GLOBALS['site_parameters']['export_order_custom_field']. Elle sera utilisée dans $$this_var plus bas dans le code.
+								// Récupération des informations de règlement;
+								$sql = "SELECT id, AMOUNT, datetime, type AS payment_technical_code
+									FROM peel_transactions
+									WHERE ORDER_ID = ".intval($commande['id']);
+								$query = query($sql);
+								$reglement_array = array();
+								while ($result = fetch_assoc($query)) {
+									$reglement_array[] = '' . get_formatted_date($result['datetime']) . ' : ' . get_payment_name($result['payment_technical_code']) . ' - ' . $GLOBALS['STR_AMOUNT'] . ' : ' . fprix($result['AMOUNT'], true, $commande['devise'], true, $commande['currency_rate']) . '';
+								}
+								$commande['reglements'] = implode('#', $reglement_array);
+							}
+							// Calculs pour le footer
+							$product_infos_array = get_product_infos_array_in_order($commande['id'], $commande['devise'], $commande['currency_rate']);
+							foreach ($product_infos_array as $this_ordered_product) {
+								$ligne_total_produit_ht += $this_ordered_product['total_prix_ht'];
+								$ligne_total_produit_ttc += $this_ordered_product['total_prix'];
+							}
+
+							if ($type == 'one_line_per_order') {
+								// Une ligne par commande, avec des sommes sur les produits concernés
+								$results_array[] = array('id' => intval($commande['id']), 'numero' => $commande['order_id'], 'o_timestamp' => $commande['date_vente'], 'nom_bill' => $commande['nom_bill'], 'societe_bill' => $commande['societe'], 'adresse_bill' => $commande['adresse'], 'ville_bill' => $commande['ville'], 'zip_bill' => $commande['code_postal'], 'pays_bill' => $commande['pays'], 'montant_ht' => fxsl($this_ordered_product['total_prix_ht']), 'tva_percent' => fxsl($this_ordered_product['tva_percent']), 'montant_avec_avoir' => fxsl($commande['montant_avec_avoir']), 'avoir' => fxsl($commande['avoir']), 'montant' => fxsl($commande['montant']+$commande['avoir']), 'cout_transport_ht' => fxsl($cout_transport_ht), 'tva_cout_transport' => fxsl($commande['cout_transport']-$commande['cout_transport_ht']), 'cout_transport' => fxsl($commande['cout_transport']), 'tarif_paiement_ht' => fxsl($commande['tarif_paiement_ht']), 'tva_tarif_paiement' => fxsl($commande['tarif_paiement']-$commande['tarif_paiement_ht']), 'tarif_paiement' => fxsl($commande['tarif_paiement']), 'paiement' => $commande['paiement'], 'total_produit_ht' => fxsl($commande['total_produit_ht']), 'tva_total_produit' => fxsl($commande['tva_total_produit']), 'total_produit' => fxsl($commande['total_produit']));
+							} elseif($type == "ventes_chronopost") {
+								// Une ligne par commande
+								$results_array[] = array('unused1' => '', 'societe' => $commande['societe_ship'], 'nom' => $commande['nom_ship'], 'prenom' => $commande['prenom_ship'], 'adresse' => $commande['adresse_ship'], 'unused2' => '', 'unused3' => '',  'unused4' => '', 'zip' => $commande['zip_ship'], 'ville' => $commande['ville_ship'], 'pays' => get_country_iso_2_letter_code($commande['pays_ship']), 'telephone' => $commande['telephone_ship'], 'email' => $commande['email_ship'], 'id' => $commande['id'], 'unused5' => '', 'unused6' => '', 'export_default_product' => vn($GLOBALS['site_parameters']['order_chronopost_export_default_product']), 'contract_number' => vn($GLOBALS['site_parameters']['chronopost_contract_number']), 'sub_account_contract_number' => vn($GLOBALS['site_parameters']['chronopost_sub_account_contract_number']), 'unused7' => '', 'unused8' => '', 'M' => 'M', 'unused9' => '', 'unused10' => '', 'unused11' => '', 'total_poids' => $commande['total_poids'], 'unused12' => '', 'unused13' => '', 'unused14' => '', 'unused15' => '', 'unused16' => '', 'delivery_date' => date('d-m-Y', strtotime($commande['o_timestamp']) + 3600*24*vn($GLOBALS['site_parameters']['order_date_delivery_delay'],2)), 'unused17' => '', 'unused18' => '', 'unused19' => '', 'unused20' => '', 'unused21' => '', 'unused22' => '', 'unused23' => '', 'unused24' => '');
+							} elseif($type == "ventes" || $type == "ventes_cegid") {
+								// On affiche sur la première ligne d'une commande le premier produit avec les infos générales de coût de la commande, puis sur les lignes suivantes les produits suivants de la commande sans indication de coût de commande
+								$i = 0;
+								foreach ($product_infos_array as $this_ordered_product) {
+									if ($this_ordered_product['quantite'] != 0) {
+										// On affiche le coût de transport et de transaction uniquement sur la ligne du premier produit commandé
+										$cout_transport = ($i == 0) ? $commande['cout_transport'] : "";
+										$cout_transport_ht = ($i == 0) ? $commande['cout_transport_ht'] : "";
+										$tva_cout_transport = $cout_transport - $cout_transport_ht;
+										$tarif_paiement = ($i == 0) ? $commande['tarif_paiement'] : "";
+										$tarif_paiement_ht = ($i == 0) ? $commande['tarif_paiement_ht'] : "";
+										$tva_tarif_paiement = $tarif_paiement - $tarif_paiement_ht;
+
+										$total_total_produit += $this_ordered_product['total_prix'];
+										$total_total_produit_ht += $this_ordered_product['total_prix_ht'];
+										$total_tarif_paiement += $tarif_paiement;
+										$total_tarif_paiement_ht += $tarif_paiement_ht;
+										$total_cout_transport_ht += $cout_transport_ht;
+										$total_cout_transport += $cout_transport;
+										
+										$i++;
+										if ($type == "ventes_cegid") {
+											$first_reference_caractere = StringMb::substr($this_ordered_product['reference'],0,1);
+											$general = ($first_reference_caractere == 0)?'706100':'70710'.$first_reference_caractere;
+											$results_array[] = array('journal' => "VEN", 'date' => get_formatted_date($commande['f_datetime'], 'short'), 'general' => $general, 'auxiliaire' => '', 'reference' => intval($commande['numero_facture']), 'libelle' => $commande['nom_bill'], 'credit' => fxsl($this_ordered_product['total_prix_ht']+$this_ordered_product['total_prix_attribut_ht']), 'debit' => '');
+										} else {
+											// Ici : $type == "ventes"
+											$results_array[] = array('id' => intval($commande['id']), 'numero' => $commande['order_id'], 'o_timestamp' => $commande['date_vente'], 'nom_bill' => $commande['nom_bill'], 'societe_bill' => $commande['societe'], 'adresse_bill' => $commande['adresse'], 'ville_bill' => $commande['ville'], 'zip_bill' => $commande['code_postal'], 'pays_bill' => $commande['pays'], 'nom_produit' => $this_ordered_product['nom_produit'], 'quantite' => $this_ordered_product['quantite'], 'prix_ht' => fxsl($this_ordered_product['prix_ht']), 'montant_ht' => fxsl($this_ordered_product['total_prix_ht']), 'tva_percent' => fxsl($this_ordered_product['tva_percent']), 'total_tva' => fxsl($this_ordered_product['total_prix'] - $this_ordered_product['total_prix_ht']), 'total_prix' => fxsl($this_ordered_product['total_prix']), 'cout_transport_ht' => fxsl($cout_transport_ht), 'tva_cout_transport' => fxsl($tva_cout_transport), 'cout_transport' => fxsl($cout_transport), 'tarif_paiement_ht' => fxsl($tarif_paiement_ht), 'tva_tarif_paiement' => fxsl($tva_tarif_paiement), 'tarif_paiement' => fxsl($tarif_paiement), 'paiement' => $commande['paiement'], 'montant_avec_avoir' => fxsl($commande['montant_avec_avoir']));
+										}
+									}
+								}
+							}
+						}
+					}
+					if ($type == "ventes" && $params['footer']) {
+						// On crée un petit tableau de totaux à la fin
+						$results_array['footer1'] = array('prix_ht' => $GLOBALS["STR_ADMIN_BILL_TOTALS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":", 'montant_ht' => fxsl($total_total_produit_ht), 'tva_percent' => '', 'total_tva' => fxsl($total_total_produit - $total_total_produit_ht), 'total_prix' => fxsl($total_total_produit), 'cout_transport_ht' => fxsl($total_cout_transport_ht), 'tva_cout_transport' => fxsl($total_cout_transport-$total_cout_transport_ht), 'cout_transport' => fxsl($total_cout_transport), 'tarif_paiement_ht' => fxsl($total_tarif_paiement_ht), 'tva_tarif_paiement' => fxsl($total_tarif_paiement - $total_tarif_paiement_ht), 'tarif_paiement' => fxsl($total_tarif_paiement), 'paiement' => $commande['paiement']);
+						$results_array['footer2'] = array('prix_ht' => $GLOBALS["STR_ADMIN_TOTAL_HT_ALL_INCLUDE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":", 'montant_ht' => fxsl($total_total_produit_ht + $total_cout_transport_ht + $total_tarif_paiement_ht));
+						$results_array['footer3'] = array('prix_ht' => $GLOBALS["STR_ADMIN_TOTAL_TVA_ALL_INCLUDE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":", 'montant_ht' => fxsl(($total_total_produit - $total_total_produit_ht) + $total_cout_transport - $total_cout_transport_ht + $total_tarif_paiement - $total_tarif_paiement_ht));
+						$results_array['footer4'] = array('prix_ht' => $GLOBALS["STR_ADMIN_TOTAL_TTC_ALL_INCLUDE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":", 'montant_ht' => fxsl($total_total_produit + $total_cout_transport + $total_tarif_paiement));
+					}
+				}
+				// **********
+			} elseif($type == 'peel_produits') {
+				$where = '';
+				if (!empty(vn($_POST['categories']))) {
+					$where = " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND " ;
+				}
+				// PRODUITS
+				// On construit toutes les lignes de données
+				$sql = "SELECT p.*, c.id AS categorie_id, c.nom_" . $_SESSION['session_langue'] . " AS categorie
+					FROM peel_produits p
+					INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
+					INNER JOIN peel_categories c ON c.id=pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+					WHERE " . $where ." ". get_filter_site_cond('produits', 'p', true) . "
+					GROUP BY id
+					ORDER BY id";
+				$query = query($sql);
+				$i = 0;
+				while ($result = fetch_assoc($query)) {
+					// On récupère les infos liées à chaque produit
+					$product_attributs_id_array = array();
+					$product_object = new Product($result['id'], $result, true, null, true, !check_if_module_active('micro_entreprise'));
+					// Gestion des champs calculés
+					$result['Listed_price_including_vat'] = fxsl($product_object->get_original_price(true, false, false));
+					$result['Listed_price_excluding_vat'] = fxsl($product_object->get_original_price(false, false, false));
+					$result['Sizes'] = implode(',', $product_object->get_possible_sizes('export'));
+					$result['Colors'] = implode(',', $product_object->get_possible_colors());
+					$result['Brand'] = implode(',', $product_object->get_product_brands());
+					$result['Associated_products'] = implode(',', $product_object->get_product_references());
+					$result['Category'] = implode(',', $product_object->get_possible_categories());
+
+					// On rajoute des informations via un hook, par exemple informations relatives à des attributs
+					$hook_result = call_module_hook('export_products_get_line_infos_array', array('id' => $product_object->id), 'array');
+					$result = array_merge_recursive_distinct($result, $hook_result);
+
+					// On génère la ligne
+					$this_line_output = array();
+					foreach($result as $this_field_name => $this_value) {
+						if (($this_field_name == $GLOBALS["STR_ADMIN_PRICE_HT_WITHOUT_REDUCTION"] || $this_field_name == $GLOBALS["STR_ADMIN_PRICE_TTC_WITHOUT_REDUCTION"] || $this_field_name == $GLOBALS["STR_ADMIN_PRICE"]) && !empty($_POST['price_disable'])) {
+							$result[$this_field_name] = '';
+						} else {
+							if (in_array($this_field_name, $GLOBALS['database_field_calc_by_table_array'][$type]) || StringMb::substr($this_field_name, 0, StringMb::strlen('descriptif_')) == 'descriptif_' || StringMb::substr($this_field_name, 0, StringMb::strlen('description_')) == 'description_') {
+								$result[$this_field_name] = StringMb::html_entity_decode_if_needed($this_value);
+							} else {
+								$result[$this_field_name] = vb($this_value);
+							}
+						}
+					}
+					$results_array[] = $result;
+					unset($product_object);
+					$i++;
+					if($i%10==0) {
+						// On transfère au fur et à mesure pour faire patienter utilisateur, et pour éviter erreur du type : Script timed out before returning headers
+						echo StringMb::convert_encoding($output, $params['data_encoding'], GENERAL_ENCODING);
+						$output = '';
+					}
+				}
+
+				echo StringMb::convert_encoding($output, $params['data_encoding'], GENERAL_ENCODING);
+			} elseif($type == 'formatted_produits') {
+				$where = '';
+				if (!empty(vn($_POST['categories']))) {
+					$where .= " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND " ;
+				}
+				$sql = "SELECT p.*, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS nom, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, p.image1
+					FROM peel_produits p
+					INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
+					INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+					WHERE " . $where ." ". get_filter_site_cond('produits', 'p', true) . "
+					GROUP BY p.id
+					ORDER BY p.id";
+				// var_dump($sql);die();
+				$query = query($sql);
+				while ($result = fetch_assoc($query)) {
+					// On récupère les infos liées à chaque produit
+					$product_object = new Product($result['id'], $result, true, null, true, !check_if_module_active('micro_entreprise'));
+					$possible_sizes = $product_object->get_possible_sizes('infos', 0, true, false, false, true);
+					$size_options_html = '';
+					if (!empty($possible_sizes)) {
+						$purchase_prix = $product_object->get_final_price();
+						foreach ($possible_sizes as $this_size_id => $this_size_infos) {
+							$option_content = $this_size_infos['name'];
+							$option_content .= "<br/><span style='font-size:10px;'>" . $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_LIST_OPTION_OVERCOST'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . fprix($purchase_prix + $this_size_infos['final_price_formatted'], true);
+							$size_options_html .= $option_content . "</span><br/>";
+						}
+					}
+					$possible_colors = $product_object->get_possible_colors();
+					$color_options_html = '';
+					if (!empty($possible_colors)) {
+						// Code pour recupérer select des couleurs
+						foreach ($possible_colors as $this_color_id => $this_color_name) {
+							$color_options_html .= $this_color_name . '<br/>';
+						}
+					}
+					$results_array[] = array('nom' => vb($result['nom']), 'descriptif' => vb($result['descriptif']), 'formatted_prix' => fprix($product_object->get_original_price(false, false, false), true) . "<br/><span style='font-size:10px;'>" . $GLOBALS["STR_ADMIN_ECOTAX"] .$GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '. fprix($product_object->get_ecotax(), true) . "</span>", 'image1' => (!empty($result['image1'])?"<img src='" . thumbs(vb($result['image1']), 80, 50, 'fit', null, null, true, true) . "'/>":''), 'formatted_colors' => (empty($color_options_html)?'<span>-</span>':$color_options_html), 'formatted_sizes' => (empty($size_options_html)?'<span>-</span>':$size_options_html));
+					unset($product_object);
+				}
+			}
+			if(empty($error_output)) {
+				// On appelle un hook qui va éventuellement gérer l'import de la ligne si il gère ce $type d'import
+				// NB : Si on veut forcer des titres dans la génération de la première ligne, dans le hook ci-dessous on peut compléter $GLOBALS['database_field_titles_by_type_array'][$type]
+				
+				if ($params['group_by']) {
+					// il y a des valeurs vide dans ce qui est envoyé en POST. Il faut transmettre au hook un tableau n'ayant que des valeurs remplies
+					$group_by_array = array();
+					foreach($params['group_by'] as $this_value) {
+						if (!empty($this_value)) {
+							$group_by_array[] = $this_value;
+						}
+					}
+				}
+				if ($params['order_by']) {
+					// il y a des valeurs vide dans ce qui est envoyé en POST. Il faut transmettre au hook un tableau n'ayant que des valeurs remplies
+					$order_by_array = array();
+					foreach($params['order_by'] as $this_value) {
+						if (!empty($this_value)) {
+							$order_by_array[] = $this_value;
+						}
+					}
+				}
+				
+				$hook_result = call_module_hook('export', array('type' => $type, 'results_array' => $results_array, 'table_name' => $table_name, 'domain' => vb($params['domain']), 'format' => $format, 'separator' => $params['separator'], 'ordered_fields_selected' => vb($params['ordered_fields_selected']), 'group_by_array' => vb($group_by_array), 'order_by_array' => vb($order_by_array), 'max_subtotals_level' => vb($params['max_subtotals_level'])), 'array');
+				if(isset($hook_result['disable_colresizable'])) {
+					$params['disable_colresizable'] = $hook_result['disable_colresizable'];
+				}
+				if(!empty($hook_result['export_output'])) {
+					// Le hook a préparé intégralement le résultat
+					if(strlen($hook_result['export_output']) < 500 && trim(StringMb::strip_tags($hook_result['export_output'])) == '') {
+						$output = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS["STR_ADMIN_NO_RESULT"]))->fetch();
+					} else {
+						$output = &$hook_result['export_output'];
+					}
+				} else {
+					if(!empty($hook_result['export_done'])) {	
+						// Un hook a traité l'export (même si résultat vide)
+						if(!empty($results_array)) {
+							$results_array = array_merge_recursive_distinct($results_array, vb($hook_result['results_array'], array()));
+						} else {
+							$results_array = &$hook_result['results_array'];
+						}
+					} else {
+						// Aucun hook n'a traité d'export, donc on fait un export générique si c'est possible
+						if(!empty($table_name) && empty($results_array) && $GLOBALS['database_mode_by_type_array'][$type] != 'virtual') {
+							$results_array = get_table_rows($table_name);
+						}
+					}
+
+					// On récupère les résultats de la BDD si pas déjà fait plus haut
+					if(empty($results_array) && !empty($sql_csv)) {
+						$query_csv = query($sql_csv);
+						while ($result = fetch_assoc($query_csv)) {
+							$results_array[] = $result;
+						}
+					}
+					foreach($params['ordered_fields_selected'] as $this_field) {
+						if(strpos($this_field, '_date') !== false || strpos($this_field, 'date_') === 0 || $this_field == 'date') {
+							$GLOBALS['database_fields_format']['date'][] = $this_field_name;
+						}
+					}
+					$output .= get_export_table($results_array, $table_name, $format, $params['separator'], $params);
+					if(!empty($params['page_bottom']) && ($format == 'pdf' || $format == 'html')) {
+						$output .= '<div style="position:absolute;bottom:0px;">' . $params['page_bottom'] . '</div>';
+					}
+				}
+				if(function_exists('t2web_database_connect')) {
+					// En cas de gestion de connexion à une bdd différente pour les données sources par rapport aux données de configuration
+					// => on bascule vers la connexion aux données de configuration
+					// NB : c'est nécessaire pour pouvoir gérer les variables de configuration de minification par exemple lors de l'output HTML
+					t2web_database_connect();
+				}
+				if($format == 'pdf' || $format == 'html') {
+					$additional_header = '
+<style>
+h1 { font-size: 14px; color: #337733; align: center; }
+h2 { font-size: 12px; }
+.footer { padding-top:10px; margin-top: 10px;}
+table { border-spacing: 0; border-collapse: collapse; border: 0px; }
+table tr td, table tr th { font-size:11px; padding: 2px; border: 1px solid #e5e5e5; }
+@media print {
+	@page {
+		size: A4 landscape;
+	}
+	body {
+		max-width: 100%;
+	}
+}
+</style>
+					';
+					if(!empty($params['report_header'])) {
+						$output = $params['report_header'] . $output;
+					}
+					if(!empty($params['report_footer'])) {
+						$output = $params['report_footer'] . $output;
+				}
+				}
+				/*// Test de performance
+				$old_output = $output;
+				for($i=0;$i<=50;$i++) {
+					$output .= $old_output;
+				}*/
+				if($format == 'pdf') {
+					$pdf_output = '';
+					$use_light_pdf = true;
+					if($use_light_pdf) {
+						// Beaucoup plus rapide que HTML2PDF qui n'est pas raisonnable car il génère 1 page toutes les secondes environ
+						require_once($GLOBALS['dirroot'].'/lib/class/pdf/light_html2pdf/light_html2pdf.class.php');
+						try
+						{
+							$html2pdf = new LIGHT_HTML2PDF('L');
+							$output = '<body style="font-size:8px">' . $additional_header . '<h1>' . $GLOBALS['DOC_TITLE'] . '</h1>' . $output . '</body>';
+							$html2pdf->AddPage();
+							$html2pdf->SetFont('freesans', '', 12);
+							$html2pdf->writeHTML($output);
+							ob_start();
+							$html2pdf->Output($GLOBALS['database_import_export_type_names_array'][$type] . '-' . str_replace('/', '-', get_formatted_date(time(), 'short')). '.pdf');
+							$pdf_output .= ob_get_contents();
+							ob_end_clean();
+						} catch (Exception $e) {
+							echo $e;
+							exit;
+						}
+					} else {
+						require_once($GLOBALS['dirroot'].'/lib/class/pdf/html2pdf/html2pdf.class.php');
+						try
+						{
+							$html2pdf = new HTML2PDF('L', 'A4', 'fr', true, 'UTF-8', array(2, 10, 10, 10));
+							// $html2pdf->setModeDebug();
+							$html2pdf->setDefaultFont('Arial');
+							/*// Test de performance
+							$old_output = $output;
+							for($i=0;$i<=1000;$i++) {
+								$output .= $old_output;
+							} */
+							$output = '<body style="font-size:8px">' . $additional_header . '<h1>' . $GLOBALS['DOC_TITLE'] . '</h1>'. $output . '</body>';
+							$html2pdf->writeHTML($output);
+							ob_start();
+							$html2pdf->Output($GLOBALS['database_import_export_type_names_array'][$type] . '-' . str_replace('/', '-', get_formatted_date(time(), 'short')). '.pdf');
+							$pdf_output .= ob_get_contents();
+							ob_end_clean();
+						}
+						catch(HTML2PDF_exception $e) {
+							echo $e;
+							exit;
+						}
+					}
+					// On envoie le PDF
+					echo $pdf_output;
+					unset($output);
+				} elseif($format == 'html') {
+					unset($GLOBALS['js_content_array']);
+					unset($GLOBALS['js_ready_content_array']);
+					if(empty($params['disable_colresizable'])) {
+						$GLOBALS['js_files'][] = $GLOBALS['wwwroot']. '/lib/js/colResizable-1.6.min.js';
+						$GLOBALS['js_ready_content_array'][] = '$("table").colResizable({postbackSafe:false, resizeMode:"flex", gripInnerHtml:"<div class=\'grip\'></div>"});';
+					}
+					output_light_html_page($output, $GLOBALS['DOC_TITLE'], $additional_header);
+				} else {
+					// On transmet le fichier qu'on vient de préparer
+					if(empty($filename)) {
+						$filename = "export_".$type."_" . str_replace(array('/', ' '), '-', get_formatted_date(time(), 'short', true)) . ".csv";
+					}
+					output_csv_http_export_header($filename, 'csv', $params['data_encoding']);
+					// On envoie le fichier CSV
+					echo StringMb::convert_encoding($output, $params['data_encoding'], GENERAL_ENCODING);
+					unset($output);
+				}
+				die();
+				break;
+			} else {
+				// On va afficher l'erreur ci-dessous
+			}
+		default:
+			$next_mode = 'export';
+			$footer_optional_array = array();
+			if(!empty($GLOBALS['database_footer_by_type_array'])) {
+				foreach ($GLOBALS['database_footer_by_type_array'] as $this_type=>$this_value) {
+					$footer_optional_array[] = $this_type;
 				}
 			}
 			
-		default:
-			echo 'A FAIRE : interface pour générer un export de manière générique avec choix de table';
-	
-			/* FORMULAIRE DE CHOIX D'EXPORTATION */
-			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_import_form.tpl');
-			$tpl->assign('action', get_current_url(false));
+			// FORMULAIRE DE CHOIX D'EXPORTATION
+			
+			$tpl = $GLOBALS['tplEngine']->createTemplate('admin_export_form.tpl');
+			$information_select_html = '';
+			if(in_array('produits' , $GLOBALS['database_import_export_type_names_array'])) {
+				// Formulaire complémentaire pour les produits
+				$tpl_information_select = $GLOBALS['tplEngine']->createTemplate('admin_ventes_information_select.tpl');
+				$tpl_information_select->assign('payment_status_options', get_payment_status_options(vb($_GET['statut'])));
+				$tpl_information_select->assign('STR_ORDER_STATUT_PAIEMENT', $GLOBALS['STR_ORDER_STATUT_PAIEMENT']);
+				$tpl_information_select->assign('STR_ADMIN_ALL_ORDERS', $GLOBALS['STR_ADMIN_ALL_ORDERS']);
+				$information_select_html = $tpl_information_select->fetch();
+			
+				$tpl->assign('STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA', $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA']);
+				$tpl->assign('STR_ADMIN_SELECT_CATEGORIES_TO_EXPORT', $GLOBALS['STR_ADMIN_SELECT_CATEGORIES_TO_EXPORT']);
+				$tpl->assign('STR_ADMIN_EXPORT_PRICES_DISABLE', $GLOBALS['STR_ADMIN_EXPORT_PRICES_DISABLE']);
+				$tpl->assign('product_categories', get_categories_output(null, 'categories',  vb($params['categories']), 'option', '&nbsp;&nbsp;', null, null, true, 80));
+			}
+
+			
+			$tpl->assign('rules_array', get_import_export_saved_configuration('export'));
+			
+			if (!empty($GLOBALS['database_group_by_type_array'])) {
+				$this_group_by_type_array = array();
+				foreach($GLOBALS['database_group_by_type_array'] as $this_type => $this_group_by_fields) {
+					$this_group_by_type_array[$this_type] = explode(',',$this_group_by_fields);
+				}
+				$tpl->assign('group_by_type_array',$this_group_by_type_array);
+			}
+			if (!empty($GLOBALS['database_order_by_type_array'])) {
+				$this_order_by_type_array = array();
+				foreach($GLOBALS['database_order_by_type_array'] as $this_type => $this_order_by_fields) {
+					$this_order_by_type_array[$this_type] = explode(',',$this_group_by_fields);
+				}
+				$tpl->assign('order_by_type_array', $this_order_by_type_array);
+			}
+			
+			if (!empty($GLOBALS['max_subtotals_level'])) {
+				$tpl->assign('max_subtotals_level', $GLOBALS['max_subtotals_level']);
+			}
+			
+			$tpl->assign('action', get_current_url(true));
+			$tpl->assign('mode', $mode);
+			$tpl->assign('next_mode', $next_mode);
+			$tpl->assign('header', $params['header']);
+			$tpl->assign('footer', $params['footer']);
+			$tpl->assign('footer_optional_array', $footer_optional_array);
 			$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . 'export'));
-			$tpl->assign('STR_ADMIN_IMPORT_TYPE', $GLOBALS['STR_ADMIN_IMPORT_TYPE']);
-			$tpl->assign('STR_ADMIN_IMPORT_CORRESPONDANCE', $GLOBALS['STR_ADMIN_IMPORT_CORRESPONDANCE']);
-			$tpl->assign('type_list', $types_array);
+			$tpl->assign('STR_ADMIN_EXPORT_TYPE', $GLOBALS['STR_ADMIN_EXPORT_TYPE']);
+			$tpl->assign('STR_ADMIN_EXPORT_COLUMNS', $GLOBALS['STR_ADMIN_EXPORT_COLUMNS']);
+			$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
+			$tpl->assign('STR_ADMIN_TEXT_HEADER_FOR_REPORT', $GLOBALS['STR_ADMIN_TEXT_HEADER_FOR_REPORT']);
+			$tpl->assign('inputs', get_database_field_properties($params));
+			$tpl->assign('types_array', $GLOBALS['database_import_export_type_names_array']);
 			$tpl->assign('uploaddir', $GLOBALS['uploaddir']);
-			$tpl->assign('export_encoding', vb($frm['export_encoding']));
+			$tpl->assign('data_encoding', vb($params['data_encoding']));
+			$tpl->assign('separator', str_replace("\t", '\t', $params['separator']));
+			$tpl->assign('selected_type', $type);
+			if(!empty($type)) {
+				$GLOBALS['js_ready_content_array'][] = 'change_export_type();';
+			}
+			$tpl->assign('format', $format);
+			$tpl->assign('admin_date_filter_form', get_admin_date_filter_form($GLOBALS['STR_ADMIN_VENTES_RESULTS_TITLE'], $information_select_html, null, false, false));
+			$tpl->assign('STR_ADMIN_TEXT_FOR_PDF_EXPORT', $GLOBALS['STR_ADMIN_TEXT_FOR_PDF_EXPORT']);
+			$tpl->assign('STR_ADMIN_COLUMN_TTTLE_FIRST_LINE', $GLOBALS['STR_ADMIN_COLUMN_TTTLE_FIRST_LINE']);
+			$tpl->assign('STR_ADMIN_ADD_FOOTER_FILE_EXPORT', $GLOBALS['STR_ADMIN_ADD_FOOTER_FILE_EXPORT']);
+			$tpl->assign('STR_ADMIN_COLUMN_AVAILABLE', $GLOBALS['STR_ADMIN_COLUMN_AVAILABLE']);
+			$tpl->assign('STR_ADMIN_GENERATE_FILE', $GLOBALS['STR_ADMIN_GENERATE_FILE']);
+			$tpl->assign('STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT', $GLOBALS['STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT']);
+			$tpl->assign('STR_ADMIN_FILE_COLUMN_EXPORTED', $GLOBALS['STR_ADMIN_FILE_COLUMN_EXPORTED']);
+			$tpl->assign('STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE', $GLOBALS['STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE']);
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
-			$tpl->assign('STR_ADMIN_IMPORT_FORM_TITLE', $GLOBALS['STR_ADMIN_IMPORT_FORM_TITLE']);
+			$tpl->assign('STR_ADMIN_EXPORT', $GLOBALS['STR_ADMIN_EXPORT']);
+			$tpl->assign('STR_ADMIN_TEXT_FOOTER_FOR_REPORT', $GLOBALS['STR_ADMIN_TEXT_FOOTER_FOR_REPORT']);
+			$tpl->assign('STR_ADMIN_TEXT_HEADER_FOR_REPORT', $GLOBALS['STR_ADMIN_TEXT_HEADER_FOR_REPORT']);
 			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT']);
 			$tpl->assign('STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_FILE_FORMAT_EXPLAIN']);
 			$tpl->assign('STR_ADMIN_IMPORT_FILE_EXAMPLE', $GLOBALS['STR_ADMIN_IMPORT_FILE_EXAMPLE']);
 			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_MODE', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_MODE']);
-			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_ALL_FIELDS']);
-			$tpl->assign('STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_IMPORT_SELECTED_FIELDS']);
 			$tpl->assign('STR_ADMIN_IMPORT_SELECT_FIELDS', $GLOBALS['STR_ADMIN_IMPORT_SELECT_FIELDS']);
 			$tpl->assign('STR_WARNING', $GLOBALS['STR_WARNING']);
 			$tpl->assign('STR_ADMIN_IMPORT_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_EXPLAIN']);
@@ -6341,724 +8011,220 @@ function handle_export() {
 			$tpl->assign('STR_ADMIN_IMPORT_FILE_NAME', $GLOBALS['STR_ADMIN_IMPORT_FILE_NAME']);
 			$tpl->assign('STR_ADMIN_IMPORT_FILE_ENCODING', $GLOBALS['STR_ADMIN_IMPORT_FILE_ENCODING']);
 			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR']);
-			$tpl->assign('STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN', $GLOBALS['STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN']);
+			$tpl->assign('STR_ADMIN_EXPORT_CSV', $GLOBALS['STR_ADMIN_EXPORT_CSV']); 
+			$tpl->assign('STR_ADMIN_EXPORT_PDF', $GLOBALS['STR_ADMIN_EXPORT_PDF']);
 			$tpl->assign('STR_VALIDATE', $GLOBALS['STR_VALIDATE']);
+			$tpl->assign('STR_INIT_FILTER', $GLOBALS['STR_INIT_FILTER']);
+			$tpl->assign('STR_LOAD_RULES', $GLOBALS['STR_LOAD_RULES']);
+			$tpl->assign('STR_SAVE_RULES', $GLOBALS['STR_SAVE_RULES']);
+			$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+			$tpl->assign('STR_ORDER_BY', $GLOBALS['STR_ORDER_BY']);
+			$tpl->assign('STR_GROUP_BY', $GLOBALS['STR_GROUP_BY']);
+			$tpl->assign('STR_NB_MAX_SUBTOTAL', $GLOBALS['STR_NB_MAX_SUBTOTAL']);
+			$hook_result = call_module_hook('export_form_template_data', array(), 'array');
+			foreach($hook_result as $this_key => $this_value) {
+				$tpl->assign($this_key, $this_value);
+			}
+			if(!empty($error_output)) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $error_output))->fetch();
+			}
 			$output .= $tpl->fetch();
-			break;
+			return $output;
+		break;
 	}
-	return $output;
 }
 
-// Détail ici chaque table temps2000
-function PInfoChampGlobal($type) {
-
-	$details = array();
-
-	// Structure de la table
-	if($type == 'tac_fact')
-	{
-		$details['structure']['Importation'] = 'ITacFact';
-		$details['structure']['NomTable'] = 'Tac_Fact';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Tac_Fact';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code tâche facturable';
-	}
-	elseif($type == 'cod_ven')
-	{
-		$details['structure']['Importation'] = 'ICodeVen';
-		$details['structure']['NomTable'] = 'Cod_Ven';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Code_Vente';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code vente';
-	}
-	elseif($type == 'collabor')
-	{
-		$details['structure']['Importation'] = 'IColl';
-		$details['structure']['NomTable'] = 'Collabor';
-		$details['structure']['NomCarac'] = 'ColParam';
-		$details['structure']['FChampsCode'] = 'Collaborateur';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code collaborateur';
-	}
-	elseif($type == 'intervex')
-	{
-		$details['structure']['Importation'] = 'ICorr';
-		$details['structure']['NomTable'] = 'Intervex';
-		$details['structure']['NomCarac'] = 'CorParam';
-		$details['structure']['FChampsCode'] = 'Intervex';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code correspondant';
-	}
-	elseif($type == 'clients')
-	{
-		$details['structure']['Importation'] = 'IClient';
-		$details['structure']['NomTable'] = 'Clients';
-		$details['structure']['NomCarac'] = 'ClnParam';
-		$details['structure']['FChampsCode'] = 'Client';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code client';
-	}
-	elseif($type == 'affaires')
-	{
-		$details['structure']['Importation'] = 'IPVQAff';
-		$details['structure']['NomTable'] = 'PVQAff';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Concat(Client,Affaire,Tac_Fact)';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même codes client, affaire et tâche facturable';
-	}
-	elseif($type == 'evmntcli')
-	{
-		$details['structure']['Importation'] = 'IEvmntCli';
-		$details['structure']['NomTable'] = 'EvmntCli';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = '';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'fam_clnt')
-	{
-		$details['structure']['Importation'] = 'IFamCli';
-		$details['structure']['NomTable'] = 'Fam_Clnt';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Famille';
-		$details['structure']['ActivePageIndex'] = 1;
-		$details['structure']['LblEnregExiste'] = 'même code famille';
-	}
-	elseif($type == 'tmppasse')
-	{
-		$details['structure']['Importation'] = 'ITemps';
-		$details['structure']['NomTable'] = 'TmpPasse';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Collaborateur';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'budtemps')
-	{
-		$details['structure']['Importation'] = 'ITempsBud';
-		$details['structure']['NomTable'] = 'BudTemps';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Collaborateur';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'fraiseng')
-	{
-		$details['structure']['Importation'] = 'IFrais';
-		$details['structure']['NomTable'] = 'FraisEng';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'C_I_S';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'budfrais')
-	{
-		$details['structure']['Importation'] = 'IFraisBud';
-		$details['structure']['NomTable'] = 'BudFrais';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'C_I_S';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'jourventlignes')
-	{
-		$details['structure']['Importation'] = 'IFactureLigne';
-		$details['structure']['NomTable'] = 'JourVentLignes';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Num_Fact';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'budfactlignes')
-	{
-		$details['structure']['Importation'] = 'IFactureLigneBud';
-		$details['structure']['NomTable'] = 'BudFactLignes';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'Num_Fact';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = '';
-	}
-	elseif($type == 'reglem')
-	{
-		$details['structure']['Importation'] = 'IReglCli';
-		$details['structure']['NomTable'] = 'Reglem';
-		$details['structure']['NomCarac'] = '';
-		$details['structure']['FChampsCode'] = 'C_I_S';
-		$details['structure']['ActivePageIndex'] = 0;
-		$details['structure']['LblEnregExiste'] = 'même code client, TTC et date d\'échéance';
-	}
-
-	$details['structure']['TableName'] = $details['structure']['NomTable'];
-	if($details['structure']['NomCarac'] != '')
-		$details['structure']['TableName'] = $details['structure']['NomCarac'];
-
-	// Champs de la table
-	$fields = get_table_field_types($type);
-	$i = 0;
-	foreach($fields as $field_name => $field_type)
-	{
-		// Si le champ est visible pour l'utilisateur et qu'il n'est pas interdit
-		if(PeutEtreVisible($type, $field_name) AND !ChampsInterdit($type, $field_name))
-		{
-			$details['fields'][$field_name]['FieldName'] = $field_name;
-			$details['fields'][$field_name]['Caption'] = $field_name;
-			if($details['fields'][$field_name]['Caption'] == 'Echeance_Mois')
-				$details['fields'][$field_name]['Caption'] = 'Jour d\'échéance';
-			if(ChampsObligatoire($type, $field_name))
-			{
-				// Delphi : Ligne.SubItems.Add('*'); 
-				$details['fields'][$field_name]['Caption'] .= '*';
-				$details['fields'][$field_name]['Required'] = true;
-			}
-			else
-			{
-				$details['fields'][$field_name]['Required'] = false;
-			}
-			$details['fields'][$field_name]['DataType'] = $field_type;
-			$details['fields'][$field_name]['DataSize'] = get_field_maxlength($field_type);
-			$details['fields'][$field_name]['TableName'] = $type;
-			$details['fields'][$field_name]['FieldIndex'] = $i;
-			$details['fields'][$field_name]['Unique'] = ChampsUnique($type, $field_name);
-			$details['fields'][$field_name]['TableRefName'] = TableRef($type, $field_name);
-			$details['fields'][$field_name]['FieldRefName'] = ChampsRef($type, $field_name);
-			$details['fields'][$field_name]['Condition'] = CondRef($type, $field_name);
-		}
-		$i++;
-	}
-
-	// TODO : récupérer la donnée TableCaracParam depuis Delphi : pas trouvé à quoi cela correspond
-	if($details['structure']['NomCarac'] != '' AND TableCaracParam())
-	{
-		// TODO : retranscrire le code Delphi ci-dessous en PHP
-	   /*TableCaracParam.Open;
-	   for i := 0 to TableCaracParam.FieldCount - 1 do begin
-	    if (PeutEtreVisible(TableCaracParam.Fields[i].FieldName)) and
-	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'client') and
-	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'affaire') and
-	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'collaborateur') and
-	    (LowerCase(TableCaracParam.Fields[i].FieldName) <> 'correspondant') then begin
-	     if (not ChampsInterdit(NomCarac, TableCaracParam.Fields[i].FieldName))
-	     or (Importation = IAffaire) then begin
-	      Ligne := ListeDest.Items.Add;
-	      Ligne.Caption := TableCaracParam.Fields[i].FieldName;
-	      InfoChamp := New(PInfoChamp);
-	      if ChampsObligatoire(NomCarac, TableCaracParam.Fields[i].FieldName) then begin
-	       Ligne.SubItems.Add('*');
-	       InfoChamp.Required := true;
-	      end
-	      else begin
-	       Ligne.SubItems.Add('');
-	       InfoChamp.Required := false;
-	      end;
-	      Ligne.SubItems.Add('');
-	      Ligne.SubItems.Add('');
-	      InfoChamp.DataSize     := TableCaracParam.Fields[i].Size;
-	      InfoChamp.DataType := TableCaracParam.Fields[i].DataType;
-	      InfoChamp.TableName   := TableCaracParam.TableName;
-	      InfoChamp.FieldIndex   := i;
-	      InfoChamp.Unique     := ChampsUnique(NomCarac, TableCaracParam.Fields[i].FieldName);
-	      InfoChamp.TableRefName   := TableRef(NomCarac, TableCaracParam.Fields[i].FieldName);
-	      InfoChamp.FieldRefName  := ChampsRef(NomCarac, TableCaracParam.Fields[i].FieldName);
-	      InfoChamp.Condition  := CondRef(NomCarac, TableCaracParam.Fields[i].FieldName);
-	      Ligne.Data := InfoChamp;
-	     end;
-	    end;
-	   end;
-	   TableCaracParam.Close;*/
-	}
-
-	if($type == 'evmntcli')
-	{
-		// Ajouter les champs de la table documents
-		$field_name = 'Fichier';
-		$details['fields'][$field_name]['FieldName'] = $field_name;
-		$details['fields'][$field_name]['Caption'] = $field_name;
-		$details['fields'][$field_name]['Required'] = false;
-		$details['fields'][$field_name]['DataType'] = 'varchar(50)';
-		$details['fields'][$field_name]['DataSize'] = 50;
-		$details['fields'][$field_name]['TableName'] = 'documents'; // Attention : table liée
-		$details['fields'][$field_name]['FieldIndex'] = 5;
-		$details['fields'][$field_name]['Unique'] = false;
-		$details['fields'][$field_name]['TableRefName'] = '';
-		$details['fields'][$field_name]['FieldRefName'] = '';
-		$details['fields'][$field_name]['Condition'] = '';
-
-		$field_name = 'Chemin';
-		$details['fields'][$field_name]['FieldName'] = $field_name;
-		$details['fields'][$field_name]['Caption'] = $field_name;
-		$details['fields'][$field_name]['Required'] = false;
-		$details['fields'][$field_name]['DataType'] = 'varchar(50)';
-		$details['fields'][$field_name]['DataSize'] = 200;
-		$details['fields'][$field_name]['TableName'] = 'documents'; // Attention : table liée
-		$details['fields'][$field_name]['FieldIndex'] = 6;
-		$details['fields'][$field_name]['Unique'] = false;
-		$details['fields'][$field_name]['TableRefName'] = '';
-		$details['fields'][$field_name]['FieldRefName'] = '';
-		$details['fields'][$field_name]['Condition'] = '';
-	}
-
-	if($type == 'budfactlignes')
-	{
-		// Ajouter les champs A_Facturer et Facture
-		// TODO : vérifier que les champs à importer correspondent bien à "Facturee" et "Fact_Auto" du Delphi
-		$field_name = 'A_Facturer';
-		$details['fields'][$field_name]['FieldName'] = $field_name;
-		$details['fields'][$field_name]['Caption'] = $field_name;
-		$details['fields'][$field_name]['Required'] = false;
-		$details['fields'][$field_name]['DataType'] = 'tinyint(4)';
-		$details['fields'][$field_name]['DataSize'] = 4;
-		$details['fields'][$field_name]['TableName'] = 'budfact'; // Attention : table liée
-		$details['fields'][$field_name]['FieldIndex'] = 7;
-		$details['fields'][$field_name]['Unique'] = false;
-		$details['fields'][$field_name]['TableRefName'] = '';
-		$details['fields'][$field_name]['FieldRefName'] = '';
-		$details['fields'][$field_name]['Condition'] = '';
-
-		$field_name = 'Facture';
-		$details['fields'][$field_name]['FieldName'] = $field_name;
-		$details['fields'][$field_name]['Caption'] = $field_name;
-		$details['fields'][$field_name]['Required'] = false;
-		$details['fields'][$field_name]['DataType'] = 'tinyint(4)';
-		$details['fields'][$field_name]['DataSize'] = 4;
-		$details['fields'][$field_name]['TableName'] = 'budfact'; // Attention : table liée
-		$details['fields'][$field_name]['FieldIndex'] = 6;
-		$details['fields'][$field_name]['Unique'] = false;
-		$details['fields'][$field_name]['TableRefName'] = '';
-		$details['fields'][$field_name]['FieldRefName'] = '';
-		$details['fields'][$field_name]['Condition'] = '';
-	}
-
-	return $details;
-}
-
-function PeutEtreVisible($nomChamps)
-{
-	$nomChamps = strtolower($nomChamps);
-	if (($nomChamps = 'cptcaracparam') or
-		($nomChamps = 'cptcaracparam_1') or
-		($nomChamps = 'client_1') or
-		($nomChamps = 'affaire_1') or
-		($nomChamps = 'collaborateur_1') or
-		($nomChamps = 'societe_1')or
-		($nomChamps = 'client_2'))
-		return false;
-	else
-		return true;
-}
-
-function ChampsInterdit($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if (($Table == 'cod_ven') and (($Champ == 'calcule') or ($Champ == 'libelle') or ($Champ == 'arrondi') or ($Champ == 'mode_arrondi') or ($Champ == 'n_cpte_vente_c2000')))
-		$Result = true;
-	if (($Table == 'clients') and (($Champ == 'cptcaracparam') and ($Champ == 'nbech') or ($Champ == 'memo') or ($Champ == 'rib_ok') or ($Champ == 'iban_ok')))
-		$Result = true;
-	if ($Table == 'affaires')
-	{
-		if (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'titre') or
-		  ($Champ == 'societe') or ($Champ == 'collaborateur') or ($Champ == 'activite') or
-		  ($Champ == 'groupe') or ($Champ == 'coeff_facturation') or
-		  ($Champ == 'modele_facture') or ($Champ == 'exceptionnel') or ($Champ == 'coeff_facturation_frais') or
-		  ($Champ == 'coeff_fact_arrondi') or ($Champ == 'coeff_fact_supinf') or ($Champ == 'cv_refact_tp') or
-		  ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'avancement') or ($Champ == 'raf_pr') or
-		  ($Champ == 'raf_pvcol') or ($Champ == 'raf_pvtac') or ($Champ == 'raf_pvq') or ($Champ == 'unite_fact') or
-		  ($Champ == 'adrclientdefaut') or ($Champ == 'adrfactnom1') or ($Champ == 'adrfactnom2') or ($Champ == 'adrfact1') or
-		  ($Champ == 'adrfact2') or ($Champ == 'adrfact3') or ($Champ == 'adrfactcp') or ($Champ == 'adrfactville') or
-		  ($Champ == 'adrfactcedex') or ($Champ == 'adrfactpays') or ($Champ == 'cv_ajout_fact'))
-			$Result = false;
-		else
-			$Result = true;
-	}
-	if (($Table == 'collabor') and (($Champ == 'cptcaracparam') or ($Champ == 'Salaire_Brut_Annuel') or ($Champ == 'Charges_Pat_Annuelles') or
-	                          ($Champ == 'Tot_Ann_SC') or ($Champ == 'Tot_Ann_SCF') or ($Champ == 'Temps_Facturable_Annuel') or
-	                          ($Champ == 'PRH_Sal_CH_FG') or ($Champ == 'PRH_Sal_CH')))
-		$Result = true;
-	if (($Table == 'intervex') and (($Champ == 'cptcaracparam') or ($Champ == 'memo')))
-		$Result = true;
-	if (($Table == 'tmppasse') and (($Champ == 'compteur') or ($Champ == 'date_periode') or ($Champ == 'numintfacttamp') or ($Champ == 'fq')))
-		$Result = true;
-	if (($Table == 'budtemps') and (($Champ == 'compteur') or ($Champ == 'date_periode') or ($Champ == 'date_semaine') or ($Champ == 'date_quinzaine') or
-	                         ($Champ == 'exceptionnel') or ($Champ == 'facture') or ($Champ == 'fq') or
-	                         ($Champ == 'date_mois') or ($Champ == 'numintfact')))
-		$Result = true;
-	if (($Table == 'fraiseng') and (($Champ == 'compteur') or ($Champ == 'mois') or ($Champ == 'numintfacttamp') or ($Champ == 'ne')))
-		$Result = true;
-	if (($Table == 'budfrais') and (($Champ == 'compteur') or ($Champ == 'mois')))
-		$Result = true;
-	if (($Table == 'jourventlignes') and (($Champ == 'compteur') or ($Champ == 'mois') or ($Champ == 'calcule') or
-	                         ($Champ == 'libelle') or ($Champ == 'libelledetails') or
-	                         ($Champ == 'libelledetailsannexe') or ($Champ == 'origine') or ($Champ == 'annexe') or
-	                         ($Champ == 'libelledetailtitre') or ($Champ == 'rappellibellecv') or ($Champ == 'taux_tva')))
-		$Result = true;
-	if (($Table == 'budfactlignes') and (($Champ == 'compteur') or ($Champ == 'calcule') or ($Champ == 'num_int')))
-		$Result = true;
-	if (($Table == 'evmntcli') and (($Champ == 'numero') or ($Champ == 'type')))
-		$Result = true;
-	if (($Table == 'reglem') and (($Champ == 'id') or ($Champ == 'dernsaisie') or ($Champ == 'netttc') or
-	                        ($Champ == 'lettrage') or ($Champ == 'nettva') or ($Champ == 'tauxtva')))
-		$Result = true;
-
-	return $Result;
-}
-
-function ChampsObligatoire($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if (($Table == 'tac_fact') and ($Champ == 'tac_fact'))
-		$Result = true;
-	if (($Table == 'cod_ven') and (($Champ == 'code_vente') or ($Champ == 'code_tva') or ($Champ == 'temps_frais')))
-		$Result = true;
-	if (($Table == 'clients') and (($Champ == 'client') or ($Champ == 'societe') or ($Champ == 'groupe') or
-	                        ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'famille') or
-	                        ($Champ == 'mode_reglement') or ($Champ == 'echeance_mois')))
-		$Result = true;
-	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'societe') or
-	                          ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'groupe') or
-	                          ($Champ == 'famille') or ($Champ == 'modele_facture') or ($Champ == 'cv_refact_tp') or
-	                          ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq')))
-		$Result = true;
-	if (($Table == 'collabor') and (($Champ == 'collaborateur') or ($Champ == 'societe') or ($Champ == 'groupe') or
-	                        ($Champ == 'fonction') or ($Champ == 'niveau') or ($Champ == 'date_embauche') or
-	                        ($Champ == 'cat_charges_patronales')))
-		$Result = true;
-	if (($Table == 'pvcolaff') and (($Champ == 'collaborateur') or ($Champ == 'client') or ($Champ == 'affaire') or
-	                        ($Champ == 'pvcol')))
-		$Result = true;
-	if (($Table == 'pvqaff') and (($Champ == 'tac_fact') or ($Champ == 'client') or ($Champ == 'affaire') or
-	                        ($Champ == 'pvq')))
-		$Result = true;
-	if (($Table == 'intervex') and (($Champ == 'intervex') or ($Champ == 'societe') or ($Champ == 'categorie')))
-		$Result = true;
-	if (($Table == 'tmppasse') and (($Champ == 'collaborateur') or ($Champ == 'datel') or ($Champ == 'tac_fact') or
-	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'temps')))
-		$Result = true;
-	if (($Table == 'budtemps') and (($Champ == 'collaborateur') or ($Champ == 'datel') or ($Champ == 'tac_fact') or
-	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'temps')))
-		$Result = true;
-	if (($Table == 'fraiseng') and (($Champ == 'c_i_s') or ($Champ == 'datel') or ($Champ == 'frais') or
-	                         ($Champ == 'clt_tnf') or ($Champ == 'affaire') or ($Champ == 'pr')))
-		$Result = true;
-	if (($Table == 'budfrais') and (($Champ == 'c_i_s') or ($Champ == 'datel') or ($Champ == 'frais') or
-	                         ($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'pr')))
-		$Result = true;
-	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'societe') or ($Champ == 'groupe') or
-	                          ($Champ == 'collaborateur') or ($Champ == 'activite') or ($Champ == 'famille')))
-		$Result = true;
-	if (($Table == 'jourventlignes') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'code_vente') or
-	                        ($Champ == 'code_tva') or ($Champ == 'num_fact') or ($Champ == 'datel') or ($Champ == 'ht_ligne')))
-		$Result = true;
-	if (($Table == 'budfactlignes') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'code_vente') or
-	                        ($Champ == 'mois') or ($Champ == 'ht_ligne')))
-		$Result = true;
-	if (($Table == 'evmntcli') and (($Champ == 'code_evmnt') or ($Champ == 'client') or ($Champ == 'col_prevu') or ($Champ == 'date_prevue')))
-		$Result = true;
-	if (($Table == 'fam_clnt') and ($Champ == 'famille'))
-		$Result = true;
-	if (($Table == 'reglem') and (($Champ == 'societe') or ($Champ == 'date_crea') or
-	                        ($Champ == 'client') or ($Champ == 'mode_reglement') or ($Champ == 'ttc') or ($Champ == 'banque')))
-		$Result = true;
-
-	return $Result;
-}
-
-function ChampsUnique($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if (($Table == 'tac_fact') and ($Champ == 'tac_fact')) $Result = true;
-	if (($Table == 'cod_ven') and ($Champ == 'code_vente')) $Result = true;
-	if (($Table == 'clients') and ($Champ == 'client')) $Result = true;
-	if (($Table == 'collabor') and ($Champ == 'collaborateur')) $Result = true;
-	if (($Table == 'intervex') and ($Champ == 'intervex')) $Result = true;
-	if (($Table == 'affaires') and (($Champ == 'client') or ($Champ == 'affaire'))) $Result = true;
-	if (($Table == 'pvcolaff') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'collaborateur'))) $Result = true;
-	if (($Table == 'pvqaff') and (($Champ == 'client') or ($Champ == 'affaire') or ($Champ == 'tac_fact'))) $Result = true;
-	if (($Table == 'fam_clnt') and ($Champ == 'famille')) $Result = true;
-
-	return $Result;
-}
-
-function TableRef($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else $Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if ($Table == 'cod_ven')
-	{
-		if ($Champ == 'code_tva')
-			$Result = 'tva';
-	}
-
-	if ($Table == 'clients')
-	{
-		if ($Champ == 'societe')  $Result = 'societes';
-		if ($Champ == 'collaborateur')  $Result = 'collabor';
-		if ($Champ == 'activite')  $Result = 'activite';
-		if ($Champ == 'famille')  $Result = 'fam_clnt';
-		if ($Champ == 'mode_reglement')  $Result = 'modereglement';
-		if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq'))  $Result = 'cod_ven';
-		if ($Champ == 'code_tva')  $Result = 'tva';
-		if ($Champ == 'groupe')  $Result = 'grpe_col';
-		if ($Champ == 'banque_def') $Result = 'banques';
-	}
-
-	if ($Table == 'affaires')
-	{
-		if ($Champ == 'client')  $Result = 'clients';
-		if ($Champ == 'societe')  $Result = 'societes';
-		if ($Champ == 'collaborateur')  $Result = 'collabor';
-		if ($Champ == 'activite')  $Result = 'activite';
-		if ($Champ == 'groupe')  $Result = 'grpe_col';
-		if ($Champ == 'famille')  $Result = 'fam_clnt';
-		if ($Champ == 'modele_facture')  $Result = 'modelfac';
-		if ($Champ == 'unite_fact')  $Result = 'unite_fact';
-		if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'cv_ajout_fact'))  $Result = 'cod_ven';
-	}
-
-	if ($Table == 'collabor')
-	{
-		if ($Champ == 'societe')  $Result = 'societes';
-		if ($Champ == 'groupe')  $Result = 'grpe_col';
-		if ($Champ == 'fonction')  $Result = 'fonc_col';
-		if ($Champ == 'niveau')  $Result = 'niv_col';
-		if ($Champ == 'cat_charges_patronales')  $Result = 'cat_col';
-	}
-
-	if ($Table == 'pvcolaff')
-	{
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'collaborateur') $Result = 'collabor';
-	}
-
-	if ($Table == 'pvqaff')
-	{
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'tac_fact') $Result = 'tac_fact';
-	}
-
-	if ($Table == 'evmntcli')
-	{
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'col_prevu') $Result = 'collabor';
-		if ($Champ == 'col_real') $Result = 'collabor';
-		if ($Champ == 'code_evmnt') $Result = 'codeevmnt';
-	}
-
-	if ($Table == 'intervex')
-	{
-		if ($Champ == 'societe') $Result = 'societes';
-		if ($Champ == 'categorie') $Result = 'cat_cor';
-	}
-
-	if ($Table == 'tmppasse')
-	{
-		if ($Champ == 'collaborateur') $Result = 'collabor';
-		if ($Champ == 'tac_fact') $Result = 'tac_fact';
-		if ($Champ == 'clt_tnf') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-	}
-
-	if ($Table == 'budtemps')
-	{
-		if ($Champ == 'collaborateur') $Result = 'collabor';
-		if ($Champ == 'tac_fact') $Result = 'tac_fact';
-		if ($Champ == 'clt_tnf') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-	}
-
-	if ($Table == 'fraiseng')
-	{
-		if ($Champ == 'frais') $Result = 'fra_eng';
-		if ($Champ == 'code_tva') $Result = 'tva';
-		if ($Champ == 'clt_tnf') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'c_i_s') $Result = 'collabor';
-	}
-
-	if ($Table == 'budfrais')
-	{
-		if ($Champ == 'frais') $Result = 'fra_eng';
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'c_i_s') $Result = 'collabor';
-	}
-
-	if ($Table == 'jourventlignes')
-	{
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'code_vente') $Result = 'cod_ven';
-		if ($Champ == 'code_tva') $Result = 'tva';
-	}
-
-	if ($Table == 'budfactlignes')
-	{
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'affaire') $Result = 'affaires';
-		if ($Champ == 'code_vente') $Result = 'cod_ven';
-	}
-
-	if ($Table == 'reglem')
-	{
-		if ($Champ == 'societe') $Result = 'societes';
-		if ($Champ == 'client') $Result = 'clients';
-		if ($Champ == 'banque') $Result = 'banques';
-		if ($Champ == 'code_tva') $Result = 'tva';
-		if ($Champ == 'mode_reglement') $Result = 'modereglement';
-	}
-
-	return $Result;
-}
-
-function ChampsRef($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else $Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if (($Champ == 'cv_refact_tp') or ($Champ == 'cv_refact_fe') or ($Champ == 'cv_refact_pvq') or ($Champ == 'cv_ajout_fact')) $Result = 'code_vente';
-	else if ($Champ == 'cat_charges_patronales') $Result = 'categorie';
-	else if ($Champ == 'clt_tnf') $Result = 'client';
-	else if ($Champ == 'jour d\'échéance') $Result = 'echeance_mois';
-	else if ($Champ == 'unite_fact') $Result = 'unite';
-	else if ($Champ == 'code_evmnt') $Result = 'codeevmnt';
-	else if (($Champ == 'col_prevu') or ($Champ == 'col_real')) $Result = 'collaborateur';
-	else if ($Champ == 'banque_def') $Result = 'banque';
-	else $Result = $Champ;
-
-	return $Result;
-}
-
-function CondRef($NomTable, $NomChamps)
-{
-	$Result = false;
-	// TODO : mettre en place cette condition Delphi ? Cela inquerait que certaines  $Table contiennent un point ?
-	// if Pos('.', NomTable) > 0 then $Table := Copy(NomTable, 1, Pos('.', NomTable) -1)
-	// else $Table := NomTable;
-	$Table = $NomTable;
-	$Table = strtolower($Table);
-	$Champ = strtolower($NomChamps);
-	if ($Table == 'clients' and $Champ == 'collaborateur') $Result = 'date_depart is null';
-	if ($Table == 'affaires' and $Champ == 'collaborateur') $Result = 'date_depart is null';
-	if ($Table == 'tmppasse' and $Champ == 'collaborateur') $Result = 'date_depart is null';
-	if ($Table == 'budtemps' and $Champ == 'collaborateur') $Result = 'date_depart is null';
-	if ($Table == 'pvcolaff' and $Champ == 'collaborateur') $Result = 'date_depart is null';
-	if ($Table == 'pvqaff' and $Champ == 'tac_fact') $Result = 'NPU = 0';
-
-	return $Result;
-}
-
-function CodeExiste($ValCode, $NomChampCode, $NomTable)
-{
-	$strSQL = 'SELECT COUNT(*) FROM '.$NomTable.' WHERE '.$NomChampCode.' = "' .$ValCode. '"';
-	$exist = (bool)query($strSQL);	
- 
-	return $exist;
-}
-
-function AjouterErr($Msg, $Code, $NumLig)
-{
-	echo 'Ligne ' . ($NumLig /*+ $DecalNum*/) . '(' . $Code . '): ' . $Msg;
-}
-
-function AjouterMessage($Msg, $NumLig = 0)
-{
-	if($NumLig > 0)
-		echo 'Ligne ' . ($NumLig /*+ $DecalNum*/) . ': ';
-	echo $Msg;
-}
-
-function AllJoursEch($key)
-{
-	$strSQL = 'select Societe, Jour_Echeance1, Jour_Echeance2, Jour_Echeance3 from Societes where Societe = "' .$key. '"';
-	$resultat = query($strSQL);	
-	$data = fetch_assoc($resultat);
-}
-
-// Vérifie que les données sont correctes pour l'importation de familles clients
-//******************************************************************************
-function VerifieFamCli($PInfoChampGlobal, $field_values, $NumLig)
-{
-	global $ListeCodes;
-
-	$NbErr = 0;
-	AjouterMessage('Vérifications spécifiques aux familles de clients');
-	//Famille, il faut vérifier qu'elle ne soit pas vide !
-	if (!$field_values['Famille'])
-	{
-		$NbErr++;
-		AjouterErr('Le code famille doit être renseigné.', '', $NumLig);
-	}
-	// on vérifie les doublons dans ListeCodes et on stocke le code si inexistant
-	else
-	{
-		if(in_array(strtoupper($field_values['Famille']), $ListeCodes))
-		{
-			$NbErr++;
-			AjouterErr('Le code famille est dupliqué.', $field_values['Famille'], $NumLig);
-		}
-		else 
-			$ListeCodes[] = strtoupper($field_values['Famille']);
-	}
-	return $NbErr;
-}
-
-function create_or_update_famille_clients($field_values, $columns_skipped) {
-
-	// Vérification si la clé primaire est bien cochée
-	if(in_array('Famille', $columns_skipped))
-		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Vous devez au moins cocher la case Famille.'))->fetch();
-
-	// Vérification si la clé primaire est importée
-	if(!array_key_exists('Famille', $field_values))
-		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Vous devez importer au moins le champ Famille.'))->fetch();
-
-	// Vérification si la clé primaire est renseignée
-	if(!$field_values['Famille'])
-		return $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => 'Le code famille doit être renseigné.'))->fetch();
-
+/**
+ * Générer un tableau de données, en CSV ou HTML
+ *
+ * @param array $lines
+ * @param string $table_name
+ * @param string $format "csv" ou "html"
+ * @param string $separator
+ * @param array $params
+ * @param boolean $autoformat Si true, cela permet de formatter automatiquement les dates.
+ * @return
+ */
+function get_export_table(&$lines, $table_name = null, $format = 'csv', $separator = "\t", &$params, $autoformat = true) {
+	// On génère les lignes de résultat
 	$output = '';
+	// Création de la ligne des titres
+	if($format != 'csv') {
+		$output .= '<table>
+';
+	}
+	// Dans l'interface : mettre en première la ligne les titres de colonnes (si disponible pour le type d'export souhaité)
+	// header vaut false pour les types virtuel, à mettre dans la configuration d'initialisation -> Priorité par rapport au champ du formulaire
 
-	$strSQL = 'select Famille from fam_clnt where Famille = "' .$field_values['Famille']. '"';
-	$resultat = query($strSQL);	
-	// Vérification si la famille existe déjà
-	if ($data = fetch_assoc($resultat)) {
-		query('UPDATE fam_clnt SET Titre = "' . $field_values['Titre'] . '" WHERE Famille="' .$field_values['Famille']. '"');
+	if(!empty($params['header'])) {
+		// On affiche les titres des colonnes
+		$output_array = array();
+		if($format != 'csv') {
+			$output .= '<tr>';
+		}
+		foreach($params['ordered_fields_selected'] as $this_field) {
+			if($format != 'csv') {
+				$output .= '<th class="center"' . (!empty($GLOBALS['database_fields_width'][$this_field])?' style="width:' . $GLOBALS['database_fields_width'][$this_field] . 'px"':'') . '>' . get_field_title($this_field, $table_name) . '</th>';
+			} else {
+				$output_array[] = filtre_csv(get_field_title($this_field, $table_name), $separator);
+			}
+		}
+		if($format == 'csv') {
+			$output .= implode($separator, $output_array) . "\r\n";
+		} else {
+			$output .= '</tr>
+';
+		}
+	}
+	if(!empty($lines)) {
+		$i = 0;
+		foreach($lines as $this_key => $this_line) {
+			$output_array = array();
+			if($format != 'csv') {
+				$style = array();
+				if($i%2) {
+					$style[] = 'background-color:#f9f9f9';
+				}
+				if (StringMb::strpos($this_key, 'total') !== false) {
+					$style[] = 'font-weight: bold';
+				}
+				$output .= '<tr style="' . implode('; ', $style) . '">';
+			}
+			foreach($params['ordered_fields_selected'] as $this_field) {
+				$this_value = vb($this_line[$this_field]);
+				$class = null;
+				$style = null;
+				if (is_array($this_value)) {
+					$this_value = implode(',', $this_value);
+				} elseif($autoformat && in_array($this_field, vb($GLOBALS['database_fields_format']['date'], array()))) {
+					$this_value = get_formatted_date($this_value, 'short', 'long');
+					$class = 'center';
+				} elseif($format != 'csv' && in_array($this_field, vb($GLOBALS['database_fields_format']['checkbox'], array())) && is_numeric($this_value) && in_array($this_value, array(0,-1,1,127))) {
+					$this_value = '<input type="checkbox" disabled="disabled"' . ($this_value != 0 ? ' checked="checked"' : '') . ' />';
+					$class = 'center';
+					$style = 'padding: 0px';
+					
+				} elseif(is_numeric($this_value) || strpos($this_value, '&nbsp;€') !== false || in_array($this_field, vb($GLOBALS['database_fields_format']['float'], array()))) {
+					$class = 'right';
+				}
+				if($format != 'csv') {
+					$output .= '<td' . ($class?' class="' . $class . '"':'') . '' . ($style?' style="' . $style . '"':'') . '>'. $this_value . '</td>' ;
+				} else {
+					$output_array[] = filtre_csv($this_value, $separator);
+				}
+			}
+			if($format == 'csv') {
+				$output .= implode($separator, $output_array) . "\r\n";
+			} else {
+				$output .= '</tr>
+';
+			}
+			$i++;
+		}
+	}
+	if(!empty($params['footer'])) {
+		/*
+			// Si on veut faire un traitement particulier on peut mettre ici ce qu'on veut.
+			// Si on veut ajouter des infos en bas du fichier sans tenir compte des clonne CSV, on peut s'inspirer de ce qui est là
+			foreach($this_line as $key=>$this_value) {
+				$output .= filtre_csv($key, $separator);
+				$output .= $separator;
+				$output .= filtre_csv($this_value, $separator);
+				$output .= "\r\n";
+			}
+		*/
+	}
+	if($format != 'csv') {
+		$output .= '</table>
+';
+	}
+	return $output;
+}
+
+/**
+ * Gestion de l'insertion ou la mise à jour d'une commande.
+ *
+ * @param boolean $frm
+ * @param string $bill_mode
+ * @return
+ */
+function handle_order_insert_or_update($frm, $bill_mode='commander') {
+	$save_commande = true;
+	$output = '';
+	// on rentre l'info du mode de facture ici, on retrouvera cette donnée plus tard dans le tableau order_infos
+	$frm['bill_mode'] = $bill_mode;
+	for ($i = 1; $i <= 1000; $i++) {
+		// $i <= 1000 : C'est le moyen le plus simple de traiter le formulaire, car les ids dans le formulaire ne se suivent par forcement, l'administrateur peut avoir supprimer le produit 1, ce qui fait que $frm["id1"] n'existe pas
+		if (!empty($frm["id" . $i])) {
+			// On vérifie si la commande ne comporte pas de produit avec une quantité inférieure au minimum requis
+			$product_object = new Product($frm["id" . $i]);
+			if (vn($product_object->quantity_min_order) > 1 && $frm["q" . $i] < $product_object->quantity_min_order) {
+				$save_commande = false;
+			}
+			unset($product_object);
+		}
+	}
+	if ($save_commande) {
+		// Ajout d'une commande en db + affichage du détail de la commande
+		$order_id = save_commande_in_database($frm);
+		if (!empty($frm['commandeid'])) {
+			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (check_if_module_active('stock_advanced') ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
+			$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null, $bill_mode);
+		} else {
+			if ($bill_mode == 'commander') {
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
+			} else {
+				$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . get_current_url(false) . '?mode='.$bill_mode.'&amp;id=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
+			}
+		}
+		if (empty($frm['id'])) {
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
+		} else {
+			tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'].' : ' . intval(vn($frm['id'])));
+		}
 	} else {
-		query('INSERT INTO fam_clnt (Famille, Titre) VALUES ("' .$field_values['Famille']. '", "' . $field_values['Titre'] . '")');
-				
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ORDER_MIN'].$GLOBALS['STR_REQUIRED_VALIDATE_ORDER']))->fetch();
+		$output .= affiche_details_commande(null, 'ajout');
+	}
+	return $output;
+}
+
+/**
+ *
+ * @param string $mode
+ * @return
+ */
+function get_import_export_saved_configuration($mode) {
+	if(function_exists('t2web_database_connect')) {
+		// En cas de gestion de connexion à une bdd différente pour les données sources par rapport aux données de configuration
+		// => on bascule vers la connexion aux données de configuration
+		t2web_database_connect();
 	}
 
-	// Affichage du message de succès
-	$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => 'OK !'))->fetch();
-	return $output;
-} 
+	// Chargement de la liste des règles d'import/export
+	$rules_name_array = array();
+	$var_name = 'import_config';
+	if (!empty($_SESSION['client_database']['code_client'])) {
+		$var_name .= '_'.$_SESSION['client_database']['code_client'];
+	}
+	$all_rules_array = get_array_from_string(get_configuration_variable($var_name, $GLOBALS['site_id'], $_SESSION['session_langue']));
+	// $all_rules_array se présente sous la forme array(
+		// nom_de_la_regle_1 => array('correspondance'=>"champ1=valeur1&champ2=valeur2"),array('default_fields'=>'champ1=valeur1&champ2=valeur2')
+		// nom_de_la_regle_2 => array('correspondance'=>"champ1=valeur1&champ2=valeur2"),array('default_fields'=>'champ1=valeur1&champ2=valeur2')
+	// ici on veut récupérer le nom seulement;
+	foreach($all_rules_array as $this_rules_name=>$this_rules_array) {
+		// On va récupérer la configuration pour cette règle, pour savoir si il s'agit d'une configuration pour l'import ou pour l'export
+		$data_array = unserialize($this_rules_array);
+		// si $mode === false on veut tout récupérer
+		if ((!empty($data_array['mode']) && $data_array['mode'] == $mode) || $mode === false) {
+			$rules_name_array[] = $this_rules_name;
+		}
+	}
+	if(function_exists('t2_client_database_connect')) {
+		// En cas de gestion de connexion à une bdd différente pour les données sources par rapport aux données de configuration
+		// => on bascule vers la connexion aux données servant pour l'import / export
+		t2_client_database_connect();
+	}
+	return $rules_name_array;
+}

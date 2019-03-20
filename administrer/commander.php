@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: commander.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: commander.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -76,36 +76,7 @@ switch (vb($_REQUEST['mode'])) {
 			sendclient($_POST['bdc_id'], 'html', 'bdc', vb($_POST['bdc_partial']));
 			$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_MSG_PURCHASE_ORDER_SENT_BY_EMAIL_OK']))->fetch();
 		} elseif (!empty($_POST)) {
-			$save_commande = true;
-			for ($i = 1; $i <= 1000; $i++) {
-				// $i <= 1000 : C'est le moyen le plus simple de traiter le formulaire, car les ids dans le formulaire ne se suivent par forcement, l'administrateur peut avoir supprimer le produit 1, ce qui fait que $frm["id1"] n'existe pas
-				if (!empty($frm["id" . $i])) {
-					// On vérifie si la commande ne comporte pas de produit avec une quantité inférieure au minimum requis
-					$product_object = new Product($frm["id" . $i]);
-					if (vn($product_object->quantity_min_order) > 1 && $frm["q" . $i] < $product_object->quantity_min_order) {
-						$save_commande = false;
-					}
-					unset($product_object);
-				}
-			}
-			if ($save_commande) {
-				// Ajout d'une commande en db + affichage du détail de la commande
-				$order_id = save_commande_in_database($frm);
-				if (!empty($frm['commandeid'])) {
-					$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_UPDATED'] . (check_if_module_active('stock_advanced') ? ' ' . $GLOBALS['STR_ADMIN_COMMANDER_AND_STOCKS_UPDATED'] : '')))->fetch();
-					$output .= affiche_details_commande($frm['commandeid'], $_GET['mode'], null);
-				} else {
-					$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_COMMANDER_ORDER_CREATED'] . ' - <a href="' . $GLOBALS['administrer_url'] . '/commander.php?mode=modif&amp;commandeid=' . $order_id . '">' . $GLOBALS['STR_ADMIN_COMMANDER_LINK_ORDER_SUMMARY'] . '</a>'))->fetch();
-				}
-				if (empty($frm['id'])) {
-					tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'CREATE_ORDER', intval(vn($frm['id_utilisateur'])));
-				} else {
-					tracert_history_admin(intval(vn($frm['id_utilisateur'])), 'EDIT_ORDER', $GLOBALS['STR_ADMIN_USER'] . ' : ' . intval(vn($frm['id_utilisateur'])) . ', '.$GLOBALS['STR_ORDER_NAME'].' : ' . intval(vn($frm['id'])));
-				}
-			} else {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ORDER_MIN'].$GLOBALS['STR_REQUIRED_VALIDATE_ORDER']))->fetch();
-				$output .= affiche_details_commande(null, 'ajout');
-			}
+			$output .= handle_order_insert_or_update($frm);
 		}
 		// Si il n'y a pas de POST, cela signifie que l'on veut uniquement afficher le détail de la commande à modifier.
 		if (empty($_POST)) {

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -44,13 +44,24 @@
 			<td class="top">{{ STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" name="on_carrousel" value="1"{% if is_on_carrousel %} checked="checked"{% endif %} /></td>
 		</tr>
+		<tr>
+			<td class="top">{{ STR_ADMIN_CARROUSEL_CATEGORY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<select class="form-control" name="carrousel_id" size="5">
+					<option value="">----</option>
+					{% for cl in carrousel_list %}
+					<option value="{{ cl.value }}" {% if cl.issel %} selected="selected"{% endif %}>{{ cl.name }}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
 		{% endif %}
 		{% if cart_force_exapaq_delivery_mode %}
 		<tr>
 			<td class="top">{{ STR_ADMIN_SELECT_ICIRELAIS_SHIPPING }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
-				<input type="radio" name="on_exapaq_delivery" value="1" {% if on_exapaq_delivery == 1} checked="checked"{% endif %} /> {{ STR_YES }}
-				<input type="radio" name="on_exapaq_delivery" value="0" {% if on_exapaq_delivery == 0} checked="checked"{% endif %} /> {{ STR_NO }}
+				<input type="radio" name="on_exapaq_delivery" value="1" {% if on_exapaq_delivery == 1 %} checked="checked"{% endif %} /> {{ STR_YES }}
+				<input type="radio" name="on_exapaq_delivery" value="0" {% if on_exapaq_delivery == 0 %} checked="checked"{% endif %} /> {{ STR_NO }}
 			</td>
 		</tr>
 		{% endif %}

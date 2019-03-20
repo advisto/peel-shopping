@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: modules_handler.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: modules_handler.php 59873 2019-02-26 14:47:11Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
     die();
@@ -148,7 +148,7 @@ function check_if_module_active($module_name, $specific_file_name = null, $skip_
  * @param boolean $return_params_by_default
  * @return
  */
-function call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_default = false) {
+function &call_module_hook($hook, $params, $mode = 'boolean', $return_params_by_default = false) {
 	static $hook_function_exists_array;
 	if($mode == 'boolean') {
 		$output_default = true;

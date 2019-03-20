@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_categorie.tpl 55116 2017-11-09 17:10:39Z sdelaporte $
+// $Id: admin_formulaire_categorie.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -43,6 +43,17 @@
 		<tr>
 			<td class="top">{$STR_ADMIN_CATEGORIES_DISPLAY_IN_CARROUSEL}{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="checkbox" name="on_carrousel" value="1"{if $is_on_carrousel} checked="checked"{/if} /></td>
+		</tr>
+		<tr>
+			<td class="top">{$STR_ADMIN_CARROUSEL_CATEGORY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<select class="form-control" name="carrousel_id" size="5">
+					<option value="">----</option>
+					{foreach $carrousel_list as $cl}
+					<option value="{$cl.value}" {if $cl.issel} selected="selected"{/if}>{$cl.name}</option>
+					{/foreach}
+				</select>
+			</td>
 		</tr>
 		{/if}
 		{if $cart_force_exapaq_delivery_mode}

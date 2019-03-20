@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: get_product_price.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: get_product_price.php 59873 2019-02-26 14:47:11Z sdelaporte $
 include("configuration.inc.php");
 
 if (empty($_POST) || empty($_POST['product_id']) || vb($_POST['hash']) != sha256('HFhza8462naf' . $_POST['product_id'])) {
@@ -38,7 +38,7 @@ $product_object = new Product($product_id, null, false, null, true, !is_user_tva
 $product_object->set_configuration($color_id, $size_id, $attribut_list, check_if_module_active('reseller') && is_reseller());
 
 $product_id = intval(vn($_POST['product_id']));
-$prix = $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), false, false, vn($_POST['quantite'], 1), true, true, true);
+$prix = $product_object->get_final_price(get_current_user_promotion_percentage(), display_prices_with_taxes_active(), check_if_module_active('reseller') && is_reseller(), false, false, vn($_POST['quantite'], 1), true, true, true, null, true);
 if(!empty($_POST['product2_id'])) {
 	$product2_id = intval(vn($_POST['product2_id']));
 	$product_object2 = new Product($product2_id, null, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));

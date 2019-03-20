@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: rpc_status.php 60147 2019-03-19 12:58:44Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 include("../configuration.inc.php");
@@ -144,7 +144,7 @@ if (!est_identifie() || empty($_POST)) {
 			SET etat='%s'
 			WHERE id='%s' AND " . get_filter_site_cond('configuration', null, true) . "";
 	} elseif($mode == 'abus' && a_priv("admin_moderation")) {
-		$new_status_sql_value = nohtml_real_escape_string($_POST['value']);
+		$new_status_sql_value = $new_status = nohtml_real_escape_string($_POST['value']);
 		$sql = "UPDATE peel_abus_comment
 			SET status='%s', id_admin='".intval($_SESSION['session_utilisateur']['id_utilisateur'])."', status_change_date='".date('Y-m-d H:i:s')."'
 			WHERE id='%s'";

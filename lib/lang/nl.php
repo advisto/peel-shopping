@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: nl.php 59883 2019-02-27 14:08:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "";
 $GLOBALS["STR_ADDRESS_NAME"] = "";
 $GLOBALS["STR_ADMIN"] = "De site beheren";
 $GLOBALS["STR_ADMINISTRATION"] = "De site beheren";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Bekijk de op uw site te plaatsen banners";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "U bent als partner geregistreerd op de website {$GLOBALS['site']}.\n\nMomenteel betalen wij u <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> van de totale verkoop die via uw account gegenereerd is.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Produceer een HTML code voor producten van partners";
@@ -319,6 +321,8 @@ $GLOBALS["STR_GET_MY_POSITION"] = "Herstel mijn positie (vereist voor deze funct
 $GLOBALS["STR_GET_PASSWORD"] = "Wachtwoord vergeten?";
 $GLOBALS["STR_GIFT_POINTS"] = "Geschenkpunten";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "Algemene promotie";
+$GLOBALS["STR_GRAMMES"] = "";
+$GLOBALS["STR_GROUP_BY"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Gecomprimeerd bestand openen mislukt";
 $GLOBALS["STR_HALF_WHOLESALER"] = "Semi groothandel";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "is verwijderd";
@@ -341,6 +345,7 @@ $GLOBALS["STR_INCLUDING"] = "waarvan";
 $GLOBALS["STR_INFO_ADDRESS"] = "";
 $GLOBALS["STR_INFORMATIONS"] = "Informatie";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Informatie niet beschikbaar";
+$GLOBALS["STR_INIT_FILTER"] = "";
 $GLOBALS["STR_INSCRIPTION_NEWSLETTER_AND_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Een logo invoegen";
 $GLOBALS["STR_INSERT_EMAIL"] = "Vul het e-mailadres in waarmee u geregistreerd staat en u zult per e-mail een nieuw wachtwoord ontvangen.";
@@ -378,6 +383,7 @@ $GLOBALS["STR_LIST"] = "Lijst";
 $GLOBALS["STR_LIST_PRODUCT"] = "Lijst van de producten";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Lijst van de onder-rubrieken";
 $GLOBALS["STR_LISTE_CADEAU"] = "Mijn geschenkenlijst";
+$GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Log alstublieft in om uw korting te ontvangen";
 $GLOBALS["STR_LOGIN_OK"] = "Wij danken u voor uw vertrouwen.";
@@ -396,6 +402,8 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Mijn gebruikte promotie codes:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Mijn huidige promotie codes:";
 $GLOBALS["STR_MESSAGE"] = "Bericht";
 $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Een minimum orderbedrag van";
 $GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "veld %s is verplicht";
@@ -539,6 +547,7 @@ $GLOBALS["STR_MY_ORDER"] = "Mijn bestellingen";
 $GLOBALS["STR_MY_QUOTES"] = "";
 $GLOBALS["STR_NAISSANCE"] = "Geboortedatum";
 $GLOBALS["STR_NAME"] = "Naam";
+$GLOBALS["STR_NB_MAX_SUBTOTAL"] = "";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "Op minder dan %s km van mijn positie";
 $GLOBALS["STR_NET"] = "Netto te betalen";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Nieuwe klant";
@@ -590,6 +599,7 @@ $GLOBALS["STR_OR_COORDINATION"] = "of";
 $GLOBALS["STR_OR"] = "of";
 $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Details van de bestelling";
+$GLOBALS["STR_ORDER_BY"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "Bestelformulier";
 $GLOBALS["STR_ORDER_HISTORY"] = "Overzicht van de bestellingen";
 $GLOBALS['STR_ORDER_MIN'] = "";
@@ -605,6 +615,7 @@ $GLOBALS["STR_ORDER_STATUT"] = "Status van de bestelling";
 $GLOBALS["STR_ORDER"] = "Bestellen";
 $GLOBALS["STR_ORIGIN"] = "Oorsprong";
 $GLOBALS["STR_OTHER"] = "Overige";
+$GLOBALS["STR_OVERWRITE_SAVE"] = "";
 $GLOBALS["STR_OUR_OTHER_SERVICES"] = "Onze overige diensten";
 $GLOBALS["STR_OUR_PARTNER"] = "Onze partners";
 $GLOBALS["STR_OUR_SERVICES"] = "Onze diensten";
@@ -737,6 +748,8 @@ $GLOBALS["STR_RSS_TITLE"] = "RSS feed van de website {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "RSS";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Algemene verkoopsvoorwaarden";
 $GLOBALS["STR_SAVE_CART"] = "Registreer winkelwagentje";
+$GLOBALS["STR_SAVE_RULES"] = "";
+$GLOBALS['STR_SCREEN_SIZE'] = "";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "Alle woorden";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "Elk woord";
 $GLOBALS["STR_SEARCH_BRAND"] = "Zoek per merk";
@@ -877,6 +890,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "";
 $GLOBALS["STR_WEEK"] = "Week(en)";
 $GLOBALS["STR_WEIGHT"] = "Gewicht van uw bestelling.";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "";
+$GLOBALS["STR_WEIGHT_SHORT"] = "";
 $GLOBALS["STR_WHOLESALER"] = "Groothandelaar";
 $GLOBALS["STR_WITH_ECOTAX"] = "Ecotax";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "met promotiecode";
@@ -911,3 +925,7 @@ $GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
 $GLOBALS["STR_PRIX_SEARCH_HT"] = "Prijs excl. BTW";
 $GLOBALS["STR_PRIX_SEARCH_TTC"] = "Prijs incl. BTW";
 $GLOBALS["STR_REGISER_CART_ALERT"] = "";
+$GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
+$GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
+$GLOBALS["STR_ON_REQUEST"] = "";
+$GLOBALS["STR_ESTIMATE"] = "";

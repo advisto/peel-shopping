@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -147,7 +147,7 @@ function get_captcha_inside_form(&$frm)
 		securityCodeCreate($code, $GLOBALS['dirroot'] . $codeSecurityPath, vn($GLOBALS['site_parameters']['captcha_noise_level'], 1000),  vn($GLOBALS['site_parameters']['captcha_noise_max_size'], 2));
 	}
 
-	$output .= '<img src="' . $GLOBALS['wwwroot'] . $codeSecurityPath . '" alt="Captcha" class="well" style="padding:0px; margin-bottom:0px" /><input type="hidden" name="code_id" value="' . intval($code_id) . '" />';
+	$output .= '<img src="' . $GLOBALS['wwwroot'] . $codeSecurityPath . '" alt="Captcha" class="well" style="padding:0px; margin-bottom:0px" /><input type="hidden" name="code_id" id="code_id" value="' . intval($code_id) . '" />';
 	return $output;
 }
 

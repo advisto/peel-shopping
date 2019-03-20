@@ -1,23 +1,26 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_date_filter_form.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
-*}<form class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
+// $Id: admin_date_filter_form.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
+*}
+{if !empty($standalone_form)}
+<form class="entryform form-inline" role="form" method="get" action="{$action|escape:'html'}">
+{/if}
 	<table class="main_table">
 		<tr><td class="entete">{$form_title}</td></tr>
 		<tr><td class="title_label center"><p>{$STR_ADMIN_TODAY_DATE} {$date}</p></td></tr>
 		{if !$only_information_select_html_displayed}
 		<tr>
-			<td class="title_label center">
+			<td class="center">
 				<table class="center" style="margin:auto;">
 					<tr>
 						<td><b>{$from_date_txt}</b>{$STR_BEFORE_TWO_POINTS}:</td>
@@ -63,8 +66,8 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="title_label center">{$STR_ADMIN_ORDER_DATE_FIELD_FILTER}{$STR_BEFORE_TWO_POINTS}: 
-				<select class="form-control" name="order_date_field_filter" style="width:200px; margin:auto;">
+			<td class="center">{$STR_ADMIN_ORDER_DATE_FIELD_FILTER}{$STR_BEFORE_TWO_POINTS}:
+				<select class="form-control" name="order_date_field_filter" style="width:260px; margin:auto;">
 				{foreach $order_date_field_options as $date_field}
 					<option value="{$date_field.value|str_form_value}"{if $date_field.issel} selected="selected"{/if}>{$date_field.name}</option>
 				{/foreach}
@@ -73,10 +76,14 @@
 		</tr>
 		{/if}
 		<tr>
-			<td class="center title_label">{$information_select_html}</td>
+			<td class="center">{$information_select_html}</td>
 		</tr>
+		{if !empty($standalone_form)}
 		<tr>
 			<td class="center"><p>{if isset($submit_html)}{$submit_html}{else}<input type="submit" name="submit" value="{$STR_ADMIN_DISPLAY_RESULTS|str_form_value}" class="btn btn-primary" />{/if}</p></td>
 		</tr>
+		{/if}
 	</table>
+{if !empty($standalone_form)}
 </form>	
+{/if}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 54230 2017-07-05 16:21:01Z sdelaporte $
+// $Id: produits.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}{if $is_associated_product}
 	{if $associated_product_multiple_add_to_cart && $prods_line_mode} 
 		<form action="{$wwwroot}/achat/caddie_ajout.php?multiprodid=true" method="post" enctype="multipart/form-data" role="form"> 
@@ -157,7 +157,13 @@
 							{if isset($prod.flash)}
 							<div class="alert alert-warning">{$prod.flash}</div>
 							{/if}
-							{if empty($prod.check_critere_stock)}<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>{/if}
+							{if empty($prod.check_critere_stock)}
+								{if !empty($prod.price_estimate)}
+									<div><b>{$str_estimate}{$STR_BEFORE_TWO_POINTS}:{$prod.price_estimate}</b></div>
+								{/if}
+								<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+							
+							{/if}
 						</td>
 					</tr>
 				{if isset($prod.departements_get_bootbox_dialog)}

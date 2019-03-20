@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Caddie.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: Caddie.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -20,12 +20,13 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Caddie.php 59053 2018-12-18 10:20:50Z sdelaporte $
+ * @version $Id: Caddie.php 59873 2019-02-26 14:47:11Z sdelaporte $
  * @access public
  */
 class Caddie {
 	/* Déclaration des tableaux */
-
+	
+	var $set_free_delivery_vat = false;
 	/* gestion de la liste cadeau */
 	var $giftlist_owners = array();
 	/* Tableau des articles */
@@ -148,6 +149,7 @@ class Caddie {
 	var $zone_technical_code;
 	var $type;
 	var $typeId;
+	var $type_technical_code;
 	var $apply_vat;
 
 	var $payment_technical_code;
@@ -252,6 +254,7 @@ class Caddie {
 		// type est ici le nom du type de livraison (en base de données, la colonne type est une id qui s'appelle ici typeId)
 		$this->type = "";
 		$this->typeId = "";
+		$this->type_technical_code = "";
 		// zone est ici le nom de la zone de livraison (en base de données, la colonne zone est une id qui s'appelle ici zoneId)
 		$this->zone = "";
 		$this->zoneId = "";
@@ -605,9 +608,14 @@ class Caddie {
 			$this->attribut[$numero_ligne] = null;
 		}
 		// Les valeurs des options ne contiennent pas les éventuelles réductions en pourcentage
-		$this->option_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false);
-		$this->option[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, $apply_vat, false, false, false);
-		
+		if ((in_array($product_object->technical_code, vb($GLOBALS['site_parameters']['product_price_from_attribut'], array())) || !empty($product_object->taille_base))) {
+			// Le prix de base du produit est défini par les attributs, donc il ne faut pas comptabiliser les attributs une seconde fois
+			$this->option_ht[$numero_ligne] = 0;
+			$this->option[$numero_ligne] = 0;
+		} else {
+			$this->option_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, false, false, false, false);
+			$this->option[$numero_ligne] = $product_object->format_prices($product_object->configuration_size_price_ht + $product_object->configuration_color_price_ht + $product_object->configuration_total_original_price_attributs_ht, $apply_vat, false, false, false);
+		}
 		// montant des options pour lesquels aucune réduction ne s'applique (valeur calculée dans la fonction affiche_attributs_form_part du module attribut.)
 		$this->option_without_reduction_ht[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht_without_reduction, false, false, false, false);
 		$this->option_without_reduction[$numero_ligne] = $product_object->format_prices($product_object->configuration_total_original_price_attributs_ht_without_reduction, $apply_vat, false, false, false);
@@ -942,6 +950,12 @@ class Caddie {
 				WHERE id = '" . intval($zoneId) . "' AND " . get_filter_site_cond('zones', 'z') . "";
 			$query = query($sql);
 			if ($Zone = fetch_assoc($query)) {
+				if ($zoneId != $this->zoneId) {
+					// On initilialise le type de port à blank car on a changé de zone ou de pays
+					$this->type = "";
+					$this->typeId = "";
+					$this->type_technical_code = "";
+				}
 				$this->zone = $Zone['nom'];
 				$this->zone_technical_code = $Zone['technical_code'];
 				$this->zoneTva = $Zone['tva'];
@@ -966,22 +980,25 @@ class Caddie {
 	function set_type($typeId)
 	{
 		$typeId = intval($typeId);
-		if ($typeId != $this->typeId) {
-			$type_name = get_delivery_type_name($typeId);
 			// Pour fixer le type, il faut obligatoirement une zone associée. Donc on regarde en base de donnée si ce type est asssocié à la zone configurée.
 			// L'association entre type et zone est faite dans peel_tarifs
-			$sql = "SELECT 1
-				FROM peel_tarifs tf
-				INNER JOIN peel_types t ON t.id = tf.type AND " . get_filter_site_cond('types', 't') . "
-				WHERE t.etat = 1 AND tf.type='" . intval($typeId) . "' AND tf.zone = '" . intval($this->zoneId) . "' AND " . get_filter_site_cond('tarifs', 'tf') . "";
+		$sql = "SELECT 1 FROM peel_tarifs WHERE type='" . intval($typeId) . "' AND zone = '" . intval($this->zoneId) . "' AND " . get_filter_site_cond('tarifs') . "";
+		$query = query($sql);
+
+		if (num_rows($query) > 0) {
+			$sql = "SELECT *, nom_" . $_SESSION['session_langue'] . " AS nom
+				FROM peel_types
+				WHERE id='" . intval($typeId) . "'";
 			$query = query($sql);
-			if ($type_name !== false && num_rows($query) > 0) {
+			if ($result = fetch_assoc($query)) {
 				// On définit le type de port seulement si trouvé en BDD
 				$this->typeId = $typeId;
-				$this->type = $type_name;
+				$this->type = $result['nom'];
+				$this->type_technical_code = $result['technical_code'];
 			} else {
 				$this->typeId = '';
 				$this->type = '';
+				$this->type_technical_code = '';
 			}
 			$this->update();
 		}
@@ -1235,11 +1252,11 @@ class Caddie {
 		
 		// ETAPE 3 : On gère des éventuels frais supplémentaires si la commande est trop petite
 		if(check_if_module_active('reseller') && is_reseller() && isset($GLOBALS['site_parameters']['minimal_amount_to_order_reve'])) {
-			$treshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
+			$threshold_to_use = $GLOBALS['site_parameters']['minimal_amount_to_order_reve'];
 		} else {
-			$treshold_to_use = vn($GLOBALS['site_parameters']['minimal_amount_to_order']);
+			$threshold_to_use = vn($GLOBALS['site_parameters']['minimal_amount_to_order']);
 		}
-		if (count($this->articles) && $this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= $treshold_to_use) {
+		if (count($this->articles) && $this->total_produit < vn($GLOBALS['site_parameters']['small_order_overcost_limit']) && $this->total_produit >= $threshold_to_use) {
 			$this->small_order_overcost_amount_ht = $GLOBALS['site_parameters']['small_order_overcost_amount'] / (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));
 			if ($this->apply_vat) {
 				$this->small_order_overcost_amount = $this->small_order_overcost_amount_ht * (1 + ($GLOBALS['site_parameters']['small_order_overcost_tva_percent'] / 100));
@@ -1317,7 +1334,10 @@ class Caddie {
 				}
 			}
 		}
-		
+		//On passe $free_delivery_vat directement à true pour le cas de figure du vat_exemption est renseigné
+		if(!empty($this->set_free_delivery_vat)) {
+			$free_delivery_vat = true;
+		}
 		if ($this->apply_vat && empty($free_delivery_vat)) {
 			$this->cout_transport = $this->cout_transport_ht * (1 + $delivery_cost_infos['tva'] / 100);
 		} else {
@@ -1381,6 +1401,7 @@ class Caddie {
 				unset($product_object);
 			}
 		}
+		call_module_hook('update_caddie', array('product_list'=>$this->articles));
 		// FIN
 		$update_in_process = false;
 		// Redirection en cas de problème de stock au dernier moment lors de la commande => on redirige vers la page de caddie
@@ -1642,8 +1663,8 @@ class Caddie {
 						}
 						unset($product_object);
 					}
-					foreach($GLOBALS['site_parameters']['global_remise_percent'] as $this_treshold => $this_percent) {
-						if (vn($total) >= $this_treshold) {
+					foreach($GLOBALS['site_parameters']['global_remise_percent'] as $this_threshold => $this_percent) {
+						if (vn($total) >= $this_threshold) {
 						   // On a dépassé le seuil, donc la valeur la plus proche est celle précédemment trouvée.
 						   $this->global_promotion = vn($this_percent);
 						}

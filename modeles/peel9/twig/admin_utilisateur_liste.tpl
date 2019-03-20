@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -14,7 +14,7 @@
 #}
 {% if groupes_options_utilisateurs %}
 <div class="entete">{{ STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP }}</div>
-	<form method="post" action="{{ action|escape(html) }}">
+	<form method="post" action="{{ action|escape('html') }}">
 		<input type="hidden" name="mode" value="groupe_utilisateurs" />
 		<span class="normal">
 			<input type="radio" value="1" name="affected" checked="checked">{{ STR_ADMIN_ASSIGN }}

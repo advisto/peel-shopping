@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_ventes.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
+// $Id: admin_ventes.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}{if isset($results)}
 <br /><div class="alert alert-info">{$STR_ADMIN_VENTES_FORM_EXPLAIN}</div><br />
 <p class="title_label center">{$period_text}</p>
@@ -79,10 +79,9 @@
 {if $is_module_export_ventes_active}
 	<div style="padding-bottom:15px">
 		<a href="{$export_href_chronopost|escape:'html'}" class="title_label"><img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />&nbsp;{$STR_ADMIN_VENTES_EXPORT_EXCEL_CHRONOPOST}</a><br />
-		<input type="radio" name="mode" value="standard" />&nbsp;<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" /><span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL}.</span>&nbsp;<a href="{$export_href|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a><br />
-		<input type="radio" name="mode" value="one_line_per_order"/>&nbsp<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />;<span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER}.</span>&nbsp;<a href="{$export_href_one_line_per_order|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a><br />
-		<input type="radio" name="mode" value="one_line_per_product" />&nbsp;<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" /><span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT}.</span>&nbsp;<a href="{$export_href_one_line_per_product|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a>
-
+		<input type="radio" name="type" value="ventes" />&nbsp;<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" /><span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL}.</span>&nbsp;<a href="{$export_href|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a><br />
+		<input type="radio" name="type" value="one_line_per_order"/>&nbsp<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" />;<span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_ORDER}.</span>&nbsp;<a href="{$export_href_one_line_per_order|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a><br />
+		<input type="radio" name="type" value="one_line_per_product" />&nbsp;<img src="{$excel_src|escape:'html'}" align="absmiddle" alt="" /><span class="title_label">{$STR_ADMIN_VENTES_EXPORT_EXCEL_ONE_LINE_PER_PRODUCT}.</span>&nbsp;<a href="{$export_href_one_line_per_product|escape:'html'}">{$STR_ADMIN_VENTES_ALL_EXPORT_EXCEL}</a>&nbsp;<br/>
 	</div>
 	<input type="submit" class="btn btn-primary" name="export_selected_order" value="{$STR_ADMIN_VENTES_EXPORT_SELECTED_ORDER}" />
 </form>

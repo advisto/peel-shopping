@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_form.tpl 53849 2017-05-19 12:29:39Z sdelaporte $
+// $Id: admin_utilisateur_form.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -54,7 +54,7 @@
 		</tr>
 {/if}
 		<tr>
-			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="https://www.infogreffe.fr/societes/">{$STR_ADMIN_UTILISATEURS_INFOGREFFE}</a></td>
+			<td colspan="2"><a onclick="return(window.open(this.href)?false:true);" href="https://www.infogreffe.fr/">{$STR_ADMIN_UTILISATEURS_INFOGREFFE}</a></td>
 		</tr>
 		<tr>
 			<td class="entete" colspan="2"><img src="{$administrer_url}/images/liste_clients.gif" width="16" height="16" alt="" align="absmiddle" />{$STR_ADMIN_UTILISATEURS_EDIT_TITLE} {$email}</td>
@@ -606,7 +606,7 @@
 		{/if}
 	</table>
 	{$hook_output}
-	<table>
+	<table class="main_table">
 		<tr>
 			<td colspan="2"><p class="center"><input class="btn btn-primary" type="submit" value="{$titre_soumet|str_form_value}" /></p></td>
 		</tr>

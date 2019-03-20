@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: produits.php 60111 2019-03-18 09:23:59Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -314,8 +314,8 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 	} else {
 		$frm['categories'] = array($categorie_id);
 	}
-	$frm['references'] = array();
-	$frm['reference_fournisseur'] = array();
+	$frm['references'] = '';
+	$frm['reference_fournisseur'] ='';
 	$frm['couleurs'] = array();
 	$frm['tailles'] = array();
 	if (check_if_module_active('payment_by_product')) {
@@ -554,6 +554,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('skip_home_special_products', !empty($GLOBALS['site_parameters']['skip_home_special_products']));
 		$tpl->assign('is_on_special', !empty($frm['on_special']));
 		$tpl->assign('is_on_new', !empty($frm['on_new']));
+		
+		$tpl->assign('price_estimate', vb($frm['price_estimate']));
 		
 		$tpl->assign('site_auto_promo', $GLOBALS['site_parameters']['auto_promo']);
 		$tpl->assign('is_on_promo', !empty($frm['on_promo']));
@@ -870,7 +872,8 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_download_module_active', check_if_module_active('download'));
 		$tpl->assign('is_on_download', !empty($frm['on_download']));
 		$tpl->assign('zip', vb($frm['zip']));
-
+		$tpl->assign('product_attributs_price_href', $GLOBALS['wwwroot'] . '/modules/attributs/administrer/produits_attributs.php?id=' . vn($frm['id']) . '&mode=edit_price');
+		
 		$tpl->assign('is_flash_sell_module_active', check_if_module_active('flash'));
 		if (check_if_module_active('flash')) {
 			$tpl->assign('prix_flash', vn($prix_flash));
@@ -912,6 +915,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_TECHNICAL_CODE', $GLOBALS['STR_ADMIN_TECHNICAL_CODE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_BEST_SELLERS', $GLOBALS['STR_ADMIN_PRODUITS_BEST_SELLERS']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ROLLOVER', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ROLLOVER']);
+		$tpl->assign('STR_ADMIN_PRODUITS_ESTIMATE_PRICE', $GLOBALS['STR_ADMIN_PRODUITS_ESTIMATE_PRICE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ESTIMATE', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ESTIMATE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_CART_PAGE', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_CART_PAGE']);
 		$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
@@ -983,6 +987,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_MANAGE_CRITERIA', $GLOBALS['STR_ADMIN_PRODUITS_MANAGE_CRITERIA']);
 		$tpl->assign('STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO', $GLOBALS['STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO']);
 		$tpl->assign('STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK', $GLOBALS['STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK']);
+		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER', $GLOBALS['STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_MANAGE_COLORS_SIZES_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_MANAGE_COLORS_SIZES_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_OTHER_OPTION', $GLOBALS['STR_ADMIN_PRODUITS_OTHER_OPTION']);
@@ -1006,6 +1011,11 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT', $GLOBALS['STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT']);
 		$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
+		$hook_result = call_module_hook('admin_formulaire_produit', array('id'=>vn($frm['id']), 'frm'=>$frm), 'array');
+
+		foreach($hook_result as $this_key => $this_value) {
+			$tpl->assign($this_key, $this_value);
+		}
 		$output .= $tpl->fetch();
 	}
 	return $output;
@@ -1189,6 +1199,7 @@ function insere_produit($frm)
 	$product_fields[] = "on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'";
 	$product_fields[] = "on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'";
 	$product_fields[] = "on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'";
+	$product_fields[] = "price_estimate = '" . nohtml_real_escape_string($frm['price_estimate']) . "'";
 	$product_fields[] = "alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'";
 	$product_fields[] = "on_stock = '" . intval(vn($frm['on_stock'])) . "'";
 	$product_fields[] = "affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'";
@@ -1318,6 +1329,7 @@ function insere_produit($frm)
 	if (!empty($product_id)) {
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_CREATED_OK'], StringMb::html_entity_decode_if_needed($frm['nom_' . $_SESSION['session_langue'] . '']))))->fetch();
 	}
+	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($product_id), 'frm'=>$frm));
 	return $output;
 }
 
@@ -1350,7 +1362,7 @@ function maj_produit($id, $frm)
 	} else {
 		$prix_promo = get_float_from_user_input($frm['prix_promo']) * (1 + $frm['tva'] / 100);
 	}
-	if (check_if_module_active('flash')) {
+	if (check_if_module_active('flash') && !empty($frm['prix_flash'])) {
 		if (display_prices_with_taxes_in_admin ()) {
 			$prix_flash = get_float_from_user_input($frm['prix_flash']);
 		} else {
@@ -1370,6 +1382,8 @@ function maj_produit($id, $frm)
 		update_payment_by_product(vb($frm['paiment_allowed'], array()), $id);
 	}
 	$prix_achat = get_float_from_user_input($frm['prix_achat']) * (1 + $frm['tva'] / 100);
+	
+	
 	
 	/* Met à jour la table produits */
 	$product_fields[] = "reference = '" . nohtml_real_escape_string($frm['reference']) . "'";
@@ -1400,6 +1414,7 @@ function maj_produit($id, $frm)
 	$product_fields[] = "on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'";
 	$product_fields[] = "on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'";
 	$product_fields[] = "on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'";
+	$product_fields[] = "price_estimate = '" . nohtml_real_escape_string($frm['price_estimate']) . "'";
 	$product_fields[] = "alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'";
 	$product_fields[] = "on_stock = '" . intval(vn($frm['on_stock'])) . "'";
 	$product_fields[] = "affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'";
@@ -1437,7 +1452,7 @@ function maj_produit($id, $frm)
 		$product_fields[] = "meta_desc_" . $lng . " = '" . nohtml_real_escape_string($frm['meta_desc_' . $lng]) . "'";
 	}
 	if (check_if_module_active('flash')) {
-		$product_fields[] = "prix_flash = '" . nohtml_real_escape_string($prix_flash) . "'";
+		$product_fields[] = "prix_flash = '" . nohtml_real_escape_string(vn($prix_flash)) . "'";
 		$product_fields[] = "on_flash = '" . nohtml_real_escape_string(vn($frm['on_flash'])) . "'";
 		if (!empty($frm['flash_start'])) {
 			$product_fields[] = "flash_start = '" . nohtml_real_escape_string(get_mysql_date_from_user_input($frm['flash_start'])) . "'";
@@ -1558,6 +1573,7 @@ function maj_produit($id, $frm)
 	} else {
 		$product_name = vb($frm['nom_' . $_SESSION['session_langue']]);
 	}
+	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($id), 'frm'=>$frm));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_PRODUCT_UPDATE_OK'], StringMb::html_entity_decode_if_needed($product_name))))->fetch();
 }
 

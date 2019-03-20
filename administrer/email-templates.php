@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: email-templates.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: email-templates.php 59927 2019-03-05 13:35:49Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -22,7 +22,7 @@ $form_error_object = new FormError();
 $report = '';
 $output = '';
 if (vb($_GET['mode'])=='supprfile' ) {
-        supprime_fichier($_GET['id'], $_GET['file']);
+    $output .=  supprime_fichier($_GET['id'], $_GET['file']);
 }
 // Modification d'un template
 if (!empty($_GET['id'])) {
@@ -49,8 +49,8 @@ if (!empty($_GET['id'])) {
 		}
 
 		if ($form_error_object->count()) {
-			if ($form_error_object->has_error['token']) {
-				$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $form_error_object->text['token']))->fetch();
+			if ($form_error_object->has_error('token')) {
+				$action = $form_error_object->text('token');
 			} else {
 				$action = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ERR_FILL_IN_ALL']))->fetch();
 			}
@@ -439,6 +439,5 @@ function supprime_fichier($id, $file)
     }
     @unlink($GLOBALS['uploaddir'] . '/' . $file['image']);
 
-    echo '<p class="global_success">Le fichier ' . $file['image'] . ' a été effacé du serveur.'; 
-
+    return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS["STR_ADMIN_FILE_DELETED"], $file['image'])))->fetch();
 }

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: format.php 59925 2019-03-05 13:28:04Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -483,7 +483,7 @@ function fdate(&$date_nok)
  * Si on appelle get_formatted_date() sur une chaine déjà formattée par get_formatted_date(), la date est bien préservée
  * On peut donc appliquer cette fonction sur une date provenant d'un formulaire ou de la base de données
  *
- * @param mixed $datetime_or_timestamp Si nulle : date du jour. Si === '' ou === 0, alors c'est pas de de date
+ * @param mixed $datetime_or_timestamp Si === null ou '' ou 0, alors pas de date
  * @param string $mode can be 'short', 'long', 'standard', 'nice', 'veryshort', 'timestamp1000'
  * @param mixed $hour_minute can be a boolean => displays the hour:minute or not, or "long" or "short" to define the format
  * @return
@@ -555,7 +555,7 @@ function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_mi
 		// $string est un timestamp
 		$string = date('Y-m-d H:i:s', $string);
 		$supposed_string_format = 'Y-m-d H:i:s';
-	} elseif (is_numeric(substr($string, 0, 4)) && substr($string, 4, 1) == '-' && !is_numeric(substr($GLOBALS['date_format_short'], 0, 4))) {
+	} elseif (is_numeric(substr($string, 0, 4)) && substr($string, 4, 1) == '-' && is_numeric(substr($string, 5, 2)) && substr($string, 7, 1) == '-' && is_numeric(substr($string, 8, 2))) {
 		// Date au format MySQL
 		$supposed_string_format = 'Y-m-d H:i:s';
 	} else {
@@ -590,51 +590,55 @@ function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_mi
  *
  * @param int $total_seconds Délai en secondes
  * @param boolean $show_seconds
- * @param string $display_mode
+ * @param string $display_mode Si display_mode vaut 'month' : mois/semaines/jours avec mots longs. Si display_mode vaut 'day' : j/m/h/s avec abbréviations. Si display_mode vaut N : N premiers résultats du mode 'day'
+ * @param boolean $show_negative
  * @return
  */
-function get_formatted_duration($total_seconds, $show_seconds = false, $display_mode = 'day')
+function get_formatted_duration($total_seconds, $show_seconds = false, $display_mode = 'day', $show_negative = false)
 {
 	$result = array();
-	if (!is_numeric($total_seconds) || $total_seconds < 0) {
+	if (!is_numeric($total_seconds) || ($total_seconds < 0 && !$show_negative)) {
 		return false;
 	}
-	$days = $total_seconds / (3600 * 24);
-	$hours = $total_seconds / 3600 - floor($days) * 24;
-	$minutes = $total_seconds / 60 - floor($days) * 60 * 24 - floor($hours) * 60;
-	$seconds = $total_seconds - floor($days) * 3600 * 24 - floor($hours) * 3600 - floor($minutes) * 60;
-	$weeks = $total_seconds / (3600 * 24 * 7);
-	$months = $total_seconds / (3600 * 24 * 30);
+	$total_s = abs($total_seconds);
+	$sign = ($total_seconds<0?'-':'');
+	$days = $total_s / (3600 * 24);
+	$hours = $total_s / 3600 - floor($days) * 24;
+	$minutes = $total_s / 60 - floor($days) * 60 * 24 - floor($hours) * 60;
+	$seconds = $total_s - floor($days) * 3600 * 24 - floor($hours) * 3600 - floor($minutes) * 60;
+	$weeks = $total_s / (3600 * 24 * 7);
+	$months = $total_s / (3600 * 24 * 30);
 
 	if ($display_mode == 'day') {
-		$result[] = floor($days) . '' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
+		$result[] = floor($days) . ' ' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
 	} elseif ($display_mode == 'minutes') {
-		$result[] = floor($total_seconds / 60) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
+		$result[] = floor($total_seconds / 60) . ' ' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
 	} elseif ($display_mode == 'hours') {
-		$result[] = floor($total_seconds / 3600) . '' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
+		$result[] = floor($total_seconds / 3600) . ' ' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
 		if ($minutes >= 1) {
-			$result[] = floor($minutes) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
+			$result[] = floor($minutes) . ' ' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
 		}
 	} elseif ($display_mode == 'month') {
 		if ($months >= 1) {
-			$result[] = floor($months) . ' ' . str_replace('(s)', ($months>1?'s':''), $GLOBALS['STR_MONTHS']);
+			$result[] = $sign . floor($months) . ' ' . str_replace('(s)', ($months>1?'s':''), $GLOBALS['STR_MONTHS']);
 		} elseif ($weeks >= 1) {
-			$result[] = floor($weeks) . ' ' . str_replace('(s)', ($weeks>1?'s':''), $GLOBALS['strWeeks']);
+			$result[] = $sign . floor($weeks) . ' ' . str_replace('(s)', ($weeks>1?'s':''), $GLOBALS['strWeeks']);
 		} elseif ($days >= 1) {
-			$result[] = floor($days) . ' ' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
+			$result[] = $sign . floor($days) . ' ' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strDays']);
 		}
 	} else {
+		// $display_mode == 'day' par exemple
 		if ($days >= 1) {
-			$result[] = floor($days) . '' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strShortDays']);
+			$result[] = $sign . floor($days) . '' . str_replace('(s)', ($days>1?'s':''), $GLOBALS['strShortDays']);
 		}
 		if ($hours >= 1) {
-			$result[] = floor($hours) . '' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
+			$result[] = $sign . floor($hours) . '' . str_replace('(s)', ($hours>1?'s':''), $GLOBALS['strShortHours']);
 		}
 		if ($minutes >= 1) {
-			$result[] = floor($minutes) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
+			$result[] = $sign . floor($minutes) . '' . str_replace('(s)', ($minutes>1?'s':''), $GLOBALS['strShortMinutes']);
 		}
-		if ($seconds >= 1 && ($show_seconds || $total_seconds<60)) {
-			$result[] = floor($seconds) . '' . str_replace('(s)', ($seconds>1?'s':''), $GLOBALS['strShortSecs']);
+		if ($seconds >= 1 && ($show_seconds || $total_s<60)) {
+			$result[] = $sign . floor($seconds) . '' . str_replace('(s)', ($seconds>1?'s':''), $GLOBALS['strShortSecs']);
 		}
 	}
 	if(is_numeric($display_mode)) {
@@ -807,6 +811,12 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$template_tags['CONTACT_FORM'] = handle_contact_form($_POST, true);
 			} elseif(StringMb::strpos($text, '[BEST_SELLER_CARROUSEL]') !== false) {
 				$template_tags['BEST_SELLER_CARROUSEL'] = affiche_best_seller_produit_colonne(true);
+			} elseif(StringMb::strpos($text, '[ADVANCED_SEARCH_BLOCK]') !== false) {
+				if(function_exists('form_search_engine')) {
+					$template_tags['ADVANCED_SEARCH_BLOCK'] = form_search_engine('home');
+				} else {
+					$template_tags['ADVANCED_SEARCH_BLOCK'] = get_search_form($_GET, vb($_GET['search']), vb($_GET['match']), null, 'module_products');
+				}
 			} elseif(StringMb::strpos($text, '[CONTENT_CARROUSEL]') !== false) {
 				$template_tags['CONTENT_CARROUSEL'] = Carrousel::display('content_carrousel', true, true);
 			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES]') !== false && check_if_module_active('references')) {
@@ -870,7 +880,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			} elseif($format == 'html') {
 				$this_tag_value = StringMb::nl2br_if_needed($this_tag_value);
 			}
-			// ATTENTION : A FAIRE AVANT la gestion des tags de dates à cause de différences entre minuscules et majuscules dans ces tags
+			// ATTENTION : ce qui suit est FAIT AVANT la gestion des tags de dates, à cause de différences entre minuscules et majuscules dans ces tags
 			$text = str_replace(array('[' . StringMb::strtoupper($this_tag) . ']', '[' . StringMb::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
 		}
 		if(!$replace_only_custom_tags) {
@@ -1128,6 +1138,11 @@ function get_string_from_array($array, $disable_ad_quote=false)
  */
 function get_array_from_string($string)
 {
+	if(is_array($string)) {
+		echo 'Error array instead of string';
+		var_dump($string);
+		return $string;
+	}
 	$string = str_replace('Array ', 'Array', trim(str_replace(array("\t", "\r\n", "\r", '\,'), array(' ', "\n", '', '¤#'), $string)));
 	if(StringMb::substr($string, 0, StringMb::strlen('Array')) == 'Array') {
 		$string = StringMb::substr($string, StringMb::strlen('Array('), StringMb::strlen($string) - StringMb::strlen('Array(')-1);
@@ -1239,7 +1254,7 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
  */
 function highlight_found_text($text, $terms, &$found_words_array, $found_tags = array('<span class="search_tag">', '</span>')) {
 	$bbcode = array('[tagsearch]', '[/tagsearch]');
-	if(empty($terms)) {
+	if((is_array($terms) && !count($terms)) || (is_string($terms) && !strlen($terms))) {
 		return $text;
 	} elseif(!is_array($terms)) {
 		$terms = array($terms);
@@ -1478,23 +1493,20 @@ function array_merge_recursive_distinct() {
     $merged = array_shift($arrays);
 
     foreach ($arrays as $array) {
-		foreach ($array as $key => $value) {
-			if(is_numeric($key)) {
-				// Clé numérique : ajout en fin de tableau, sans effacer ce qui existe déjà => comme array_merge ou array_merge_recursive
-				$merged[] = $value;
-			} elseif (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
-				// Merge récursif, comme array_merge_recursive et non pas comme array_merge
-				if (is_numeric($key)) {
-					$merged[] = array_merge_recursive_distinct($merged[$key], $value);
+		if(is_array($array)) {
+			foreach ($array as $key => &$value) {
+				if(!is_string($key)) {
+					// Clé numérique : ajout en fin de tableau, sans effacer ce qui existe déjà => comme array_merge ou array_merge_recursive
+					$merged[] = $value;
+				} elseif (is_array($value) && (isset($merged[$key]) && is_array($merged[$key]))) {
+					// Merge récursif, comme array_merge_recursive et non pas comme array_merge
+						$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
 				} else {
-					$merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
+					// Clé alphanumérique : efface toute autre version déjà présente dans le tableau (=> d'où le nom array_merge_recursive_distinct, contrairement à array_merge_recursive qui créerait un tableau)
+					$merged[$key] = $value;
 				}
-			} else {
-				// Clé alphanumérique : efface toute autre version déjà présente dans le tableau (=> d'où le nom array_merge_recursive_distinct, contrairement à array_merge_recursive qui créerait un tableau)
-				$merged[$key] = $value;
 			}
 		}
-		unset($key, $value);
     }
     return $merged;
 }

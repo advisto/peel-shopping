@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nom_attributs.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: nom_attributs.php 59873 2019-02-26 14:47:11Z sdelaporte $
 
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
@@ -22,6 +22,8 @@ include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 
 $start = intval(vn($_GET['start'])); // Détermine la variable start (début de page)
 $frm = $_POST;
+
+echo assign_or_unassign_nom_attribut($frm);
 
 switch (vb($_REQUEST['mode'])) {
 	case "ajout" :

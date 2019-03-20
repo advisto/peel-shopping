@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: haut.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,14 +32,38 @@ if(!empty($output) && (StringMb::strpos($output, 'vimeo.') !== false || StringMb
 output_general_http_header(null, (est_identifie()?null:vb($GLOBALS['site_parameters']['page_cache_if_not_loggued_in_seconds'])));
 
 $tpl = $GLOBALS['tplEngine']->createTemplate('haut.tpl');
+$tpl->assign('content_tag_body', vb($GLOBALS['site_parameters']['content_tag_body']));
 $tpl->assign('site_id', $GLOBALS['site_id']);
 if (defined('IN_HOME')) {
 	$tpl->assign('in_home', defined('IN_HOME'));
+	$tpl->assign('CONTENT_MAIN_CONTENT', affiche_contenu_html('content_main_content', true));
 }
 if (defined('IN_CONTACT')) {
 	$tpl->assign('in_contact', defined('IN_CONTACT'));
 }
-
+if (defined('IN_LOGIN')) {
+	$tpl->assign('IN_LOGIN', defined('IN_LOGIN'));
+}
+if (check_if_module_active('carrousel') && defined('IN_CATALOGUE') && !empty($_GET['catid'])) {
+	$sql = "SELECT nom
+			FROM peel_carrousels c
+			INNER JOIN peel_categories pc ON pc.carrousel_id = c.id
+			WHERE pc.id = " . intval($_GET['catid']) . "";
+	$query_name = query($sql);
+	if ($car = fetch_assoc($query_name)) {
+		$name_carrousel = $car['nom']."_category";
+		$carrousel = Carrousel::display($name_carrousel, true);
+		if (!empty($carrousel)) {
+			$cat['carrousel'] = $carrousel;
+		}
+		$banner = affiche_banner(8, true, null, $_GET['catid']);
+		if (!empty($banner)) {
+			$cat['banner'] = $banner;
+		}
+		$tpl->assign('cat', $cat);
+	}
+}
+$tpl->assign('main_content_class', vb($GLOBALS['site_parameters']['main_content_class'], 'container'));
 $tpl->assign('page_columns_count', $GLOBALS['page_columns_count']);
 $tpl->assign('disable_navbar_toggle', !empty($GLOBALS['site_parameters']['disable_navbar_toggle']));
 $tpl->assign('disable_header_login', !empty($GLOBALS['site_parameters']['disable_header_login']));
@@ -116,6 +140,9 @@ if ($GLOBALS['page_columns_count'] > 1) {
 	$modules_left = '';
 	if((defined('IN_CATALOGUE_ANNONCE') || defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE_DETAILS')) && check_if_module_active('annonces')) {
 		$modules_left .= get_modules('left_annonce', true, null, vn($_GET['catid'])); 
+	}
+	if(defined('IN_CATALOGUE')) {
+		$modules_left .= get_modules('left_category', true, null, vn($_GET['catid']));
 	}
 	$modules_left .= get_modules('left', true, null, vn($_GET['catid']));
 	$tpl->assign('MODULES_LEFT', $modules_left);

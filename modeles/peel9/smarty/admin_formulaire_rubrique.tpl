@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_rubrique.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
+// $Id: admin_formulaire_rubrique.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -65,6 +65,16 @@
 				{include file="uploaded_file.tpl" f=$image STR_DELETE=$STR_DELETE_THIS_FILE}
 		{else}
 				<input name="image" type="file" value="" />
+		{/if}
+			</td>
+		</tr>	
+		<tr>
+			<td>{$STR_IMAGE} {$STR_ADMIN_HEADING}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+		{if !empty($image_head)}
+				{include file="uploaded_file.tpl" f=$image_head STR_DELETE=$STR_DELETE_THIS_FILE}
+		{else}
+				<input name="image_head" type="file" value="" />
 		{/if}
 			</td>
 		</tr>

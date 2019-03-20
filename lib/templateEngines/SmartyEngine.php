@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: SmartyEngine.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 59053 2018-12-18 10:20:50Z sdelaporte $
+ * @version $Id: SmartyEngine.php 59873 2019-02-26 14:47:11Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -108,8 +108,8 @@ class SmartyEngine extends EngineTpl {
 			$data['cart_qties'] = $_SESSION['session_caddie']->count_products();
 			$data['cart'] = $_SESSION['session_caddie']->articles;
 		}
-		$data['currencies'] = array(vb($_SESSION['session_devise']['code'],'EUR'));
-		$data['id_currency_cookie'] = vb($_SESSION['session_devise']['code'],'EUR');
+		$data['currencies'] = array(vb($_SESSION['session_devise']['code'], 'EUR'));
+		$data['id_currency_cookie'] = vb($_SESSION['session_devise']['code'], 'EUR');
 		$data['logged'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur']));
 		$data['page_name'] = null; // Non disponible systématiquement ici
 		$data['customerName'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur'])?vb($_SESSION['session_utilisateur']['prenom']) . ' '. vb($_SESSION['session_utilisateur']['nom_famille']):null);

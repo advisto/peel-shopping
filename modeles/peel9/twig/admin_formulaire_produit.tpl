@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -127,6 +127,10 @@
 		<tr>
 			<td class="title_label top"><label for="on_estimate">{{ STR_ADMIN_PRODUITS_IS_ON_ESTIMATE }}</label>{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="checkbox" id="on_estimate" name="on_estimate" value="1"{% if is_on_estimate %} checked="checked"{% endif %} /></td>
+		</tr>
+			<tr>
+			<td class="title_label top"><label for="price_estimate">{{ STR_ADMIN_PRODUITS_ESTIMATE_PRICE }}</label>{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input type="text" class="form-control" name="price_estimate" value="{{ price_estimate|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -358,6 +362,11 @@
 			<td colspan="2">
 				<div class="alert alert-info">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO }}{{ STR_BEFORE_TWO_POINTS }}: {% if mode == "maj" %}<a href="{{ produits_attributs_href|escape('html') }}" class="alert-link" onclick="return(window.open(this.href)?false:true);">{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK }}</a>{% else %}{{ STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER }} <a href="{{ nom_attributs_href|escape('html') }}">{{ nom_attributs_href }}</a>{% endif %}</div></td>
 		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="alert alert-info"><a class="alert-link" href="{{ product_attributs_price_href|escape('html') }}">{{ STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE }}</a><br /></div>
+			</td>
+		</tr>
 	{% endif %}
 		<tr>
 			<td colspan="2">
@@ -464,11 +473,11 @@
 		<tr>
 			<td colspan="2"><div class="alert alert-info"><p>{{ STR_ADMIN_PRODUITS_FILES_EXPLAIN }}</p></div></td>
 		</tr>
-	{% for i in files|keys %}
-		{% if (files.i) %}
+	{% for i,f in files %}
+		{% if (f) %}
 		<tr>
-			<td class="title_label">{% if files.i.type == 'img' %}{{ STR_IMAGE }} {% else %}{{ STR_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>{% include "uploaded_file.tpl" with {'f':files.i,'STR_DELETE':STR_DELETE_THIS_FILE } %}</td>
+			<td class="title_label">{% if f.type == 'img' %}{{ STR_IMAGE }} {% else %}{{ STR_FILE }} {% endif %}{{ i }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>{% include "uploaded_file.tpl" with {'f':f,'STR_DELETE':STR_DELETE_THIS_FILE } %}</td>
 		</tr>
 		{% else %}
 		<tr>

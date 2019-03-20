@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: user.php 59990 2019-03-08 17:18:57Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -119,9 +119,10 @@ function a_priv($requested_priv, $demo_allowed = false, $site_configuration_modi
  * @param boolean $warn_admin_if_template_active
  * @param boolean $skip_existing_account_tests
  * @param boolean $create_password_on_behalf_of_user
+ * @param boolean $test_mode
  * @return mixed New user id or array with user information
  */
-function insere_utilisateur($frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false)
+function insere_utilisateur($frm, $password_already_encoded = false, $send_user_confirmation = false, $warn_admin_if_template_active = true, $skip_existing_account_tests = false, $create_password_on_behalf_of_user = false, $test_mode = false)
 {
 	$sql_condition_array = array();
 	// Si un compte a un privilège ci-dessous, et qu'un utilisateur veut créer un nouveau compte avec le même email, alors il est remplacé automatiquement par le nouveau compte
@@ -175,8 +176,10 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 				WHERE (" . implode(' OR ', $sql_condition_array).") AND priv IN ('" . implode("', '", real_escape_string($user_low_priviledges_array)) . "') AND " . get_filter_site_cond('utilisateurs') . '';
 			$query = query($sql);
 			if ($user_already_exists_infos = fetch_assoc($query)) {
-				query("DELETE FROM peel_utilisateurs
+				if(!$test_mode) {
+					query("DELETE FROM peel_utilisateurs
 					WHERE id_utilisateur='" . intval($user_already_exists_infos['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+				}
 			}
 		}
 		if (!$skip_existing_account_tests) {
@@ -214,7 +217,7 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 		}
 	}
 	if (!isset($frm['etat'])) {
-		// Par sécurité on fait ce test. On ne peut pas laisser le champs etat sans valeur.
+		// Par sécurité on fait ce test. On ne peut pas laisser le champ etat sans valeur.
 		$frm['etat'] = 1;
 	}
 	if(defined('IN_REGISTER')) {
@@ -247,6 +250,9 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 	$frm['date_insert'] = vb($frm['date_insert'], date('Y-m-d H:i:s', time()));
 	$frm['date_update'] = vb($frm['date_update'], date('Y-m-d H:i:s', time()));
 	$frm['email'] = trim($frm['email']);
+	if(empty($frm['email'])) {
+		$frm['email'] = vb($frm['pseudo'], unique_id(8)).'@migrated';
+	}
 	$frm['format'] = vb($from['format'], vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html'));
 	$frm['seg_who'] = vb($frm['seg_who'], 'no_info');
 	$frm['seg_want'] = vb($frm['seg_want'], 'no_info');
@@ -300,75 +306,80 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 			$frm[$this_field] = implode(',', $frm[$this_field]);
 		}
 	}
-	$sql = "INSERT INTO peel_utilisateurs SET
-			" . implode(',', $sql_fields_array) . "";
-	query($sql);
-	
-	// $frm['id_utilisateur'] est utilisé par create_or_update_comments.
-	$frm['id'] = $frm['id_utilisateur'] = insert_id();
-	if(empty($frm['code_client'])) {	
-		$code_client = "CLT" . date("Y") . $frm['id'];
+	if(!$test_mode) {
+		$sql = "INSERT INTO peel_utilisateurs SET
+				" . implode(',', $sql_fields_array) . "";
+		query($sql);
+
+		// $frm['id_utilisateur'] est utilisé par create_or_update_comments.
+		$frm['id'] = $frm['id_utilisateur'] = insert_id();
+
+		if(empty($frm['code_client'])) {	
+			$code_client = "CLT" . date("Y") . $frm['id'];
+		} else {
+			$code_client = $frm['code_client'];
+		}
+		query("UPDATE peel_utilisateurs
+			SET code_client = '" . nohtml_real_escape_string($code_client) . "'
+			WHERE id_utilisateur = '" . intval($frm['id']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
+		if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation']) && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
+			// && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable']) : Si la validation de compte par email est active, alors la validation de l'inscrption à la newsletter/offres commerciales se fera en même temps que la validation du compte
+			if (!empty($frm['newsletter'])) {
+				// double optin pour l'inscription à la newsletter
+				$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
+				$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
+				send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+			}
+			if (!empty($frm['commercial'])) {
+				// double optin pour l'inscription aux partenaires commerciaux
+				$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
+				$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
+				send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+			}
+		}
+
+		if ($send_user_confirmation) {
+			// Envoi de l'email qui contient le mot de passe qui a été demandé ou créé automatiquement suivant que $frm['mot_passe'] était vide ou déjà rempli
+			send_mail_for_account_creation($frm['email'], $frm['mot_passe'], vb($frm['priv']));
+		}
+		if ($warn_admin_if_template_active) {
+			// Prévenir l'administrateur d'une création d'utilisateur
+			if ($frm['priv'] == "newsletter") {
+				$email_array = explode('@', $frm['email']);
+				$civilite = 'M.';
+				$prenom = $email_array[0];
+				$nom_famille = $email_array[1];
+			} else {
+				$civilite = vb($frm['civilite']);
+				$prenom = vb($frm['prenom']);
+				$nom_famille = vb($frm['nom_famille']);
+			}
+			$custom_template_tags['PRIV'] = get_profil(vb($frm['priv']), 'name');
+			$custom_template_tags['CIVILITE'] = vb($civilite);
+			$custom_template_tags['PRENOM'] = vb($prenom);
+			$custom_template_tags['NOM_FAMILLE'] = vb($nom_famille);
+			$custom_template_tags['EMAIL'] = vb($frm['email']);
+			$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
+			$custom_template_tags['SOCIETE'] = vb($frm['societe']);
+			$custom_template_tags['TELEPHONE'] = vb($frm['telephone']);
+			$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $frm['id'] . '&start=0';
+
+			if ($frm['priv'] == 'stop') {
+				$template_technical_code = 'warn_admin_reve_subscription';
+			} else {
+				$template_technical_code = 'warn_admin_user_subscription';
+			}
+			send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support_sav_client']);
+		}
+		call_module_hook('user_create', $frm);
+		if (isset($frm['comments'])) {
+			create_or_update_comments($frm);
+		}
+		return $frm['id'];
 	} else {
-		$code_client = $frm['code_client'];
+		// en mode test on retourne un entier pour indiquer que l'utilisateur sera bien créé
+		return 1;
 	}
-	query("UPDATE peel_utilisateurs
-		SET code_client = '" . nohtml_real_escape_string($code_client) . "'
-		WHERE id_utilisateur = '" . intval($frm['id']) . "' AND " . get_filter_site_cond('utilisateurs') . "");
-	if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation']) && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
-		// && !empty($GLOBALS['site_parameters']['user_double_optin_registration_disable']) : Si la validation de compte par email est active, alors la validation de l'inscrption à la newsletter/offres commerciales se fera en même temps que la validation du compte
-		if (!empty($frm['newsletter'])) {
-			// double optin pour l'inscription à la newsletter
-			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
-			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
-			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
-		}
-		if (!empty($frm['commercial'])) {
-			// double optin pour l'inscription aux partenaires commerciaux
-			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
-			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
-			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
-		}
-	}
-	
-	if ($send_user_confirmation) {
-		// Envoi de l'email qui contient le mot de passe qui a été demandé ou créé automatiquement suivant que $frm['mot_passe'] était vide ou déjà rempli
-		send_mail_for_account_creation($frm['email'], $frm['mot_passe'], vb($frm['priv']));
-	}
-	if ($warn_admin_if_template_active) {
-		// Prévenir l'administrateur d'une création d'utilisateur
-		if ($frm['priv'] == "newsletter") {
-			$email_array = explode('@', $frm['email']);
-			$civilite = 'M.';
-			$prenom = $email_array[0];
-			$nom_famille = $email_array[1];
-		} else {
-			$civilite = $frm['civilite'];
-			$prenom = $frm['prenom'];
-			$nom_famille = $frm['nom_famille'];
-		}
-		$custom_template_tags['PRIV'] = get_profil(vb($frm['priv']), 'name');
-		$custom_template_tags['CIVILITE'] = vb($civilite);
-		$custom_template_tags['PRENOM'] = vb($prenom);
-		$custom_template_tags['NOM_FAMILLE'] = vb($nom_famille);
-		$custom_template_tags['EMAIL'] = vb($frm['email']);
-		$custom_template_tags['DATE'] = get_formatted_date(time(), 'short', 'long');
-		$custom_template_tags['SOCIETE'] = vb($frm['societe']);
-		$custom_template_tags['TELEPHONE'] = vb($frm['telephone']);
-		$custom_template_tags['ADMIN_URL'] = $GLOBALS['administrer_url'] . '/utilisateurs.php?mode=modif&id_utilisateur=' . $frm['id'] . '&start=0';
-		if ($frm['priv'] == 'stop') {
-			$template_technical_code = 'warn_admin_reve_subscription';
-		} else {
-			$template_technical_code = 'warn_admin_user_subscription';
-		}
-		send_email($GLOBALS['support_sav_client'], '', '', $template_technical_code, $custom_template_tags, null, $GLOBALS['support_sav_client']);
-	}
-
-	if (isset($frm['comments'])) {
-		create_or_update_comments($frm);
-	}
-
-	call_module_hook('user_create', $frm);
-	return $frm['id'];
 }
 
 /**
@@ -376,9 +387,10 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
  *
  * @param array $frm Array with all fields data
  * @param boolean $update_current_session
+ * @param boolean $test_mode
  * @return
  */
-function maj_utilisateur(&$frm, $update_current_session = false)
+function maj_utilisateur(&$frm, $update_current_session = false, $test_mode = false)
 {
 	if (empty($frm['id_utilisateur'])) {
 		return false;
@@ -466,89 +478,90 @@ function maj_utilisateur(&$frm, $update_current_session = false)
 			$sql_fields_array[$this_field] = word_real_escape_string($this_field) . "='" . nohtml_real_escape_string($frm[$this_field])."'";
 		}
 	}
-	$sql = "UPDATE peel_utilisateurs SET
-			" . implode(',', $sql_fields_array) . "
-		WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
-	query($sql);
+	if(!$test_mode) {
+		$sql = "UPDATE peel_utilisateurs SET
+				" . implode(',', $sql_fields_array) . "
+			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "'";
+		query($sql);
 		
-	if ($update_current_session) {
-		// Mise à jour de la session en cours
-		$sql = "SELECT *
-			FROM peel_utilisateurs
-			WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "";
-		$qid = query($sql);
-		if($user_infos = fetch_assoc($qid)) {
-			$hook_result = call_module_hook('maj_user_maj_session', array('user_infos' => $user_infos), 'array');
-			foreach($hook_result as $this_key => $this_value) {
-				$_SESSION['session_utilisateur'][$this_key] = $this_value;
+		if ($update_current_session) {
+			// Mise à jour de la session en cours
+			$sql = "SELECT *
+				FROM peel_utilisateurs
+				WHERE id_utilisateur = '" . intval($frm['id_utilisateur']) . "' AND " . get_filter_site_cond('utilisateurs') . "";
+			$qid = query($sql);
+			if($user_infos = fetch_assoc($qid)) {
+				$hook_result = call_module_hook('maj_user_maj_session', array('user_infos' => $user_infos), 'array');
+				foreach($hook_result as $this_key => $this_value) {
+					$_SESSION['session_utilisateur'][$this_key] = $this_value;
+				}
+				$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
+				$_SESSION['session_utilisateur']['civilite'] = vb($user_infos['civilite']);
+				$_SESSION['session_utilisateur']['prenom'] = $user_infos['prenom'];
+				$_SESSION['session_utilisateur']['pseudo'] = $user_infos['pseudo'];
+				$_SESSION['session_utilisateur']['nom_famille'] = $user_infos['nom_famille'];
+				$_SESSION['session_utilisateur']['societe'] = $user_infos['societe'];
+				$_SESSION['session_utilisateur']['intracom_for_billing'] = StringMb::strtoupper(vb($user_infos['intracom_for_billing']));
+				$_SESSION['session_utilisateur']['telephone'] = $user_infos['telephone'];
+				$_SESSION['session_utilisateur']['fax'] = $user_infos['fax'];
+				$_SESSION['session_utilisateur']['portable'] = $user_infos['portable'];
+				$_SESSION['session_utilisateur']['adresse'] = $user_infos['adresse'];
+				$_SESSION['session_utilisateur']['code_postal'] = $user_infos['code_postal'];
+				$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
+				$_SESSION['session_utilisateur']['format'] = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
+				$_SESSION['session_utilisateur']['naissance'] = vb($user_infos['naissance']);
+				$_SESSION['session_utilisateur']['description'] = vb($user_infos['description']);
+				$_SESSION['session_utilisateur']['url'] = vb($user_infos['url']);
 			}
-			$_SESSION['session_utilisateur']['pays'] = $user_infos['pays'];
-			$_SESSION['session_utilisateur']['civilite'] = vb($user_infos['civilite']);
-			$_SESSION['session_utilisateur']['prenom'] = $user_infos['prenom'];
-			$_SESSION['session_utilisateur']['pseudo'] = $user_infos['pseudo'];
-			$_SESSION['session_utilisateur']['nom_famille'] = $user_infos['nom_famille'];
-			$_SESSION['session_utilisateur']['societe'] = $user_infos['societe'];
-			$_SESSION['session_utilisateur']['intracom_for_billing'] = StringMb::strtoupper(vb($user_infos['intracom_for_billing']));
-			$_SESSION['session_utilisateur']['telephone'] = $user_infos['telephone'];
-			$_SESSION['session_utilisateur']['fax'] = $user_infos['fax'];
-			$_SESSION['session_utilisateur']['portable'] = $user_infos['portable'];
-			$_SESSION['session_utilisateur']['adresse'] = $user_infos['adresse'];
-			$_SESSION['session_utilisateur']['code_postal'] = $user_infos['code_postal'];
-			$_SESSION['session_utilisateur']['ville'] = $user_infos['ville'];
-			$_SESSION['session_utilisateur']['format'] = vb($GLOBALS['site_parameters']['email_sending_format_default'], 'html');
-			$_SESSION['session_utilisateur']['naissance'] = vb($user_infos['naissance']);
-			$_SESSION['session_utilisateur']['description'] = vb($user_infos['description']);
-			$_SESSION['session_utilisateur']['url'] = vb($user_infos['url']);
 		}
-	}
+		if (!empty($frm['email'])) {
+			if (check_if_module_active('bounces')) {
+				include_once($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php");
+				resolve_bounce($frm['id_utilisateur'], $frm['email']);
+			}
+		}
+		if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
+			if (!empty($frm['newsletter']) && empty($this_user['newsletter'])) {
+				// double optin pour l'inscription à la newsletter
+				$sql = "UPDATE peel_utilisateurs
+					SET newsletter = 0, newsletter_validation_date='0000-00-00'
+					WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+				query($sql);
 
-	if (!empty($frm['email'])) {
-		if (check_if_module_active('bounces')) {
-			include_once($GLOBALS['dirroot'] . "/modules/bounces/bounces_driver.php");
-			resolve_bounce($frm['id_utilisateur'], $frm['email']);
-		}
-	}
-	if(!empty($GLOBALS['site_parameters']['newsletter_and_commercial_double_optin_validation'])) {
-		if (!empty($frm['newsletter']) && empty($this_user['newsletter'])) {
-			// double optin pour l'inscription à la newsletter
-			$sql = "UPDATE peel_utilisateurs
-				SET newsletter = 0, newsletter_validation_date='0000-00-00'
-				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
-			query($sql);
+				$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
+				$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
+				send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
 
-			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
-			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
-			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
-			
-		} elseif(empty($frm['newsletter']) && !empty($this_user['newsletter'])) {
-			// Désinscription à la newsletter
-			$sql = "UPDATE peel_utilisateurs
-				SET newsletter = 0, newsletter_validation_date='0000-00-00'
-				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
-			query($sql);
+			} elseif(empty($frm['newsletter']) && !empty($this_user['newsletter'])) {
+				// Désinscription à la newsletter
+				$sql = "UPDATE peel_utilisateurs
+					SET newsletter = 0, newsletter_validation_date='0000-00-00'
+					WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+				query($sql);
+			}
+			if (!empty($frm['commercial']) && empty($this_user['commercial'])) {
+				// double optin pour l'inscription aux partenaires commerciaux
+				$sql = "UPDATE peel_utilisateurs
+					SET commercial = 0, commercial_validation_date='0000-00-00'
+					WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+				query($sql);
+
+				$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
+				$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
+				send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
+			} elseif(empty($frm['commercial']) && !empty($this_user['commercial'])) {
+				// Désinscription aux partenaires commerciaux
+				$sql = "UPDATE peel_utilisateurs
+					SET commercial = 0, commercial_validation_date='0000-00-00'
+					WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
+				query($sql);
+			}
 		}
-		if (!empty($frm['commercial']) && empty($this_user['commercial'])) {
-			// double optin pour l'inscription aux partenaires commerciaux
-			$sql = "UPDATE peel_utilisateurs
-				SET commercial = 0, commercial_validation_date='0000-00-00'
-				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
-			query($sql);
-			
-			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_COMMERCIAL_OFFER"];
-			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_commercial&email='.$frm['email'];
-			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
-		} elseif(empty($frm['commercial']) && !empty($this_user['commercial'])) {
-			// Désinscription aux partenaires commerciaux
-			$sql = "UPDATE peel_utilisateurs
-				SET commercial = 0, commercial_validation_date='0000-00-00'
-				WHERE id_utilisateur = " . intval($frm['id_utilisateur']);
-			query($sql);
+		if (isset($frm['comments'])) {
+			create_or_update_comments($frm);
 		}
+		call_module_hook('user_update', $frm);
 	}
-	if (isset($frm['comments'])) {
-		create_or_update_comments($frm);
-	}
-	call_module_hook('user_update', $frm);
 	if (affected_rows()) {
 		return true;
 	} else {
@@ -760,6 +773,9 @@ function user_logout()
 	unset($_SESSION['session_update_account']);
 	unset($_SESSION['session_parameters']);
 
+	unset($_SESSION['table_infos']); // Variable d'optimisation du chargement des listes de tables
+	unset($_SESSION['table_fields_infos']); // Variable d'optimisation du chargement des listes de tables
+	
 	call_module_hook('user_logout', array());
 }
 
@@ -907,7 +923,7 @@ function send_mail_for_account_creation($email, $mot_passe, $priv)
 	$custom_template_tags = array_merge_recursive_distinct($custom_template_tags, $hook_result);
 
 	// Template d'email spécifique pour le profil d'utilisateur. Cet email est envoyé en plus de l'email d'inscription. L'email d'inscription contient les identifiants du compte.
-	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.$priv, $_SESSION['session_langue']);
+	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.implode('_',$priv), $_SESSION['session_langue']);
 	
 	if (!empty($template_infos) && (!empty($template_infos['subject']) || !empty($template_infos['text']))) {
 		// Le template d'email existe, il faut l'utiliser
@@ -950,14 +966,25 @@ function get_user_information($user_id = null, $get_full_infos = false, $skip_ca
 		$user_id = $_SESSION['session_utilisateur']['id_utilisateur'];
 	} elseif (est_identifie() && a_priv('demo')) {
 		// Pas les droits pour voir les informations sur les administrateurs et les revendeurs
-		$sql_cond .= " AND priv NOT LIKE '%admin%' AND priv NOT LIKE '%reve%'";
+		$sql_cond .= " AND u.priv NOT LIKE '%admin%' AND u.priv NOT LIKE '%reve%'";
 	}
 	$cache_id = md5($user_id.$sql_cond.($get_full_infos?'full':''));
 	if (!empty($user_id)) {
 		if (!isset($result_array[$cache_id]) || $skip_cache) {
-			$qid = query("SELECT *
-				FROM peel_utilisateurs
-				WHERE (id_utilisateur = '" . intval($user_id) . "' OR email = '" . nohtml_real_escape_string($user_id) . "') AND " . get_filter_site_cond('utilisateurs') . "" . $sql_cond);
+			$sql_cond = "(u.id_utilisateur = '" . intval($user_id) . "' OR u.email = '" . nohtml_real_escape_string($user_id) . "') AND " . get_filter_site_cond('utilisateurs', 'u') . "" . $sql_cond;
+			$sql = "SELECT *
+				FROM peel_utilisateurs u";
+			if($get_full_infos) {
+				$sql .= "
+				LEFT JOIN peel_utilisateur_connexions uc ON uc.user_id=u.id_utilisateur
+				WHERE " . $sql_cond . "
+				ORDER BY uc.date DESC
+				LIMIT 1";
+			} else {
+				$sql .= "
+				WHERE " . $sql_cond;
+			}
+			$qid = query($sql);
 			if($result_array[$cache_id] = fetch_assoc($qid)) {
 				// L'utilisateur a été trouvé, on complète les informations
 				$result_array[$cache_id]['parameters'] = unserialize(vb($result_array[$cache_id]['parameters']));
@@ -1211,7 +1238,7 @@ function get_personal_address_form($id_utilisateur, $address_type = 'bill', $sel
 		}
 		$output = '
 		<select class="form-control" '.(!empty($validate_form_on_change)?'onchange="if(this.value){this.form.submit()}"':'').' name="personal_address_' . StringMb::str_form_value(implode('"_"', $address_type)) . '" style="' . $css_style. '">
-			<option value="">' . $GLOBALS['STR_ADDRESS'] . '....</option>';
+			<option value="">' . $GLOBALS['STR_ADDRESS'] . '...</option>';
 		
 		if (!empty($original_address_suggest)) {
 			$output .= '

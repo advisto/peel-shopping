@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_produit.tpl 54214 2017-07-04 14:14:47Z sdelaporte $
+// $Id: admin_formulaire_produit.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" enctype="multipart/form-data">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -155,6 +155,10 @@
 		<tr>
 			<td class="title_label top"><label for="on_estimate">{$STR_ADMIN_PRODUITS_IS_ON_ESTIMATE}</label>{$STR_BEFORE_TWO_POINTS}:</td>
 			<td><input type="checkbox" id="on_estimate" name="on_estimate" value="1"{if $is_on_estimate} checked="checked"{/if} /></td>
+		</tr>
+		<tr>
+			<td class="title_label top"><label for="price_estimate">{$STR_ADMIN_PRODUITS_ESTIMATE_PRICE}</label>{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input type="text" class="form-control" name="price_estimate" value="{$price_estimate|html_entity_decode_if_needed|str_form_value}" /></td>
 		</tr>
 		<tr>
 			<td class="title_label">{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -384,6 +388,10 @@
 		<tr>
 			<td colspan="2">
 				<div class="alert alert-info">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_INTRO}{$STR_BEFORE_TWO_POINTS}: {if $mode == "maj"}<a href="{$produits_attributs_href|escape:'html'}" class="alert-link" onclick="return(window.open(this.href)?false:true);">{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_LINK}</a>{else}{$STR_ADMIN_PRODUITS_MANAGE_CRITERIA_TEASER} <a href="{$nom_attributs_href|escape:'html'}">{$nom_attributs_href}</a>{/if}</div></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="alert alert-info"><a class="alert-link" href="{$product_attributs_price_href|escape:'html'}">{$STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE}</a><br /></div></td>
 		</tr>
 	{/if}
 		<tr>

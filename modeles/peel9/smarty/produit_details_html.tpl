@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produit_details_html.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: produit_details_html.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}
 <div typeof="Product">
 	{if isset($global_error)}
@@ -80,7 +80,7 @@
 								</td>
 							</tr>
 						{/if}
-						{if isset($avis)}
+						{if isset($avis) && empty($module_avis_verifie)}
 							<tr class="picto-avis">
 								<td class="img-avis">
 												<a href="{$avis.href|escape:'html'}"><i class="fa fa-commenting-o" aria-hidden="true"></i>
@@ -183,6 +183,9 @@
 		{if isset($conditionnement)}
 			<p><b>{$STR_CONDITIONING}{$STR_BEFORE_TWO_POINTS}: </b>{$conditionnement}</p>
 		{/if}
+		{if isset($cas_number)}
+			<p><b>{$cas_number.label}{$STR_BEFORE_TWO_POINTS}: </b>{$cas_number.txt}</p>
+		{/if}
 		{if isset($marque)}
 			<h3 property="brand">{$marque.label}: <b>{$marque.txt}</b></h3>
 		{/if}
@@ -226,4 +229,19 @@
 	{$youtube_code}
 	{/if}
 </div>
+{$product_detail_html_zone}
 {$associated_products}
+{if $module_devis_active}
+<div class="form-content" style="display:none;">
+	<form action="{$wwwroot}/achat/caddie_ajout.php?prodid=[PROD_ID]&is_quote=1" class="form" role="form" method="post">
+	<div class="form-group">
+		{$LANG.STR_MODULE_DEVIS_CHECK_QUOTE_QUANTITY}
+		<br />
+		<label for="email">{$LANG.STR_EMAIL}</label>
+		<input type="email" class="form-control" required="required" id="email" name="email" placeholder="{$LANG.STR_WRITE_EMAIL_HERE}" ></input>
+		<input type="hidden" name="qte" value="1" />
+	</div>
+	<input type="submit" class="btn btn btn-success" value="{$LANG.STR_MODULE_DEVIS_ASK_FOR_QUOTE}" />
+	</form>
+</div>
+{/if}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -73,7 +73,7 @@
 					<table class="table admin_commande_details">
 						<thead>
 							<tr style="background-color:#EEEEEE">
-								<td colspan="2" class="title_label center" style="width:65px">{{ STR_REFERENCE }} - {{ STR_ADMIN_NAME }}</td>
+								<td colspan="{% if associated_product_multiple_add_to_cart %}3{% else %}2{% endif %}" class="title_label center" style="width:65px">{{ STR_REFERENCE }} - {{ STR_ADMIN_NAME }}</td>
 							</tr>
 						</thead>
 						{* Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! *}

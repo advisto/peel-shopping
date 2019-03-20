@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -103,12 +103,24 @@ function affiche_banner($position = null, $return_mode = false, $page = null, $c
 		}
 		// On prend les bannières qui correspondent au type de page recherché
 		// Si $page_type === null, on ne tient pas compte de ce paramètre : a priori, on ne met jamais $page_type à null
-		if(in_array($page_type, $GLOBALS['page_types_array'])) {
-			// Type de page connu => on prend les bannières qui correspondent
-			$sql_cond .= ' AND on_'.$page_type .'=1';
-		} elseif($page_type!==null) {
-			// Type de page non listé => rentre dans le cadre de on_other_page
-			$sql_cond .= ' AND on_other_page=1';
+		if (!empty($page_type) && is_array($page_type)) {
+			// On passe plusieurs type de page en paramètre. Donc on cumul les critères dans la requête SQL
+			foreach($page_type as $this_page_type) {
+				if(in_array($this_page_type, $GLOBALS['page_types_array'])) {
+					$sql_cond .= ' AND on_'.$this_page_type .'=1';
+				} elseif($this_page_type!==null) {
+					// Type de page non listé => rentre dans le cadre de on_other_page
+					$sql_cond .= ' AND on_other_page=1';
+				}
+			}
+		} else {
+			if(in_array($page_type, $GLOBALS['page_types_array'])) {
+				// Type de page connu => on prend les bannières qui correspondent
+				$sql_cond .= ' AND on_'.$page_type .'=1';
+			} elseif($page_type!==null) {
+				// Type de page non listé => rentre dans le cadre de on_other_page
+				$sql_cond .= ' AND on_other_page=1';
+			}
 		}
 		if(!empty($keywords_array)) {
 			// On veut aussi chercher si keywords vaut "" et pas juste les bannières pour ce mot clé
@@ -537,9 +549,24 @@ function google_get_ad_url() {
  * @return
  */
 function banner_hook_front_html_header_template_data () {
-    if ((!empty($GLOBALS['site_parameters']['display_background_banner_on_home_page_only']) && defined('IN_HOME')) || empty($GLOBALS['site_parameters']['display_background_banner_on_home_page_only'])) {
-		$this_banner = affiche_banner(null, true, null, vn($_GET['catid']), 0, "background_site", null, null, true);
-		
+		$page_type = array();
+		$page_type[] = "background_site";
+		if (defined('IN_HOME')) {
+			$page_type[] = 'home_page';
+		} elseif ((defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE')) && (empty($_GET['page']) || $_GET['page'] === '0' || $_GET['page'] == 1)) {
+			$page_type[] = 'first_page_category';
+		} elseif ((defined('IN_CATALOGUE') || defined('IN_CATALOGUE_ANNONCE')) && $_GET['page'] > 1) {
+			$page_type[] = 'other_page_category';
+		} elseif (defined('IN_CATALOGUE_ANNONCE_DETAILS')) {
+			$page_type[] = 'ad_page_details';
+		} elseif (defined('IN_SEARCH')) {
+			$page_type[] = 'search_engine_page';
+		} elseif (defined('IN_AD_CREATION')) {
+			$page_type[] = 'ad_creation_page';
+		} else {
+			$page_type[] = 'other_page';
+		}
+		$this_banner = affiche_banner(null, true, null, vn($_GET['catid']), 0, $page_type, null, null, true);
 		if (!empty($this_banner)) {
 			$GLOBALS['js_ready_content_array'][] = '
 			$(\'#main_content\').on(\'click\', function(event) {
@@ -551,5 +578,5 @@ function banner_hook_front_html_header_template_data () {
 		} else {
 			return array();
 		}
-	}
+	
 }

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: it.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: it.php 59883 2019-02-27 14:08:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "Gestire i miei indirizzi di fatturazione e di sp
 $GLOBALS["STR_ADDRESS_NAME"] = "Indirizzo di titolo";
 $GLOBALS["STR_ADMIN"] = "Amministratore";
 $GLOBALS["STR_ADMINISTRATION"] = "Amministratore";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Vedere il banner da mettere sul tuo sito";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "Sei un affiliato con il sito {$GLOBALS['site']}.\n\nActuellement, doniamo è <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> del numero di affari HT generato dal tuo account.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Generare il codice HTML per prodotti di affiliazione";
@@ -319,6 +321,8 @@ $GLOBALS["STR_GET_MY_POSITION"] = "Recuperare la mia posizione (richiesto per qu
 $GLOBALS["STR_GET_PASSWORD"] = "Recuperare la password";
 $GLOBALS["STR_GIFT_POINTS"] = "Punti regali";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "Promozione generale";
+$GLOBALS["STR_GRAMMES"] = "";
+$GLOBALS["STR_GROUP_BY"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Impossibile aprire il file compresso";
 $GLOBALS["STR_HALF_WHOLESALER"] = "Semi-grossista";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "è stato rimosso";
@@ -341,6 +345,7 @@ $GLOBALS["STR_INCLUDING"] = "di cui";
 $GLOBALS["STR_INFO_ADDRESS"] = "Al momento del vostro ordine, vi chiederemo di specificare l'indirizzo di consegna e l'indirizzo di fatturazione";
 $GLOBALS["STR_INFORMATIONS"] = "informazioni";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Informazione non disponibile";
+$GLOBALS["STR_INIT_FILTER"] = "";
 $GLOBALS["STR_INSCRIPTION_NEWSLETTER_AND_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Inserire Logo";
 $GLOBALS["STR_INSERT_EMAIL"] = "Inserisci il tuo indirizzo e-mail di avviare la procedura per rinnovare la tua password.\r\n\r\nPer convalidare questa forma, una e-mail verrà inviata automaticamente.\r\n Fare clic sul collegamento nell'e-mail per accedere al modulo il rinnovo della password.";
@@ -378,6 +383,7 @@ $GLOBALS["STR_LIST"] = "Lista";
 $GLOBALS["STR_LIST_PRODUCT"] = "Elenco prodotti";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Lista sotto rubriche";
 $GLOBALS["STR_LISTE_CADEAU"] = "La mia lista";
+$GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "Posizione";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Entra per ricevere lo sconto";
 $GLOBALS["STR_LOGIN_OK"] = "Grazie per la vostra fiducia.";
@@ -396,6 +402,8 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "I miei codici promozionali utilizzati:
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "I miei codici di sconto essere:";
 $GLOBALS["STR_MESSAGE"] = "Messaggio";
 $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Un minimo di";
 $GLOBALS["STR_MINIMUM_PRODUCT"] = " prodotti minimi sono necessari per finalizzare l'ordine";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "campo obbligatorio %s";
@@ -539,6 +547,7 @@ $GLOBALS["STR_MY_ORDER"] = "I miei ordini";
 $GLOBALS["STR_MY_QUOTES"] = "";
 $GLOBALS["STR_NAISSANCE"] = "Data di nascita";
 $GLOBALS["STR_NAME"] = "Cognome";
+$GLOBALS["STR_NB_MAX_SUBTOTAL"] = "";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "Meno di %s km in relazione alla propria posizione";
 $GLOBALS["STR_NET"] = "Retribuzione netta";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Nuovo cliente?";
@@ -590,6 +599,7 @@ $GLOBALS["STR_OR_COORDINATION"] = "ou";
 $GLOBALS["STR_OR"] = "ou";
 $GLOBALS['STR_ORDER_BY_BUTTON'] = "Sorta";
 $GLOBALS["STR_ORDER_DETAIL"] = "Dettagli dell'ordine";
+$GLOBALS["STR_ORDER_BY"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "Buono d'ordine";
 $GLOBALS["STR_ORDER_HISTORY"] = "Storico ordini";
 $GLOBALS['STR_ORDER_MIN'] = "Ordine minimo";
@@ -605,6 +615,7 @@ $GLOBALS["STR_ORDER_STATUT"] = "Stato dell'ordine";
 $GLOBALS["STR_ORDER"] = "Ordine";
 $GLOBALS["STR_ORIGIN"] = "Origine";
 $GLOBALS["STR_OTHER"] = "Altro";
+$GLOBALS["STR_OVERWRITE_SAVE"] = "";
 $GLOBALS["STR_OUR_OTHER_SERVICES"] = "I nostri servizi";
 $GLOBALS["STR_OUR_PARTNER"] = "Nostri Partner";
 $GLOBALS["STR_OUR_SERVICES"] = "I nostri servizi";
@@ -737,6 +748,8 @@ $GLOBALS["STR_RSS_TITLE"] = "RSS del sito {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "Nostro feed RSS";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Condizioni di vendita";
 $GLOBALS["STR_SAVE_CART"] = "Salva carrello";
+$GLOBALS["STR_SAVE_RULES"] = "";
+$GLOBALS['STR_SCREEN_SIZE'] = "";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "Tutte le parole";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "Alcune parole";
 $GLOBALS["STR_SEARCH_BRAND"] = "Cerca un brand";
@@ -877,6 +890,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "Nessun sito";
 $GLOBALS["STR_WEEK"] = "Week (s)";
 $GLOBALS["STR_WEIGHT"] = "Peso dell'ordine";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "Cosa fai con quella lista?";
+$GLOBALS["STR_WEIGHT_SHORT"] = "";
 $GLOBALS["STR_WHOLESALER"] = "Grossista";
 $GLOBALS["STR_WITH_ECOTAX"] = "compreso l'imposta ambientale";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "compreso il codice promozionale";
@@ -911,3 +925,7 @@ $GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
 $GLOBALS["STR_PRIX_SEARCH_HT"] = "Priced";
 $GLOBALS["STR_PRIX_SEARCH_TTC"] = "TTC Prezzo";
 $GLOBALS["STR_REGISER_CART_ALERT"] = "";
+$GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
+$GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
+$GLOBALS["STR_ON_REQUEST"] = ";
+$GLOBALS["STR_ESTIMATE"] = "";

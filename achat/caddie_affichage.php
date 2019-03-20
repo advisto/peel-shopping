@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: caddie_affichage.php 59873 2019-02-26 14:47:11Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -153,7 +153,11 @@ if (!empty($redirect_next_step)) {
 		necessite_identification();
 	} else {
 		call_module_hook('show_caddie_next_step_pre', array());
-		if (!empty($short_order_process)) {
+		if (!empty($_SESSION['caddie_second_step_url'])) {
+			$redirect_url = $_SESSION['caddie_second_step_url'];
+			unset($_SESSION['caddie_second_step_url']);
+			redirect_and_die($redirect_url);
+		} elseif (!empty($short_order_process)) {
 			// On active le process de commande court
 			redirect_and_die(get_url('achat_maintenant'), array('short_order_process' => $short_order_process));
 		} else {
@@ -166,7 +170,14 @@ if (!empty($redirect_next_step)) {
 		$GLOBALS['error_text_to_display'] = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_REGISER_CART_ALERT']))->fetch();
 	}
 }
-
+	
+$cart_measurement_max_reached = get_cart_measurement_max($_SESSION['session_caddie']);
+if (!empty($cart_measurement_max_reached)) {
+		// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
+		// Il faut afficher un message spécifique dans ce cas
+		 // "Le calcul des frais de port vous sera envoyé par devis"
+		$form_error_object->add('type', $GLOBALS['STR_DELIVERY_COST_QUOTE']);
+}
 if(!empty($GLOBALS['site_parameters']['save_cart_auto_enable']) && !empty($_POST)) {
 	necessite_identification();
 	preserve_cart();

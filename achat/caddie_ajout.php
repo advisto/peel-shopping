@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: caddie_ajout.php 59873 2019-02-26 14:47:11Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -42,6 +42,15 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	unset($_SESSION['session_display_popup']);
 	unset($_SESSION['session_show_caddie_popup']);
 
+	if (!empty($_GET['is_quote'])) {
+		// Si le produit est que sur devis, on va créer un nouvelle session caddie juste pour le devis.
+		// Cette session caddie dédiée au devis sert exclusivement sur cette page. On ajoute le produit concerné dans cette nouvelle session est on créer la commande directement. Ensuite la session est supprimée à la fin de ce fichier.
+		// De cette manière on peux utiliser les fonctions standard de création de commande juste pour un produit, sans modifier le panier déjà existant avec session_caddie et session_commande
+		if (!isset($_SESSION['session_caddie_quote']) || empty($_SESSION['session_caddie_quote'])) {
+			$_SESSION['session_caddie_quote'] = new Caddie(get_current_user_promotion_percentage());
+		}
+	}
+		
 	$_SESSION['session_display_popup']['error_text'] = '';
 	foreach ($_POST['qte'] as $i => $qte) {
 		$product_infos['on_check'] = 0;
@@ -103,7 +112,6 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 			if (!empty($_POST['listcadeaux_owner']) && check_if_module_active('listecadeau')) {
 				$listcadeaux_owner = $_POST['listcadeaux_owner'];
 			}
-			$attributs_array = array();
 			if (check_if_module_active('attributs')) {
 				// L'appel à get_attribut_list_from_post_data remplit également $_SESSION["session_display_popup"] en cas d'erreur de téléchargement
 				$attribut_list = get_attribut_list_from_post_data($product_object, $_POST);
@@ -168,16 +176,32 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 					$can_add_to_cart = false;
 					$_SESSION['session_display_popup']['error_text'] .= $GLOBALS['STR_ORDER_MIN'].' '.$product_object->quantity_min_order;
 				}
-				if (!empty($GLOBALS['site_parameters']['user_offers_table_enable']) && order_only_if_offer_users($product_object)) {
+				
+				$product_available_for_user = call_module_hook('check_if_product_available_for_user', array('product_object' => $product_object), 'array');
+				// si pas de résultat product_available_for_user a pour valeur true, cf fonction call_module_hook
+				if (!empty($GLOBALS['site_parameters']['user_offers_table_enable']) && empty($product_available_for_user['result']) && empty($product_available_for_user['is_quote'])) {
 					$order_only_if_offer_users = true;
 					$can_add_to_cart = false;
+				}
+				if (function_exists('product_surface_add_to_cart')) {
+					$product_surface_add_to_cart = product_surface_add_to_cart($_POST);
+					if ($product_surface_add_to_cart !== true) {
+						$can_add_to_cart = false;
+						$_SESSION['session_display_popup']['error_text'] .= $product_surface_add_to_cart;
+					}
 				}
 				// Gestion de l'ajout au caddie
 				if ($can_add_to_cart) {
 					// Pas de problème => on ajoute le produit
 					$hook_result = call_module_hook('add_cart_complementary_data_array', vb($_GET), 'array');
 					// $hook_result contient de nouvelle valeurs pour caddie_ajout; On utilise un hook pour filtrer les données du GET
-					$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $data_check, $listcadeaux_owner, $hook_result);
+					if (!empty($_GET['is_quote'])) {
+						// On ajoute le produit sur devis dans la session caddie dédié.
+						$added_quantity = $_SESSION['session_caddie_quote']->add_product($product_object, $quantite, $data_check, $listcadeaux_owner, $hook_result);
+					} else {
+						$added_quantity = $_SESSION['session_caddie']->add_product($product_object, $quantite, $data_check, $listcadeaux_owner, $hook_result);
+					}
+					
 					// Préparation par exemple de l'affichage d'une popup de confirmation de mise dans le panier dans le module cart_popup
 					call_module_hook('cart_product_added', array('quantite' => $added_quantity, 'user_id' => $_SESSION['session_utilisateur']['id_utilisateur'], 'product_object' => $product_object));
 					unset($_SESSION['session_taille_id']);
@@ -263,6 +287,26 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 	} elseif(isset($_POST['export_pdf']) && !empty($articles_array)){
 		$_SESSION['export_pdf_products_info_array'] = $articles_array;
 		redirect_and_die($GLOBALS['wwwroot'] . '/modules/facture_advanced/genere_pdf.php?export_products_list_in_pdf_file=search_page');
+	}
+}
+if (!empty($_GET['is_quote'])) {
+	$frm['email'] = $_POST['email'];
+	// Le produit est sur devis et à ce stade il est contenu dans la nouvelle session session_caddie_quote.
+	// On créer le devis en BDD :
+	unset($_SESSION['session_form_contact_sent']);
+	unset($_SESSION["session_display_popup"]);
+	unset($_SESSION['session_show_caddie_popup']);
+	$create_devis_order_output = Devis::create_devis_order($frm, 'punchout_quote');
+	if(!empty($_SESSION['session_caddie_quote']->commande_id)) {
+		// On supprime la session de caddie spécial pour le devis
+		unset($_SESSION['session_caddie_quote']);
+		// On supprime de la session les données spécifique au devis
+		unset($_SESSION['session_quote']);
+
+		include($GLOBALS['repertoire_modele'] . "/haut.php");
+		echo $create_devis_order_output;
+		include($GLOBALS['repertoire_modele'] . "/bas.php");
+		die();
 	}
 }
 if (!empty($_SERVER['HTTP_REFERER'])) {

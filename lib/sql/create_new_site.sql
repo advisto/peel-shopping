@@ -1,15 +1,15 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.1.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.2.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 59053 2018-12-18 10:20:50Z sdelaporte $
+# $Id: create_new_site.sql 59873 2019-02-26 14:47:11Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -57,7 +57,7 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('allow_command_product_ongift', 'core', 'boolean', 'false', '', NOW(), 'Permet aux produits cadeaux (champ on_gift dans peel_produits) d''être également commandés comme des produits ordinaire, en plus d''être commandé avec les points cadeaux.', 1, "[SITE_ID]"),
 ('uploaded_file_max_size', 'core', 'integer', '4194304', '', NOW(), 'En octets / in bytes => Par défaut 4Mo / Au delà de cette limite, les fichiers ne seront pas acceptés', 1, "[SITE_ID]"),
 ('filesize_limit_keep_origin_file', 'core', 'integer', '300000', '', NOW(), 'Taille limite au delà de laquelle les images téléchargées sont regénérées par PHP et sauvegardées en JPG', 1, "[SITE_ID]"),
-('image_max_width', 'core', 'integer', '1280', '', NOW(), 'Taille limite au delà de laquelle les images téléchargées sont converties en JPG à cette largeur maximum', 1, "[SITE_ID]"),
+('image_max_width', 'core', 'integer', '1680', '', NOW(), 'Taille limite au delà de laquelle les images téléchargées sont converties en JPG à cette largeur maximum', 1, "[SITE_ID]"),
 ('image_max_height', 'core', 'integer', '1024', '', NOW(), 'Taille limite au delà de laquelle les images téléchargées sont converties en JPG à cette hauteur maximum', 1, "[SITE_ID]"),
 ('jpeg_quality', 'core', 'integer', '88', '', NOW(), 'Qualité pour les JPEG créés par le serveur / PHP default for JPEG quality: 75', 1, "[SITE_ID]"),
 ('session_cookie_basename', 'core', 'string', 'sid', '', NOW(), 'Sera complété par un hash de 8 caractères correspondant au chemin d''installation de ce site', 1, "[SITE_ID]"),

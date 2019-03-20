@@ -1,21 +1,26 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: achat_maintenant.php 59873 2019-02-26 14:47:11Z sdelaporte $
 include("../configuration.inc.php");
 $GLOBALS['allow_fineuploader_on_page'] = true;
 
 $form_error_object = new FormError();
 $output = '';
+if (!empty($_SESSION['caddie_second_step_url'])) {
+	$redirect_url = $_SESSION['caddie_second_step_url'];
+	unset($_SESSION['caddie_second_step_url']);
+	redirect_and_die($redirect_url);
+}
 if (empty($GLOBALS['site_parameters']['unsubscribe_order_process'])) {
 	// Test sur l'identification, il faut obligatoirement être connecté à son compte pour renseigner un code promo. Les utilisateurs 'stop' (attente revendeur) ou 'stand' (attente affiliation) ne peuvent pas se connecter à leur compte, ne peuvent donc pas passer commande et ne bénéficient donc pas des avantages liés au statut final 'reve' (revendeur confirmé) ou 'affi' (affilié confirmé). Les utilisateurs 'load' (téléchargement) ou 'newsletter' (abonné newsletter) ne peuvent pas se connecter, et donc ne peuvent pas non plus passer commande.
 	necessite_identification();
@@ -31,14 +36,12 @@ $short_order_process = vb($_GET['short_order_process']);
 // Il faut vérifier la cohérence du panier, dans le cas où la quantité de produit a été mise à jour sans que le panier est été rafraichi.
 if (!empty($_SESSION['session_caddie']->typeId)) {
 	$_SESSION['session_caddie']->update();
-	if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && check_if_module_active('tnt') && !empty($_SESSION['session_caddie']->typeId) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
-		$cart_measurement_max_array = get_cart_measurement_max($_SESSION['session_caddie']->articles, $_SESSION['session_caddie']->id_attribut);
-		if ($cart_measurement_max_array > $GLOBALS['site_parameters']['tnt_treshold']) {
+	$cart_measurement_max_reached = get_cart_measurement_max($_SESSION['session_caddie']);
+		if (!empty($cart_measurement_max_reached)) {
 			// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
 			// Il faut afficher un message spécifique dans ce cas
 			$short_order_process = true;
 		}
-	}
 	if (empty($short_order_process)) {
 		// $short_order_process : Si on est dans un cas de figure avec un dépassement de seuil (poids ou dimension), le type de transport choisi n'est plus cohérent. Mais comme on passe en mode de process court le type choisi n'a plus d'importance, donc dans ce cas on ne veut pas passer par ce morceau de code qui vérifie la cohérence du panier.
 		$sqlType = get_tarifs_sql();
@@ -107,6 +110,14 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			$check_fields['vat_exemption_technical_code'] = $GLOBALS['STR_ERR_VALIDATE_VAT_EXEMPTION'];
 		} elseif (!empty($_POST['vat_exemption']) && (empty($_POST['document']))) {
 			$check_fields['vat_exemption_technical_code'] = $GLOBALS['STR_ERR_VAT_EXEMPTION'];
+		}
+		
+		if (!empty($_POST['vat_exemption'])) {
+			$_SESSION['session_caddie']->set_free_delivery_vat = true;
+			$_SESSION['session_caddie']->update();
+		} else {
+			$_SESSION['session_caddie']->set_free_delivery_vat = false;
+			$_SESSION['session_caddie']->update();
 		}
 		
 		if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId)) && (!check_if_module_active('socolissimo') || empty($_SESSION['session_commande']['is_socolissimo_order']))) {
@@ -403,6 +414,7 @@ if (empty($short_order_process) && !empty($GLOBALS['site_parameters']['mode_tran
 				// Si le panier est égal à 0, on valide automatiquement la commande puisqu'il n'y a pas de paiement.
 				update_order_payment_status($commandeid, true);
 			}
+			email_commande($commandeid);
 			
 			// Le caddie est réinitialisé pour ne pas laisser le client passer une deuxième commande en soumettant une deuxième fois le formulaire
 			$custom_template_tags['ORDER_ID'] = $commandeid;

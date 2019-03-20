@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -24,6 +24,13 @@
 				<select class="form-control" {% if site_id_select_multiple %} name="site_id[]" multiple="multiple" size="5"{% else %} name="site_id"{% endif %}>
 					{{ site_id_select_options }}
 				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="radio" name="etat" value="1" {% if etat == '1' %} checked="checked"{% endif %} /> {{ STR_ADMIN_ACTIVATED }}
+				<input type="radio" name="etat" value="0" {% if etat == '0' OR etat is empty %} checked="checked"{% endif %} /> {{ STR_ADMIN_DEACTIVATED }}
 			</td>
 		</tr>
 		{% for lng in langs %}
@@ -55,13 +62,6 @@
 		<tr>
 			<td class="title_label">{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="left"><input type="number" class="form-control" name="position" value="{{ position|str_form_value }}" /></td>
-		</tr>
-		<tr>
-			<td>{{ STR_ADMIN_MANDATORY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<input type="radio" name="mandatory" value="1" {% if mandatory == '1' %} checked="checked"{% endif %} /> {{ STR_YES }} <br />
-				<input type="radio" name="mandatory" value="0" {% if mandatory == '0' %} checked="checked"{% endif %} /> {{ STR_NO }}
-			</td>
 		</tr>
 		<tr>
 			<td colspan="2" class="center"><p><input class="btn btn-primary" type="submit" value="{{ titre_soumet|str_form_value }}" /></p></td>

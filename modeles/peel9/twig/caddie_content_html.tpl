@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -183,5 +183,30 @@
 				</div>
 			</div>
 		</form>
+	{% endif %}
+	{% if display_quote_list %}
+		<div style="margin-top: 100px;">
+			<h2 class="page_title">{{ STR_QUOTE_LIST_TITLE }}</h2>
+			<div class="table-responsive">
+				<table class="table">
+					{{ links_header_row }}
+					{% for this_order in order_array %}
+					<tr style="background-color: #{{ cycle(["F4F4F4,ffffff"],loop.index0) }}">
+						<td class="center">
+							<a href="{{ this_order.href|escape('html') }}"><img src="{{ this_order.info_src|escape('html') }}" width="21" height="21" alt="info" /></a>
+						{% if this_order.devis_href %}
+							<br /><a onclick="return(window.open(this.href)?false:true);" href="{{ this_order.devis_href|escape('html') }}" style="white-space: nowrap;"><img src="{{ this_order.pdf_src|escape('html') }}" width="8" height="11" alt="" />&nbsp;{{ STR_PDF_QUOTATION }}</a>
+						{% endif %}
+						</td>
+						<td class="center">{{ this_order.numero }}</td>
+						<td class="center">{{ this_order.o_timestamp }}</td>
+						<td class="center">{{ this_order.product_list }}</td>
+						<td class="center">{{ this_order.date_fin_validite }}</td>
+						<td class="center">{{ this_order.montant_ht }}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+		</div>
 	{% endif %}
 </div>

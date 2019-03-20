@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: search.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -39,7 +39,6 @@ if (!empty($GLOBALS['site_parameters']['search_default_display_show_no_result'])
 	$launch_search = false;
 }
 
-call_module_hook('search_pre', array());
 if (!empty($_GET['type']) && $_GET['type'] == 'unset_quick_add_product_from_search_page') {
 	unset($_SESSION['session_search_product_list']);
 }
@@ -191,7 +190,7 @@ if($launch_search) {
 	}
 
 	if (vn($_GET['page'])<=1 && count($terms) > 0) {
-		// On ne recherche dans les articles & marques que si l'on a renseigné le champs texte
+		// On ne recherche dans les articles & marques que si l'on a renseigné le champ texte
 		// Affichage sur la première page uniquement (pas de multipage)
 		$tpl_r->assign('are_terms', true);
 
@@ -550,22 +549,50 @@ function search_products($frm, $terms, $match, $real_search) {
 				}
 			}
 			if (!empty($frm['categorie'])) {
-				$additional_sql_cond_array[] = 'pc.categorie_id IN ("' . implode('","', get_category_tree_and_itself(intval($frm['categorie']), 'sons', 'categories')) . '")';
-				$this_category_name = get_category_name($frm['categorie']);
+				if (is_array($frm['categorie'])) {
+					$sql_cond_temp = array();
+					$this_category_temp = array();
+					foreach ($frm['categorie'] as $this_cat) {
+						$sql_cond_temp[] = 'pc.categorie_id IN ("' . implode('","', get_category_tree_and_itself(intval($this_cat), 'sons', 'categories')) . '")';
+						$this_category_temp[] = get_category_name($this_cat);
+					}
+					$additional_sql_cond_array[] = '(' . implode(' OR ',$sql_cond_temp) . ')';
+					$this_category_name = implode(' / ',$this_category_temp);
+				} else {
+					$additional_sql_cond_array[] = 'pc.categorie_id IN ("' . implode('","', get_category_tree_and_itself(intval($frm['categorie']), 'sons', 'categories')) . '")';
+					$this_category_name = get_category_name($frm['categorie']);
+				}
 				if (!empty($this_category_name)) {
 					$GLOBALS['search_text_array']['categorie'] = StringMb::ucfirst($this_category_name);
 				}
 			}
 			if (!empty($frm['couleur'])) {
 				$additional_sql_inner .= ' INNER JOIN peel_produits_couleurs pco ON p.id=pco.produit_id';
-				$additional_sql_cond_array[] = 'pco.couleur_id="' . intval($frm['couleur']) . '"';
-				$this_color_name = get_color_name($frm['couleur']);
+				$additional_sql_inner .= ' INNER JOIN peel_couleurs co ON co.id=pco.couleur_id';
+				
+				if (is_array($frm['couleur'])) {
+					$sql_cond_temp = array();
+					$this_color_temp = array();
+					foreach($frm['couleur'] as $this_color) {
+						$sql_cond_temp[] = 'co.nom_'.$_SESSION['session_langue'].' LIKE "%' . nohtml_real_escape_string($this_color) . '%"';
+						$this_color_temp[] = $this_color;
+					}
+					$additional_sql_cond_array[] = '(' . implode(' OR ',$sql_cond_temp) . ')';
+					$this_color_name = implode(' / ',$this_color_temp);
+				} else {
+					$additional_sql_cond_array[] = 'pco.couleur_id="' . intval($frm['couleur']) . '"';
+					$this_color_name = get_color_name($frm['couleur']);
+				}
 				if (!empty($this_color_name)) {
 					$GLOBALS['search_text_array']['color'] = StringMb::ucfirst($this_color_name);
 				}
 			}
 			if (!empty($frm['marque'])) {
-				$additional_sql_cond_array[] = 'p.id_marque="' . nohtml_real_escape_string($frm['marque']) . '"';
+				if (is_array($frm['marque'])) {
+					$additional_sql_cond_array[] = 'p.id_marque IN ("' . implode('","', nohtml_real_escape_string($frm['marque'])) . '")';
+				} else {
+					$additional_sql_cond_array[] = 'p.id_marque="' . nohtml_real_escape_string($frm['marque']) . '"';
+				}
 			}
 			if (!empty($frm['date_flash'])) {
 				$additional_sql_cond_array[] = 'p.on_flash="1" AND p.flash_start LIKE "' . get_mysql_date_from_user_input($frm['date_flash']) . '%"';
@@ -591,13 +618,38 @@ function search_products($frm, $terms, $match, $real_search) {
 				while($result_attribut_name = fetch_assoc($query_attribut_name)) {
 					$GLOBALS['search_attribut_array'][] = $result_attribut_name['attribut_name'];
 				}
+				$GLOBALS['search_attribut_array'] = array_unique($GLOBALS['search_attribut_array']);
 			}
 
 			if (!empty($frm['custom_nom_attribut']) && is_array($frm['custom_nom_attribut'])) {
+				$product_ids_array = array();
 				foreach($frm['custom_nom_attribut'] as $this_nom_attribut_id) {
 					if (!empty($this_nom_attribut_id) && is_numeric($this_nom_attribut_id)) {
 						$nom_attributs_array[intval($this_nom_attribut_id)] = true;
+						$sql = "SELECT pa.produit_id, na.nom_".$_SESSION['session_langue']." as attribut_name
+							FROM peel_produits_attributs pa
+							INNER JOIN peel_nom_attributs na ON na.id=pa.nom_attribut_id
+							WHERE pa.nom_attribut_id = " . intval($this_nom_attribut_id);
+						$query = query($sql);
+						while ($result = fetch_assoc($query)) {
+							$product_ids_array[] = $result['produit_id'];
+							$GLOBALS['search_attribut_array'][] = $result['attribut_name'];
+						}
 					}
+				}
+				$GLOBALS['search_attribut_array'] = array_unique($GLOBALS['search_attribut_array']);
+				$additional_sql_cond_array[] = "pat.produit_id IN (".implode(',', $product_ids_array).")";
+			}
+			$hook_result = call_module_hook('search_engine_additional_sql_cond', array('frm'=>$frm), 'array');
+			$additional_sql_cond_array = array_merge($additional_sql_cond_array,$hook_result);
+			$additional_sql_inner .= call_module_hook('search_engine_additional_inner', array('frm'=>$frm), 'string');
+			
+			// On recherche une éventuelle utilisation de la table peel_produits_attributs dans le tableau de condition SQL
+			foreach($additional_sql_cond_array as $this_condition) {
+				if (StringMb::strpos($this_condition, 'pat.') !== false) {
+					// A DEBOGUER : Prise en compte des noms d'attributs qui viennent des hooks, qui faut prendre en compte pour having_cond_array 
+					// $nom_attributs_array = true;
+					break;
 				}
 			}
 			if (!empty($attributs_array) || !empty($nom_attributs_array)) {
@@ -626,9 +678,6 @@ function search_products($frm, $terms, $match, $real_search) {
 					$additional_sql_having .= 'HAVING '.implode(' AND ', $having_cond_array);
 				}
 			}
-			$hook_result = call_module_hook('search_engine_additional_sql_cond', array('frm'=>$frm), 'array');
-			$additional_sql_cond_array = array_merge($additional_sql_cond_array,$hook_result);
-			$additional_sql_inner .= call_module_hook('search_engine_additional_inner', array('frm'=>$frm), 'string');
 		}
 		
 			

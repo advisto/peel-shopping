@@ -1,20 +1,21 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: haut.tpl 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: haut.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<!DOCTYPE html>
 <html lang="{$lang}" dir="ltr">
 	{$HTML_HEAD}
 	<body vocab="http://schema.org/" typeof="WebPage">
+		{$content_tag_body}
 		{if isset($auto_login_with_facebook)}{$auto_login_with_facebook}{/if}
 		{if isset($logout_with_facebook)}{$logout_with_facebook}{/if}
 		
@@ -25,7 +26,7 @@
 		<div id="total" class="clearfix page_{$page_name}">
 			<!-- Début header -->
 			{if isset($update_msg)}
-			<div class="center" style="font-size:16px; font-weight:bold; padding:10px">{$update_msg}</div>
+			<div class="center" style="font-size:16px; font-weight:bold; padding:10px; background-color:#cccccc">{$update_msg}</div>
 			{/if}
 			{if $CONTENT_HEADER}<div class="page_warning alert-dismissable alert"><div class="container"><div class="row"><div class="col-sm-12">{$CONTENT_HEADER} <button type="button" class="close remember-close" data-dismiss="alert" id="page_warning_close">×</button></div></div></div></div>{/if}
 			<header id="main_header">
@@ -106,6 +107,15 @@
 						</div>
 					</div>
 				{/if}
+				{if !empty($CONTENT_MAIN_CONTENT)}
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+							{$CONTENT_MAIN_CONTENT}
+						</div>
+					</div>
+				</div>
+				{/if}
 				{if !empty($MODULES_ABOVE_MIDDLE)}
 				<!-- Début above_middle -->
 				<div class="above_middle container">
@@ -117,6 +127,26 @@
 				<!-- Fin above_middle -->   
 				{/if}
 				<div class="{$main_content_class}">
+					{if isset($cat.carrousel) || isset($cat.banner)}
+						<div class="row">
+						{if (!isset($cat.carrousel) && isset($cat.banner)) || (isset($cat.carrousel) && !isset($cat.banner))}
+							<div class="col-md-12">
+							{if isset($cat.banner)}
+								{$cat.banner}
+							{elseif isset($cat.carrousel)}
+								{$cat.carrousel}
+							{/if}
+							</div>
+						{else}
+							<div class="col-md-6">
+							{$cat.banner}
+							</div>
+							<div class="col-md-6">
+							{$cat.carrousel}
+							</div>
+						{/if}
+						</div>
+					{/if}
 					<div class="row">
 						{if !empty($MODULES_LEFT)}
 						<!-- Début left_column -->

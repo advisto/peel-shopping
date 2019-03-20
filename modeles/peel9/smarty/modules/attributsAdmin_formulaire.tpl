@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -24,6 +24,13 @@
 				<select class="form-control" name="site_id">
 					{$site_id_select_options}
 				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{$STR_STATUS}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="etat" value="1" {if $etat == '1'} checked="checked"{/if} /> {$STR_ADMIN_ACTIVATED}
+				<input type="radio" name="etat" value="0" {if $etat == '0' OR empty($etat)} checked="checked"{/if} /> {$STR_ADMIN_DEACTIVATED}
 			</td>
 		</tr>
 		{foreach $langs as $lng}

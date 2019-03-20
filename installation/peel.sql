@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.1.1, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.2.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 59053 2018-12-18 10:20:50Z sdelaporte $
+# $Id: peel.sql 60034 2019-03-12 10:49:50Z sdelaporte $
 #
 
 --
@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS `peel_attributs` (
   `prix_revendeur` float(15,5) NOT NULL DEFAULT '0.00000',
   `position` int(11) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
+  `etat` tinyint(1) NOT NULL DEFAULT '1',
   `site_id` int( 11 ) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `site_id` (`site_id`)
@@ -732,6 +733,9 @@ CREATE TABLE IF NOT EXISTS `peel_html` (
 
 CREATE TABLE IF NOT EXISTS `peel_import_field` (
   `champs` varchar(255) NOT NULL DEFAULT '',
+  `type` varchar(255) NOT NULL DEFAULT '',
+  `source` varchar(255) NOT NULL DEFAULT '',
+  `configuration_name` varchar(255) NOT NULL DEFAULT '',
   `etat` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   KEY `site_id` (`site_id`)
@@ -894,6 +898,7 @@ CREATE TABLE IF NOT EXISTS `peel_nom_attributs` (
   `upload` tinyint(1) NOT NULL DEFAULT '0',
   `mandatory` tinyint(1) NOT NULL DEFAULT '0',
   `disable_reductions` tinyint(1) NOT NULL DEFAULT '0',
+  `position` int( 11 ) NOT NULL DEFAULT '0',
   `site_id` int( 11 ) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `technical_code` (`technical_code`),
@@ -1014,6 +1019,7 @@ CREATE TABLE IF NOT EXISTS `peel_produits` (
   `prix_revendeur` float(15,5) NOT NULL DEFAULT '0.00000',
   `prix_flash` float(15,5) NOT NULL DEFAULT '0.00000',
   `prix_achat` float(15,5) NOT NULL DEFAULT '0.00000',
+  `price_estimate` float(15,5) NOT NULL DEFAULT '0.00000',
   `poids` float(10,2) NOT NULL DEFAULT '0.00',
   `volume` float(10,2) NOT NULL DEFAULT '0.00',
   `display_price_by_weight` tinyint(1) NOT NULL DEFAULT '0',
@@ -1202,6 +1208,7 @@ CREATE TABLE IF NOT EXISTS `peel_rubriques` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL DEFAULT '0',
   `image` varchar(255) NOT NULL DEFAULT '',
+  `image_head` varchar(255) NOT NULL DEFAULT '',
   `lang` varchar(2) NOT NULL DEFAULT '',
   `on_special` tinyint(1) NOT NULL DEFAULT '0',
   `etat` tinyint(1) NOT NULL DEFAULT '0',

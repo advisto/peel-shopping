@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 59059 2018-12-18 11:20:35Z sdelaporte $
+// $Id: update.php 60033 2019-03-12 10:38:56Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -1516,7 +1516,6 @@ $sql_update_array['7.0.3'] = "
 ALTER TABLE `peel_commandes` ADD `f_datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00';
 UPDATE peel_commandes SET f_datetime=a_timestamp WHERE numero!='' AND f_datetime='0000-00-00 00:00:00';
 ALTER TABLE `peel_commandes` ADD `e_datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00';
-UPDATE peel_commandes SET id_statut_livraison=0 WHERE id_statut_livraison=1 AND id_statut_paiement IN (0,1);
 INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, `lang`, `last_update`, `explain`, `etat`) VALUES
 ('article_details_index_page_columns_count', 'core', 'integer', '3', '', NOW(), '', 1),
 ('lire_index_page_columns_count', 'core', 'integer', '3', '', NOW(), '', 1),
@@ -1743,7 +1742,7 @@ ALTER TABLE `peel_articles` ADD `on_reseller` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `peel_produits` ADD `recommanded_product_on_cart_page` tinyint(1) NOT NULL DEFAULT '0';
 
 -- Ajout de swf dans la liste d'extension générique de fichiers autorisés pour l'upload
-UPDATE  peel_configuration SET `string` = '\"jpg\", \"jpeg\", \"gif\", \"png\", \"ico\", \"swf\", \"csv\", \"txt\", \"pdf\", \"zip\"'  WHERE technical_code = 'extensions_valides_any';
+UPDATE peel_configuration SET `string` = '\"jpg\", \"jpeg\", \"gif\", \"png\", \"ico\", \"swf\", \"csv\", \"txt\", \"pdf\", \"zip\"'  WHERE technical_code = 'extensions_valides_any';
 
 -- Ajout de champs obligatoires dans la variable de configuration user_mandatory_fields
 UPDATE peel_configuration SET string='\"prenom\" => \"STR_ERR_FIRSTNAME\", \"nom_famille\" => \"STR_ERR_NAME\", \"adresse\" => \"STR_ERR_ADDRESS\", \"code_postal\" => \"STR_ERR_ZIP\", \"ville\" => \"STR_ERR_TOWN\", \"pays\" => \"STR_ERR_COUNTRY\", \"telephone\" => \"STR_ERR_TEL\", \"email\" => \"STR_ERR_EMAIL\", \"pseudo\" => \"STR_ERR_PSEUDO\", \"token\" => \"STR_INVALID_TOKEN\"' WHERE technical_code='user_mandatory_fields';
@@ -2602,9 +2601,9 @@ $sql_update_array['9.0.0'] = "
 	ALTER TABLE `peel_couleurs` ADD `image` VARCHAR(255) NOT NULL DEFAULT '';
 	ALTER TABLE `peel_codes_promos` ADD `brand_not_apply_code_promo` TEXT NOT NULL AFTER `promo_code_combinable`; 
 	ALTER TABLE `peel_commandes` ADD `document` VARCHAR(255) NOT NULL AFTER `order_id`;
-	ALTER TABLE `peel_zones` ADD `applied_franco_mode` VARCHAR(255) NOT NULL;
-	ALTER TABLE `peel_email_template` ADD `image_haut` VARCHAR(255) NOT NULL;
-	ALTER TABLE `peel_email_template` ADD `image_bas` VARCHAR(255) NOT NULL;
+	ALTER TABLE `peel_zones` ADD `applied_franco_mode` VARCHAR(255) NOT NULL DEFAULT '';
+	ALTER TABLE `peel_email_template` ADD `image_haut` VARCHAR(255) NOT NULL DEFAULT '';
+	ALTER TABLE `peel_email_template` ADD `image_bas` VARCHAR(255) NOT NULL DEFAULT '';
 	ALTER TABLE `peel_newsletter` ADD `product_ids` VARCHAR(255) NOT NULL DEFAULT '' AFTER `date_envoi`; 
 	ALTER TABLE `peel_utilisateurs` ADD `ip` VARCHAR(255) NOT NULL DEFAULT ''; 
 	ALTER TABLE `peel_zones` ADD `on_franco_weight` float(15,5) NOT NULL DEFAULT '0.00000';
@@ -2620,9 +2619,50 @@ if(file_exists($GLOBALS['dirroot'] . '/modules/banner')) {
 }
 foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
 	$sql_update_array['9.0.0'] .= "
-	ALTER TABLE `peel_categories` ADD `nom_court_".$this_lang."` VARCHAR(255) NOT NULL;";
+	ALTER TABLE `peel_categories` ADD `nom_court_".$this_lang."` VARCHAR(255) NOT NULL DEFAULT '';";
 }
 $sql_update_array['9.1.0'] = "";
+
+$sql_update_array['9.1.1'] = "
+	ALTER TABLE `peel_rubriques` ADD `image_head` varchar(255) NOT NULL DEFAULT '';
+	ALTER TABLE `peel_produits` ADD `price_estimate` float(15,5) NOT NULL DEFAULT '0.00000';
+	ALTER TABLE `peel_import_field` ADD `type` varchar(255) NOT NULL DEFAULT '', ADD `source` varchar(255) NOT NULL DEFAULT '', ADD `configuration_name` varchar(255) NOT NULL DEFAULT '';
+";
+if(file_exists($GLOBALS['dirroot'] . '/modules/attributs')) {
+	foreach($GLOBALS['admin_lang_codes'] as $this_lang) {
+		$sql_update_array['9.1.1'] .= "
+		ALTER TABLE `peel_attributs` ADD `description_".$this_lang."` VARCHAR(255) NOT NULL DEFAULT '';";
+	}
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_attributs` ADD `etat` TINYINT(1) NOT NULL DEFAULT '1'; 
+	ALTER TABLE `peel_nom_attributs` ADD `position` INT(11) NOT NULL DEFAULT '0';";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/crons')) {
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_crons` ADD `data` VARCHAR(255) NOT NULL DEFAULT '';
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/exaprint')) {
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_categories` ADD `on_exapaq_delivery` TINYINT(1) NOT NULL DEFAULT '0';
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/carrousel')) {
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_categories` ADD `carrousel_id` INT(11) NOT NULL DEFAULT '0';
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/devis')) {
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_commandes` ADD `date_fin_validite` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00';
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/partenaires')) {
+	$sql_update_array['9.1.1'] .= "
+	ALTER TABLE `peel_partenaires` ADD `document` VARCHAR(255) NOT NULL DEFAULT '' AFTER `description`;
+	ALTER TABLE `peel_partenaires`  ADD `comments` VARCHAR(255) NOT NULL DEFAULT ''  AFTER `description`;
+";
+}
 // FIN du SQL par version
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	
@@ -2650,7 +2690,7 @@ if (!empty($current_version)) {
 						if(!class_exists(StringMb::ucfirst($this_module)) && !empty($GLOBALS['site_parameters']['modules_front_office_functions_files_array'][$this_module])) {
 							// On gère uniquement les modules light préconfigurés - pour les autres il faudra aller dans l'administration gérer la configuration des modules dans sites.php
 							// En effet, par défaut plus tard on considèrera que si la variable de configuration module_xxxx pas trouvée, on considère que le module n'est pas activé.
-							set_configuration_variable(array('technical_code' => vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$this_module], 'module_' . $this_module), 'string' => 1, 'type' => 'integer', 'site_id' => 0, 'origin' => 'modules'), false);
+							set_configuration_variable(array('technical_code' => vb($GLOBALS['site_parameters']['modules_configuration_variable_array'][$this_module], 'module_' . $this_module), 'string' => 1, 'type' => 'integer', 'site_id' => 1, 'origin' => 'modules'), false);
 						}
 					}
 				}

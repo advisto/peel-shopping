@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles_html.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
+// $Id: articles_html.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}{if $is_content}
 	<div class="rubrique row">
 		{if !empty($STR_TITLE_ARTICLE_HTML)}{if empty($IN_HOME)}<h1>{$STR_TITLE_ARTICLE_HTML}</h1>{else}<h2 class="home_title">{$STR_TITLE_ARTICLE_HTML}</h2>{/if}{/if}
@@ -21,7 +21,9 @@
 			{/if}
 			{if isset($item.titre)}
 			<h3><a href="{$item.href|escape:'html'}">{$item.titre|html_entity_decode_if_needed}</a></h3>
+			{if empty($display_chapo_disable)}
 			{$item.chapo|html_entity_decode_if_needed}
+			{/if}
 			{if $item.is_texte && $category_content_show_explicit_buttons_if_articles_more_to_read}
 			<div class="inside_rubrique row">
 				<div class="left col-md-6"><a style="white-space: normal;" href="{$item.href|escape:'html'}" class="btn btn-primary btn-red"><span style="margin-right: -5px;" class="glyphicon glyphicon-circle-arrow-right">&#160;</span>{$item.titre|html_entity_decode_if_needed}</a></div>

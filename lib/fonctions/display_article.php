@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_article.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: display_article.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -50,10 +50,17 @@ if (!function_exists('get_article_details_html')) {
 				));
 			}
 			if(empty($GLOBALS['site_parameters']['chapo_in_article_page_disabled'])) {
-				$tpl->assign('chapo', $article['chapo']);
+				$chapo = $article['chapo'];
+				$tpl->assign('chapo', $chapo);
 			}
-
-			$tpl->assign('texte', template_tags_replace($article['texte'],$custom_template_tags));
+			$texte = template_tags_replace($article['texte'],$custom_template_tags);
+			if (!est_identifie() && !empty($GLOBALS['site_parameters']['truncate_article_text_if_not_logged']) && $article['rub_technical_code']!='articles') {
+				$texte = trim(StringMb::str_shorten(StringMb::strip_tags($texte), 520, null, '...'));
+				if(!empty($texte)) {
+					$texte .= '<br />'.$GLOBALS["STR_lOGIN_TEXT"];
+				}
+			}
+			$tpl->assign('texte', $texte);
 			
 			if (function_exists('get_share_feature')) {
 				$tpl->assign('share_feature', get_share_feature());
@@ -71,6 +78,17 @@ if (!function_exists('get_article_details_html')) {
 				));
 			}
 		}
+		//Récupération de l'image d'entête de la rubrique associée à l'article
+		$sql = "SELECT image_head
+			FROM peel_rubriques r
+			INNER JOIN peel_articles_rubriques ar ON ar.rubrique_id = r.id
+			WHERE ar.article_id =" . intval($article_id);
+		$query = query($sql);
+		$result = fetch_assoc($query);
+		if (!empty($result['image_head'])) {
+			$tpl->assign('rub_banner_head_article', thumbs($result['image_head'], vn($GLOBALS['site_parameters']['medium_width_image_head_article'],100), vn($GLOBALS['site_parameters']['medium_height_image_head_article'],100), 'fit', null, null, true, true));
+		}
+		
 		$hook_result = call_module_hook('article_details_html_template_data', array('rubid'=>$article['rubrique_id'], 'id'=>$article_id), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
@@ -160,6 +178,7 @@ if (!function_exists('get_articles_html')) {
 		
 		$tpl = $GLOBALS['tplEngine']->createTemplate('articles_html.tpl');
 		$tpl->assign('is_content', !empty($results_array));
+		$tpl->assign('display_chapo_disable', !empty($GLOBALS['site_parameters']['display_chapo_disable']));
 		$tpl->assign('STR_MORE_DETAILS', $GLOBALS['STR_MORE_DETAILS']);
 		$tpl->assign('haut_de_page_txt', $GLOBALS['STR_HAUT_DE_PAGE']);
 		$tpl->assign('haut_de_page_href', '#haut_de_page');
@@ -220,7 +239,7 @@ if (!function_exists('get_articles_list_brief_html')) {
 			$GLOBALS['site_parameters']['minify_css_exclude_array'][] = 'font-awesome.min.css';
 		}
 		$output ='';
-		$sqlrub = "SELECT image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom, articles_review, etat, technical_code
+		$sqlrub = "SELECT image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom, articles_review, etat, technical_code, image_head
 			FROM peel_rubriques r
 			WHERE id = '" . intval($rubid) . "' AND nom_" . $_SESSION['session_langue'] . " != '' AND r.technical_code NOT IN ('other', 'iphone_content') AND " . get_filter_site_cond('rubriques', 'r') . "
 			ORDER BY r.position ASC, r.id DESC";
@@ -248,6 +267,9 @@ if (!function_exists('get_articles_list_brief_html')) {
 					'src' => thumbs($rowrub['image'], $GLOBALS['site_parameters']['medium_width'], $GLOBALS['site_parameters']['medium_height'], 'fit', null, null, true, true),
 					'file_type' => get_file_type($rowrub['image'])
 				));
+			}
+			if (!empty($rowrub['image_head'])) {
+				$tpl->assign('rub_banner_head_article', thumbs($rowrub['image_head'], vn($GLOBALS['site_parameters']['medium_width_image_head_article'], 100), vn($GLOBALS['site_parameters']['medium_height_image_head_article'], 100), 'fit', null, null, true, true));
 			}
 			$tpl->assign('technical_code', $rowrub['technical_code']);
 			$custom_template_tags = call_module_hook('rubrique_custom_template_tags', $rowrub, 'array');

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -21,7 +21,9 @@
 			{% endif %}
 			{% if item.titre %}
 				<h3><a href="{{ item.href|escape('html') }}">{{ item.titre|html_entity_decode_if_needed }}</a></h3>
+				{% if display_chapo_disable is empty %}
 				{{ item.chapo|html_entity_decode_if_needed }}
+				{% endif %}
 				{% if item.is_texte and category_content_show_explicit_buttons_if_articles_more_to_read %}
 				<div class="inside_rubrique row">
 					<div class="left col-md-6"><a style="white-space: normal;" href="{{ item.href|escape('html') }}" class="btn btn-primary btn-red"><span style="margin-right: -5px;" class="glyphicon glyphicon-circle-arrow-right">&#160;</span>{{ item.titre|html_entity_decode_if_needed }}</a></div>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: newsletter.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: newsletter.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -142,15 +142,15 @@ function affiche_formulaire_modif_newsletter($id, &$frm)
 		$frm["titre_bouton"] = $GLOBALS['STR_ADMIN_FORM_SAVE_CHANGES'];
 		
 		$product_info_array = array();
-		if (!empty($frm['product_ids'])) {
-			$q = query("SELECT nom_".$_SESSION['session_langue']." as name, reference, id as value
-				FROM peel_produits
-				WHERE id IN (".$frm['product_ids'].")");
-			while($result = fetch_assoc($q)) {
-				$product_info_array[] = $result;
-			}
+	if (!empty($frm['product_ids'])) {
+        $q = query("SELECT nom_".$_SESSION['session_langue']." as name, reference, id as value
+            FROM peel_produits
+            WHERE id IN (".$frm['product_ids'].")");
+    while($result = fetch_assoc($q)) {
+        $product_info_array[] = $result;
+    }
 		}
-		$frm['product_info_array'] = $product_info_array;
+    $frm['product_info_array'] = $product_info_array;
 		affiche_formulaire_newsletter($frm);
 	} else {
 		redirect_and_die(get_current_url(false).'?mode=ajout');
@@ -175,6 +175,7 @@ function affiche_formulaire_newsletter(&$frm)
 		);
 		$i++;
 	}
+	$tpl->assign('associated_product_multiple_add_to_cart', vb($GLOBALS['site_parameters']['associated_product_multiple_add_to_cart']));
 	$tpl->assign('products_in_newsletter', vn($GLOBALS['site_parameters']['products_in_newsletter']));
 	$tpl->assign('produits_options', vb($tpl_produits_options));
 	$tpl->assign('nb_produits', count($frm['product_info_array']));
@@ -276,7 +277,7 @@ function maj_newsletter($id, $frm)
             format='html',
             date = '" . date('Y-m-d H:i:s', time()) . "',
             template_technical_code = '" . nohtml_real_escape_string($frm['template_technical_code']) . "',
-            product_ids = '" . implode(',', nohtml_real_escape_string($frm['product_ids'])) . "',
+            product_ids = '" . implode(',', nohtml_real_escape_string(vb($frm['product_ids'], array()))) . "',
             site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
         WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('newsletter', null, true);
 	$qid = query($req);

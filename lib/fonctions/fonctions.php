@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 60162 2019-03-20 14:53:54Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -449,8 +449,10 @@ function charge_article($id, $show_all_etat_if_admin = true)
 			,a.etat
 			,a.on_special
 			,ar.rubrique_id
+			,r.technical_code AS rub_technical_code
 		FROM peel_articles a
 		INNER JOIN peel_articles_rubriques ar ON a.id = ar.article_id
+		INNER JOIN peel_rubriques r ON r.id = ar.rubrique_id AND " . get_filter_site_cond('rubriques', 'r') . "
 		WHERE a.id='" . intval($id) . "' AND " . get_filter_site_cond('articles', 'a') . " " . ($show_all_etat_if_admin && a_priv("admin_content", false) ? '' : "AND a.etat = '1' AND (a.titre_" . $_SESSION['session_langue'] . "!='' OR a.texte_" . $_SESSION['session_langue'] . "!='' OR a.chapo_" . $_SESSION['session_langue'] . "!='' OR a.surtitre_" . $_SESSION['session_langue'] . "!='')") . "");
 	return fetch_assoc($qid);
 }
@@ -645,7 +647,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 						// Test sur la présence de affiche_menu_catalogue qui est l'ancienne fonction pour l'affichage du catalogue. L'utilisation est permise ici pour des raions de compatibilité avec d'anciens templates, dans le cas où la fonction est définie dans display_custom.php
 						$this_module_output = affiche_menu_catalogue($this_module['location'], true, true);
 					} else {
-						$this_module_output = get_categories_output($this_module['location'], 'categories', vn($_GET['catid']), ($this_module['location']=='footer'?'div':''), null);
+						$this_module_output = get_categories_output($this_module['location'], 'categories', vn($_GET['catid']), ($this_module['location']=='footer'?'div':''), null, null, null, false, vn($GLOBALS['site_parameters']['categories_output_text_max_length'], 30));
 					}
 					$tpl = $GLOBALS['tplEngine']->createTemplate('menu_catalogue.tpl');
 					$tpl->assign('menu', $this_module_output);
@@ -784,7 +786,11 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 			} elseif ($this_module['technical_code'] == 'agenda_datepicker' && check_if_module_active('agenda')) {
 				$this_module_output = display_agenda();
 			} elseif ($this_module['technical_code'] == 'get_search_product_form' ) {
-				$this_module_output = get_search_form($_GET, vb($_GET['search']), vb($_GET['match']), null, 'module_products');
+				if (in_array($this_module['location'], array('left', 'right', 'left_category')) && function_exists('form_search_engine')) {
+					$this_module_output = form_search_engine('column');
+				} else {
+					$this_module_output = get_search_form($_GET, vb($_GET['search']), vb($_GET['match']), null, 'module_products');
+				}
 			} elseif ($this_module['technical_code'] == 'get_search_ads_form' ) {
 				$this_module_output = get_search_form($_GET, vb($_GET['search']), vb($_GET['match']), null, 'module_ads');
 			} elseif ($this_module['technical_code'] == 'get_search_member_form' && check_if_module_active('groups_advanced')) {
@@ -820,7 +826,7 @@ function get_modules($location, $return_mode = false, $technical_code = null, $i
 					$block_class .= ' ' . $GLOBALS['site_parameters']['modules_block_class_by_technical_code_array'][$this_module['technical_code']];
 				} elseif(!empty($GLOBALS['site_parameters']['modules_block_class_by_display_mode_array']) && !empty($GLOBALS['site_parameters']['modules_block_class_by_display_mode_array'][$this_module['display_mode']])) {
 					$block_class .= ' ' . $GLOBALS['site_parameters']['modules_block_class_by_display_mode_array'][$this_module['display_mode']];
-				} elseif(in_array($this_module['location'], vb($GLOBALS['site_parameters']['modules_no_class_location_array'], array('left', 'right', 'left_annonce', 'right_annonce')))) {
+				} elseif(in_array($this_module['location'], vb($GLOBALS['site_parameters']['modules_no_class_location_array'], array('left', 'right', 'left_annonce', 'right_annonce', 'left_category')))) {
 					$block_class .= '';
 				} elseif(isset($width_class)) {
 					$block_class .= ' ' . $width_class;
@@ -1672,6 +1678,7 @@ function nodaysdatepicker(inst) {
 						$(this).datepicker("setDate", sel);
 					}
 				},
+				closeText: "' . $GLOBALS['STR_VALIDATE']. '",
 				onChangeMonthYear: function(year, month, inst) { nodaysdatepicker(inst); }, 
 				onClose: function(dateText, inst) { $(this).datepicker("setDate", new Date(inst.selectedYear, inst.selectedMonth, 1)); } 
 			});
@@ -1783,6 +1790,9 @@ function get_css_files_to_load($minify = false)
  * @return
  */
 function output_general_http_header($page_encoding = null, $cache_duration_in_seconds = null) {
+	if(!empty($GLOBALS['http_headers_sent'])) {
+		return null;
+	}
 	if(empty($page_encoding)) {
 		$page_encoding = GENERAL_ENCODING;
 	}
@@ -2734,7 +2744,7 @@ function handle_site_suspended() {
 			// Page de création de compte autorisée
 			$allow_access_if_suspended = true;
 		}
-		if (!IN_INSTALLATION && !defined('IN_QRCODE') && !defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_CRON') && !defined('IN_PEEL_ADMIN') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_GET_PASSWORD') && !defined('IN_FINE_UPLOADER') && !a_priv('admin*', true) && empty($allow_access_if_suspended)) {
+		if (!IN_INSTALLATION && !defined('IN_QRCODE') && !defined('IN_PATHFILE') && !defined('IN_IPN') && !defined('IN_CRON') && !defined('IN_PEEL_ADMIN')  && !defined('IN_RPC') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_CHECK_FIELD') && !defined('IN_GET_PASSWORD') && !defined('IN_FINE_UPLOADER') && !a_priv('admin*', true) && empty($allow_access_if_suspended)) {
 			if (!empty($GLOBALS['site_parameters']['site_suspended_with_redirection_to_home'])) {
 				if (!defined('IN_REGISTER') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_NEWSLETTER')) {
 					// Redirection vers la home, sauf si on est sur l'une de ces 4 pages : Home (pour éviter un redirection en boucle), enregistrement (pour permettre de créer un compte), membre (pour permettre aux admins de se connecter) et newsletter (pour permettre l'inscription à la newsletter)
@@ -3304,6 +3314,11 @@ function params_affiche_produits($condition_value1, $unused, $type, $nb_par_page
 		$sql_cond_array[] = "p.etat=0 AND id_utilisateur = '".intval($_SESSION['session_utilisateur']['id_utilisateur'])."'";
 	} elseif ($type == 'newsletter') {
 		$nb_par_page = '*';
+        $params_list['small_width'] = 130;
+        $params_list['small_height'] = 130;
+        $sql_cond_array[] = "p.id IN (" . nohtml_real_escape_string($condition_value1) . ")";
+    } 
+	elseif ($type == 'newsletter') {
         $params_list['small_width'] = 130;
         $params_list['small_height'] = 130;
         $sql_cond_array[] = "p.id IN (" . nohtml_real_escape_string($condition_value1) . ")";
@@ -4660,13 +4675,20 @@ bkLib.onDomLoaded(function() {
 			config.contentsCss=["'.implode('", "', $css_files).'"];
 		';
 		
+		$removePlugins = 'blockquote,save,flash,iframe,pagebreak,templates,about,showblocks,newpage,language';
+		$removeButtons = 'Form,TextField,Select,Textarea,Button,HiddenField,Radio,Checkbox,Anchor,BidiLtr,BidiRtl,Preview,Indent,Outdent';
 		if (empty($GLOBALS['site_parameters']['ckeditor_upload_image_enable'])) {
 			// Le module imageuploader permet l'upload d'image depuis l'éditeur HTML. Il ajoute un onglet "Téléverser" dans la fenêtre de gestion des images. 
-			// Mais ce module ne fonctionne pas, lorsque l'on souhaite uplaoder une image, un message "Forbidden You don't have permission to access /upload/ on this server."
+			// Mais ce module ne fonctionne pas, lorsque l'on souhaite uploader une image, un message "Forbidden You don't have permission to access /upload/ on this server."
 			// Donc la gestion des images est désactivée par défaut pour cet éditeur.
-			$ckeditor_config_js .= "
-			config.removeButtons = 'Image';";
+			$removePlugins .= ',image';
+			$removeButtons .= ',ImageButton';
 		}
+		$ckeditor_config_js .= "
+			config.language = '" . $_SESSION['session_langue'] . "';
+			config.removePlugins = '" . $removePlugins . "';
+			config.removeButtons = '" . $removeButtons . "';
+";
 		$GLOBALS['js_ready_content_array'][] = "
 		CKEDITOR.editorConfig = function( config ) {
 			" . $ckeditor_config_js . "
@@ -4752,7 +4774,7 @@ function get_configuration_variable($technical_code, $site_id, $lang)
 
 	$qid = query($sql);
 	if ($select = fetch_assoc($qid)) {
-		// Elément déjà existant, qu'on met à jour
+		// Elément existant, on retourne sa valeur
 		return $select['string'];
 	} else {
 		return null;
@@ -4811,7 +4833,7 @@ function set_configuration_variable($frm, $update_if_technical_code_exists = fal
 		$sql_items[] = "lang = '" . nohtml_real_escape_string(vb($frm['lang'])) . "'";
 		$sql = "SELECT id
 			FROM peel_configuration
-			WHERE " . implode(' AND ', $sql_items) . " AND " . get_filter_site_cond('configuration', null, false, 0, true);
+			WHERE " . implode(' AND ', $sql_items) . " AND " . get_filter_site_cond('configuration', null, false, vn($frm['site_id'], 0), true);
 		$qid = query($sql); 
 		if (!fetch_assoc($qid)) {
 			$sql_items[] = "`type` = '" . nohtml_real_escape_string($frm['type']) . "'";
@@ -4947,10 +4969,12 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 			unset($files_array[$this_key]);
 		}
 	}
-	if(!empty($_GET['update']) && $_GET['update'] == 1 && empty($GLOBALS['already_updated_minify_id_increment'])) {
+	if(((!empty($_GET['update']) && $_GET['update'] == 1) || empty($GLOBALS['site_parameters']['minify_id_increment'])) && empty($GLOBALS['already_updated_minify_id_increment'])) {
 		$GLOBALS['site_parameters']['minify_id_increment'] = intval($GLOBALS['site_parameters']['minify_id_increment'])+1;
+		set_configuration_variable(array('technical_code' => 'minify_id_increment', 'string' => $GLOBALS['site_parameters']['minify_id_increment'], 'type' => 'integer', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
 		$GLOBALS['already_updated_minify_id_increment'] = true;
 	}
+	if(!empty($files_to_minify_array)) {
 	$cache_id = md5(implode(',', $files_to_minify_array) . ','. vb($GLOBALS['site_parameters']['minify_id_increment']));
 	$file_name = $files_type . '_minified_' . substr($cache_id, 0, 16).'.'.$files_type;
 	$minified_doc_root = $GLOBALS['dirroot'] . '/'.$GLOBALS['site_parameters']['cache_folder'].'/';
@@ -5079,7 +5103,6 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 				$write_result = fwrite($fp, $output, strlen($output));
 				@flock($fp, LOCK_UN);
 				fclose($fp);
-				set_configuration_variable(array('technical_code' => 'minify_id_increment', 'string' => $GLOBALS['site_parameters']['minify_id_increment'], 'type' => 'integer', 'origin' => 'auto '.date('Y-m-d'), 'site_id' => $GLOBALS['site_id']), true);
 			}
 			if(!$write_result) {
 				return $files_array;
@@ -5092,6 +5115,7 @@ function get_minified_src($files_array, $files_type = 'css', $lifetime = 3600) {
 	}
 	// On remet le fichier CSS minifié en position dans le tableau de tous les CSS à charger, à la position du premier fichier qui a été minifié (pour respecter au mieux les priorités)
 	$files_array[key($files_to_minify_array)] = str_replace($GLOBALS['dirroot'], $this_wwwroot, $file_path);
+	}
 	return $files_array;
 }
 
@@ -5136,57 +5160,72 @@ function get_quick_search_results($search, $maxRows, $active_only = false, $sear
 		$sql_additional_cond = '';
 		$sql_additional_join = '';
 		if(!empty($GLOBALS['site_parameters']['quick_search_results_main_search_field'])) {
-			$name_field = $GLOBALS['site_parameters']['quick_search_results_main_search_field'];
+			$name_field_array = $GLOBALS['site_parameters']['quick_search_results_main_search_field'];
 		} else {
-			$name_field = "nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])."";
+			$name_field_array = "nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])."";
 		}
 		// Pour optimiser, on segmente la recherche en plusieurs requêtes courtes
 		if($active_only) {
 			$sql_additional_cond .= " AND etat='1'";
 		}
-
-		if(is_numeric($search)) {
-			$product_table_field_names = get_table_field_names('peel_produits');
-			$sql_where = "(p.id='" . nohtml_real_escape_string($search) . "'";
-			if (in_array('ean_code', $product_table_field_names)) {
-				$sql_where .= " OR ean_code = '" . nohtml_real_escape_string($search) . "'";
+		if (!is_array($name_field_array)) {
+			$name_field_array = array($name_field_array);
+		}
+		foreach($name_field_array as $name_field) {
+			if(is_numeric($search)) {
+				$product_table_field_names = get_table_field_names('peel_produits');
+				$sql_where = "(p.id='" . nohtml_real_escape_string($search) . "'";
+				if (in_array('ean_code', $product_table_field_names)) {
+					$sql_where .= " OR ean_code = '" . nohtml_real_escape_string($search) . "'";
+				}
+				$sql_where .= ") AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond;
+				$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
+					FROM peel_produits p
+					WHERE " . $sql_where . "
+					LIMIT 1";
 			}
-			$sql_where .= ") AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond;
-			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
-				FROM peel_produits p
-				WHERE " . $sql_where . "
-				LIMIT 1";
-		}
-		if(!empty($search_category)) {
-			$sql_additional_cond .= " AND pc.categorie_id IN ('" . implode("','", get_category_tree_and_itself(intval($search_category), 'sons', 'categories')) . "')";
-			$sql_additional_join .= 'INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id';
-			$group_by = 'GROUP BY pc.produit_id';
-		}
-		if(!is_array($search)) {
-			$search = array($search);
-		}
-		foreach($search as $this_search) {
-			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
-				FROM peel_produits p
-				".$sql_additional_join."
-				WHERE p." . word_real_escape_string($name_field) . " LIKE '" . nohtml_real_escape_string($this_search) . "%' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
-				" . vb($group_by) . "
-				ORDER BY p." . word_real_escape_string($name_field) . " ASC";
-			$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
-				FROM peel_produits p
-				".$sql_additional_join."
-				WHERE p.reference LIKE '" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!='' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
-				" . vb($group_by) . "
-				ORDER BY IF(p.reference LIKE '" . nohtml_real_escape_string($this_search) . "',1,0) DESC, p." . word_real_escape_string($name_field) . " ASC";
-			if(empty($GLOBALS['site_parameters']['autocomplete_fast_partial_search'])) {
+			if(!empty($search_category)) {
+				$sql_additional_cond .= " AND pc.categorie_id IN ('" . implode("','", get_category_tree_and_itself(intval($search_category), 'sons', 'categories')) . "')";
+				$sql_additional_join .= 'INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id';
+			}
+			if(!is_array($search)) {
+				$search = array($search);
+			}
+			foreach($search as $this_search) {
 				$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
 					FROM peel_produits p
 					".$sql_additional_join."
-					WHERE (ean_code = '" . nohtml_real_escape_string($this_search) . "' OR p." . word_real_escape_string($name_field) . " LIKE '%" . nohtml_real_escape_string($this_search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!=''))" . $sql_additional_cond . " AND " . get_filter_site_cond('produits', 'p') . "
-					" . vb($group_by) . "
+					WHERE p." . word_real_escape_string($name_field) . " LIKE '" . nohtml_real_escape_string($this_search) . "%' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
 					ORDER BY p." . word_real_escape_string($name_field) . " ASC";
+				$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
+					FROM peel_produits p
+					".$sql_additional_join."
+					WHERE p.reference LIKE '" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!='' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
+					ORDER BY IF(p.reference LIKE '" . nohtml_real_escape_string($this_search) . "',1,0) DESC, p." . word_real_escape_string($name_field) . " ASC";
+				if(empty($GLOBALS['site_parameters']['autocomplete_fast_partial_search'])) {
+					$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
+						FROM peel_produits p
+						".$sql_additional_join."
+						WHERE (ean_code = '" . nohtml_real_escape_string($this_search) . "' OR p." . word_real_escape_string($name_field) . " LIKE '%" . nohtml_real_escape_string($this_search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!=''))" . $sql_additional_cond . " AND " . get_filter_site_cond('produits', 'p') . "
+						ORDER BY p." . word_real_escape_string($name_field) . " ASC";
+				}
+				$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
+					FROM peel_produits p
+					".$sql_additional_join."
+					WHERE p.reference LIKE '" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!='' AND " . get_filter_site_cond('produits', 'p') . "" . $sql_additional_cond . "
+					" . vb($group_by) . "
+					ORDER BY IF(p.reference LIKE '" . nohtml_real_escape_string($this_search) . "',1,0) DESC, p." . word_real_escape_string($name_field) . " ASC";
+				if(empty($GLOBALS['site_parameters']['autocomplete_fast_partial_search'])) {
+					$queries_sql_array[] = "SELECT p.*, p." . word_real_escape_string($name_field) . " AS nom
+						FROM peel_produits p
+						".$sql_additional_join."
+						WHERE (ean_code = '" . nohtml_real_escape_string($this_search) . "' OR p." . word_real_escape_string($name_field) . " LIKE '%" . nohtml_real_escape_string($this_search) . "%' OR (p.reference LIKE '%" . nohtml_real_escape_string($this_search) . "%' AND p." . word_real_escape_string($name_field) . "!=''))" . $sql_additional_cond . " AND " . get_filter_site_cond('produits', 'p') . "
+						" . vb($group_by) . "
+						ORDER BY p." . word_real_escape_string($name_field) . " ASC";
+				}
 			}
 		}
+		
 		foreach($queries_sql_array as $this_query_sql) {
 			if(StringMb::strpos($this_query_sql, 'LIMIT') === false) {
 				$this_query_sql .= ' LIMIT '.intval($maxRows);
@@ -5366,7 +5405,7 @@ function get_filter_site_cond($table_technical_code, $table_alias = null, $use_s
 		// Si pas dans un contexte d'administration de la donnée : ajout de la condition de le pays du visiteur 
 		$cond_array[] = "FIND_IN_SET('" . real_escape_string($_SESSION['session_site_country']) . "', " . $prefix . "site_country)";
 	}
-	// On théorie on devrait ajouter un test sur les tables qui ont le champs site_id en SET, mais FIND_IN_SET fonctionne également avec les champs INT.
+	// On théorie on devrait ajouter un test sur les tables qui ont le champ site_id en SET, mais FIND_IN_SET fonctionne également avec les champs INT.
 	$use_set = (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id']) || (!empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']) && !empty($GLOBALS['site_parameters']['multisite_using_array_for_site_id_by_table']['peel_' . $table_technical_code])));
 	if($exclude_public_items) {
 		// La requête concerne un seul site, sans tenir compte de la configuration globale.
@@ -5655,7 +5694,7 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 					$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
 				}
 			}
-			if (isset($frm['commande_id']) && !$form_error_object->has_error('commande_id') && vb($frm['sujet']) == $GLOBALS['STR_CONTACT_SELECT3'] && empty($frm['commande_id'])) {
+			if (isset($frm['commande_id']) && !$form_error_object->has_error('commande_id') && vb($frm['sujet']) == $GLOBALS['STR_CONTACT_SELECT3'] && empty($frm['commande_id']) && vb($GLOBALS['site_parameters']['website_type']) != 'showcase') {
 				$form_error_object->add('commande_id', $GLOBALS['STR_ERR_ORDER_NUMBER']);
 			}
 			if (check_if_module_active('captcha')) {
@@ -5799,9 +5838,9 @@ function handle_contact_form($frm, $skip_introduction_text = false) {
 							} elseif ($field_name == 'meta_description') {
 								$GLOBALS['meta_description'] = $field_value;
 							}
-							// On renseigne les informations de session utilisateur si la valeur du champs est vide
+							// On renseigne les informations de session utilisateur si la valeur du champ est vide
 							if (empty($field_value)) {
-								// Dans le cas pour le nom de la famille, le champs différent on fait donc un test et on concatène avec '_famille'
+								// Dans le cas pour le nom de la famille, le champ différent on fait donc un test et on concatène avec '_famille'
 								if ($field_name == 'nom') {
 									$frm[$field_name] = vb($_SESSION['session_utilisateur'][$field_name.'_famille']);
 								} else {
@@ -5966,12 +6005,11 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 		// On veut compléter $frm avec les informations de session d'un utilisateur
 		$user_infos = $_SESSION['session_utilisateur'];
 	}
-		
-	$specific_field_prefix = $form_usage;
+
 	if (in_array($form_usage, array('reseller', 'user'))) {
 		$mandatory_field_prefix = 'user';
 	} else {
-		$mandatory_field_prefix = $specific_field_prefix;
+		$mandatory_field_prefix = $form_usage;
 	}
 
 	if(!empty($GLOBALS['site_parameters'][$mandatory_field_prefix . '_' . vb($user_infos['user_type']) . '_mandatory_fields'])) {
@@ -5981,8 +6019,9 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 		// Sinon on prennd la configuration par défaut
 		$mandatory_fields = template_tags_replace(vb($GLOBALS['site_parameters'][$mandatory_field_prefix . '_mandatory_fields'], array()), $custom_template_tags);
 	}
-
-	foreach(array('readonly', 'style', 'titles', 'types', 'names', 'class', 'id', 'values', 'positions', 'steps', 'search', 'types', 'javascript', 'placeholder', 'multiple') as $this_info_name) {
+	
+	foreach(array('disabled', 'readonly', 'style', 'titles', 'types', 'names', 'class', 'id', 'values', 'positions', 'steps', 'search', 'types', 'javascript', 'placeholder', 'multiple') as $this_info_name) {
+		$specific_field_prefix = $form_usage;
 		$this_var_name = 'specific_field_' . $this_info_name;
 
 		if(vb($user_infos['user_type']) == 'company') {
@@ -5992,7 +6031,15 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			// Sinon c'est une personne physique
 			$specific_field_user_type_prefix = $specific_field_prefix . '_person';
 		}
-		if (!empty($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name])) {
+		
+		if ($specific_field_prefix == 'order' && !empty($frm['bill_mode'])) {
+			// Si on a défini une variable de configuration de formulaire spécifiquement pour un type de commande précis (facture ou devis)
+			$specific_field_order_type_prefix = $specific_field_prefix . '_' . $frm['bill_mode'];
+		}
+		if (!empty($specific_field_order_type_prefix) && !empty($GLOBALS['site_parameters'][$specific_field_order_type_prefix . '_specific_field_' . $this_info_name])) {
+			// On test si il existe une variable qui utilise le type d'utilisateur dans le nom; Si oui on prend le contenu de cette variable.
+			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_order_type_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
+		} elseif (!empty($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name])) {
 			// On test si il existe une variable qui utilise le type d'utilisateur dans le nom; Si oui on prend le contenu de cette variable.
 			$$this_var_name = template_tags_replace(vb($GLOBALS['site_parameters'][$specific_field_user_type_prefix . '_specific_field_' . $this_info_name], array()), $custom_template_tags);
 		} else {
@@ -6127,6 +6174,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			unset($tpl_options);
 			unset($this_value);
 			$readonly = false;
+			$disabled = false;
 			$frm_this_field_values_array = array();
 			$this_title = vb($specific_field_titles[$this_field]);
 			if(StringMb::substr($this_title, 0, 4)== 'STR_') {
@@ -6145,6 +6193,10 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 			if (in_array($this_field, $specific_field_readonly)) {
 				// La valeur du champ ne doit pas être modifié. On va utiliser l'attribut HTML readonly pour empêcher l'utilisateur de modifier la valeur du champ. Avec readonly la valeur affichée est envoyée en POST, à l'inverse de disabled qui n'envoi pas la valeur dans le formulaire.
 				$readonly = true;
+			}	
+			if (in_array($this_field, $specific_field_disabled)) {
+				// La valeur du champ est à titre informative uniquement. Elle ne sera pas envoyée en POST
+				$disabled = true;
 			}
 			if (in_array($this_field, $specific_field_multiple)) {
 				$multiple = true;
@@ -6196,6 +6248,7 @@ function get_specific_field_infos($frm, $form_error_object = null, $form_usage =
 					'field_placeholder' => vb($specific_field_placeholder[$this_field]),
 					'javascript' => $field_javascript,
 					'readonly' => !empty($readonly),
+					'disabled' => !empty($disabled),
 					'multiple' => !empty($multiple),
 					'mandatory' => (!empty($mandatory_fields[$this_field])),
 					'error_text' => (is_object($form_error_object)?$form_error_object->text($this_field):''),
@@ -6452,16 +6505,16 @@ function display_specific_field_form($specific_field_infos_array, $display_mode 
 		if(!empty($specific_fields['field_title']) || !in_array($specific_fields['field_type'], array('hidden', 'separator', 'textarea', 'html'))) {
 			if($display_mode == 'div') {
 				$output .= '
-<div class="row '.(!empty($specific_fields['field_class'])?$specific_fields['field_class']:'').'" style="margin-bottom:10px '.(!empty($specific_fields['field_style'])?';'.$specific_fields['field_style']:'').'">
+<div class="row'.(!empty($specific_fields['field_class'])? ' ' . $specific_fields['field_class']:'').'" style="margin-bottom:10px '.(!empty($specific_fields['field_style'])?';'.$specific_fields['field_style']:'').'">
 	<div class="col-sm-4 col-md-5 col-lg-4">'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS_HTML'] .':':'') .'</div>
-	<div class="col-sm-8 col-md-7 col-lg-8">' . $tpl->fetch() . vb($specific_fields['error_text']) . '</div>
+	<div class="col-sm-8 col-md-7 col-lg-8">' . $tpl->fetch() .' <span id="'.$specific_fields['field_class'].'">'.vb($specific_fields['error_text']) . '</span></div>
 </div>
 ';
 			} else {
 				$output .= '
 			<tr>
-				<td>'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS_HTML'] . ':':'') . '</td>
-				<td>' . $tpl->fetch() . vb($specific_fields['error_text']) . '</td>
+				<td><p>'.(!empty($specific_fields['field_title'])?$specific_fields['field_title'].''. $mandatory_text . $GLOBALS['STR_BEFORE_TWO_POINTS_HTML'] . ':':'') . '</p></td>
+				<td><p>' . $tpl->fetch() . vb($specific_fields['error_text']) . '</p></td>
 			</tr>';
 			}
 		} else {
@@ -6474,7 +6527,7 @@ function display_specific_field_form($specific_field_infos_array, $display_mode 
 				$output .= '
 			<tr>
 				<td></td>
-				<td>' . $tpl->fetch() . $mandatory_text . vb($specific_fields['error_text']) . '</td>
+				<td><p>' . $tpl->fetch() . $mandatory_text . vb($specific_fields['error_text']) . '</p></td>
 			</tr>';
 			}
 		}
@@ -6508,11 +6561,11 @@ function handle_upload_use_specific_table($frm, $source = '', $upload_multiple_f
 		} else {
 			foreach($frm[$upload_multiple_fieldname] as $this_cache_file) {
 				$_REQUEST[$upload_multiple_fieldname.'_'.$i] = $this_cache_file;
-				$uploaded_files[] = upload($upload_multiple_fieldname.'_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+				$GLOBALS['uploaded_file_new'][] = upload($upload_multiple_fieldname.'_'.$i, false, 'image', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
 				$i++;
 			}
 		}
-		if (!empty($frm['ref'])) {
+		if (!empty($frm['ref']) && empty($source)) {
 			// On supprime tous les fichiers de peel_telechargement liés à $source et qui ne sont plus dans ce qui a été géré par la boucle sur upload ci-dessus
 			$annonce_object->delete_pictures(false, $source, $GLOBALS['uploaded_file_already_existing']);
 		} else {
@@ -6521,9 +6574,7 @@ function handle_upload_use_specific_table($frm, $source = '', $upload_multiple_f
 				WHERE source='" . real_escape_string($source) . "'";
 			$query = query($sql);
 			while ($result = fetch_assoc($query)) {
-				if (!in_array($result['url'], $GLOBALS['uploaded_file_already_existing'])) {
-					// Suppression du fichier sur le disque
-					delete_uploaded_file_and_thumbs($result['url']);
+				if (in_array($result['url'], $GLOBALS['uploaded_file_already_existing'])) {
 					$sql = "DELETE FROM peel_telechargement
 						WHERE id='". intval($result['id']) . "'";
 					query($sql);
@@ -6579,6 +6630,7 @@ function handle_upload_use_specific_table($frm, $source = '', $upload_multiple_f
 	$GLOBALS['css_files'][] = $wwwroot . '/lib/css/fineuploader.css';
 	$GLOBALS['js_content_array'][] = '
 window.init_fineuploader = function(object) {
+	' . vb($GLOBALS['js_fineuploader_init']) . '
 	data_name = object.data("name");
 	if(data_name) {
 		data_name = data_name.replace(/_openarray_/g, "[").replace(/_closearray_/g, "]");
@@ -6602,6 +6654,7 @@ window.init_fineuploader = function(object) {
 	}).on("complete", function(event, id, fileName, responseJSON) {
 		if (responseJSON.success) {
 			object.replaceWith(responseJSON.html);
+			' . vb($GLOBALS['js_fineuploader_complete']) . '
 		}
 	});
 };
@@ -6627,13 +6680,12 @@ $(".uploader").each(function () {
  * Import d'un produit : mise à jour ou création du produit
  *
  * @param array $field_values Array with all fields data
- * @param array $columns_skipped
- * @param array $product_field_names Names of colums authorized (this array is not mandatory)
- * @param array $specific_fields_array
  * @param boolean $admin_mode
+ * @param boolean $categories_created_activate
+ * @param boolean $test_mode
  * @return
  */
-function create_or_update_product($field_values, $columns_skipped = array(), $product_field_names = array(), $specific_fields_array = array(), $admin_mode = false, $categories_created_activate = true) {
+function create_or_update_product($field_values, $admin_mode = false, $categories_created_activate = true, $test_mode = false) {
 	$output = '';
 	if(!isset($GLOBALS['nbprod_update'])) {
 		$GLOBALS['nbprod_update'] = 0;
@@ -6643,10 +6695,14 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 	if (!isset($GLOBALS['nbprod_insert'])) {
 		$GLOBALS['nbprod_insert'] = 0;
 	}
+	// On complète les données si nécessaire
 	if (isset($field_values['site_id'])) {
 		$site_id = $field_values['site_id'];
 	} else {
 		$site_id = $GLOBALS['site_id'];
+	}
+	if (empty($field_values['date_maj'])) {
+		$field_values['date_maj'] = date('Y-m-d H:i:s', time());
 	}
 	// Gestion des champs impactant $field_values (transformation d'un nom en id par exemple)
 	if (!empty($field_values['id_marque'])) {
@@ -6673,11 +6729,13 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 						$this_brand_id_array[] = $brand['id'];
 					}elseif(!empty($this_field_value) && !is_numeric($this_field_value)) {
 						// Marque inexistante, on l'insère en base de données.
-						$q = query('INSERT INTO peel_marques
-							SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1", site_id="' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"');
-						$this_brand_id_array[] = insert_id();
-						if($admin_mode) {
-							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_BRAND_CREATED'], $GLOBALS['line_number'], $field_values['id_marque'])))->fetch();
+						if(!$test_mode) {
+							$q = query('INSERT INTO peel_marques
+								SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_field_value) . '", etat="1", site_id="' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"');
+							$this_brand_id_array[] = insert_id();
+							if($admin_mode) {
+								$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_BRAND_CREATED'], $GLOBALS['line_number'], $field_values['id_marque'])))->fetch();
+							}
 						}
 					}
 				}
@@ -6689,330 +6747,333 @@ function create_or_update_product($field_values, $columns_skipped = array(), $pr
 	// Génération du SQL à partir de $field_values. product_field_names peut contenir des inforamtions non vérifié, provenant d'un formulaire par exemple. Il faut s'assurer qu'il n'y a pas de champ utilisé qui n'existe pas réélement dans la bas de 
 	$product_table_field_names = get_table_field_names('peel_produits');
 	foreach($field_values as $this_field_name => $this_value) {
-		if (!empty($this_field_name) && !in_array($this_field_name, $columns_skipped)) {
-			// On ne souhaite pas inclure les champs spécifiques ou non reconnus dans la requête SQL des produits. Mais il ne faut pas supprimer les champs specifiques de $field_values puisque l'on s'en sert après
-			if((empty($product_field_names) || in_array($this_field_name, $product_field_names)) && !in_array($this_field_name, array('id', 'Categorie', 'categorie_id')) && in_array($this_field_name, $product_table_field_names)) {
-				// On ne tient compte que des colonnes présentes dans la table produits pour sql_fields, les autres champs sont traités séparément
-				if(StringMb::strpos($this_field_name, 'nom_') === 0 && StringMb::strlen($this_field_name) == 6 && !empty($GLOBALS['site_parameters']['product_name_forced_lang']) && $this_field_name != 'nom_' . $GLOBALS['site_parameters']['product_name_forced_lang']) {
-					// Colonne nom_XX n'existant pas sur ce site, on ne traite pas le champ
-					continue;
-				}
-				if(StringMb::strpos($this_field_name, 'description_') === 0 && StringMb::strlen($this_field_name) == 14 && !empty($GLOBALS['site_parameters']['product_description_forced_lang']) && $this_field_name != 'description_' . $GLOBALS['site_parameters']['product_description_forced_lang']) {
-					// Colonne description_XX n'existant pas sur ce site, on ne traite pas le champ
-					continue;
-				}
-				$set_sql_fields[$this_field_name] = word_real_escape_string($this_field_name) . "='" . real_escape_string($this_value) . "'";
-			}
-		} elseif(empty($specific_fields_array[$this_field_name])) {
-			// Ce champ ne sera pas utilisé, on le supprime
-			unset($field_values[$this_field_name]);
+		// On ne souhaite pas inclure les champs spécifiques ou non reconnus dans la requête SQL des produits. Mais il ne faut pas supprimer les champs specifiques de $field_values puisque l'on peut s'en servir après
+		if (!in_array($this_field_name, array('id', 'categorie_id')) && in_array($this_field_name, $product_table_field_names)) {
+			// On ne tient compte que des colonnes présentes dans la table produits pour sql_fields, les autres champs sont traités séparément
+			// NB : categorie_id sera traitée séparément aussi. Et l'id est inutilisée car clé primaire gérée par ailleurs
+			$set_sql_fields[$this_field_name] = word_real_escape_string($this_field_name) . "='" . real_escape_string($this_value) . "'";
 		}
 	}
 	if (!empty($field_values['id'])) {
 		// On a spécifié une id Produit, donc on essaie de faire un UPDATE
-		if (!empty($set_sql_fields)) {
-			$sql = "UPDATE peel_produits
-				SET " . implode(', ', $set_sql_fields) . "
-				WHERE id='" . intval($field_values['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
-			query($sql);
-			if (affected_rows()) {
-				$product_id = $field_values['id'];
-				$GLOBALS['nbprod_update']++;
-				if($admin_mode) {
-					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_LINE_UPDATED'], $GLOBALS['line_number'], $product_id)))->fetch();
+		// On vérifie si le produit existe déjà (et donc n'a pas été modifié) ou si il est à créer
+		$q = query("SELECT id
+			FROM peel_produits
+			WHERE id='" . intval($field_values['id']) . "' AND " . get_filter_site_cond('produits', null, true));
+		if ($product = fetch_assoc($q)) {
+			// Produit existe
+			if (!empty($set_sql_fields)) {
+				if(!$test_mode) {
+					$sql = "UPDATE peel_produits
+						SET " . implode(', ', $set_sql_fields) . "
+						WHERE id='" . intval($field_values['id']) . "' AND " . get_filter_site_cond('produits', null, true) . "";
+					query($sql);
+					if (affected_rows()) {
+						$product_id = $field_values['id'];
+						$GLOBALS['nbprod_update']++;
+						if($admin_mode) {
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_LINE_UPDATED'], $GLOBALS['line_number'], $product_id)))->fetch();
+						}
+					} 
 				} else {
-					$output = true;
+					// Le produit pourrait être MAJ
+					$product_id = $field_values['id'];	
+					$GLOBALS['nbprod_update']++;
 				}
-			} 
-		}
-		if (!isset($product_id)) {
-			// On vérifie si le produit existe déjà (et donc n'a pas été modifié) ou si il est à créer
-			$q = query("SELECT id
-				FROM peel_produits
-				WHERE id='" . intval($field_values['id']) . "' AND " . get_filter_site_cond('produits', null, true));
-			if ($product = fetch_assoc($q)) {
+			}
+			if (!isset($product_id)) {
 				// Produit existe, et n'avait donc pas été modifié
 				$GLOBALS['nbprod_update_null']++;
 				$product_id = $field_values['id'];
-			} else {
-				// Produit inexistant : on va exécuter l'INSERT INTO plus loin en imposant l'id
-				$set_sql_fields['id'] = "id='" . intval($field_values['id']) . "'";
 			}
+		} else {
+			// Produit inexistant : on va exécuter l'INSERT INTO plus loin en imposant l'id
+			$set_sql_fields['id'] = "id='" . intval($field_values['id']) . "'";
 		}
 	}
 	if (!isset($product_id) && !empty($set_sql_fields)) {
 		// Produit pas encore existant et $set_sql_fields est forcément non vide ici
-		$sql = "INSERT INTO peel_produits
-			SET " . implode(', ', $set_sql_fields);
-		query($sql);
-		$product_id = insert_id();
-		$GLOBALS['nbprod_insert']++;
-		if($admin_mode) {
-			$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_LINE_CREATED'], $GLOBALS['line_number'], $product_id)))->fetch();
-		} else {
-			$output = true;
+		if (empty($set_sql_fields['date_insere'])) {
+			$set_sql_fields['date_insere'] = 'date_insere' . "='" . real_escape_string(date('Y-m-d H:i:s', time())) . "'";
 		}
+		if(!$test_mode) {
+			$sql = "INSERT INTO peel_produits
+				SET " . implode(', ', $set_sql_fields);
+			query($sql);
+			$product_id = insert_id();
+			if($admin_mode) {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_LINE_CREATED'], $GLOBALS['line_number'], $product_id)))->fetch();
+			}
+		}
+		$GLOBALS['nbprod_insert']++;
 	} elseif(!isset($product_id)) {
 		if($admin_mode) {
 			$output .= 'Problem empty product_id';
 		}
 		return false;
 	}
-	// Gestion des champs nécessitant d'écrire dans d'autres tables en connaissant $product_id
-	foreach($field_values as $this_field_name => $this_field_value) {
-		if($admin_mode && $this_field_name == $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_COLORS']) {
-			// Gestion de la couleur
-			query('DELETE FROM peel_produits_couleurs 
-				WHERE produit_id="' . intval($product_id) . '"');
-			$this_list_color = explode(",", $this_field_value);
-			foreach($this_list_color as $this_value){
-				if(StringMb::strlen($this_value)>0) {
-					if(!is_numeric($this_value)) {
-						$sql_select_color = 'SELECT * 
-							FROM peel_couleurs
-							WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' .  get_filter_site_cond('couleurs');
-						$query_color = query($sql_select_color);
-						if($color = fetch_assoc($query_color)){
-							$this_value = $color['id'];
+	if(!$test_mode) {
+		// Gestion des champs nécessitant d'écrire dans d'autres tables en connaissant $product_id
+		foreach($field_values as $this_field_name => $this_field_value) {
+			if($admin_mode && $this_field_name == 'formatted_colors') {
+				// Gestion de la couleur
+				query('DELETE FROM peel_produits_couleurs 
+					WHERE produit_id="' . intval($product_id) . '"');
+				$this_list_color = explode(",", $this_field_value);
+				foreach($this_list_color as $this_value){
+					if(StringMb::strlen($this_value)>0) {
+						if(!is_numeric($this_value)) {
+							$sql_select_color = 'SELECT * 
+								FROM peel_couleurs
+								WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' .  get_filter_site_cond('couleurs');
+							$query_color = query($sql_select_color);
+							if($color = fetch_assoc($query_color)){
+								$this_value = $color['id'];
+							}else{
+								$sql_insert_color = 'INSERT INTO peel_couleurs (nom_'.$_SESSION['session_langue'].', site_id) 
+									VALUES ("'.real_escape_string($this_value).'", "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'")';
+								query($sql_insert_color);
+								$this_value = insert_id();
+							}
+						}
+						$sql_select_product_color = 'SELECT * 
+							FROM peel_produits_couleurs 
+							WHERE produit_id = "' . intval($product_id) . '" AND couleur_id = "' . intval($this_value) . '"';
+						$query_select_product_color = query($sql_select_product_color);
+						if(!fetch_assoc($query_select_product_color)){
+							$sql_match_product_color = 'INSERT INTO peel_produits_couleurs(produit_id,couleur_id) 
+								VALUES ("' . intval($product_id) . '","' . intval($this_value) . '")';
+							query($sql_match_product_color);
+						}
+					}
+				}
+			} elseif($admin_mode && $this_field_name == 'formatted_sizes'){
+				// Gestion de la taille
+				query('DELETE FROM peel_produits_tailles 
+					WHERE produit_id="' . intval($product_id) . '"');
+				$this_list_size = explode(",", $this_field_value);
+				foreach($this_list_size as $this_value){
+					$this_list_size_and_price = explode("§", $this_value);
+					$size_name = $this_list_size_and_price[0];
+					if(StringMb::strlen($size_name)>0) {
+						$size_price = vn($this_list_size_and_price[1]);
+						$size_price_reseller = vn($this_list_size_and_price[2]);
+						// On ne fait pas de test is_numeric ou pas sur les tailles pour savoir si on parle d'id ou de nom, car une taille peut être un nombre !
+						// Donc obligatoirement, on considère qu'une taille est rentrée par son nom
+						$sql_size = 'SELECT * 
+							FROM peel_tailles 
+							WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($size_name).'"  AND ' . get_filter_site_cond('tailles');
+						$query_size = query($sql_size);
+						if($size = fetch_assoc($query_size)){
+							if(isset($this_list_size_and_price[1]) && get_float_from_user_input($size_price) != $size['prix']){
+								query('UPDATE peel_tailles 
+									SET prix = "'.real_escape_string(get_float_from_user_input($size_price)).'" 
+									WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
+							}
+							if(isset($this_list_size_and_price[2]) && get_float_from_user_input($size_price_reseller) != $size['prix_revendeur']){
+								query('UPDATE peel_tailles 
+									SET prix_revendeur = "'.real_escape_string(get_float_from_user_input($size_price_reseller)).'" 
+									WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
+							}
+							$this_size_id = $size['id'];
 						}else{
-							$sql_insert_color = 'INSERT INTO peel_couleurs (nom_'.$_SESSION['session_langue'].', site_id) 
-								VALUES ("'.real_escape_string($this_value).'", "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'")';
-							query($sql_insert_color);
-							$this_value = insert_id();
+							$sql_insert_size = 'INSERT INTO peel_tailles (nom_'.$_SESSION['session_langue'].', prix, prix_revendeur, site_id) 
+								VALUES ("'.real_escape_string($size_name).'", "'.floatval(get_float_from_user_input(vn($size_price))).'", "'.floatval(get_float_from_user_input(vn($size_price_reseller))).'", "'. nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'")';
+							query($sql_insert_size);
+							$this_size_id = insert_id();
 						}
-					}
-					$sql_select_product_color = 'SELECT * 
-						FROM peel_produits_couleurs 
-						WHERE produit_id = "' . intval($product_id) . '" AND couleur_id = "' . intval($this_value) . '"';
-					$query_select_product_color = query($sql_select_product_color);
-					if(!fetch_assoc($query_select_product_color)){
-						$sql_match_product_color = 'INSERT INTO peel_produits_couleurs(produit_id,couleur_id) 
-							VALUES ("' . intval($product_id) . '","' . intval($this_value) . '")';
-						query($sql_match_product_color);
+						$select_size_product = 'SELECT * 
+							FROM peel_produits_tailles 
+							WHERE produit_id = "' . intval($product_id) . '" AND taille_id = "' . intval($this_size_id) . '"';
+						$query_size_product = query($select_size_product);
+						if(!fetch_assoc($query_size_product)){
+							$sql_match_product_size = 'INSERT INTO peel_produits_tailles (produit_id, taille_id) 
+								VALUES ("' . intval($product_id) . '", "' . intval($this_size_id) . '")';
+							query($sql_match_product_size);
+						}
 					}
 				}
-			}
-		} elseif($admin_mode && $this_field_name == $GLOBALS['STR_ADMIN_EXPORT_PRODUCTS_SIZES']){
-			// Gestion de la taille
-			query('DELETE FROM peel_produits_tailles 
-				WHERE produit_id="' . intval($product_id) . '"');
-			$this_list_size = explode(",", $this_field_value);
-			foreach($this_list_size as $this_value){
-				$this_list_size_and_price = explode("§", $this_value);
-				$size_name = $this_list_size_and_price[0];
-				if(StringMb::strlen($size_name)>0) {
-					$size_price = vn($this_list_size_and_price[1]);
-					$size_price_reseller = vn($this_list_size_and_price[2]);
-					// On ne fait pas de test is_numeric ou pas sur les tailles pour savoir si on parle d'id ou de nom, car une taille peut être un nombre !
-					// Donc obligatoirement, on considère qu'une taille est rentrée par son nom
-					$sql_size = 'SELECT * 
-						FROM peel_tailles 
-						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($size_name).'"  AND ' . get_filter_site_cond('tailles');
-					$query_size = query($sql_size);
-					if($size = fetch_assoc($query_size)){
-						if(isset($this_list_size_and_price[1]) && get_float_from_user_input($size_price) != $size['prix']){
-							query('UPDATE peel_tailles 
-								SET prix = "'.real_escape_string(get_float_from_user_input($size_price)).'" 
-								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
-						}
-						if(isset($this_list_size_and_price[2]) && get_float_from_user_input($size_price_reseller) != $size['prix_revendeur']){
-							query('UPDATE peel_tailles 
-								SET prix_revendeur = "'.real_escape_string(get_float_from_user_input($size_price_reseller)).'" 
-								WHERE id="'.intval($size['id']).'" AND ' . get_filter_site_cond('tailles'));
-						}
-						$this_size_id = $size['id'];
-					}else{
-						$sql_insert_size = 'INSERT INTO peel_tailles (nom_'.$_SESSION['session_langue'].', prix, prix_revendeur, site_id) 
-							VALUES ("'.real_escape_string($size_name).'", "'.floatval(get_float_from_user_input(vn($size_price))).'", "'.floatval(get_float_from_user_input(vn($size_price_reseller))).'", "'. nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'")';
-						query($sql_insert_size);
-						$this_size_id = insert_id();
-					}
-					$select_size_product = 'SELECT * 
-						FROM peel_produits_tailles 
-						WHERE produit_id = "' . intval($product_id) . '" AND taille_id = "' . intval($this_size_id) . '"';
-					$query_size_product = query($select_size_product);
-					if(!fetch_assoc($query_size_product)){
-						$sql_match_product_size = 'INSERT INTO peel_produits_tailles (produit_id, taille_id) 
-							VALUES ("' . intval($product_id) . '", "' . intval($this_size_id) . '")';
-						query($sql_match_product_size);
-					}
-				}
-			}
-		} elseif (strpos($this_field_name, "§") !== false) {
-			// Gestion des prix par lots : tarifs dégressifs
-			// Nom du champs
-			$this_bulk_discount = explode("§", $this_field_name);
-			$this_quantity = $this_bulk_discount[0];
-			$this_price_standard = $this_bulk_discount[1];
-			$this_price_reseller = $this_bulk_discount[2];
-			// Valeur du champs
-			if(!empty($this_field_value)){
-				$this_package_price = explode("§", $this_field_value);
-				$quantity = $this_package_price[0];
-				$price_standard = $this_package_price[1];
-				$price_reseller = $this_package_price[2];
-				if (check_if_module_active('lot')) {
-					$sql_prix_lot = 'SELECT * 
-						FROM peel_quantites 
-						WHERE produit_id="' . intval($product_id) . '" AND quantite = "' . intval($quantity) . '" AND ' . get_filter_site_cond('quantites');
-					$query_prix_lot = query($sql_prix_lot);
-					if(fetch_assoc($query_prix_lot)){
-						$sql_update = 'UPDATE peel_quantites 
-							SET quantite = "'.intval($quantity).'"';
-						if(isset($this_price_standard) && isset($price_standard)) {
-							$sql_update.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
-						}
-						if(isset($this_price_reseller) && isset($price_reseller)) {
-							$sql_update.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
-						}
-						$sql_update.= ', site_id = "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'"
-							WHERE produit_id="' . intval($product_id) . '" AND quantite = "'.intval($quantity).'"';
-						query($sql_update);
-						if($admin_mode) {
-							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_TARIF_UPDATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
-						}
-					} else {
-						if(isset($quantity) && $quantity > 0) {
-							$q = 'INSERT INTO peel_quantites 
-								SET produit_id="' . intval($product_id) . '"';	
-							$q.= ', quantite ="'.intval($quantity).'" 
-								, site_id = "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'"';
-							if(isset($this_price_standard) && isset($price_standard)){
-								$q.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
+			} elseif (strpos($this_field_name, "§") !== false) {
+				// Gestion des prix par lots : tarifs dégressifs
+				// Nom du champ
+				$this_bulk_discount = explode("§", $this_field_name);
+				$this_quantity = $this_bulk_discount[0];
+				$this_price_standard = $this_bulk_discount[1];
+				$this_price_reseller = $this_bulk_discount[2];
+				// Valeur du champ
+				if(!empty($this_field_value)){
+					$this_package_price = explode("§", $this_field_value);
+					$quantity = $this_package_price[0];
+					$price_standard = $this_package_price[1];
+					$price_reseller = $this_package_price[2];
+					if (check_if_module_active('lot')) {
+						$sql_prix_lot = 'SELECT * 
+							FROM peel_quantites 
+							WHERE produit_id="' . intval($product_id) . '" AND quantite = "' . intval($quantity) . '" AND ' . get_filter_site_cond('quantites');
+						$query_prix_lot = query($sql_prix_lot);
+						if(fetch_assoc($query_prix_lot)){
+							$sql_update = 'UPDATE peel_quantites 
+								SET quantite = "'.intval($quantity).'"';
+							if(isset($this_price_standard) && isset($price_standard)) {
+								$sql_update.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
 							}
-							if(isset($this_price_reseller) && isset($price_reseller)){
-								$q.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
+							if(isset($this_price_reseller) && isset($price_reseller)) {
+								$sql_update.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
 							}
-							query($q);
+							$sql_update.= ', site_id = "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'"
+								WHERE produit_id="' . intval($product_id) . '" AND quantite = "'.intval($quantity).'"';
+							query($sql_update);
 							if($admin_mode) {
-								$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_TARIF_CREATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+								$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_TARIF_UPDATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+							}
+						} else {
+							if(isset($quantity) && $quantity > 0) {
+								$q = 'INSERT INTO peel_quantites 
+									SET produit_id="' . intval($product_id) . '"';	
+								$q.= ', quantite ="'.intval($quantity).'" 
+									, site_id = "'.nohtml_real_escape_string(get_site_id_sql_set_value($site_id)).'"';
+								if(isset($this_price_standard) && isset($price_standard)){
+									$q.= ', prix ="'.nohtml_real_escape_string($price_standard).'"';
+								}
+								if(isset($this_price_reseller) && isset($price_reseller)){
+									$q.= ', prix_revendeur ="'.nohtml_real_escape_string($price_reseller).'"';
+								}
+								query($q);
+								if($admin_mode) {
+									$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_TARIF_CREATED'], vb($price_standard), vb($price_reseller), vb($quantity), $product_id)))->fetch();
+								}
 							}
 						}
 					}
 				}
-			}
-		} elseif (strpos($this_field_name, "#") !== false && check_if_module_active('attributs')) {
-			// Gestion des attributs
-			if($admin_mode) {
-				$output .= attributes_create_or_update($this_field_name, $this_field_value, $product_id, $site_id, $admin_mode);
+			} elseif (strpos($this_field_name, "#") !== false && strpos($this_field_name, "attribut_technical_code") !== false && check_if_module_active('attributs')) {
+				custom_attributes_create_or_update($this_field_name, $this_field_value, $product_id);
+			} elseif (strpos($this_field_name, "#") !== false && check_if_module_active('attributs')) {
+				// Gestion des attributs
+				if($admin_mode) {
+					$output .= attributes_create_or_update($this_field_name, $this_field_value, $product_id, $site_id, $admin_mode);
+				}
 			}
 		}
 	}	
-	// Gestion de la catégorie
-	unset($this_categories_array);
-	if (!empty($field_values['categorie_id']) && !is_numeric($field_values['categorie_id']) && empty($field_values['Categorie'])) {
-		// Compatibilité avec anciens champs appelés categorie_id et contenant des noms de catégories
-		$field_values['Categorie'] = $field_values['categorie_id'];
-		unset($field_values['categorie_id']);
-	}
-	if (!empty($field_values['Categorie'])) {
-		// Ce champ contient une liste de catégories séparées par des virgules
-		foreach(explode(',', $field_values['Categorie']) as $this_category) {
-			if (is_numeric($this_category)) {
-				// le champ Categorie est un id
-				$this_categorie_id = intval($this_category);
-			} else {
-				// le champ Categorie n'est pas un nombre, on tente une recherche dans la BDD sur le nom de la catégorie.
-				$q = query('SELECT id
-					FROM peel_categories
-					WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '" AND ' . get_filter_site_cond('categories') . '');
-				// Catégorie existante, ou le champ Categorie du fichier n'est ni un ID, ni le nom de la catégorie
-				if ($categorie = fetch_assoc($q)) {
-					$this_categorie_id = $categorie['id'];
+	if(!$test_mode) {
+		// Gestion de la catégorie
+		unset($this_categories_array);
+		if (!empty($field_values['categorie_id']) && !is_numeric($field_values['categorie_id']) && empty($field_values['Categorie'])) {
+			// Compatibilité avec anciens champs appelés categorie_id et contenant des noms de catégories
+			$field_values['Categorie'] = $field_values['categorie_id'];
+			unset($field_values['categorie_id']);
+		}
+		if (!empty($field_values['Categorie'])) {
+			// Ce champ contient une liste de catégories séparées par des virgules
+			foreach(explode(',', $field_values['Categorie']) as $this_category) {
+				if (is_numeric($this_category)) {
+					// le champ Categorie est un id
+					$this_categorie_id = intval($this_category);
 				} else {
-					if(!empty($field_values['section_catalogue'])) {
-						$q = query('INSERT INTO peel_categories
-							SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($field_values['section_catalogue']) . '", etat="'.(!empty($categories_created_activate)?1:0).'"');
-						$categorie_parent_id = insert_id();
+					// le champ Categorie n'est pas un nombre, on tente une recherche dans la BDD sur le nom de la catégorie.
+					$q = query('SELECT id
+						FROM peel_categories
+						WHERE nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '" AND ' . get_filter_site_cond('categories') . '');
+					// Catégorie existante, ou le champ Categorie du fichier n'est ni un ID, ni le nom de la catégorie
+					if ($categorie = fetch_assoc($q)) {
+						$this_categorie_id = $categorie['id'];
+					} else {
+						if(!empty($field_values['section_catalogue'])) {
+							$q = query('INSERT INTO peel_categories
+								SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($field_values['section_catalogue']) . '", etat="'.(!empty($categories_created_activate)?1:0).'"');
+							$categorie_parent_id = insert_id();
+						}
+						$sql = 'INSERT INTO peel_categories
+							SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '", etat="'.(!empty($categories_created_activate)?1:0).'", site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"';
+						// Catégorie inexistante : on l'insère en base de données
+						if(!empty($categorie_parent_id)) {
+							$sql .= ', parent_id="' . intval($categorie_parent_id) . '"';
+							unset($categorie_parent_id);
+						}
+						$q = query($sql);
+						$this_categorie_id = insert_id();
+						if($admin_mode) {
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_CATEGORY_CREATED'], $this_category, $this_categorie_id)))->fetch();
+						}
 					}
-					$sql = 'INSERT INTO peel_categories
-						SET nom_' . $_SESSION['session_langue'] . '="' . nohtml_real_escape_string($this_category) . '", etat="'.(!empty($categories_created_activate)?1:0).'", site_id = "' . nohtml_real_escape_string(get_site_id_sql_set_value($site_id)) . '"';
-					// Catégorie inexistante : on l'insère en base de données
-					if(!empty($categorie_parent_id)) {
-						$sql .= ', parent_id="' . intval($categorie_parent_id) . '"';
-						unset($categorie_parent_id);
+				}
+				$this_categories_array[] = $this_categorie_id;
+			}
+		}
+		if (!empty($field_values['categorie_id'])) {
+			// On a déjà testé plus haut si categorie_id était numérique ou non, et si pas numérique on l'a supprimé
+			// donc là il est forcément numérique
+			if (get_category_name($field_values['categorie_id']) !== false) {
+				$this_categories_array[] = $field_values['categorie_id'];
+			} else {
+				if($admin_mode) {
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_REFERENCE_DOES_NOT_EXIST'], $field_values['categorie_id'])))->fetch();
+				}
+			}
+		}
+		if (!empty($this_categories_array)) {
+			if(empty($GLOBALS['site_parameters']['products_import_reset_category_associations_disable'])) {
+				// Suppression des anciennes associations entre les produits et les catégories, pour insérer celles du fichier.
+				query('DELETE FROM peel_produits_categories
+					WHERE produit_id="' . intval($product_id) . '"');
+			}
+			foreach($this_categories_array as $this_categorie_id) {
+				if (!empty($this_categorie_id)) {
+					// Vérification que l'association entre les produits, les catégories de produits
+					$q = query('SELECT produit_id, categorie_id
+						FROM peel_produits_categories
+						WHERE produit_id="' . intval($product_id) . '" AND categorie_id="' . intval($this_categorie_id) . '"');
+					if (!num_rows($q)) {
+						query('INSERT INTO peel_produits_categories
+							SET produit_id="' . intval($product_id) . '",
+								categorie_id="' . intval($this_categorie_id) . '"');
+						$GLOBALS['nbprod_categorie_insert']++;
 					}
-					$q = query($sql);
-					$this_categorie_id = insert_id();
-					if($admin_mode) {
-						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_MSG_CATEGORY_CREATED'], $this_category, $this_categorie_id)))->fetch();
+				}
+			}
+		}
+		// Gestion des stocks
+		// Doit être fait à la fin car on doit déjà avoir les couleurs et tailles bien rentrées en base de données
+		if(!empty($field_values["Stock"]) && $admin_mode && check_if_module_active('stock_advanced')) {
+			// Format stock ou stock§color§size, et les combinaisons sont séparées par ,
+			$this_list_stock = explode(",", $field_values["Stock"]);
+			$stock_frm = array();
+			foreach($this_list_stock as $this_id => $this_value){
+				$this_list_infos = explode("§", $this_value);
+				$stock_frm["id"][$this_id] = $product_id;
+				$stock_frm["stock"][$this_id] = $this_list_infos[0];
+				$this_value = vb($this_list_infos[1]);
+				if(is_numeric($this_value)) {
+					$stock_frm["couleur_id"][$this_id] = $this_value;
+				} elseif(!empty($this_value) && !is_numeric($this_value)) {
+					$sql_select_color = 'SELECT * 
+						FROM peel_couleurs
+						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' . get_filter_site_cond('couleurs');
+					$query_color = query($sql_select_color);
+					if($color = fetch_assoc($query_color)){
+						$stock_frm["couleur_id"][$this_id] = $color['id'];
+					}
+				}
+				if(!empty($this_list_infos[2])) {
+					// Taille donnée forcément par son nom
+					$sql_size = 'SELECT * 
+						FROM peel_tailles 
+						WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_list_infos[2]).'"  AND ' . get_filter_site_cond('tailles');
+					$query_size = query($sql_size);
+					if($size = fetch_assoc($query_size)){
+						$stock_frm["taille_id"][$this_id] = $size['id'];
 					}
 				}
 			}
-			$this_categories_array[] = $this_categorie_id;
+			$output .= insere_stock_produit($stock_frm);
+		}
+		if (check_if_module_active('stock_advanced') && !empty($field_values['on_stock']) && $field_values['on_stock'] == 1) {
+			// pas d'output sur cette fonction. Elle ne fait que des manipulation en BDD
+			insert_product_in_stock_table_if_not_exist($product_id, 1);
 		}
 	}
-	if (!empty($field_values['categorie_id'])) {
-		// On a déjà testé plus haut si categorie_id était numérique ou non, et si pas numérique on l'a supprimé
-		// donc là il est forcément numérique
-		if (get_category_name($field_values['categorie_id']) !== false) {
-			$this_categories_array[] = $field_values['categorie_id'];
-		} else {
-			if($admin_mode) {
-				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_IMPORT_ERR_REFERENCE_DOES_NOT_EXIST'], $field_values['categorie_id'])))->fetch();
-			}
-		}
-	}
-	if (!empty($this_categories_array)) {
-		if(empty($GLOBALS['site_parameters']['products_import_reset_category_associations_disable'])) {
-			// Suppression des anciennes associations entre les produits et les catégories, pour insérer celles du fichier.
-			query('DELETE FROM peel_produits_categories
-				WHERE produit_id="' . intval($product_id) . '"');
-		}
-		foreach($this_categories_array as $this_categorie_id) {
-			if (!empty($this_categorie_id)) {
-				// Vérification que l'association entre les produits, les catégories de produits
-				$q = query('SELECT produit_id, categorie_id
-					FROM peel_produits_categories
-					WHERE produit_id="' . intval($product_id) . '" AND categorie_id="' . intval($this_categorie_id) . '"');
-				if (!num_rows($q)) {
-					query('INSERT INTO peel_produits_categories
-						SET produit_id="' . intval($product_id) . '",
-							categorie_id="' . intval($this_categorie_id) . '"');
-					$GLOBALS['nbprod_categorie_insert']++;
-				}
-			}
-		}
-	}
-	// Gestion des stocks
-	// Doit être fait à la fin car on doit déjà avoir les couleurs et tailles bien rentrées en base de données
-	if(!empty($field_values["Stock"]) && $admin_mode && check_if_module_active('stock_advanced')) {
-		// Format stock ou stock§color§size, et les combinaisons sont séparées par ,
-		$this_list_stock = explode(",", $field_values["Stock"]);
-		$stock_frm = array();
-		foreach($this_list_stock as $this_id => $this_value){
-			$this_list_infos = explode("§", $this_value);
-			$stock_frm["id"][$this_id] = $product_id;
-			$stock_frm["stock"][$this_id] = $this_list_infos[0];
-			$this_value = vb($this_list_infos[1]);
-			if(is_numeric($this_value)) {
-				$stock_frm["couleur_id"][$this_id] = $this_value;
-			} elseif(!empty($this_value) && !is_numeric($this_value)) {
-				$sql_select_color = 'SELECT * 
-					FROM peel_couleurs
-					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_value).'" AND ' . get_filter_site_cond('couleurs');
-				$query_color = query($sql_select_color);
-				if($color = fetch_assoc($query_color)){
-					$stock_frm["couleur_id"][$this_id] = $color['id'];
-				}
-			}
-			if(!empty($this_list_infos[2])) {
-				// Taille donnée forcément par son nom
-				$sql_size = 'SELECT * 
-					FROM peel_tailles 
-					WHERE nom_'.$_SESSION['session_langue'].' = "'.real_escape_string($this_list_infos[2]).'"  AND ' . get_filter_site_cond('tailles');
-				$query_size = query($sql_size);
-				if($size = fetch_assoc($query_size)){
-					$stock_frm["taille_id"][$this_id] = $size['id'];
-				}
-			}
-		}
-		$output .= insere_stock_produit($stock_frm);
-	}
-	if (check_if_module_active('stock_advanced') && !empty($field_values['on_stock']) && $field_values['on_stock'] == 1) {
-		// pas d'output sur cette fonction. Elle ne fait que des manipulation en BDD
-		insert_product_in_stock_table_if_not_exist($product_id, 1);
-	}
+
 	return $output;
 }
 
@@ -7113,7 +7174,7 @@ if (!function_exists('isSearchBot')) {
  * @param string $mode
  * @return
  */
-function get_default_content($fields_array, $id, $mode=null){
+function get_default_content($fields_array, $id, $mode=null) {
 	// Récupération de la langue par défaut
 	$main_content_lang = $GLOBALS['site_parameters']['main_content_lang'];
 	// Selon le mode de contenu on cible les champs souhaités
@@ -7146,6 +7207,7 @@ function get_default_content($fields_array, $id, $mode=null){
 			FROM peel_rubriques r
 			WHERE r.id='" . intval($id) . "' AND " . get_filter_site_cond('rubriques', 'r');
 	} elseif ($mode == "marques") {
+		/*
 		if(!is_int($id)) {
 			$sql = "SELECT id
 				FROM peel_marques
@@ -7157,6 +7219,7 @@ function get_default_content($fields_array, $id, $mode=null){
 				$id = $id_marque;
 			}
 		}
+		*/
 		$this_sql_fields = array(array('nom_' => 'nom', 'description_' => 'description'),array('nom_' => 'titre', 'description_' => 'texte'), array('nom_' => 'marque'));
 		$sql_main_content = "SELECT
 			m.nom_" . $main_content_lang . "
@@ -7202,6 +7265,141 @@ function get_default_content($fields_array, $id, $mode=null){
 			return $fields_array;
 		}
 	}
+}
+
+/**
+ *
+ * @return
+ */
+function create_multisite_google_sitemap () {
+	// Création d'un fichier sitemap.xml par sous-domaine et domaine. Le fichier sitemap sera appeler en front office via le fichier php get_sitemap.php
+	// Les urls des sites dans un sous-dossier ne sont pas correctement générées.
+	$langs_array_by_subdomain = array();	
+	$file_encoding = 'utf-8';
+	foreach($GLOBALS['langs_array_by_wwwroot'] as $this_wwwroot=>$this_lang_array) {
+		// Création du tableau langue par sous domaine
+		$langs_array_by_subdomain[get_site_domain(false, $this_wwwroot, false)][] = $this_lang_array[0];
+	}
+	// Format du tableau
+	// $langs_array_by_subdomain = array(domain1 => array('lng1', 'lng2', 'lng3'), domain2 => array('lng4'), domain3 => array('lng5','lng6'));
+	foreach ($langs_array_by_subdomain as $this_domain=>$this_lang_array) {
+		// Création des fichiers sitemap.
+		create_google_sitemap($this_domain, $this_lang_array, $file_encoding);
+	}
+}
+
+/**
+ *
+ * @param string $this_wwwroot
+ * @param string $this_wwwroot_lang_array
+ * @param string $file_encoding
+ * @return
+ */
+function create_google_sitemap($this_wwwroot, $this_wwwroot_lang_array, $file_encoding)
+{
+	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_google_sitemap.tpl');
+	$tpl->assign('GENERAL_ENCODING', GENERAL_ENCODING);
+	$sitemap = '';
+	$tpl_products = array();
+	$account_register_url_array = array();
+	$product_category_url_array = array();
+	$content_url_array = array();
+	$content_category_url_array = array();
+	$account_url_array = array();
+	$wwwroot_array = array();
+	$legal_url_array = array();
+	$tpl->assign('date', date("Y-m-d"));
+	$current_lang = $_SESSION['session_langue'];
+	foreach($this_wwwroot_lang_array as $this_lang) {
+		// Modification de l'environnement de langue
+		$_SESSION['session_langue'] = $this_lang;
+		set_lang_configuration_and_texts($this_lang, vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$this_lang]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+
+		// génération des liens pour les produits 
+		$sql = "SELECT p.id AS produit_id, c.id AS categorie_id, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$this_lang)." AS name, c.nom_" . $this_lang . " AS categorie
+			FROM peel_produits p
+			INNER JOIN peel_produits_categories pc ON p.id = pc.produit_id
+			INNER JOIN peel_categories c ON c.id = pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p') . "
+			ORDER BY p.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$product_object = new Product($result['produit_id'], $result, true, null, true, !check_if_module_active('micro_entreprise'), false, true);
+			$tpl_products[] = $product_object->get_product_url();
+			unset($product_object);
+		}
+
+		// génération des liens pour les categories de produit
+		if (empty($GLOBALS['site_parameters']['disallow_main_category'])) {
+			$product_category_url_array[] = get_product_category_url();
+		}
+		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
+			FROM peel_categories c
+			WHERE c.etat=1 AND " . get_filter_site_cond('categories', 'c') . "
+			ORDER BY c.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$product_category_url_array[] = get_product_category_url($result['id'], $result['nom']);
+		}
+		
+		// génération des liens pour les articles de contenu
+		$sql = "SELECT p.id, c.id AS categorie_id, p.titre_".$this_lang." AS name, c.nom_" . $this_lang . " AS categorie
+			FROM peel_articles p
+			INNER JOIN peel_articles_rubriques pc ON p.id = pc.article_id
+			INNER JOIN peel_rubriques c ON c.id = pc.rubrique_id AND " . get_filter_site_cond('rubriques', 'c') . "
+			WHERE p.etat=1 AND " . get_filter_site_cond('produits', 'p') . "
+			ORDER BY p.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$content_url_array[] = get_content_url($result['id'], $result['name'], $result['categorie_id'], $result['categorie']);
+		}
+
+		// génération des liens pour les rubriques de contenu
+		if (empty($GLOBALS['site_parameters']['disallow_main_content_category'])) {
+			$content_category_url_array[] = get_content_category_url();
+		}
+		$sql = "SELECT c.id, c.nom_" .$_SESSION['session_langue']. " AS nom
+			FROM peel_rubriques c
+			WHERE c.etat=1 AND " . get_filter_site_cond('rubriques', 'c') . "
+			ORDER BY c.position ASC";
+		$created_report[] = $sql;
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			$content_category_url_array[] = get_content_category_url($result['id'], $result['nom']);
+		}
+		$content_url_array[] = get_contact_url(false, false);
+		$legal_url_array[] = get_url('legal');
+		$legal_url_array[] = get_url('cgv');
+		$account_register_url_array[] = get_account_register_url();
+		$account_url_array[] = get_account_url(false, false, false);
+		$account_url_array[] = get_url('/utilisateurs/oubli_mot_passe.php');
+		$wwwroot_array[] = get_url('/');
+	}
+	// rétablissement de la langue du back office pour l'affichage du message de confirmation
+	$_SESSION['session_langue'] = $current_lang;
+	set_lang_configuration_and_texts($_SESSION['session_langue'], vb($GLOBALS['load_default_lang_files_before_main_lang_array_by_lang'][$_SESSION['session_langue']]), true, false, !empty($GLOBALS['load_admin_lang']), true, defined('SKIP_SET_LANG'));
+
+	$tpl->assign('account_register_url_array', $account_register_url_array);
+	$tpl->assign('product_category_url_array', $product_category_url_array);
+	$tpl->assign('content_url_array', $content_url_array);
+	$tpl->assign('content_category_url_array', $content_category_url_array);
+	$tpl->assign('account_url_array', $account_url_array);
+	$tpl->assign('wwwroot_array', $wwwroot_array);
+	$tpl->assign('products', $tpl_products);
+	$tpl->assign('legal_url_array', $legal_url_array);
+	$sitemap = $tpl->fetch();
+	// Création du fichier. Ce fichier sera lu par le fichier php /get_sitemap.xml. Une règle de réécriture dans le htaccess rend cet appel transparent pour le client.
+	$xml_filename = $GLOBALS['dirroot'] . "/sitemap_" . substr(md5($this_wwwroot), 0, 4) . ".xml";
+	$create_xml = StringMb::fopen_utf8($xml_filename, "wb");
+	if (!empty($create_xml)) {
+		fwrite($create_xml, StringMb::convert_encoding($sitemap, $file_encoding, GENERAL_ENCODING));
+		fclose($create_xml);
+	}
+	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_ADMIN_SITEMAP_MSG_CREATED_OK']))->fetch();
+	echo '<p>'.$GLOBALS['STR_ADMIN_SITEMAP_CREATED_REPORT'].'<br /><br />' . StringMb::nl2br_if_needed(implode('<hr />', $created_report)) . '</p>';
 }
 
 

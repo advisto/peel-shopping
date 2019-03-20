@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 59925 2019-03-05 13:28:04Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,7 +34,7 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 			INNER JOIN peel_statut_paiement sp ON sp.id=pc.id_statut_paiement AND " . get_filter_site_cond('statut_paiement', 'sp') . "
 			INNER JOIN peel_produits p ON pca.produit_id = p.id AND " . get_filter_site_cond('produits', 'p') . "
 			INNER JOIN peel_categories c ON pca.categorie_id = c.id AND " . get_filter_site_cond('categories', 'c') . "
-			WHERE " . get_filter_site_cond('commandes_articles', 'pca', true) . " AND p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND sp.technical_code IN ('being_checked','completed') " . (!empty($GLOBALS['site_parameters']['best_seller_produit_date'])?' AND pc.a_timestamp > "' . $GLOBALS['site_parameters']['best_seller_produit_date'] .'" ':' ') . "
+			WHERE " . get_filter_site_cond('commandes_articles', 'pca', true) . " AND p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND p.on_gift='0' AND sp.technical_code IN ('being_checked','completed') " . (!empty($GLOBALS['site_parameters']['best_seller_produit_date'])?' AND pc.a_timestamp > "' . $GLOBALS['site_parameters']['best_seller_produit_date'] .'" ':' ') . "
 			GROUP BY pca.produit_id
 			ORDER BY quantite DESC
 			LIMIT 0, " . intval(vn($GLOBALS['site_parameters']['nb_on_top']));
@@ -43,7 +43,7 @@ function affiche_best_seller_produit_colonne($return_mode = false, $location = n
 			FROM peel_produits p
 			INNER JOIN peel_produits_categories pc ON pc.produit_id=p.id
 			INNER JOIN peel_categories c ON c.id=pc.categorie_id AND " . get_filter_site_cond('categories', 'c') . "
-			WHERE p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND p.on_top='1' AND " .get_filter_site_cond('produits', 'p') . "
+			WHERE p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." != '' AND p.etat='1' AND p.on_gift='0' AND p.on_top='1' AND " .get_filter_site_cond('produits', 'p') . "
 			GROUP BY p.id
 			ORDER BY RAND()
 			LIMIT 0, " . intval(vn($GLOBALS['site_parameters']['nb_on_top']));

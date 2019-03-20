@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,7 +13,7 @@
 // $Id: search_result.tpl 53221 2017-03-20 17:19:44Z sdelaporte $
 #}{% if is_annonce_module_active %}
 	{% if (res_affiche_annonces) %}
-<h1 property="name" class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}{% endif %} - {{ ads_found }} {{ STR_MODULE_ANNONCES_ADS }} {% if STR_AT_LEAST_ONE_CAMPAIGN %}{{ STR_AT_LEAST_ONE_CAMPAIGN }}{% endif %}</h1>
+<h1 property="name" class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}{% endif %} - {{ ads_found }}  {% if ads_found>1 %}{{ STR_MODULE_ANNONCES_ADS|replace({'s':'s'}) }}{% else %}{{ STR_MODULE_ANNONCES_ADS|replace({'s':''}) }}{% endif %} {% if STR_AT_LEAST_ONE_CAMPAIGN %}{{ STR_AT_LEAST_ONE_CAMPAIGN }}{% endif %}</h1>
 	{{ res_affiche_annonces }}
 	{% elseif page<1 and not (result_affichage_produit) %}
 <h1 property="name" class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} {{ STR_MODULE_ANNONCES_SEARCH_RESULT_ADS }}{% endif %}</h1>

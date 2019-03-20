@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: pt.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: pt.php 59883 2019-02-27 14:08:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "";
 $GLOBALS["STR_ADDRESS_NAME"] = "";
 $GLOBALS["STR_ADMIN"] = "Administrar o site";
 $GLOBALS["STR_ADMINISTRATION"] = "Administrar o site";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "";
@@ -327,6 +329,8 @@ $GLOBALS["STR_GET_MY_POSITION"] = "";
 $GLOBALS["STR_GET_PASSWORD"] = "Recuperar o seu password";
 $GLOBALS["STR_GIFT_POINTS"] = "Pontos prémios";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "";
+$GLOBALS["STR_GRAMMES"] = "";
+$GLOBALS["STR_GROUP_BY"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "";
 $GLOBALS["STR_HALF_WHOLESALER"] = "";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "";
@@ -349,6 +353,7 @@ $GLOBALS["STR_INCLUDING"] = "";
 $GLOBALS["STR_INFO_ADDRESS"] = "";
 $GLOBALS["STR_INFORMATIONS"] = " Informações ";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "";
+$GLOBALS["STR_INIT_FILTER"] = "";
 $GLOBALS["STR_INSCRIPTION_NEWSLETTER_AND_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_INSERT_A_LOGO"] = "";
 $GLOBALS["STR_INSERT_EMAIL"] = "Pôr o seu E-mail para recuperaro seu password.\nDepois de aprovar este formulário, o seu password será reinicializado e o seu novo password será enviado automaticamente por E-mail.";
@@ -386,6 +391,7 @@ $GLOBALS["STR_LIST"] = "";
 $GLOBALS["STR_LIST_PRODUCT"] = "Lista dos produtos";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Lista dos subtítulos";
 $GLOBALS["STR_LISTE_CADEAU"] = "";
+$GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "";
 $GLOBALS["STR_LOGIN_OK"] = "Obrigado da sua confiança.";
@@ -404,6 +410,8 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "";
 $GLOBALS["STR_MESSAGE"] = "Mensagem";
 $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "";
 $GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "";
@@ -547,6 +555,7 @@ $GLOBALS["STR_MY_ORDER"] = "Minhas encomendas";
 $GLOBALS["STR_MY_QUOTES"] = "";
 $GLOBALS["STR_NAISSANCE"] = "Data de nascimento";
 $GLOBALS["STR_NAME"] = "Apelido";
+$GLOBALS["STR_NB_MAX_SUBTOTAL"] = "";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "";
 $GLOBALS["STR_NET"] = "A pagar";
 $GLOBALS["STR_NEW_CUSTOMER"] = "";
@@ -598,6 +607,7 @@ $GLOBALS["STR_OR_COORDINATION"] = "";
 $GLOBALS["STR_OR"] = "";
 $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detalhe da encomenda";
+$GLOBALS["STR_ORDER_BY"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historial das encomendas";
 $GLOBALS['STR_ORDER_MIN'] = "";
@@ -613,6 +623,7 @@ $GLOBALS["STR_ORDER_STATUT"] = "Estatuto da encomenda";
 $GLOBALS["STR_ORDER"] = "Enconmendar";
 $GLOBALS["STR_ORIGIN"] = "";
 $GLOBALS["STR_OTHER"] = "";
+$GLOBALS["STR_OVERWRITE_SAVE"] = "";
 $GLOBALS["STR_OUR_OTHER_SERVICES"] = "";
 $GLOBALS["STR_OUR_PARTNER"] = "";
 $GLOBALS["STR_OUR_SERVICES"] = "";
@@ -695,7 +706,7 @@ $GLOBALS["STR_PRODUCT"] = "Produto";
 $GLOBALS["STR_PRODUCT_ORDER_ONCE_ERR"] = "";
 $GLOBALS["STR_PRODUCTS_PURCHASED"] = "";
 $GLOBALS["STR_PRODUCTS_PURCHASED_LIST"] = "";
-$GLOBALS["STR_PRODUCTS"] = "Os nossos produtos";
+$GLOBALS["STR_PRODUCTS"] = "produtos";
 $GLOBALS["STR_PROFESSION"] = "";
 $GLOBALS["STR_PROFORMA"] = "Nota de encomenda";
 $GLOBALS["STR_PROMO_CODE"] = "";
@@ -745,6 +756,8 @@ $GLOBALS["STR_RSS_TITLE"] = "";
 $GLOBALS["STR_RSS"] = "Nos Flux RSS";
 $GLOBALS['STR_SALES_CONDITIONS'] = " Condições de venda ";
 $GLOBALS["STR_SAVE_CART"] = "";
+$GLOBALS["STR_SAVE_RULES"] = "";
+$GLOBALS['STR_SCREEN_SIZE'] = "";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "";
 $GLOBALS["STR_SEARCH_BRAND"] = "Pesquisa por marca";
@@ -885,6 +898,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "";
 $GLOBALS["STR_WEEK"] = "";
 $GLOBALS["STR_WEIGHT"] = "Peso da encomenda";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "";
+$GLOBALS["STR_WEIGHT_SHORT"] = "";
 $GLOBALS["STR_WHOLESALER"] = "";
 $GLOBALS["STR_WITH_ECOTAX"] = "ecotaxe";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "";
@@ -919,3 +933,7 @@ $GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
 $GLOBALS["STR_PRIX_SEARCH_HT"] = "";
 $GLOBALS["STR_PRIX_SEARCH_TTC"] = "";
 $GLOBALS["STR_REGISER_CART_ALERT"] = "";
+$GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
+$GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
+$GLOBALS["STR_ON_REQUEST"] = "";
+$GLOBALS["STR_ESTIMATE"] = "";

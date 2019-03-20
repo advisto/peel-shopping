@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -13,6 +13,7 @@
 // $Id: HTMLHead.tpl 53849 2017-05-19 12:29:39Z sdelaporte $
 #}
 <head{% if head_attributes is defined %} {{ head_attributes }}{% endif %}>
+	{{ content_tag_htmlhead }}
 	{{ meta }}
 	{% if (favicon_href) %}<link rel="icon" type="image/x-icon" href="{{ favicon_href }}" />
 	<link rel="shortcut icon" type="image/x-icon" href="{{ favicon_href }}" />{% endif %}
@@ -42,6 +43,7 @@
 	{% endif %}
 	</style>
 	{{ js_output }}
+	{{ css_output }}
 	<!--[if lt IE 9]>
 	<script src="{{ wwwroot }}/lib/js/html5shiv.js"></script>
 	<script src="{{ wwwroot }}/lib/js/respond.js"></script>

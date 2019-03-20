@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_de.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: admin_de.php 59884 2019-02-27 16:04:22Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -113,6 +113,8 @@ $GLOBALS["STR_ADMIN_CHART_DATA_MESSAGES_NUMBER_TITLE"] = "Aufteilung nach %s Tag
 $GLOBALS["STR_ADMIN_CHART_DATA_USERS_BY_COUNTRY"] = "Verteilung der Nutzer nach Ländern";
 $GLOBALS["STR_ADMIN_CHART_DATA_USERS_BY_SEX"] = "M / F-Verteilung";
 $GLOBALS["STR_ADMIN_CHECK_ALL"] = "alle auswählen";
+$GLOBALS["STR_ADMIN_CHECK_DATA"] = "";
+$GLOBALS["STR_ADMIN_CHECK_DATA_BEFORE_IMPORT"] = "";
 $GLOBALS["STR_ADMIN_CHOOSE_FAVORITE_CATEGORIES"] = "3 Wählen Sie eine Kategorie Favoriten aus den verfügbaren Kategorien.";
 $GLOBALS["STR_ADMIN_CHOOSE_SITE_TO_MODIFY"] = "Wählen Sie eine Stelle zu verwalten (wird es möglich sein, nur den Inhalt der ausgewählten Seite zu bearbeiten)";
 $GLOBALS["STR_ADMIN_CHOOSE_SEARCH_CRITERIA"] = "Wählen Sie Ihre Suchkriterien";
@@ -182,6 +184,7 @@ $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_INFORMATION"] = "Kundeninformationen";
 $GLOBALS["STR_ADMIN_COMMANDER_CLIENT_UPDATED_ICON_EXPLAIN"] = "zeigt die Befehle für die das Konto seit Bestelldatum aktualisiert";
 $GLOBALS["STR_ADMIN_COMMANDER_COUPON_USED"] = "Promotion-Code verwendet";
 $GLOBALS["STR_ADMIN_COMMANDER_CREATE"] = "Auftragserstellung";
+$GLOBALS["STR_ADMIN_COMMANDER_QUOTE_CREATE_OR_UPDATE_TITLE"] = "";
 $GLOBALS["STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE"] = "Erstellen oder ändern Sie eine Bestellung";
 $GLOBALS["STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED"] = "Wechselkurs an die Steuerung angewendet (im Vergleich zu %s)";
 $GLOBALS["STR_ADMIN_COMMANDER_DOWNLOADS_LIST_TITLE"] = "Liste der aktuellen Downloads";
@@ -334,6 +337,7 @@ $GLOBALS["STR_ADMIN_ECOTAXES_NO_ECOTAX_FOUND"] = "Keine Ökosteuer in der Datenb
 $GLOBALS["STR_ADMIN_ECOTAXES_TITLE"] = "Management von Umweltgebührenordnung veröffentlicht Ecotaxe";
 $GLOBALS["STR_ADMIN_ECOTAXES_FORM_TITLE"] = "Hinzufügen oder eine Umweltsteuer bearbeiten";
 $GLOBALS["STR_ADMIN_EXPORT_CSV"] = "CSV-Export";
+$GLOBALS["STR_ADMIN_EXPORT_PDF"] = "";
 $GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Preise nicht exportieren (für den CSV-Export)";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Wählen Sie Ihre Exportkriterien";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "E-Mail-Vorlage";
@@ -367,6 +371,7 @@ $GLOBALS["STR_ADMIN_ERR_NOT_FOUND"] = "Konnte die angeforderte Artikel finden";
 $GLOBALS["STR_ADMIN_ERR_NO_USER_SELECTED"] = "Kein Benutzer ausgewählt.";
 $GLOBALS["STR_ADMIN_ERR_PAGE_NOT_FOUND"] = "Konnte nicht gefunden werden die Seite!";
 $GLOBALS["STR_ADMIN_EXPORT"] = "Export";
+$GLOBALS["STR_ADMIN_EXPORT_COLUMNS"] = "";
 $GLOBALS["STR_ADMIN_EXPORT_MODE"] = "So exportieren";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_ASSOCIATED_PRODUCTS"] = "Ähnliche Produkte";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_BRAND"] = "Marke";
@@ -375,6 +380,8 @@ $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_COLORS"] = "Farben";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_EXCLUDING_VAT"] = "Priced die Reduktion";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_LISTED_PRICE_INCLUDING_VAT"] = "Preis ohne Steuerermäßigung";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_SIZES"] = "Größen";
+$GLOBALS["STR_ADMIN_EXPORT_SEPARATOR_EXPLAIN"] = "";
+$GLOBALS["STR_ADMIN_EXPORT_TYPE"] = "";
 $GLOBALS["STR_ADMIN_FILE_DELETED"] = "Die Datei %s ist aus dem Server gelöscht.";
 $GLOBALS["STR_ADMIN_FILE_NAME"] = "Dateinamen";
 $GLOBALS["STR_ADMIN_FLAG"] = "Flagge";
@@ -422,6 +429,7 @@ $GLOBALS["STR_ADMIN_ID"] = "Identifikation";
 $GLOBALS["STR_ADMIN_IP"] = "";
 $GLOBALS["STR_ADMIN_IMAGE_SHORT_PATH"] = "Bild / Verzeichnis";
 $GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE"] = "";
+$GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND"] = "";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Spalte Nr %s nicht behandelte importieren (rein beschreibend für den Export): %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Spalte Nr %s nicht erkannt und daher nicht importiert: %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_FIELDS_NOT_CHOSEN"] = "Sie müssen Sie mindestens eine Feld. <br /> Import gestoppt.";
@@ -451,6 +459,7 @@ $GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_UPDATED"] = "Aktualisieren der abnehmenden 
 $GLOBALS["STR_ADMIN_IMPORT_SELECT_FIELDS"] = "Wählen Sie die Felder, die Sie aktualisieren möchten";
 $GLOBALS["STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN"] = "Geben Sie \\t für Reiter - leer lassen für die automatische Erkennung";
 $GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Spaltentrenn";
+$GLOBALS["STR_ADMIN_IMPORT_STATUS"] = "";
 $GLOBALS["STR_ADMIN_IMPORT_TITLE"] = "Import-Modul";
 $GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Achtung: wenn die Spalte \"id\" in der Datei vorhanden ist, werden die Produkte mit dem \"id\" gefunden werden ihre geänderte Daten haben.";
 $GLOBALS["STR_ADMIN_IMPORT_TYPE"] = "";
@@ -682,6 +691,8 @@ $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_TITLE"] = "Webmastering";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_MARKETING"] = "MARKETING";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_OPINIONS"] = "Geschäftsführer Meinungen von Online-";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_BEST_PRODUCTS"] = "Die besten Produkte";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT"] = "";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT"] = "";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_IMPORT_PRODUCTS"] = "Import Artikel";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_EXPORT_PRODUCTS"] = "Export-Produkte";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT"] = "Exportkunden";
@@ -700,7 +711,7 @@ $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_MANAGEMENT"] = "Projektmanagement"
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_TASKS"] = "Auszuführenden Aufgaben";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_SOLD"] = "verkauft Projekte";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_PROJECT_CONTENT"] = "Zersetzungs Projekte";
-$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"] = "ANDERE TOOLS";
+$GLOBALS["STR_ADMIN_MENU_WEBMASTERING_VARIOUS_HEADER"] = "TOOLS";
 $GLOBALS["STR_ADMIN_MENU_WEBMASTERING_CALC"] = "Rechner";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_TITLE"] = "Mäßigung";
 $GLOBALS["STR_ADMIN_MENU_MODERATION_ADS_HEADER"] = "ANKÜNDIGUNGEN";
@@ -879,6 +890,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_EAN_CODE"] = "8/13 EAN oder UPC";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_CATEGORY"] = "Sie müssen mindestens eine Kategorie, um Ihr Produkt zu wählen.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_EMPTY_NAME"] = "Sie müssen einen Produktnamen ein.";
 $GLOBALS["STR_ADMIN_PRODUITS_ERR_NOT_FOUND"] = "Das Produkt wurde nicht gefunden.";
+$GLOBALS["STR_ADMIN_PRODUITS_ESTIMATE_PRICE"] = "";
 $GLOBALS["STR_ADMIN_PRODUITS_EXTRA_LINK"] = "URL einer zusätzlichen Link auf der Produktseite unter der Beschreibung (inaktiv, wenn leer)";
 $GLOBALS["STR_ADMIN_PRODUITS_FILE_FOR_COLOR"] = "Dateien für die Farb";
 $GLOBALS["STR_ADMIN_PRODUITS_FILE_NAME"] = "Vollständige Dateinamen";
@@ -1279,7 +1291,7 @@ $GLOBALS["STR_ADMIN_SITES_THUMBS_SIZE"] = "Miniaturgröße (Seite Katalog)";
 $GLOBALS["STR_ADMIN_SITES_TITLE"] = "Site Configuration";
 $GLOBALS["STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER"] = "Transport Kontonummer TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_EXPEDITION_DELAY"] = "Verzögerung zwischen Auftragsannahme und Versand von Paketen";
-$GLOBALS["STR_ADMIN_SITES_TNT_TRESHOLD"] = "";
+$GLOBALS["STR_ADMIN_SITES_TNT_THRESHOLD"] = "";
 $GLOBALS["STR_ADMIN_SITES_TNT_MODULE"] = "TNT Liefer";
 $GLOBALS["STR_ADMIN_SITES_TNT_PASSWORD"] = "TNT vergessen";
 $GLOBALS["STR_ADMIN_SITES_TNT_USERNAME"] = "ID TNT";
@@ -1372,6 +1384,8 @@ $GLOBALS["STR_ADMIN_TARIFS_TITLE"] = "Verwaltung von Lieferquoten nach Art der L
 $GLOBALS["STR_ADMIN_TARIFS_UPDATE"] = "Bearbeiten Sie diesen Preis";
 $GLOBALS["STR_ADMIN_TECHNICAL_CODE"] = "Technische-Code";
 $GLOBALS["STR_ADMIN_TECHNICAL_ORDER_NUMBER"] = "Technische Bestellnummer";
+$GLOBALS["STR_ADMIN_TEXT_HEADER_FOR_REPORT"] = "";
+$GLOBALS["STR_ADMIN_TEXT_FOOTER_FOR_REPORT"] = "";
 $GLOBALS["STR_ADMIN_TEXT_FOR_PDF_EXPORT"] = "Text am unteren Rand der Seite für den PDF-Export";
 $GLOBALS["STR_ADMIN_TITLE_NOT_DISPLAYED"] = "Titel - Der Titel wird nicht auf der Seite sichtbar sein";
 $GLOBALS["STR_ADMIN_TITLE"] = "Titel";
@@ -1619,6 +1633,9 @@ $GLOBALS["STR_ADMIN_ZONES_UPDATE"] = "Bearbeiten Sie diese Zone";
 $GLOBALS["STR_ADMIN_SELECT_ICIRELAIS_SHIPPING"] = "";
 $GLOBALS["STR_ADMIN_UNASSIGN"] = "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN"] = "Die unten aufgeführten Optionen sind die möglichen Werte eines Attributs. Wenn ein Attribut mit einem Produkt verbunden sind, können Sie die Optionen für diese spezielle Produkt unter allen möglichen Optionen für dieses Attribut erlaubt zu wählen.";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_ALREADY_EXIST"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_DELETED"] =  "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ASSOCIATION_OK"] =  "";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST"] = "Liste der Optionen mit dem Attribut verbunden";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX"] = "Checkbox";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CREATE_OPTION"] = "Hinzufügen einer Option auf das Attribut";
@@ -1665,6 +1682,7 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE"] = "Hinzufügen oder Bearbeit
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPDATE"] = "Ändern Sie diese Attribut";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_ATTRIBUTE"] = "Bild-Upload Felder auf dem Produktblatt";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD"] = "Hochladen Boxen";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS"] = "";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_AD"] = "Jetzt bewerten Anzeigen";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ADD_ON_PRODUCT"] = "Eine Rezension verfassen zu einem Produkt";
 $GLOBALS["STR_MODULE_AVIS_ADMIN_ERR_NOT_ADDED"] = "Die Ankündigung hinzugefügt wurde: Technisches Problem";
@@ -2055,3 +2073,56 @@ $GLOBALS["STR_ADMIN_DECIMAL_SEPARATOR_PRICE"] = "";
 $GLOBALS["STR_ADMIN_THOUSANDS_SEPARATOR_PRICE"] = "";
 $GLOBALS["STR_ADMIN_NAME_SHORT"] = "Name kurz";
 $GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"] = "";
+$GLOBALS["STR_ADMIN_ASSOCIATED"] = "";
+$GLOBALS["STR_ADMIN_DISASSOCIATED"] = "";
+$GLOBALS["STR_ADMIN_ONLY_INLINE_QUANTITY_ORDER"] = "Export Auftragsdaten im CSV-Format mit einer Zeile pro Produkt bestellt";
+$GLOBALS["STR_ADMIN_CARROUSEL_CATEGORY"] = "";
+$GLOBALS["STR_ADMIN_ACTIF"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BACK_TO_LIST_ATTRIBUTS"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MOTTE"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BAC"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NOT_CONDITION"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_LIGNE"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_GROUP"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] = "Gruppe";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_STATUS"] = "";
+$GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CONDIT"] = "";
+$GLOBALS["STR_ADMIN_HEADING"] = "";
+$GLOBALS["STR_ADMIN_PRIMARY_KEY_MANDATORY"] = "";
+$GLOBALS["STR_ADMIN_FIELD_VALUE_MANDATORY"] = "";
+$GLOBALS["STR_ADMIN_CODE_MAX_CHAR_REACHED"] = "";
+$GLOBALS["STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE"] = "";
+$GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "";
+$GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "";
+$GLOBALS["STR_ADMIN_IMPORT_USER_END"] = "";
+$GLOBALS["STR_ADMIN_IMPORT_FILE_END"] = "";
+$GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"] = "";
+$GLOBALS["STR_ADMIN_LINE"] = "";
+$GLOBALS["STR_ADMIN_SIMULATION"] = "";
+$GLOBALS["STR_ADMIN_CHOOSE_COLUMN"] = "";
+$GLOBALS["STR_ADMIN_PRODUCT_ID_MANDATORY_IN_URL"] = "";
+$GLOBALS["STR_ADMIN_TOTAL_HT_ALL_INCLUDE"] = "";
+$GLOBALS["STR_ADMIN_TOTAL_TVA_ALL_INCLUDE"] = "";
+$GLOBALS["STR_ADMIN_TOTAL_TTC_ALL_INCLUDE"] = "";
+$GLOBALS["STR_ADMIN_PRICE_HT_WITHOUT_REDUCTION"] = "Priced die Reduktion";
+$GLOBALS["STR_ADMIN_PRICE_TTC_WITHOUT_REDUCTION"] = "Preis ohne Steuerermäßigung";
+$GLOBALS["STR_ADMIN_PRICE"] = "";
+$GLOBALS["STR_ADMIN_COLUMN_TTTLE_FIRST_LINE"] = "";
+$GLOBALS["STR_ADMIN_ADD_FOOTER_FILE_EXPORT"] = "";
+$GLOBALS["STR_ADMIN_COLUMN_AVAILABLE"] = "";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE"] = "";
+$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "";
+$GLOBALS["STR_ADMIN_FILE_COLUMN_EXPORTED"] = "";
+$GLOBALS["STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT"] = "";
+$GLOBALS["STR_ADMIN_SOURCE_FILE"] = "";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP"] = "";
+$GLOBALS["STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE"] = "";
+$GLOBALS["STR_ADMIN_SITE_COLUMN_IN_DATABASE"] = "";
+$GLOBALS["STR_ADMIN_TYPE"] = "Typ";
+$GLOBALS["STR_ADMIN_IMPORTED_COLUMN"] = "";
+$GLOBALS["STR_ADMIN_DEFAULT_VALUE"] = "";
+$GLOBALS["STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE"] = "";
+$GLOBALS["STR_ADMIN_SEND_EMAIL_TO_USERS"] = "";
+$GLOBALS["STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER"] = "";
+$GLOBALS["STR_ADMIN_HTML_HOME_HEADER"] = "";

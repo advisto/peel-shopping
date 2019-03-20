@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -453,6 +453,10 @@ function insere_avis($frm)
 function render_avis_public_list($prodid, $type, $display_specific_note = null, $no_display_if_empty = false, $mode = 'avis', $title='h2', $campaign_id = null, $submit_value = null)
 {
 	$output = '';
+	if (!empty($GLOBALS['site_parameters']['render_avis_public_list_user_logged_only']) && !est_identifie()) {
+		// Ne pas afficher le contenu des avis et commentaires pour les utilisateurs non connecté
+		return '<a class="btn btn_p2" href="'.get_url('membre').'">'.$GLOBALS["STR_PLEASE_LOGIN"].'</a>';
+	}
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/avis_public_list.tpl');
 
 	$tpl->assign('campaign_id', $campaign_id);
@@ -474,6 +478,7 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 	$tpl->assign('STR_BACK_TO_PRODUCT', $GLOBALS['STR_BACK_TO_PRODUCT']);
 	$tpl->assign('STR_POSTED_OPINION', $GLOBALS['STR_POSTED_OPINION']);
 	$tpl->assign('STR_POSTED_OPINIONS', $GLOBALS['STR_POSTED_OPINIONS']);
+	$tpl->assign('module_avis_verifie', vn($GLOBALS['site_parameters']['module_avis_verifie']));
 
 	if (!empty($submit_value)) {
 		$tpl->assign('submit_value', $submit_value);
@@ -615,8 +620,10 @@ function render_avis_public_list($prodid, $type, $display_specific_note = null, 
 
 	$tpl->assign('id', $prodid);
 	if ($type == 'produit') {
+		$tpl->assign('product_id', $product_object->id);
 		$tpl->assign('product_name', $product_object->name);
 		$tpl->assign('urlprod', $urlprod);
+		$tpl->assign('product_url_image', $GLOBALS['repertoire_upload'].'/'.$product_object->get_product_main_picture());
 		unset($product_object);
 	} elseif ($type == 'annonce') {
 		$tpl->assign('annonce_titre', $annonce_object->get_titre());

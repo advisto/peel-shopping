@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: categories.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: categories.php 59873 2019-02-26 14:47:11Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -395,6 +395,9 @@ function insere_categorie(&$frm)
 			, promotion_percent
 			, on_child';
 		}
+		if (check_if_module_active('carrousel')) {
+			$sql .= ", carrousel_id";
+		}
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$sql .= "
 			, alpha_" . $lng . "
@@ -444,6 +447,9 @@ function insere_categorie(&$frm)
 			$sql .= ", '" . floatval(get_float_from_user_input($frm['promotion_devises'])) . "'
 			, '" . floatval(get_float_from_user_input($frm['promotion_percent'])) . "'
 			, '" . intval($frm['on_child']) . "'";
+		}
+		if (check_if_module_active('carrousel')) {
+			$sql .= ", '" . intval($frm['carrousel_id']) . "'";
 		}
 		foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 			$sql .= "
@@ -532,6 +538,9 @@ function maj_produits_categorie($id, $frm)
 		, promotion_percent = '" . nohtml_real_escape_string($frm['promotion_percent']) . "'
 		, on_child = '" . intval($frm['on_child']) . "'";
 	}
+	if (check_if_module_active('carrousel')) {
+		$sql .= ", carrousel_id = '" . nohtml_real_escape_string(vn($frm['carrousel_id'])) . "'";
+	}
 
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", alpha_" . $lng . "='" . nohtml_real_escape_string(StringMb::substr(strtoupper($frm['nom_' . $lng]), 0, 1)) . "'
@@ -612,6 +621,25 @@ function affiche_formulaire_produits_categorie(&$frm)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('admin_formulaire_categorie.tpl');
 	$tpl->assign('action', get_current_url(false));
+	if (check_if_module_active('carrousel')) {
+		$tpl_options_carrousel_list = array();
+		$sql = 'SELECT carrousel_id
+				FROM peel_categories 
+				WHERE id = ' . intval($frm['id']) . '';
+		$qid = query($sql);
+		if ($category_carrousel_id = fetch_assoc($qid)) {
+			$issel = $category_carrousel_id['carrousel_id'];
+		}
+		$array_carrousel_list = Carrousel::get_carrousel_list();
+		foreach ($array_carrousel_list as $carrousel_id => $name) {
+			$tpl_options_carrousel_list[] = array(
+						'value' => $carrousel_id,
+						'name' => $name,
+						'issel' => ($issel == $carrousel_id)
+					);
+		}
+		$tpl->assign('carrousel_list', $tpl_options_carrousel_list);
+	}
 	$tpl->assign('form_token', get_form_token_input($_SERVER['PHP_SELF'] . $frm['nouveau_mode'] . intval($frm['id'])));
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
@@ -641,6 +669,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	}
 	$tpl->assign('type_affichage', $frm['type_affichage']);
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
+
 	$tpl->assign('cart_force_exapaq_delivery_mode', !empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode']));
 	if (!empty($GLOBALS['site_parameters']['cart_force_exapaq_delivery_mode'])) {
 		$tpl->assign('on_exapaq_delivery', $frm['on_exapaq_delivery']);
@@ -736,6 +765,7 @@ function affiche_formulaire_produits_categorie(&$frm)
 	$tpl->assign('STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT', $GLOBALS['STR_ADMIN_SENTENCE_DISPLAYED_ON_PRODUCT']);
 	$tpl->assign('STR_ADMIN_NAME_SHORT', $GLOBALS['STR_ADMIN_NAME_SHORT']);
 	$tpl->assign('STR_ADMIN_PRODUITS_WEIGHT', $GLOBALS['STR_ADMIN_PRODUITS_WEIGHT']);
+	$tpl->assign('STR_ADMIN_CARROUSEL_CATEGORY', $GLOBALS['STR_ADMIN_CARROUSEL_CATEGORY']); 
 	echo $tpl->fetch();
 }
 

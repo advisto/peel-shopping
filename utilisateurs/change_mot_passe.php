@@ -1,16 +1,17 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: change_mot_passe.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: change_mot_passe.php 59873 2019-02-26 14:47:11Z sdelaporte $
+define('IN_CHANGE_PASSWORD', true);
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
 
@@ -47,7 +48,6 @@ if (!empty($_POST)) {
 
 $output .= get_change_password_form($frm, $form_error_object, $noticemsg);
 
-define('IN_CHANGE_PASSWORD', true);
 $GLOBALS['page_name'] = 'change_mot_passe';
 $GLOBALS['DOC_TITLE'] = $GLOBALS['STR_CHANGE_PASSWORD'];
 

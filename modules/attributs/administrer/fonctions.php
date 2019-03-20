@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: fonctions.php 60033 2019-03-12 10:38:56Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -147,6 +147,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('mode', $frm["nouveau_mode"]);
 	$tpl->assign('id', intval($frm['id']));
+	$tpl->assign('position', vn($frm['position']));
 	$tpl->assign('etat', vb($frm['etat']));
 	$tpl->assign('texte_libre', vb($frm['texte_libre']));
 	$tpl->assign('upload', vb($frm['upload']));
@@ -154,6 +155,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('type_affichage_attribut', vn($frm["type_affichage_attribut"]));
 	$tpl->assign('technical_code', vb($frm["technical_code"]));
 	$tpl->assign('show_description', vb($frm["show_description"]));
+	$tpl->assign('value_position', vn($frm["position"]));
 	$tpl->assign('disable_reductions', vn($frm["disable_reductions"]));
 	$tpl->assign('mandatory', vn($frm["mandatory"]));
 	$tpl_langs = array();
@@ -168,6 +170,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
 	$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
 	$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPDATE_TITLE']);
 	$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 	$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
@@ -189,6 +192,7 @@ function affiche_formulaire_nom_attribut(&$frm)
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CHECKBOX']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_DEFAULT_DISPLAY_MODE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_DEFAULT_DISPLAY_MODE']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT']);
+	$tpl->assign('STR_ADMIN_POSITION', $GLOBALS['STR_ADMIN_POSITION']);
 	echo $tpl->fetch();
 }
 
@@ -233,14 +237,14 @@ function insere_nom_attribut($frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", nom_" . $lng;
 	}
-	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description, disable_reductions
+	$sql .= ", texte_libre, upload, technical_code, type_affichage_attribut, show_description, disable_reductions, position
 	) VALUES ('" . intval($frm['etat']) . "'
 			, '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
 			, '" . intval($frm['mandatory']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "', '" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "')";
+	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "', '" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "', '" . intval($frm['position']) . "')";
 
 	query($sql);
 }
@@ -274,6 +278,7 @@ function maj_nom_attribut($id, $frm)
 			 , technical_code ='" . nohtml_real_escape_string($frm['technical_code']) . "'
 			 , type_affichage_attribut ='" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "'
 			 , show_description ='" . nohtml_real_escape_string($frm['show_description']) . "'
+			 , position ='" . intval(vn($frm['position'])) . "'
 			 , disable_reductions ='" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "'
 			WHERE id='" . intval($id) . "' AND " . get_filter_site_cond('nom_attributs', null, true);
 	query($sql);
@@ -303,6 +308,8 @@ function affiche_liste_nom_attribut($start)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_liste_nom.tpl');
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
+	$tpl->assign('action', get_current_url(false));
+	$tpl->assign('categorie_options', get_categories_output(null, 'categories', 0, 'option', '&nbsp;&nbsp;', null, null, true));
 	$tpl->assign('add_href', get_current_url(false) . '?mode=ajout');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
@@ -317,6 +324,7 @@ function affiche_liste_nom_attribut($start)
 		$i = 0;
 		while ($ligne = fetch_assoc($query)) {
 			$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+				'id' => $ligne['id'],
 				'nom' => (!empty($ligne['nom_' . $_SESSION['session_langue']])?$ligne['nom_' . $_SESSION['session_langue']]:'['.$ligne['id'].']'),
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
@@ -346,6 +354,7 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CUSTOM_TEXT', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CUSTOM_TEXT']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPDATE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPDATE']);
+	$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
 	$tpl->assign('STR_ADMIN_UPDATE', $GLOBALS['STR_ADMIN_UPDATE']);
 	echo $tpl->fetch();
 }
@@ -366,6 +375,7 @@ function affiche_formulaire_ajout_attribut(&$frm, &$form_error_object)
 		$frm["prix"] = 0;
 		$frm['mandatory'] = 0;
 		$frm['position'] = 0;
+		$frm['etat'] = 0;
 	}
 	$frm['nouveau_mode'] = "insere";
 	$frm["titre_soumet"] = $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CREATE_THIS_OPTION"];
@@ -424,11 +434,11 @@ function insere_attribut($id, $frm)
 {
 	$prix = get_float_from_user_input($frm['prix']);
 	$prix_revendeur = get_float_from_user_input($frm['prix_revendeur']);
-	$sql = "INSERT INTO peel_attributs (id_nom_attribut, image, prix, prix_revendeur, position, mandatory, site_id";
+	$sql = "INSERT INTO peel_attributs (id_nom_attribut, image, prix, prix_revendeur, position, mandatory, site_id, etat";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", descriptif_" . $lng;
 	}
-	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval(vn($frm['mandatory'])) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'";
+	$sql .= ") VALUES ('" . intval($id) . "', '" . nohtml_real_escape_string($frm['image']) . "', '" . nohtml_real_escape_string($prix) . "', '" . nohtml_real_escape_string($prix_revendeur) . "', '" . intval($frm['position']) . "', '" . intval(vn($frm['mandatory'])) . "', '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "', '" . intval($frm['etat']) . "'";
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['descriptif_' . $lng]) . "'";
 	}
@@ -450,6 +460,7 @@ function maj_attribut($id, $frm)
 	$sql = "UPDATE peel_attributs
 		SET id_nom_attribut = '" . intval($id) . "'
 		 ,  image = '" . nohtml_real_escape_string($frm['image']) . "'
+		 ,  etat = '" . intval($frm['etat']) . "'
 		 ,  prix = '" . nohtml_real_escape_string($prix) . "'
 		 ,  prix_revendeur = '" . nohtml_real_escape_string($prix_revendeur) . "'
 		 ,  mandatory = '" . intval(vn($frm['mandatory'])) . "'
@@ -499,6 +510,11 @@ function affiche_liste_attribut($frm)
 			$nom_att->nom = '[' . $nom_att->id . ']';
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('modules/attributsAdmin_liste.tpl');
+		
+		$tpl->assign('nom_attribut_id', $_GET['attid']);
+		$tpl->assign('action', get_current_url(false));
+		$tpl->assign('categorie_options', get_categories_output(null, 'categories', 0, 'option', '&nbsp;&nbsp;', null, null, true));
+		
 		$tpl->assign('nom', $nom_att->nom);
 		$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 		$tpl->assign('add_href', get_current_url(false) . '?mode=ajout&attid=' . $_GET['attid']);
@@ -514,6 +530,7 @@ function affiche_liste_attribut($frm)
 			$i = 0;
 			while ($DescAtt = fetch_assoc($res)) {
 				$tpl_results[] = array('tr_rollover' => tr_rollover($i, true),
+					'id' => $DescAtt['id'],
 					'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
 					'drop_src' => $GLOBALS['administrer_url'] . '/images/b_drop.png',
 					'edit_href' => get_current_url(false) . '?mode=modif&id=' . $DescAtt['id'] . '&attid=' . $_GET['attid'],
@@ -527,6 +544,9 @@ function affiche_liste_attribut($frm)
 		}
 		$tpl->assign('results', $tpl_results);
 		$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
+		$tpl->assign('STR_ADMIN_ASSOCIATED', $GLOBALS['STR_ADMIN_ASSOCIATED']);
+		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS']);
+		$tpl->assign('STR_ADMIN_DISASSOCIATED', $GLOBALS['STR_ADMIN_DISASSOCIATED']);
 		$tpl->assign('STR_ADMIN_WEBSITE', $GLOBALS['STR_ADMIN_WEBSITE']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST']);
 		$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN']);
@@ -539,6 +559,7 @@ function affiche_liste_attribut($frm)
 		$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS['STR_ADMIN_DELETE_WARNING']);
 		$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
 		$tpl->assign('STR_MODIFY', $GLOBALS['STR_MODIFY']);
+		$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
 		echo $tpl->fetch();
 	}
 }
@@ -578,6 +599,7 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl->assign('prix', fprix(vn($frm['prix']), false, $GLOBALS['site_parameters']['code'], false));
 		$tpl->assign('prix_revendeur', fprix(vn($frm['prix_revendeur']), false, $GLOBALS['site_parameters']['code'], false));
 		$tpl->assign('symbole', $GLOBALS['site_parameters']['symbole']);
+		$tpl->assign('etat', intval($frm['etat']));
 		$tpl->assign('position', intval($frm['position']));
 		$tpl->assign('titre_soumet', $frm["titre_soumet"]);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -599,6 +621,9 @@ function affiche_formulaire_attribut(&$frm, &$form_error_object)
 		$tpl->assign('STR_YES', $GLOBALS['STR_YES']);
 		$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 		$tpl->assign('STR_DELETE_THIS_FILE', $GLOBALS['STR_DELETE_THIS_FILE']);
+		$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
+		$tpl->assign('STR_ADMIN_ACTIVATED', $GLOBALS['STR_ADMIN_ACTIVATED']);
+		$tpl->assign('STR_ADMIN_DEACTIVATED', $GLOBALS['STR_ADMIN_DEACTIVATED']);
 		echo $tpl->fetch();
 	}
 }
@@ -680,6 +705,7 @@ function affiche_liste_attributs_by_id($id)
 	$tpl->assign('product_name', $product_object->name);
 	$tpl->assign('product_revenir_href', $GLOBALS['administrer_url'] . '/produits.php?mode=modif&id=' . $id);
 	$tpl->assign('product_liste_revenir_href', $GLOBALS['administrer_url'] . '/produits.php');
+	$tpl->assign('product_attributs_price_href', $GLOBALS['wwwroot'] . '/modules/attributs/administrer/produits_attributs.php?id=' . vn($id) . '&mode=edit_price');
 	$tpl->assign('action', get_current_url(false) . '?id=' . $id);
 
 	$all_attributs_array = get_possible_attributs(null, 'rough', false, false);
@@ -729,6 +755,7 @@ function affiche_liste_attributs_by_id($id)
 	}
 	$tpl->assign('results', $tpl_results);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_TITLE', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_TITLE"]);
+	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_PRODUCTS_ATTRIBUTS_PRICE"]);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCT', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCT"]);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCTS_LIST', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_BACK_TO_PRODUCTS_LIST"]);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_LIST_EXPLAIN_SELECT', $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_LIST_EXPLAIN_SELECT"]);
@@ -762,3 +789,263 @@ function get_attributs_names($lang)
 	return $output_array;
 }
 
+/**
+ *
+ * @param string $lang
+ * @return
+ */
+function assign_or_unassign_attribut($frm) {
+	$output='';
+	if (!empty($frm['submit_product_attribut_form'])) {
+		// on récupère la liste des ids de produits concerné par le formulaire.
+		$sql= "SELECT produit_id 
+			FROM peel_produits_categories 
+			WHERE categorie_id IN (" . nohtml_real_escape_string(implode(',', get_category_tree_and_itself($frm['categories'], 'sons'))) . ")";
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			foreach($frm['attribut_id'] as $this_id_attribut) {
+				// pour chaque attribut coché.
+				if ($frm['assignation_mode'] == 'assign') {
+					// Si on souhaite assigner 
+					// il faut d'abord vérifier que le couple produit / attribut n'existe pas déjà
+					$sql_attribut_assocation_exist = "SELECT *
+						FROM peel_produits_attributs
+						WHERE produit_id=".intval($result['produit_id']) ." AND attribut_id=".intval($this_id_attribut);
+						$query_attribut_assocation_exist = query($sql_attribut_assocation_exist);
+					if (!num_rows($query_attribut_assocation_exist)) {
+						// il n'y a pas le couple en bdd, on insere
+						query('INSERT INTO peel_produits_attributs
+							SET produit_id="' . intval($result['produit_id']) . '",
+								nom_attribut_id="' . intval($frm["nom_attribut_id"]) . '",
+								attribut_id="' . intval($this_id_attribut) . '"');
+						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_OK'], $this_id_attribut, $result['produit_id'])))->fetch();
+					} else {
+						// il y a déjà l'info en BDD, on ne fait rien
+						$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_ALREADY_EXIST'], $this_id_attribut, $result['produit_id'])))->fetch();
+					}
+				} else {
+					// On souhaite supprimer l'assignation
+					$sql_delete = "DELETE
+						FROM peel_produits_attributs
+						WHERE produit_id=".intval($result['produit_id']) ." AND attribut_id=".intval($this_id_attribut);
+					query($sql_delete);
+					// 
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' =>  sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_DELETED'], $this_id_attribut, $result['produit_id'])))->fetch();
+				}
+			}
+		}
+	}
+	return $output;
+}
+/**
+ *
+ * @param string $lang
+ * @return
+ */
+function assign_or_unassign_nom_attribut($frm) {
+	$output='';
+	if (!empty($frm['submit_product_attribut_form'])) {
+		// on récupère la liste des ids de produits concerné par le formulaire.
+		$sql= "SELECT produit_id 
+			FROM peel_produits_categories 
+			WHERE categorie_id IN (" . nohtml_real_escape_string(implode(',', get_category_tree_and_itself($frm['categories'], 'sons'))) . ")";
+		$query = query($sql);
+		while ($result = fetch_assoc($query)) {
+			foreach($frm['attribut_id'] as $this_id_attribut) {
+				// pour chaque attribut coché.
+				if ($frm['assignation_mode'] == 'assign') {
+					// Si on souhaite assigner 
+					// si le nom d'attribut a des options :
+					$sql_attribut = "SELECT upload, texte_libre
+						FROM peel_nom_attributs
+						WHERE id=".intval($this_id_attribut);
+					$query_attribut = query($sql_attribut);
+					$result_attribut = fetch_assoc($query_attribut);
+					if ($result_attribut['upload'] == 0 && $result_attribut['texte_libre'] == 0) {
+						// Attribut avec liste d'option. Donc on récupère les options pour les associer aux produits
+						$sql_options = "SELECT id
+							FROM `peel_attributs` 
+							WHERE id_nom_attribut = " . intval($this_id_attribut);
+						$query_options = query($sql_options);
+						while($result_options = fetch_assoc($query_options)) {
+							// il faut d'abord vérifier que le couple produit / attribut n'existe pas déjà
+							$sql_attribut_assocation_exist = "SELECT *
+								FROM peel_produits_attributs
+								WHERE produit_id=".intval($result['produit_id']) ." AND attribut_id=".intval($result_options['id']);
+								$query_attribut_assocation_exist = query($sql_attribut_assocation_exist);
+							if (!num_rows($query_attribut_assocation_exist)) {
+								// il n'y a pas le couple en bdd, on insere
+								query('INSERT INTO peel_produits_attributs
+									SET produit_id="' . intval($result['produit_id']) . '",
+										nom_attribut_id="' . intval($this_id_attribut) . '",
+										attribut_id="' . intval($result_options['id']) . '"');
+								$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_OK'], $result_options['id'], $result['produit_id'])))->fetch();
+							} else {
+								// il y a déjà l'info en BDD, on ne fait rien
+								$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_ALREADY_EXIST'], $result_options['id'], $result['produit_id'])))->fetch();
+							}
+						}
+					} else {
+						// upload ou texte libre. 
+						// On regarde d'abord si l'asociation n'existe pas déjà.
+						$sql_attribut_assocation_exist = "SELECT *
+							FROM peel_produits_attributs
+							WHERE produit_id=".intval($result['produit_id']) ." AND nom_attribut_id=".intval($this_id_attribut);
+							$query_attribut_assocation_exist = query($sql_attribut_assocation_exist);
+						if (!num_rows($query_attribut_assocation_exist)) {
+							// il n'y a pas le couple en bdd, on insere
+							query('INSERT INTO peel_produits_attributs
+								SET produit_id="' . intval($result['produit_id']) . '",
+									nom_attribut_id="' . intval($this_id_attribut) . '"');
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_OK'], $this_id_attribut, $result['produit_id'])))->fetch();
+						} else {
+							// il y a déjà l'info en BDD, on ne fait rien
+							$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_ALREADY_EXIST'], $this_id_attribut, $result['produit_id'])))->fetch();
+						}
+					}
+				} else {
+					// On souhaite supprimer l'assignation
+					$sql_delete = "DELETE
+						FROM peel_produits_attributs
+						WHERE produit_id=".intval($result['produit_id']) ." AND nom_attribut_id=".intval($this_id_attribut);
+					query($sql_delete);
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' =>  sprintf($GLOBALS['STR_MODULE_ATTRIBUTS_ASSOCIATION_DELETED'], $this_id_attribut, $result['produit_id'])))->fetch();
+				}
+			}
+		}
+	}
+	return $output;
+}
+
+function edit_attribut_price_per_product($product_id) {
+	//- Récupérer les options d'attributs administrable associé au produit dont l'id est passé en paramètre (peel_attributs et peel_produits_attributs).
+	$output = '';
+	$q = 'SELECT DISTINCT pna.id, pna.*, pp.nom_'.$_SESSION['session_langue'].' as nom_produit, pna.etat
+		FROM peel_nom_attributs pna
+		INNER JOIN peel_produits_attributs ppa ON ppa.nom_attribut_id=pna.id
+		INNER JOIN peel_produits pp ON pp.id=ppa.produit_id
+		LEFT JOIN peel_attributs pa ON ppa.attribut_id=pa.id
+		WHERE pna.nom_' . $_SESSION['session_langue'] . ' != "" '.(!empty($GLOBALS['site_parameters']['special_price_by_group_attribut'])?'AND pna.technical_code = "'.nohtml_real_escape_string($GLOBALS['site_parameters']['special_price_by_group_attribut']).'"':'').' AND ppa.produit_id = ' . intval($product_id) . '
+		ORDER BY pna.id';
+	$output .= '
+	<a href="' . $GLOBALS["wwwroot"] .'/modules/attributs/administrer/produits_attributs.php?id=' . intval($product_id) . '">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BACK_TO_LIST_ATTRIBUTS"] . '</a><br />';
+	$q_edit = query($q);
+	while ($result = fetch_assoc($q_edit)) {
+		$i = 0;
+		$select = '';
+		$output .= '
+		<form style="margin-bottom:20px;" class="entryform form-inline" role="form" method="post" action="' . get_current_url(false) . '?id=' . intval($product_id) . '&mode=edit_price" enctype="multipart/form-data">
+		<div class="table-responsive">
+			<div class="entete center">' . $result['nom_produit'] . '</div>
+			<table class="main_table">
+				<tr class="classe2">
+					<td class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] . '</td>
+					<td class="title_label"></td>
+					<td class="title_label"></td>
+					<td class="title_label"></td>
+					<td class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_STATUS"] . '</td>
+				<tr class="classe2">
+					<td style="padding:10px;"class="title_label"><input type="text"  disabled class="form-control center" value="' . $result['nom_' . $_SESSION['session_langue']] . '"></td>
+					<td style="padding:10px;" class="title_label"></td>
+					<td style="padding:10px;" class="title_label"></td>
+					<td style="padding:10px;" class="title_label"></td>
+					<td style="padding:10px;" class="title_label center">
+					<select ' . (empty($result['etat'])?'style="color:#ff0000;"':'') . ' class="form-control" name="nom_attribut_actif_' . $result['id'] .'">
+						<option value="0"' . (empty($result['etat'])? 'selected="selected"':'') . '>' . $GLOBALS["STR_ADMIN_DEACTIVATED"] . '</option>
+						<option value="1"' . (!empty($result['etat'])? 'selected="selected"':'\'') . '>' . $GLOBALS["STR_ADMIN_ACTIVATED"] . '</option>
+					</select>
+				</td>
+				</tr>
+				<tr class="classe1">
+					<td style="padding-top:10px;" class="title_label"></td>
+					'.((!empty($GLOBALS['site_parameters']['attribut_description_is_conditioning']))?'<td style="padding-top:10px;" class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CONDIT"] . '</td>':'').'
+					<td style="padding-top:10px;" class="title_label center">' . $GLOBALS["STR_ADMIN_NAME"] . '</td>
+					<td style="padding-top:10px;" class="title_label center">' . $GLOBALS["STR_PRICE"] . '</td>
+					<td style="padding-top:10px;" class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_STATUS"] . '</td>
+					'.((empty($GLOBALS['site_parameters']['attribut_description_is_conditioning']))?'<td style="padding-top:10px;" class="title_label"></td>':'').'
+				</tr>';
+		$query_attribut = query('SELECT pa.*
+			FROM peel_attributs pa
+			INNER JOIN peel_produits_attributs ppa ON ppa.attribut_id=pa.id
+			WHERE pa.descriptif_' . $_SESSION['session_langue'] . ' != "" AND ppa.produit_id =' . intval($product_id) . ' AND pa.id_nom_attribut = ' . intval($result['id']));
+		while ($result_attribut = fetch_assoc($query_attribut)) {
+			if (!empty($GLOBALS['site_parameters']['attribut_description_is_conditioning'])) {
+				$select ='
+				<select class="form-control" name="attribut_description_id_' . $result_attribut['id'] .'">
+					<option value="0" > ' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NOT_CONDITION"] . '</option>
+					<option value="M"' . ($result_attribut['description_' . $_SESSION['session_langue']]=='M'? 'selected="selected"':'\'') . '>' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MOTTE"] . ' </option>
+					<option value="B"' . ($result_attribut['description_' . $_SESSION['session_langue']]=='B'? 'selected="selected"':'\'') . '>' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BAC"] . '</option>
+				</select>';
+			} else {
+				$select ='
+				<select class="form-control" name="attribut_description_id_' . $result_attribut['id'] .'">
+					<option value="0" selected="selected" >' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NOT_CONDITION"] . '</option>
+					<option value="M">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MOTTE"] . '</option>
+					<option value="B">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BAC"] . '</option>
+				</select>';
+			}
+			$output .=  '
+			<tr class="classe1">
+				<td style="padding-bottom:10px;" class="title_label"></td>
+				'.((!empty($GLOBALS['site_parameters']['attribut_description_is_conditioning']))?'<td style="padding-bottom:10px;" class="title_label center">' . $select . '</td>':'').'
+				<td style="padding-bottom:10px;" class="title_label center"><input type="text" class="form-control center" value="' . $result_attribut['descriptif_' . $_SESSION['session_langue']] . '"  name="attribut_descriptif_id_' . $result_attribut['id'] .'"></td>
+				<td style="padding-bottom:10px;" class="title_label">
+					<input type="text" class="form-control center" value="' . $result_attribut['prix'] . '" name="attribut_prix_id_' . $result_attribut['id'] .'">
+				</td>
+				<td style="padding-bottom:10px;" class="title_label center">
+					<select ' . (empty($result_attribut['etat'])?'style="color:#ff0000;"':'') . ' class="form-control" name="attribut_actif_' . $result_attribut['id'] .'">
+						<option value="0"' . (empty($result_attribut['etat'])? 'selected="selected"':'\'') . '>' . $GLOBALS["STR_ADMIN_DEACTIVATED"] . '</option>
+						<option value="1"' . (!empty($result_attribut['etat'])? 'selected="selected"':'\'') . '>' . $GLOBALS["STR_ADMIN_ACTIVATED"] . '</option>
+					</select>
+				</td>
+				'.((empty($GLOBALS['site_parameters']['attribut_description_is_conditioning']))?'<td style="padding-bottom:10px;" class="title_label"></td>':'').'
+			</tr>';
+			$i++;
+		}
+	$output .= '
+			</table>
+		</div>
+		<div class="center" style="padding:10px;"><input type="submit" name="submit" class="btn btn-primary" value="' . $GLOBALS["STR_ADMIN_UPDATE"] . '"></div>
+	</form>';
+	}
+	$select_nom_attribut = '';
+	$q_select_nom_attribut = query($q);
+	while ($result_nom_attribut = fetch_assoc($q_select_nom_attribut)) {
+		if (!empty($result_nom_attribut['nom_' . $_SESSION['session_langue']])) {
+			$nom_attribut_id = $result_nom_attribut['id'];
+			$select_nom_attribut .= '<option value="' . $result_nom_attribut['id'] . '" >' . $result_nom_attribut['nom_' . $_SESSION['session_langue']] . '</option>
+			';
+		}
+	}	
+	$output .= '
+	<form style="margin-bottom:20px;" class="entryform form-inline" role="form" method="post" action="' . get_current_url(false) . '?id=' . intval($product_id) . '&mode=add_attributs" enctype="multipart/form-data">
+		<div class="table-responsive">
+			<div class="entete center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_LIGNE"] . '</div>
+			<table class="main_table">
+				<tr class="classe2">
+					<td class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] . ' *<select required class="form-control" name="nom_attribut_id"><option value="" >' . $GLOBALS["STR_CHOOSE"] . '...</option>' . $select_nom_attribut . '</select></td>
+
+				'.((!empty($GLOBALS['site_parameters']['attribut_description_is_conditioning']))?'<td class="title_label center">Condit *<select required class="form-control" name="attribut_description"><option value="" >' . $GLOBALS["STR_CHOOSE"] . '...</option><option value="0" > ' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NOT_CONDITION"] . ' </option><option value="M">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_MOTTE"] . '</option><option value="B"> ' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_BAC"] . ' </option></select></td>':'').'
+
+					<td class="title_label center">' . $GLOBALS["STR_ADMIN_NAME"] . '<input required="required" type="text" class="form-control center" value="" name="attribut_descriptif"></td>
+					<td class="title_label center">' . $GLOBALS["STR_PRICE"] . ' *<input required="required" type="text" class="form-control center" value="" name="attribut_prix"></td>
+				<tr class="classe2">
+			</table>
+		</div>
+		<div class="center" style="padding:10px;"><input type="submit" name="submit" class="btn btn-primary" value="' . $GLOBALS["STR_ADMIN_ADD"] . '"></div>
+	</form>';
+	$output .= '
+	<form style="margin-bottom:20px;" class="entryform form-inline" role="form" method="post" action="' . get_current_url(false) . '?id=' . intval($product_id) . '&mode=add_nom_attributs" enctype="multipart/form-data">
+		<div class="table-responsive">
+			<div class="entete center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_NEW_GROUP"] . '</div>
+			<table class="main_table">
+				<tr class="classe2">
+					<td class="title_label center">' . $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] . ' *<input style="width:50%;" required="required" type="text" class="form-control center" value="" name="nom_attributs"></td>
+				<tr class="classe2">
+			</table>
+		</div>
+		<div class="center" style="padding:10px;"><input type="submit" name="submit" class="btn btn-primary" value="' . $GLOBALS["STR_ADMIN_ADD"] . '"></div>
+	</form>';
+	
+	echo $output;
+}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -56,7 +56,7 @@
 		<tr>
 			<td>
 				{% if image %}
-				<img src="{{ image.src|escape:'html' }}" /><br />
+				<img src="{{ image.src|escape('html') }}" /><br />
 					{{ STR_ADMIN_FILE_NAME}}{{ STR_BEFORE_TWO_POINTS }}: {{ image.nom }}&nbsp;
 				<a href="{{ image.drop_href|escape('html') }}"><img src="{{ image.drop_src|escape('html') }}" width="16" height="16" alt="" />{{ STR_ADMIN_DELETE_IMAGE }}</a>
 				<input type="hidden" name="image" value="{{ image.nom|str_form_value }}" />

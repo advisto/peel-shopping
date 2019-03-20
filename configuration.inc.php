@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: configuration.inc.php 59873 2019-02-26 14:47:11Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.1.1');
+define('PEEL_VERSION', '9.2.0');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -96,8 +96,10 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 
 $GLOBALS['ip_for_debug_mode'] = '';
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
-	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0)) {
-		define('PEEL_DEBUG', true);
+	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0) && (!defined('PEEL_DEBUG') || PEEL_DEBUG)) {
+		if(!defined('PEEL_DEBUG')) {
+			define('PEEL_DEBUG', true);
+		}
 		define('DEBUG_TEMPLATES', true);
 		$GLOBALS['display_errors'] = 1;
 		break;
@@ -181,10 +183,13 @@ require($GLOBALS['dirroot'] . "/lib/fonctions/emails.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/user.php");
 require($GLOBALS['dirroot'] . "/lib/fonctions/format.php");
 
+// Gestion de connexions multiples avec nom de variable de connexion à utiliser implicitement
+$GLOBALS['implicit_database_object_var'] = 'database_object';
+
 if (!IN_INSTALLATION) {
 	if (empty($GLOBALS['installation_folder_active'])) {
-		db_connect($GLOBALS['database_object']);
-		if (!$GLOBALS['database_object']) {
+		db_connect($GLOBALS[$GLOBALS['implicit_database_object_var']]);
+		if (!$GLOBALS[$GLOBALS['implicit_database_object_var']]) {
 			die('database_object is null');
 		}
 		if(!defined('IN_CRON')) {
@@ -271,11 +276,15 @@ handle_sessions();
 // NB : ne peut pas être mis dans une fonction si $$xxxx ne renvoie pas le tableau superglobal dans toutes les versions de PHP
 // NB2 : doit être fait APRES l'ouverture de la session car ça retire le HTML des données si on n'est pas administrateur
 foreach(array('_POST', '_GET', '_COOKIE', '_REQUEST') as $this_global_array) {
-	if (function_exists('array_walk_recursive')) {
-		// PHP 5+ uniquement
-		array_walk_recursive($$this_global_array, 'cleanDataDeep');
+	if(isset($$this_global_array) && is_array($$this_global_array)) {
+		if (function_exists('array_walk_recursive')) {
+			// PHP 5+ uniquement
+			array_walk_recursive($$this_global_array, 'cleanDataDeep');
+		} else {
+			$$this_global_array = array_map('cleanDataDeep', $$this_global_array);
+		}
 	} else {
-		$$this_global_array = array_map('cleanDataDeep', $$this_global_array);
+		$$this_global_array = array();
 	}
 }
 	
@@ -297,15 +306,15 @@ if (IN_INSTALLATION >= 4 && empty($_SESSION['session_install_finished'])) {
 		$GLOBALS['utilisateur_mysql'] = $_SESSION['session_install_utilisateur'];
 		$GLOBALS['mot_de_passe_mysql'] = $_SESSION['session_install_motdepasse'];
 	}
-	db_connect($GLOBALS['database_object'], false);
-	if (!$GLOBALS['database_object']) {
+	db_connect($GLOBALS[$GLOBALS['implicit_database_object_var']], false);
+	if (!$GLOBALS[$GLOBALS['implicit_database_object_var']]) {
 		redirect_and_die("bdd.php?err=1");
 	}
 	if (IN_INSTALLATION >= 5) {
 		if(!empty($_SESSION['session_install_choixbase'])) {
 			$GLOBALS['nom_de_la_base'] = $_SESSION['session_install_choixbase'];
 		}
-		if (!select_db(vb($GLOBALS['nom_de_la_base']), $GLOBALS['database_object'], true)) {
+		if (!select_db(vb($GLOBALS['nom_de_la_base']), $GLOBALS[$GLOBALS['implicit_database_object_var']], true)) {
 			redirect_and_die("choixbase.php?err=1");
 		}
 	}
@@ -515,13 +524,17 @@ if (!IN_INSTALLATION || IN_INSTALLATION >= 5) {
 	if (defined('IN_PEEL_ADMIN')) {
 		// Protection de l'administration, qui vient en doublon de vérification en haut de chaque fichier d'admin
 		// pour plus de sécurité
+
 		if(!defined('IN_RPC')) {
 			// On redirige si problème de sécurité
 			necessite_identification();
 			necessite_priv("admin*");
 		} elseif (!est_identifie() || !a_priv("admin*", true)) {
 			// On ne redirige pas, on s'arrête
-			die();
+			$hook_result = call_module_hook('call_rpc_on_front_page', array(), 'boolean');
+			if (empty($hook_result)) {
+				die();
+			}
 		}
 		if (!isset($_SESSION['session_admin_multisite']) && isset($GLOBALS['site_id'])) {
 			// session_admin_multisite permet de récupérer les données d'un site à administrer. Cette valeur est choisissable par l'admin dans la page administer/index.php.
@@ -652,7 +665,7 @@ if(!isset($_SESSION['session_site_country'])) {
 		set_current_devise(null, $_SESSION['session_site_country']);
 	}
 }
-if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE') && !defined('IN_RPC') && !defined('HOME_CONTENT')) {
+if(!empty($GLOBALS['site_parameters']['login_force_keep_current_page']) && !defined('IN_CHECK_FIELD') && !defined('IN_ACCES_ACCOUNT') && !defined('IN_COMPTE') && !defined('IN_REGISTER') && !defined('IN_GET_PASSWORD') && !defined('IN_404_ERROR_PAGE') && !defined('IN_CHART_DATA') && !defined('IN_QRCODE') && !defined('IN_RPC') && !defined('HOME_CONTENT')) {
 	$_SESSION['session_redirect_after_login'] = get_current_url(true); 
 }
 account_update();

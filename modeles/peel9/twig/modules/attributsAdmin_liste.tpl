@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -11,7 +11,8 @@
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
 // $Id: attributsAdmin_liste.tpl 53200 2017-03-20 11:19:46Z sdelaporte $
-#}<table class="full_width">
+#}<form action="{{ action }}" method="POST">
+	<table class="full_width">
 	<tr><td colspan="6" class="entete">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST }} <strong>{{ nom|html_entity_decode_if_needed }}</strong></td></tr>
 	<tr>
 		<td colspan="6"><div class="alert alert-info">{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTE_OPTIONS_LIST_EXPLAIN }}</div></td>
@@ -28,10 +29,11 @@
 	</tr>
 {% if num_results == 0 %}
 	<tr><td colspan="5"><b>{{ STR_MODULE_ATTRIBUTS_ADMIN_NO_OPTION_DEFINED }}</b></td></tr>
-{% else %}
+{% else %}C
 	{% for res in results %}
 		{{ res.tr_rollover }}
 		<td class="center">
+			<input type="checkbox" value="{{ res.id }}" name="attribut_id[]" />
 			<a data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ res.drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a>
 		</td>
 		<td class="center">
@@ -43,4 +45,28 @@
 	</tr>
 	{% endfor %}
 {% endif %}
-</table>
+	<tr><td colspan="5">&nbsp;</td></tr>
+	<tr>
+		<td colspan="5">
+			<input type="hidden" name="nom_attribut_id" value="{{ nom_attribut_id }}" />
+			<table>
+				<tr>
+					<td>
+						<select class="form-control" name="assignation_mode">
+							<option value="assign">{{ STR_ADMIN_ASSOCIATED }}</option>
+							<option value="unassign">{{ STR_ADMIN_DISASSOCIATED }}</option>
+						</select>
+					</td><td>
+						{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS }}
+					</td><td>
+						<select class="form-control" name="categories">
+							{{ categorie_options }}
+						</select>
+					</td>
+					<td>&nbsp;<input type="submit" class="btn btn-primary" name="submit_product_attribut_form" value="{{ STR_SEND }}" /></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</form>

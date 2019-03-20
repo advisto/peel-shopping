@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_content_html.tpl 53849 2017-05-19 12:29:39Z sdelaporte $
+// $Id: caddie_content_html.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}<div class="totalcaddie">
 	{if $is_empty}
 	<p>{$STR_EMPTY_CADDIE}</p>
@@ -78,12 +78,27 @@
 							<div id="choix_zone">
 								{if $display_pays_zone_select}
 								<p class="caddie_bold">{$STR_SHIPPING_ZONE}&nbsp;<span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: {$zone_error}
+									{if $shipping_zone_display_mode !='radio'}
 									<select class="form-control" name="pays_zone" onchange="return frmsubmit('recalc')">
 										<option value="">{$STR_SHIP_ZONE_CHOOSE}</option>
 										{foreach $zone_options as $zo}
 										<option value="{$zo.value|str_form_value}"{if $zo.issel} selected="selected"{/if}>{$zo.name|html_entity_decode_if_needed}</option>
 										{/foreach}
 									</select>
+									{else}
+										<table class="shipping_type_display_mode">
+										{foreach $zone_options as $zo}
+										<tr>
+											<td>
+												<input type="radio" name="pays_zone" value="{$zo.value|str_form_value}" {if $zo.issel} checked="checked"{/if} onchange="return frmsubmit('recalc')"  />
+											</td>
+											<td>
+												{$zo.name|html_entity_decode_if_needed}
+											</td>
+										</tr>
+										{/foreach}
+										</table>
+									{/if}
 								</p>
 								{else}
 									<input type="hidden" value="{$zoneId}" name="pays_zone" />
@@ -95,12 +110,33 @@
 									{if $is_zone}
 										{if isset($shipping_type_options)}
 											{$STR_SHIPPING_TYPE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: {$shipping_type_error}
+											{if $shipping_type_display_mode !='radio'}
 											<select class="form-control" name="type" onchange="return frmsubmit('recalc')">
 												<option value="">{$STR_SHIP_TYPE_CHOOSE}</option>
 												{foreach $shipping_type_options as $sto}
 												<option value="{$sto.value|str_form_value}"{if $sto.issel} selected="selected"{/if}>{$sto.name|html_entity_decode_if_needed}</option>
 												{/foreach}
 											</select>
+											{else}
+											<table class="shipping_type_display_mode">
+												{foreach $shipping_type_options as $sto}
+												<tr>
+													<td>
+														<input onchange="return frmsubmit('recalc')" type="radio" name="type" value="{$sto.value|str_form_value}" {if $sto.issel} checked="checked"{/if} />
+													</td>
+													<td {if empty($sto.picture)}colspan="2"{/if}>{$sto.name|html_entity_decode_if_needed}</td>
+													{if !empty($sto.picture)}
+													<td>
+														<img src="{$sto.picture}" alt="{$sto.name|str_form_value}" />
+													</td>
+													{/if}
+												</tr>
+													{if !empty($sto.text)}
+													<tr><td colspan="3"> {$sto.text|str_form_value} </td></tr>
+													{/if}
+												{/foreach}
+											</table>
+											{/if}
 										{else}
 											<span style="color:red;">{$STR_ERREUR_TYPE}</span><br />
 										{/if}
@@ -193,5 +229,30 @@ border-color: #999;" href="{$shopping_href|escape:'html'}achat_maintenant.php?sh
 				</div>
 			</div>
 		</form>
+	{/if}
+	{if !empty($display_quote_list)}
+		<div style="margin-top: 100px;">
+			<h2 class="page_title">{$STR_QUOTE_LIST_TITLE}</h2>
+			<div class="table-responsive">
+				<table class="table">
+					{$links_header_row}
+					{foreach $order_array as $this_order}
+					<tr style="background-color: #{cycle values="F4F4F4,ffffff"}">
+						<td class="center">
+							<a href="{$this_order.href|escape:'html'}"><img src="{$this_order.info_src|escape:'html'}" width="21" height="21" alt="info" /></a>
+						{if !empty($this_order.devis_href)}
+							<br /><a onclick="return(window.open(this.href)?false:true);" href="{$this_order.devis_href|escape:'html'}" style="white-space: nowrap;"><img src="{$this_order.pdf_src|escape:'html'}" width="8" height="11" alt="" />&nbsp;{$STR_PDF_QUOTATION}</a>
+						{/if}
+						</td>
+						<td class="center">{$this_order.numero}</td>
+						<td class="center">{$this_order.o_timestamp}</td>
+						<td class="center">{$this_order.product_list}</td>
+						<td class="center">{$this_order.date_fin_validite}</td>
+						<td class="center">{$this_order.montant_ht}</td>
+					</tr>
+					{/foreach}
+				</table>
+			</div>
+		</div>
 	{/if}
 </div>

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -99,7 +99,15 @@
 							<!-- Ajout au panier -->
 							{{ prod.check_critere_stock }}
 				{% else %}
-						{% if prod.check_critere_stock is empty %}<div class="fc_prix">{% if prod.on_estimate %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>{% endif %}
+						{% if prod.check_critere_stock is empty %}
+							<div class="fc_prix">
+								{% if prod.on_estimate %}
+									<div><b>{{ str_estimate }}{{ STR_BEFORE_TWO_POINTS }}:{{ prod.on_estimate }}</b></div>
+								{% else %}
+									<span class="prix">&nbsp;</span>
+								{% endif %}
+							</div>
+						{% endif %}
 				{% endif %}
 			{% endif %}
 				

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -36,16 +36,23 @@
 						<div class="alert alert-info">{{ STR_ADMIN_CREATE_BILL_NUMBER_BEFORE }}</div>
 					{% endif %}
 					
-						<p><b>{{ STR_PROFORMA|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b>
-							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ proforma_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_PROFORMA }} PDF</a>
-							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ sendproforma_pdf_href|escape('html') }}" data-confirm="{{ STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL_CONFIRM|str_form_value }}">{{ STR_ADMIN_COMMANDER_SEND_PDF_PROFORMA_BY_EMAIL }}</a>
+						<p><b>{{ bill_anchor|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b>
+							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ proforma_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ bill_anchor }} PDF</a>
+							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ sendproforma_pdf_href|escape('html') }}" data-confirm="{{ bill_send_pdf_anchor_confirm|str_form_value }}">{{ bill_send_pdf_anchor }}</a>
 						</p>
+						{% if devis_pdf_href %}
 						<p><b>{{ STR_QUOTATION|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b>
 							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ devis_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_QUOTATION }} PDF</a>
 							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ senddevis_pdf_href|escape('html') }}" data-confirm="{{ STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM|str_form_value }}">{{ STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL }}</a>
 						</p>
+						{% endif %}
+						{% if disable_bdc is empty %}
 						<p><b>{{ STR_ORDER_FORM|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b> <img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ bdc_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ORDER_FORM }} PDF</a></p>
-					{% if is_module_factures_html_active %}
+						{% endif %}
+					{% if convert_bill_button %}
+						<p>{{ convert_bill_button }}</p>
+					{% endif %}
+					{% if is_module_factures_html_active and disable_html_bill is empty %}
 						<form class="entryform form-inline" role="form" method="post" action="{{ bdc_action|escape('html') }}">
 							<p><b>{{ STR_ORDER_FORM }} HTML</b> {{ STR_ADMIN_COMMANDER_WITH_PARTIAL_AMOUNT }}
 							<input type="hidden" name="bdc_code_facture" value="{{ bdc_code_facture|str_form_value }}" />
@@ -67,12 +74,18 @@
 	{% if is_tnt_module_active and etiquette_tnt %}
 		{{ etiquette_tnt }}
 	{% endif %}
+	{% if trackingCreation %}
+		<tr>
+			<td>{{ trackingCreation }}</td>
+		</tr>
+	{% endif %}
 	{% if is_fianet_sac_module_active %}
 		<tr>
 			<td><b>{{ STR_ADMIN_COMMANDER_FIANET_FUNCTIONS }}</b>{{ STR_BEFORE_TWO_POINTS }}: {{ fianet_analyse_commandes }}</td>
 		</tr>
 	{% endif %}
 </table>
+{% if information_on_this_order_disabled is empty %}
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table>
 		<tr>
@@ -85,14 +98,6 @@
 			<td>{{ STR_ORDER_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>{{ order_id }}</td>
 		</tr>
-		{% if url_document %}
-		<tr>
-			<td>{{ LANG.STR_CERTIFICATE_OF_EXEMPTION}}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td>
-				<a href="{{ url_document }}">{{ LANG.STR_MODULE_PROFIL_ADMIN_UPLOAD_DOCUMENT }}</a>
-			</td>
-		</tr>
-		{% endif %}
 		{% if is_kiala_module_active and shortkpid %}
 		<tr>
 			<td>{{ STR_MODULE_KIALA_TRACKING_ID }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -147,11 +152,16 @@
 			<td>{{ STR_ADMIN_AUTOCOMPLETE_ORDER_ADRESSES }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" /></td>
 		</tr>
+	{% else %}
+		<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+		<table>
+	{% endif %}
 {% else %}
 </table>
 <form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table>
 {% endif %}
+	{% if order_detail_fields_disable.numero is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_BILL_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -159,12 +169,14 @@
 				<div class="alert alert-info"><p>{{ STR_ADMIN_COMMANDER_BILL_NUMBER_EXPLAIN }}</p></div>
 			</td>
 		</tr>
+	{% endif %}
 		{% if internal_order_enable %}
  		<tr>
 			<td>{{ STR_REFERENCE_IF_KNOWN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="commande_interne" value="{{ commande_interne|str_form_value }}" /></td>
 		</tr>
 		{% endif %}
+		{% if order_detail_fields_disable.site_id is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_WEBSITE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -173,6 +185,8 @@
 				</select>
 			</td>
 		</tr>
+		{% endif %}
+		{% if mode_transport %}
 		<tr>
 			<td class="form_commande_detail">{{ STR_ADMIN_COMMANDER_TRACKING_NUMBER }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td class="form_commande_detail">
@@ -180,6 +194,8 @@
 				{% if is_icirelais_module_active %}<div id="tracking_url"></div><br /><a href="javascript:setTracking('{{ MODULE_ICIRELAIS_SETUP_TRACKING_URL|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_COMMENT_TRACKING|filtre_javascript(true,true,true) }}','{{ STR_MODULE_ICIRELAIS_ERROR_TRACKING|filtre_javascript(true,true,true) }}')">{{ STR_MODULE_ICIRELAIS_CREATE_TRACKING }}</a>{% endif %}
 			</td>
 		</tr>
+		{% endif %}
+		{% if order_detail_fields_disable.payment_select is empty %}
 		<tr>
 			<td width="350">{{ STR_PAYMENT_MEAN }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -190,12 +206,16 @@
 			{% endif %}
 			</td>
 		</tr>
+		{% endif %}
+		{% if order_detail_fields_disable.statut_paiement is empty %}
 		<tr>
 			<td>{{ STR_ORDER_STATUT_PAIEMENT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<select class="form-control" name="statut_paiement">{{ payment_status_options }}</select>
 			</td>
 		</tr>
+		{% endif %}
+		{% if (mode_transport) %}
 		<tr>
 			<td>{{ STR_ORDER_STATUT_LIVRAISON }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -203,7 +223,6 @@
 
 			</td>
 		</tr>
-		{% if (mode_transport) %}
 		<tr>
 			<td>{{ STR_SHIPPING_TYPE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -232,7 +251,7 @@
 			</td>
 		</tr>
 		{% endif %}
-		{% if is_devises_module_active %}
+		{% if is_devises_module_active and order_detail_fields_disable.devise is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_USED_CURRENCY }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
@@ -244,16 +263,20 @@
 			</td>
 		</tr>
 		{% endif %}
+		{% if order_detail_fields_disable.tva_small_order_overcost is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_SMALL_ORDERS_OVERCOST }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input type="text" class="form-control" name="small_order_overcost_amount" value="{{ small_order_overcost_amount|str_form_value }}" /> {{ devise }} TTC dont TVA <input type="text" class="form-control" name="tva_small_order_overcost" value="{{ tva_small_order_overcost|str_form_value }}" /> {{ devise }}
 			</td>
 		</tr>
+		{% endif %}
+		{% if order_detail_fields_disable.currency_rate is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_CURRENCY_EXCHANGE_USED }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="text" class="form-control" name="currency_rate" value="{{ currency_rate|str_form_value }}" /></td>
 		</tr>
+		{% endif %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_ORDER_TOTAL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><b>{{ montant_displayed_prix }} {{ ttc_ht }}</b></td>
@@ -270,10 +293,12 @@
 			<td><b>{{ code_promo }}</b></td>
 		</tr>
 		{% endif %}
+		{% if order_detail_fields_disable.avoir is empty %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_INCLUDING_CREDIT_NOTE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input name="avoir" type="text" class="form-control" value="{{ avoir_prix|str_form_value }}" /> {{ devise }}</td>
 		</tr>
+		{% endif %}
 		{% if is_affilie %}
 		<tr>
 			<td class="label_rouge">{{ STR_ADMIN_COMMANDER_AFFILIATE_COMMISSION }}</td>
@@ -308,19 +333,24 @@
 			</td>
 		</tr>
 		{% endif %}
+		{% if order_detail_fields_disable.commentaires is empty %}
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
 				<textarea class="form-control" name="commentaires" style="width:100%" rows="5" cols="54">{{ commentaires|trim }}</textarea>
 			</td>
 		</tr>
+		{% endif %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+		{% if order_detail_fields_disable.commentaires_admin is empty %}
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_ADMIN_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
 				<textarea class="form-control" name="commentaires_admin" style="width:100%" rows="5" cols="54">{{ commentaires_admin|trim }}</textarea>
 			</td>
 		</tr>
+		{% endif %}
+		{% if order_detail_fields_disable.client_address is empty %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
@@ -382,10 +412,14 @@
 			</td>
 		</tr>
 	{% endfor %}
+	{% endif %}
 	{% for f in specific_fields %}
 		<tr>
 			{% if f.field_title %}
 				<td>{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</td>
+				<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
+			{% elseif f.field_type == "checkbox" %}
+				<td></td>
 				<td>{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
 			{% else %}
 				<td colspan="2">{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}</td>
@@ -402,6 +436,12 @@
 	<div class="table-responsive">
 		<table class="table admin_commande_details">
 			<thead>
+		{% if hook_order_line_html_head %}
+			<tr style="background-color:#EEEEEE;">
+				<td style="width:20px"></td>
+				{{ hook_order_line_html_head }}
+			</tr>
+		{% else %}
 				<tr>
 					<td colspan="9" class="title_label">{{ STR_ADMIN_COMMANDER_PRICES_MUST_BE_IN_ORDER_CURRENCY }}</td>
 				</tr>
@@ -421,6 +461,7 @@
 					<td class="title_label center" style="width:120px">{{ STR_ADMIN_CUSTOM_ATTRIBUTES }}</td>
 					<td class="title_label center" style="width:20px">{{ STR_IMAGE }}</td>
 				</tr>
+			{% endif %}
 			</thead>
 			{# Attention : pour éviter bug IE8, il ne doit pas y avoir d'espaces entre tbody et tr ! #}
 			<tbody class="sortable ui-sortable" id="dynamic_order_lines">{% for o in order_lines %}{{ o }}{% endfor %}</tbody>
@@ -459,7 +500,32 @@
 {% if is_order_modification_allowed %}
 	<div class="entete">{{ STR_ADMIN_COMMANDER_ADD_PRODUCTS_TO_ORDER }}</div>
 	<div class="add_line_order">
-		<p style="margin-top:0px;"><input value="{{ STR_ADMIN_ADD_EMPTY_LINE|str_form_value }}" name="add_product" class="btn btn-primary" type="button" onclick="add_products_list_line(0, '', '', '', '', 0, 1, '', '', '{{ default_vat_select_options|filtre_javascript(true,true,true)}}', 0, 0, 0, '{{ STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript(true,true,true) }}', 'order'); return false;" /> {{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" onclick="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order');" /></p>
+		{% if add_empty_line %}
+			{{ add_empty_line }}
+		{% else %}
+		<script><!--//--><![CDATA[//><!--
+			var arr0 = {
+				"id" : "0", 
+				"ref" : "",
+				"nom" : "",
+				"quantite" : "1",
+				"image_thumbs" : "",
+				"image_large" : "",
+				"purchase_prix_ht" : "0.00",
+				"tva_options_html" : "{{ tva_options_html|filtre_javascript(true,true,true,true,false) }}",
+				"color_options_html" : "",
+				"size_options_html" : "",
+				"purchase_prix" : "0.00",
+				"prix_cat" : "0.00",
+				"prix_cat_ht" : "0.00",
+				"remise" : "0",
+				"remise_ht" : "0",
+				"percent" : "0"
+			}
+			//--><!]]></script>
+		<p style="margin-top:0px;"><input value="{{ STR_ADMIN_ADD_EMPTY_LINE|str_form_value }}" name="add_product" class="btn btn-primary" type="button" onclick="add_products_list_line(arr0, '{{ STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript(true,true,true) }}', 'order'); return false;" /> 
+		{% endif %}
+		{{ STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order', '#suggestions', 'products', '{{ rpc_path }}', '{{ this_page }}');" onclick="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'order', '#suggestions', 'products', '{{ rpc_path }}', '{{ this_page }}');" /></p>
 		<div class="suggestions" id="suggestions"></div>
 	</div>
 {% endif %}

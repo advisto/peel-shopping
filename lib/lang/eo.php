@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 59053 2018-12-18 10:20:50Z sdelaporte $
+// $Id: eo.php 59883 2019-02-27 14:08:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,6 +34,8 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "";
 $GLOBALS["STR_ADDRESS_NAME"] = "";
 $GLOBALS["STR_ADMIN"] = "Administrado";
 $GLOBALS["STR_ADMINISTRATION"] = "Administrado";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "";
+$GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Vidi la reklamrubandojn enmeteblajn ĉe via retejo";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "Vi partneras la retejon {$GLOBALS['site']}.\n\nNi nuntempe redonas <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> de la krom-imposta enspezo efektivigita de via konto.";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_PROD"] = "Krei HTML-kodon pri la partneraj produktoj";
@@ -319,6 +321,8 @@ $GLOBALS["STR_GET_MY_POSITION"] = "Rehavi mian pozicion (necesa por ĉi funkcio)
 $GLOBALS["STR_GET_PASSWORD"] = "Rehavi sian pasvorton";
 $GLOBALS["STR_GIFT_POINTS"] = "Donac-poentoj";
 $GLOBALS["STR_GLOBAL_PROMOTION"] = "Tut-reteja rabato";
+$GLOBALS["STR_GRAMMES"] = "";
+$GLOBALS["STR_GROUP_BY"] = "";
 $GLOBALS["STR_GZOPEN_FAILED"] = "Malfermo de la densigita dosiero fiaskis";
 $GLOBALS["STR_HALF_WHOLESALER"] = "Duon-povendisto";
 $GLOBALS["STR_HAS_BEEN_DELETED"] = "estis bone forigita";
@@ -341,6 +345,7 @@ $GLOBALS["STR_INCLUDING"] = "inkluzive";
 $GLOBALS["STR_INFO_ADDRESS"] = "";
 $GLOBALS["STR_INFORMATIONS"] = "Informoj";
 $GLOBALS["STR_INFORMATION_NOT_AVAILABLE"] = "Nedisponebla informo";
+$GLOBALS["STR_INIT_FILTER"] = "";
 $GLOBALS["STR_INSCRIPTION_NEWSLETTER_AND_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_INSERT_A_LOGO"] = "Enmeti logotipon";
 $GLOBALS["STR_INSERT_EMAIL"] = "Enmeti vian retpoŝtadreson por startigi la proceson de pasvorta renovigo.\r\n\r\nPost validi la formularon, retmesaĝo aŭtomate sendiĝis al vi.\r\nKlaku la kunsenditan ligilon en la mesaĝo por viziti la formularon pri pasvorta renovigo.";
@@ -378,6 +383,7 @@ $GLOBALS["STR_LIST"] = "Listo";
 $GLOBALS["STR_LIST_PRODUCT"] = "Varo-listo";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Listo de sub-rubrikoj";
 $GLOBALS["STR_LISTE_CADEAU"] = "Mia donac-listo";
+$GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Ensalutu por profiti de via rabato";
 $GLOBALS["STR_LOGIN_OK"] = "Dankon pri via konfido.";
@@ -396,6 +402,8 @@ $GLOBALS["STR_MES_CODE_PROMO_UTILISE"] = "Miaj uzitaj rabat-kodoj:";
 $GLOBALS["STR_MES_CODE_PROMO_VALIDE"] = "Miaj validaj rabat-kodoj:";
 $GLOBALS["STR_MESSAGE"] = "Mesaĝo";
 $GLOBALS["STR_MESSAGE_BOOTBOX_INVOICE_CRITERE_STOCK"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_DELETE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
+$GLOBALS["STR_MESSAGE_BOOTBOX_SAVE_IMPORT_EXPORT_CONFIGURATION_DONE"] = "";
 $GLOBALS["STR_MINIMUM_PURCHASE_OF"] = "Minimuma aĉet-valoro je";
 $GLOBALS["STR_MINIMUM_PRODUCT"] = "";
 $GLOBALS["STR_MISSED_ATTRIBUT_MANDATORY"] = "nepras la kampo %s";
@@ -539,6 +547,7 @@ $GLOBALS["STR_MY_ORDER"] = "Miaj mendoj";
 $GLOBALS["STR_MY_QUOTES"] = "";
 $GLOBALS["STR_NAISSANCE"] = "Naskiĝdato";
 $GLOBALS["STR_NAME"] = "Nomo";
+$GLOBALS["STR_NB_MAX_SUBTOTAL"] = "Niveaux MAX de sous totaux";
 $GLOBALS["STR_NEAR_POSITION_INPUT"] = "Malpli ol %s km kompare vian situo";
 $GLOBALS["STR_NET"] = "Netprezo pagota";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Ĉu nova kliento?";
@@ -590,6 +599,7 @@ $GLOBALS["STR_OR_COORDINATION"] = "aŭ";
 $GLOBALS["STR_OR"] = "aŭ";
 $GLOBALS['STR_ORDER_BY_BUTTON'] = "";
 $GLOBALS["STR_ORDER_DETAIL"] = "Detaloj de la mendo";
+$GLOBALS["STR_ORDER_BY"] = "";
 $GLOBALS["STR_ORDER_FORM"] = "Mendilo";
 $GLOBALS["STR_ORDER_HISTORY"] = "Historio pri mendoj";
 $GLOBALS['STR_ORDER_MIN'] = "";
@@ -605,6 +615,7 @@ $GLOBALS["STR_ORDER_STATUT"] = "Stato de mendo";
 $GLOBALS["STR_ORDER"] = "Finpretigi vian mendon";
 $GLOBALS["STR_ORIGIN"] = "Deveno";
 $GLOBALS["STR_OTHER"] = "Alia";
+$GLOBALS["STR_OVERWRITE_SAVE"] = "";
 $GLOBALS["STR_OUR_OTHER_SERVICES"] = "Niaj ceteraj servoj";
 $GLOBALS["STR_OUR_PARTNER"] = "Niaj Partneroj";
 $GLOBALS["STR_OUR_SERVICES"] = "Niaj servoj";
@@ -737,6 +748,8 @@ $GLOBALS["STR_RSS_TITLE"] = "RSS-fluo de la retejo {$GLOBALS['site']}";
 $GLOBALS["STR_RSS"] = "Nia RSS-fluo";
 $GLOBALS['STR_SALES_CONDITIONS'] = "Vend-kondiĉoj";
 $GLOBALS["STR_SAVE_CART"] = "Registri la aĉetkorbon";
+$GLOBALS["STR_SAVE_RULES"] = "";
+$GLOBALS['STR_SCREEN_SIZE'] = "";
 $GLOBALS["STR_SEARCH_ALL_WORDS"] = "Ĉiuj vortoj";
 $GLOBALS["STR_SEARCH_ANY_WORDS"] = "Ajna vorto";
 $GLOBALS["STR_SEARCH_BRAND"] = "Serĉo laŭ marko";
@@ -877,6 +890,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "";
 $GLOBALS["STR_WEEK"] = "Semajno(j)";
 $GLOBALS["STR_WEIGHT"] = "Pezo de la mendaĵo";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "";
+$GLOBALS["STR_WEIGHT_SHORT"] = "";
 $GLOBALS["STR_WHOLESALER"] = "Povendisto";
 $GLOBALS["STR_WITH_ECOTAX"] = "kun medi-imposto je";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "inkluzive de la rabata kodo";
@@ -911,3 +925,7 @@ $GLOBALS["STR_MSG_NEW_RESELLER_CUSTOMER"] = "";
 $GLOBALS["STR_PRIX_SEARCH_HT"] = "Prezo sen imposto";
 $GLOBALS["STR_PRIX_SEARCH_TTC"] = "Prezo kun imposto";
 $GLOBALS["STR_REGISER_CART_ALERT"] = "";
+$GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
+$GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
+$GLOBALS["STR_ON_REQUEST"] = "";
+$GLOBALS["STR_ESTIMATE"] = "";

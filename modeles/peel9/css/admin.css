@@ -695,7 +695,10 @@ img {
 	background-color: #F5F5FF;
 	padding:10px;
 }
-
+#dynamic_order_lines input[type=text] {
+	/* pour fixer pour de bon la taille de la typo dans les champs du formulaire de création de commande, même si le formulaire est utilisé en front office */
+	font-size:14px !important;
+}
 /* Styles responsive */
 @media (max-width: 767px) {
 	.table-responsive {

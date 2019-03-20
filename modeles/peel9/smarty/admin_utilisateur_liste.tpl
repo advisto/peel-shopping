@@ -1,18 +1,17 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 53676 2017-04-25 14:51:39Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
 *}
-
 {if isset($groupes_options_utilisateurs)}
 <div class="entete">{$STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP}</div>
 	<form method="post" action="{$action|escape:'html'}">
@@ -21,12 +20,16 @@
 			<input type="radio" value="1" name="affected" checked="checked">{$STR_ADMIN_ASSIGN}
 			<input type="radio" value="0" name="affected">{$STR_ADMIN_UNASSIGN}
 		</span>
+	{if isset($groupes_options_utilisateurs)}
 		<select class="form-control" name="id_groupe">
 			<option value="">-------------------------------------------</option>
 			{foreach $groupes_options_utilisateurs as $o}
 			<option value="{$o.value|str_form_value}"{if $o.issel} selected="selected"{/if}>{$o.name|html_entity_decode_if_needed} / - {$o.remise} %</option>
 			{/foreach}
 		</select>
+	{else}
+		{$STR_ADMIN_UTILISATEURS_NO_GROUP_DEFINED}
+	{/if}
 	<br />
 	<input type="submit" value="Valider" class="btn btn-success" />
 	</form>

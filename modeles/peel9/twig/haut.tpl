@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2018 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.1.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -15,6 +15,7 @@
 <html lang="{{ lang }}" dir="ltr">
 	{{ HTML_HEAD }}
 	<body vocab="http://schema.org/" typeof="WebPage">
+		{{ content_tag_body }}
 		{% if auto_login_with_facebook %}{{ auto_login_with_facebook }}{% endif %}
 		{% if logout_with_facebook %}{{ logout_with_facebook }}{% endif %}
 		
@@ -25,7 +26,7 @@
 		<div id="total" class="clearfix page_{{ page_name }}">
 			<!-- Début header -->
 			{% if update_msg is defined %}
-			<div class="center" style="font-size:16px; font-weight:bold; padding:10px">{{ update_msg }}</div>
+			<div class="center" style="font-size:16px; font-weight:bold; padding:10px; background-color:#cccccc"">{{ update_msg }}</div>
 			{% endif %}
 			{% if CONTENT_HEADER %}<div class="page_warning alert-dismissable alert"><div class="container"><div class="row"><div class="col-sm-12">{{ CONTENT_HEADER }} <button type="button" class="close remember-close" data-dismiss="alert" id="page_warning_close">×</button></div></div></div></div>{% endif %}
 			<header id="main_header">
@@ -43,7 +44,7 @@
 										{% if header_custom_baseline_html is defined %}{{ header_custom_baseline_html }}{% endif %}</div>
 									{% endfor %}
  								{% endif %}
-								{% if site_offline is empty %}
+								{% if page_offline is empty %}
 								{% if disable_navbar_toggle is empty %}
 								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 									<span class="icon-bar"></span>
@@ -101,6 +102,22 @@
 			
 			<!-- Début main_content -->
 			<div id="main_content" class="column_{{ page_columns_count }}" style="clear:both">
+				{% if below_main_menu is defined %}
+					<div class="container">
+						<div class="below_main_menu_container">
+							{{ below_main_menu }}
+						</div>
+					</div>
+				{% endif %}
+				{% if CONTENT_MAIN_CONTENT %}
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+							{{ CONTENT_MAIN_CONTENT }}
+						</div>
+					</div>
+				</div>
+				{% endif %}
 				{% if MODULES_ABOVE_MIDDLE %}
 				<!-- Début above_middle -->
 				<div class="above_middle container">
@@ -112,6 +129,26 @@
 				<!-- Fin above_middle -->   
 				{% endif %}
 				<div class="{{ main_content_class }}">
+					{% if cat.carrousel is defined or cat.banner is defined %}
+						<div class="row">
+						{% if ( cat.carrousel is empty and cat.banner is defined ) or ( cat.carrousel is defined and cat.banner is empty ) %}
+							<div class="col-md-12">
+							{% if cat.banner is defined %}
+								{{ cat.banner }}
+							{% elseif cat.carrousel is defined %}
+								{{ cat.carrousel }}
+							{% endif %}
+							</div>
+						{% else %}
+							<div class="col-md-6">
+							{{ cat.banner }}
+							</div>
+							<div class="col-md-6">
+							{{ cat.carrousel }}
+							</div>
+						{% endif %}
+						</div>
+					{% endif %}
 					<div class="row">
 						{% if MODULES_LEFT %}
 						<!-- Début left_column -->
