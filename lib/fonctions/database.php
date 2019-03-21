@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 60162 2019-03-20 14:53:54Z sdelaporte $
+// $Id: database.php 60179 2019-03-21 16:32:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -148,7 +148,7 @@ function select_db($database_name, &$database_object, $continue_if_error = false
 		// Please check if you need to convert GENERAL_ENCODING encoding name to mysql name
 		query("SET NAMES '" . GENERAL_ENCODING . "'", false, $database_object);
 	}
-	query("SET SESSION sql_mode = '' ", false, $database_object);
+	@query("SET SESSION sql_mode = '' ", false, $database_object);
 	return $GLOBALS['selection_de_la_base'];
 }
 

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 59873 2019-02-26 14:47:11Z sdelaporte $
+// $Id: order.php 60179 2019-03-21 16:32:56Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -559,6 +559,15 @@ function create_or_update_order($order_infos, $articles_array)
 		$order_infos['xETTCode'] = vb($_SESSION['session_commande']['xETTCode']);
 		$order_infos['expedition_date'] = $GLOBALS['web_service_tnt']->shippingDate;
 		$order_infos['shipping_date'] = $GLOBALS['web_service_tnt']->shippingDate;
+	}
+	if (empty($order_infos['paiement']) && !empty($order_infos['payment_technical_code'])) {
+		$order_infos['paiement'] = $order_infos['payment_technical_code'];
+	}
+	if (empty($order_infos['zone_franco']) && !empty($order_infos['zoneFranco'])) {
+		$order_infos['zone_franco'] = $order_infos['zoneFranco'];
+	}
+	if (empty($order_infos['zone']) && !empty($order_infos['zoneId'])) {
+		$order_infos['zone'] = $order_infos['zoneId'];
 	}
 
 	// Appel du hook qui viendra potentiellement remplacer le tableau de correspondance des champs de la table qui stock les commandes.
