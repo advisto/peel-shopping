@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 59990 2019-03-08 17:18:57Z sdelaporte $
+// $Id: user.php 60194 2019-03-22 09:07:05Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -922,8 +922,14 @@ function send_mail_for_account_creation($email, $mot_passe, $priv)
 	$hook_result = call_module_hook('send_mail_for_account_creation_custom_template_tags', array('email' => $email, 'priv' => $priv, 'mot_passe' => $mot_passe, 'custom_template_tags' => $custom_template_tags), 'array');
 	$custom_template_tags = array_merge_recursive_distinct($custom_template_tags, $hook_result);
 
+	if(is_array($priv)) {
+		$priv_template_infos = implode('_',$priv);
+	} else {
+		$priv_template_infos = $priv;
+	}
+	
 	// Template d'email spécifique pour le profil d'utilisateur. Cet email est envoyé en plus de l'email d'inscription. L'email d'inscription contient les identifiants du compte.
-	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.implode('_',$priv), $_SESSION['session_langue']);
+	$template_infos = getTextAndTitleFromEmailTemplateLang('send_mail_for_account_creation_'.$priv_template_infos, $_SESSION['session_langue']);
 	
 	if (!empty($template_infos) && (!empty($template_infos['subject']) || !empty($template_infos['text']))) {
 		// Le template d'email existe, il faut l'utiliser
