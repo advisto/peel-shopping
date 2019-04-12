@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 60050 2019-03-13 08:38:13Z sdelaporte $
+// $Id: fonctions_admin.php 60295 2019-04-01 10:20:47Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1365,7 +1365,7 @@ function affiche_details_commande($id, $action, $user_id = 0, $page = 'commander
 			$tpl->assign('action', get_current_url(false) . '?mode=modif&commandeid=' . vn($id));
 		}
 		$tpl->assign('rpc_path', $GLOBALS['wwwroot'] . '/' . $GLOBALS['site_parameters']['backoffice_directory_name'] . '/rpc.php');
-		$tpl->assign('tva_options_html', get_vat_select_options());
+		$tpl->assign('tva_options_html', get_vat_select_options('20.00'));
 		$tpl->assign('this_page', $page);
 		$tpl->assign('action_name', $action);
 		$tpl->assign('id', vn($id));
@@ -4490,6 +4490,10 @@ function get_vat_select_options($selected_vat = null, $approximative_amount_sele
 		ORDER BY tva DESC';
 	$res_paiement = query($sql_paiement);
 	
+	if (empty($selected_vat)) {
+		$selected_vat = get_default_vat();
+	}
+	
 	$tpl = $GLOBALS['tplEngine']->createTemplate('select_options.tpl');
 	$tpl_options = array();
 	while ($tab_paiement = fetch_assoc($res_paiement)) {
@@ -5058,9 +5062,6 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 				if(vb($frm[$this_get . '_input1'])=='') {
 					continue;
 				}
-				if(vb($frm[$this_get . '_input1'])=='') {
-					continue;
-				}
 				$first_value = get_mysql_date_from_user_input($frm[$this_get . '_input1']);
 				if ($frm[$this_get] == '1') {
 					// Une valeur cherchée uniquement : le X
@@ -5156,7 +5157,7 @@ function afficher_liste_utilisateurs($priv, $cle, $frm = null, $order = 'date_in
 				} elseif ($frm[$this_get] == 4) {
 					$sql_where_array[] = 'pacp.timestamp < "' . nohtml_real_escape_string($timestamp_planified_contact_1) . '"';
 				}
-			} elseif (!empty($frm['ads_count'])) {
+			} elseif ($this_get == 'ads_count') {
 				$sql_inner_array['peel_lot_vente'] = 'INNER JOIN peel_lot_vente plv ON plv.id_personne=u.id_utilisateur';
 				$sql_columns_array[] = 'COUNT(plv.ref) AS ads_count';
 				// Nombre d'annonce égal à

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fin.php 60162 2019-03-20 14:53:54Z sdelaporte $
+// $Id: fin.php 60163 2019-03-20 14:54:30Z sdelaporte $
 define('IN_INSTALLATION', 6);
 include("../configuration.inc.php");
 

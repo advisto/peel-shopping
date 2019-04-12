@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 60179 2019-03-21 16:32:56Z sdelaporte $
+// $Id: order.php 60363 2019-04-10 10:58:59Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -577,11 +577,17 @@ function create_or_update_order($order_infos, $articles_array)
 	}
 	$set_sql = array();
 	$commandes_fields = get_table_field_names('peel_commandes', null, true);
+	$commandes_fields_types = get_table_field_types('peel_commandes', null, true);
 	foreach($order_infos as $peel_field=>$value_field) {
 		if ($peel_field == 'specific_field_sql_set') {
 			$set_sql[] = implode(',', $value_field);
 		} elseif(in_array($peel_field, $commandes_fields)) {
-			$set_sql[] = $peel_field." = '" . nohtml_real_escape_string($order_infos[$peel_field]) . "'";
+			if (StringMb::strpos($commandes_fields_types[$peel_field], 'date') !== false) {
+				$value = get_mysql_date_from_user_input($order_infos[$peel_field]);
+			} else {
+				$value = $order_infos[$peel_field];
+			}
+			$set_sql[] = $peel_field." = '" . nohtml_real_escape_string($value) . "'";
 		}
 	}
 
