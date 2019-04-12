@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step2.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
+// $Id: order_step2.tpl 60372 2019-04-12 12:35:34Z sdelaporte $
 *}<h1 property="name" class="order_step2">{$STR_STEP2}</h1>
 <div class="totalcaddie">
 	<p>{$STR_DATE}{$STR_BEFORE_TWO_POINTS}: {$date}</p>

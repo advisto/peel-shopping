@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search_result.tpl 59873 2019-02-26 14:47:11Z sdelaporte $
+// $Id: search_result.tpl 60372 2019-04-12 12:35:34Z sdelaporte $
 *}{if $is_annonce_module_active}
 	{if !empty($res_affiche_annonces)}
 <h1 property="name" class="search_result">{if !empty($search)}{$search|strtoupper}{else}{$STR_RESULT_SEARCH} {$search|strtoupper} {$STR_MODULE_ANNONCES_SEARCH_RESULT_ADS}{/if} - {$ads_found} {if ($ads_found)>1}{$STR_MODULE_ANNONCES_ADS|replace:'s':'s'}{else}{$STR_MODULE_ANNONCES_ADS|replace:'s':''}{/if} {if !empty($STR_AT_LEAST_ONE_CAMPAIGN)}{$STR_AT_LEAST_ONE_CAMPAIGN}{/if}</h1>

@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.0, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 59873 2019-02-26 14:47:11Z sdelaporte $
+// $Id: configuration.inc.php 60372 2019-04-12 12:35:34Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.2.0');
+define('PEEL_VERSION', '9.2.1');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
