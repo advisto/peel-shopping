@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: Multipage.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: Multipage.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -40,7 +40,7 @@ if (!defined('IN_PEEL')) {
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: Multipage.php 60372 2019-04-12 12:35:34Z sdelaporte $
+ * @version $Id: Multipage.php 61970 2019-11-20 15:48:40Z sdelaporte $
  * @access public
  */
 class Multipage {
@@ -273,7 +273,7 @@ class Multipage {
 			$this->Calcul(!empty($query), $forced_nbRecord);
 		} elseif(!empty($this->avoid_pagination_calculation) && $forced_nbRecord !== null) {
 			// On ne veut pas faire de calcul de pagination ; et on connait nbRecord car peu de résultats dans la première page
-			$this->nbRecord = $forced_nbRecord + count($this->external_results_to_merge_at_beginning);
+			$this->nbRecord = $forced_nbRecord + (!empty($this->external_results_to_merge_at_beginning)?count($this->external_results_to_merge_at_beginning):0);
 		}
 		return $results_array;
 	}

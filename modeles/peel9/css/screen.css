@@ -1134,6 +1134,9 @@ a.col_description:hover {
 .image_zoom:hover .fc_zoom a, .image_zoom .fc_zoom a:hover {
 	display: inline-block;
 }
+.description_text {
+	min-height: 40px;
+}
 .description_text a {
 	color: #666666 !important;
 }

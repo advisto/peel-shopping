@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_de.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: admin_de.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1795,7 +1795,7 @@ $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_FILE_EXPORTED"] = "exportierte Datei";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_MSG_EXPORTED_OK"] = "Die Datei erfolgreich exportiert.";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_NAME"] = "Vergleichen Bezeichnung";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_WARNING"] = "Dieses Modul kann eine Anpassung aufgrund von Änderungen in den einzelnen Komparatoren Preis. <br /> Diese Entwicklungen Format dieser Websites Dritter sind nicht von uns und werden bei der Abrechnung der Entwicklung führen, wenn wir uns den Inhalt der CSV-Export ändern";
-$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "Aktualisieren Sie alle Wechselkurse von Websites XE, Google und Oanda";
+$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE"] = "Fügen Sie eine Währung";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN"] = "Hinweis: Der Standardwährung muss immer eine Umwandlungsrate gleich 1 ist.";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY"] = "Der Standardwährung des Geschäft: %s.";

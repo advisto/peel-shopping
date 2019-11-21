@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_es.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: admin_es.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1795,7 +1795,7 @@ $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_FILE_EXPORTED"] = "El archivo exportado";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_MSG_EXPORTED_OK"] = "El archivo ha sido exportado con éxito.";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_NAME"] = "Nombre del comparador";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_WARNING"] = "Este módulo puede requerir ajustes en base a los cambios en la comparación de precios diferentes.<br />Estos cambios de formato de estos sitios no dependen de nosotros y se traducirá en el desarrollo de la facturación si cambiamos el contenido de las exportaciones de CSV ";
-$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "Actualizar todos los tipos de cambio de las páginas web y Google XE Oanda";
+$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE"] = "Añadir un lema";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN"] = "Nota:. La moneda predeterminada siempre debe tener una tasa de conversión igual a 1";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY"] = "La moneda por defecto de la tienda es: %s.";

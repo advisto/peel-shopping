@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_en.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: admin_en.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1795,7 +1795,7 @@ $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_FILE_EXPORTED"] = "Exported file";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_MSG_EXPORTED_OK"] = "The file was successfully exported.";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_NAME"] = "Name of the comparator";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_WARNING"] = "This module may require adjustments based on changes in various price comparison. <br /> These changes format of these sites are not dependent on us and will result in billing development if we change the contents of CSV exports";
-$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "Update all exchange rates from websites XE and Oanda Google";
+$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE"] = "Add a currency";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN"] = "Note: The default currency must always have a conversion rate equal to 1.";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY"] = "The default currency of the store is: %s.";

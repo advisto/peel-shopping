@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_commandes.tpl 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: liste_commandes.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
 *}<h1 property="name" class="liste_commandes">{$STR_ORDER_HISTORY}</h1>
 {if isset($STR_NO_ORDER)}
 <div><p>{$STR_NO_ORDER}</p></div>

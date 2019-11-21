@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -923,7 +923,7 @@ function insere_ticket(&$frm)
 		$custom_template_tags['DISPO'] = vb($frm['dispo']);
 		$custom_template_tags['TEXTE'] = vb($frm['texte']);
 		$custom_template_tags['SUJET'] = ((!empty($frm['commande_id'])) ? "[" . $GLOBALS['STR_ORDER_NAME'] . " " . $frm['commande_id'] . "] " : "") . vb($frm['sujet']);
-		$custom_template_tags['PRENOM'] = vb($frm['prenom']);
+		$custom_template_tags['PRENOM'] = vb($frm['prenom'], "");
 		if (empty($_SESSION['session_form_insere_ticket_sent'])) {
 			$_SESSION['session_form_insere_ticket_sent'] = 0;
 		}
@@ -977,30 +977,33 @@ function getFlashBannerHTML($url, $width = 680, $height = 250, $mode_transparent
  */
 function get_country_name($id)
 {
-	if(strpos($id, ',') !== false) {
-		$site_country_array = array();
-		foreach(explode(',', $id) as $this_id) {
-			$site_country_array[] = get_country_name($this_id);
-		}
-		return implode(', ', $site_country_array);
-	} elseif($id === null || $id === '') {
-		return null;
-	}
-	if(!is_numeric($id)) {
-		return $id;
-	} elseif($id == 0) {
-		return $GLOBALS['STR_WORLD'];
-	} else {
-		$sql = 'SELECT pays_' . $_SESSION['session_langue'] . '
-			FROM peel_pays
-			WHERE id="' . intval($id) . '"';
-		$q = query($sql);
-		if ($result = fetch_assoc($q)) {
-			return StringMb::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
+	static $result;
+	if(!isset($result[$id])) {
+		if(strpos($id, ',') !== false) {
+			$site_country_array = array();
+			foreach(explode(',', $id) as $this_id) {
+				$site_country_array[] = get_country_name($this_id);
+			}
+			$result[$id] = implode(', ', $site_country_array);
+		} elseif($id === null || $id === '') {
+			$result[$id] = null;
+		} elseif(!is_numeric($id)) {
+			$result[$id] = $id;
+		} elseif($id == 0) {
+			$result[$id] = $GLOBALS['STR_WORLD'];
 		} else {
-			return false;
+			$sql = 'SELECT pays_' . $_SESSION['session_langue'] . '
+				FROM peel_pays
+				WHERE id="' . intval($id) . '"';
+			$q = query($sql);
+			if ($result = fetch_assoc($q)) {
+				$result[$id] = StringMb::html_entity_decode_if_needed($result['pays_' . $_SESSION['session_langue']]);
+			} else {
+				$result[$id] = false;
+			}
 		}
 	}
+	return $result[$id];
 }
 
 /**

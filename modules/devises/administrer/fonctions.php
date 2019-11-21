@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -189,7 +189,6 @@ function affiche_liste_devise($start)
 {
 	$tpl = $GLOBALS['tplEngine']->createTemplate('modules/devisesAdmin_liste.tpl');
 	$tpl->assign('ajout_href', get_current_url(false) . '?mode=ajout');
-	$tpl->assign('update_rates_href', get_current_url(false) . '?mode=update_rates');
 	$tpl->assign('drop_src', $GLOBALS['administrer_url'] . '/images/b_drop.png');
 	$tpl->assign('edit_src', $GLOBALS['administrer_url'] . '/images/b_edit.png');
 	$tpl_results = array();
@@ -224,7 +223,6 @@ function affiche_liste_devise($start)
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN', $GLOBALS['STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_LIST_TITLE', $GLOBALS['STR_MODULE_DEVISES_ADMIN_LIST_TITLE']);
 	$tpl->assign('STR_MODULE_DEVISES_ADMIN_CREATE', $GLOBALS['STR_MODULE_DEVISES_ADMIN_CREATE']);
-	$tpl->assign('STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN', $GLOBALS['STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN']);
 	$tpl->assign('STR_ADMIN_ACTION', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 	$tpl->assign('STR_DEVISE', $GLOBALS['STR_DEVISE']);
 	$tpl->assign('STR_ADMIN_SYMBOL', $GLOBALS['STR_ADMIN_SYMBOL']);
@@ -240,51 +238,57 @@ function affiche_liste_devise($start)
 	echo $tpl->fetch();
 }
 
-/**
- * Mise à jour de la table peel_devises
- *
- * @param mixed $base_currency_code
- * @param mixed $commission_percentage Permet de corriger les taux de change en fonction des frais bancaire de conversion
- * @return
- */
-function update_currencies_rates($base_currency_code, $commission_percentage = 2.5)
-{
-	$output = '<b>'.sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_UPDATE_TITLE'], $commission_percentage).' :</b><br />';
-	$q = query("SELECT code, conversion
-		FROM peel_devises
-		WHERE code!='" . nohtml_real_escape_string($base_currency_code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
-	while ($result = fetch_object($q)) {
-		unset($rate);
-		$rate = quote_xe_currency($result->code, $base_currency_code);
-		$output .= 'XE : ' . $result->code . '=' . $rate . '<br />';
-		if (empty($rate)) {
-			$rate = quote_google_currency($result->code, $base_currency_code);
-			$output .= 'Google : ' . $result->code . '=' . $rate . '<br />';
+/*
+
+ Google ne fournit plus le service de conversion de devise, XE a changé ses conditions générales et interdit la récupération des données de leur page web au profit d'une API payante, et Oanda impose la création d'un compte pour utiliser leur service.
+
+=> Suite à ces changements nous ne proposerons plus la fonctionnalité de récupération de taux de change automatique depuis l'administration de PEEL.
+
+
+	/**
+	 * Mise à jour de la table peel_devises
+	 *
+	 * @param mixed $base_currency_code
+	 * @param mixed $commission_percentage Permet de corriger les taux de change en fonction des frais bancaire de conversion
+	 * @return
+	function update_currencies_rates($base_currency_code, $commission_percentage = 2.5)
+	{
+		$output = '<b>'.sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_UPDATE_TITLE'], $commission_percentage).' :</b><br />';
+		$q = query("SELECT code, conversion
+			FROM peel_devises
+			WHERE code!='" . nohtml_real_escape_string($base_currency_code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
+		while ($result = fetch_object($q)) {
+			unset($rate);
+			$rate = quote_xe_currency($result->code, $base_currency_code);
+			$output .= 'XE : ' . $result->code . '=' . $rate . '<br />';
+			if (empty($rate)) {
+				$rate = quote_google_currency($result->code, $base_currency_code);
+				$output .= 'Google : ' . $result->code . '=' . $rate . '<br />';
+			}
+			if (empty($rate)) {
+				$rate = quote_oanda_currency($result->code, $base_currency_code);
+				$output .= 'Oanda : ' . $result->code . '=' . $rate . '<br />';
+			}
+			if (!empty($rate) && is_numeric($rate)) {
+				$currency_update[$result->code] = $rate * (1 + $commission_percentage / 100);
+			}
+			if (rand(0, 3) == 1) {
+				// Ne pas surcharger les sites d'appels trop fréquents
+				sleep(1);
+			}
 		}
-		if (empty($rate)) {
-			$rate = quote_oanda_currency($result->code, $base_currency_code);
-			$output .= 'Oanda : ' . $result->code . '=' . $rate . '<br />';
+		if (!empty($currency_update)) {
+			foreach($currency_update as $code => $rate) {
+				query("UPDATE peel_devises
+					SET conversion='" . str_replace(',', '.', $rate) . "'
+					WHERE code='" . nohtml_real_escape_string($code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
+			}
+			$output = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $output))->fetch();
+		} else {
+			$output = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $output . '<br />' . sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_ERR_GET_DATA'], @ini_get("allow_url_fopen"))))->fetch();
 		}
-		if (!empty($rate) && is_numeric($rate)) {
-			$currency_update[$result->code] = $rate * (1 + $commission_percentage / 100);
-		}
-		if (rand(0, 3) == 1) {
-			// Ne pas surcharger les sites d'appels trop fréquents
-			sleep(1);
-		}
+		return $output;
 	}
-	if (!empty($currency_update)) {
-		foreach($currency_update as $code => $rate) {
-			query("UPDATE peel_devises
-				SET conversion='" . str_replace(',', '.', $rate) . "'
-				WHERE code='" . nohtml_real_escape_string($code) . "' AND " . get_filter_site_cond('devises', null, true) . "");
-		}
-		$output = $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $output))->fetch();
-	} else {
-		$output = $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $output . '<br />' . sprintf($GLOBALS['STR_MODULE_DEVISES_ADMIN_ERR_GET_DATA'], @ini_get("allow_url_fopen"))))->fetch();
-	}
-	return $output;
-}
 
 /**
  * Fonctions pour récupérer les taux de change
@@ -292,7 +296,7 @@ function update_currencies_rates($base_currency_code, $commission_percentage = 2
  * @param string $to
  * @param string $from
  * @return
- */
+ 
 function quote_oanda_currency($to, $from)
 {
 	$page = @file('http://www.oanda.com/convert/fxdaily?value=1&redirected=1&exch=' . $to . '&format=CSV&dest=Get+Table&sel_list=' . $from);
@@ -314,7 +318,7 @@ function quote_oanda_currency($to, $from)
  * @param string $to
  * @param string $from
  * @return
- */
+ 
 function quote_xe_currency($to, $from)
 {
 	$url = 'http://www.xe.com/ucc/convert?Amount=1&From=' . $from . '&To=' . $to;
@@ -337,7 +341,7 @@ function quote_xe_currency($to, $from)
  * @param string $to
  * @param string $from
  * @return
- */
+ 
 function quote_google_currency($to, $from)
 {
 	$page = @file('http://www.google.com/ig/calculator?hl=en&q=' . urlencode(1 . '' . $from . '=?' . $to));
@@ -353,4 +357,4 @@ function quote_google_currency($to, $from)
 	}
 	return $matches[1] ? $matches[1] : false;
 }
-
+ */

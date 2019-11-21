@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: order.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1469,7 +1469,7 @@ function get_product_infos_array_in_order($order_id, $devise = null, $currency_r
 		$reference_text = (!empty($prod['reference']) ? "\r\n" . $GLOBALS['STR_REFERENCE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::htmlspecialchars_decode($prod["reference"], ENT_QUOTES) : "");
 		$couleur_text = (!empty($prod['couleur']) ? "\r\n" . $GLOBALS['STR_COLOR'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::html_entity_decode_if_needed($prod['couleur']) : "");
 		$taille_text = (!empty($prod['taille']) ? "\r\n" . $GLOBALS['STR_SIZE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::html_entity_decode_if_needed($prod['taille']) : "");
-		$poids_text = (!empty($prod['poids'] && $prod['poids']>0) ? "\r\n" . $GLOBALS['STR_WEIGHT_SHORT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::htmlspecialchars_decode($prod["poids"], ENT_QUOTES) . ' ' . $GLOBALS["STR_GRAMMES"] : "");
+		$poids_text = (!empty($prod['poids']) && $prod['poids']>0 ? "\r\n" . $GLOBALS['STR_WEIGHT_SHORT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ": " . StringMb::htmlspecialchars_decode($prod["poids"], ENT_QUOTES) . ' ' . $GLOBALS["STR_GRAMMES"] : "");
 		if ($prod['nom_attribut'] != '') {
 			$attribut_text = "\r\n" . trim(StringMb::html_entity_decode_if_needed($prod['nom_attribut']));
 			if($add_total_prix_attribut) {

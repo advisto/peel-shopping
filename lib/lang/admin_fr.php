@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: admin_fr.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1795,7 +1795,7 @@ $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_FILE_EXPORTED"] = "Fichier exporté";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_MSG_EXPORTED_OK"] = "Le fichier a été correctement exporté.";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_NAME"] = "Nom du comparateur";
 $GLOBALS["STR_MODULE_COMPARATEUR_ADMIN_WARNING"] = "Ce module peut nécessiter des adaptations en fonction des évolutions des différents comparateurs de prix.<br />Ces évolutions de format de ces sites tiers ne sont pas dépendantes de nous et donneront lieu à facturation du développement si nous devons modifier le contenu des exports CSV";
-$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "Mettre à jour tous les taux de change à partir des sites internet XE, Google et Oanda";
+$GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN"] = "";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_CREATE"] = "Ajouter une devise";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY_EXPLAIN"] = "NB : La devise par défaut doit toujours avoir un taux de conversion égal à 1.";
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_DEFAULT_CURRENCY"] = "La devise par défaut de la boutique est : %s.";

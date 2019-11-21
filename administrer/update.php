@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: update.php 61970 2019-11-20 15:48:40Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -1689,7 +1689,7 @@ ALTER TABLE `peel_parrain` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '0', 
 }
 if(file_exists($GLOBALS['dirroot'] . '/modules/sauvegarde_recherche')) {
 	$sql_update_array['7.1.4'] .= "
-ALTER TABLE `peel_alertes` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '0', ADD KEY `site_id` (`site_id`);
+ALTER TABLE `peel_alertes_recherches` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '0', ADD KEY `site_id` (`site_id`);
 ";
 }
 if(file_exists($GLOBALS['dirroot'] . '/modules/affiliation')) {
@@ -1699,6 +1699,7 @@ ALTER TABLE `peel_affiliation` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '
 }
 if(file_exists($GLOBALS['dirroot'] . '/modules/stock_advanced')) {
 	$sql_update_array['7.1.4'] .= "
+ALTER TABLE `peel_alertes` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '0', ADD KEY `site_id` (`site_id`);
 ALTER TABLE `peel_etatstock` ADD `site_id` int(11) unsigned NOT NULL DEFAULT '0', ADD KEY `site_id` (`site_id`);
 ";
 }
@@ -2176,6 +2177,11 @@ UPDATE `peel_parrain` SET site_id = 1;
 ";
 }
 if(file_exists($GLOBALS['dirroot'] . '/modules/sauvegarde_recherche')) {
+	$sql_update_array['7.1.4'] .= "
+UPDATE `peel_alertes_recherches` SET site_id = 1;
+";
+}
+if(file_exists($GLOBALS['dirroot'] . '/modules/stock_advanced')) {
 	$sql_update_array['7.1.4'] .= "
 UPDATE `peel_alertes` SET site_id = 1;
 ";

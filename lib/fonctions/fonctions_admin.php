@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an  	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an  	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	|
 // +----------------------------------------------------------------------+
-// $Id: fonctions_admin.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: fonctions_admin.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -4286,6 +4286,9 @@ function get_tag_function_site_options_values_list($params = array()) {
 	if(vb($params['mode'], 'id') == 'id') {
 		return implode(',', array_keys($result_array));
 	} else {
+		foreach ($result_array as $this_key => $this_value) {
+			$result_array[$this_key] = str_replace(',', ' ', $this_value);
+		}
 		return implode(',', $result_array);
 	}
 }
@@ -7651,7 +7654,7 @@ function handle_export($check_access_rights = true, $params = array()) {
 				// **********
 			} elseif($type == 'peel_produits') {
 				$where = '';
-				if (!empty(vn($_POST['categories']))) {
+				if (!empty($_POST['categories'])) {
 					$where = " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND " ;
 				}
 				// PRODUITS
@@ -7708,7 +7711,7 @@ function handle_export($check_access_rights = true, $params = array()) {
 				echo StringMb::convert_encoding($output, $params['data_encoding'], GENERAL_ENCODING);
 			} elseif($type == 'formatted_produits') {
 				$where = '';
-				if (!empty(vn($_POST['categories']))) {
+				if (!empty($_POST['categories'])) {
 					$where .= " c.id IN (" . implode(',',vn($_POST['categories'])) . ") AND " ;
 				}
 				$sql = "SELECT p.*, p.nom_" . (!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']) . " AS nom, p.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, p.image1

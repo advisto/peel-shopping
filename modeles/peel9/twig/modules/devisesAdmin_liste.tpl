@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -16,7 +16,7 @@
 		<td class="entete" colspan="7">{{ STR_MODULE_DEVISES_ADMIN_LIST_TITLE }}</td>
 	</tr>
 	<tr>
-		<td colspan="7"><p><a href="{{ ajout_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a> - <a href="{{ update_rates_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE_EXPLAIN }}</a></p></td>
+		<td colspan="7"><p><a href="{{ ajout_href|escape('html') }}">{{ STR_MODULE_DEVISES_ADMIN_CREATE }}</a></p></td>
 	</tr>
 	{% if (results) %}
 		<tr>

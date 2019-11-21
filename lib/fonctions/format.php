@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: format.php 61970 2019-11-20 15:48:40Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -1160,18 +1160,23 @@ function get_array_from_string($string)
 					$this_key = trim($line[0]);
 					$this_value = trim($line[1]);
 				}
+				// Si l'élément commence par ', " ou [ alors on veut réunir l'élément avec le suivant
 				if(in_array(StringMb::substr($this_value, 0, 1), array('"', "'", '['))) {
-					// On retire le séparateur de début
-					$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value)-1);						
-					$i=1;
-					while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && !empty($parts[$this_part_key+$i])) {
-						// On rajoute la suite tant qu'on n'a pas de séparateur de fin : il y avait une ou des virgules dans le texte
-						$this_value .= ','.$parts[$this_part_key+$i];
-						$skip_part_key_array[] = $this_part_key+$i;
-						$i++;
+					// On vérifie qu'il n'y a pas de fin à l'intérieur de l'élément, en ne tenant pas compte des '' et "" qui sont utilisés pour avoir des guillemets à l'intérieur d'une colonne CSV
+					$next_separator = StringMb::strpos(StringMb::substr(str_replace(array('""', "''"), '', $this_value), 1), str_replace('[', ']', StringMb::substr($this_value, 0, 1)));
+					if($next_separator === false || $next_separator == StringMb::strlen($this_value) - 2) {
+						// On retire le séparateur de début
+						$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value)-1);						
+						$i=1;
+						while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && isset($parts[$this_part_key+$i])) {
+							// On rajoute la suite tant qu'on n'a pas de séparateur de fin : il y avait une ou des virgules dans le texte
+							$this_value .= ','.$parts[$this_part_key+$i];
+							$skip_part_key_array[] = $this_part_key+$i;
+							$i++;
+						}
+						// On retire le séparateur de fin
+						$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value)-1);
 					}
-					// On retire le séparateur de fin
-					$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value)-1);
 				}
 				if($this_value == 'true' || $this_value == 'TRUE'){
 					$this_value = true;

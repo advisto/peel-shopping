@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: payment_form.tpl 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: payment_form.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
 *}{if $type == 'check'}
 <p><b>{$STR_FOR_A_CHECK_PAYMENT}</b></p>
 <p>- <a href="{$commande_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_PRINT_PROFORMA}</a></p>

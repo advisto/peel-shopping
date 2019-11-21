@@ -3,14 +3,14 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.1, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 60372 2019-04-12 12:35:34Z sdelaporte $
+// $Id: configuration.inc.php 61973 2019-11-20 17:13:21Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.2.1');
+define('PEEL_VERSION', '9.2.2');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -153,6 +153,11 @@ if (!empty($_SERVER["HTTP_HOST"])) {
 	} else {
 		$_SERVER["HTTP_HOST"] = '';
 	}
+}
+
+if (empty($_SERVER['HTTPS']) && !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+	// on appel la page en https mais $_SERVER['HTTPS'] est vide. $_SERVER['HTTPS'] doit normalement avoir pour valeur 'on' dans ce cas. Sur certain serveur cette valeur est vide, ce qui pose problème ensuite dans le code. Donc on force la valeur à 'on'.
+	$_SERVER['HTTPS'] = 'on';
 }
 if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] === '443')) {
 	$GLOBALS['detected_wwwroot'] = str_replace('http://', 'https://', $GLOBALS['detected_wwwroot']);
@@ -471,7 +476,6 @@ if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['cod
 		}
 	}
 }
-
 if (!defined('IN_CRON') && !defined('IN_IPN') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
