@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: update.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: update.php 61979 2019-11-21 10:14:47Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_PEEL_CONFIGURE', true);
 include("../configuration.inc.php");
@@ -2669,6 +2669,9 @@ if(file_exists($GLOBALS['dirroot'] . '/modules/partenaires')) {
 	ALTER TABLE `peel_partenaires`  ADD `comments` VARCHAR(255) NOT NULL DEFAULT ''  AFTER `description`;
 ";
 }
+$sql_update_array['9.2.0'] = "";
+$sql_update_array['9.2.1'] = "";
+
 // FIN du SQL par version
 if(!isset($sql_update_array[PEEL_VERSION])) {
 	$sql_update_array[PEEL_VERSION] = "";	
