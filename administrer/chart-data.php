@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: chart-data.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: chart-data.php 64750 2020-10-21 16:20:30Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_CHART_DATA', true);
 include("../configuration.inc.php");
@@ -35,8 +35,8 @@ $legend_font_size = 12;
 $font_size = 12;
 
 if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
-	$date_format = 'timestamp1000';
-} elseif (strtotime($date2) - strtotime($date1) < 6300 * 24 * 30 * 6) {
+	$date_format = 'timestamp';
+} elseif (strtotime($date2) - strtotime($date1) < 3600 * 24 * 30 * 6) {
 	$date_format = 'veryshort';
 } else {
 	$date_format = 'short';

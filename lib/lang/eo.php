@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: eo.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: eo.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -54,8 +54,10 @@ $GLOBALS["STR_AND"] = "kaj";
 $GLOBALS["STR_AMOUNT"] = "Monsumo";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Mi interesiĝas pri la sekvaj kategorioj:";
 $GLOBALS["STR_ARTICLES"] = "artikoloj";
+$GLOBALS["STR_ARTICLES_PLURAL_OPTIONAL"] = "";
 $GLOBALS["STR_ASC"] = "kreska";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "La klientoj kiuj ŝatis ĉi artikolon aĉetis ankaŭ ...";
+$GLOBALS["STR_ATTACHEMENT"] = "";
 $GLOBALS["STR_AUCUN_RESULTAT"] = "Neniu nomo de varo komenciĝas per ĉi vorto";
 $GLOBALS["STR_AUTH_DENIAL"] = "Malpermesas";
 $GLOBALS["STR_AVOIR"] = "Kredito";
@@ -72,6 +74,7 @@ $GLOBALS["STR_BANK_ACCOUNT_RIB_KEY"] = "RIB-kodo";
 $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "RIB-kodo";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Banko-konto";
 $GLOBALS["STR_BARCODE"] = "";
+$GLOBALS["STR_BASE_PRICE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Iĝi partnero";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
 $GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
@@ -147,6 +150,7 @@ $GLOBALS["STR_CONTACT_US"] = "Kontakti nin";
 $GLOBALS["STR_CONTACT"] = "Kontakto";
 $GLOBALS["STR_CONTINUE"] = "Daŭrigi";
 $GLOBALS["STR_CONTINENT"] = "";
+$GLOBALS["STR_COPY_TO"] = "";
 $GLOBALS["STR_COPY_VERIFICATION_CODE"] = "";
 $GLOBALS["STR_COOKIES_CHROME"] = "Agordoj &gt; Aldonaj agordoj &gt; Agordoj pri enhavo... &gt; Kuketoj<br />Elekti &quot;Permesi stokadon de lokaj datumoj&quot;";
 $GLOBALS["STR_COOKIES_HOWTO"] = "Por kontroli se via foliumilo akceptas kuketojn:";
@@ -173,6 +177,7 @@ $GLOBALS["STR_DELETE_CART_TITLE"] = "Forigi la savkopion";
 $GLOBALS["STR_DELETE_PROD_CART"] = "Konfirmu la forigon de ĉi varo el via aĉetkorbo.";
 $GLOBALS["STR_DELETE_THIS_FILE"] = "forigi ĉi dosieron";
 $GLOBALS["STR_DELETE"] = "Forigi";
+$GLOBALS["STR_DELETE_SELECTION"] = "";
 $GLOBALS["STR_DELETE_CONFIRM"] = "Konfirmu forigon";
 $GLOBALS["STR_DELIVERY_STOCK"] = "Antaŭplanita livero-tempo";
 $GLOBALS["STR_DELIVERY"] = "Livero";
@@ -209,6 +214,7 @@ $GLOBALS["STR_EMAIL_ABSENT"] = "Ĉi retpoŝtadreso ne ekzistas";
 $GLOBALS["STR_EMAIL_BOUNCE_REPLACE"] = "La servilo %s sendis sisteman eraron %s je antaŭaj sendaj provoj al %s. Bonvolu enigi validan retpoŝtadreson ĉe viaj kontaj agordoj.";
 $GLOBALS["STR_EMAIL_FRIEND"] = "Retpoŝtadreso de amiko";
 $GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Salutnomo / kromnomo";
+$GLOBALS["STR_EMAIL_REPLY_TO"] = "";
 $GLOBALS["STR_EMAIL_SENDING_DEACTIVATED"] = "Provo pri sendo de retmesaĝo \"%s\" - sendo malaktivigita";
 $GLOBALS["STR_EMAIL"] = "Retpoŝto";
 $GLOBALS["STR_EMPLOYEE"] = "Dungato / Senlaborulo";
@@ -250,6 +256,7 @@ $GLOBALS["STR_ERR_KEYB"] = "Premu la klavon <b>x</b> por fermi.";
 $GLOBALS["STR_ERR_LOGIN"] = "Vi ne difinis vian kromnomon.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Vi ne difinis vian mesaĝon.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "La pasvortoj malsamas, bonvolu nove enmeti la pasvortojn.";
+$GLOBALS['STR_ERR_MONDIAL_RELAY']= "Please select a relay point";
 $GLOBALS["STR_ERR_NAME"] = "Vi ne difinis vian familinomon.\n";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "Bonvolu konfirmi la novan pasvorton.\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "Vi ne enmetis novan pasvorton.\n";
@@ -268,6 +275,7 @@ $GLOBALS["STR_ERR_PSEUDO"] = "Vi ne difinis vian kromnomon, aŭ tiu enhavas heli
 $GLOBALS["STR_ERR_QUANTITY"] = "Vi ne difinis la kvanton.\n";
 $GLOBALS["STR_ERR_SIREN"] = "Vi ĝuste plenigu la SIREN-kodon.";
 $GLOBALS["STR_ERR_SOCIETY"] = "Vi ne difinis vian entreprenon.\n";
+$GLOBALS["STR_ERR_SPAMMER_EMAIL"] = "";
 $GLOBALS["STR_ERR_SUBJECT"] = "Vi ne difinis la kialon de via mendo.\n";
 $GLOBALS["STR_ERR_TEL"] = "Vi ne difinis vian telefonnumeron.\n";
 $GLOBALS["STR_ERR_TIME"] = "La tempolimo je 24 horoj post renovigo de pasvorto jam forpasis.";
@@ -284,6 +292,7 @@ $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Io ne funkcias: kontrolu la dosieruja
 $GLOBALS["STR_ETAPE_SUIVANTE"] = "Sekva ŝtupo";
 $GLOBALS["STR_EVERYBODY"] = "";
 $GLOBALS["STR_EXPEDITION_DATE"] = "Livero-dato";
+$GLOBALS["STR_EXPEDITOR_EMAIL"] = "";
 $GLOBALS["STR_FAQ_TITLE"] = "Fakdosiero";
 $GLOBALS["STR_FAX"] = "Faksilo";
 $GLOBALS["STR_FB_DECONNECT"] = "Malkonektiĝi el Facebook";
@@ -383,6 +392,7 @@ $GLOBALS["STR_LIST"] = "Listo";
 $GLOBALS["STR_LIST_PRODUCT"] = "Varo-listo";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Listo de sub-rubrikoj";
 $GLOBALS["STR_LISTE_CADEAU"] = "Mia donac-listo";
+$GLOBALS["STR_LOGIN_FOR_PAYPAL_CHECKOUT"] = "";
 $GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Ensalutu por profiti de via rabato";
@@ -476,6 +486,7 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_NO_QUESTION"] = "Neniu demando estis deponita."
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTION"] = "Demando";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "Demandoj";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "Elŝuti la dosieron pri via mendo n-o";
+$GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_GENERIC_FILES"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "Krei la HTML-kodon";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Listo de vortoj";
@@ -536,6 +547,7 @@ $GLOBALS["STR_MONTH"] = "Monato";
 $GLOBALS["STR_MONTHS"] = "monato";
 $GLOBALS["STR_MORE_DETAILS"] = "pliajn detalojn";
 $GLOBALS["STR_MORE"] = "Aĉeti";
+$GLOBALS["STR_MORE_THAN"] = "";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "La ŝanĝo de agordoj efektiviĝis.";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Por malfermi konton, ĉi klaku</a>.";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Ensalutu.";
@@ -553,6 +565,7 @@ $GLOBALS["STR_NET"] = "Netprezo pagota";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Ĉu nova kliento?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Nova pasvorto por konfirmo";
 $GLOBALS["STR_NEW_PASSWORD"] = "Nova pasvorto";
+$GLOBALS["STR_NEW_SEARCH"] = "";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Aliĝo al la novaĵ-bulteno";
 $GLOBALS["STR_NEWSLETTER_YES"] = "Jes, mi bonvolas aliĝi la novaĵ-bultenon de {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "Novaĵ-bulteno";
@@ -639,6 +652,7 @@ $GLOBALS["STR_PAYMENT_SUCCEED"] = "Ĉi paĝo indikas ke via transakcio bone esti
 $GLOBALS["STR_PAYMENT"] = "Pago";
 $GLOBALS["STR_PAYPAL_IMG"] = "<img src=\"{$GLOBALS['wwwroot']}/images/logo-xclickBox.gif\" width=\"152\" height=\"29\" alt=\"pagoj per PayPal\" />";
 $GLOBALS["STR_PAYPAL"] = "PayPal";
+$GLOBALS["STR_PDF_ACOMPTE"] = "";
 $GLOBALS["STR_PDF_AVOIR"] = "Klienta kredito";
 $GLOBALS["STR_PDF_BILL_DATE"] = "Dato";
 $GLOBALS["STR_PDF_BILL_PAGE"] = "Paĝo";
@@ -722,6 +736,7 @@ $GLOBALS["STR_READ_ENTIRE_ARTICLE"] = "Legi la tutan artikolon";
 $GLOBALS["STR_REBATE_NOW"] = "nun, se vi havas rabatan kuponon";
 $GLOBALS["STR_RECOVER_PASSWORD_OK"] = "La renovigo de via pasvorto sukcesis.\r\nEblas de nun ensaluti per ĉi novan pasvorton ĉe <a href=\"{$GLOBALS['wwwroot']}/membre.php\"> ĉi adreso </a>";
 $GLOBALS["STR_RECURRENT"] = "Reokaza";
+$GLOBALS["STR_RECIPENT_NO_SET"] = "";
 $GLOBALS["STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE"] = "Ĉiuj produktoj en ĉi kategorio profitas rebaton je";
 $GLOBALS["STR_REFERENCE_ON_LINE_SHOP"] = "Referencoj de ret-vendejoj";
 $GLOBALS["STR_REFERENCE"] = "Referenco";
@@ -767,6 +782,7 @@ $GLOBALS["STR_SEARCH_RESULT_PRODUCT"] = "tra la varoj";
 $GLOBALS["STR_SEARCH"] = "Serĉi";
 $GLOBALS["STR_SECOND_CHOICE"] = "2a elekto";
 $GLOBALS["STR_SEE_YOU_SOON"] = "Ĝis baldaŭ ĉe";
+$GLOBALS["STR_SEND_EMAIL_OK"] = "";
 $GLOBALS["STR_SEND_CHECK"] = "Sendu la pagon al";
 $GLOBALS["STR_SEND_TRANSFER"] = "Ĝiru la pagon ĉe la sekvan bank-konton";
 $GLOBALS["STR_SEND"] = "Sendi";
@@ -805,6 +821,7 @@ $GLOBALS["STR_STOCK"] = "Stok-informo";
 $GLOBALS["STR_STRONG_PASSWORD_NOTIFICATION"] = "Pasvortoj entenu de 7 ĝis 16 signoj, ne enhavu komunajn vortojn aŭ nomojn kaj konsistu el majuskloj, minuskloj, ciferoj kaj simboloj.";
 $GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "La kromnomo ne entenu la signon heliko (@)";
 $GLOBALS["STR_SUBMIT"] = "Validigi";
+$GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Via kredito ebligas vin akiri pliajn varojn rilataj. <a href=\"achat/suggest.php\">Ni proponas vin konsulti la sugest-liston por kompletigi vian aĉetadon</a>.";
 $GLOBALS["STR_SUPPORT"] = "Pri ĉiaj informpetoj, <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">eblas kontakti nin pere de ĉi formularo</a>.";
 $GLOBALS["STR_SWIFT"] = "SWIFT-/BIC-kodo";
@@ -830,6 +847,7 @@ $GLOBALS["STR_THIRD_CHOICE"] = "3a elekto";
 $GLOBALS["STR_TICKET_OK"] = "Bone sendiĝis via mesaĝo.\nKonsilanto baldaŭ kontaktos vin.";
 $GLOBALS["STR_TITLE_SEARCH_HEADER"] = "";
 $GLOBALS["STR_TITLE_SUFFIX"] = "{$GLOBALS['site']}";
+$GLOBALS["STR_TO_SEND"] = "";
 $GLOBALS["STR_TO"] = "al";
 $GLOBALS["STR_TO_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_TO_NEWSLETTER"] = "";
@@ -861,6 +879,7 @@ $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_HIGHER_THAN"] = "";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_LARGER_THAN"] = "";
 $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"] = "";
 $GLOBALS["STR_USER_ACCOUNT_COMPLETION"] = "";
+$GLOBALS["STR_USER_ALREADY_EXISTS"] = "";
 $GLOBALS["STR_USER_CANCEL"] = "Nuligo de la retumanto.";
 $GLOBALS["STR_USER_ORIGIN"] = "Kiel vi ekkonis ĉi retejon?";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "Per amiko aŭ samfamiliano";
@@ -890,7 +909,7 @@ $GLOBALS["STR_WEBSITE_NONE"] = "";
 $GLOBALS["STR_WEEK"] = "Semajno(j)";
 $GLOBALS["STR_WEIGHT"] = "Pezo de la mendaĵo";
 $GLOBALS["STR_WHAT_DO_YOU_DO_WITH_THAT_LIST"] = "";
-$GLOBALS["STR_WEIGHT_SHORT"] = "";
+$GLOBALS["STR_WEIGHT_SHORT"] = "Pezo";
 $GLOBALS["STR_WHOLESALER"] = "Povendisto";
 $GLOBALS["STR_WITH_ECOTAX"] = "kun medi-imposto je";
 $GLOBALS["STR_WITH_PROMO_CODE"] = "inkluzive de la rabata kodo";
@@ -917,7 +936,13 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "Neniu varo estis aldonita";
 $GLOBALS["STR_ZIP"] = "Poŝtkodo";
 $GLOBALS["STR_ZOOM"] = "Aligrandigi";
+$GLOBALS["STR_PIECE"] = "";
+$GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "";
+$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "";
 $GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
 $GLOBALS["STR_CARD_ESTIMATE"] = "";
 $GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
@@ -929,3 +954,13 @@ $GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
 $GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
 $GLOBALS["STR_ON_REQUEST"] = "";
 $GLOBALS["STR_ESTIMATE"] = "";
+$GLOBALS["STR_ORDER_SUSPECT"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "";
+
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "monato";
+$GLOBALS["STR_CODE_CHORUS"] = "";
+$GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
+$GLOBALS["STR_NAME_ADDRESS"] = "";

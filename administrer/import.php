@@ -1,7 +1,7 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
 // | This file is part of PEEL Shopping 9.0.0, which is subject to an     |
 // | opensource GPL license: you are allowed to customize the code		  |
@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/   |
 // +----------------------------------------------------------------------+
-// $Id: import.php 59873 2019-02-26 14:47:11Z sdelaporte $
+// $Id: import.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -27,7 +27,8 @@ if(!empty($_POST['type'])) {
 	$params['type'] = vb($GLOBALS['database_import_export_type_by_urlpart_array'][$_GET['type']], $_GET['type']);
 } 
 $params['mode'] = vb($_POST['mode'], vb($_GET['mode']));
-
+// liste de champ à sauvegarder lors de l'appel de la fonction JS set_rules
+$params['set_rules_additional_input_ids_array'] = array('correspondance' => 'correspondance', 'default_fields' => 'default_fields', 'header' => 'header', 'show_details' => 'show_details', 'separator' => 'separator', 'data_encoding' => 'data_encoding');
 $output = handle_import(true, $params);
 		
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");

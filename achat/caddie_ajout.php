@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_ajout.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: caddie_ajout.php 64741 2020-10-21 13:48:51Z sdelaporte $
 include("../configuration.inc.php");
 
 $attributs_array_upload = array();
@@ -67,6 +67,7 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 			if (!empty($GLOBALS['site_parameters']['user_register_during_giftcheck_order_process']) && !empty($_POST['sender_email_check' . vb($_GET['checkid'])]) && !empty($_POST['sender_prenom' . vb($_GET['checkid'])]) && !empty($_POST['sender_nom' . vb($_GET['checkid'])])) {
 				// On utilise les informations rempli lors de l'ajout au panier d'un cheque cadeaux. Dans ce cas on enregistre la personne offrant le cadeaux.
 				// On s'assure d'avoir au moins le nom, le prénom et l'email du créateur du chèque pour lui créer un compte.
+				$frm = array();
 				$frm['email'] = $_POST['sender_email_check' . vb($_GET['checkid'])];
 				$frm['prenom'] = $_POST['sender_prenom' . vb($_GET['checkid'])];
 				$frm['nom_famille'] = $_POST['sender_nom' . vb($_GET['checkid'])];
@@ -89,6 +90,14 @@ if (!isset($_COOKIE[$session_cookie_name]) && function_exists('ini_set')) {
 			$quantite = intval($quantite);
 		}
 		$product_object = new Product($id, $product_infos, false, null, true, !is_user_tva_intracom_for_no_vat() && !check_if_module_active('micro_entreprise'));
+		if (empty($product_object->id)) {
+			// le produit n'est pas trouvé, on ne fait rien de plus
+			if (!empty($_SERVER['HTTP_REFERER'])) {
+				redirect_and_die($_SERVER['HTTP_REFERER'] . "");
+			} else {
+				redirect_and_die(get_url('/'));
+			}
+		}
 		if ((!empty($_GET['from']) && $_GET['from'] == 'search_page') && ((isset($_POST['save_product_list']) && check_if_module_active('cart_preservation')) || (isset($_POST['export_pdf']) && check_if_module_active('facture_advanced', 'administrer/genere_pdf.php')))) {
 			// Sauvegarde via le module de conservation de panier de la liste de produit envoyée.
 			// Constitution du tableau de donnée compatible avec la fonction save_cart (voir plus bas)

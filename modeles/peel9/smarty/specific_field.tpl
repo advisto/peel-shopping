@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: specific_field.tpl 59822 2019-02-19 16:18:47Z sdelaporte $
+// $Id: specific_field.tpl 63117 2020-04-08 10:39:31Z sdelaporte $
 *}{if !empty($text_only) && $f.field_type != "upload"}
 	{$f.field_value}
 {elseif $f.field_type == "radio"}
@@ -22,13 +22,15 @@
 {elseif $f.field_type == "checkbox"}
 	{if !empty($f.options)}
 		{foreach $f.options as $o}
-<input {if !empty($f.readonly)  && empty($o.issel)} readonly="readonly"{/if} type="checkbox" value="{$o.value|str_form_value}"{if $o.issel} checked="checked"{/if}{if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} id="{$f.field_id|str_form_value}#{$o.value|str_form_value}" name="{$f.field_name|str_form_value}[]" /> <label for="{$f.field_name}#{$o.value|str_form_value}">{$o.name}</label>{if !empty($o.br)}<br />{/if}
+<input {if !empty($f.readonly)  && empty($o.issel)} readonly="readonly"{/if} type="checkbox" value="{$o.value|str_form_value}"{if $o.issel} checked="checked"{/if}{if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} id="{$f.field_id|str_form_value}_{$o.value|str_form_value}" name="{$f.field_name|str_form_value}[]" /> <label for="{$f.field_name}#{$o.value|str_form_value}">{$o.name}</label>{if !empty($o.br)}<br />{/if}
 		{/foreach}
 	{/if}
 {elseif $f.field_type == "select"}
 <select {if !empty($f.mandatory)} required="required"{/if} {if !empty($f.multiple)} multiple="multiple" size="5" name="{$f.field_name|str_form_value}[]" {else} name="{$f.field_name|str_form_value}" {/if} {if !empty($f.readonly)} readonly="readonly"{/if} id="{$f.field_id|str_form_value}" {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} class="form-control" onchange="{$f.javascript|str_form_value}">
-	{if $f.options|@count>1 && empty($f.readonly)}
-	<option value="">{$f.STR_CHOOSE}...</option>
+	{if !empty($f.options)}
+		{if $f.options|@count>1 && empty($f.readonly)}
+		<option value="">{$f.STR_CHOOSE}...</option>
+		{/if}
 	{/if}
 	{if !empty($f.options)}
 		{foreach $f.options as $o}
@@ -52,7 +54,7 @@
 {elseif $f.field_type == "number"}
 <input {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} type="number" step="any" id="{$f.field_id|str_form_value}" name="{$f.field_name|str_form_value}" value="{$f.field_value|str_form_value}" class="form-control" />
 {elseif $f.field_type == "datepicker"}
-<input {if !empty($f.mandatory)} required="required"{/if} {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} type="text" value="{$f.field_value|str_form_value}" id="{$f.field_id|str_form_value}#{$f.field_value|str_form_value}" name="{$f.field_name|str_form_value}" class="form-control datepicker" />
+<input {if !empty($f.mandatory)} required="required"{/if} {if !empty($f.disabled) || !empty($disabled)} disabled="disabled"{/if} type="text" value="{$f.field_value|str_form_value}" id="{$f.field_id|str_form_value}{if !empty($f.field_value)}#{$f.field_value|str_form_value}{/if}" name="{$f.field_name|str_form_value}" class="form-control datepicker" />
 {elseif $f.field_type == "upload"}
 	{if empty($f.upload_infos)}
 		{if $site_parameters.used_uploader=="fineuploader"}

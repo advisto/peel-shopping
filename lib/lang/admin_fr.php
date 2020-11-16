@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 // +----------------------------------------------------------------------+
-// $Id: admin_fr.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_fr.php 64863 2020-10-30 11:05:39Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -46,6 +46,7 @@ $GLOBALS["STR_ADMIN_ALL"] = "Tous";
 $GLOBALS["STR_ADMIN_ALL_SITES"] = "Tous les sites";
 $GLOBALS["STR_ADMIN_ALL_STATUS_DELIVERY"] = "Tous les statuts de livraison";
 $GLOBALS["STR_ADMIN_ANY"] = "Peu importe";
+$GLOBALS["STR_ADMIN_APPLY_CHANGES"] = "Etes-vous sûr de vouloir effectuer les changements ?";
 $GLOBALS["STR_ADMIN_ARTICLE_SHORT_DESCRIPTION"] = "Chapô rapide (pourra apparaître dans les listes, avec lien pour accéder à la version complète)";
 $GLOBALS["STR_ADMIN_ARTICLES_ALL"] = "Tous les articles";
 $GLOBALS["STR_ADMIN_ARTICLES_ARTICLES_LIST"] = "LISTE DES ARTICLES";
@@ -92,6 +93,7 @@ $GLOBALS["STR_ADMIN_CATEGORIES_FORM_ADD_BUTTON"] = "Ajouter cette catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_FORM_MODIFY"] = "Modifier la catégorie";
 $GLOBALS["STR_ADMIN_CATEGORIES_LIST_TITLE"] = "Liste des catégories";
 $GLOBALS["STR_ADMIN_CATEGORIES_LOT_PRICE"] = "Remise par lot (différentes remises en fonction des quantités commandées)";
+$GLOBALS["STR_ADMIN_CATEGORIES_LOT_PRICE_HANDLE_EXPLAIN"] = "Vous pourrez définir des prix différents en fonction des quantités quand vous aurez déjà créé cette catégorie et que vous l'éditerez";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_CREATED_OK"] = "La catégorie %s a été ajoutée avec succès.";
 $GLOBALS["STR_ADMIN_CATEGORIES_MSG_DELETED"] = "La catégorie %s a été effacée. Tous ses produits et sous-catégories ont été réassignés à la catégorie parente %s.";
 $GLOBALS["STR_ADMIN_CATEGORIES_PARENT"] = "Catégorie parente";
@@ -314,6 +316,27 @@ $GLOBALS["STR_ADMIN_DELIVERY_EMAIL_SENT"] = "Un email de confirmation d'expédit
 $GLOBALS["STR_ADMIN_DEMO_EMAILS_DEACTIVATED"] = "DEMONSTRATION : L'envoi d'emails est désactivé";
 $GLOBALS["STR_ADMIN_DEMO_WARNING"] = "DEMONSTRATION : Vous êtes connecté en tant qu'administrateur de démonstration : vous pouvez voir les données mais pas les modifier";
 $GLOBALS["STR_ADMIN_DESCRIPTION"] = "Description";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CHANGED_ACCEPTED"] = "Changed to Accepted on";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CHANGED_REFUSED"] = "Changed to Refused on";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CONFIRM_ACCEPT"] = "Êtes-vous sûr de vouloir accepter la proposition ?";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CONFIRM_REFUSE"] = "Êtes-vous sûr de vouloir refuser la proposition ?";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CREATED_BY"] = "Créé par";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_CREATED_ON"] = "Créé le";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_DATE_INSERE_END"] = "Date de création fin";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_DATE_INSERE_START"] = "Date de création début";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_DATE_MAJ_END"] = "Date d'acceptation fin";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_DATE_MAJ_START"] = "Date d'acceptation début";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_EXPLAIN"] = "Ici s'affiche la liste des propositions des commerciaux sur les descriptions (catégories et marques)";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_FORM_MODIFY"] = "Modifier la proposition pour la catégorie ou marque";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_FORM_MODIFY_AFTER"] = "Proposition (non modifiable)";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_FORM_MODIFY_BEFORE"] = "Description actuelle (à modifier)";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_FORM_SUBMIT_BUTTON"] = "Valider la modification de la description";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_KEYWORD"] = "Mot clé";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_NOT_FOUND"] = "Aucune proposition de trouvée.";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_STATUT"] = "Statut";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_STATUT_MSG_UPDATED_OK"] = "Les changements apportés au statut de la proposition ont bien été pris en compte.";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_TABLE"] = "Gérer les propositions";
+$GLOBALS["STR_ADMIN_DESCRIPTION_DETAILS_TITLE"] = "Liste des propositions";
 $GLOBALS["STR_ADMIN_DETECTED"] = "Détecté";
 $GLOBALS["STR_ADMIN_DIAPORAMA_MSG_DELETED_OK"] = "L'image du diaporama : <b>%s</b> a été effacé du serveur avec succès.";
 $GLOBALS["STR_ADMIN_DIRECTORY"] = "Dossier";
@@ -340,6 +363,8 @@ $GLOBALS["STR_ADMIN_EXPORT_CSV"] = "Export CSV";
 $GLOBALS["STR_ADMIN_EXPORT_PDF"] = "Export PDF";
 $GLOBALS["STR_ADMIN_EXPORT_PRICES_DISABLE"] = "Ne pas exporter les tarifs (pour l'export CSV)";
 $GLOBALS["STR_ADMIN_EXPORT_PRODUCTS_CHOOSE_EXPORT_CRITERIA"] = "Choisissez vos critères d'export";
+$GLOBALS["STR_ADMIN_EXPORT_SHOW_DETAILS"] = "Afficher les lignes de détails";
+$GLOBALS["STR_ADMIN_EXPORT_SKIP_EMPTY_TOTALS"] = "Retirer les lignes au total nul";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATE"] = "Modèle d'email";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_EXAMPLES_TITLE"] = "TAGS GENERIQUES";
 $GLOBALS["STR_ADMIN_EMAIL_TEMPLATES_INSERT_TEMPLATE"] = "Insérer un modèle d'email";
@@ -429,6 +454,7 @@ $GLOBALS["STR_ADMIN_ID"] = "Id";
 $GLOBALS["STR_ADMIN_IP"] = "IP";
 $GLOBALS["STR_ADMIN_IMAGE_SHORT_PATH"] = "Image / Répertoire";
 $GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE"] = "Correspondance des colonnes";
+$GLOBALS["STR_ADMIN_IMPORT_CORRESPONDANCE_EXPLANATION"] = "Une fois le type de données à importer choisi et le tableau de correspondance rempli, cliquer sur le bouton 'Valider' en bas de page pour effectuer l'import de données";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_FOUND"] = "Colonne choisie non trouvée dans le fichier : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_HANDLED"] = "Colonne n°%s non gérée à l'import (purement descriptive lors de l'export) : %s";
 $GLOBALS["STR_ADMIN_IMPORT_ERR_COLUMN_NOT_KNOWN"] = "Colonne n°%s non reconnue et donc non importée : %s";
@@ -459,6 +485,7 @@ $GLOBALS["STR_ADMIN_IMPORT_MSG_TARIF_UPDATED"] = "Mise à jour du tarif dégress
 $GLOBALS["STR_ADMIN_IMPORT_SELECT_FIELDS"] = "Sélectionner les champs que vous souhaitez mettre à jour";
 $GLOBALS["STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN"] = "indiquez \\t pour tabulation - ne rien indiquer pour détection automatique";
 $GLOBALS["STR_ADMIN_IMPORT_SEPARATOR"] = "Séparateur de colonnes";
+$GLOBALS["STR_ADMIN_IMPORT_SAVE_IMPORT_PARAMS"] = "Sauvegarde de paramètres d'import";
 $GLOBALS["STR_ADMIN_IMPORT_STATUS"] = "Fin de l'importation";
 $GLOBALS["STR_ADMIN_IMPORT_TITLE"] = "Module d'importation";
 $GLOBALS["STR_ADMIN_IMPORT_WARNING_ID"] = "Attention : sauvegardez vos données avant de procéder à un import !<br />Si une ligne importée a la même clé primaire qu'une ligne en base de données, les données de la ligne seront modifiées, sinon elles seront ajoutées.";
@@ -633,6 +660,7 @@ $GLOBALS["STR_ADMIN_MENU_PRODUCTS_ATTRIBUTES"] = "Gestion des attributs";
 $GLOBALS["STR_ADMIN_MENU_PRODUCTS_OPTIONS"] = "Options d'attributs";
 $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING_HEADER"] = "HEBERGEMENT";
 $GLOBALS["STR_ADMIN_MENU_PRODUCTS_HOSTING"] = "Gestion des hébergements";
+$GLOBALS["STR_ADMIN_MENU_PRODUCTS_PROPOSITIONS_LIST"] = "Liste des propositions";
 $GLOBALS["STR_ADMIN_MENU_SALES_SALES_TITLE"] = "Commandes";
 $GLOBALS["STR_ADMIN_MENU_SALES_SALES_HEADER"] = "VENTES";
 $GLOBALS["STR_ADMIN_MENU_SALES_ORDERS"] = "Liste des commandes";
@@ -785,7 +813,7 @@ $GLOBALS["STR_ADMIN_PAIEMENT_PAYMENT_MEAN"] = "Moyen de paiement";
 $GLOBALS["STR_ADMIN_PAIEMENT_STATUS"] = "Statut du reversement";
 $GLOBALS["STR_ADMIN_PAIEMENT_STATUS_IN_WAIT"] = "paiement en attente";
 $GLOBALS["STR_ADMIN_PAIEMENT_STATUS_DONE"] = "paiement effectué";
-$GLOBALS["STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN"] = "Liste des codes techniques par défaut :<br />Chèque : check<br />Paypal : paypal<br />Moneybookers : moneybookers<br />Virement bancaire : transfer<br />";
+$GLOBALS["STR_ADMIN_PAIEMENT_TECHNICAL_CODE_DEFAULT_EXPLAIN"] = "Liste des codes techniques par défaut :<br />Chèque : check<br />Paypal : paypal<br />Virement bancaire : transfer<br />";
 $GLOBALS["STR_ADMIN_PAIEMENT_TECHNICAL_CODE_EXPLAIN"] = "Le code technique permet d'associer le moyen de paiement avec le code PHP concerné";
 $GLOBALS["STR_ADMIN_PAIEMENT_TITLE"] = "Gestion des moyens de paiement";
 $GLOBALS["STR_ADMIN_PAIEMENT_UPDATE"] = "Modifier ce moyen de paiement";
@@ -955,6 +983,7 @@ $GLOBALS["STR_ADMIN_PRODUITS_PRODUCT_SIZES"] = "Tailles du produit";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCTS_COUNT"] = "Nombre total de produits";
 $GLOBALS["STR_ADMIN_PRODUITS_PRODUCTS_LIST"] = "Liste des produits";
 $GLOBALS["STR_ADMIN_PRODUITS_PURCHASE_PRICE_IN"] = "Prix d'achat en";
+$GLOBALS["STR_ADMIN_PRODUCTS_QUOTE"] = "Produit hors format";
 $GLOBALS["STR_ADMIN_PRODUITS_RESELLER_PRICE_IN"] = "Prix de vente revendeur en";
 $GLOBALS["STR_ADMIN_PRODUITS_SHORT_DESCRIPTION"] = "Descriptif (quelques mots affichés au dessus de la description, et dans les pages catalogue)";
 $GLOBALS["STR_ADMIN_PRODUITS_SHOW_TABS"] = "Afficher les onglets";
@@ -1020,7 +1049,7 @@ $GLOBALS["STR_ADMIN_SITES_ABOVE_MIDDLE"] = "Au dessus du contenu central";
 $GLOBALS['STR_ADMIN_SITE_COUNTRY'] = 'Autorisation par pays du visiteur';
 $GLOBALS["STR_ADMIN_SITE_ID"] = "Id du site (0 pour tous)";
 $GLOBALS["STR_ADMIN_SITE_DUPLICATE_CONFIRM"] = "Confirmer la duplication du site %s. Seul la configuration sera dupliquée.";
-$GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"] = "Confirmer la supression du site %s";
+$GLOBALS["STR_ADMIN_SITE_DELETE_CONFIRM"] = "Confirmer la suppression du site %s";
 $GLOBALS["STR_ADMIN_SITES_ADD_SITE"] = "Ajouter un site";
 $GLOBALS["STR_ADMIN_SITES_ADD_TO_CART_ANIMATION"] = "Animation graphique lors de l'ajout d'un produit au panier (image produit qui vole vers le panier)";
 $GLOBALS["STR_ADMIN_SITES_ADMIN_FORCE_SSL_EXPLAIN"] = "Ce paramètre interdit toutes les pages de l'administration sans HTTPS (sauf la page de configuration du site pour vous permettre de changer ce paramètre en cas de problème)";
@@ -1292,6 +1321,8 @@ $GLOBALS["STR_ADMIN_SITES_TITLE"] = "Configuration du site";
 $GLOBALS["STR_ADMIN_SITES_TNT_ACCOUNT_NUMBER"] = "Numéro de compte de transport TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_EXPEDITION_DELAY"] = "Délai entre la prise de commande et l'expédition du colis";
 $GLOBALS["STR_ADMIN_SITES_TNT_THRESHOLD"] = "Seuil de dimension maximum de colis (Longueur + largeur + profondeur) en mm";
+$GLOBALS["STR_ADMIN_SITES_TNT_EXTRA_COST"] = "Surcoût";
+$GLOBALS["STR_ADMIN_SITES_TNT_TRESHOLD_LIMIT"] = "Limite à pas dépasser";
 $GLOBALS["STR_ADMIN_SITES_TNT_MODULE"] = "Livraison TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_PASSWORD"] = "Mot de passe TNT";
 $GLOBALS["STR_ADMIN_SITES_TNT_USERNAME"] = "Nom d'utilisateur TNT";
@@ -1412,6 +1443,7 @@ $GLOBALS["STR_ADMIN_UPDATE_VERSION_DETECTED"] = 'Version détectée';
 $GLOBALS["STR_ADMIN_UPDATE_VERSION_INVITE"] = 'Vous devez mettre à jour la structure de votre base de données';
 $GLOBALS["STR_ADMIN_UPDATE_VERSION_OK"] = 'MAJ de la base de données exécutée : ancienne version = %s - nouvelle version = %s';
 $GLOBALS["STR_ADMIN_UPDATE_VERSION_WARNING"] = 'Vous devez sauvegarder votre base de données par vos propres moyens avant toute mise à jour automatique - Cet outil est risqué et sous votre propre responsabilité';
+$GLOBALS["STR_ADMIN_UPDATE_WARNING"] = "Etes-vous sûr de vouloir modifier ?";
 $GLOBALS["STR_ADMIN_URL_REWRITING"] = "URL Rewriting";
 $GLOBALS["STR_ADMIN_URLLIST_CREATE_TITLE"] = "Création du sitemap";
 $GLOBALS["STR_ADMIN_URLLIST_GENERATE_SITEMAP"] = "Générer le sitemap pour Yahoo !";
@@ -1424,7 +1456,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_ACCESS_HISTORY_CHECKBOX"] = "Cochez la case pou
 $GLOBALS["STR_ADMIN_UTILISATEURS_ACCOUNT_MANAGER"] = "Gestionnaire de compte";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ACTIONS_ON_THIS_ACCOUNT"] = "Actions des modérateurs / administrateurs sur ce compte";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ADD_CONTACT_DATE"] = "Ajouter une nouvelle date de contact / Gérer les dates de contact";
-$GLOBALS["STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING"] = "Ajout d'un événement concernant";
+$GLOBALS["STR_ADMIN_UTILISATEURS_ADD_EVENT_REGARDING"] = "Ajout d'un évènement concernant";
 $GLOBALS["STR_ADMIN_UTILISATEURS_ADMIN_NOTE"] = "Note Administrateur";
 $GLOBALS["STR_ADMIN_UTILISATEURS_BUY"] = "Achat";
 $GLOBALS["STR_ADMIN_UTILISATEURS_BUY_ONE_OLD"] = "Un achat > 1 an";
@@ -1473,7 +1505,7 @@ $GLOBALS["STR_ADMIN_DELETE_LOGO"] = "Supprimer le logo";
 $GLOBALS["STR_ADMIN_UTILISATEURS_DISPLAY_IMAGE_IN_PHOTODESK"] = "Afficher l'image dans le module Photodesk.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_TITLE"] = "Edition d'un compte utilisateur";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EDIT_USER"] = "Edition du compte n°%s";
-$GLOBALS["STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION"] = "Description de l'événement";
+$GLOBALS["STR_ADMIN_UTILISATEURS_EVENT_DESCRIPTION"] = "Description de l'évènement";
 $GLOBALS["STR_ADMIN_UTILISATEURS_EXCEL_EXPORT"] = "Exporter l'ensemble des utilisateurs sous Excel";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILER_EXPLAIN"] = "Le filtre sur la langue des utilisateurs est obligatoire pour l'envoi multiple";
 $GLOBALS["STR_ADMIN_UTILISATEURS_FILTER_MIN_SPENDING"] = "CA total minimum HT";
@@ -1534,7 +1566,7 @@ $GLOBALS["STR_ADMIN_UTILISATEURS_PROJECT_DATE_FORECASTED"] = "Date de réalisati
 $GLOBALS["STR_ADMIN_UTILISATEURS_PROJECT_DESCRIPTION_DISPLAY"] = "Afficher la description dans la page CLIENTS.";
 $GLOBALS["STR_ADMIN_UTILISATEURS_PROJECT_PRODUCT_PROPOSED"] = "Produit qu'on lui propose";
 $GLOBALS["STR_ADMIN_UTILISATEURS_RECEIVED_CREDIT"] = "Total avoirs reçus";
-$GLOBALS["STR_ADMIN_UTILISATEURS_SAVE_EVENT"] = "Enregistrer l'événement";
+$GLOBALS["STR_ADMIN_UTILISATEURS_SAVE_EVENT"] = "Enregistrer l'évènement";
 $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_CONTACT_FORECASTED"] = "A contacter";
 $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_LOGIN"] = "Dern. connexion";
 $GLOBALS["STR_ADMIN_UTILISATEURS_SEARCH_LAST_PAYMENT"] = "Dern. paiement";
@@ -1706,7 +1738,7 @@ $GLOBALS["STR_MODULE_BANNER_ADMIN_DATES_EXPLAIN"] = "Les dates sont des champs o
 $GLOBALS["STR_MODULE_BANNER_ADMIN_END_PUBLICATION_DATE"] = "Date de fin de publication";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ERROR_INSERTED"] = "Votre insertion a échoué. Merci de renseigner une image ou un tag HTML";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_ERR_UPDATED"] = "La mise à jour de la bannière a échoué. Vous devez renseigner une image ou du HTML pour cette bannière.";
-$GLOBALS["STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT"] = "Evénement JavaScript sur le href (onclick=\"exemple()\")";
+$GLOBALS["STR_MODULE_BANNER_ADMIN_EXTRA_JAVASCRIPT"] = "Evènement JavaScript sur le href (onclick=\"exemple()\")";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HEIGHT"] = "Hauteur (dimension en px)";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_HIT"] = "Hit";
 $GLOBALS["STR_MODULE_BANNER_ADMIN_IMAGE_OR_FLASH"] = "Image ou Flash";
@@ -1813,7 +1845,7 @@ $GLOBALS["STR_MODULE_DEVISES_ADMIN_MSG_UPDATED_OK"] = "Les changements apportés
 $GLOBALS["STR_MODULE_DEVISES_ADMIN_MSG_STATUS_UPDATED_OK"] = "Le statut de la devise %s a bien été changé.";
 $GLOBALS["STR_MODULE_DOWNLOAD_ADMIN_DELETED"] = "Tous les fichiers téléchargés ont été effacés du serveur.";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_TITLE"] = "Génération de facture en PDF";
-$GLOBALS["STR_MODULE_FACTURES_ADMIN_FILTER_HEADER"] = "Filtre (par id de commande OU par date de paiement)";
+$GLOBALS["STR_MODULE_FACTURES_ADMIN_FILTER_HEADER"] = "Filtre (par id de commande OU par date de facture)";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ID_BEGIN"] = "Id de début";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ID_END"] = "Id de fin";
 $GLOBALS["STR_MODULE_FACTURES_ADMIN_ALL_BILLS_IN_ONE_FILE"] = "Toutes les factures dans un seul PDF affichable maintenant";
@@ -1922,6 +1954,7 @@ $GLOBALS["STR_MODULE_PREMIUM_ADMIN_ALLOW_ADD_PRODUCT_WITH_NO_STOCK_IN_CART"] = "
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_CATEGORY_OR_SUPPLIER_STOCK"] = "Choisir la catégorie et/ou le fournisseur dont vous souhaitez gérer le stock";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_CHOOSE_SUPPLIER"] = "Choisissez votre fournisseur";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_DAYS"] = "Délai de livraison prévu (en jours)";
+$GLOBALS["STR_MODULE_PREMIUM_ADMIN_DELIVERY_DELAY_SEVEN_DAYS"] = "Afficher la mention \"Article livrable dans un délai de 7 jours\"";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS"] = "Afficher les stocks";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_DISPLAY_STOCKS_PRODUCT"] = "Afficher le stock du produit";
 $GLOBALS["STR_MODULE_PREMIUM_ADMIN_EDIT"] = "Editer";
@@ -2051,6 +2084,7 @@ $GLOBALS["STR_ADMIN_TYPES_FORM_TITLE"] = "Ajouter ou modifier un mode de livrais
 $GLOBALS["STR_ADMIN_TYPES_KWIXO"] = "PAIEMENT KWIXO";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_DPD"] = "Relier ce mode de livraison à DPD";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_ICIRELAIS"] = "Relier ce mode de livraison à ICI relais";
+$GLOBALS["STR_ADMIN_TYPES_LINK_TO_MONDIAL_RELAY"] = "Relier ce mode de livraison à Mondial Relay";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO_EXPLAIN"] = "1 : Retrait de la marchandise chez le marchand<br />2 : Utilisation d'un réseau de points-retrait tiers (type Kiala, Alveol, etc.)<br />3 : Retrait dans un aéroport, une gare ou une agence de voyage<br />4 : Transporteur (La Poste, Colissimo, UPS, DHL... ou tout transporteur privé)<br />5 : Émission d'un billet électronique, téléchargements (ce cas de figure est géré automatiquement)<br />";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_KWIXO"] = "Asssocier le type de transport à l'un des types de transport prédéfinis pour KWIXO";
 $GLOBALS["STR_ADMIN_TYPES_LINK_TO_SOCOLISSIMO"] = "Relier ce mode de livraison à SO Colissimo";
@@ -2076,6 +2110,13 @@ $GLOBALS["STR_ADMIN_SITE_ACCESS_STATISTICS"] = "Statistiques accès site interne
 $GLOBALS["STR_ADMIN_ASSOCIATED"] = "Associer";
 $GLOBALS["STR_ADMIN_DISASSOCIATED"] = "Désassocier";
 
+$GLOBALS["STR_PRICE_ESTIMATE"] = "Estimation du prix";
+
+$GLOBALS['STR_ADMIN_HTML_END_PROCESS_ORDER'] = "Fin du process de command court";
+$GLOBALS['STR_ADMIN_HTML_HEADER_LOGO_SIGNATURE'] = "Signature logo";
+$GLOBALS['STR_MODULE_PREMIUM_ADMIN_DELIVERY_SCALE_STOCK'] = "Jours ? Semaine ? ou Mois ?";
+$GLOBALS['STR_ADMIN_HTML_CONTENT_MAIN_CONTENT'] = "Zone HTML HAUT home";
+$GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER_FULL_CUSTOM_HTML'] = "Footer full html";
 $GLOBALS["STR_ADMIN_ONLY_INLINE_QUANTITY_ORDER"] = "Exporter le détail des commandes au format CSV avec une ligne par produit commandé";
 
 $GLOBALS["STR_ADMIN_CARROUSEL_CATEGORY"] = "Carrousel de la catégorie";
@@ -2092,12 +2133,12 @@ $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_GROUP"] = "Groupe";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_STATUS"] = "Status";
 $GLOBALS["STR_MODULE_ATTRIBUTS_ADMIN_CONDIT"] = "Condit";
 $GLOBALS["STR_ADMIN_HEADING"] = "entête";
-$GLOBALS["STR_ADMIN_PRIMARY_KEY_MANDATORY"] = "La clé primaire '%s' doit être renseignée.";
-$GLOBALS["STR_ADMIN_FIELD_VALUE_MANDATORY"] = "La valeur du champ '%s' doit être renseignée pour une insertion.";
-$GLOBALS["STR_ADMIN_CODE_MAX_CHAR_REACHED"] = "Le code '%s' fait %s caractères au lieu de %s caractères maximum autorisés.";
-$GLOBALS["STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE"] = "La valeur '%s' n'existe pas dans la table '%s' pour le champ '%s'";
-$GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "La colonne '%s' doit contenir au choix : %s";
-$GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "La valeur du champ '%s' doit être unique.";
+$GLOBALS["STR_ADMIN_PRIMARY_KEY_MANDATORY"] = "La clé primaire \"%s\" doit être renseignée.";
+$GLOBALS["STR_ADMIN_FIELD_VALUE_MANDATORY"] = "La valeur du champ \"%s\" doit être renseignée pour une insertion.";
+$GLOBALS["STR_ADMIN_CODE_MAX_CHAR_REACHED"] = "Le code \"%s\" fait %s caractères au lieu de %s caractères maximum autorisés.";
+$GLOBALS["STR_ADMIN_VALUE_NOT_EXIST_IN_TABLE"] = "La valeur \"%s\" n'existe pas dans la table \"%s\" pour le champ \"%s\".";
+$GLOBALS["STR_ADMIN_COLUMN_CONTAINS_CHOICE"] = "La colonne \"%s\" doit contenir au choix : %s";
+$GLOBALS["STR_ADMIN_FIELD_UNIQUE"] = "La valeur du champ \"%s\" doit être unique.";
 $GLOBALS["STR_ADMIN_IMPORT_USER_END"] = "Fin de l'import des utilisateurs : %s insérés, %s MAJ<br />E-mails avec mot de passe générés envoyés.";
 $GLOBALS["STR_ADMIN_IMPORT_FILE_END"] = "Fin de l'import du fichier : %s lignes insérées, %s MAJ";
 $GLOBALS["STR_ADMIN_NO_PROBLEM_OCCURED"] = "Pas d'anomalie trouvée, vous pouvez valider ci-dessous pour réaliser l'import";
@@ -2114,28 +2155,33 @@ $GLOBALS["STR_ADMIN_PRICE"] = "prix";
 $GLOBALS["STR_ADMIN_COLUMN_TTTLE_FIRST_LINE"] = "Mettre les titres de colonnes en première ligne (si disponible pour le type d'export choisi)";
 $GLOBALS["STR_ADMIN_ADD_FOOTER_FILE_EXPORT"] = "Mettre un footer contenant les totaux à la fin du fichier d'export (la colonne montant_ht doit être présente dans le fichier)";
 $GLOBALS["STR_ADMIN_COLUMN_AVAILABLE"] = "Colonnes disponibles";
-$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE"] = "Vous devez déplacer avec drag&drop les colonnes que vous souhaitez exclure du fichier d'export vers ce tableau";
-$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "Fichier à générer";
-$GLOBALS["STR_ADMIN_FILE_COLUMN_EXPORTED"] = "Colonnes du fichier qui seront exportées";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP_FOR_EXCLUDE"] = "Glissez / déposez ci-dessous les noms de colonnes EXCLUES";
+$GLOBALS["STR_ADMIN_GENERATE_FILE"] = "Colonnes inclues";
+$GLOBALS["STR_ADMIN_FILE_COLUMN_EXPORTED"] = "Glissez / déposez ci-dessous les noms de colonnes souhaitées";
 $GLOBALS["STR_ADMIN_SELECTED_COLUMN_FOR_EXPORT"] = "Après le choix du type de données ci-dessus, dans cette section vous pourrez sélectionner et ordonner les colonnes que vous souhaitez exporter.";
 $GLOBALS["STR_ADMIN_SOURCE_FILE"] = "Fichier Source";
-$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP"] = "Colonnes à déplacer avec drag&drop vers le tableau de correspondance";
+$GLOBALS["STR_ADMIN_MOVE_COLUMN_WITH_DRAG_DROP"] = "Colonnes à glisser / déposer vers le tableau de correspondance";
 $GLOBALS["STR_ADMIN_IMPORT_MANDATORY_FIELD_INFORMATION_MESSAGE"] = "* Champs obligatoires pour insertions : associez avec une colonne ou indiquez une valeur par défaut &nbsp; &nbsp; ** Clé primaire obligatoire et unique";
 $GLOBALS["STR_ADMIN_SITE_COLUMN_IN_DATABASE"] = "Colonne %s en base de données";
 $GLOBALS["STR_ADMIN_TYPE"] = "Type";
-$GLOBALS["STR_ADMIN_IMPORTED_COLUMN"] = "Colonne importée (faire drag&drop)";
+$GLOBALS["STR_ADMIN_IMPORTED_COLUMN"] = "Colonne importée (faire glisser / déposer)";
 $GLOBALS["STR_ADMIN_DEFAULT_VALUE"] = "Valeur par défaut";
 $GLOBALS["STR_ADMIN_CORRESPONDANCE_COLUMN_FILE_AND_SITE"] = "Après le choix du type de données à importer, dans cette section vous pourrez faire la correspondance entre les colonnes de votre fichier et les colonnes gérées par %s.";
 $GLOBALS["STR_ADMIN_SEND_EMAIL_TO_USERS"] = "Envoyer des emails aux utilisateurs";
 $GLOBALS["STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER"] = "Bas de page produit";
 $GLOBALS["STR_ADMIN_HTML_HOME_HEADER"] = "Sous le menu de la page d'accueil";
-
-
-
-
-
-
-
-
-
-
+$GLOBALS["STR_ADMIN_SHOW_TAG_LIST_EXPLANATION"] = "Un tag est un élément qui sera remplacé automatiquement par la bonne valeur (associée au destinataire) lors de l'envoi de l'email. Pour ajouter un tag au texte de l'email vous pouvez cliquer desssus.";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION'] = "Afficher en page d'accueil et dans la rubrique Notre sélection";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION'] = "Ne pas Afficher en page d'accueil et dans la rubrique Notre sélection";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW'] = "Afficher dans la rubrique Nouveautés";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_NEW'] = "Ne pas Afficher dans la rubrique Nouveautés";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_PROMO'] = "Afficher dans la rubrique Promotions";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_PROMO'] = "Ne pas Afficher dans la rubrique Promotions";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_BEST_SELLERS'] = "Afficher dans la rubrique Meilleures ventes";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_BEST_SELLERS'] = "Ne pas Afficher dans la rubrique Meilleures ventes";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_RECOMMENDED_PRODUCTS'] = "Afficher dans les produits recommandés";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_TOP'] = "Afficher dans le bloc A la une";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT'] = "Mettre en ligne";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT'] = "Mettre hors ligne";
+$GLOBALS['STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT'] = "Supprimer les produits sélectionnés";
+$GLOBALS['STR_ADMIN_NO_UPDATE_VERSION'] = "On n'utilise pas cette page pour mettre à jour la base de données pour ce site. Veuillez contacter le support";

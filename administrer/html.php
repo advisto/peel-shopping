@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: html.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: html.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -162,6 +162,10 @@ function affiche_formulaire_home(&$frm)
 	$emplacement_array['contact_page'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CONTACT_PAGE'];
 	$emplacement_array['product_detail_html_zone'] = $GLOBALS['STR_ADMIN_HTML_PRODUCT_PAGE_FOOTER'];
 	$emplacement_array['content_main_content'] = $GLOBALS['STR_ADMIN_HTML_HOME_HEADER'];
+	$emplacement_array['end_process_order'] = $GLOBALS['STR_ADMIN_HTML_END_PROCESS_ORDER'];
+	$emplacement_array['header_logo_signature'] = $GLOBALS['STR_ADMIN_HTML_HEADER_LOGO_SIGNATURE'];
+	$emplacement_array['footer_full_custom_html'] = $GLOBALS['STR_ADMIN_HTML_PLACE_FOOTER_FULL_CUSTOM_HTML'];
+
 	if(check_if_module_active('carrousel', null, true)){
 		$emplacement_array['entre_carrousel'] = $GLOBALS['STR_ADMIN_HTML_PLACE_CARROUSEL_TOP'];
 	}
@@ -207,6 +211,15 @@ function affiche_formulaire_home(&$frm)
 			'name' => $GLOBALS['lang_names'][$lng]
 			);
 	}
+	
+	//On met à disposition les emplacements des mega menu existant
+	$sql_emplacement_menu_html = query("SELECT emplacement
+		FROM peel_html
+		WHERE emplacement LIKE '%menu_html_%'");
+	while ($result_emplacement_menu_html = fetch_assoc($sql_emplacement_menu_html)) {
+		$emplacement_array[$result_emplacement_menu_html['emplacement']] = 'Mega menu '. str_replace('menu_html_', '', $result_emplacement_menu_html['emplacement']);
+	}
+	
 	$tpl->assign('langs', $tpl_langs);
 	$tpl->assign('etat', vb($frm["etat"]));
 	$tpl->assign('emplacement', vb($frm['emplacement']));

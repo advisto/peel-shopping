@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -28,6 +28,9 @@
 				<p>{{ STR_ZIP }}{{ STR_BEFORE_TWO_POINTS }}: <span class="right">{{ code_postal1 }}</span></p>
 				<p>{{ STR_TOWN }}{{ STR_BEFORE_TWO_POINTS }}: <span class="right">{{ ville1 }}</span></p>
 				<p>{{ STR_COUNTRY }}{{ STR_BEFORE_TWO_POINTS }}: <span class="right">{{ pays1 }}</span></p>
+				{% if (num_tva1) %}
+				<p>{{ STR_INTRACOM_FORM }}{{ STR_BEFORE_TWO_POINTS }}: <span class="right">{{ num_tva1 }}</span></p>
+                {% endif %}
 				{% if (commentaires) %}
 				<p>{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}: <span class="right">{{ commentaires|nl2br_if_needed }}</span></p>
 				{% endif %}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -80,6 +80,12 @@
 			<td>{{ STR_MODULE_ATTRIBUTS_ADMIN_NO_PROMOTION_OPTION_ATTRIBUT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>
 				<input type="checkbox" name="disable_reductions" value="1" {% if disable_reductions %}checked="checked"{% endif %} />
+			</td>
+		</tr>		
+		<tr>
+			<td>{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="text" class="form-control" name="position" value="{{ position|str_form_value }}">
 			</td>
 		</tr>
 		<tr>

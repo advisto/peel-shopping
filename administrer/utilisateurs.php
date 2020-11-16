@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: utilisateurs.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: utilisateurs.php 64750 2020-10-21 16:20:30Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -44,6 +44,11 @@ if (!empty($_POST['print_all_bill'])) {
 			$output .= $form_error_object->text('token');
 		}
 	}
+}
+
+if (isset($_POST['send_email_to_selected'])) {
+	// envoi d'email aux utilisateurs cochés
+	redirect_and_die($GLOBALS['wwwroot'] . '/modules/webmail/administrer/webmail_send.php?'.http_build_query(array('user_ids' => $_REQUEST['user_ids'])));
 }
 
 switch (vb($_REQUEST['mode'])) {
@@ -248,6 +253,32 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		$output .= afficher_liste_utilisateurs($priv, $cle);
 		break;
+		
+	case $GLOBALS['STR_DELETE_SELECTION'] :
+		// suppression groupée d'utilisateur. Le mode à pour valeur le value du bouton submit, donc différent par langue
+		if (!empty($frm['user_ids'])) {
+			foreach($frm['user_ids'] as $id_utilisateur){
+				if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
+					// L'utilisateur qu'on veut modifier n'est pas un administrateur, ou alors l'utilisateur loggué a pas le droit de le modifier
+					$user_infos = get_user_information($id_utilisateur);
+					if(!empty($user_infos)) {
+						$output .= efface_utilisateur($id_utilisateur);
+						$annonce_active = false;
+						if (check_if_module_active('annonces')) {
+							$output .= delete_user_ads($id_utilisateur);
+							$annonce_active = true;
+						}
+						$output .=  $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_UTILISATEURS_MSG_DELETED_OK'] . ($annonce_active?' - ' . $GLOBALS['STR_MODULE_ANNONCES_ADMIN_UTILISATEURS_ADS_ALSO_DEACTIVATED'] : ''), $user_infos['email'])))->fetch();
+					}
+				} else {
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => sprintf($GLOBALS['STR_RIGHTS_LIMITED'], StringMb::strtoupper($_SESSION['session_utilisateur']['priv']))))->fetch();
+				}
+			}
+		}
+		
+		$output .= afficher_liste_utilisateurs($priv, $cle);
+		break;
+
 
 	case "supprlogo" :
 		if(!a_priv('admin*', false, false, $id_utilisateur) || (a_priv('admin', false, true) || (!a_priv('admin', false, false, $id_utilisateur) && (a_priv('admin_finance', false, true) || a_priv('admin_operations', false, true) || a_priv('admin_productsline', false, true))))) {
@@ -426,7 +457,7 @@ switch (vb($_REQUEST['mode'])) {
 		
 	case "phone_call" :
 		if ((!empty($_POST['phone_emitted_submit']) || !empty($_GET['phone_emitted_submit']))) {
-			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'PHONE_EMITTED', 'NOT_ENDED_CALL', nohtml_real_escape_string((!empty($_POST['form_phone_comment'])?$_POST['form_phone_comment']:'')));
+			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'PHONE_EMITTED', 'NOT_ENDED_CALL', (!empty($_POST['form_phone_comment'])?$_POST['form_phone_comment']:''));
 			if (!empty($_GET['callee']) && check_if_module_active('phone_cti')) {
 				$query = query('SELECT telephone, pays
 					FROM peel_utilisateurs
@@ -441,7 +472,7 @@ switch (vb($_REQUEST['mode'])) {
 			}
 		}
 		if (!empty($_POST['phone_received_submit'])) {
-			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'PHONE_RECEIVED', 'NOT_ENDED_CALL', nohtml_real_escape_string((!empty($_POST['form_phone_comment'])?$_POST['form_phone_comment']:'')));
+			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'PHONE_RECEIVED', 'NOT_ENDED_CALL', (!empty($_POST['form_phone_comment'])?$_POST['form_phone_comment']:''));
 		}
 		if (!empty($_POST['turn_off_phone'])) {
 			// On ne peut pas utiliser tracert_history_admin car action SQL trop particulière
@@ -456,7 +487,7 @@ switch (vb($_REQUEST['mode'])) {
 		
 	case "event_comment":
 		if (!empty($_POST['form_event_comment'])) {
-			// On n'enregistre que les événements avec du texte
+			// On n'enregistre que les évènements avec du texte
 			tracert_history_admin(intval($_REQUEST['id_utilisateur']), 'EVENT', '', (!empty($_POST['form_event_comment'])?$_POST['form_event_comment']:''));
 		}
 		$output .= affiche_formulaire_modif_utilisateur($id_utilisateur);
@@ -621,7 +652,7 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		break;
 	case 'send_email_alert':
-		call_module_hook('user_send_email_alert_admin', array('id_utilisateur'=>$_GET['id_utilisateur']));
+		call_module_hook('user_send_email_alert_admin', array('id_utilisateur' => $_GET['id_utilisateur']));
 		$output .= affiche_formulaire_modif_utilisateur($_GET['id_utilisateur']);
 		break;
 	
@@ -652,7 +683,7 @@ switch (vb($_REQUEST['mode'])) {
 					$this_wwwroot =  $GLOBALS['wwwroot'];
 				}
 				if(vb($GLOBALS['site_parameters']['chart_product']) == 'flot') {
-					$output .=  '<div class="center">' . get_flot_chart('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', 'line', $this_wwwroot . '/modules/chart/', 'date_format_veryshort') . '</div>';
+					$output .=  '<div class="center">' . get_flot_chart('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', 'line', $this_wwwroot . '/modules/chart/', 'date_format_veryshort', array('period' => 'jour')) . '</div>';
 				} else {
 					$output .=  '<div class="center">' . open_flash_chart_object_str('100%', 300, $GLOBALS['administrer_url'] . '/chart-data.php?type=users-count&date1=' . date('Y-m-d', time()-3600 * 24 * 90) . '&date2=' . date('Y-m-d', time()) . '&width=1000', true, $this_wwwroot . '/modules/chart/') . '</div>';
 				}
@@ -660,6 +691,8 @@ switch (vb($_REQUEST['mode'])) {
 		}
 		break;
 }
+
+
 
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
@@ -861,7 +894,7 @@ function afficher_formulaire_utilisateur(&$frm)
 			);
 	}
 	$tpl->assign('util_options', $tpl_util_options);
-	if (check_if_module_active('sauvegarde_recherche')) {
+	if (check_if_module_active('user_alerts')) {
 		$tpl->assign('user_alerts', display_ads_search_list($frm['id_utilisateur'], false));
 	}
 	$tpl->assign('is_annonce_module_active', check_if_module_active('annonces'));
@@ -1267,7 +1300,7 @@ function afficher_formulaire_utilisateur(&$frm)
 		$tpl2->assign('event_comment', (!empty($_POST['event_comment']) ? $_POST['event_comment'] : ''));
 		$tpl2->assign('affiche_recherche_connexion_user',  affiche_recherche_connexion_user(array('user_id' => $frm['id_utilisateur']), false));
 		if (check_if_module_active('annonces')) {
-			$tpl2->assign('affiche_liste_abus', affiche_liste_abus(array('annonceur'=>$frm['pseudo']), true, false));
+			$tpl2->assign('affiche_liste_abus', affiche_liste_abus(array('annonceur' => $frm['pseudo']), true, false));
 		}
 		$tpl2->assign('actions_moderations_user', affiche_actions_moderations_user($frm['id_utilisateur']));
 		$tpl2->assign('columns', $columns);

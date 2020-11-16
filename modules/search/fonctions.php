@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -167,6 +167,31 @@ function search_hook_search_form_template_data(&$params) {
 				}
 			}
 			$results['continent_inputs'] = $tpl_continent_inps;
+		}
+		if (!empty($GLOBALS['site_parameters']['localisation_input_on_search_form'])) {
+			$tpl_localisation__inps = array();
+			unset($sql);
+			
+			$sql = "SELECT id, name_" . $_SESSION['session_langue'] . " AS name
+				FROM peel_villes
+				WHERE " . get_filter_site_cond('villes') . " AND etat = 1
+				GROUP BY name
+				ORDER BY name";
+			
+			if(!empty($sql)) {
+				$query_localisation_ = query($sql);
+				while ($localisation = fetch_assoc($query_localisation_)) {
+					$tpl_localisation__inps[] = array('value' => $localisation['id'],
+						'issel' => !empty($params['frm']['localisation']) && is_array($params['frm']['localisation']) && in_array($localisation['id'], $params['frm']['localisation']),
+						'name' => $localisation['name']
+						);
+				}
+				$tpl_localisation__inps[] = array('value' => 35310,
+						'issel' => !empty($params['frm']['localisation']) && is_array($params['frm']['localisation']) && in_array(35310, $params['frm']['localisation']),
+						'name' => 'National'
+						);
+			}
+			$results['localisation_input'] = $tpl_localisation__inps;
 		}
 		if (!empty($GLOBALS['site_parameters']['ads_search_date_end_past'])) {
 			$results['date_end_future'] = (!empty($params['frm']['date_end']) && in_array('future', $params['frm']['date_end']));

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_affichage.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: caddie_affichage.php 64741 2020-10-21 13:48:51Z sdelaporte $
 include("../configuration.inc.php");
 include($GLOBALS['dirroot']."/lib/fonctions/display_caddie.php");
 
@@ -77,7 +77,7 @@ if (!empty($GLOBALS['site_parameters']['cart_measurement_max_quotation']) && che
 	}
 }
 
-call_module_hook('show_caddie_pre', array('user'=>vb($_SESSION['session_utilisateur']),'frm'=>$_POST, 'form_error_object'=>$form_error_object));
+call_module_hook('show_caddie_pre', array('user'=>vb($_SESSION['session_utilisateur']),'frm' => $_POST, 'form_error_object' => $form_error_object));
 
 if (isset($_POST['func'])) {
 	$mode = $_POST['func'];
@@ -88,8 +88,26 @@ if (isset($_POST['func'])) {
 if ($mode) {
 	switch ($mode) {
 		case "enleve" :
-			$_SESSION['session_caddie']->delete_line(intval(vb($_GET['ligne'])));
+			// On récupère le produit en surcoût, si il en existe, avec le technical_code "over_cost"
+			$sql_over_cost = 'SELECT id
+				FROM peel_produits 
+				WHERE technical_code = "over_cost"
+				LIMIT 1';
+			$query_over_cost = query($sql_over_cost);
+			$result_over_cost = fetch_assoc($query_over_cost);
+			if (!empty($result_over_cost)) {
+				// Si c'est le produit en surcoût on refuse la suppression et on affiche un message le signalant
+				if (vn($_GET['id']) == $result_over_cost['id'] && count($_SESSION['session_caddie']->articles) > 1){
+					$_SESSION['session_display_popup']['error_text'] = 'Vous ne pouvez pas supprimer cet article';
+				} else{
+					$_SESSION['session_caddie']->delete_line(intval(vb($_GET['ligne'])));
+				}
+			} else {
+				$_SESSION['session_caddie']->delete_line(intval(vb($_GET['ligne'])));
+			}
 			$_SESSION['session_caddie']->update();
+			$_SESSION['session_caddie']->manage_product_over_cost();
+
 			if ($_SESSION['session_caddie']->count_products() == 0) {
 				// Suite à la suppression du produit, il n'y a plus de produit dans le caddie. Donc on réinitialise le caddie pour remettre à 0 tous les totaux;
 				$_SESSION['session_caddie']->init();

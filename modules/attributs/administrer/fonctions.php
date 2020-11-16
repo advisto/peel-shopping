@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -244,7 +244,7 @@ function insere_nom_attribut($frm)
 	foreach ($GLOBALS['admin_lang_codes'] as $lng) {
 		$sql .= ", '" . nohtml_real_escape_string($frm['nom_' . $lng]) . "'";
 	}
-	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "', '" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "', '" . intval($frm['position']) . "')";
+	$sql .= ", '" . intval($frm['texte_libre']) . "', '" . intval($frm['upload']) . "', '" . nohtml_real_escape_string($frm['technical_code']) . "', '" . nohtml_real_escape_string($frm['type_affichage_attribut']) . "', '" . nohtml_real_escape_string($frm['show_description']) . "', '" . nohtml_real_escape_string(vn($frm['disable_reductions'])) . "', '" . intval(vn($frm['position'])) . "')";
 
 	query($sql);
 }
@@ -350,9 +350,12 @@ function affiche_liste_nom_attribut($start)
 	$tpl->assign('STR_TYPE', $GLOBALS['STR_TYPE']);
 	$tpl->assign('STR_ADMIN_CONFIRM_JAVASCRIPT', $GLOBALS['STR_ADMIN_CONFIRM_JAVASCRIPT']);
 	$tpl->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+	$tpl->assign('STR_ADMIN_DISASSOCIATED', $GLOBALS['STR_ADMIN_DISASSOCIATED']);
+	$tpl->assign('STR_ADMIN_ASSOCIATED', $GLOBALS['STR_ADMIN_ASSOCIATED']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_HANDLE_OPTIONS', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_HANDLE_OPTIONS']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPLOAD_FIELD']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_CUSTOM_TEXT', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_CUSTOM_TEXT']);
+	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS']);
 	$tpl->assign('STR_MODULE_ATTRIBUTS_ADMIN_UPDATE', $GLOBALS['STR_MODULE_ATTRIBUTS_ADMIN_UPDATE']);
 	$tpl->assign('STR_SEND', $GLOBALS['STR_SEND']);
 	$tpl->assign('STR_ADMIN_UPDATE', $GLOBALS['STR_ADMIN_UPDATE']);
@@ -444,6 +447,8 @@ function insere_attribut($id, $frm)
 	}
 	$sql .= ")";
 	$qid = query($sql);
+	
+	return insert_id();
 }
 
 /**
@@ -887,7 +892,7 @@ function assign_or_unassign_nom_attribut($frm) {
 						}
 					} else {
 						// upload ou texte libre. 
-						// On regarde d'abord si l'asociation n'existe pas déjà.
+						// On regarde d'abord si l'association n'existe pas déjà.
 						$sql_attribut_assocation_exist = "SELECT *
 							FROM peel_produits_attributs
 							WHERE produit_id=".intval($result['produit_id']) ." AND nom_attribut_id=".intval($this_id_attribut);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: rpc.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 
@@ -35,7 +35,9 @@ $id_utilisateur = vb($_POST['id_utilisateur']);
 $apply_vat = vb($_POST['apply_vat']);
 $currency = vb($_POST['currency']);
 $currency_rate = vn($_POST['currency_rate']);
+$field_id = vn($_POST['field_id']);
 $results_array = array();
+$GLOBALS['found_words_array'] = array();
 if (!empty($_POST['maxRows'])) {
 	$maxRows = $_POST['maxRows'];
 } else {
@@ -44,11 +46,12 @@ if (!empty($_POST['maxRows'])) {
 if (empty($currency_rate)) {
 	$currency_rate = 1;
 }
+		
 if (StringMb::strlen($search)>0) {
-	$hook_result = call_module_hook('admin_rpc_post', array('mode' => $mode, 'search' => $search, 'maxRows' => $maxRows, 'results_array' => $results_array, 'page' => $page), 'array');
-	if (!empty($hook_result)) {
+	$hook_result = call_module_hook('admin_rpc_pre', array('mode' => $mode, 'search' => $search, 'maxRows' => $maxRows, 'results_array' => $results_array, 'page' => $page, 'frm' => $_POST), 'array');
+	if (!empty($hook_result['done'])) {
 		// Si le hook retourne des résultats, ceux ci sont prioritaire sur les résulats par défaut. En effet les résulats issues du hook sont d'un modèle différent des autres résultats par défaut, donc on ne peut pas faire de array_merge entre les resultats du hook et les résultats par défaut, ce ne serait pas cohérent de mixer 2 tableaux de résultats avec 2 architectures différentes
-		$results_array = $hook_result;
+		$results_array = $hook_result['results'];
 	} else {
 		if($mode=="products"){
 			$queries_results_array = get_quick_search_results($search, $maxRows);
@@ -170,7 +173,7 @@ if (!empty($_POST['return_json_array_with_raw_information'])) {
 		$tpl->assign('STR_ADMIN_OFFER_ADD_OFFER', $GLOBALS['STR_ADMIN_OFFER_ADD_OFFER']);
 	}
 	$tpl->assign('mode', $mode);
-	$hook_result = call_module_hook('admin_rpc_tpl', array('mode' => $mode, 'search' => $search, 'maxRows' => $maxRows, 'results_array' => $results_array), 'array');
+	$hook_result = call_module_hook('admin_rpc_tpl', array('mode' => $mode, 'search' => $search, 'maxRows' => $maxRows, 'results_array' => $results_array, 'field_id' => $field_id), 'array');
 	foreach($hook_result as $this_key => $this_value) {
 		$tpl->assign($this_key, $this_value);
 	}

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step1.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: order_step1.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}{if !empty($error_cvg)}
 	<p>{$error_cvg}</p>
 {/if}
@@ -85,16 +85,21 @@
 					</select>
 					{$pays1_error}
 				</div>
+				<div>                    
+					<label for="num_tva1"> {$STR_INTRACOM_FORM} {$STR_BEFORE_TWO_POINTS}: </label>
+					<input class="form-control" type="text" name="num_tva1" id="num_tva1" size="32" value="{$num_tva1|str_form_value}" />
+					{$num_tva1_error}
+				</div>
 			</fieldset>
 		</div>
 		{if $is_mode_transport}
-		<div class="col-sm-6">
+		<div class="col-sm-6" {if isset($mondial_relay_delivery_points)} hidden{/if}>
 			<fieldset>
 				<legend>{$STR_SHIP_ADDRESS}{$STR_BEFORE_TWO_POINTS}:</legend>
 				{if isset($LANG.STR_DELIVERY_DPD_SHIP_ADDRESS)}
 					{$LANG.STR_DELIVERY_DPD_SHIP_ADDRESS}
 				{/if}
-				{if isset($text_temp_STR_ADDRESS)}{$text_temp_STR_ADDRESS}{/if}
+				{if isset($text_temp_address)}{$text_temp_address}{/if}
 				<div>
 					<label for="personal_address_ship">{$STR_CHOOSE}{$STR_BEFORE_TWO_POINTS}:</label>
 					{$get_ship_user_address}
@@ -151,6 +156,9 @@
 					<input {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" type="text" name="ville2" id="ville2" size="32" value="{$ville2|str_form_value}" />
 					{$ville2_error}
 				</div>
+				{if isset($mondial_relay_delivery_points)} 
+					<input id="id_target" name="id_target" type="hidden" value="">
+				{/if}
 				<div>
 					<label for="pays2">{$STR_COUNTRY} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
 					<select {if $order_step1_adresse_ship_disabled}readonly="readonly"{/if} class="form-control" name="pays2" id="pays2">
@@ -174,6 +182,12 @@
 			</div>
 		{/if}
 	{/foreach}
+	{if isset($mondial_relay_delivery_points)} 
+		{$id_target_error}
+	{/if}
+	{if isset($mondial_relay_delivery_points)}
+		{$mondial_relay_delivery_points}
+	{/if}
 	<div class="row">
 		<div class="col-sm-12">
 			{if $is_payment_cgv}
@@ -194,6 +208,18 @@
 						{else}
 							<input name="document" type="file" value="" />
 						{/if}
+					</div>
+				</div>
+			</fieldset>
+			{/if}
+			{if $code_chorus_active}
+         	<fieldset>
+				<legend>{$STR_CHORUS_PRO}{$STR_BEFORE_TWO_POINTS}: </legend>
+				<div class="row formulaire-achat">
+					<div class="col-sm-6">
+						<label for="code_chorus1">{$STR_CHORUS_PRO_CODE_SERVICE} <span class="etoile">*</span>{$STR_BEFORE_TWO_POINTS}: </label>
+						<input class="form-control" type="text" name="code_chorus1" id="code_chorus1" size="32" value="{$code_chorus1|str_form_value}"/>
+						{$code_chorus1_error}
 					</div>
 				</div>
 			</fieldset>

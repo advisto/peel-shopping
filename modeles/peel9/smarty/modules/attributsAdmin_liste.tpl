@@ -1,9 +1,9 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -60,7 +60,7 @@
 							<option value="unassign">{$STR_ADMIN_DISASSOCIATED}</option>
 						</select>
 					</td><td>
-						{$STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS}
+						&nbsp;{$STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS}&nbsp;
 					</td><td>
 						<select class="form-control" name="categories">
 							{$categorie_options}

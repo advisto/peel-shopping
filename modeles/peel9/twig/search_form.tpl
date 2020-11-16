@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -63,7 +63,7 @@
 	</div>
 {% else %}
 <form class="search_form" action="{{ action|escape('html') }}" method="get">
-	{% if display == 'full' %}<h2>{{ STR_SEARCH }}{{ search }}</h2>{% endif %}
+	{% if display == 'full' %}<h2>{{ STR_SEARCH }} {{ search }}</h2>{% endif %}
 	<ul class="attribute_select_search attribute_select_search_part1">
 		<li class="input">
 			{{ STR_SEARCH }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control"  id="search_advanced_input" name="search" size="48" value="{{ value|str_form_value }}" placeholder="{{ STR_ENTER_KEY|str_form_value }}"{% if quick_add_product_from_search_page %} oninput="lookup(this.value, '{{ id_utilisateur }}', '{{ zone_tva }}', '{{ devise }}', '{{ currency_rate }}', 'search_product_list','#suggestions','search_product_list','{{ rpc_path }}');"{% endif %} />

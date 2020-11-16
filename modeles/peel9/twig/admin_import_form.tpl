@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -63,16 +63,17 @@
 
 	<h2>{{ STR_ADMIN_IMPORT_FILE_NAME }}{{ STR_BEFORE_TWO_POINTS }}:</h2>
 	<div class="center">
-		{% if import_file %}
-			{% include "uploaded_file.tpl" with {'f':import_file, 'STR_DELETE':STR_DELETE_THIS_FILE} %}
-		{% else %}
-			<input name="import_file" type="file" value="" />
-		{% endif %}
 		<p>{{ STR_ADMIN_IMPORT_FILE_ENCODING }}{{ STR_BEFORE_TWO_POINTS }}: <select class="form-control" name="data_encoding" style="width: 150px">
 				<option value="utf-8"{% if data_encoding == 'utf-8' %} selected="selected"{% endif %}>UTF-8</option>
 				<option value="iso-8859-1"{% if data_encoding == 'iso-8859-1' %} selected="selected"{% endif %}>ISO 8859-1</option>
 			</select></p>
 		<p>{{ STR_ADMIN_IMPORT_SEPARATOR }}{{ STR_BEFORE_TWO_POINTS }}: <input style="width:50px" type="text" id="separator" class="form-control" name="separator" value="{{ separator }}" /> ({{ STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN }})</p>
+
+		{% if import_file %}
+			{% include "uploaded_file.tpl" with {'f':import_file, 'STR_DELETE':STR_DELETE_THIS_FILE} %}
+		{% else %}
+			<input name="import_file" type="file" value="" />
+		{% endif %}
 
 	</div>
 	<h2>{{ STR_ADMIN_IMPORT_TYPE }}{{ STR_BEFORE_TWO_POINTS }}:</h2>
@@ -88,17 +89,20 @@
 			<div class="col-lg-12">
 				<div class="row">
 					<div class="col-sm-9 col-lg-9">
+						<h2>{{ STR_ADMIN_IMPORT_SAVE_IMPORT_PARAMS }}{{ STR_BEFORE_TWO_POINTS }}:</h2>
 						<div class="pull-right" style="margin:5px">
 							<table>
 								<tr>
 									<td style="padding:5px;">
 										<div class="input-group">
-											<select name="load_rule" class="form-control" id="load_rule">
-												<option value=""> -- </option>
-												{% for this_rule in rules_array %}
-													<option value="{{ this_rule }}">{{ this_rule }}</option>
-												{% endfor %}
-											</select>
+											<div id="load_rule_container">
+												<select name="load_rule" class="form-control" id="load_rule">
+													<option value=""> -- </option>
+													{% for this_rule in rules_array %}
+														<option value="{{ this_rule }}">{{ this_rule }}</option>
+													{% endfor %}
+												</select>
+											</div>
 											  <div class="input-group-btn">
 												<a href="#" onclick="return false;" class="btn btn-primary" data-target="basic" id="rules_get">{{ STR_LOAD_RULES }}</a>
 											</div>
@@ -109,6 +113,7 @@
 											<input type="text" id="rule_name" name="rule_name" class="form-control"/>
 											<span class="input-group-btn">
 												<a href="#" onclick="return false;" class="btn btn-success" data-target="basic" id="rules_set">{{ STR_SAVE_RULES }}</a>
+												<a href="#" onclick="return false;" class="btn btn-danger" data-target="basic" id="rules_delete">{{ STR_DELETE }}</a>
 											</span>
 										</div>
 									</td>
@@ -126,6 +131,7 @@
 		<br />
 	</div>
 	<h2>{{ STR_ADMIN_IMPORT_CORRESPONDANCE }}{{ STR_BEFORE_TWO_POINTS }}:</h2>
+	<div class="alert alert-info">{{ STR_ADMIN_IMPORT_CORRESPONDANCE_EXPLANATION }}</div>
 	<div class="well">
 		<div id="div_correspondance" class="collapse">
 			<div class="row">
@@ -140,7 +146,7 @@
 					</table>
 				</div>
 				{% for this_type,fields in inputs %}
-				<div style="display:none" class="fields_div" id="fields_{{ this_type }}">
+				<div id="fields_{{ this_type }}" class="div_hidden_by_default">
 					<div class="col-sm-1">
 						<div class="btn btn-default" onclick="move_draggable_fields('.contains_draggable', '#fields_{{ this_type }} .container_drop_draggable', '#fields_{{ this_type }}')">&gt;&gt;</div>
 						<div class="btn btn-default" onclick="move_draggable_fields('#fields_{{ this_type }} .container_drop_draggable', '.contains_draggable')">&lt;&lt;</div>
@@ -158,10 +164,10 @@
 							</tr>
 					{% for field_key,field in fields %}
 							<tr class="{% if field.primary %}bg-primary{% else %}{% if field.required %}bg-info{% endif %}{% endif %}">
-								<td><span{% if field.explanation %} data-toggle="tooltip" title="{{ field.explanation|escape('html') }}"{% endif %}>{{ field.field }}{% if field.primary %} **{% else %}{% if field.required %} *{% endif %}{% endif %}</span></td>
+								<td><span{% if field.explanation %} data-toggle="tooltip" title="{{ field.explanation|escape('html') }}"{% endif %}>{{ field.field_title }}{% if field.primary %} **{% else %}{% if field.required %} *{% endif %}{% endif %}</span></td>
 								<td>{{ field.type }}</td>
 								<td id="fields_{{ this_type }}_{{ field.field }}" class="container_drop_draggable"></td>
-								<td><input type="text" id="default_{{ this_type }}_{{ field.field }}" name="default_{{ this_type }}_{{ field.field }}" value="{{ field.default }}" class="form-control"{% if field.maxlength %} maxlength="{{ field.maxlength }}{% endif %}" /></td>
+								<td><input type="text" id="default_{{ this_type }}_{{ field.field }}" name="default_{{ this_type }}_{{ field.field }}" value="{{ field.default }}" class="form-control"{% if field.maxlength %} maxlength="{{ field.maxlength }}"{% endif %} /></td>
 							</tr>
 					{% endfor %}
 						</table>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -190,6 +190,7 @@ function affiche_liste_recherche($start)
 		foreach ($results_array as $ligne) {
 			$tpl_results[] = array(
 				'tr_rollover' => tr_rollover($i, true),
+				'id' => $ligne['id'],
 				'tag_name' => $ligne['tag_name'],
 				'drop_href' => get_current_url(false) . '?mode=suppr&id=' . $ligne['id'],
 				'edit_href' => get_current_url(false) . '?mode=modif&id=' . $ligne['id'],
@@ -201,6 +202,7 @@ function affiche_liste_recherche($start)
 		$tpl->assign('results', $tpl_results);
 	}
 	$tpl->assign('links_multipage', $Links->GetMultipage());
+	$tpl->assign('action', get_current_url(false) . '?start=0');
 	$tpl->assign('STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE', $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_LIST_TITLE"]);
 	$tpl->assign('STR_ADMIN_DELETE_WARNING', $GLOBALS["STR_ADMIN_DELETE_WARNING"]);
 	$tpl->assign('STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND', $GLOBALS["STR_MODULE_TAGCLOUD_ADMIN_NOTHING_FOUND"]);

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -143,6 +143,16 @@ if (!function_exists('get_cart_popup_div')) {
 		if(!empty($GLOBALS['site_parameters']['bootbox_dialog_buttons_success_link'][$product_object->technical_code])) {
 			// Configuration possible du lien du bouton "Continuer mes achats"
 			$tpl->assign('success_href', $GLOBALS['site_parameters']['bootbox_dialog_buttons_success_link'][$product_object->technical_code]);
+		}
+		
+		if(empty($GLOBALS['site_parameters']['cart_popup_current_page_success_href'])){
+			// On redirige le bouton "Continuer mes achats" vers la page précédement visitée
+			if(!empty($GLOBALS['site_parameters']['cart_popup_previous_page_success_href']) && !empty($_SESSION['product_details_previous_page_url'])) {
+				$tpl->assign('success_href', $_SESSION['product_details_previous_page_url']);
+			}
+		} else {
+			//on reste sur la même page
+			$tpl->assign('success_href', get_current_url(false));
 		}
 		
 		// On verifie si le technical code du produit correspond à un affichage spécial contenu dans "bootbox_dialog_buttons_success_label"

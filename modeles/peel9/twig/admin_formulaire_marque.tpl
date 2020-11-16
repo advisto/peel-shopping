@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -23,6 +23,15 @@
 			<td>{{ STR_ADMIN_POSITION }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td><input type="number" class="form-control" name="position" value="{{ position|html_entity_decode_if_needed|str_form_value }}" /></td>
 		</tr>
+	{% if importance and STR_ADMIN_IMPORTANCE %}
+		<tr>
+			<td>{{ STR_ADMIN_IMPORTANCE }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td>
+				<input type="number" class="form-control" name="importance" value="{{ importance|html_entity_decode_if_needed|str_form_value }}" />
+				<input type="hidden" name="importance_old" value="{{ importance }}" />
+			</td>
+		</tr>
+	{% endif %}
 		<tr>
 			<td>{{ STR_STATUS }}{{ STR_BEFORE_TWO_POINTS }}:</td>
 			<td>

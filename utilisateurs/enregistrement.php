@@ -1,19 +1,22 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: enregistrement.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: enregistrement.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_REGISTER', true);
 
 include("../configuration.inc.php");
+if (check_if_module_active('geoip') && !empty($GLOBALS['site_parameters']['filter_no_europ_enable'])) {
+	include("../modules/geoip/filter_no_europ.php");
+}
 include($GLOBALS['dirroot']."/lib/fonctions/display_user_forms.php");
 $GLOBALS['allow_fineuploader_on_page'] = true;
 if (est_identifie()) {
@@ -37,10 +40,11 @@ $GLOBALS['page_name'] = 'enregistrement';
 $GLOBALS['DOC_TITLE'] = $GLOBALS["STR_OPEN_ACCOUNT"];
 
 // initialisation des variables
-$frm = $_POST;
+$frm = $_POST; unset($frm['priv']);
 if(isset($frm['email'])) {
 	$frm['email'] = trim($frm['email']);
 }
+unset($frm['priv']);
 
 if (!empty($_GET['mode']) && $_GET['mode'] == 'register_validation' && !empty($_GET['email']) && !empty($_GET['hash'])) {
 	$sql = "SELECT * 
@@ -108,7 +112,7 @@ if(check_if_module_active('annonces')) {
 	$mandatory_fields['cgv_confirm'] = 'STR_ERR_CGV';
 	$mandatory_fields['mot_passe_confirm'] = 'STR_ERR_PASS_CONFIRM';
 }
-if(check_if_module_active('captcha')) {
+if(empty($GLOBALS['site_parameters']['google_recaptcha_sitekey']) && check_if_module_active('captcha')) {
 	$mandatory_fields['code'] = 'STR_EMPTY_FIELD';
 }
 if(empty($GLOBALS['site_parameters']['pseudo_is_not_used']) && empty($GLOBALS['site_parameters']['pseudo_is_optionnal'])) {
@@ -162,6 +166,21 @@ if (!empty($frm)) {
 				$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL']);
 			}
 		}
+		if (check_if_module_active('spam')) {
+			$add_mail_spam_error = is_spammer_email($frm['email']);
+			if($add_mail_spam_error){
+				$form_error_object->add('email', $GLOBALS['STR_ERR_SPAMMER_EMAIL']);
+			}
+
+			$add_ip_spam_error = is_spammer_ip();
+			if($add_ip_spam_error) {
+				// On fait croire au spammeur que la création du compte a réussi, pour éviter qu'il cherche à changer d'ip
+				include($GLOBALS['repertoire_modele'] . "/haut.php");
+				echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => StringMb::nl2br_if_needed(sprintf($GLOBALS['STR_LOGIN_OK3'], get_url('account'), get_url('account'), get_url('catalog'), get_url('catalog')))))->fetch();
+				include($GLOBALS['repertoire_modele'] . "/bas.php");
+				die();
+			}
+		}
 		if (!$form_error_object->has_error('email')) {
 			if (!EmailOK($frm['email'])) {
 				$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_BAD']);
@@ -172,15 +191,27 @@ if (!empty($frm)) {
 				$form_error_object->add('email', $GLOBALS['STR_ERR_EMAIL_STILL']);
 			}
 		}
+	}	
+	if(!empty($frm['form_verif'])) {
+		// ce champ n'est pas visible pour un utilisateur, il est utilisé pour détecter les bots qui le remplirons
+		die();
 	}
-	if (!empty($frm['code']) && check_if_module_active('captcha')) {
+	if (!empty($GLOBALS['site_parameters']['google_recaptcha_sitekey'])) {
+		$captcha = false;
+		if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {         
+			$captcha = $_POST['g-recaptcha-response'];
+		}
+		if(!$captcha){        
+			$form_error_object->add('code', $GLOBALS['STR_CODE_INVALID']);
+		}
+	} elseif (!empty($frm['code']) && check_if_module_active('captcha')) {
 		if (!check_captcha($frm['code'], $frm['code_id'])) {
 			$form_error_object->add('code', $GLOBALS['STR_CODE_INVALID']);
 			// Code mal déchiffré par l'utilisateur, on en donne un autre
 			delete_captcha(vb($frm['code_id']));
 			unset($frm['code']);
-		}
 	}
+    }
 	if(!empty($frm['token'])) {
 		if (!verify_token('get_user_register_form', 120, false)) {
 			$form_error_object->add('token', $GLOBALS['STR_INVALID_TOKEN']);
@@ -203,7 +234,7 @@ if (!empty($frm)) {
 			$frm['naissance'] = $frm['naissance_company'];
 		}
 		// Le formulaire envoyé est apparemment OK, on le traite
-		if (check_if_module_active('captcha')) {
+		if (empty($GLOBALS['site_parameters']['google_recaptcha_sitekey']) && check_if_module_active('captcha')) {
 			// Code OK on peut effacer le code
 			delete_captcha($frm['code_id']);
 		}
@@ -226,7 +257,7 @@ if (!empty($frm)) {
 			$result = fetch_assoc($query);
 
 			// On créer un tableau de correspondance entre les intitulés des champs et leurs noms en BDD
-			$field_name_mapping = array('email'=>$GLOBALS['STR_EMAIL'], 'pseudo'=>$GLOBALS['STR_PSEUDO'], 'civilite'=>$GLOBALS['STR_GENDER'], 'nom_famille'=>$GLOBALS['STR_NAME'], 'prenom'=>$GLOBALS['STR_FIRST_NAME'], 'societe'=>$GLOBALS['STR_SOCIETE'], 'siret'=>$GLOBALS['STR_COMPANY_IDENTIFICATION'], 'intracom_for_billing'=>$GLOBALS['STR_INTRACOM_FORM'], 'url'=>$GLOBALS['STR_WEBSITE'], 'type'=>$GLOBALS['STR_YOU_ARE'], 'activity'=>$GLOBALS['STR_ACTIVITY'], 'fonction'=>$GLOBALS['STR_FONCTION'], 'naissance'=>$GLOBALS['STR_NAISSANCE'], 'telephone'=>$GLOBALS['STR_TELEPHONE'], 'portable'=>$GLOBALS['STR_PORTABLE'], 'fax'=>$GLOBALS['STR_FAX'], 'adresse'=>$GLOBALS['STR_ADDRESS'], 'code_postal'=>$GLOBALS['STR_ZIP'], 'ville'=>$GLOBALS['STR_TOWN'], 'pays'=>$GLOBALS['STR_COUNTRY'], 'id_cat_1'=>$GLOBALS['STR_FIRST_CHOICE'], 'id_cat_2'=>$GLOBALS['STR_SECOND_CHOICE'], 'id_cat_3'=>$GLOBALS['STR_THIRD_CHOICE'], 'origin'=>$GLOBALS['STR_USER_ORIGIN'], 'logo'=>$GLOBALS['STR_LOGO'], 'newsletter'=>$GLOBALS['STR_NEWSLETTER_YES'], 'commercial'=>$GLOBALS['STR_COMMERCIAL_YES']); 
+			$field_name_mapping = array('email' => $GLOBALS['STR_EMAIL'], 'pseudo' => $GLOBALS['STR_PSEUDO'], 'civilite' => $GLOBALS['STR_GENDER'], 'nom_famille' => $GLOBALS['STR_NAME'], 'prenom' => $GLOBALS['STR_FIRST_NAME'], 'societe' => $GLOBALS['STR_SOCIETE'], 'siret' => $GLOBALS['STR_COMPANY_IDENTIFICATION'], 'intracom_for_billing' => $GLOBALS['STR_INTRACOM_FORM'], 'url' => $GLOBALS['STR_WEBSITE'], 'type' => $GLOBALS['STR_YOU_ARE'], 'activity' => $GLOBALS['STR_ACTIVITY'], 'fonction' => $GLOBALS['STR_FONCTION'], 'naissance' => $GLOBALS['STR_NAISSANCE'], 'telephone' => $GLOBALS['STR_TELEPHONE'], 'portable' => $GLOBALS['STR_PORTABLE'], 'fax' => $GLOBALS['STR_FAX'], 'adresse' => $GLOBALS['STR_ADDRESS'], 'code_postal' => $GLOBALS['STR_ZIP'], 'ville' => $GLOBALS['STR_TOWN'], 'pays' => $GLOBALS['STR_COUNTRY'], 'id_cat_1' => $GLOBALS['STR_FIRST_CHOICE'], 'id_cat_2' => $GLOBALS['STR_SECOND_CHOICE'], 'id_cat_3' => $GLOBALS['STR_THIRD_CHOICE'], 'origin' => $GLOBALS['STR_USER_ORIGIN'], 'logo' => $GLOBALS['STR_LOGO'], 'newsletter' => $GLOBALS['STR_NEWSLETTER_YES'], 'commercial' => $GLOBALS['STR_COMMERCIAL_YES']); 
 
 			// On créer une variable qui contiendra les informations sur le compte à valider et qui servira dans l'email de validation
 			$custom_template_tags['FIELDS'] = '';
@@ -254,7 +285,7 @@ if (!empty($frm)) {
 			$utilisateur = user_login_now($frm['email'], $frm['mot_passe']);
 		}
 
-		if(!empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
+		if(!empty($utilisateur) && !empty($_GET['devis']) && !empty($GLOBALS['site_parameters']['create_user_when_ask_for_quote']) && check_if_module_active('devis')) {
 			$output = Devis::create_devis_order($frm);
 		} else {
 			$output = get_user_register_success($frm);

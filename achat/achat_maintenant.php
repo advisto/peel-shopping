@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: achat_maintenant.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: achat_maintenant.php 64741 2020-10-21 13:48:51Z sdelaporte $
 include("../configuration.inc.php");
 $GLOBALS['allow_fineuploader_on_page'] = true;
 
@@ -41,6 +41,7 @@ if (!empty($_SESSION['session_caddie']->typeId)) {
 			// Le produit le plus grand du panier dépasse la taille maximal autorisé pour le transporteur choisi (TNT)
 			// Il faut afficher un message spécifique dans ce cas
 			$short_order_process = true;
+			$_SESSION['session_commande']['is_quote'] = true;
 		}
 	if (empty($short_order_process)) {
 		// $short_order_process : Si on est dans un cas de figure avec un dépassement de seuil (poids ou dimension), le type de transport choisi n'est plus cohérent. Mais comme on passe en mode de process court le type choisi n'a plus d'importance, donc dans ce cas on ne veut pas passer par ce morceau de code qui vérifie la cohérence du panier.
@@ -65,6 +66,7 @@ if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 	$user_table_fields_names = get_table_field_names('peel_utilisateurs');
 	$order_table_fields_names = get_table_field_names('peel_commandes');
 }
+
 if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUEST['PUDOFOID']) && !empty($_REQUEST['CEEMAIL']) && !empty($_REQUEST['SIGNATURE']) && !empty($_REQUEST['ORDERID'])) {
 	// On veut vérifier s'il y a eu passage par la page SO de SoColissimo
 	put_session_commande_from_so_page();
@@ -74,7 +76,19 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 }  elseif (!empty($_GET['appuId'])){
 	put_session_commande_from_ups_page($_GET);
 } elseif (!empty($_POST)) {
-	put_session_commande($_POST);
+    //On veut inserer le numéro de tva dans la session session_caddie
+    if(isset($_POST['num_tva1'])){        
+        $_SESSION['session_caddie']->num_tva = $_POST['num_tva1'];        
+    }
+    //On veut inserer le code chorus dans la session session_caddie
+    if(isset($_POST['code_chorus1']) && !empty($_POST['code_chorus1'])){        
+        $_SESSION['session_caddie']->code_chorus = $_POST['code_chorus1'];        
+    }
+    //On veut inserer la Siret dans la session session_caddie
+    if(isset($_POST['siret1']) && !empty($_POST['siret1'])){        
+        $_SESSION['session_caddie']->siret =$_POST['siret1'];        
+    }
+	put_session_commande($_POST);    
 	if(empty($GLOBALS['site_parameters']['user_multiple_addresses_disable'])) {
 		// En cas de changement d'adresse par l'utilisateur depuis le menu déroulant (fonction get_personal_address_form)
 		if(vb($_POST['personal_address_bill']) == 'manage' || vb($_POST['personal_address_ship']) == 'manage') {
@@ -95,6 +109,8 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			'email1' => $GLOBALS['STR_ERR_EMAIL'],
 			'adresse1' => $GLOBALS['STR_ERR_ADDRESS'],
 			'code_postal1' => $GLOBALS['STR_ERR_ZIP'],
+			// 'num_tva1' => $GLOBALS['STR_INTRACOM_FORM'],
+			//'code_chorus1' => 'Code chorus',
 			'ville1' => $GLOBALS['STR_ERR_TOWN']);
 		if (empty($GLOBALS['site_parameters']['order_process_disable_cgv'])) {
 			$check_fields['cgv'] = $GLOBALS['STR_ERR_CGV'];
@@ -137,6 +153,9 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 		if(vb($_POST['payment_technical_code']) == 'order_form' && empty($_SESSION['session_commande']['commentaires'])) {
 			$form_error_object->add('order_form_payment_methods', $GLOBALS['STR_ORDER_FORM'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':' . $GLOBALS['STR_EMPTY_FIELD']);
 		}
+		if(check_if_module_active('mondial_relay') && !empty($_SESSION['session_commande']['is_mondial_relay_order'])) {
+			$check_fields['id_target'] = $GLOBALS['STR_ERR_MONDIAL_RELAY'];
+		}
 		$form_error_object->valide_form($_SESSION['session_commande'], $check_fields);
 		$_SESSION['session_caddie']->set_paiement($_POST['payment_technical_code']);
 		$_SESSION['session_caddie']->update();
@@ -145,13 +164,17 @@ if (check_if_module_active('socolissimo') && !empty($_REQUEST) && !empty($_REQUE
 			// Pas d'erreur dans le formulaire de commande.
 			if (!empty($GLOBALS['site_parameters']['register_during_order_process']) && !empty($_POST['register_during_order_process'])) {
 				// Création du compte en fonction du paramètrage et du souhait de l'utilisateur.
-				// Conversion des données fournies dans le formulaire d'adresse de facturation avant de transmettre à la fonction de création d'utilisateur
+				// Conversion des données fournies dans le formulaire d'adresse de facturation avant de transmettre à la fonction de création d'utilisateur                
+				$frm = array();
 				$frm['societe'] = vb($_SESSION['session_commande']['societe1']);
 				$frm['nom_famille'] = vb($_SESSION['session_commande']['nom1']);
 				$frm['prenom'] = vb($_SESSION['session_commande']['prenom1']);
 				$frm['telephone'] = vb($_SESSION['session_commande']['contact1']);
 				$frm['adresse'] = vb($_SESSION['session_commande']['adresse1']);
 				$frm['code_postal'] = vb($_SESSION['session_commande']['code_postal1']);
+				$frm['num_tva'] = vb($_SESSION['session_commande']['num_tva1']);
+				$frm['code_chorus'] = vb($_SESSION['session_commande']['code_chorus1']);
+				$frm['siret'] = vb($_SESSION['session_commande']['siret1']);
 				$frm['ville'] = vb($_SESSION['session_commande']['ville1']);
 				$frm['pays'] = vb($_SESSION['session_commande']['pays1']);
 				$frm['email'] = vb($_SESSION['session_commande']['email1']);
@@ -249,15 +272,27 @@ foreach(array('bill' => 1, 'ship' => 2) as $address_type => $session_commande_ad
 		$where = 'id_utilisateur = "' . intval($user_id) . '"';
 		
 		$table_to_use = 'peel_utilisateurs';
-	} else {
+	} else {        
 		// Adresse renseignée depuis la page de création d'adresse utilisateurs/adresse.php
 		$where = 'id="'.intval($this_new_address).'"';
 		$table_to_use = 'peel_adresses';
 	}
-	// Recherche des informations de l'adresse choisie
-	$sql = 'SELECT civilite, prenom, nom_famille AS nom, societe, IF(portable!="", portable, telephone) AS contact, adresse, code_postal, ville, pays, email 
+    if($table_to_use == 'peel_adresses'){ 
+        //premier chargement
+        // Recherche des informations de l'adresse choisie
+	    $sql = 'SELECT civilite, prenom , num_tva , nom_famille AS nom, societe, IF(portable!="", portable, telephone) AS contact, adresse, code_postal, ville, pays, email 
 		FROM ' . word_real_escape_string($table_to_use) . ' 
 		WHERE ' . $where;
+    } else {       
+        // Recherche des informations de l'adresse choisie
+	    $sql = 'SELECT civilite , intracom_for_billing , prenom,nom_famille AS nom, societe, IF(portable!="", portable, telephone) AS contact, adresse, code_postal, ville, pays, email 
+		FROM ' . word_real_escape_string($table_to_use) . ' 
+		WHERE ' . $where;
+    }
+	 // Recherche des informations de l'adresse choisie
+     /* $sql = 'SELECT civilite, prenom, nom_famille AS nom, societe, IF(portable!="", portable, telephone) AS contact, adresse, code_postal, ville, pays, email 
+      FROM ' . word_real_escape_string($table_to_use) . ' 
+      WHERE ' . $where;*/
 	$q = query($sql);
 	if($result = fetch_assoc($q)) {
 		foreach($result as $key => $value) {
@@ -317,7 +352,6 @@ if(!$zone_ok) {
 // Adresse de facturation :
 // Pour un mode de livraison rattaché ou non à SoColissimo : elle est préremplie en STEP 1 avec les infos du compte utilisateur
 // En STEP 2, on la récupere après traitement du formulaire dans $_SESSION['session_commande']
-
 $frm['societe1'] = vb($_SESSION['session_commande']['societe1']);
 $frm['nom1'] = vb($_SESSION['session_commande']['nom1']);
 $frm['prenom1'] = vb($_SESSION['session_commande']['prenom1']);
@@ -326,6 +360,22 @@ $frm['adresse1'] = vb($_SESSION['session_commande']['adresse1']);
 $frm['code_postal1'] = vb($_SESSION['session_commande']['code_postal1']);
 $frm['ville1'] = vb($_SESSION['session_commande']['ville1']);
 $frm['pays1'] = vb($_SESSION['session_commande']['pays1']);
+$frm['code_chorus1'] = vb($_SESSION['session_commande']['code_chorus1']);
+$frm['siret1'] = vb($_SESSION['session_commande']['siret1']);
+
+/*
+	si $table_to_use == 'peel_adresses' alors $frm['num_tva1'] est défini dans le bloc foreach($result as $key => $value) { vers la ligne 300.
+	if($table_to_use == 'peel_adresses') $frm['num_tva1'] = vb($_SESSION['session_commande']['num_tva1']);  
+	else $frm['num_tva1'] = vb($_SESSION['session_commande']['intracom_for_billing1']);
+*/
+
+if(empty($_SESSION['session_commande']['num_tva1'])) {
+    $frm['num_tva1'] = vb($_SESSION['session_commande']['intracom_for_billing1']);
+}
+elseif(empty($_SESSION['session_commande']['intracom_for_billing1'])) {   
+    $frm['num_tva1'] = vb($_SESSION['session_commande']['num_tva1']);
+}
+
 $frm['email1'] = vb($_SESSION['session_commande']['email1']);
 if (!empty($GLOBALS['site_parameters']['order_specific_field_titles'])) {
 	foreach($GLOBALS['site_parameters']['order_specific_field_titles'] as $this_field => $this_title) {
@@ -346,11 +396,11 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address
 	// - Pour un mode de livraison non rattaché à SO Colissimo : elle est préremplie en STEP 1 avec les infos du compte utilisateur
 	// - Pour un mode de livraison rattaché à SO Colissimo, la page SO vient avant STEP 1, et on a donc déjà saisi et validé l'adresse de livraison. ---> les infos sont dans $_SESSION['session_commande']
 	$frm['societe2'] = vb($_SESSION['session_commande']['societe2']);
-	$frm['nom2'] = vb($_SESSION['session_commande']['nom2']);
-	$frm['prenom2'] = vb($_SESSION['session_commande']['prenom2']);
+	$frm['nom2']     = vb($_SESSION['session_commande']['nom2']);
+	$frm['prenom2']  = vb($_SESSION['session_commande']['prenom2']);
 	$frm['contact2'] = vb($_SESSION['session_commande']['contact2']);
 	$frm['adresse2'] = vb($_SESSION['session_commande']['adresse2']);
-	$frm['code_postal2'] = vb($_SESSION['session_commande']['code_postal2']);
+	$frm['code_postal2'] = vb($_SESSION['session_commande']['code_postal2']);	
 	$frm['ville2'] = vb($_SESSION['session_commande']['ville2']);
 	$frm['pays2'] = vb($_SESSION['session_commande']['pays2']);
 	$frm['email2'] = vb($_SESSION['session_commande']['email2']);
@@ -371,8 +421,6 @@ if (!empty($GLOBALS['site_parameters']['mode_transport']) && is_delivery_address
 $frm['commande_interne'] = vb($_POST['commande_interne'], vb($_SESSION['session_commande']['commande_interne']));
 $frm['commentaires'] = vb($_POST['commentaires'], vb($_SESSION['session_commande']['commentaires']));
 $frm['cgv'] = vb($_POST['cgv'], vb($_SESSION['session_commande']['cgv']));
-
-
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['achat_maintenant_page_columns_count'];
 if (empty($short_order_process) && !empty($GLOBALS['site_parameters']['mode_transport']) && (empty($_SESSION['session_caddie']->zoneId) || empty($_SESSION['session_caddie']->typeId))) {
 	define('IN_CADDIE', true);

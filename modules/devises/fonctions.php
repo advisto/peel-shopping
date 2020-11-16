@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64944 2020-11-06 08:47:15Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -47,8 +47,10 @@ function devises_hook_configuration_end($params) {
  * @return
  */
 function devises_hook_general_actions_24h($params) {
-	// Mise à jour des devises
-	return update_currencies_rates(vb($GLOBALS['site_parameters']['code']));
+	// Google ne fournit plus le service de conversion de devise, XE a changé ses conditions générales et interdit la récupération des données de leur page web au profit d'une API payante, et Oanda impose la création d'un compte pour utiliser leur service.
+	// => Suite à ces changements nous ne proposerons plus la fonctionnalité de récupération de taux de change automatique.
+
+	// return update_currencies_rates(vb($GLOBALS['site_parameters']['code']));
 }
 
 /**
@@ -80,7 +82,7 @@ function set_current_devise($currency_id_or_code, $reference_country_id = null)
 			FROM peel_devises d
 			" . vb($join) . "
 			WHERE d.etat='1'" . (!defined('IN_PEEL_ADMIN') || empty($currency_id_or_code) ? " AND " . get_filter_site_cond('devises', 'd') : '') . "
-			ORDER BY IF(" . $cond . ", -1, 1) ASC
+			ORDER BY IF(" . $cond . ", -1, 1) ASC, main DESC
 			LIMIT 1";
 		$resDevise = query($sql);
 		if ($Devise = fetch_object($resDevise)) {

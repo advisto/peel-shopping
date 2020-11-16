@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: StringMb.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: StringMb.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -23,7 +23,7 @@ $GLOBALS['ucfirsts'] = array('zh' => false, 'ja' => false);
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: StringMb.php 61970 2019-11-20 15:48:40Z sdelaporte $
+ * @version $Id: StringMb.php 64741 2020-10-21 13:48:51Z sdelaporte $
  * @access public
  */
 class StringMb {
@@ -205,7 +205,7 @@ class StringMb {
 	}
 
 	/**
-	 * Adds a seperator every $max_part_length characters
+	 * Adds a separator every $max_part_length characters
 	 *
 	 * @param string $string The input string.
 	 * @param integer $max_part_length
@@ -318,9 +318,10 @@ class StringMb {
 	 * @param integer $length_limit
 	 * @param string $separator
 	 * @param boolean $force_shorten_if_special_content
+	 * @param string $ending_if_no_middle_separator
 	 * @return
 	 */
-	public static function str_shorten_words($string, $length_limit = 100, $separator = " ", $force_shorten_if_special_content = false, $add_separator_instead_of_cutting = true)
+	public static function str_shorten_words($string, $length_limit = 100, $separator = " ", $force_shorten_if_special_content = false, $add_separator_instead_of_cutting = true, $ending_if_no_middle_separator = null)
 	{
 		// On coupe autour de tous les mots
 		$sentences_array = explode("\n", $string);
@@ -331,11 +332,11 @@ class StringMb {
 				foreach($tab as $key => $this_string) {
 					// "quote=" => Compatibilité avec les enchaînements de quote dans lesquels il n'y a pas d'espace
 					// On met une condition strlen (et non pas StringMb::strlen) pour aller plus rapide
-					if (strlen($this_string) > $length_limit && ($force_shorten_if_special_content || (StringMb::strpos($this_string, 'http') === false && StringMb::strpos($this_string, 'quote=') === false && StringMb::strpos($this_string, '[/quote]') === false))) {
+					if (strlen($this_string) > $length_limit && ($force_shorten_if_special_content || (StringMb::strpos($this_string, 'http') === false && StringMb::strpos($this_string, '[WWWROOT]') === false && StringMb::strpos($this_string, '.php?') === false && StringMb::strpos($this_string, 'quote=') === false && StringMb::strpos($this_string, '[/quote]') === false && StringMb::strpos($this_string, '&#') === false))) {
 						if($add_separator_instead_of_cutting) {
 							$tab[$key] = StringMb::cut_with_separator($this_string, $length_limit, $separator);
 						} else {
-							$tab[$key] = StringMb::str_shorten($this_string, $length_limit, $separator, null, null);
+							$tab[$key] = StringMb::str_shorten($this_string, $length_limit, $separator, $ending_if_no_middle_separator, null);
 						}
 					}
 				}
@@ -579,10 +580,11 @@ class StringMb {
 	/**
 	 * Fonction de compatibilité avec de vieilles versions de PEEL ou du contenu qui vient d'ailleurs
 	 *
-	 * @param mixed $string
+	 * @param string $string
+	 * @param boolean $strip_nl_if_br
 	 * @return
 	 */
-	public static function nl2br_if_needed($string)
+	public static function nl2br_if_needed($string, $strip_nl_if_br = false)
 	{
 		$has_no_br = StringMb::strpos($string, '&lt;br') === false && StringMb::strpos($string, '<br') === false;
 		// Attention aux balises param
@@ -593,6 +595,8 @@ class StringMb {
 		$has_no_div = StringMb::strpos($string, '&lt;div') === false && StringMb::strpos($string, '<div') === false;
 		if ($has_no_br && $has_no_p && $has_no_table && $has_no_ul && $has_no_script && $has_no_div) {
 			$string = str_replace(array("\n"), "<br />\n", str_replace(array("\r\n", "\r"), "\n", $string));
+		} elseif($strip_nl_if_br) {
+			$string = str_replace(array("\r", "\n"), "", $string);
 		}
 		return $string;
 	}
@@ -674,7 +678,7 @@ class StringMb {
 	 * @param integer $max_word_and_url_length
 	 * @return
 	 */
-	public static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000, $max_word_and_url_length = 100)
+	public static function getCleanHTML($text, $max_width = null, $allow_form = false, $allow_object = false, $allow_class = false, $additional_config = null, $safe = true, $additional_elements = null, $max_caracters_length = 50000, $max_octets_length = 59000, $max_word_and_url_length = 300) 
 	{
 		require_once($GLOBALS['dirroot'] . "/lib/fonctions/htmlawed.php");
 		if (empty($text)) {
@@ -939,6 +943,46 @@ class StringMb {
 		} else {
 			return rawurldecode($string);
 		}
+	}
+
+	/**
+	 * str_pad multibytes
+	 *
+	 * @param string $input The input string.
+	 * @param string $pad_length
+	 * @param string $pad_string
+	 * @param string $pad_type
+	 * @return
+	 */
+	public static function str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT)
+	{
+		$strlen = StringMb::strlen($input);
+		if($strlen < $pad_length) {
+			if($pad_type == STR_PAD_BOTH) {
+				$repeat = ceil(($pad_length - $strlen) / (2 * StringMb::strlen($pad_string)));
+			} else {
+				$repeat = ceil(($pad_length - $strlen) / StringMb::strlen($pad_string));
+			}
+			for($i=0;$i<$repeat;$i++) {
+				if ($pad_type == STR_PAD_LEFT || $pad_type == STR_PAD_BOTH) {
+					$input = $pad_string . $input;
+				}
+				if ($pad_type == STR_PAD_RIGHT || $pad_type == STR_PAD_BOTH) {
+					$input .= $pad_string;
+				}
+			}
+			// Si $pad_string fait plus d'un caractère, le dernier ajouté doit éventuellement être tronqué 
+			if ($pad_type == STR_PAD_LEFT) {
+				$input = StringMb::substr($input, -$pad_length);
+			} elseif ($pad_type == STR_PAD_RIGHT) {
+				$input = StringMb::substr($input, 0, $pad_length);
+			} else {
+				$truncate = (StringMb::strlen($input) - $pad_length) / 2;
+				// On tronque de floor($truncate) à gauche, donc implicitement de ceil($truncate) à droite
+				$input = StringMb::substr($input, floor($truncate), floor($truncate)+$pad_length);
+			}
+		}
+		return $input;
 	}
 }
 

@@ -1,21 +1,25 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: index.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: index.php 64741 2020-10-21 13:48:51Z sdelaporte $
 include("../configuration.inc.php");
 
 if (isset($_GET['catid']) && empty($_GET['catid'])) {
 	// URL invalide
 	redirect_and_die(get_url('/'), true);
+}
+if(isset($_POST["submit_suggest_comment_details_1"])){   
+    if(isset($_POST["comment_details"]) && !empty($_POST["comment_details"])){      set_suggestion_commentaire_details(vb($_POST["comment_details"]),vb($_GET["catid"]),0,$_SESSION['session_utilisateur']);       
+    }
 }
 if (empty($_GET['catid']) && !empty($GLOBALS['site_parameters']['disallow_main_category']) && empty($_GET['convert_gift_points'])) {
 	// Si pas autorisé de voir /lire/ , retour à la page d'accueil avec redirection 301
@@ -38,7 +42,7 @@ if (!empty($catid)) {
 		WHERE c.id='" . intval($catid) . "' AND " . get_filter_site_cond('categories', 'c') . "" . (!a_priv("admin_products", false)?' AND c.etat = "1"':'');
 	$cat_query = query($sql);
 	if ($cat = fetch_assoc($cat_query)) {
-		// get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+		//get_default_content remplace le contenu par la langue par défaut si les conditions sont réunis
 		if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
 			$cat = get_default_content($cat, intval($catid), 'categories');
 		}
@@ -60,6 +64,8 @@ if (!empty($_SESSION["session_display_popup"]["upload_error_text"])) {
 	unset($_SESSION["session_display_popup"]["upload_error_text"]);
 }
 $GLOBALS['page_columns_count'] = $GLOBALS['site_parameters']['achat_index_page_columns_count'];
+
+$output = affiche_contenu_html('header_product_list', true);
 
 // Une redirection est susceptible d'être faite dans la fonction get_products_list_brief_html, il faut donc l'appeler avant include($GLOBALS['repertoire_modele'] . "/haut.php").
 $output = get_products_list_brief_html($catid, empty($_GET['convert_gift_points']) && empty($GLOBALS['site_parameters']['subcategories_display_disable']), (empty($_GET['convert_gift_points'])?'category':'convert_gift_points'));

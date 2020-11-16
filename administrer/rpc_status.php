@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rpc_status.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: rpc_status.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 define('IN_RPC', true);
 include("../configuration.inc.php");
@@ -89,15 +89,27 @@ if (!est_identifie() || empty($_POST)) {
 			WHERE id='%s' AND " . get_filter_site_cond('nom_attributs', null, true) . "";
 	}elseif($mode == 'articles' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_articles
-			SET etat='%s', date_maj='".get_mysql_date_from_user_input(time())."'
+			SET etat='%s'";
+		if (empty($GLOBALS['site_parameters']['rpc_status_date_maj_disable'])) {
+			$sql .=", date_maj='".get_mysql_date_from_user_input(time())."'";
+		}
+		$sql .="
 			WHERE id='%s' AND " . get_filter_site_cond('articles', null, true) . "";
 	}elseif($mode == 'rubriques' && a_priv("admin_content")) {
 		$sql = "UPDATE peel_rubriques
-			SET etat='%s', date_maj='".get_mysql_date_from_user_input(time())."'
+			SET etat='%s'";
+		if (empty($GLOBALS['site_parameters']['rpc_status_date_maj_disable'])) {
+			$sql .=", date_maj='".get_mysql_date_from_user_input(time())."'";
+		}
+		$sql .="
 			WHERE id='%s' AND " . get_filter_site_cond('rubriques', null, true) . "";
 	}elseif($mode == 'produits' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_produits
-			SET etat='%s', date_maj='".get_mysql_date_from_user_input(time())."'
+			SET etat='%s'";
+		if (empty($GLOBALS['site_parameters']['rpc_status_date_maj_disable'])) {
+			$sql .=", date_maj='".get_mysql_date_from_user_input(time())."'";
+		}
+		$sql .="
 			WHERE id='%s' AND " . get_filter_site_cond('produits', null, true) . "";
 	}elseif($mode == 'utilisateurs' && a_priv("admin_users")) {
 		/*
@@ -108,7 +120,11 @@ if (!est_identifie() || empty($_POST)) {
 		*/
 	}elseif($mode == 'marques' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_marques
-			SET etat='%s', date_maj='".get_mysql_date_from_user_input(time())."'
+			SET etat='%s'";
+		if (empty($GLOBALS['site_parameters']['rpc_status_date_maj_disable'])) {
+			$sql .=", date_maj='".get_mysql_date_from_user_input(time())."'";
+		}
+		$sql .="
 			WHERE id='%s' AND " . get_filter_site_cond('marques', null, true);
 	}elseif($mode == 'langues' && a_priv("admin_manage")) {
 		$sql = "UPDATE peel_langues
@@ -133,7 +149,11 @@ if (!est_identifie() || empty($_POST)) {
 			WHERE id='%s' AND " . get_filter_site_cond('codes_promos', null, true) . "";
 	}elseif($mode == 'categories' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_categories
-			SET etat='%s', date_maj='".get_mysql_date_from_user_input(time())."'
+			SET etat='%s'";
+		if (empty($GLOBALS['site_parameters']['rpc_status_date_maj_disable'])) {
+			$sql .=", date_maj='".get_mysql_date_from_user_input(time())."'";
+		}
+		$sql .="
 			WHERE id='%s' AND " . get_filter_site_cond('categories', null, true) . "";
 	}elseif($mode == 'lexique' && a_priv("admin_products")) {
 		$sql = "UPDATE peel_lexique

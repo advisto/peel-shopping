@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -32,7 +32,7 @@
 			<div class="clearfix visible-sm"></div>
 			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_BRAND }}{{ STR_BEFORE_TWO_POINTS }}:
-+ 				<select class="form-control" name="brand_search">
+ 				<select class="form-control" name="brand_search">
 					<option value="0">{{ STR_CHOOSE }}</option>
 					{% for o in marques_options %}
 					<option value="{{ o.value|str_form_value }}"{% if o.issel %} selected="selected"{% endif %}>{{ o.name|html_entity_decode_if_needed }}</option>
@@ -40,7 +40,7 @@
 				</select>
 			</div>
 			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
-				{{ STR_ADMIN_PRODUCT_NAME }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" name="name_search" size="15" value="" />
+				{{ STR_ADMIN_PRODUCT_NAME }}{{ STR_BEFORE_TWO_POINTS }}: <input type="text" class="form-control" id="name_search" name="name_search" size="15" value="" />
 			</div>
 			<div class="clearfix visible-sm"></div>
 			<div class="clearfix visible-md visible-lg"></div>
@@ -68,7 +68,6 @@
 					<input type="radio" name="promo_search"{% if promo_search_zero_issel %} checked="checked"{% endif %} value="0" /> {{ STR_NO }}
 				</span>
 			</div>
-			<div class="clearfix visible-md visible-lg"></div>
 		{% if is_best_seller_module_active %}
 			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT_IN }} <strong>{{ STR_TOP }}</strong> ?<br />
@@ -79,7 +78,7 @@
 				</span>
 			</div>
 		{% endif %}
-			<div class="clearfix visible-sm"></div>
+			<div class="clearfix visible-md visible-lg"></div>
 		{% if is_gifts_module_active %}
 			<div class="col-md-3 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
 				{{ STR_ADMIN_PRODUITS_IS_PRODUCT }} <strong>{{ STR_MODULE_GIFTS_ADMIN_GIFT }}</strong> ?<br />
@@ -90,26 +89,36 @@
 				</span>
 			</div>
 		{% endif %}
+			<div class="col-md-4 col-sm-6" style="margin-top:10px; margin-bottom:10px;">
+				{{ STR_ADMIN_PRODUITS_IS_PRODUCT }} <strong>{{ STR_ADMIN_ACTIVATED }}</strong> ?<br />
+				<span>
+					<input type="radio" name="etat" value="null" checked="checked" /> {{ STR_ADMIN_ANY }} &nbsp;
+					<input type="radio" name="etat"{% if etat_one_issel %} checked="checked"{% endif %} value="1" /> {{ STR_YES }}
+					<input type="radio" name="etat"{% if etat_zero_issel %} checked="checked"{% endif %} value="0" /> {{ STR_NO }}
+				</span>
+			</div>
 			<div class="col-md-3 col-sm-6 center pull-right" style="padding-top:10px; padding-bottom:10px">
 				<input class="btn btn-primary" type="submit" value="{{ STR_SEARCH|str_form_value }}" name="action" />
 			</div>
 		</div>
 	</div>
-</form>
 <div class="entete">{{ STR_ADMIN_PRODUITS_PRODUCTS_LIST }} <span style="float:right;">{{ STR_ADMIN_PRODUITS_PRODUCTS_COUNT }}{{ STR_BEFORE_TWO_POINTS }}: {{ nombre_produits }}</span></div>
 <div><img src="images/add.png" width="16" height="16" alt="" class="middle" /><a href="{{ ajout_produits_href|escape('html') }}">{{ STR_ADMIN_CATEGORIES_ADD_PRODUCT }}</a></div>
 	{% if is_duplicate_module_active %}
 <div class="alert alert-info"><b>{{ STR_NOTA_BENE }}{{ STR_BEFORE_TWO_POINTS }}:</b> {{ STR_ADMIN_PRODUITS_DUPLICATE_WARNING }}</div>
 	{% endif %}
+</form>
+<form class="entryform form-inline" role="form" method="POST" action="{{ action|escape('html') }}">
 	{% if not (lignes) %}
 <div class="alert alert-warning">{{ STR_ADMIN_PRODUITS_NOTHING_FOUND }}</div>
 	{% else %}
 <div class="table-responsive">
-	<table class="table">
+	<table id="tablesForm" class="table">
 		{{ HeaderRow }}
 	{% for li in lignes %}
 		{{ li.tr_rollover }}
-		<td class="center">
+		<td class="center">	
+			<input name="product_ids[]" type="checkbox" value="{{ li.id|str_form_value }}" id="{{ li.id }}" />
 			<a data-confirm="{{ li.drop_confirm|str_form_value }}" class="title_label" title="{{ STR_DELETE|str_form_value }} {{ li.name }}" href="{{ li.drop_href|escape('html') }}"><img src="{{ li.drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a>
 			<a title="{{ STR_MODIFY|str_form_value }}" href="{{ li.edit_href|escape('html') }}"><img src="{{ li.edit_src|escape('html') }}" alt="edit" /></a>
 			{% if is_duplicate_module_active %}
@@ -117,7 +126,7 @@
 			{% endif %}
 		</td>
 		<td class="center">
-		<input type="text" onchange="update_reference(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')" style="width:100px" value="{{ li.reference }}" id="reference{{ li.id }}" name="reference_product" class="form-control">
+		<input  data-confirm="{{ STR_ADMIN_UPDATE_WARNING|str_form_value }}"  type="text" onchange="update_reference(this, '{{ li.id|str_form_value }}', '{{ administrer_url|str_form_value }}')" style="width:100px" value="{{ li.reference }}" id="reference{{ li.id }}" name="reference_product" class="form-control">
 		</td>
 		<td class="center">
 			{% if not (li.cats) %}
@@ -170,6 +179,29 @@
 	{% endfor %}
 	</table>
 </div>
+	<div class="center" style="line-height: 42px">
+		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{{ STR_ADMIN_CHECK_ALL|str_form_value }}" />
+		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{{ STR_ADMIN_UNCHECK_ALL|str_form_value }}" />
+		<br>
+		<select class="form-control" name="modification_multiple" style="max-width: 450px">
+			<option value="">------</option>
+			<option value="on_our_selection">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_OUR_SELECTION }}</option>
+			<option value="off_our_selection">{{ STR_ADMIN_MODIFICATION_MULTIPLE_OFF_OUR_SELECTION }}</option>
+			<option value="on_news">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_NEW }}</option>
+			<option value="off_news">{{ STR_ADMIN_MODIFICATION_MULTIPLE_OFF_NEW }}</option>
+			<option value="on_promotions">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_PROMO }}</option>
+			<option value="off_promotions">{{ STR_ADMIN_MODIFICATION_MULTIPLE_OFF_PROMO }}</option>
+			<option value="on_best_sellers">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_BEST_SELLERS }}</option>
+			<option value="off_best_sellers">{{ STR_ADMIN_MODIFICATION_MULTIPLE_OFF_BEST_SELLERS }}</option>
+			<option value="on_recommended_products">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_RECOMMENDED_PRODUCTS }}</option>
+			<option value="on_top_block">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_TOP }}</option>
+			<option value="on_etat">{{ STR_ADMIN_MODIFICATION_MULTIPLE_ON_ETAT }}</option>
+			<option value="off_etat">{{ STR_ADMIN_MODIFICATION_MULTIPLE_OFF_ETAT }}</option>
+			<option value="suppr_multiple">{{ STR_ADMIN_MODIFICATION_MULTIPLE_SUPPR_PRODUCT }}</option>
+		</select>
+		<br>
+		<input class="btn btn-primary" type="submit" value="{{ LANG.STR_VALIDATE|str_form_value }}" data-confirm="{{ STR_ADMIN_APPLY_CHANGES|str_form_value }}"/>
+	</div>
 <div class="center">{{ Multipage }} <a href="{{ delete_all_href|str_form_value }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}" class="btn btn-danger">{{ STR_ADMIN_DELETE_ALL_RESULTS }}</a></div>
 	{% endif %}
 {% endif %}

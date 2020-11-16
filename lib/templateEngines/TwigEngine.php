@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: TwigEngine.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: TwigEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'TwigTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: TwigEngine.php 61970 2019-11-20 15:48:40Z sdelaporte $
+ * @version $Id: TwigEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
  * @access public
  */
 class TwigEngine extends EngineTpl {
@@ -55,6 +55,8 @@ class TwigEngine extends EngineTpl {
 		$this->twig->addFilter(new Twig_SimpleFilter("intval", "intval"));
 		$this->twig->addFilter(new Twig_SimpleFilter("round", "round"));
 		$this->twig->addFilter(new Twig_SimpleFilter("strip_tags", "strip_tags"));
+		$this->twig->addFilter(new Twig_SimpleFilter("rewriting_urlencode", "rewriting_urlencode"));
+		$this->twig->addFilter(new Twig_SimpleFilter("fprix", "fprix"));
 		/*$title = new Twig_Function_Function(getTitle, array('is_safe' => array('html')));
 		$this->twig->addFunction('getTitle', $title);
 		//
@@ -93,8 +95,8 @@ class TwigEngine extends EngineTpl {
 	public function createTemplate($template, array $data = null)
 	{
 		// Variables générales disponibles dans Twig, et variables de compatibilité partielle avec certains modèles de templates
-		$data['LANG'] = $GLOBALS['LANG'];
-		$data['site_parameters'] = $GLOBALS['site_parameters'];
+		$data['LANG'] = &$GLOBALS['LANG'];
+		$data['site_parameters'] = &$GLOBALS['site_parameters'];
 		if(!isset($data['site_id'])) {
 			$data['site_id'] = $GLOBALS['site_id'];
 		}
@@ -130,6 +132,16 @@ class TwigEngine extends EngineTpl {
 		$data['customerName'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur'])?vb($_SESSION['session_utilisateur']['prenom']) . ' '. vb($_SESSION['session_utilisateur']['nom_famille']):null);
 		$data['priceDisplay'] = null;
 		$this->context = array_merge($this->context, $data);
+			
+		if (!empty($GLOBALS['site_parameters']['forced_template_files_by_code']) && !empty($GLOBALS['site_parameters']['forced_template_files_by_code'][$template])) {
+			// Si il y a une configuration spécifique pour ce template.
+			if (file_exists($GLOBALS['dirroot'] . "/modeles/peel9/twig/".$GLOBALS['site_parameters']['forced_template_files_by_code'][$template]) || file_exists($GLOBALS['repertoire_modele']."/twig/".$GLOBALS['site_parameters']['forced_template_files_by_code'][$template])) {
+				// le nouveau fichier configuré existe
+				// 'haut.tpl' => 'haut_toto.tpl'
+				$template = $GLOBALS['site_parameters']['forced_template_files_by_code'][$template];
+			}
+		}
+
 		try{
 			//try {
 				return new TwigTemplate($this->twig->loadTemplate($template), $this->context);

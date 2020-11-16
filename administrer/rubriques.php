@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: rubriques.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: rubriques.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -48,7 +48,7 @@ switch (vb($_REQUEST['mode'])) {
 		break;
 
 	case "insere" :
-		// Si get_default_content_enable est activé, on veut pouvoir insérer une rubrique sans titre dans la langue d'administration qui n'est pas par défaut
+		//Si get_default_content_enable est activé, on veut pouvoir insérer une rubrique sans titre dans la langue d'administration qui est pas par défaut
 		$form_error_object->valide_form($frm,
 			array((!empty($GLOBALS['site_parameters']['get_default_content_enable'])?'nom_' . $GLOBALS['site_parameters']['main_content_lang']:'nom_' . $_SESSION['session_langue']) => $GLOBALS['STR_ADMIN_PRODUITS_ACHETES_ERR_NO_TITLE']));
 		if (!verify_token($_SERVER['PHP_SELF'] . $frm['mode'] . $frm['id'])) {
@@ -300,6 +300,10 @@ function supprime_rubrique($id)
 	}
 	query("DELETE FROM peel_rubriques WHERE id = '" . intval($id) . "' AND " . get_filter_site_cond('rubriques', null, true) . "");
 
+	// Suppression des caches de rubriques (le groupe s'appelle aussi categories, même pour les rubriques)
+	$this_cache_object = new Cache(null, array('group' => 'categories'));
+	$this_cache_object->delete_cache_file(true);
+	unset($this_cache_object);
 	echo $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_RUBRIQUES_MSG_CREATED_OK'], $current_rub['nom'])))->fetch();
 }
 
@@ -367,6 +371,11 @@ function insere_sous_rubrique($frm)
 	}
 	$sql .= ')';
 	query($sql);
+	
+	// Suppression des caches de rubriques (le groupe s'appelle aussi categories, même pour les rubriques)
+	$this_cache_object = new Cache(null, array('group' => 'categories'));
+	$this_cache_object->delete_cache_file(true);
+	unset($this_cache_object);
 }
 
 /**
@@ -414,6 +423,11 @@ function maj_rubrique($id, $frm)
 		WHERE id = '" . intval($id) . "'";
 
 	query($sql);
+	
+	// Suppression des caches de rubriques (le groupe s'appelle aussi categories, même pour les rubriques)
+	$this_cache_object = new Cache(null, array('group' => 'categories'));
+	$this_cache_object->delete_cache_file(true);
+	unset($this_cache_object);
 }
 
 /**

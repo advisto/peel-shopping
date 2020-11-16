@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: advisto-chart.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: advisto-chart.php 64741 2020-10-21 13:48:51Z sdelaporte $
 
 if (!defined('IN_PEEL')) {
 	die();
@@ -46,7 +46,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 	}
 	// use the chart class to build the chart:
 	if($chart_product == 'flot') {
-		$output = '';
+		$output = array();
 	} else {
 		$graph = new graph();		
 		$graph->title((str_replace(array(',', '&'), array('.', '-'), $title)), '{font-size:12px; padding:5px}');
@@ -57,8 +57,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 	if (!empty($data)) {
 		$max_all_data = 0;
 		$min_all_data = 0;
-		$temp = array_keys($data);
-		foreach($temp as $key) {
+		foreach(array_keys($data) as $key) {
 			// On va remplacer le $key par sa valeur UTF8 et sans virgule
 			$value = $data[$key];
 			if (str_replace(array(',', '&'), array('.', '-'), ($key)) != $key) {
@@ -72,8 +71,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				$data[$key] = $value;
 			}
 		}
-		$temp = array_keys($graph_type);
-		foreach($temp as $key) {
+		foreach(array_keys($graph_type) as $key) {
 			// On va remplacer le $key par sa valeur UTF8 et sans virgule
 			$value = $graph_type[$key];
 			if (($key) != $key) {
@@ -103,94 +101,105 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 			if(!empty($graph)) {
 				$graph->set_tool_tip('#key#<br>#x_label#<br>#val#');
 			}
-		}
-		foreach($data as $data_title => $data_array) {
-			if (empty($all_graph_type) || $all_graph_type != 'pie') {
-				if (!empty($data_array)) {
-					foreach($data_array as $value) {
-						$value = floatval($value);
-						if ($value > $max_all_data) {
-							$max_all_data = $value;
+			foreach($data as $data_title => $data_array) {
+				$this_output = null;
+				if (empty($all_graph_type) || $all_graph_type != 'pie') {
+					if (!empty($data_array)) {
+						foreach($data_array as $value) {
+							$value = floatval($value);
+							if ($value > $max_all_data) {
+								$max_all_data = $value;
+							}
+						}
+					}
+					if (!empty($data_array)) {
+						foreach($data_array as $value) {
+							$value = floatval($value);
+							if ($value < $min_all_data) {
+								$min_all_data = $value;
+							}
 						}
 					}
 				}
-				if (!empty($data_array)) {
-					foreach($data_array as $value) {
-						$value = floatval($value);
-						if ($value < $min_all_data) {
-							$min_all_data = $value;
+				if (!empty($colors[($data_title)])) {
+					$color = $colors[($data_title)];
+				} elseif ($data_title == 'FALSE') {
+					$color = 'FF0000';
+				} elseif ($data_title == 'TRUE') {
+					$color = '009900';
+				} elseif ($data_title == 'DESACTIVATED') {
+					$color = '999977';
+				} elseif ($data_title == 'F') {
+					$color = 'FF00CC';
+				} elseif ($data_title == 'H') {
+					$color = '0000FF';
+				} else {
+					$r = base_convert(base_convert(StringMb::substr(md5($data_title), 0, 4), 16, 10) % 15, 10, 16);
+					$g = base_convert(base_convert(StringMb::substr(md5($data_title), 5, 4), 16, 10) % 15, 10, 16);
+					$b = base_convert(base_convert(StringMb::substr(md5($data_title), 9, 4), 16, 10) % 15, 10, 16);
+					$color = StringMb::strtoupper($r . '0' . $g . '0' . $b . '0');
+				}
+				if (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'bar') {
+					if($chart_product == 'flot') {
+						$i=0;
+						$bar_data = array();
+						foreach($data_array as $x => $y) {
+							$bar_data[] = array($x, $y);
+							$i++;
 						}
+						$this_output = $bar_data;
+					} else {
+						$graph->set_data($data_array);
+						$graph->bar(80, '0x' . $color, $data_title);				
+					}
+				} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'dot') {
+					$points_data_array = array();
+					if($chart_product == 'flot') {
+						$i=0;
+						foreach($data_array as $x => $y) {
+							$points_data_array[] = array($x, $y);
+							$i++;
+						}
+						$this_output = $points_data_array;
+					} else {
+						$i=0;
+						foreach($data_array as $x => $y) {
+							$points_data_array[] = new point($i, round($y), 6);
+							$i++;
+						}
+						$graph->scatter($points_data_array, 2, '#' . $color, $data_title, 10);
+					}
+				} elseif (!empty($all_graph_type) && $all_graph_type == 'pie') {
+					$pie_slice_colours[] = '#' . $color;
+				} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'line') {
+					if($chart_product == 'flot') {
+						$this_output = $data_array;
+					} else {
+						$graph->set_data($data_array);
+						$graph->line(2, '0x' . $color, $data_title, 10);
+					}
+				} else {
+					// Par défaut line_dot
+					if($chart_product == 'flot') {
+						ksort($data_array);
+						$i=0;
+						$line_data = array();
+						foreach($data_array as $x => $y) {
+							$line_data[] = array($x, $y);
+							$i++;
+						}
+						$this_output = $line_data;
+					} else {
+						$graph->set_data($data_array);
+						$graph->line_dot(2, 4, '0x' . $color, $data_title, 10);
 					}
 				}
-			}
-			if (!empty($colors[($data_title)])) {
-				$color = $colors[($data_title)];
-			} elseif ($data_title == 'FALSE') {
-				$color = 'FF0000';
-			} elseif ($data_title == 'TRUE') {
-				$color = '009900';
-			} elseif ($data_title == 'DESACTIVATED') {
-				$color = '999977';
-			} elseif ($data_title == 'F') {
-				$color = 'FF00CC';
-			} elseif ($data_title == 'H') {
-				$color = '0000FF';
-			} else {
-				$r = base_convert(base_convert(StringMb::substr(md5($data_title), 0, 4), 16, 10) % 15, 10, 16);
-				$g = base_convert(base_convert(StringMb::substr(md5($data_title), 5, 4), 16, 10) % 15, 10, 16);
-				$b = base_convert(base_convert(StringMb::substr(md5($data_title), 9, 4), 16, 10) % 15, 10, 16);
-				$color = StringMb::strtoupper($r . '0' . $g . '0' . $b . '0');
-			}
-			if (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'bar') {
-				if($chart_product == 'flot') {
-					$i=0;
-					foreach($data_array as $x => $y) {
-						$bar_data[] = array($x, $y);
-						$i++;
-					}
-					$output .= json_encode($bar_data);
-				} else {
-					$graph->set_data($data_array);
-					$graph->bar(80, '0x' . $color, $data_title);				
+				if ((empty($graph_type[$data_title]) || $graph_type[$data_title] !== 'dot') && (empty($all_graph_type) || $all_graph_type !== 'pie')) {
+					$x_array = array_keys($data_array);
 				}
-			} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'dot') {
 				if($chart_product == 'flot') {
-					$output .= json_encode($points_data_array);
-				} else {
-					$i=0;
-					foreach($data_array as $x => $y) {
-						$points_data_array[] = new point($i, round($y), 6);
-						$i++;
-					}
-					$graph->scatter($points_data_array, 2, '#' . $color, $data_title, 10);
-					unset($points_data_array);
+				$output[] = array('label' => $data_title, 'data' => $this_output);
 				}
-			} elseif (!empty($all_graph_type) && $all_graph_type == 'pie') {
-				$pie_slice_colours[] = '#' . $color;
-			} elseif (!empty($graph_type[$data_title]) && $graph_type[$data_title] == 'line') {
-				if($chart_product == 'flot') {
-					$output .= json_encode($data_array);
-				} else {
-					$graph->set_data($data_array);
-					$graph->line(2, '0x' . $color, $data_title, 10);
-				}
-			} else {
-				// Par défaut line_dot
-				if($chart_product == 'flot') {
-					ksort($data_array);
-					$i=0;
-					foreach($data_array as $x => $y) {
-						$line_data[] = array($x, $y);
-						$i++;
-					}
-					$output .= json_encode($line_data);
-				} else {
-					$graph->set_data($data_array);
-					$graph->line_dot(2, 4, '0x' . $color, $data_title, 10);
-				}
-			}
-			if ((empty($graph_type[$data_title]) || $graph_type[$data_title] !== 'dot') && (empty($all_graph_type) || $all_graph_type !== 'pie')) {
-				$x_array = array_keys($data_array);
 			}
 		}
 		if (empty($all_graph_type) || $all_graph_type != 'pie') {
@@ -220,6 +229,7 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 				}
 			}
 			if($chart_product == 'flot') {
+				//
 			} else {
 				$graph->set_y_max($max_y);
 				$graph->set_y_min($min_y);
@@ -231,14 +241,9 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 			}
 		} else {
 			if($chart_product == 'flot') {
-				foreach($data as $title => $value) {
-					$temp = new stdClass();
-					$temp->label = $title;
-					$temp->data = intval($value);
-					$pie_data[] = $temp;
-					unset($temp);
+				foreach($data as $data_title => $value) {
+					$output[] = array('label' => $data_title, 'data' => intval($value));
 				}
-				$output .= json_encode($pie_data);
 			} else {
 				$graph->pie_values($data, array_keys($data));
 				$graph->pie_slice_colours($pie_slice_colours);
@@ -246,10 +251,10 @@ function advistoChart(&$data, $title = null, $all_graph_type = null, $graph_type
 		}
 	} elseif($chart_product == 'flot') {
 		$data = array();
-		$output .= json_encode($data);
+		$output[] = $data;
 	}
 	if($chart_product == 'flot') {
-		return $output;
+		return json_encode($output);
 	} else {
 		// display the data
 		return $graph->render();

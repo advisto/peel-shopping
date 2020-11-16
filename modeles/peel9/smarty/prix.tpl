@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: prix.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: prix.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<table class="{$table_css_class}">
 {if $hide_price}
 	<tr>
@@ -21,7 +21,7 @@
 		{if !empty($prix_ht_without_ecotax)}
 	<tr>
 		<td>
-			<span class="prix">{$prix_ht_without_ecotax.prix}</span>
+			<span property="price" class="prix">{$prix_ht_without_ecotax.prix}</span>
 		</td>
 	</tr> 
 	<tr>
@@ -36,14 +36,14 @@
 		<td class="middle"><del>{$original_price}</del></td>
 			{/if}
 		<td>
-			<span class="prix"{if !empty($item_id)} id="{$item_id}"{/if}>{if !empty($STR_FROM)}{$STR_FROM}{/if} {$final_price} {if !empty($conditionnement)}{$STR_CONDITIONING_TEXT}{/if}</span>
+			<span property="price" class="prix"{if !empty($item_id)} id="{$item_id}"{/if}>{if !empty($STR_FROM)}{$STR_FROM}{/if} {$final_price} {if !empty($conditionnement)}{$STR_CONDITIONING_TEXT}{/if}</span>
 		</td>
 	</tr>
 		{/if}
 	{else}
 	<tr>
 		<td>
-			<span class="prix"{if !empty($item_id)} id="{$item_id}"{/if}>{if !empty($STR_FROM)}{$STR_FROM}{/if} {$final_price}{if !empty($conditionnement)}{$STR_CONDITIONING_TEXT}{/if}</span>
+			<span property="price" class="prix"{if !empty($item_id)} id="{$item_id}"{/if}>{if !empty($STR_FROM)}{$STR_FROM}{/if} {$final_price}{if !empty($conditionnement)}{$STR_CONDITIONING_TEXT}{/if}</span>
 		</td>
 	</tr>
 		{if isset($original_price)}

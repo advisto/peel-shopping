@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: database.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: database.php 64973 2020-11-09 13:07:30Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -243,6 +243,11 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 				$error_name = mysql_error($database_object);
 			}
 		}
+		if(strpos(strtolower($query), 'drop table') === 0 || strpos(strtolower($query), 'alter table') === 0 || (!empty($error_number) && $error_number == 1054)) {
+			// Intialisation de cache de table
+			unset($_SESSION['table_infos']);
+			unset($_SESSION['table_fields_infos']);
+		}
 		$i++;
 		if ($i >= 2) {
 			break;
@@ -254,24 +259,21 @@ function query($query, $die_if_error = false, $database_object = null, $silent_i
 	}
 	if (!empty($GLOBALS['last_query_result'])) {
 		// Pas d'erreur
-		if(strpos(strtolower($query), 'drop table') === 0 || strpos(strtolower($query), 'alter table') === 0) {				// Intialisation de cache de table
-			unset($_SESSION['table_infos']);
-			unset($_SESSION['table_fields_infos']);
-		}
 		return $GLOBALS['last_query_result'];
 	} else {
 		// Erreur
+		$GLOBALS['last_sql_error_message'] = vb($GLOBALS['STR_SQL_ERROR']) . ' ' . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query;
+		// if (a_priv('admin*', false) || (defined('PEEL_DEBUG') && PEEL_DEBUG)) {
+		if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+			$GLOBALS['last_sql_error_message'] .= print_r(debug_backtrace(), true);
+		}
 		if (!$silent_if_error || in_array($error_number, array(1118))) {
 			// Si l'erreur est 1118 (Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535.) qui peut arriver lors d'un ALTER TABLE ADD alors on affiche quand même l'erreur pour meilleure gestion par l'administrateur
-			$error_message = vb($GLOBALS['STR_SQL_ERROR']) . ' ' . vb($error_number) . ' - ' . vb($error_name) . " - " . vb($GLOBALS['STR_PAGE']) . ' ' . vb($_SERVER['REQUEST_URI']) . ' - IP ' . vb($_SERVER['REMOTE_ADDR']) . ' - ' . $query . ' - Error number ';
-			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
-				$error_message .= print_r(debug_backtrace(), true);
-			}
 			if (empty($GLOBALS['display_errors']) && a_priv('admin*', false)) {
 				// Erreurs pas visibles => on rend quand même visible si on est loggué en administrateur
-				echo '[admin info : ' . $error_message . ']<br />';
+				echo '[admin info : ' . $GLOBALS['last_sql_error_message'] . ']<br />';
 			}
-			trigger_error($error_message , E_USER_NOTICE);
+			trigger_error($GLOBALS['last_sql_error_message'] , E_USER_NOTICE);
 		}
 		if ($die_if_error) {
 			die();
@@ -504,12 +506,12 @@ function create_sql_from_array($array, $separator = ',')
 }
 
 /**
- * get_table_fields()
+ * Renvoie les informations des champs d'une table avec SHOW COLUMNS
  *
  * @param string $table_name
  * @param mixed $database_object
  * @param boolean $silent_if_error
- * @param array $fields_allowed : si non nul, On ne garde que les champs présents dans $fields_allowed
+ * @param array $fields_allowed : si non nul, on ne garde que les champs présents dans $fields_allowed
  * @return
  */
 function get_table_fields($table_name, $database_object = null, $silent_if_error = false, $fields_allowed = null)
@@ -517,7 +519,7 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
 	static $fields;
 	$cache_id = $GLOBALS['implicit_database_object_var'] . '_' . $table_name . '_' . serialize($fields_allowed);
 	//debug_print_backtrace();
-	if($database_object === null && !empty($GLOBALS['store_table_fields_infos_in_session']) && isset($_SESSION['table_fields_infos'][$cache_id]) && (empty($GLOBALS['store_table_fields_infos_in_session_excluded']) || !in_array($table_name, $GLOBALS['store_table_fields_infos_in_session_excluded']))) {
+	if($database_object === null && !empty($GLOBALS['store_table_fields_infos_in_session']) && isset($_SESSION['table_fields_infos'][$cache_id]) && (empty($GLOBALS['store_table_fields_infos_in_session_excluded']) || !in_array($table_name, $GLOBALS['store_table_fields_infos_in_session_excluded'], true))) {
 		// Pour certains sites faisant beaucoup usage de SHOW COLUMNS, c'est intéressant de mettre les informations en cache de session. L'initialisation de $GLOBALS['store_table_fields_infos_in_session'] est à gérer par ailleurs de manière spécifique, en ne concernant pas les administrateurs par exemple.
 		$fields[$cache_id] = $_SESSION['table_fields_infos'][$cache_id];
 	} elseif(!isset($fields[$cache_id])) {
@@ -533,8 +535,8 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
 				$temp = explode(' ', trim($this_field));
 				$this_field = $temp[0];
 				if(StringMb::strpos($this_field, '.') !== false) {
-					$temp = explode('.', $this_field);
-					$this_field = $temp[1];
+					$temp = explode('.', $this_field, 2);
+					$this_field = end($temp);
 				}
 				$fields_allowed[$this_key] = $this_field;
 			}
@@ -557,7 +559,7 @@ function get_table_fields($table_name, $database_object = null, $silent_if_error
 }
 
 /**
- * get_table_field_names()
+ * Renvoie les noms des champs d'une table
  *
  * @param string $table_name
  * @param mixed $database_object
@@ -582,11 +584,11 @@ function get_table_field_names($table_name, $database_object = null, $silent_if_
 						$temp = explode(' ', trim(str_replace('=', ' = ', $this_field)));
 						$this_field = $temp[0];
 						if(StringMb::strpos($this_field, '.') !== false) {
-							$temp = explode('.', $this_field);
-							$this_field = $temp[1];
+							$temp = explode('.', $this_field, 2);
+							$this_field = end($temp);
 						}
 						// On ne garde que les champs de $fields_to_be_filtered_array correspondant à des champs de $field_names
-						if(!in_array($this_field, $field_names)) {
+						if(!in_array($this_field, $field_names, true)) {
 							unset($fields_to_be_filtered_array[$this_key]);
 						}
 					}
@@ -630,9 +632,10 @@ function get_table_field_types($table_name, $database_object = null, $silent_if_
 
 /**
  * Récupération des informations de jointures entre des tables
+ * Exemple : si la table tmppasse contient un champ Collaborateur, on peut récupérer les informations liées à la jointure sur ce champ avec get_join_infos('tmppasse', 'Collaborateur') => target_table est la table 'collaborateurs', target_field est 'Collaborateur' (le nom du champ dans collaborateurs), et result_field est 'Nom_Prenom' (la valeur de titre dans collaborateurs)
  *
  * @param string $table_name Dans le cas général, on met ici le nom de la table
- * @param string $this_field_name
+ * @param string $this_field_name Nom du champ pour lequel il pourrait y avoir une jointure
  * @param string $table_view
  * @param array $field_join_infos_array
  * @return
@@ -649,13 +652,13 @@ function get_join_infos($table_name, $this_field_name, $table_view = null, $fiel
 	
 	if(!empty($field_join_infos_array[$table_name . '.' . $this_field_name])) {
 		$raw_join_infos = $field_join_infos_array[$table_name . '.' . $this_field_name];
-	} elseif(!empty($field_join_infos_array[$this_field_name]) && strpos($field_join_infos_array[$this_field_name], $table_name . '.') === false) {
-		// On  ne prend que des jointures valables, sans prendre les définitions de jointure impliquant un champ distant qui est dans la table en cours
+	} elseif(!empty($field_join_infos_array[$this_field_name]) && (empty($table_name) || strpos($field_join_infos_array[$this_field_name], $table_name . '.') === false)) {
+		// On ne prend que des jointures valables, sans prendre les définitions de jointure impliquant un champ distant qui est dans la table en cours
 		$raw_join_infos = $field_join_infos_array[$this_field_name];
 	}
 	if(!empty($raw_join_infos)) {
 		$temp = explode('.', $raw_join_infos, 2);
-		$temp2 = explode('/', $temp[1], 2);
+		$temp2 = explode('/', end($temp), 2);
 		$join_infos['table'] = $table_view;
 		$join_infos['field'] = $this_field_name;
 		$join_infos['target_table'] = str_replace('CONCAT(', '', $temp[0]);
@@ -690,7 +693,7 @@ function get_select_infos($table_name, $this_field_name) {
  * Récupération de lignes venant de tables quelconques, selon diverses règles
  *
  * @param string $table
- * @param string $id
+ * @param mixed $id  Valeur de l'id si champ simple, ou tableau du type key1=>val1, key2=>val2
  * @param string $search
  * @param boolean $one_row_mode
  * @param integer $limit
@@ -699,21 +702,24 @@ function get_select_infos($table_name, $this_field_name) {
  * @param string $sql_cond
  * @param string $group_by
  * @param string $forced_order_by
- * @param array $cols
+ * @param mixed $cols
  * @param boolean $forced_cgst
+ * @param boolean $row_key_col
  * @return
  */
-function &get_table_rows($table, $id = null, $search = null, $one_row_mode = false, $limit = null, $npu = null, $one_col_mode = false, $sql_cond = null, $group_by = null, $forced_order_by = null, $cols = null, $forced_cgst = null) {
+function &get_table_rows($table, $id = null, $search = null, $one_row_mode = false, $limit = null, $npu = null, $one_col_mode = false, $sql_cond = null, $group_by = null, $forced_order_by = null, $cols = null, $forced_cgst = null, $row_key_col = null, $search_field_forced = null) {
 	$results = array();
-	if(!empty($one_col_mode) && $one_col_mode !== true) {
+	$where_array = array();
+	if(empty($row_key_col) && !empty($one_col_mode) && $one_col_mode !== true) {
+		// Pour gérer $row_key_col il ne faut pas récupérer que la colonne correspondant à $one_col_mode
 		$cols = $one_col_mode;
 	}
-	
-	$hook_result = call_module_hook('database_table_rows_configure', array('table' => $table), 'array');
-	if (!empty($hook_result['where'])) {
-		$where_array[] = vb($hook_result['where']);
+	$hook_result = call_module_hook('database_table_rows_configure', array('table' => $table, 'forced_cgst' => $forced_cgst, 'search_field_forced' => $search_field_forced), 'array');
+	if(!empty($hook_result['where'])) {
+		$where_array[] = '(' . $hook_result['where'] . ')';
 	}
 	$search_fields_array = vb($hook_result['search_fields_array'], array());
+	
 	if(!empty($hook_result['table'])) {
 		$table = $hook_result['table'];
 	}
@@ -731,12 +737,12 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 	} else {
 		$fields_list = '*';
 	}
-
-	if((!empty($id) && empty($primary_key)) || (empty($search_fields_array) && !empty($search))) {
+	$database_field_infos_array = array();
+	if((!empty($id) && empty($primary_key)) || (empty($search_fields_array) && strlen($search))) {
 		// on veut ne charger qu'une seule fois get_table_fields($table)
 		$database_field_infos_array = get_table_fields($table);
 	}
-	if(empty($search_fields_array) && !empty($search)) {
+	if(empty($search_fields_array) && strlen($search)) {
 		// Cas général si pas de hook spécifiant la recherche
 		// On recherche sur les champs texte
 		foreach($database_field_infos_array as $this_field_infos) {
@@ -745,31 +751,9 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 			}
 		}
 	}
-	//if(!empty($forced_cgst) || ($forced_cgst !== false && !empty($GLOBALS['CGST_table_types_array'][$table]))) {
-	if(!empty($forced_cgst) || !empty($GLOBALS['CGST_table_types_array'][$table])) {
-		// Table avec gestion CGST
-		$where_array[] = get_CGST_sql_cond($table, $forced_cgst);
-	}	   
 	// A mettre  ? Compliqué suivant les cas...
 	if(!empty($id)) {
-		if(empty($primary_key)) {
-			if(!empty($database_field_infos_array)) {
-				$primary_key = get_primary_key($table, $database_field_infos_array);
-			} else {
-				$primary_key = get_primary_key($table);
-			}
-		}	   
-		foreach(explode(',', $primary_key) as $this_key => $this_field) {
-			// Gestion de clé primaire simple ou multiple => dans le cas d'une clé multiple, $id doit être un tableau qui donne les valeurs de chaque champ
-			if(is_array($id) && isset($id[$this_field])) {
-				$this_id = $id[$this_field];
-			} elseif(is_array($id) && isset($id[$this_key])) {
-				$this_id = $id[$this_key];
-			} else {
-				$this_id = $id;
-			}
-			$where_array[] = word_real_escape_string($this_field).'="'.real_escape_string($this_id).'"';
-		}
+		$where_array = array_merge_recursive_distinct($where_array, get_where_array_from_id_infos($table, $primary_key, $id, $database_field_infos_array));
 		$limit = 1;
 	}
 	if($npu !== null && in_array($table, $GLOBALS['database_tables_with_npu_array'])) {
@@ -786,10 +770,13 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 		}
 		$where_array[] = '('.$sql_cond.')';
 	}	   
-	if(!empty($search) && !empty($search_fields_array)) {
+	if(strlen($search) && !empty($search_fields_array)) {
 		$search_sql_cond = array();
+		if($search !== '%') {
+			$search = $search . '%';
+		}
 		foreach($search_fields_array as $this_field) {
-			$search_sql_cond[] = word_real_escape_string($this_field).' LIKE "'.real_escape_string($search).'%"';
+			$search_sql_cond[] = word_real_escape_string($this_field).' LIKE "'.real_escape_string($search).'"';
 		}
 		$where_array[] = '('.implode(' OR ', $search_sql_cond).')';
 	}
@@ -811,9 +798,9 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 	if(!empty($forced_order_by)) {
 		$order_by = $forced_order_by;
 	}
-	if(!empty($order_by)) {
+	if(!empty($order_by) && (empty($id) || !empty($forced_order_by))) {
 		$sql .= '
-			ORDER BY '.real_escape_string($order_by);
+			ORDER BY '.(strpos($order_by, 'IF') === false ? real_escape_string($order_by) : $order_by);
 	}
 	if($one_row_mode) {
 		$limit = 1;
@@ -824,11 +811,19 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 	}
 	$query = query($sql);
 	while ($result = fetch_assoc($query)) {
-		if($one_col_mode) {
+		// echo memory_get_usage() . "\n"; 
+		if(!empty($row_key_col) && $one_col_mode !== true) {
+			$results[$result[$row_key_col]] = $result[$one_col_mode];
+			continue;
+		} elseif($one_col_mode) {
 			$result = current($result);
 		}
+		
+		// il n'est pas cohérent d'appeler la fonction avec one_row_mode et row_key_col en même temps
 		if($one_row_mode) {
 			return $result;
+		} elseif(!empty($row_key_col)) {
+			$results[$result[$row_key_col]] = $result;
 		} else {
 			$results[] = $result;
 		}
@@ -841,9 +836,49 @@ function &get_table_rows($table, $id = null, $search = null, $one_row_mode = fal
 }
 
 /**
+ * Génération d'une condition where à partir de divers format d'id
+ *
+ * @param string $table
+ * @param string $primary_key
+ * @param mixed $id
+ * @param array $database_field_infos_array
+ * @return
+ */
+function get_where_array_from_id_infos($table, $primary_key, $id, $database_field_infos_array = null) {
+	$where_array = array();
+	if(empty($primary_key)) {
+		if(!empty($database_field_infos_array)) {
+			$primary_key = get_primary_key($table, $database_field_infos_array);
+		} else {
+			$primary_key = get_primary_key($table);
+		}
+	}	   
+	foreach(explode(',', $primary_key) as $this_key => $this_field) {
+		// Gestion de clé primaire simple ou multiple
+		if(is_array($id) && isset($id[$this_field])) {
+			// $id est a priori le résultat de get_primary_key_values_from_datatables_id
+			// Dans le cas d'une clé multiple, $id est ici un tableau qui donne les valeurs de chaque champ
+			$this_id = $id[$this_field];
+		} elseif(is_array($id) && isset($id[$this_key])) {
+			// $id est un tableau de valeurs ordonné de la même manière que get_primary_key
+			$this_id = $id[$this_key];
+		} elseif(!is_array($id)) {
+			$this_id = $id;
+		} else {
+			continue;
+		}
+		$where_array[] = word_real_escape_string($this_field).'="'.real_escape_string($this_id).'"';
+	}
+	return $where_array;
+}
+
+/**
  * Récupération de la clé primaire d'une table
  * Dans le cas d'une clé primaire contenant plusieurs champs, on veut récupérer la liste séparée par des virgules
  *
+ * @param string $table_name
+ * @param array $database_field_infos_array
+ * @param boolean $get_first_field_only
  * @return
  */
 function get_primary_key($table_name = null, $database_field_infos_array = null, $get_first_field_only = false) {
@@ -851,27 +886,32 @@ function get_primary_key($table_name = null, $database_field_infos_array = null,
 	$cache_id = $GLOBALS['implicit_database_object_var']  . '_' . $table_name;
 	if(!isset($primary_key_array_by_table[$cache_id])) {
 		$primary_key_array_by_table[$cache_id] = array();
-		if(empty($database_field_infos_array)) {
-			// Optimisation si $database_field_infos_array n'est pas vide
-			// => pas besoin d'avoir une clé de cache particulière si on a ou non $database_field_infos_array vide
-			$database_field_infos_array = get_table_fields($table_name);
-		}
-		if(!empty($database_field_infos_array)) {
-			foreach($database_field_infos_array as $this_infos) {
-				if(empty($default_field)) {
-					// Par défaut on prend la première colonne si pas d'autre trouvée ensuite
-					$default_field = $this_infos['Field'];
-				} elseif(in_array(strtolower($this_infos['Field']), array('id', 'compteur'))) {
-					$default_field = $this_infos['Field'];
-				}
-				if($this_infos['Key'] == 'PRI') {
-					$primary_key_array_by_table[$cache_id][] = $this_infos['Field'];
+		if(!empty($GLOBALS['database_primary_keys_by_table_array']) && !empty($GLOBALS['database_primary_keys_by_table_array'][$table_name])) {
+			// Par défaut on prend la première colonne si pas d'autre trouvée ensuite
+			$primary_key_array_by_table[$cache_id] = $GLOBALS['database_primary_keys_by_table_array'][$table_name];
+		} else {
+			if(empty($database_field_infos_array)) {
+				// Optimisation si $database_field_infos_array n'est pas vide
+				// => pas besoin d'avoir une clé de cache particulière si on a ou non $database_field_infos_array vide
+				$database_field_infos_array = get_table_fields($table_name);
+			}
+			if(!empty($database_field_infos_array)) {
+				foreach($database_field_infos_array as $this_infos) {
+					if(empty($default_field)) {
+						// Par défaut on prend la première colonne si pas d'autre trouvée ensuite
+						$default_field = $this_infos['Field'];
+					} elseif(in_array(strtolower($this_infos['Field']), array('id', 'compteur'), true)) {
+						$default_field = $this_infos['Field'];
+					}
+					if($this_infos['Key'] == 'PRI') {
+						$primary_key_array_by_table[$cache_id][] = $this_infos['Field'];
+					}
 				}
 			}
-		}
-		if(empty($primary_key_array_by_table[$cache_id]) && !empty($default_field)) {
-			// Par défaut on prend 'id' ou 'compteur', ou à défaut la première colonne
-			$primary_key_array_by_table[$cache_id][] = $default_field;
+			if(empty($primary_key_array_by_table[$cache_id]) && !empty($default_field)) {
+				// Par défaut on prend 'id' ou 'compteur', ou à défaut la première colonne
+				$primary_key_array_by_table[$cache_id][] = $default_field;
+			}
 		}
 	}
 	if($get_first_field_only) {
@@ -886,19 +926,18 @@ function get_primary_key($table_name = null, $database_field_infos_array = null,
  *
  * @param string $field_name
  * @param string $table_name
- * @param string $primary_key_array
- * @return
+ * @param array $primary_key_array
  * @return
  */
 function get_field_unique($field_name, $table_name, $primary_key_array = null) {
 	if ($primary_key_array === null) {
 		$primary_key_array = explode(',', get_primary_key($table_name));
 	}
-	if (!empty($primary_key_array) && count($primary_key_array) == 1 && in_array($field_name, $primary_key_array)) {
+	if (!empty($primary_key_array) && count($primary_key_array) == 1 && in_array($field_name, $primary_key_array, true)) {
 		// Si la clé primaire concerne plusieurs colonnes, alors on ne gère pas ici l'unicité
 		return true;
 	} elseif (!empty($GLOBALS['database_fields_unique_by_table_array'][$table_name])) {
-		return in_array($field_name, get_array_from_string($GLOBALS['database_fields_unique_by_table_array'][$table_name]));
+		return in_array($field_name, get_array_from_string($GLOBALS['database_fields_unique_by_table_array'][$table_name]), true);
 	} else {
 		return false;
 	}
@@ -934,36 +973,64 @@ function get_field_maxlength($field_type, $return_decimals = false) {
  * @param string $field_name
  * @param string $type_or_table_name
  * @param boolean $force_no_empty
+ * @param integer $max_length
+ * @param boolean $add_table_name_if_full_field_name
  * @return
  */
-function get_field_title($field_name, $type_or_table_name, $force_no_empty = false) {
-	if(strpos($field_name, '.') !== false) {
-		// Nom complet, du type : table.champ => cette information de table est prioritaire
-		$temp = explode('.', $field_name, 2);
-		$field_name = $temp[1];
-		$this_table = $temp[0];
+function get_field_title($field_name, $type_or_table_name, $force_no_empty = false, $max_length = null, $add_table_name_if_full_field_name = false) {
+	static $field_titles;
+	$cache_id = $field_name  . '_' . $type_or_table_name . '_' . serialize($force_no_empty) . '_' . serialize($add_table_name_if_full_field_name);
+	if(!isset($field_titles[$cache_id])) {
+		if(strpos($field_name, '.') !== false) {
+			// Nom complet, du type : table.champ => cette information de table est prioritaire
+			$temp = explode('.', $field_name, 2);
+			$field_name = $temp[1];
+			$this_table = $temp[0];
+			if($field_name == 'tacnfact.Presence_Absence') {
+				// On ne veut pas de préfixe de table ajouté
+				$add_table_name_if_full_field_name = false;
+			}
+		} else {
+			$this_table = $type_or_table_name;
+			$add_table_name_if_full_field_name = false;
+		}
+		if (isset($GLOBALS['database_field_titles_by_type_array'][$type_or_table_name][$field_name])) {
+			// La notion de type de rapport est prioritaire sur la notion de table de stockage des données
+			$return = $GLOBALS['database_field_titles_by_type_array'][$type_or_table_name][$field_name];
+		}
+		if ((!isset($return) || (empty($return) && $force_no_empty)) && isset($GLOBALS['database_field_titles_by_table_array'][$this_table][$field_name])) {
+			$return = $GLOBALS['database_field_titles_by_table_array'][$this_table][$field_name];
+		}
+		if((!isset($return) || (empty($return) && $force_no_empty)) && !empty($GLOBALS['database_import_export_table_by_type_array'][$type_or_table_name])) {
+			// $type_or_table_name est apparemment un type qui a une correspondance vers une table
+			$this_table_or_tables = $GLOBALS['database_import_export_table_by_type_array'][$type_or_table_name];
+			if(isset($GLOBALS['database_field_titles_by_table_array'][$this_table_or_tables][$field_name])) {
+				$return = $GLOBALS['database_field_titles_by_table_array'][$this_table_or_tables][$field_name];
+			}
+		}
+		if ((!isset($return) || (empty($return) && $force_no_empty)) && isset($GLOBALS['database_field_titles_array'][$field_name])) {
+			// Titre d'ordre général, non spécifique à un type ou une table
+			$return = $GLOBALS['database_field_titles_array'][$field_name];
+		}
+		if ((!isset($return) || (empty($return) && $force_no_empty))) {
+			// Ajout d'un espace avant majuscule suivie d'une minuscule
+			$output = preg_replace('/(?<! )(?<!^)[A-Z][a-z]/', ' $0', $field_name);
+			// Ajout d'un espace après un mot et avant majuscule
+			$output = preg_replace('/(?<! )(?<!^)(?<![A-Z])[A-Z]/', ' $0', $output);
+			// Ajout d'un espace avant un nombre
+			$output = preg_replace('/(?<! )(?<!^)(?<![0-9])[0-9]/', ' $0', $output);
+			$return = trim(str_replace('  ', ' ', str_replace('_', ' ', $output)));
+		}
+		if($add_table_name_if_full_field_name) {
+			$return = (!empty($GLOBALS["STR_MODULE_TEMPS_TABLE_NAMES_ARRAY"][$this_table]) ? $GLOBALS["STR_MODULE_TEMPS_TABLE_NAMES_ARRAY"][$this_table] . $GLOBALS["STR_BEFORE_TWO_POINTS"] . ': ' : '') . $return;
+		}
+		$field_titles[$cache_id] = $return;
+	}
+	if(!empty($max_length)) {
+		return StringMb::str_shorten_words($field_titles[$cache_id], $max_length, '', true, false, '.');
 	} else {
-		$this_table = $type_or_table_name;
+		return $field_titles[$cache_id];
 	}
-	if (isset($GLOBALS['database_field_titles_by_type_array'][$type_or_table_name][$field_name])) {
-		$return = $GLOBALS['database_field_titles_by_type_array'][$type_or_table_name][$field_name];
-	}
-	if ((!isset($return) || (empty($return) && $force_no_empty)) && isset($GLOBALS['database_field_titles_by_table_array'][$this_table][$field_name])) {
-		$return = $GLOBALS['database_field_titles_by_table_array'][$this_table][$field_name];
-	}
-	if ((!isset($return) || (empty($return) && $force_no_empty)) && isset($GLOBALS['database_field_titles_array'][$field_name])) {
-		$return = $GLOBALS['database_field_titles_array'][$field_name];
-	}
-	if ((!isset($return) || (empty($return) && $force_no_empty))) {
-		// Ajout d'un espace avant majuscule suivie d'une minuscule
-		$output = preg_replace('/(?<! )(?<!^)[A-Z][a-z]/', ' $0', $field_name);
-		// Ajout d'un espace après un mot et avant majuscule
-		$output = preg_replace('/(?<! )(?<!^)(?<![A-Z])[A-Z]/', ' $0', $output);
-		// Ajout d'un espace avant un nombre
-		$output = preg_replace('/(?<! )(?<!^)(?<![0-9])[0-9]/', ' $0', $output);
-		$return = trim(str_replace('  ', ' ', str_replace('_', ' ', $output)));
-	}
-	return $return;
 }
 
 /**
@@ -974,12 +1041,12 @@ function get_field_title($field_name, $type_or_table_name, $force_no_empty = fal
  * @return
  */
 function get_field_required($field_name, $type_or_table_name) {
-	$return = (!empty($GLOBALS['database_fields_required_array']) && in_array($field_name, $GLOBALS['database_fields_required_array']));
+	$return = (!empty($GLOBALS['database_fields_required_array']) && in_array($field_name, $GLOBALS['database_fields_required_array'], true));
 	foreach(explode('|', $type_or_table_name) as $table_name) { 
-		$return = ($return || (!empty($GLOBALS['database_fields_required_by_table_array']) && !empty($GLOBALS['database_fields_required_by_table_array'][$table_name]) && in_array($field_name, get_array_from_string(vb($GLOBALS['database_fields_required_by_table_array'][$table_name])))));
+		$return = ($return || (!empty($GLOBALS['database_fields_required_by_table_array']) && !empty($GLOBALS['database_fields_required_by_table_array'][$table_name]) && in_array($field_name, get_array_from_string(vb($GLOBALS['database_fields_required_by_table_array'][$table_name])), true)));
 		if(!$return && !empty($table_name)) {
 			$primary_key = get_primary_key($table_name);
-			if(in_array($field_name, get_array_from_string($primary_key))) {
+			if(in_array($field_name, get_array_from_string($primary_key), true)) {
 				// Si on rajoute strpos($primary_key, ',') === false &&  : Obligatoire seulement si clé primaire simple
 				// Sinon par défaut ici, tout élément de clé primaire est obligatoire
 				$return = true;

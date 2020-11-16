@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: types.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: types.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -96,6 +96,7 @@ function affiche_formulaire_ajout_type(&$frm)
 		$frm['without_delivery_address'] = 0;
 		$frm['is_socolissimo'] = 0;
 		$frm['is_icirelais'] = 0;
+		$frm['is_mondial_relay'] = 0;
 		$frm['is_dpd'] = 0;
 		$frm['tnt_threshold'] = 0;
 		$frm['technical_code'] = '';
@@ -172,6 +173,10 @@ function affiche_formulaire_type(&$frm)
 	if (check_if_module_active('icirelais')) {
 		$tpl->assign('is_icirelais', $frm['is_icirelais']);
 	}
+	$tpl->assign('is_mondial_relay_module_active', check_if_module_active('mondial_relay'));
+	if (check_if_module_active('mondial_relay')) {
+		$tpl->assign('is_mondial_relay', $frm['is_mondial_relay']);
+	}
 	$tpl->assign('is_dpd_module_active', check_if_module_active('dpd'));
 	if (check_if_module_active('dpd')) {
 		$tpl->assign('is_dpd', $frm['is_dpd']);
@@ -207,7 +212,7 @@ function affiche_formulaire_type(&$frm)
 	$tpl->assign('STR_NO', $GLOBALS['STR_NO']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_DPD', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_DPD']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
-	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_ICIRELAIS', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_ICIRELAIS']);
+	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_MONDIAL_RELAY', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_MONDIAL_RELAY']);
 	$tpl->assign('STR_ADMIN_TYPES_TNT', $GLOBALS['STR_ADMIN_TYPES_TNT']);
 	$tpl->assign('STR_ADMIN_TYPES_LINK_TO_TNT', $GLOBALS['STR_ADMIN_TYPES_LINK_TO_TNT']);
 	$tpl->assign('STR_ADMIN_TYPES_TNT_DESTINATION', $GLOBALS['STR_ADMIN_TYPES_TNT_DESTINATION']);
@@ -257,6 +262,9 @@ function insere_type($frm)
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais";
 	}
+	if (check_if_module_active('mondial_relay')) {
+		$sql .= ", is_mondial_relay";
+	}
 	if (check_if_module_active('ups')) {
 		$sql .= ", is_ups";
 	}
@@ -286,6 +294,9 @@ function insere_type($frm)
 	}
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", '" . intval($frm['is_icirelais']) . "'";
+	}
+	if (check_if_module_active('mondial_relay')) {
+		$sql .= ", '" . intval($frm['is_mondial_relay']) . "'";
 	}
 	if (check_if_module_active('ups')) {
 		$sql .= ", '" . intval($frm['is_ups']) . "'";
@@ -331,6 +342,9 @@ function maj_type($id, $frm)
 	}
 	if (check_if_module_active('icirelais')) {
 		$sql .= ", is_icirelais = '" . intval(vn($frm['is_icirelais'])) . "'";
+	}
+	if (check_if_module_active('mondial_relay')) {
+		$sql .= ", is_mondial_relay = '" . intval(vn($frm['is_mondial_relay'])) . "'";
 	}
 	if (check_if_module_active('dpd')) {
 		$sql .= ", is_dpd = '" . intval(vn($frm['is_dpd'])) . "'";

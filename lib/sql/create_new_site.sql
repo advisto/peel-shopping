@@ -1,15 +1,15 @@
 # This file should be in UTF8 without BOM - Accents examples: éèê
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: create_new_site.sql 61970 2019-11-20 15:48:40Z sdelaporte $
+# $Id: create_new_site.sql 64898 2020-11-03 15:22:13Z sdelaporte $
 #
 
 -- Fichier exécuté par la fonction execute_sql lors de la création d'un nouveau site. La création d'un nouveau site est automatique lors de l'installation, ou manuelle depuis l'administration.
@@ -308,7 +308,8 @@ INSERT INTO `peel_configuration` (`technical_code`, `origin`, `type`, `string`, 
 ('skip_home_affiche_compte', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('scroll_to_top', 'core', 'boolean', 'true', '', NOW(), '', 1, "[SITE_ID]"),
 ('products_in_newsletter', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
-('anim_loading_page', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]");
+('anim_loading_page', 'core', 'integer', '1', '', NOW(), '', 1, "[SITE_ID]"),
+('y_max_allowed_last_page_without_comment', 'core', 'integer', '4', '', NOW(), '', 1, "[SITE_ID]");
 
 -- --------------------------------------------------------
 
@@ -504,7 +505,6 @@ INSERT INTO `peel_paiement` (`technical_code`, `position`, `tarif`, `tarif_perce
 ('check', 3, 0.00000, 0.00000, 0.00, 1, "[SITE_ID]"),
 ('paypal', 1, 0.00000, 0.00000, 0.00, 1, "[SITE_ID]"),
 ('transfer', 4, 0.00000, 0.00000, 0.00, 1, "[SITE_ID]"),
-('moneybookers', 2, 0.00000, 0.00000, 0.00, 1, "[SITE_ID]"),
 ('pickup', 5, 0.00000, 0.00000, 0.00, 0, "[SITE_ID]"),
 ('delivery', 6, 0.00000, 0.00000, 0.00, 0, "[SITE_ID]"),
 ('cash', 7, 0.00000, 0.00000, 0.00, 0, "[SITE_ID]");

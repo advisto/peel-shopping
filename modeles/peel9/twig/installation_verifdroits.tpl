@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -27,7 +27,7 @@
 		<br />
 		<input type="submit" value="{{ STR_CONTINUE|str_form_value }}" class="btn btn-primary btn-lg" />
 	</p>
-	<p>{{ STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN|escape('html') }}</p>
+	<div class="alert alert-info">{{ STR_ADMIN_INSTALL_STEP_5_LINK_EXPLAIN|escape('html') }}</div>
 	{% else %}
 	<p class="alert alert-danger">{{ STR_ADMIN_INSTALL_RIGHTS_NOK|escape('html') }}</p>
 	<p class="center">

@@ -1,7 +1,7 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
 // | This file is part of PEEL Shopping 8.0.2, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
@@ -12,38 +12,38 @@
 // +----------------------------------------------------------------------+
 // $Id: carrousel_reference.tpl 54014 2017-06-09 09:26:20Z jlesergent $
 *}
-{if !empty($references)}
-	{if !empty($module_best_sellers_return_result_as_link)}
-	{foreach $references as $ref}
-		{$ref.html}<br />
-	{/foreach}
+{% if references %}
+	{% if module_best_sellers_return_result_as_link %}
+	{% for ref in references %}
+		{{ ref.html }}<br />
+	{% endfor %}
 	
 	{else}
 	<div class="col-md-2"></div>
 	<div id="carrousel_reference" class="col-md-8 carousel slide" data-ride="carousel" data-interval="10000">
 	  <!-- Indicators -->
 	  {*<ol class="carousel-indicators">
-		{for $i=0 to ((count($references)-1)/$nb_col_md|floor)}
-			<li data-target="#carrousel_reference" data-slide-to="{$i}" class="{if $i==0}active{/if}"></li>
-		{/for}
+		{% for i in 0..((references.count-1)/nb_col_md|floor) %}
+			<li data-target="#carrousel_reference" data-slide-to="{{ i }}" class="{% if i==0 %}active{% endif %}"></li>
+		{% endfor %}
 	  </ol>*}
 
 		<!-- Wrapper for slides -->
 		<div class="carousel-inner">
 			<div class="item active">
-		{foreach $references as $ref}
-			{if $ref.i%1!=1 && $ref.i>1}
+		{% for ref in references %}
+			{% if ref.i%1!=1 && ref.i>1 %}
 			</div>
 			<div class="item">
-			{/if}
-				<div class="center col-sm-{(12/$nb_col_sm|floor)} col-md-{(12/$nb_col_md|floor)}{if ($ref.i-1)%$nb_col_md>$nb_col_xs-1} hidden-xs{/if}{if ($ref.i-1)%$nb_col_md>$nb_col_sm-1} hidden-sm{/if}">
-					{$ref.html}
+			{% endif %}
+				<div class="center col-sm-{(12/nb_col_sm|floor)} col-md-{(12/nb_col_md|floor)}{% if (ref.i-1)% nb_col_md>nb_col_xs-1} hidden-xs{% endif %}{% if ($ref.i-1)%nb_col_md>nb_col_sm-1} hidden-sm{% endif %}">
+					{{ ref.html }}
 				</div>
-		{/foreach}
+		{% endfor %}
 			</div>
 		</div>
 
-		{if ((count($references)-1|floor)/$nb_col_md)>0}
+		{% if ((references.count-1|floor)/nb_col_md)>0 %}
 		<!-- Controls -->
 		<a class="left carousel-control" href="#carrousel_reference" data-slide="prev">
 			<span class="glyphicon glyphicon-chevron-left"></span>
@@ -51,8 +51,8 @@
 		<a class="right carousel-control" href="#carrousel_reference" data-slide="next">
 			<span class="glyphicon glyphicon-chevron-right"></span>
 		</a>
-		{/if}
+		{% endif %}
 	</div>
 	<div class="col-md-2"></div>
-	{/if}
+	{% endif %}
 {/if}

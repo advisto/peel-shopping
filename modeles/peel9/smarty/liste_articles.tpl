@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: liste_articles.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: liste_articles.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<form id="search_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	<div class="entete">{$STR_ADMIN_CHOOSE_SEARCH_CRITERIA}</div>
 	<div style="margin-top:15px; margin-bottom:15px">

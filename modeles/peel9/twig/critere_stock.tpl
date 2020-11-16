@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -14,7 +14,7 @@
 #}{% if is_form %}
 <form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{{ action|escape('html') }}" id="{{ form_id }}">
 {% endif %}
-	<div class="affiche_critere_stock well pull-right {{ update_class }}">
+	<div class="affiche_critere_stock {% if product_overlay_in_category_page is empty %}well{% endif %} pull-right {{ update_class }}">
 {% if is_form %}
 	{% if not condensed_display_mode %}
 		{% if is_color %}
@@ -46,7 +46,7 @@
 					<label>{{ STR_SIZE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 				</td>
 				<td>
-					<select class="form-control" id="{{ id_select_size }}" name="taille" onchange="update_product_price{{ save_suffix_id }}();bootbox_sizes_options(this);">
+					<select class="form-control" id="{{ id_select_size }}" name="taille" onchange="update_product_price{{ save_suffix_id }}();{% if sizes_id_out_stock %}bootbox_sizes_options(this);{% endif %}">
 						<option value="0">{{ STR_CHOOSE_SIZE }}</option>
 						{% for so in sizes_options %}
 							<option {% if so.bootbox_sizes_options %}{{ so.bootbox_sizes_options }}{% endif %} value="{{ so.id|intval }}"{% if so.issel %} selected="selected"{% endif %}{% if not so.isavailable %} disabled="disabled"{% endif %}{% if so.found_stock_info >0 %}style="font-weight:bold;"{% endif %}>
@@ -94,7 +94,7 @@
 		{{ formulaire_alerte }}
 	{% endif %}
 {% endif %}
-{% if is_form %}
+{% if is_form and (not is_in_catalog or not product_overlay_in_category_page) %}
 	{% if not on_estimate %}
 		<table>
 		{% if display_order_minimum %}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -182,16 +182,16 @@
 		</tr>
 		{% endif %}
 		{% if is_lot_module_active %}
-		<tr>
-			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
-		</tr>
 			{% if mode == "maj" %}
+		<tr>
+			<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_CATEGORIES_LOT_PRICE }}{{ STR_BEFORE_TWO_POINTS }}:</h2></td>
+		</tr>
 		<tr>
 			<td class="title_label">{{ lot_explanation_table }}</td>
 		</tr>
 		<tr>
 			<td class="title_label">
-				<a href="{{ lot_href|escape('html') }}">{{ STR_ADMIN_PRODUITS_LOT_PRICE_HANDLE }}</a>
+				<a href="{{ lot_href|escape('html') }}">{{ STR_ADMIN_CATEGORIES_LOT_PRICE_HANDLE_EXPLAIN }}</a>
 					{% if (lot_supprime_href) %}
 				/ <a href="{{ lot_supprime_href|escape('html') }}" data-confirm="{{ STR_ADMIN_DELETE_WARNING|str_form_value }}">{{ STR_DELETE }}</a>
 					{% endif %}

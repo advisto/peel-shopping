@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits_attributs.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: produits_attributs.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -34,7 +34,7 @@ switch (vb($_REQUEST['mode'])) {
 				$temp = explode('_', $this_key);
 				$this_attribut_id = intval($temp[3]);
 				if (!empty($this_attribut_id)) {
-					$sql = "UPDATE peel_attributs SET prix='" . intval($_POST['attribut_prix_id_'.$this_attribut_id]) . "', etat = '" . intval(vn($_POST['attribut_actif_'.$this_attribut_id])) . "', descriptif_" . $_SESSION['session_langue'] . " = '" . nohtml_real_escape_string(vn($_POST['attribut_descriptif_id_'.$this_attribut_id])) . "'
+					$sql = "UPDATE peel_attributs SET prix='" . nohtml_real_escape_string($_POST['attribut_prix_id_'.$this_attribut_id]) . "', etat = '" . intval(vn($_POST['attribut_actif_'.$this_attribut_id])) . "', descriptif_" . $_SESSION['session_langue'] . " = '" . nohtml_real_escape_string(vn($_POST['attribut_descriptif_id_'.$this_attribut_id])) . "'
 					WHERE id='".intval($this_attribut_id). "'";
 					query($sql);
 				}
@@ -66,7 +66,7 @@ switch (vb($_REQUEST['mode'])) {
 			$this_nom_attribut_id = intval($_POST['nom_attribut_id']);
 			$sql = "INSERT INTO 
 				peel_attributs SET descriptif_" . $_SESSION['session_langue'] . " ='" . nohtml_real_escape_string($_POST['attribut_descriptif']) . "', 
-				prix='" . intval($_POST['attribut_prix']) . "' , 
+				prix='" . nohtml_real_escape_string($_POST['attribut_prix']) . "' , 
 				".(!empty($_POST['attribut_description'])?"description_" . $_SESSION['session_langue'] . " ='" . nohtml_real_escape_string($_POST['attribut_description']) . "' ,":"")." 
 				id_nom_attribut = '" . intval($this_nom_attribut_id) . "'";
 			query($sql);

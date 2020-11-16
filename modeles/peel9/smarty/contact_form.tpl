@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: contact_form.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: contact_form.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}{if empty($skip_introduction_text)}<h1 class="page_title">{if empty($meta_title)}{$STR_CONTACT}{else}{$meta_title}{/if}</h1>{/if}
 {if isset($token_error)}{$token_error}{/if}
 <div id="contact">
@@ -110,6 +110,11 @@
 					<td><label for="code_postal">{$STR_ZIP} {$STR_BEFORE_TWO_POINTS}:</label></td>
 					<td class="{$align}">
 						<input type="text" class="form-control" id="code_postal" name="code_postal" value="{$zip_value|str_form_value}" />
+					</td>
+				</tr>		
+				<tr class="hidden">
+					<td class="{$align}">
+						<span><input type="text" class="form-control" id="form_verif" name="form_verif" value="" /></span>
 					</td>
 				</tr>
 				<tr{if $short_form || !empty($hidden_ville)} class="hidden"{/if}>

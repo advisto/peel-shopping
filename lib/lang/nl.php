@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: nl.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: nl.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,7 +34,7 @@ $GLOBALS["STR_ADDRESS_TEXT"] = "";
 $GLOBALS["STR_ADDRESS_NAME"] = "";
 $GLOBALS["STR_ADMIN"] = "De site beheren";
 $GLOBALS["STR_ADMINISTRATION"] = "De site beheren";
-$GLOBALS["STR_ADVANCED_SEARCH"] = "";
+$GLOBALS["STR_ADVANCED_SEARCH"] = "Recherche avancêe";
 $GLOBALS["STR_ADVANCED_SEARCH_ACCESS"] = "";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_BAN"] = "Bekijk de op uw site te plaatsen banners";
 $GLOBALS["STR_AFFILIATE_ACCOUNT_MSG"] = "U bent als partner geregistreerd op de website {$GLOBALS['site']}.\n\nMomenteel betalen wij u <b>{$GLOBALS['site_parameters']['commission_affilie']} %</b> van de totale verkoop die via uw account gegenereerd is.";
@@ -54,8 +54,10 @@ $GLOBALS["STR_AND"] = "en";
 $GLOBALS["STR_AMOUNT"] = "Bedrag";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Ik heb interesse in de volgende categorieën:";
 $GLOBALS["STR_ARTICLES"] = "artikelen";
+$GLOBALS["STR_ARTICLES_PLURAL_OPTIONAL"] = "";
 $GLOBALS["STR_ASC"] = "oplopend";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "Verbonden of complementaire produkten";
+$GLOBALS["STR_ATTACHEMENT"] = "";
 $GLOBALS["STR_AUCUN_RESULTAT"] = "Geen producten beginnen met dat woord";
 $GLOBALS["STR_AUTH_DENIAL"] = "Toestemming geweigerd";
 $GLOBALS["STR_AVOIR"] = "Tegoed";
@@ -72,6 +74,7 @@ $GLOBALS["STR_BANK_ACCOUNT_RIB_KEY"] = "RIB sleutel";
 $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "RIB sleutel";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Bankrekening";
 $GLOBALS["STR_BARCODE"] = "";
+$GLOBALS["STR_BASE_PRICE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Word partner";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
 $GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
@@ -147,6 +150,7 @@ $GLOBALS["STR_CONTACT_US"] = "Contact";
 $GLOBALS["STR_CONTACT"] = "Contact";
 $GLOBALS["STR_CONTINUE"] = "Doorgaan";
 $GLOBALS["STR_CONTINENT"] = "Continent";
+$GLOBALS["STR_COPY_TO"] = "";
 $GLOBALS["STR_COPY_VERIFICATION_CODE"] = "";
 $GLOBALS["STR_COOKIES_CHROME"] = "Opties &gt; Geavanceerde opties &gt; Instellingen voor inhoud... &gt; Cookies<br />Selecteer &quot;Opslaan van locale gegevens toestaan&quot;";
 $GLOBALS["STR_COOKIES_HOWTO"] = "Controleer of uw browser cookies accepteert:";
@@ -173,6 +177,7 @@ $GLOBALS["STR_DELETE_CART_TITLE"] = "Verwijder safeguard";
 $GLOBALS["STR_DELETE_PROD_CART"] = "Weet u zeker dat u dit product uit uw winkelwagentje wilt verwijderen?";
 $GLOBALS["STR_DELETE_THIS_FILE"] = "";
 $GLOBALS["STR_DELETE"] = "Verwijderen";
+$GLOBALS["STR_DELETE_SELECTION"] = "";
 $GLOBALS["STR_DELETE_CONFIRM"] = "";
 $GLOBALS["STR_DELIVERY_STOCK"] = "Verwachte vertraging levering";
 $GLOBALS["STR_DELIVERY"] = "Levering";
@@ -209,6 +214,7 @@ $GLOBALS["STR_EMAIL_ABSENT"] = "Dit e-mailadres bestaat niet";
 $GLOBALS["STR_EMAIL_BOUNCE_REPLACE"] = "De server %s heeft een permanente fout %s na een eerdere verzending naar %s. Vul een geldig e-mailadres in in uw accountgegevens.";
 $GLOBALS["STR_EMAIL_FRIEND"] = "E-mail van uw vriend";
 $GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Login";
+$GLOBALS["STR_EMAIL_REPLY_TO"] = "";
 $GLOBALS["STR_EMAIL_SENDING_DEACTIVATED"] = "Poging om email te versturen \"%s\"";
 $GLOBALS["STR_EMAIL"] = "Email";
 $GLOBALS["STR_EMPLOYEE"] = "Werkloos";
@@ -250,6 +256,7 @@ $GLOBALS["STR_ERR_KEYB"] = "Druk op de <b>x</b> toets om te sluiten.";
 $GLOBALS["STR_ERR_LOGIN"] = "U heeft uw gebruikersnaam niet ingevuld.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "U heeft uw bericht niet ingevuld.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "De wachtwoorden komen niet overeen. Dank u voor het opnieuw invoeren van de wachtwoorden";
+$GLOBALS['STR_ERR_MONDIAL_RELAY']= "";
 $GLOBALS["STR_ERR_NAME"] = "U hebt uw achternaam vergeten te vermelden";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "U hebt uw nieuw wachtwoord niet bevestigd\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "U hebt uw nieuwe wachtwoord niet ingevuld.\n";
@@ -268,6 +275,7 @@ $GLOBALS["STR_ERR_PSEUDO"] = "U heeft uw gebruikersnaam niet ingevuld, of het be
 $GLOBALS["STR_ERR_QUANTITY"] = "Vul alstublieft uw aantal in";
 $GLOBALS["STR_ERR_SIREN"] = "U bent uw bedrijf nummer vergeten te vermelden";
 $GLOBALS["STR_ERR_SOCIETY"] = "U bent de maatschappij vergeten te vermelden";
+$GLOBALS["STR_ERR_SPAMMER_EMAIL"] = "";
 $GLOBALS["STR_ERR_SUBJECT"] = "Vul alstublieft het onderwerp van uw aanvraag in.\n";
 $GLOBALS["STR_ERR_TEL"] = "U bent uw telefoonnummer vergeten te vermelden";
 $GLOBALS["STR_ERR_TIME"] = "De periode van 24 uur na het verzoek om vernieuwing van het wachtwoord is overschreden.";
@@ -284,6 +292,7 @@ $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Iets werkt niet: Controleer de direct
 $GLOBALS["STR_ETAPE_SUIVANTE"] = "Volgende stap";
 $GLOBALS["STR_EVERYBODY"] = "";
 $GLOBALS["STR_EXPEDITION_DATE"] = "Datum van expeditie";
+$GLOBALS["STR_EXPEDITOR_EMAIL"] = "";
 $GLOBALS["STR_FAQ_TITLE"] = "FAQ";
 $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Facebook uitloggen";
@@ -383,6 +392,7 @@ $GLOBALS["STR_LIST"] = "Lijst";
 $GLOBALS["STR_LIST_PRODUCT"] = "Lijst van de producten";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Lijst van de onder-rubrieken";
 $GLOBALS["STR_LISTE_CADEAU"] = "Mijn geschenkenlijst";
+$GLOBALS["STR_LOGIN_FOR_PAYPAL_CHECKOUT"] = "";
 $GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Log alstublieft in om uw korting te ontvangen";
@@ -476,6 +486,7 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_NO_QUESTION"] = "Er zijn geen vragen ingediend.
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTION"] = "Vraag";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "Vragen";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "Om uw bestelnummer te downloaden";
+$GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_GENERIC_FILES"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "HTML code creëren";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Woordenlijst";
@@ -536,6 +547,7 @@ $GLOBALS["STR_MONTH"] = "Maand";
 $GLOBALS["STR_MONTHS"] = "Maanden";
 $GLOBALS["STR_MORE_DETAILS"] = "Meer details";
 $GLOBALS["STR_MORE"] = "meer details";
+$GLOBALS["STR_MORE_THAN"] = "meer dan";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Het veranderen van de parameters werd uitgevoerd.";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Klik hierom naar het aanmeldformulier te gaan</a>.";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Log dan hier in.";
@@ -553,6 +565,7 @@ $GLOBALS["STR_NET"] = "Netto te betalen";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Nieuwe klant";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Nieuw wachtwoord voor bevestiging";
 $GLOBALS["STR_NEW_PASSWORD"] = "Nieuw wachtwoord";
+$GLOBALS["STR_NEW_SEARCH"] = "";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Inschrijven voor de nieuwsbrief";
 $GLOBALS["STR_NEWSLETTER_YES"] = "Ja, ik wens mij te abonneren aan de Newsletter van de website  {$GLOBALS['site']}";
 $GLOBALS["STR_NEWSLETTER"] = "De e-nieuwsbrief";
@@ -639,6 +652,7 @@ $GLOBALS["STR_PAYMENT_SUCCEED"] = "Deze pagina geeft aan dat uw transactie in de
 $GLOBALS["STR_PAYMENT"] = "Betaling";
 $GLOBALS["STR_PAYPAL_IMG"] = "<img src=\"{$GLOBALS['wwwroot']}/images/logo-xclickBox.gif\" width=\"152\" height=\"29\" alt=\"betalingen via Paypal\" />";
 $GLOBALS["STR_PAYPAL"] = "Paypal";
+$GLOBALS["STR_PDF_ACOMPTE"] = "";
 $GLOBALS["STR_PDF_AVOIR"] = "Avoir client";
 $GLOBALS["STR_PDF_BILL_DATE"] = "Datum van bestelling";
 $GLOBALS["STR_PDF_BILL_PAGE"] = "Pagina";
@@ -722,6 +736,7 @@ $GLOBALS["STR_READ_ENTIRE_ARTICLE"] = "Lees het hele artikel";
 $GLOBALS["STR_REBATE_NOW"] = "nu als u een tegoedbon heeft";
 $GLOBALS["STR_RECOVER_PASSWORD_OK"] = "Het vernieuwen van uw wachtwoord is met succes afgesloten.\r\nU kunt nu inloggen met het nieuwe wachtwoord door te klikken op <a href=\"{$GLOBALS['wwwroot']}/membre.php\"> ce lien </a>";
 $GLOBALS["STR_RECURRENT"] = "Terugkerend";
+$GLOBALS["STR_RECIPENT_NO_SET"] = "";
 $GLOBALS["STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE"] = "Op alle producten in deze categorie geldt een korting van";
 $GLOBALS["STR_REFERENCE_ON_LINE_SHOP"] = "Referenties webwinkel";
 $GLOBALS["STR_REFERENCE"] = "Referentie";
@@ -767,6 +782,7 @@ $GLOBALS["STR_SEARCH_RESULT_PRODUCT"] = "in de producten";
 $GLOBALS["STR_SEARCH"] = "Zoeken";
 $GLOBALS["STR_SECOND_CHOICE"] = "2e keus";
 $GLOBALS["STR_SEE_YOU_SOON"] = "Tot binnenkort bij";
+$GLOBALS["STR_SEND_EMAIL_OK"] = "";
 $GLOBALS["STR_SEND_CHECK"] = "Gelieve uw betaling over te maken aan";
 $GLOBALS["STR_SEND_TRANSFER"] = "Gelieve uw betaling per overschrijving uit te voeren\n";
 $GLOBALS["STR_SEND"] = "Verzenden";
@@ -805,6 +821,7 @@ $GLOBALS["STR_STOCK"] = "Info voorraad.";
 $GLOBALS["STR_STRONG_PASSWORD_NOTIFICATION"] = "Sterke wachtwoorden bevatten 7 tot 16 tekens, bevatten geen woorden of gemeenschappelijke namen en combineren hoofdletters, kleine letters, cijfers en symbolen.";
 $GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "De bijnaam mag het (@) teken niet bevatten";
 $GLOBALS["STR_SUBMIT"] = "Bevestigen";
+$GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Uw tegoed laat U toe supplementaire produkten te kopen. Wij raden U aan de volgende <href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">lijst</a> te raadplegen om deze te kiezen.";
 $GLOBALS["STR_SUPPORT"] = "Voor alle verdere vragen, neem gerust contact met ons op door middel van ons <a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">contactformulier</a>";
 $GLOBALS["STR_SWIFT"] = "BIC";
@@ -830,6 +847,7 @@ $GLOBALS["STR_THIRD_CHOICE"] = "3e keus";
 $GLOBALS["STR_TICKET_OK"] = "Uw bericht is in goede orde ontvangen.\n\nEr zal zo spoedig mogelijk contact met uw opgenomen worden.";
 $GLOBALS["STR_TITLE_SEARCH_HEADER"] = "";
 $GLOBALS["STR_TITLE_SUFFIX"] = "{$GLOBALS['site']}";
+$GLOBALS["STR_TO_SEND"] = "";
 $GLOBALS["STR_TO"] = "naar";
 $GLOBALS["STR_TO_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_TO_NEWSLETTER"] = "";
@@ -861,6 +879,7 @@ $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_HIGHER_THAN"] = "";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_LARGER_THAN"] = "";
 $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"] = "";
 $GLOBALS["STR_USER_ACCOUNT_COMPLETION"] = "";
+$GLOBALS["STR_USER_ALREADY_EXISTS"] = "";
 $GLOBALS["STR_USER_CANCEL"] = "Annulering door gebruiker.";
 $GLOBALS["STR_USER_ORIGIN"] = "Hoe heeft u de website gevonden?";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "Door een vriend of familielid";
@@ -917,7 +936,13 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "";
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "Er zijn geen producten toegevoegd";
 $GLOBALS["STR_ZIP"] = "Postcode";
 $GLOBALS["STR_ZOOM"] = "Zoom";
+$GLOBALS["STR_PIECE"] = "";
+$GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "";
+$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "";
 $GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "Quantity";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "";
 $GLOBALS["STR_CARD_ESTIMATE"] = "";
 $GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
@@ -929,3 +954,13 @@ $GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
 $GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
 $GLOBALS["STR_ON_REQUEST"] = "";
 $GLOBALS["STR_ESTIMATE"] = "";
+$GLOBALS["STR_ORDER_SUSPECT"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "";
+
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "Maanden";
+$GLOBALS["STR_CODE_CHORUS"] = "";
+$GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
+$GLOBALS["STR_NAME_ADDRESS"] = "";

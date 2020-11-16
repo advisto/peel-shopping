@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: articles.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: articles.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../configuration.inc.php");
 necessite_identification();
@@ -225,7 +225,7 @@ function affiche_formulaire_modif_article($id, &$frm, &$form_error_object)
 		$frm['rubriques'][] = $cat['nom_rubrique'];
 	}
 
-	$hook_result = call_module_hook('affiche_formulaire_modif_article', array('id'=>$id, 'frm'=>$frm), 'array');
+	$hook_result = call_module_hook('affiche_formulaire_modif_article', array('id' => $id, 'frm' => $frm), 'array');
 	$frm = array_merge_recursive_distinct($frm, $hook_result);
 		
 	$frm['nouveau_mode'] = "maj";
@@ -494,8 +494,8 @@ function insere_article($frm)
 			VALUES ('" . intval($frm['rubriques'][$i]) . "', '" . intval($article_id) . "')");
 	}
 
-	call_module_hook('insere_article', array('article_id'=>$article_id, 'frm'=>$frm));
-	}
+	call_module_hook('insere_article', array('article_id' => $article_id, 'frm' => $frm));
+}
 
 /**
  * Met à jour l'article $id avec de nouvelles valeurs. Les champs sont dans $frm
@@ -516,6 +516,7 @@ function maj_article($id, $frm)
 		SET etat = '" . intval($frm['etat']) . "'
 		, position = '" . intval($frm['position']) . "'
 		, site_id = '" . nohtml_real_escape_string(get_site_id_sql_set_value($frm['site_id'])) . "'
+		
 		, technical_code = '" . nohtml_real_escape_string($frm['technical_code']) . "'
 		, image1 = '" . nohtml_real_escape_string($frm['image1']) . "'
 		, date_maj = '" . date('Y-m-d H:i:s', time()) . "'";
@@ -572,9 +573,9 @@ function maj_article($id, $frm)
 			VALUES ('" . intval($frm['rubriques'][$i]) . "', '" . intval($id) . "')");
 	}
 	
-	call_module_hook('maj_article', array('id'=>$id, 'frm'=>$frm));
-	}
-	
+	call_module_hook('maj_article', array('id' => $id, 'frm' => $frm));
+}
+
 /**
  * Supprime le produit spécifié par $id. Il faut supprimer le produit puis les entrées correspondantes de la table produits_categories
  *

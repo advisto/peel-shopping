@@ -238,7 +238,9 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
                 // debug output
                 $this->smarty->_debug->display_debug($this, true);
             }
-			$GLOBALS['peel_debug'][] = array('template' => 'Display template Smarty <b>' . $this->source->name .'</b>' . ($this->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
+			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+				$GLOBALS['peel_debug'][] = array('template' => 'Display template Smarty <b>' . $this->source->name .'</b>' . ($this->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
+			}
             return '';
         } else {
             if ($this->smarty->debugging) {
@@ -247,7 +249,9 @@ class Smarty_Internal_Template extends Smarty_Internal_TemplateBase
                     $this->smarty->_debug->display_debug($this, true);
                 }
             }
-			$GLOBALS['peel_debug'][] = array('template' => 'Fetch template Smarty <b>' . $this->source->name .'</b>'  . ($this->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
+			if (defined('PEEL_DEBUG') && PEEL_DEBUG) {
+				$GLOBALS['peel_debug'][] = array('template' => 'Fetch template Smarty <b>' . $this->source->name .'</b>'  . ($this->smarty->force_compile?' - <span class="bold">recompile forced</span> (=> you are working local or with recompile forced in your configuration file)':''), 'duration' => microtime_float() - $GLOBALS['smarty_create_time'], 'start' => $GLOBALS['smarty_create_time'] - $GLOBALS['script_start_time']);
+			}
             if (!$no_output_filter
                 && (!$this->caching || $this->cached->has_nocache_code || $this->source->handler->recompiled)
                 && (isset($this->smarty->autoload_filters[ 'output' ])

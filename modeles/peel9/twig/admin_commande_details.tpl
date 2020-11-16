@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -33,25 +33,67 @@
 						{% endif %}
 						</p>
 					{% else %}
-						<div class="alert alert-info">{{ STR_ADMIN_CREATE_BILL_NUMBER_BEFORE }}</div>
+						{% if STR_ADMIN_CREATE_BILL_NUMBER_BEFORE %}
+							<div class="alert alert-info">{{ STR_ADMIN_CREATE_BILL_NUMBER_BEFORE }}</div>
+						{% endif %}
 					{% endif %}
-					
-						<p><b>{{ bill_anchor|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b>
-							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ proforma_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ bill_anchor }} PDF</a>
+						{% if specific_pdf_fact_button is empty %}
+							<b>{% if button_group_title %}{{ button_group_title|upper }}{% else %}{{ bill_anchor|upper }}{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</b>
+							<a href="{{ proforma_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">
+								<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> {{ bill_anchor }}
+							</a>
+						{% endif %}
+						{% if sendproforma_pdf_href %}
 							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ sendproforma_pdf_href|escape('html') }}" data-confirm="{{ bill_send_pdf_anchor_confirm|str_form_value }}">{{ bill_send_pdf_anchor }}</a>
-						</p>
+						{% endif %}
 						{% if devis_pdf_href %}
 						<p><b>{{ STR_QUOTATION|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b>
 							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ devis_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_QUOTATION }} PDF</a>
+						{% if senddevis_pdf_href %}
 							<img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ senddevis_pdf_href|escape('html') }}" data-confirm="{{ STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM|str_form_value }}">{{ STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL }}</a>
+						{% endif %}
 						</p>
 						{% endif %}
 						{% if disable_bdc is empty %}
 						<p><b>{{ STR_ORDER_FORM|upper }}{{ STR_BEFORE_TWO_POINTS }}:</b> <img src="{{ pdf_src|escape('html') }}" width="8" height="11" alt="" /> <a href="{{ bdc_pdf_href|escape('html') }}" onclick="return(window.open(this.href)?false:true);">{{ STR_ORDER_FORM }} PDF</a></p>
 						{% endif %}
-					{% if convert_bill_button %}
-						<p>{{ convert_bill_button }}</p>
-					{% endif %}
+						
+						<div class="row">
+						{% if specific_pdf_fact_button %}
+							<div class="col-md-3">
+								<a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">
+									{{ bill_anchor }}
+								</a>
+							</div>
+						{% endif %}
+						{% if convert_bill_button %}
+							<div class="col-md-3">{{ convert_bill_button }}</div>
+						{% endif %}
+						{% if send_bill_by_mail %}
+							<div class="col-md-6">
+							{{ send_bill_by_mail }}
+							</div>
+						{% endif %}
+						</div>
+						{% if message %}
+						<div class="row">
+							<div class="col-md-12">
+								<br />
+								{{ message }}
+							</div>
+						</div>
+						{% endif %}
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+
 					{% if is_module_factures_html_active and disable_html_bill is empty %}
 						<form class="entryform form-inline" role="form" method="post" action="{{ bdc_action|escape('html') }}">
 							<p><b>{{ STR_ORDER_FORM }} HTML</b> {{ STR_ADMIN_COMMANDER_WITH_PARTIAL_AMOUNT }}
@@ -86,8 +128,27 @@
 	{% endif %}
 </table>
 {% if information_on_this_order_disabled is empty %}
-<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
+<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
 	<table>
+		{% if order_detail_fields_disable.montant_displayed_prix is empty and montant_displayed_prix>0 %}
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="2" class="bloc"><h2>{{ STR_ADMIN_COMMANDER_ORDER_TOTAL }}{{ STR_BEFORE_TWO_POINTS }}</h2></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<div class="well">
+						{{ STR_ADMIN_TOTAL_TTC_ALL_INCLUDE }} : {{ montant_displayed_prix }} {{ ttc_ht }}
+							<br />
+						{{ STR_ADMIN_INCLUDING_VAT }} : {{ amount_tva }}
+							<br />
+						{{ STR_ADMIN_TOTAL_HT_ALL_INCLUDE }} : {{ amount_ht }} {{ ht }}
+					</div>
+				</td>
+			</tr>
+		{% endif %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
@@ -153,13 +214,13 @@
 			<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" /></td>
 		</tr>
 	{% else %}
-		<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
-		<table>
+		<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+		<table style="width:100%;">
 	{% endif %}
 {% else %}
 </table>
-<form class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
-	<table>
+<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{{ action|escape('html') }}">
+	<table style="width:100%;">
 {% endif %}
 	{% if order_detail_fields_disable.numero is empty %}
 		<tr>
@@ -277,10 +338,6 @@
 			<td><input type="text" class="form-control" name="currency_rate" value="{{ currency_rate|str_form_value }}" /></td>
 		</tr>
 		{% endif %}
-		<tr>
-			<td>{{ STR_ADMIN_COMMANDER_ORDER_TOTAL }}{{ STR_BEFORE_TWO_POINTS }}:</td>
-			<td><b>{{ montant_displayed_prix }} {{ ttc_ht }}</b></td>
-		</tr>
 		{% if (total_remise_prix) %}
 		<tr>
 			<td>{{ STR_ADMIN_COMMANDER_INCLUDING_DISCOUNT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
@@ -333,20 +390,24 @@
 			</td>
 		</tr>
 		{% endif %}
+		<tr>
+			<td class="title_label">{{ STR_ORDER_SUSPECT }}{{ STR_BEFORE_TWO_POINTS }}:</td>
+			<td><input value="1" {% if order_suspect ==1 %} checked="checked"{% endif %} name="suspect" type="checkbox" /></td>
+		</tr>
 		{% if order_detail_fields_disable.commentaires is empty %}
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
 				<textarea class="form-control" name="commentaires" style="width:100%" rows="5" cols="54">{{ commentaires|trim }}</textarea>
 			</td>
 		</tr>
-		{% endif %}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+		{% endif %}
 		{% if order_detail_fields_disable.commentaires_admin is empty %}
 		<tr>
 			<td colspan="2" class="title_label">{{ STR_ADMIN_COMMENTS }}{{ STR_BEFORE_TWO_POINTS }}:<br />
-				<textarea class="form-control" name="commentaires_admin" style="width:100%" rows="5" cols="54">{{ commentaires_admin|trim }}</textarea>
+				{{ commentaires_admin|trim }}
 			</td>
 		</tr>
 		{% endif %}
@@ -413,6 +474,7 @@
 		</tr>
 	{% endfor %}
 	{% endif %}
+	{{ specific_field_form_part }}
 	{% for f in specific_fields %}
 		<tr>
 			{% if f.field_title %}
@@ -481,21 +543,7 @@
 				<input type="hidden" name="id" value="{{ id|str_form_value }}" />
 				<input type="hidden" name="id_utilisateur" value="{{ id_utilisateur|str_form_value }}" />
 				<input type="hidden" name="lang" value="{{ lang|str_form_value }}" />
-				<p><input id="nb_produits" type="hidden" name="nb_produits" value="{{ nb_produits|str_form_value }}" />
-{% if (get_mode) %}
-	{% if get_mode == "insere" or get_mode == "ajout" %}
-					<input type="submit" value="{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER|str_form_value }}" class="btn btn-primary" />
-	{% else %}
-		{% if is_order_modification_allowed %}
-					<input type="submit" value="{{ STR_ADMIN_FORM_SAVE_CHANGES|str_form_value }}" class="btn btn-primary" />
-		{% else %}
-					{{ STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED }}
-		{% endif %}
-	{% endif %}
-{% else %}
-					<input type="submit" value="{{ STR_ADMIN_FORM_SAVE_CHANGES|str_form_value }}" class="btn btn-primary" />
-{% endif %}
-				</p>
+				<p><input id="nb_produits" type="hidden" name="nb_produits" value="{{ nb_produits|str_form_value }}" /></p>
 		</div>
 {% if is_order_modification_allowed %}
 	<div class="entete">{{ STR_ADMIN_COMMANDER_ADD_PRODUCTS_TO_ORDER }}</div>
@@ -529,6 +577,20 @@
 		<div class="suggestions" id="suggestions"></div>
 	</div>
 {% endif %}
+<br />
+	{% if (get_mode) %}
+		{% if get_mode == "insere" or get_mode == "ajout" %}
+						<input type="submit" value="{{ STR_ADMIN_UTILISATEURS_CREATE_ORDER|str_form_value }}" class="btn btn-primary" />
+		{% else %}
+			{% if is_order_modification_allowed %}
+						<input type="submit" value="{{ STR_ADMIN_FORM_SAVE_CHANGES|str_form_value }}" class="btn btn-primary" />
+			{% else %}
+						{{ STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED }}
+			{% endif %}
+		{% endif %}
+	{% else %}
+						<input type="submit" value="{{ STR_ADMIN_FORM_SAVE_CHANGES|str_form_value }}" class="btn btn-primary" />
+	{% endif %}
 </form>
 {% if (parrainage_form) %}
 <form class="entryform form-inline" role="form" method="post" action="{{ parrainage_form.action }}">

@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_formulaire_type.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_formulaire_type.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
 	{$form_token}
 	<input type="hidden" name="mode" value="{$mode|str_form_value}" />
@@ -94,6 +94,15 @@
 			<td>
 				<input type="radio" name="is_icirelais" value="1" {if $is_icirelais == 1} checked="checked"{/if} /> {$STR_YES}
 				<input type="radio" name="is_icirelais" value="0" {if $is_icirelais == 0} checked="checked"{/if} /> {$STR_NO}
+			</td>
+		</tr>
+		{/if}
+		{if $is_mondial_relay_module_active}
+		<tr>
+			<td>{$STR_ADMIN_TYPES_LINK_TO_MONDIAL_RELAY}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td>
+				<input type="radio" name="is_mondial_relay" value="1" {if $is_mondial_relay == 1} checked="checked"{/if} /> {$STR_YES}
+				<input type="radio" name="is_mondial_relay" value="0" {if $is_mondial_relay == 0} checked="checked"{/if} /> {$STR_NO}
 			</td>
 		</tr>
 		{/if}

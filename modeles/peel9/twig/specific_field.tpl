@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
 // | opensource GPL license: you are allowed to customize the code		 |
 // | for your own needs, but must keep your changes under GPL			 |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
@@ -23,13 +23,15 @@
 {% elseif f.field_type == "checkbox" %}
 	{% if f.options %}
 		{% for o in f.options %}
-<input {% if f.readonly and o.issel is empty %} readonly="readonly"{% endif %} type="checkbox" value="{{ o.value|str_form_value }}" {% if o.issel %} checked="checked"{% endif %}{% if disabled %} disabled="disabled"{% endif %} id="{{ f.field_id|str_form_value }}#{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name }}#{{ o.value|str_form_value }}" >{{ o.name }}</label>{% if o.br %}<br />{% endif %}
+<input {% if f.readonly and o.issel is empty %} readonly="readonly"{% endif %} type="checkbox" value="{{ o.value|str_form_value }}" {% if o.issel %} checked="checked"{% endif %}{% if disabled %} disabled="disabled"{% endif %} id="{{ f.field_id|str_form_value }}_{{ o.value|str_form_value }}" name="{{ f.field_name|str_form_value }}[]" /> <label for="{{ f.field_name }}#{{ o.value|str_form_value }}" >{{ o.name }}</label>{% if o.br %}<br />{% endif %}
 		{% endfor %}
 	{% endif %}
 {% elseif f.field_type == "select" %}
 <select {% if f.mandatory %} required="required"{% endif %}{% if f.multiple %} multiple="multiple" size="5" name="{{ f.field_name|str_form_value }}[]" {% else %} name="{{ f.field_name|str_form_value }}" {% endif %} {% if f.readonly %} readonly="readonly"{% endif %} id="{{ f.field_id|str_form_value }}" {% if disabled %} disabled="disabled"{% endif %} class="form-control" onchange="{{ f.javascript|str_form_value }}" >
-	{% if f.options|length >1 and f.readonly is empty %}
-	<option value="">{{ f.STR_CHOOSE }}...</option>
+	{% if f.options %}
+		{% if f.options|length >1 and f.readonly is empty %}
+		<option value="">{{ f.STR_CHOOSE }}...</option>
+		{% endif %}
 	{% endif %}
 	{% if f.options %}
 		{% for o in f.options %}
@@ -38,9 +40,9 @@
 	{% endif %}
 </select>
 {% elseif f.field_type == "select_multiple" %}
-<select {% if f.mandatory %} required="required"{% endif %} multiple="multiple" size="5" name="{{ $f.field_name|str_form_value }}[]" {% if f.readonly %} readonly="readonly"{% endif %} id="{{ f.field_id|str_form_value }}" {% if $disabled %} disabled="disabled"{% endif %} class="form-control" onchange="{{ $f.javascript|str_form_value }}">
-	{% if count(f.options)>1 and f.readonly is empty %}
-	<option value="">{$f.STR_CHOOSE}...</option>
+<select {% if f.mandatory %} required="required"{% endif %} multiple="multiple" size="5" name="{{ f.field_name|str_form_value }}[]" {% if f.readonly %} readonly="readonly"{% endif %} id="{{ f.field_id|str_form_value }}" {% if disabled %} disabled="disabled"{% endif %} class="form-control" onchange="{{ f.javascript|str_form_value }}">
+	{% if f.options.count > 1 and f.readonly is empty %}
+	<option value="">{{ f.STR_CHOOSE }}...</option>
 	{% endif %}
 	{% if f.options %}
 		{% for o in f.options %}
@@ -53,7 +55,7 @@
 {% elseif f.field_type == "number" %}
 <input {% if disabled or f.disabled %} disabled="disabled"{% endif %} type="number" step="any" id="{{ f.field_id|str_form_value }}" name="{{ f.field_name|str_form_value }}" value="{{ f.field_value|str_form_value }}" class="form-control" />
 {% elseif f.field_type == "datepicker" %}
-<input {% if disabled or f.disabled %} disabled="disabled"{% endif %} type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_id|str_form_value }}#{{ f.field_value|str_form_value }}" name="{{ f.field_name|str_form_value }}" class="form-control datepicker" />
+<input {% if disabled or f.disabled %} disabled="disabled"{% endif %} type="text" value="{{ f.field_value|str_form_value }}" id="{{ f.field_id|str_form_value }}{% if f.field_value %}#{{ f.field_value|str_form_value }}{% endif %}" name="{{ f.field_name|str_form_value }}" class="form-control datepicker" />
 {% elseif f.field_type == "upload" %}
 	{% if f.upload_infos is empty %}
 		{% if site_parameters.used_uploader=="fineuploader" %}

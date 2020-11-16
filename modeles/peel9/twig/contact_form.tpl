@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -116,6 +116,11 @@
 					<td><label for="code_postal">{{ STR_ZIP }} {{ STR_BEFORE_TWO_POINTS }}:</label></td>
 					<td class="{{ align }}">
 						<input type="text" class="form-control" id="code_postal" name="code_postal" value="{{ zip_value|str_form_value }}" />
+					</td>
+				</tr>
+				<tr class="hidden">
+					<td class="{{ align }}">
+						<span><input type="text" class="form-control" id="form_verif" name="form_verif" value="" /></span>
 					</td>
 				</tr>
 				<tr{% if short_form or hidden_ville %} class="hidden"{% endif %}>

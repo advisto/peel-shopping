@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: order_step2.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: order_step2.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<h1 property="name" class="order_step2">{$STR_STEP2}</h1>
 <div class="totalcaddie">
 	<p>{$STR_DATE}{$STR_BEFORE_TWO_POINTS}: {$date}</p>
@@ -33,6 +33,9 @@
 				<p>{$STR_ZIP}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$code_postal1}</span></p>
 				<p>{$STR_TOWN}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$ville1}</span></p>
 				<p>{$STR_COUNTRY}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$pays1}</span></p>
+				{if !empty($num_tva1)}
+				<p>{$STR_INTRACOM_FORM}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$num_tva1}</span></p>
+                {/if}
 				{if isset($commentaires)}
 				<p>{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}: <span class="right">{$commentaires|nl2br_if_needed}</span></p>
 				{/if}

@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -34,7 +34,13 @@
 	</tr>
 	{% for res in results %}
 		{{ res.tr_rollover }}
-			<td class="center"><input type="checkbox" value="{{ res.id }}" name="attribut_id[]" /><a data-confirm="{{ STR_ADMIN_CONFIRM_JAVASCRIPT|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a> <a href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_ADMIN_UPDATE }}" /></a></td>
+			<td class="center">
+				<input type="checkbox" value="{{ res.id }}" name="attribut_id[]" />
+				&nbsp;
+				<a data-confirm="{{ STR_ADMIN_CONFIRM_JAVASCRIPT|str_form_value }}" title="{{ STR_DELETE|str_form_value }} {{ res.nom }}" href="{{ res.drop_href|escape('html') }}"><img src="{{ drop_src|escape('html') }}" alt="{{ STR_DELETE|str_form_value }}" /></a>
+				&nbsp;
+				<a href="{{ res.edit_href|escape('html') }}"><img src="{{ edit_src|escape('html') }}" alt="{{ STR_ADMIN_UPDATE }}" /></a>
+			</td>
 			<td class="center"><a title="{{ STR_MODULE_ATTRIBUTS_ADMIN_UPDATE|str_form_value }}" href="{{ res.edit_href|escape('html') }}">{{ res.nom }}</a></td>
 			<td class="center">
 				{% if not res.texte_libre and not res.upload %}
@@ -59,17 +65,17 @@
 				<tr>
 					<td>
 						<select class="form-control" name="assignation_mode">
-							<option value="assign">Associer</option>
-							<option value="unassign">Désassocier</option>
+							<option value="assign">{{ STR_ADMIN_ASSOCIATED }}</option>
+							<option value="unassign">{{ STR_ADMIN_DISASSOCIATED }}</option>
 						</select>
 					</td><td>
-						les attributs cochés aux produits de la catégorie
+						&nbsp;{{ STR_MODULE_ATTRIBUTS_ADMIN_ATTRIBUTES_CHECKED_IN_CATEGORY_PRODUCTS }}&nbsp;
 					</td><td>
 						<select class="form-control" name="categories">
-							{$categorie_options}
+							{{ categorie_options }}
 						</select>
 					</td>
-					<td>&nbsp;<input type="submit" class="btn btn-primary" name="submit_product_attribut_form" value="{$STR_SEND}" /></td>
+					<td>&nbsp;<input type="submit" class="btn btn-primary" name="submit_product_attribut_form" value="{{ STR_SEND }}" /></td>
 				</tr>
 			</table>
 		</td>

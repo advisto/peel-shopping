@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -81,6 +81,7 @@
 				<td class="center">{{ res.order_id }}</td>
 				<td class="center"><a href="commander.php?mode=modif&amp;commandeid={{ res.order_id }}">{{ res.numero|default('&nbsp;') }}</a></td>
 				<td class="center">{{ res.date }}</td>
+				<td class="center" style="{% if res.suspect %}background-color:green;{% else %}background-color:red;{% endif %}"></td>
 				<td class="center">{{ res.montant_prix }}</td>
 				<td class="center">{{ res.avoir_prix }}</td>
 				<td class="center">{{ res.modifUser }}</td>

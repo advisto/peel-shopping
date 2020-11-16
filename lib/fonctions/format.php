@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: format.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: format.php 64928 2020-11-05 10:50:06Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -32,7 +32,7 @@ function cleanDataDeep(&$value, $key = null)
 			$value = array_map('cleanDataDeep', $value);
 		}
 	} else {
-		if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+		if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc()) {
 			// Si magic_quotes est activé dans la configuration de l'hébergement, alors on annule ses effets ici
 			$value = stripslashes($value);
 		}
@@ -46,7 +46,7 @@ function cleanDataDeep(&$value, $key = null)
 			if($key!==null){
 				// On ne passe ici que si $key est défini, donc si on appelle cette fonction avec array_walk_recursive et non pas array_map
 				$key_parts=explode('_', str_replace('form_', '', $key));
-				if (!empty($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && (!in_array($key, $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && !in_array($key_parts[0], $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'])) && preg_match('|\</?([a-zA-Z]+[1-6]?)(\s[^>]*)?(\s?/)?\>|', $value)) {
+				if (isset($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && ($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'] === false || (is_array($GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && (!in_array($key, $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin']) && !in_array($key_parts[0], $GLOBALS['site_parameters']['post_variables_with_html_allowed_if_not_admin'])) && preg_match('|\</?([a-zA-Z]+[1-6]?)(\s[^>]*)?(\s?/)?\>|', $value)))) {
 					// Un utilisateur sans droit administrateur ne peut jamais donner de HTML => protège de toute sorte de XSS
 					$value = StringMb::strip_tags($value);
 				}
@@ -212,10 +212,10 @@ function get_float_from_user_input($string, $from_currency_rate = 1)
 	}
 	if (strpos($string, ',') !== false && strpos($string, '.') !== false) {
 		if (strpos($string, ',') < strpos($string, '.')) {
-			// La virgule est spérateur de milliers
+			// La virgule est séparateur de milliers
 			$string = str_replace(',', '', $string);
 		} else {
-			// Le point est spérateur de milliers
+			// Le point est séparateur de milliers
 			$string = str_replace('.', '', $string);
 		}
 	}
@@ -312,8 +312,13 @@ function rewriting_urlencode($string, $convert_string_to_lower = true)
 	$string = preg_replace('/[^a-zA-Z0-9_]/', "-", utf8_decode(StringMb::strip_tags(StringMb::convert_accents(StringMb::html_entity_decode($string)))));
 	$string = preg_replace('/[-]{2,}/', "-", $string);
 	$url_part = StringMb::rawurlencode(StringMb::str_shorten($string, 60, '', '', 30));
+
+	if (!empty($GLOBALS['site_parameters']['rewriting_strip_dash'])) {
+		$url_part = preg_replace('/-{1,}$/', "", $url_part);
+	}
 	return $url_part;
 }
+
 
 /**
  * get_currency_international_numerical_code()
@@ -494,24 +499,27 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 	// $date = strftime(str_replace('%A', $GLOBALS['day_of_week'][(0 + strftime('%w', strtotime($datetime_or_timestamp)))], str_replace('%B', $GLOBALS['months_names'][(0 + strftime('%m', strtotime($datetime_or_timestamp)))], $GLOBALS['date_format_long'])), strtotime($datetime_or_timestamp));
 	if (!empty($GLOBALS['date_format_'.$mode])) {
 		$format = $GLOBALS['date_format_'.$mode];
-	} elseif($mode != 'timestamp' && $mode != 'timestamp1000') {
+	} elseif($mode != 'timestamp' && $mode != 'timestamp1000' && $mode !== null) {
 		$format = $GLOBALS['date_format_long'];
 	} else {
 		$format = null;
 	}
-	if($format !== null) {
+	if($format !== null || $mode === null) {
+		$temp = null;
 		if ($hour_minute===true) {
-			$format .= ' ' . $GLOBALS['time_format_long'];
+			$temp = $GLOBALS['time_format_long'];
 		}elseif (!empty($hour_minute)) {
-			$format .= ' ' . vb($GLOBALS['time_format_'.$hour_minute]);
+			$temp = vb($GLOBALS['time_format_'.$hour_minute]);
+		}
+		if(!empty($temp)) {
+			if(!empty($format)) {
+				$format .= ' ';
+			}
+			$format .= $temp;
 		}
 	}
 	if (empty($datetime_or_timestamp) || $datetime_or_timestamp==='0') {
-		if($mode == 'timestamp' || $mode == 'timestamp1000') { 
-			$date = 0;
-		} else {
-			$date = '';
-		}
+		$date = '';
 	} elseif (!is_numeric($datetime_or_timestamp)) {
 		if (substr($datetime_or_timestamp, 0, 10) == '0000-00-00') {
 			$date = '';
@@ -533,6 +541,9 @@ function get_formatted_date($datetime_or_timestamp = null, $mode = 'short', $hou
 	if($date!=='' && $date!==false && $date!==null && is_numeric($date) && $format !== null) {
 		// Format numérique timestamp => on convertit en date
 		$date = strftime($format, $date);
+	}
+	if(($date === '' || $date === false) && ($mode == 'timestamp' || $mode == 'timestamp1000')) { 
+		$date = 0;
 	} elseif($mode == 'timestamp1000' && is_numeric($date)) {
 		// ms instead of seconds - on passe en chaine de caractères pour compatibilité avec entiers 32 bits si serveur n'est pas en 64 bits.
 		$date = '' . $date . '000';
@@ -553,7 +564,7 @@ function get_mysql_date_from_user_input($string, $use_current_hour_min_sec_if_mi
 {
 	if(is_numeric($string) && $string>100000000) {
 		// $string est un timestamp
-		$string = date('Y-m-d H:i:s', $string);
+		$string = date('Y-m-d H:i:s', intval($string));
 		$supposed_string_format = 'Y-m-d H:i:s';
 	} elseif (is_numeric(substr($string, 0, 4)) && substr($string, 4, 1) == '-' && is_numeric(substr($string, 5, 2)) && substr($string, 7, 1) == '-' && is_numeric(substr($string, 8, 2))) {
 		// Date au format MySQL
@@ -670,9 +681,10 @@ function get_formatted_duration($total_seconds, $show_seconds = false, $display_
  * @param string $format : null => does not touch the format of the tag, "text" or "html"
  * @param string $lang
  * @param boolean $avoid_load_urls A mettre à true pour éviter appels récursifs infinis
+ * @param boolean alternative_syntaxe_enable : Ajoute la gestion des <# #>. si true, Faire un str_replace dans le texte pour remplacer les syntaxes alternatives.
  * @return
  */
-function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null, $lang = null, $avoid_load_urls = false)
+function template_tags_replace($text, $custom_template_tags = array(), $replace_only_custom_tags = false, $format = null, $lang = null, $avoid_load_urls = false, $alternative_syntaxe_enable = false, $format_lowercase_tag_name_disable = false)
 {
 	if(is_array($text)) {
 		$temp = array();
@@ -689,6 +701,11 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 	}
 	if (empty($lang)) {
 		$lang = $_SESSION['session_langue'];
+	}
+	if (!empty($alternative_syntaxe_enable)) {
+		// Remplacement des ouvertures / fermetures de tags écrit différemment, pour n'avoir qu'une seule nomenclature à gérer ensuite
+		$text = str_replace(array('&lt;#','<#'), '[', $text);
+		$text = str_replace(array('#&gt;','#>'), ']', $text);
 	}
 	if(StringMb::strpos(str_replace('[]','', $text), '[') !== false && StringMb::strpos(str_replace('[]','', $text), ']') !== false) {
 		$template_tags = array();
@@ -709,6 +726,7 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			$template_tags['DATE'] = get_formatted_date(time(), 'long', false);
 			$template_tags['DATE_SHORT'] = get_formatted_date(time(), 'short', false);
 			$template_tags['TIMESTAMP'] = time();
+			$template_tags['YEARS'] = date('Y');
 			// Gestion des tags [CODE_PROMO_SOURCE=XXXXXXXXXX]
 			foreach(array('CODE_PROMO_SOURCE' => false, 'FUNCTION' => true, 'HTML' => true, 'GLOBALS' => true, 'BEST_SELLER_CARROUSEL' => true, 'CONTENT_CARROUSEL' => true) as $this_function_tag => $arg_mandatory) {
 				$tag_begin = -1;
@@ -824,6 +842,29 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 				$template_tags['CLIENT_REFERENCES'] = affiche_reference_multipage(null, '', 'reference', 12, 'general', true, 0, 4, false);
 			} elseif(StringMb::strpos($text, '[CLIENT_REFERENCES_CARROUSEL]') !== false) {
 				$template_tags['CLIENT_REFERENCES_CARROUSEL'] = affiche_reference_carrousel(true,null, 1, 1, 12, 0);
+			} elseif(StringMb::strpos($text, '[SPECIFIC_FIELD_FORM]') !== false && !empty($GLOBALS['site_parameters']['enable_admin_specific_form'])) {
+				$frm = $_POST;
+				if (!isset($form_error_object)) {
+					$form_error_object = new FormError();
+				}
+				if (sizeof($frm)>5) {
+					$form_error_object->valide_form($frm, $GLOBALS['site_parameters']['customer_mandatory_fields']);
+				}
+				$specific_field_infos_array = get_specific_field_infos($frm, $form_error_object, 'customer');
+				$template_tags['SPECIFIC_FIELD_FORM'] = display_specific_field_form($specific_field_infos_array, 'div');
+				handle_specific_fields($frm, 'customer');
+				if (!$form_error_object->count() && sizeof($frm)>5) {
+					$set_sql = implode(',', $frm['specific_field_sql_set']);
+					$content_form =  implode('<br>', $frm['specific_field_sql_set']);
+					// On insert dans la table
+					$sql = "INSERT INTO peel_specific_form
+						SET " . $set_sql . ", site_id=" . $GLOBALS['site_id'] . "";
+					query($sql);
+					$GLOBALS['js_ready_content_array'][] = "bootbox.alert('".filtre_javascript($GLOBALS['STR_SPECIFIC_FORM_SAVE_CONFIRM'], true, true, false, true, false) ."')";
+					$custom_template_tags['FIELD_FORM'] = str_replace('=', ':', $content_form);
+					send_email($GLOBALS['support'], '', '', 'save_product_number', $custom_template_tags, null, $GLOBALS['support']);
+				}
+				
 			}
 			if(StringMb::strpos($text, '[CLOSE_MAIN_CONTAINER]') !== false) {
 				$template_tags['CLOSE_MAIN_CONTAINER'] = '</div></div></div></div>';
@@ -880,8 +921,10 @@ function template_tags_replace($text, $custom_template_tags = array(), $replace_
 			} elseif($format == 'html') {
 				$this_tag_value = StringMb::nl2br_if_needed($this_tag_value);
 			}
-			// ATTENTION : ce qui suit est FAIT AVANT la gestion des tags de dates, à cause de différences entre minuscules et majuscules dans ces tags
-			$text = str_replace(array('[' . StringMb::strtoupper($this_tag) . ']', '[' . StringMb::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
+			if (empty($format_lowercase_tag_name_disable)) {
+				// ATTENTION : ce qui suit est FAIT AVANT la gestion des tags de dates, à cause de différences entre minuscules et majuscules dans ces tags
+				$text = str_replace(array('[' . StringMb::strtoupper($this_tag) . ']', '[' . StringMb::strtolower($this_tag) . ']'), str_replace('&euro;', '€', $this_tag_value), $text);
+			}
 		}
 		if(!$replace_only_custom_tags) {
 			// On rajoute des tags de date qui sont en minuscules ou majuscules
@@ -1091,21 +1134,22 @@ function smileysFormat ($string)
  * Convertit un tableau en chaine de caractère simple à gérer par un utilisateur
  *
  * @param mixed $array
- * @param mixed $disable_ad_quote pour ne pas ajouter de guillemets autour de la valeur à retourner.
+ * @param mixed $disable_add_quote pour ne pas ajouter de guillemets autour de la valeur à retourner.
  * @return
  */
-function get_string_from_array($array, $disable_ad_quote=false)
+function get_string_from_array($array, $disable_add_quote=false)
 {
 	if(is_array($array)) {
-		// NB : Pas besoin de remplacer " par \" dans les valeurs des chaines, le décodage tient compte des " en association avec les virgules uniquement
+		// NB : Même si le décodage tient compte des " en association avec les virgules uniquement, on remplace " par "" dans les valeurs des chaines, 
 		if($array===array_values($array)) {
 			// On ne précise pas les clés du tableau
-			if ($disable_ad_quote) {
+			if (!$disable_add_quote) {
+				foreach($array as $this_key => $this_value) {
+					$array[$this_key] = '"' . str_replace('"', '""', $this_value) . '"';
+				}	
+			}
 				$string = '' . implode(', ', $array) . '';
 			} else {
-				$string = '"' . implode('", "', $array) . '"';
-			}
-		}else {
 			foreach($array as $this_key => $this_value) {
 				if($this_value === true){
 					$array[$this_key] = 'true';
@@ -1118,7 +1162,11 @@ function get_string_from_array($array, $disable_ad_quote=false)
 						// On n'est pas censé passer par là, on avertit si l'utilisateur est admin.
 						var_dump($this_value, $array);
 					}
-					$array[$this_key] = '"' . $this_value . '"';
+					if ($disable_add_quote) {
+						$array[$this_key] = $this_value;
+					} else {
+						$array[$this_key] = '"' . str_replace('"', '""', $this_value) . '"';
+					}
 				}
 			}
 			$string = trim(str_replace(array('Array ', '    ', '  ', '  '), array('Array', ' ', ' ', ' '), str_replace(array("Array,", "),", "(,", ",)"), array("Array ", ")", "(", ")"), str_replace(array("\r\n", "\n"), ',', print_r($array, true)))));
@@ -1152,7 +1200,7 @@ function get_array_from_string($string)
 	foreach($parts as $this_part_key => $this_part) {
 		if(empty($skip_part_key_array) || !in_array($this_part_key, $skip_part_key_array)) {
 			$this_part = trim(str_replace(array('¤#', "\\'"), array(',', "'"), $this_part));
-			if(!empty($this_part)){
+			if($this_part !=""){
 				$line = explode('=>', $this_part, 2);
 				if(!isset($line[1])) {
 					$this_value = trim($line[0]);
@@ -1160,15 +1208,17 @@ function get_array_from_string($string)
 					$this_key = trim($line[0]);
 					$this_value = trim($line[1]);
 				}
+				$quote_char = StringMb::substr($this_value, 0, 1);
 				// Si l'élément commence par ', " ou [ alors on veut réunir l'élément avec le suivant
-				if(in_array(StringMb::substr($this_value, 0, 1), array('"', "'", '['))) {
+				if(in_array($quote_char, array('"', "'", '['))) {
 					// On vérifie qu'il n'y a pas de fin à l'intérieur de l'élément, en ne tenant pas compte des '' et "" qui sont utilisés pour avoir des guillemets à l'intérieur d'une colonne CSV
-					$next_separator = StringMb::strpos(StringMb::substr(str_replace(array('""', "''"), '', $this_value), 1), str_replace('[', ']', StringMb::substr($this_value, 0, 1)));
+					$next_separator = StringMb::strpos(StringMb::substr(str_replace($quote_char . $quote_char, '##', $this_value), 1), str_replace('[', ']', $quote_char));
 					if($next_separator === false || $next_separator == StringMb::strlen($this_value) - 2) {
 						// On retire le séparateur de début
 						$this_value = StringMb::substr($this_value, 1, StringMb::strlen($this_value)-1);						
 						$i=1;
-						while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && isset($parts[$this_part_key+$i])) {
+						// Si $next_separator === false on passe N fois dans la boucle ci-dessous, sinon on n'y passe pas
+					while(!in_array(StringMb::substr($this_value, -1), array('"', "'", ']')) && isset($parts[$this_part_key+$i])) {
 							// On rajoute la suite tant qu'on n'a pas de séparateur de fin : il y avait une ou des virgules dans le texte
 							$this_value .= ','.$parts[$this_part_key+$i];
 							$skip_part_key_array[] = $this_part_key+$i;
@@ -1176,7 +1226,13 @@ function get_array_from_string($string)
 						}
 						// On retire le séparateur de fin
 						$this_value = StringMb::substr($this_value, 0, StringMb::strlen($this_value)-1);
+						if($quote_char != '[') {
+							// On retire les doublons du caractères englobant, puisqu'il a été doublé à l'intérieur de la chaine
+							$this_value = str_replace($quote_char.$quote_char, $quote_char, $this_value);
 					}
+					} else {
+						// On a une anomalie : séparateur à l'intérieur de la chaine
+				}
 				}
 				if($this_value == 'true' || $this_value == 'TRUE'){
 					$this_value = true;
@@ -1257,12 +1313,19 @@ function get_keywords_from_text($string_or_array, $min_length = 3, $max_length =
  * @param array $found_tags
  * @return
  */
-function highlight_found_text($text, $terms, &$found_words_array, $found_tags = array('<span class="search_tag">', '</span>')) {
+function highlight_found_text($text, $terms, $found_words_array = null, $found_tags = array('<span class="search_tag">', '</span>')) {
 	$bbcode = array('[tagsearch]', '[/tagsearch]');
 	if((is_array($terms) && !count($terms)) || (is_string($terms) && !strlen($terms))) {
 		return $text;
 	} elseif(!is_array($terms)) {
 		$terms = array($terms);
+	}
+	if (!empty($found_words_array)) {
+		// Avant ce bloc de code on passait directement found_words_array en référence au niveau de l'argument. Mais cela posait problème lors de l'usage de cette fonction dans SMARTY, le passage par référence d'une variable ne fonctionne pas ( Parameter 3 to highlight_found_text() expected to be a reference, value given ).
+		$found_words_array = &$found_words_array;
+	}
+	if (!is_array($found_words_array)) {
+		$found_words_array = array($found_words_array);
 	}
 	foreach ($terms as $this_term) {
 		if((StringMb::strlen($text)<80  && StringMb::strlen($this_term)>0) || StringMb::strlen($this_term)>=3) { 
@@ -1572,4 +1635,103 @@ function get_csv_export_from_html_table($report, $add_extra_csv_data = null, $re
 	} else {
 		die('Aucune donnée générée');
 	}
+}
+
+/**
+ * Permet d'ajouter ou de supprimer une div qui englobe le HTML qui lui est fourni en paramètre. Cette div peut recevoir des arguments de style CSS transmis via le paramètre css_style
+ *
+ * @param string $html le html à modifier
+ * @param string $mode a pour valeur 'add' ou 'delete', permet d'ajouter ou supprimer la div
+ * @param array $css_style pour spécifier des règles CSS dans la div que l'on va ajouter
+ *
+ * @return 
+ *
+ */
+function add_or_remove_primary_container_in_html($html, $mode = 'add', $css_style = array()) {
+	// return $html;
+	if (!empty($html)) {
+		// Il y a du contenu à modifier. On va créer la balise ouvrante
+		$open_div_tag = '<span style="margin:0px;padding:0px';
+		if (!empty($css_style) && is_array($css_style)) {
+			// On veut passer un ou plusieurs style à la balise
+			$i=1;
+			foreach($css_style as $this_rules=>$this_value) {
+				// on ne met pas de ; à la fin car CKeditor les supprimes
+				$open_div_tag .= ';'.$this_rules.':'.$this_value;
+				$i++;
+			}
+		}
+		// Fermeture de la balise ouvrante.
+		$open_div_tag .= '">';
+
+		// balise fermante
+		$close_div_tag = '</span>';
+		if ($mode == 'add') {
+			// On souhaite ajouter la span globale
+			$html_with_globale_div = $open_div_tag;
+			$html_with_globale_div .= $html;
+			$html_with_globale_div .= $close_div_tag;
+			
+			// on retourne le tout
+			return $html_with_globale_div;
+		} elseif($mode == 'remove') {
+			$html_without_globale_div = trim($html);
+			// on souhaite supprimer la span globale
+			// on regarde si le HTML commence par la span globale qui a été ajoutée
+			$is_text_begin_with_globale_div = StringMb::substr($html, 0, StringMb::strlen($open_div_tag)) == $open_div_tag;
+			if ($is_text_begin_with_globale_div) {
+				// La span est présente en début de texte, on peut effectuer la suppression.
+				$html_without_globale_div = str_replace($open_div_tag, '', $html_without_globale_div);
+			}
+
+			$is_text_end_with_globale_div = StringMb::substr($html_without_globale_div, -StringMb::strlen($close_div_tag)) == $close_div_tag;
+
+			if ($is_text_begin_with_globale_div && $is_text_end_with_globale_div) {
+				// on supprime la balise de fin, si la balise au début a elle aussi été supprimée
+				$html_without_globale_div = StringMb::substr($html_without_globale_div, 0, StringMb::strlen($html_without_globale_div) - StringMb::strlen($close_div_tag));
+			}
+
+			return $html_without_globale_div;
+		} else {
+			// problème de paramètrage, on ne fait rien
+			return $html;
+		}
+	} else {
+		// on a pas fourni de contenu à modifier, donc on retourne rien. Si c'est vide ça reste vide
+		return null;
+	}
+}
+
+/**
+ * Nettoyage du HTML pour inclusion dans le PDF
+ *
+ * @param string $html
+ * @return
+ */
+function get_clean_html_for_pdf($html) {
+	$output = trim(str_replace(array("\r\n",'<div>&nbsp;</div>', '<div><br></div>', '</body>', '<html>', '</html>', '<head>', '</head>', '<title>', '</title>', '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', '<meta http-equiv="Content-Style-Type" content="text/css">'), '', $html));
+	if (!empty($GLOBALS['site_parameters']['empty_container_to_delete_in_html_for_pdf'])) {
+		// Ajout du paramètre empty_container_to_delete_in_html_for_pdf pour supprimer des div vide générées lors de la conversion du RTF en HTML.
+		$output = str_replace($GLOBALS['site_parameters']['empty_container_to_delete_in_html_for_pdf'], '', $output);
+	}
+	$output = str_replace('<b><br></b>', '<br>', $output);
+	$output = preg_replace('/<body([^\>]*)>/siU', '', $output);
+	$output = preg_replace('/<font([^\>]*)><br><\/font>/siU', '<br>', $output);
+	$output = str_replace('<div><br></div>', '', $output);
+	$output = str_replace('<div>', '<div style="margin:0px;padding:0px;">', $output);
+	$output = str_replace('<li>', '<li style="margin:0px;padding:0px;">', $output);
+	$output = str_replace('<ul', '<ul style="margin:0px;padding:0px;"', $output);
+	$output = str_replace('</li>', '</li><br>', $output);
+	
+	// Si on exécute plusieurs fois cette fonction sur le même texte, on annule les effets indésirables :
+	$output = str_replace('</li><br><br>', '</li><br>', $output);
+	$output = str_replace('  style="', ' style="', $output);
+	$output = preg_replace('/<([^\>]*)style="([^\>]*)" style="([^\>]*)">/siU', '<$1 style="$2$3">', $output);
+	$output = str_replace('margin:0px;padding:0px;margin:0px;padding:0px;', 'margin:0px;padding:0px;', $output);
+	
+	if (!empty($GLOBALS['site_parameters']['convert_div_into_span_in_pdf'])) {
+		// le problème des div ajoutée automatiquement est qu'elle provoque des sauts de lignes lorsqu'elle sont affiché dans le PDF. On ne souhaite pas avoir de décalage de ce type avec les div. Si on veut des sauts de ligne, on utilise <br />.
+		$output = str_replace('div', 'span', $output);
+	}
+	return $output;
 }

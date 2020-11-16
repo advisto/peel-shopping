@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_import_form.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_import_form.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}{if $mode == 'import' && $general_configuration_is_valid}
 <form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}" id="import_export_form" enctype="multipart/form-data">
  	{$form_token}
@@ -63,16 +63,17 @@
 
 	<h2>{$STR_ADMIN_IMPORT_FILE_NAME}{$STR_BEFORE_TWO_POINTS}:</h2>
 	<div class="center">
+		<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="data_encoding" style="width: 150px" onchange="window.imported_file=null; change_import_type();">
+				<option value="utf-8"{if $data_encoding == 'utf-8'} selected="selected"{/if}>UTF-8</option>
+				<option value="iso-8859-1"{if $data_encoding == 'iso-8859-1'} selected="selected"{/if}>ISO 8859-1</option>
+			</select></p>
+		<p>{$STR_ADMIN_IMPORT_SEPARATOR}{$STR_BEFORE_TWO_POINTS}: <input style="width:50px" type="text" id="separator" class="form-control" name="separator" value="{$separator}" onchange="window.imported_file=null; change_import_type();" /> ({$STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN})</p>
+	
 		{if !empty($import_file)}
 			{include file="uploaded_file.tpl" f=$import_file STR_DELETE=$STR_DELETE_THIS_FILE}
 		{else}
 			<input name="import_file" type="file" value="" />
 		{/if}
-		<p>{$STR_ADMIN_IMPORT_FILE_ENCODING}{$STR_BEFORE_TWO_POINTS}: <select class="form-control" name="data_encoding" style="width: 150px">
-				<option value="utf-8"{if $data_encoding == 'utf-8'} selected="selected"{/if}>UTF-8</option>
-				<option value="iso-8859-1"{if $data_encoding == 'iso-8859-1'} selected="selected"{/if}>ISO 8859-1</option>
-			</select></p>
-		<p>{$STR_ADMIN_IMPORT_SEPARATOR}{$STR_BEFORE_TWO_POINTS}: <input style="width:50px" type="text" id="separator" class="form-control" name="separator" value="{$separator}" /> ({$STR_ADMIN_IMPORT_SEPARATOR_EXPLAIN})</p>
 
 	</div>
 	<h2>{$STR_ADMIN_IMPORT_TYPE}{$STR_BEFORE_TWO_POINTS}:</h2>
@@ -85,9 +86,11 @@
 		</select>
 
 		<div class="row" id="fields_rules" style="display:none;">
+		
 			<div class="col-lg-12">
 				<div class="row">
 					<div class="col-sm-9 col-lg-9">
+						<h2>{$STR_ADMIN_IMPORT_SAVE_IMPORT_PARAMS}{$STR_BEFORE_TWO_POINTS}:</h2>
 						<div class="pull-right" style="margin:5px">
 							<table>
 								<tr>
@@ -129,6 +132,7 @@
 		<br />
 	</div>
 	<h2>{$STR_ADMIN_IMPORT_CORRESPONDANCE}{$STR_BEFORE_TWO_POINTS}:</h2>
+	<div class="alert alert-info">{$STR_ADMIN_IMPORT_CORRESPONDANCE_EXPLANATION}</div>
 	<div class="well">
 		<div id="div_correspondance" class="collapse">
 			<div class="row">
@@ -143,7 +147,7 @@
 					</table>
 				</div>
 				{foreach $inputs as $this_type => $fields}
-				<div style="display:none" class="fields_div" id="fields_{$this_type}">
+				<div id="fields_{$this_type}" class="div_hidden_by_default">
 					<div class="col-sm-1">
 						<div class="btn btn-default" onclick="move_draggable_fields('.contains_draggable', '#fields_{$this_type} .container_drop_draggable', '#fields_{$this_type}')">&gt;&gt;</div>
 						<div class="btn btn-default" onclick="move_draggable_fields('#fields_{$this_type} .container_drop_draggable', '.contains_draggable')">&lt;&lt;</div>
@@ -161,10 +165,10 @@
 							</tr>
 					{foreach $fields as $field_key => $field}
 							<tr class="{if $field.primary}bg-primary{else}{if $field.required}bg-info{/if}{/if}">
-								<td><span{if !empty($field.explanation)} data-toggle="tooltip" title="{$field.explanation|escape:'html'}"{/if}>{$field.field}{if $field.primary} **{else}{if $field.required} *{/if}{/if}</span></td>
+								<td><span{if !empty($field.explanation)} data-toggle="tooltip" title="{$field.explanation|escape:'html'}"{/if}>{$field.field_title}{if $field.primary} **{else}{if $field.required} *{/if}{/if}</span></td>
 								<td>{$field.type}</td>
 								<td id="fields_{$this_type}_{$field.field}" class="container_drop_draggable"></td>
-								<td><input type="text" id="default_{$this_type}_{$field.field}" name="default_{$this_type}_{$field.field}" value="{$field.default}" class="form-control"{if !empty($field.maxlength)} maxlength="{$field.maxlength}{/if}" /></td>
+								<td><input type="text" id="default_{$this_type}_{$field.field}" name="default_{$this_type}_{$field.field}" value="{$field.default}" class="form-control"{if !empty($field.maxlength)} maxlength="{$field.maxlength}"{/if} /></td>
 							</tr>
 					{/foreach}
 						</table>

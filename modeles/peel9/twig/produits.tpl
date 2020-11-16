@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -35,7 +35,7 @@
 {% if  no_results %}{% if (no_results_msg) %}<p>{{ no_results_msg }}</p>{% endif %}
 {% else %}
 <div class="col-md-12">
-	<div class="produits row {% if  allow_order %}allow_order{% endif %}">
+	<div class="produits row {% if allow_order %}allow_order{% endif %}{% if product_overlay_in_category_page %} product_overlay_in_category_page{% endif %}">
 	{% for prod in products %}
 			{% if  prods_line_mode %}
 		<div class="col-sm-12">
@@ -136,7 +136,7 @@
 							{% if prod.img_new %}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{{ prod.img_new }}" alt="new"></div>{% endif %}
 							<span class="image_zoom">
 							{% if  (prod.image) %}
-								<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if  prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if  prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>
+								<a property="url" title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image.src|escape('html') }}"{% if  prod.image.width %} width="{{ prod.image.width }}"{% endif %}{% if  prod.image.height %} height="{{ prod.image.height }}"{% endif %} alt="{{ prod.image.alt|str_form_value }}" /></a>
 								{% if  (prod.image.zoom) %}
 									{% if  prod.image.zoom.is_lightbox %}
 								<span class="fc_zoom"><a href="{{ prod.image.zoom.href|escape('html') }}" typeof="ImageObject" class="lightbox" onclick="return false;" title="{{ prod.name|str_form_value }}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
@@ -152,16 +152,23 @@
 						<td class="fc_titre_produit">
 							<a property="url" title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><span property="name">{{ prod.name }}</span></a>
 						</td>
-					</tr>
+					</tr>	
+					{% if product_overlay_in_category_page %}
+						<tr>
+							<td>
+							{% for foo in 1..avisnote %}<img src="{{ star_src|escape('html') }}" alt="" />{% endfor %}
+							</td>
+						</tr>
+					{% endif %}
 					<tr>
 						<td>
-							{% if  (prod.description) and product_description_catalogue_disabled is empty %}
-							<div class="description_text"><a href="{{ prod.href|escape('html') }}">{{ prod.description }}</a></div>
+							{% if  (prod.description) and product_description_catalogue_disabled is empty and product_overlay_in_category_page is empty %}
+							<div property="url" class="description_text"><a href="{{ prod.href|escape('html') }}">{{ prod.description }}</a></div>
 							{% endif %}
 							{% if (prod.flash) %}
 							<div class="alert alert-warning">{{ prod.flash }}</div>
 							{% endif %}
-							<div class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>
+							<div property="offers" typeof="Offer" class="fc_prix">{% if (prod.on_estimate) %}{{ prod.on_estimate }}{% else %}<span class="prix">&nbsp;</span>{% endif %}</div>
 						</td>
 					</tr>
 				{% if prod.departements_get_bootbox_dialog is defined %}
@@ -190,6 +197,24 @@
 				{% endif %}
 				</table>
 			</div>
+			{% if product_overlay_in_category_page %}
+				<div class="produit_catalogue_hover">
+					<div class="produit_catalogue_hover_bloc">
+						{% if prod.image_second %}
+							<a title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><img property="image" src="{{ prod.image_second.src|escape('html') }}"{% if prod.image_second.width %} width="{{ prod.image_second.width }}"{% endif %}{% if prod.image_second.height %} height="{{ prod.image_second.height }}"{% endif %} alt="{{ prod.image_second.alt|str_form_value }}" /></a>
+						{% endif %}
+						<div class="produit_catalogue_hover_sub">
+							<a property="url" title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}"><span property="name">{{ prod.name }}</span></a><br>
+							{% if prod.description and product_description_catalogue_disabled is empty %}
+							<div class="description_text"><a href="{{ prod.href|escape('html') }}">{{ prod.description|str_shorten(190) }}</a></div>
+							{% endif %}
+							<div class="produit_catalogue_hover_link">
+								<a property="url" title="{{ prod.name|str_form_value }}" href="{{ prod.href|escape('html') }}">{{ LANG.STR_MORE_DETAILS }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-play"></span></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif %}
 			{% endif %}
 			</div>
 			{% if prod.i%nb_col_md==0 %}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_caddie.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: display_caddie.php 65009 2020-11-12 17:22:05Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -36,12 +36,12 @@ if (!function_exists('get_caddie_content_html')) {
 		if(!empty($_SESSION['session_caddie']->zoneId)) {
 			$q = query('SELECT on_franco, on_franco_amount, on_franco_nb_products, on_franco_reseller_amount, applied_franco_mode
 				FROM peel_zones z
-				WHERE id="'.intval($_SESSION['session_caddie']->zoneId).'" AND ' . get_filter_site_cond('zones', 'z') . '');
+				WHERE id="'.intval($_SESSION['session_caddie']->zoneId).'" AND ' . get_filter_site_cond('zones', 'z') . ' AND technical_code != "filter_geoip" ');
 			$zone_result = fetch_assoc($q);
 			if (!empty($zone_result['on_franco'])) {
-				$on_franco_amount = floatval((check_if_module_active('reseller') && is_reseller()) ? $zone_result['on_franco_reseller_amount'] : $zone_result['on_franco_amount']);
-				$on_franco_nb_products = $zone_result['on_franco_nb_products'];
-			}
+			$on_franco_amount = floatval((check_if_module_active('reseller') && is_reseller()) ? $zone_result['on_franco_reseller_amount'] : $zone_result['on_franco_amount']);
+			$on_franco_nb_products = $zone_result['on_franco_nb_products'];
+		}
 		}
 		
 		if(!empty($_SESSION['session_caddie']->typeId)) {
@@ -73,7 +73,7 @@ if (!function_exists('get_caddie_content_html')) {
 			}
 			elseif (!empty($zone_result) && $zone_result['applied_franco_mode'] == 'weight' && (!empty($zone_result['on_franco_weight']) && round($zone_result['on_franco_weight'], 2) > 0)) {
 				$shipping_text .= $GLOBALS['STR_SHIPPING_COST'] . ' (' . $GLOBALS['STR_OFFERED'] . ' ' . $GLOBALS['STR_FROM'] . ' ' . round($zone_result['on_franco_weight'], 2) .' ' . $GLOBALS['STR_GRAMMES'] .')';
-			}
+		}
 		}
 		$tpl = $GLOBALS['tplEngine']->createTemplate('caddie_content_html.tpl');
 		$tpl->assign('is_empty', ($_SESSION['session_caddie']->count_products() == 0));
@@ -223,7 +223,7 @@ if (!function_exists('get_caddie_content_html')) {
 				if(check_if_module_active('devis')) {
 					$tpl->assign('STR_DEVIS', $GLOBALS['STR_DEVIS']);
 					$tpl->assign('devis_url', $GLOBALS['wwwroot'] . '/modules/devis/devis.php');
-				}
+			}
 			}
 			$tpl->assign('STR_SAVE_CART', $GLOBALS['STR_SAVE_CART']);
 			if (!empty($GLOBALS['site_parameters']['short_order_process_by_estimate'])) {
@@ -271,15 +271,15 @@ if (!function_exists('get_caddie_content_html')) {
 					// On va recherche si il y a une zone associée à un moyen de paiement.
 					$sql = "SELECT payment_technical_code
 						FROM peel_zones
-						WHERE payment_technical_code!='' AND id = " . intval($_SESSION['session_caddie']->zoneId);
+						WHERE payment_technical_code!='' AND technical_code != 'filter_geoip' AND id = " . intval($_SESSION['session_caddie']->zoneId);
 					$query = query($sql);
 					if ($result = fetch_assoc($query)) {
 						// un mode de paiement est défini pour la zone, donc on ne veut pas proposer plusieurs choix à l'utilisateur;
 						$payment_multiple_disable = true;
-					}
+		}
 				}
 				$tpl->assign('STR_PAYMENT', $GLOBALS['STR_PAYMENT']);
-				// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier réglement.
+				// Le paramètre payment_multiple est composé de cette façon : '2'=>'50', '3'=>'30' par exemple, donc la clé contient le nombre de paiement, et la valeur correspond au pourcentage du montant total à payer pour le premier règlement.
 				// Donc pour l'affichage des différents paiement possible (1x, 3x, 5x, etc ...) on récupère seulement les clés du tableau.
 				if (empty($payment_multiple_disable) && !empty($GLOBALS['site_parameters']['payment_multiple'])) {
 					$tpl->assign('payment_multiple', array_keys($GLOBALS['site_parameters']['payment_multiple']));
@@ -290,8 +290,7 @@ if (!function_exists('get_caddie_content_html')) {
 		$hook_result = call_module_hook('caddie_content_template_data', array(), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
-		}
-		
+		}	
 		
 		$output = $tpl->fetch();
 		return $output;
@@ -312,7 +311,7 @@ if (!function_exists('get_order_step1')) {
 		$output = '';
 		if (empty($_SESSION['session_caddie']) || $_SESSION['session_caddie']->count_products() == 0) {
 			$output .= $GLOBALS['STR_EMPTY_CADDIE'];
-		} else {
+		} else {            
 			$tpl = $GLOBALS['tplEngine']->createTemplate('order_step1.tpl');
 			$tpl->assign('internal_order_enable', vn($GLOBALS['site_parameters']['internal_order_enable']));
 			$tpl->assign('order_step1_adresse_ship_disabled', vn($GLOBALS['site_parameters']['order_step1_adresse_ship_disabled']));
@@ -332,10 +331,17 @@ if (!function_exists('get_order_step1')) {
 			$tpl->assign('adresse1', $frm['adresse1']);
 			$tpl->assign('code_postal1_error', $form_error_object->text('code_postal1'));
 			$tpl->assign('code_postal1', $frm['code_postal1']);
+            $tpl->assign('num_tva1_error', $form_error_object->text('num_tva1'));
+			$tpl->assign('num_tva1', $frm['num_tva1']);			
 			$tpl->assign('ville1_error', $form_error_object->text('ville1'));
 			$tpl->assign('ville1', $frm['ville1']);
 			$tpl->assign('pays1_error', $form_error_object->text('pays1'));
-			$tpl->assign('pays1_options', get_country_select_options($frm['pays1'], null));
+			$tpl->assign('pays1_options', get_country_select_options($frm['pays1'], null));            
+            $tpl->assign('code_chorus1_error', $form_error_object->text('code_chorus1'));
+			$tpl->assign('code_chorus1', $frm['code_chorus1']);
+			$tpl->assign('siret1_error', $form_error_object->text('siret1'));
+			$tpl->assign('siret1', $frm['siret1']);
+			$tpl->assign('code_chorus_active', ((isset($GLOBALS["site_parameters"]["chorus_code_service"]) && $GLOBALS["site_parameters"]["chorus_code_service"]) ? true : false));
 			$tpl->assign('STR_STEP1', $GLOBALS['STR_STEP1']);
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 			$tpl->assign('STR_INVOICE_ADDRESS', $GLOBALS['STR_INVOICE_ADDRESS']);
@@ -346,9 +352,13 @@ if (!function_exists('get_order_step1')) {
 			$tpl->assign('STR_TELEPHONE', $GLOBALS['STR_TELEPHONE']);
 			$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 			$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
+			$tpl->assign('STR_INTRACOM_FORM', $GLOBALS['STR_INTRACOM_FORM']);
 			$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
 			$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
 			$tpl->assign('STR_CHOOSE', $GLOBALS['STR_CHOOSE']);
+			$tpl->assign('STR_CHORUS_PRO', vb($GLOBALS['STR_CHORUS_PRO']));
+			$tpl->assign('STR_SIRET', $GLOBALS['STR_SIRET']);
+			$tpl->assign('STR_CHORUS_PRO_CODE_SERVICE', vb($GLOBALS['STR_CHORUS_PRO_CODE_SERVICE']));
 			if(empty($GLOBALS['site_parameters']['user_multiple_addresses_disable'])) {
 				$tpl->assign('STR_ADDRESS_TEXT', $GLOBALS['STR_ADDRESS_TEXT']);
 				$tpl->assign('personal_address_bill_id', vb($_SESSION['session_commande']['personal_address_bill']));
@@ -361,6 +371,27 @@ if (!function_exists('get_order_step1')) {
 				if(check_if_module_active('icirelais') && !empty($_SESSION['session_commande']['is_icirelais_order'])) {
 					$tpl->assign('text_temp_address', $GLOBALS["STR_MODULE_ICIRELAIS_TEMP_ADDRESS"]);
 				}
+				if(check_if_module_active('mondial_relay') && !empty($_SESSION['session_commande']['is_mondial_relay_order'])) {
+					$tpl->assign('mondial_relay_delivery_points', get_mondial_relay_delivery_points(true));
+					$tpl->assign('societe2', '');
+					$tpl->assign('nom2_error', $form_error_object->text('nom2'));
+					$tpl->assign('nom2', $frm['nom2']);
+					$tpl->assign('prenom2_error', $form_error_object->text('prenom2'));
+					$tpl->assign('prenom2', $frm['prenom2']);
+					$tpl->assign('email2_error', $form_error_object->text('email2'));
+					$tpl->assign('email2', $frm['email2']);
+					$tpl->assign('contact2_error', $form_error_object->text('contact2'));
+					$tpl->assign('contact2', $frm['contact2']);
+					$tpl->assign('adresse2_error', $form_error_object->text('adresse2'));
+					$tpl->assign('adresse2', '');
+					$tpl->assign('code_postal2_error', $form_error_object->text('code_postal2'));
+					$tpl->assign('code_postal2', '');
+					$tpl->assign('ville2_error', $form_error_object->text('ville2'));
+					$tpl->assign('ville2', '');
+					$tpl->assign('pays2_error', $form_error_object->text('pays2'));
+					$tpl->assign('id_target_error', $form_error_object->text('id_target'));
+					$tpl->assign('pays2_options', get_country_select_options($frm['pays2'], null, 'name', false, $_SESSION['session_caddie']->zoneId));
+				} else {
 				$tpl->assign('societe2', $frm['societe2']);
 				$tpl->assign('nom2_error', $form_error_object->text('nom2'));
 				$tpl->assign('nom2', $frm['nom2']);
@@ -373,11 +404,12 @@ if (!function_exists('get_order_step1')) {
 				$tpl->assign('adresse2_error', $form_error_object->text('adresse2'));
 				$tpl->assign('adresse2', $frm['adresse2']);
 				$tpl->assign('code_postal2_error', $form_error_object->text('code_postal2'));
-				$tpl->assign('code_postal2', $frm['code_postal2']);
+				$tpl->assign('code_postal2', $frm['code_postal2']);                
 				$tpl->assign('ville2_error', $form_error_object->text('ville2'));
 				$tpl->assign('ville2', $frm['ville2']);
 				$tpl->assign('pays2_error', $form_error_object->text('pays2'));
 				$tpl->assign('pays2_options', get_country_select_options($frm['pays2'], null, 'name', false, $_SESSION['session_caddie']->zoneId));
+				}
 			} else {
 				$tpl->assign('is_mode_transport', false);
 			}
@@ -397,7 +429,7 @@ if (!function_exists('get_order_step1')) {
 			if (!empty($GLOBALS['site_parameters']['enable_form_caddie_vat_exemption'])) {
 				$tpl->assign('is_vat_exemption', true);
 				$tpl->assign('vat_exemption_error', $form_error_object->text('vat_exemption_technical_code'));
-				$tpl->assign('STR_SELECT_FILE_VAT_EXEMPTION', $GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"]);
+				$tpl->assign('STR_SELECT_FILE_VAT_EXEMPTION', $GLOBALS['STR_SELECT_FILE_VAT_EXEMPTION']);
 				$tpl->assign('STR_VAT_EXEMPTION', $GLOBALS['STR_VAT_EXEMPTION']);
 				$tpl->assign('STR_NOT_SUBJECT_TO_VAT', $GLOBALS['STR_NOT_SUBJECT_TO_VAT']);
 				$tpl->assign('STR_CERTIFICATE_OF_EXEMPTION', $GLOBALS['STR_CERTIFICATE_OF_EXEMPTION']);
@@ -406,7 +438,7 @@ if (!function_exists('get_order_step1')) {
 				if (!empty($name_document_upload)) {
 					$tpl->assign('document', get_uploaded_file_infos("document", $name_document_upload, get_current_url(false) . '?mode=supprfile&id=' . vb($_SESSION['session_utilisateur']['id_utilisateur']) . '&file=document'));
 				}
-			}			
+			}
 			
 			$tpl->assign('specific_fields', get_specific_field_infos($frm, $form_error_object, "order"));
 			$tpl->assign('STR_CGV_OK', $GLOBALS['STR_CGV_OK']);
@@ -432,11 +464,12 @@ if (!function_exists('get_order_step2')) {
 	 * @return
 	 */
 	function get_order_step2(&$frm, $mode_transport)
-	{
+	{      
+        
 		$output = '';
 		if ($_SESSION['session_caddie']->count_products() == 0) {
 			$output .= $GLOBALS['STR_EMPTY_CADDIE'];
-		} else {
+		} else {          
 			$is_delivery_address_necessary_for_delivery_type = is_delivery_address_necessary_for_delivery_type(vn($_SESSION['session_caddie']->typeId));
 			$tpl = $GLOBALS['tplEngine']->createTemplate('order_step2.tpl');
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
@@ -449,7 +482,9 @@ if (!function_exists('get_order_step2')) {
 			$tpl->assign('STR_EMAIL', $GLOBALS['STR_EMAIL']);
 			$tpl->assign('STR_ADDRESS', $GLOBALS['STR_ADDRESS']);
 			$tpl->assign('STR_ZIP', $GLOBALS['STR_ZIP']);
+			$tpl->assign('STR_INTRACOM_FORM', $GLOBALS['STR_INTRACOM_FORM']);
 			$tpl->assign('STR_TOWN', $GLOBALS['STR_TOWN']);
+			$tpl->assign('STR_SIRET', $GLOBALS['STR_SIRET']);
 			$tpl->assign('STR_COUNTRY', $GLOBALS['STR_COUNTRY']);
 			$tpl->assign('date', get_formatted_date(time()));
 			$tpl->assign('societe1', $frm['societe1']);
@@ -459,8 +494,11 @@ if (!function_exists('get_order_step2')) {
 			$tpl->assign('email1', $frm['email1']);
 			$tpl->assign('adresse1', $frm['adresse1']);
 			$tpl->assign('code_postal1', $frm['code_postal1']);
+			$tpl->assign('num_tva1', vn($frm['num_tva1']));
 			$tpl->assign('ville1', $frm['ville1']);
 			$tpl->assign('pays1', $frm['pays1']);
+			$tpl->assign('code_chorus1', $frm['code_chorus1']);
+			$tpl->assign('siret1', $frm['siret1']);
 			if (trim($frm['commentaires']) != '') {
 				$tpl->assign('STR_COMMENTS', $GLOBALS['STR_COMMENTS']);
 				$tpl->assign('commentaires', $frm['commentaires']);
@@ -540,13 +578,13 @@ if (!function_exists('get_order_step3')) {
 		$template_tags['ORDER_ID_ARTICLES'] = implode(',',$tab_produit);
 		$tpl = $GLOBALS['tplEngine']->createTemplate('order_step3.tpl');
 		if (!empty($display_payment_method)) {
-			$tpl->assign('payment_form', get_payment_form($commandeid, null, true));
+		$tpl->assign('payment_form', get_payment_form($commandeid, null, true));
 		}
 		$tpl->assign('resume_commande', affiche_resume_commande($commandeid, false, $display_payment_method));
 		$tpl->assign('conversion_page', affiche_contenu_html("conversion_page", true, $template_tags));
 		$tpl->assign('STR_STEP3', $GLOBALS['STR_STEP3']);
 		$tpl->assign('STR_MSG_THANKS', $GLOBALS["STR_MSG_THANKS"]);
-		$hook_result = call_module_hook('order_step3', array('commandeid'=>$commandeid), 'array');
+		$hook_result = call_module_hook('order_step3', array('commandeid' => $commandeid), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}
@@ -614,16 +652,21 @@ if (!function_exists('affiche_resume_commande')) {
 					$quote_link_display = true;
 				}
 			}
-
+			//La commande est un devis, on affiche pas les moyens de paiements
+			if(!empty($commande->is_quote)) {
+				$show_payment_form = false;
+			}
 			$tpl->assign('pdf_src', $GLOBALS['wwwroot_in_admin'] . '/images/view_pdf.gif');
 			$tpl->assign('is_devis', $quote_link_display && empty($commande->paiement));
 			$tpl->assign('devis_pdf_href', get_site_wwwroot($commande->site_id) . '/factures/commande_pdf.php?code_facture=' . vb($commande->code_facture) . '&mode=devis');
 			$tpl->assign('STR_QUOTATION', $GLOBALS['STR_QUOTATION']);
 			$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+			$tpl->assign('STR_QUANTITY_RESUME_COMMANDE', $GLOBALS['STR_QUANTITY_RESUME_COMMANDE']);
 			$tpl->assign('STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD', $GLOBALS['STR_MODULE_TELECHARGEMENT_FOR_DOWNLOAD']);
 			$tpl->assign('STR_ORDER_DETAIL', $GLOBALS['STR_ORDER_DETAIL']);
 			$tpl->assign('STR_ORDER_NUMBER', $GLOBALS['STR_ORDER_NUMBER']);
 			$tpl->assign('STR_DATE', $GLOBALS['STR_DATE']);
+			$tpl->assign('STR_SIRET', $GLOBALS['STR_SIRET']);
 			$tpl->assign('STR_AMOUNT', $GLOBALS['STR_AMOUNT']);
 			$tpl->assign('STR_NET', $GLOBALS['STR_NET']);
 			$tpl->assign('STR_TTC', $GLOBALS['STR_TTC']);
@@ -633,6 +676,7 @@ if (!function_exists('affiche_resume_commande')) {
 			$tpl->assign('date', get_formatted_date($commande->o_timestamp, 'short', 'long'));
 			$tpl->assign('order_amount', $order_infos['net_infos_array']['montant']);
 			$tpl->assign('bill_address', $order_infos['client_infos_bill']);
+			$tpl->assign('siret', vb($commande->siret));
 			if (!empty($GLOBALS['site_parameters']['mode_transport'])) {
 				$tpl->assign('STR_SHIP_ADDRESS', $GLOBALS['STR_SHIP_ADDRESS']);
 				$tpl->assign('ship_address', $order_infos['client_infos_ship']);
@@ -658,7 +702,7 @@ if (!function_exists('affiche_resume_commande')) {
 			} else {
 				$tpl->assign('is_delivery_tracking', false);
 			}
-			if((defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3')) && check_if_module_active('tnt') && !empty($GLOBALS['web_service_tnt']) && !empty($GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId)))) {
+			if((defined('IN_STEP1') || defined('IN_STEP2') || defined('IN_STEP3')) && check_if_module_active('tnt') && !empty($GLOBALS['web_service_tnt']) && $GLOBALS['web_service_tnt']->is_type_linked_to_tnt(vn($_SESSION['session_caddie']->typeId))) {
 				$receiver_info['type_id'] = '';
 				if(!empty($commande->type)) {
 					// Récupération des informations sur le type de transport sélectionné.
@@ -699,7 +743,8 @@ if (!function_exists('affiche_resume_commande')) {
 				try {
 					$tpl->assign('STR_MODULE_TNT_FEASIBILITY_REPORT', $GLOBALS['STR_MODULE_TNT_FEASIBILITY_REPORT']);
 					if (!empty($GLOBALS['web_service_tnt'])) {
-						$tpl->assign('tnt_message', $GLOBALS['web_service_tnt']->get_tnt_feasibility_test($order_infos, $receiver_info, true));
+						$tpl->assign('tnt_message_disable', !empty($GLOBALS['site_parameters']['tnt_message_disable']));
+					$tpl->assign('tnt_message', $GLOBALS['web_service_tnt']->get_tnt_feasibility_test($order_infos, $receiver_info, true));
 					}
 				} catch (SoapFault $ex) {
 					$tpl->assign('tnt_message', $GLOBALS['STR_MODULE_TNT_ERREUR_WEBSERVICE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': '.$ex->faultstring );
@@ -759,6 +804,7 @@ if (!function_exists('affiche_resume_commande')) {
 					'commandeid' => $commande->id,
 					'utilisateurid' => $commande->id_utilisateur,
 					'paiement' => $commande->paiement,
+					'siret' => vb($commande->siret),
 					'langue' => $commande->lang,
 					'nom_produit' => $this_ordered_product['nom_produit'],
 					'taille_produit' => $this_ordered_product['taille'],
@@ -941,6 +987,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		if($_SESSION['session_caddie']->tarif_paiement>0) {
 			$tpl->assign('tarif_paiement', fprix($_SESSION['session_caddie']->tarif_paiement, true));
 		}
+		$tpl->assign('STR_TABLE_SUMMARY_CADDIE_QTY', $GLOBALS['STR_QUANTITY_RESUME_COMMANDE']);
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_TABLE_SUMMARY_CADDIE', $GLOBALS['STR_TABLE_SUMMARY_CADDIE']);
 		$tpl->assign('STR_FRAIS_GESTION', $GLOBALS['STR_FRAIS_GESTION']);
@@ -1113,14 +1160,14 @@ if (!function_exists('get_caddie_products_summary_table')) {
 				}
 				if (check_if_module_active('ecotaxe') && !empty($ecotaxe)) {
 					if (empty($GLOBALS['site_parameters']['product_ecotaxe_display_split'])) {
-						$tmpProd['prix_ecotaxe'] = fprix($ecotaxe, true);
+					$tmpProd['prix_ecotaxe'] = fprix($ecotaxe, true);
 					} else {
 						$tmpProd['prix_ht_without_ecotax'] = array(
 						'label' => $GLOBALS['STR_ECOTAXE_INCLUDE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'],
 						'prix_ecotaxe' => fprix($ecotaxe, true),
 						'prix' => fprix($product_object->get_original_price(false, false, false, false, false), true));
-					}
 				}
+					}
 				if (($option + $option_without_reduction) != 0) {
 					$tmpProd['option_prix'] = fprix($option * (1 - $_SESSION['session_caddie']->percent_remise_produit[$numero_ligne] / 100) + $option_without_reduction, true);
 					if (!empty($_SESSION['session_caddie']->percent_remise_produit[$numero_ligne]) && empty($option_without_reduction)) {
@@ -1158,8 +1205,10 @@ if (!function_exists('get_caddie_products_summary_table')) {
 						$tmpProd['quantite']['message'] = $this_prepared_javascript_message;
 						$tmpProd['quantite']['stock_commandable'] = $stock_commandable;
 					}
+
+					$tmpProd['delete']['hidden_fields'] = ($product_object->technical_code == 'over_cost');
 					if(empty($GLOBALS['site_parameters']['disable_modify_quantity_on_cart'])){
-						$tmpProd['quantite']['hidden_fields'] = ($product_object->on_download == 1);
+						$tmpProd['quantite']['hidden_fields'] = ($product_object->on_download == 1 || $product_object->technical_code == 'over_cost');
 					}else {
 						$tmpProd['quantite']['hidden_fields'] = $GLOBALS['site_parameters']['disable_modify_quantity_on_cart'];
 					}
@@ -1185,6 +1234,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		}
 		$tpl->assign('products', $products);
 		$tpl->assign('cart_disable_delete_product_link', !empty($GLOBALS['site_parameters']['cart_disable_delete_product_link']));
+		$tpl->assign('display_transport_caddie_products_summary_table', !empty($GLOBALS['site_parameters']['display_transport_caddie_products_summary_table']));
 		$tpl->assign('with_totals_summary', $with_totals_summary);
 		$tpl->assign('STR_WITH_PROMO_CODE', $GLOBALS['STR_WITH_PROMO_CODE']);
 		$tpl->assign('STR_ON_CATEGORY', $GLOBALS['STR_ON_CATEGORY']);
@@ -1200,6 +1250,7 @@ if (!function_exists('get_caddie_products_summary_table')) {
 		$tpl->assign('STR_ORDER_POINT', $GLOBALS['STR_ORDER_POINT']);
 		$tpl->assign('STR_GIFT_POINTS', $GLOBALS['STR_GIFT_POINTS']);
 		$tpl->assign('STR_SHIPPING_TO_BE_DETERMINED', $GLOBALS['STR_SHIPPING_TO_BE_DETERMINED']);
+		$tpl->assign('STR_VAT_EXEMPTION', $GLOBALS['STR_VAT_EXEMPTION']);
 		
 		if ($with_totals_summary) {
 			if (check_if_module_active('ecotaxe') && !empty($_SESSION['session_caddie']->total_ecotaxe_ttc)) {
@@ -1237,10 +1288,16 @@ if (!function_exists('get_caddie_products_summary_table')) {
 			}
 			// if ($_SESSION['session_caddie']->total > 0) {
 			if (!check_if_module_active('micro_entreprise')) {
-				$tpl->assign('micro', array(
-					'prix_th' => fprix($_SESSION['session_caddie']->total_ht, true),
+				$tpl->assign('ht_tva', array(
+					'prix_ht' => fprix($_SESSION['session_caddie']->total_ht, true),
 					'prix_tva' => fprix($_SESSION['session_caddie']->total_tva, true)
 				));
+			}
+			$tpl->assign('tva_intracom_vat_exemption', is_user_tva_intracom_for_no_vat());
+			if (!empty($_SESSION['session_caddie']->num_tva)) {
+				$tpl->assign('tva_intracom', $_SESSION['session_caddie']->num_tva);
+			} elseif(est_identifie()) {
+				$tpl->assign('tva_intracom', $_SESSION['session_utilisateur']['intracom_for_billing']);
 			}
 			if (!empty($_SESSION['session_caddie']->avoir)) {
 				$tpl->assign('prix_avoir', fprix($_SESSION['session_caddie']->avoir, true));

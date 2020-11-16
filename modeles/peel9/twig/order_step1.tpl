@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -55,6 +55,18 @@
 					<textarea {% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %} class="form-control" cols="50" rows="3" name="adresse1" id="adresse1">{{ adresse1 }}</textarea>
 					{{ adresse1_error }}
 				</div>
+				{% for f in specific_fields %}
+					{% if f.field_position=='adresse_bill' %}
+						<div>
+						{% if f.field_title %}
+							<label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>
+							{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+						{% else %}
+							{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+						{% endif %}
+						</div>
+					{% endif %}
+				{% endfor %}
 				<div>
 					<label for="code_postal1">{{ STR_ZIP }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
 					<input {% if order_step1_adresse_ship_disabled %}readonly="readonly"{% endif %} class="form-control" type="text" name="code_postal1" id="code_postal1" size="32" value="{{ code_postal1|str_form_value }}" />
@@ -72,16 +84,21 @@
 					</select>
 					{{ pays1_error }}
 				</div>
+				<div>                    
+					<label for="num_tva1"> {{ STR_INTRACOM_FORM }} {{ STR_BEFORE_TWO_POINTS }}: </label>
+					<input class="form-control" type="text" name="num_tva1" id="num_tva1" size="32" value="{{ num_tva1|str_form_value }}" />
+					{{ num_tva1_error }}
+				</div>
 			</fieldset>
 		</div>
 		{% if is_mode_transport %}
-		<div class="col-sm-6">
+		<div class="col-sm-6" {% if mondial_relay_delivery_points %} hidden{% endif %}>
 			<fieldset>
 				<legend>{{ STR_SHIP_ADDRESS }}{{ STR_BEFORE_TWO_POINTS }}:</legend>
 				{% if LANG.STR_DELIVERY_DPD_SHIP_ADDRESS %}
 					{{ LANG.STR_DELIVERY_DPD_SHIP_ADDRESS }}
 				{% endif %}
-				{% if (text_temp_STR_ADDRESS) %}{{ text_temp_STR_ADDRESS }}{% endif %}
+				{% if (text_temp_address) %}{{ text_temp_address }}{% endif %}
 				<div>
 					<label for="personal_address_ship">{{ STR_CHOOSE }}{{ STR_BEFORE_TWO_POINTS }}:</label>
 					{{ get_ship_user_address }}
@@ -116,6 +133,18 @@
 					<textarea class="form-control" cols="50" rows="3" name="adresse2" id="adresse2">{{ adresse2 }}</textarea>
 					{{ adresse2_error }}
 				</div>
+				{% for f in specific_fields %}
+					{% if f.field_position=='adresse_ship' %}
+						<div>
+						{% if f.field_title %}
+							<label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>
+							{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+						{% else %}
+							{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+						{% endif %}
+						</div>
+					{% endif %}
+				{% endfor %}
 				<div>
 					<label for="code_postal2">{{ STR_ZIP }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
 					<input class="form-control" type="text" name="code_postal2" id="code_postal2" size="32" value="{{ code_postal2|str_form_value }}" />
@@ -126,6 +155,9 @@
 					<input class="form-control" type="text" name="ville2" id="ville2" size="32" value="{{ ville2|str_form_value }}" />
 					{{ ville2_error }}
 				</div>
+				{% if mondial_relay_delivery_points %} 
+					<input id="id_target" name="id_target" type="hidden" value="">
+				{% endif %}
 				<div>
 					<label for="pays2">{{ STR_COUNTRY }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
 					<select class="form-control" name="pays2" id="pays2">
@@ -137,6 +169,22 @@
 		</div>
 		{% endif %}
 	</div>
+	{% for f in specific_fields %}
+		{% if f.field_position!='adresse_ship' and f.field_position!='adresse_bill' %}
+			<div>
+			{% if f.field_title %}
+				<label for="{{ f.field_name }}">{{ f.field_title }}{% if f.mandatory %}<span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label>
+				{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+			{% else %}
+				{% include "specific_field.tpl" with {'f':f} %}{{ f.error_text }}
+			{% endif %}
+			</div>
+		{% endif %}
+	{% endfor %}
+	{% if mondial_relay_delivery_points %} 
+		{{ id_target_error }}
+		{{ mondial_relay_delivery_points }}
+	{% endif %}
 	<div class="row">
 		<div class="col-sm-12">
 			{% if is_payment_cgv %}
@@ -157,6 +205,18 @@
 						{% else %}
 							<input name="document" type="file" value="" />
 						{% endif %}
+					</div>
+				</div>
+			</fieldset>
+			{% endif %}
+			{% if code_chorus_active %}
+         	<fieldset>
+				<legend>{{ STR_CHORUS_PRO }}{{ STR_BEFORE_TWO_POINTS }}: </legend>
+				<div class="row formulaire-achat">
+					<div class="col-sm-6">
+						<label for="code_chorus1">{{ STR_CHORUS_PRO_CODE_SERVICE }} <span class="etoile">*</span>{{ STR_BEFORE_TWO_POINTS }}: </label>
+						<input class="form-control" type="text" name="code_chorus1" id="code_chorus1" size="32" value="{{ code_chorus1|str_form_value }}"/>
+						{{ code_chorus1_error }}
 					</div>
 				</div>
 			</fieldset>

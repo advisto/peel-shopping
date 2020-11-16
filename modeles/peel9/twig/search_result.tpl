@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -22,7 +22,7 @@
 {% endif %}
 {% if not is_annonce_module_active %}
 	{% if (result_affichage_produit) %}
-<h1 property="name" class="search_result">{{ STR_RESULT_SEARCH }} {{ search|strtoupper }} {% if attributs_list %} {{ attributs_list }} {% endif %}{{ STR_SEARCH_RESULT_PRODUCT }} - {{ products_found }} {{ STR_PRODUCTS }}</h1>
+<h1 property="name" class="search_result">{{ STR_RESULT_SEARCH }} {{ search|strtoupper }} {% if attributs_list %} {{ attributs_list }} {% endif %}{{ STR_SEARCH_RESULT_PRODUCT }} - {{ products_found }} {{ STR_CADDIE_OBJECTS_COUNT }}</h1>
 	{{ result_affichage_produit }}
 	{% elseif page<1 and not (res_affiche_annonces) and ((search) or (result_affichage_produit)) %}
 <h1 property="name" class="search_result">{% if (search) %}{{ search|strtoupper }}{% else %}{{ STR_RESULT_SEARCH }} {{ STR_SEARCH_RESULT_PRODUCT }}{% endif %}</h1>
@@ -31,7 +31,7 @@
 {% endif %}
 {% if (are_terms) %}
 	{% if (arts_found) %}
-<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_ARTICLE }} - {{ arts_found|length }} {{ STR_ARTICLES }}</h2><br />
+<h2 class="search_result">{{ STR_RESULT_SEARCH }} - {{ STR_SEARCH_RESULT_ARTICLE }} - {{ arts_found|length }} {{ STR_ARTICLES_PLURAL_OPTIONAL }}</h2><br />
 		{% for art in arts_found %}
 			<p>
 				<b>{{ art.num }}. <a href="{{ art.category_href|escape('html') }}">{{ art.rubrique|html_entity_decode_if_needed }}</a></b> {% if (art.content_href) %} - <a href="{{ art.content_href|escape('html') }}">{{ art.titre|html_entity_decode_if_needed }}</a>{% endif %}<br />
@@ -42,7 +42,7 @@
 	<h2 class="search_result">{{ STR_RESULT_SEARCH }} {{ STR_SEARCH_RESULT_ARTICLE }}</h2><br />
 <div>{{ STR_SEARCH_NO_RESULT_ARTICLE }}</div><br />
 	{% endif %}
-	<h2 class="search_result">{{ STR_RESULT_SEARCH }} {{ STR_SEARCH_RESULT_BRAND }} - {{ brands_found|length }} {{ STR_BRANDS }}</h2><br />
+	<h2 class="search_result">{{ STR_RESULT_SEARCH }} {{ STR_SEARCH_RESULT_BRAND }} - {{ brands_found|length }} {{ STR_BRAND }}</h2><br />
 	{% if brands_found %}
 <h2 class="search_result">{{ STR_RESULT_SEARCH }} {{ search|strtoupper }} {{ STR_SEARCH_RESULT_BRAND }}</h2>
 		{% for brand in brands_found %}

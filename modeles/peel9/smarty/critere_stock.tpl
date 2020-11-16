@@ -1,20 +1,20 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: critere_stock.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: critere_stock.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}{if $is_form}
 <form class="entryform form-inline" role="form" enctype="multipart/form-data" method="post" action="{$action|escape:'html'}" id="{$form_id}">
 {/if}
-	<div class="affiche_critere_stock well pull-right {$update_class}">
+	<div class="affiche_critere_stock {if !isset($product_overlay_in_category_page)}well{/if} pull-right {$update_class}">
 {if $is_form}
 	{if isset($affiche_attributs_form_part)}{$affiche_attributs_form_part}{/if}
 	{if isset($affiche_etat_stock)}{$affiche_etat_stock}{/if}
@@ -66,7 +66,7 @@
 					<label>{$STR_SIZE}{$STR_BEFORE_TWO_POINTS}:</label>
 				</td>
 				<td>
-					<select class="form-control" id="{$id_select_size}" name="taille" onchange="update_product_price{$save_suffix_id}();bootbox_sizes_options(this);">
+					<select class="form-control" id="{$id_select_size}" name="taille" onchange="update_product_price{$save_suffix_id}();{if !empty($sizes_id_out_stock)}bootbox_sizes_options(this);{/if}">
 						<option value="0">{$STR_CHOOSE_SIZE}</option>
 						{foreach $sizes_options as $so}
 							<option {if !empty($so.bootbox_sizes_options)}{$so.bootbox_sizes_options}{/if} value="{$so.id|intval}"{if $so.issel} selected="selected"{/if}{if !$so.isavailable} disabled="disabled"{/if} {if $so.found_stock_info >0}style="font-weight:bold;"{/if}>
@@ -94,7 +94,7 @@
 {/if}
 		{$display_javascript_for_price_update}
 		<div property="offers" typeof="Offer" class="product_affiche_prix">{$product_affiche_prix}</div>
-{if $is_form}
+{if $is_form && (!$is_in_catalog || !isset($product_overlay_in_category_page))}
 	{if empty($on_estimate)}
 		<table>
 		{if !empty($display_order_minimum)}

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: SmartyEngine.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: SmartyEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -24,7 +24,7 @@ require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SmartyTemplate.php';
  * @package PEEL
  * @author PEEL <contact@peel.fr>
  * @copyright Advisto SAS 51 bd Strasbourg 75010 Paris https://www.peel.fr/
- * @version $Id: SmartyEngine.php 61970 2019-11-20 15:48:40Z sdelaporte $
+ * @version $Id: SmartyEngine.php 64741 2020-10-21 13:48:51Z sdelaporte $
  * @access public
  */
 class SmartyEngine extends EngineTpl {
@@ -52,6 +52,8 @@ class SmartyEngine extends EngineTpl {
 		$this->smarty->registerPlugin("modifier", "htmlentities", "StringMb::htmlentities");
 		$this->smarty->registerPlugin("modifier", "textEncode", "StringMb::textEncode");
 		$this->smarty->registerPlugin("modifier", "highlight_found_text", "highlight_found_text");
+		$this->smarty->registerPlugin("modifier", "rewriting_urlencode", "rewriting_urlencode");
+		$this->smarty->registerPlugin("modifier", "fprix", "fprix");
 		$this->smarty->registerDefaultTemplateHandler('SmartyDefaultTemplateHandler');
 	}
 
@@ -78,8 +80,8 @@ class SmartyEngine extends EngineTpl {
 	public function createTemplate($template, array $data = null)
 	{
 		// Variables générales disponibles dans Smarty, et variables de compatibilité partielle avec certains modèles de templates
-		$data['LANG'] = $GLOBALS['LANG'];
-		$data['site_parameters'] = $GLOBALS['site_parameters'];
+		$data['LANG'] = &$GLOBALS['LANG'];
+		$data['site_parameters'] = &$GLOBALS['site_parameters'];
 		if(!isset($data['site_id'])) {
 			$data['site_id'] = $GLOBALS['site_id'];
 		}
@@ -114,6 +116,16 @@ class SmartyEngine extends EngineTpl {
 		$data['page_name'] = null; // Non disponible systématiquement ici
 		$data['customerName'] = (!empty($_SESSION['session_utilisateur']['id_utilisateur'])?vb($_SESSION['session_utilisateur']['prenom']) . ' '. vb($_SESSION['session_utilisateur']['nom_famille']):null);
 		$data['priceDisplay'] = null;
+		
+		if (!empty($GLOBALS['site_parameters']['forced_template_files_by_code']) && !empty($GLOBALS['site_parameters']['forced_template_files_by_code'][$template])) {
+			// Si il y a une configuration spécifique pour ce template.
+			if (file_exists($GLOBALS['dirroot'] . "/modeles/peel9/smarty/".$GLOBALS['site_parameters']['forced_template_files_by_code'][$template]) || file_exists($GLOBALS['repertoire_modele']."/smarty/".$GLOBALS['site_parameters']['forced_template_files_by_code'][$template])) {
+				// le nouveau fichier configuré existe
+				// 'haut.tpl' => 'haut_toto.tpl'
+				$template = $GLOBALS['site_parameters']['forced_template_files_by_code'][$template];
+			}
+		}
+
 		return new SmartyTemplate($this->smarty->createTemplate($template, null, null, $data));
 	}
 }

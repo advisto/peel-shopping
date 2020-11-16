@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: de.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: de.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -54,8 +54,10 @@ $GLOBALS["STR_AND"] = "und";
 $GLOBALS["STR_AMOUNT"] = "Betrag";
 $GLOBALS["STR_ANNOUNCEMENT_INDICATION"] = "Ich interessiere mich für die folgenden Kategorien:";
 $GLOBALS["STR_ARTICLES"] = "Artikel";
+$GLOBALS["STR_ARTICLES_PLURAL_OPTIONAL"] = "";
 $GLOBALS["STR_ASC"] = "Hörnchen";
 $GLOBALS["STR_ASSOCIATED_PRODUCT"] = "Kunden, die diesen Artikel mochten, kauften auch ...";
+$GLOBALS["STR_ATTACHEMENT"] = "";
 $GLOBALS["STR_AUCUN_RESULTAT"] = "Kein mit diesem Wort anfangendes Produkt";
 $GLOBALS["STR_AUTH_DENIAL"] = "Autorisierung wurde abgelehnt";
 $GLOBALS["STR_AVOIR"] = "Gutschein";
@@ -72,6 +74,7 @@ $GLOBALS["STR_BANK_ACCOUNT_RIB_KEY"] = "RIB-Schlüssel";
 $GLOBALS["STR_BANK_ACCOUNT_RIB"] = "RIB-Schlüssel";
 $GLOBALS["STR_BANK_ACCOUNT"] = "Bankkonto";
 $GLOBALS["STR_BARCODE"] = "Strichcode";
+$GLOBALS["STR_BASE_PRICE"] = "";
 $GLOBALS['STR_BECOME_PARTNER'] = "Werden Sie Partner";
 $GLOBALS["STR_BEFORE_TWO_POINTS"] = " ";
 $GLOBALS["STR_BEFORE_TWO_POINTS_HTML"] = "&nbsp;";
@@ -147,6 +150,7 @@ $GLOBALS["STR_CONTACT_US"] = "Kontakt";
 $GLOBALS["STR_CONTACT"] = "Kontakt";
 $GLOBALS["STR_CONTINUE"] = "Weiter";
 $GLOBALS["STR_CONTINENT"] = "Kontinent";
+$GLOBALS["STR_COPY_TO"] = "";
 $GLOBALS["STR_COPY_VERIFICATION_CODE"] = "";
 $GLOBALS["STR_COOKIES_CHROME"] = "Optionen &gt; Fortgeschrittene Optionen &gt; Inhaltsparameter ... &gt; Cookies<br />Wählen Sie aus &quot;Speichern der lokalen Daten erlauben&quot;";
 $GLOBALS["STR_COOKIES_HOWTO"] = "Um zu prüfen, ob Ihr Browser Cookies akzeptiert:";
@@ -179,6 +183,7 @@ $GLOBALS["STR_DELETE_CART_TITLE"] = "Sicherung löschen";
 $GLOBALS["STR_DELETE_PROD_CART"] = "Möchten Sie diese Artikel wirklich aus dem Warenkorb entfernen?";
 $GLOBALS["STR_DELETE_THIS_FILE"] = "diese Datei löschen";
 $GLOBALS["STR_DELETE"] = "Löschen";
+$GLOBALS["STR_DELETE_SELECTION"] = "";
 $GLOBALS["STR_DELETE_CONFIRM"] = "Sind Sie sicher, dass Sie löschen wollen?";
 $GLOBALS["STR_DELIVERY_STOCK"] = "Voraussichtliche Verzögerung der Lieferzeit";
 $GLOBALS["STR_DELIVERY"] = "Lieferung";
@@ -215,6 +220,7 @@ $GLOBALS["STR_EMAIL_ABSENT"] = "Diese E-Mail-Adresse existiert nicht.";
 $GLOBALS["STR_EMAIL_BOUNCE_REPLACE"] = "Der Server %s gibt einen dauerhaften Fehler %s nach einem früheren Zustellungsversuch an %s aus. Bitte geben Sie in Ihrem Konto eine gültige E-Mail-Adresse an.";
 $GLOBALS["STR_EMAIL_FRIEND"] = "E-Mail-Adresse Ihres Freundes";
 $GLOBALS["STR_EMAIL_OR_PSEUDO"] = "Login";
+$GLOBALS["STR_EMAIL_REPLY_TO"] = "";
 $GLOBALS["STR_EMAIL_SENDING_DEACTIVATED"] = "Zustellungsversuch \"%s\" deaktiviert.";
 $GLOBALS["STR_EMAIL"] = "E-Mail";
 $GLOBALS["STR_EMPLOYEE"] = "Arbeitnehmer/Arbeitslose";
@@ -256,6 +262,7 @@ $GLOBALS["STR_ERR_KEYB"] = "Drücken Sie zum Schließen auf die Taste <b>x</b>."
 $GLOBALS["STR_ERR_LOGIN"] = "Sie haben Ihren Nutzernamen nicht angegeben.\n";
 $GLOBALS["STR_ERR_MESSAGE"] = "Sie haben keine Nachricht hinterlassen.\n";
 $GLOBALS["STR_ERR_MISMATCH_PASSWORD"] = "Die Kennwörter stimmen nicht überein. Bitte geben Sie die Kennwörter erneut ein.";
+$GLOBALS['STR_ERR_MONDIAL_RELAY']= "Please select a relay point";
 $GLOBALS["STR_ERR_NAME"] = "Sie haben keinen Familiennamen angegeben.\n";
 $GLOBALS["STR_ERR_NEWPASS_CONFIRM"] = "Sie haben das neue Kennwort nicht bestätigt.\n";
 $GLOBALS["STR_ERR_NEWPASS"] = "Sie haben kein neues Kennwort eingegeben.\n";
@@ -274,6 +281,7 @@ $GLOBALS["STR_ERR_PSEUDO"] = "Sie haben Ihren Nutzernamen nicht angegeben oder d
 $GLOBALS["STR_ERR_QUANTITY"] = "Sie haben Ihre Anzahl nicht eingegeben.\n";
 $GLOBALS["STR_ERR_SIREN"] = "Sie haben keine SIREN angegeben.";
 $GLOBALS["STR_ERR_SOCIETY"] = "Sie haben keine Gesellschaft angegeben.\n";
+$GLOBALS["STR_ERR_SPAMMER_EMAIL"] = "";
 $GLOBALS["STR_ERR_SUBJECT"] = "Sie haben vergessen, den Grund Ihrer Anfrage anzugeben.\n";
 $GLOBALS["STR_ERR_TEL"] = "Sie haben keine Telefonnummer angegeben.\n";
 $GLOBALS["STR_ERR_TIME"] = "Das 24-Stunden-Limit für die Erneuerung Ihres Kennworts ist überschritten.";
@@ -290,6 +298,7 @@ $GLOBALS["STR_ERROR_SOMETHING_PICTURE"] = "Etwas funktioniert nicht: Prüfen Sie
 $GLOBALS["STR_ETAPE_SUIVANTE"] = "Weiter";
 $GLOBALS["STR_EVERYBODY"] = "Alle Leute";
 $GLOBALS["STR_EXPEDITION_DATE"] = "Lieferdatum";
+$GLOBALS["STR_EXPEDITOR_EMAIL"] = "";
 $GLOBALS["STR_FAQ_TITLE"] = "FAQ";
 $GLOBALS["STR_FAX"] = "Fax";
 $GLOBALS["STR_FB_DECONNECT"] = "Von Facebook abmelden.";
@@ -389,6 +398,7 @@ $GLOBALS["STR_LIST"] = "Liste";
 $GLOBALS["STR_LIST_PRODUCT"] = "Liste der Artikel";
 $GLOBALS["STR_LIST_RUBRIQUES"] = "Liste der Unterrubriken";
 $GLOBALS["STR_LISTE_CADEAU"] = "Meine Wunschliste";
+$GLOBALS["STR_LOGIN_FOR_PAYPAL_CHECKOUT"] = "";
 $GLOBALS["STR_LOAD_RULES"] = "";
 $GLOBALS["STR_LOCATION"] = "Lage";
 $GLOBALS["STR_LOGIN_FOR_REBATE"] = "Melden Sie sich an, um von dieser Ermäßigung zu profitieren";
@@ -482,6 +492,7 @@ $GLOBALS["STR_MODULE_PREMIUM_FAQ_NO_QUESTION"] = "Es liegen keine Fragen vor.";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTION"] = "Frage";
 $GLOBALS["STR_MODULE_PREMIUM_FAQ_QUESTIONS"] = "Fragen";
 $GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_FILES"] = "Laden Sie hier den Bestellschein für die Bestellnummer:";
+$GLOBALS["STR_MODULE_PREMIUM_FOR_DOWNLOADING_GENERIC_FILES"] = "";
 $GLOBALS["STR_MODULE_PREMIUM_HAS_BEEN_CREATED_FOR"] = "wurde erstellt und gesendet an";
 $GLOBALS["STR_MODULE_PREMIUM_HTML_DEFAULT"] = "HTML-Code generieren";
 $GLOBALS["STR_MODULE_PREMIUM_LISTE_WORD"] = "Wörterliste";
@@ -542,6 +553,7 @@ $GLOBALS["STR_MONTH"] = "Monat";
 $GLOBALS["STR_MONTHS"] = "Monate";
 $GLOBALS["STR_MORE_DETAILS"] = "Weitere Einzelheiten";
 $GLOBALS["STR_MORE"] = "Einkaufen";
+$GLOBALS["STR_MORE_THAN"] = "mehr als";
 $GLOBALS["STR_MSG_CHANGE_PARAMS"] = "Änderung der Einstellungen.";
 $GLOBALS["STR_MSG_NEW_CUSTOMER"] = "<a class=\"notice\" href=\"{$GLOBALS['wwwroot']}/utilisateurs/enregistrement.php\">Um ein Konto anzulegen, klicken Sie bitte hier</a>.";
 $GLOBALS["STR_MSG_STILL_CUSTOMER"] = "Melden Sie sich dann hier an.";
@@ -559,6 +571,7 @@ $GLOBALS["STR_NET"] = "Netto zu zahlen";
 $GLOBALS["STR_NEW_CUSTOMER"] = "Sie sind noch kein Kunde?";
 $GLOBALS["STR_NEW_PASSWORD_CONFIRM"] = "Neues Kennwort zur Bestätigung";
 $GLOBALS["STR_NEW_PASSWORD"] = "Neues Kennwort";
+$GLOBALS["STR_NEW_SEARCH"] = "";
 $GLOBALS["STR_NEWSLETTER_TITLE"] = "Anmeldung für den Rundbrief";
 $GLOBALS["STR_NEWSLETTER_YES"] = "Ja, gern beziehe ich Ihren Rundbrief.";
 $GLOBALS["STR_NEWSLETTER"] = "Der E-Rundbrief";
@@ -645,6 +658,7 @@ $GLOBALS["STR_PAYMENT_SUCCEED"] = "Ihre Transaktion wurde in Behandlung genommen
 $GLOBALS["STR_PAYMENT"] = "Zahlung";
 $GLOBALS["STR_PAYPAL_IMG"] = "<img src=\"{$GLOBALS['wwwroot']}/images/logo-xclickBox.gif\" width=\"152\" height=\"29\" alt=\"Zahlungen via Paypal\" />";
 $GLOBALS["STR_PAYPAL"] = "Paypal";
+$GLOBALS["STR_PDF_ACOMPTE"] = "";
 $GLOBALS["STR_PDF_AVOIR"] = "Kundenguthaben";
 $GLOBALS["STR_PDF_BILL_DATE"] = "Datum";
 $GLOBALS["STR_PDF_BILL_PAGE"] = "Seite";
@@ -728,6 +742,7 @@ $GLOBALS["STR_READ_ENTIRE_ARTICLE"] = "Lesen Sie den ganzen Artikel";
 $GLOBALS["STR_REBATE_NOW"] = "jetzt, wenn Sie einen Rabattgutschein haben";
 $GLOBALS["STR_RECOVER_PASSWORD_OK"] = "Sie haben nun ein neues Kennwort.\n\rDamit können Sie sich diesen Link <a href=\"{$GLOBALS['wwwroot']}/membre.php\"> anmelden</a>";
 $GLOBALS["STR_RECURRENT"] = "Wiederkehrend";
+$GLOBALS["STR_RECIPENT_NO_SET"] = "";
 $GLOBALS["STR_REDUCTION_ON_ALL_PRODUCTS_FROM_CATEGORIE"] = "Alle Artikel dieser Kategorie profitieren von einer Ermäßigung in Höhe von";
 $GLOBALS["STR_REFERENCE_ON_LINE_SHOP"] = "Referenzen Netzläden";
 $GLOBALS["STR_REFERENCE"] = "Referenz";
@@ -775,6 +790,7 @@ $GLOBALS["STR_SEARCH_RESULT_PRODUCT"] = "in den Produkten";
 $GLOBALS["STR_SEARCH"] = "Suchen";
 $GLOBALS["STR_SECOND_CHOICE"] = "2. Wahl";
 $GLOBALS["STR_SEE_YOU_SOON"] = "Bis bald auf";
+$GLOBALS["STR_SEND_EMAIL_OK"] = "";
 $GLOBALS["STR_SEND_CHECK"] = "Senden Sie Ihre Zahlung an";
 $GLOBALS["STR_SEND_TRANSFER"] = "Zahlungen bitte auf folgendes Bankkonto";
 $GLOBALS["STR_SEND"] = "Senden";
@@ -813,6 +829,7 @@ $GLOBALS["STR_STOCK"] = "Vorratsangaben";
 $GLOBALS["STR_STRONG_PASSWORD_NOTIFICATION"] = "Starke Kennworte enthalten mehr als 8 Zeichen, und eine Kombination aus Groß- und Kleinbuchstaben, Ziffern und Symbolen.";
 $GLOBALS["STR_STRONG_PSEUDO_NOTIFICATION"] = "Der Spitzname darf nicht das @-Zeichen enthalten.";
 $GLOBALS["STR_SUBMIT"] = "Validieren";
+$GLOBALS["STR_SUBJECT_AND_MESSAGE"] = "";
 $GLOBALS["STR_SUGGEST"] = "Ihr Guthaben erlaubt es, weitere Produkte zu erhalten. <a href=\"{$GLOBALS['wwwroot']}/achat/suggest.php\">Schauen Sie sich doch einmal unsere Empfehlungen an, um Ihren Einkauf zu komplettieren</a>.";
 $GLOBALS["STR_SUPPORT"] = "Für all Ihre Informationsersuchen<a href=\"{$GLOBALS['wwwroot']}/utilisateurs/contact.php\">können Sie uns über dieses Formular kontaktieren</a>.";
 $GLOBALS["STR_SWIFT"] = "SWIFT / BIC";
@@ -838,6 +855,7 @@ $GLOBALS["STR_THIRD_CHOICE"] = "3. Wahl";
 $GLOBALS["STR_TICKET_OK"] = "Wir haben Ihre Nachtricht empfangen.\nWir werden Sie bald kontaktieren.";
 $GLOBALS["STR_TITLE_SEARCH_HEADER"] = "";
 $GLOBALS["STR_TITLE_SUFFIX"] = "{$GLOBALS['site']}";
+$GLOBALS["STR_TO_SEND"] = "";
 $GLOBALS["STR_TO"] = "zu";
 $GLOBALS["STR_TO_COMMERCIAL_OFFER"] = "";
 $GLOBALS["STR_TO_NEWSLETTER"] = "";
@@ -863,12 +881,13 @@ $GLOBALS["STR_UPDATE"] = "Warenkorb aktualisieren";
 $GLOBALS["STR_UPLOAD"] = "Download";
 $GLOBALS["STR_UPLOAD_ERROR_DURING_TRANSFER"] = "Problem bei der Übertragung von Dateien - Try Again";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_IS_TOO_BIG"] = "Die hochgeladene Datei ist zu groß (Grenze: %s KB)";
-$GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"] = "Der Dateityp (%s), die Sie hochladen möchten, ist nicht erlaubt, können Sie Dateien wie heruntergeladen werden:";
+$GLOBALS["STR_UPLOAD_ERROR_FILE_NOT_ALLOWED"] = "Der Dateityp (%s), die Sie hochladen möchten, ist nicht erlaubt.";
 $GLOBALS["STR_UPLOAD_ERROR_FILE_TYPE_NOT_VALID"] = "Der Typ der Datei nicht gültig ist";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_HIGHER_THAN"] = "Ihr Bild sollte nicht mehr als %s Pixel betragen";
 $GLOBALS["STR_UPLOAD_ERROR_IMAGE_MUST_NOT_BE_LARGER_THAN"] = "Ihr Bild sollte nicht größer als %s Pixel betragen";
 $GLOBALS["STR_UPLOAD_ERROR_YOU_UPLOAD_NOTHING"] = "Sie haben nicht hochgeladen.";
 $GLOBALS["STR_USER_ACCOUNT_COMPLETION"] = "Ihr Profil wird in %s abgeschlossen.";
+$GLOBALS["STR_USER_ALREADY_EXISTS"] = "";
 $GLOBALS["STR_USER_CANCEL"] = "Stornierung durch Nutzer.";
 $GLOBALS["STR_USER_ORIGIN"] = "Wie haben Sie diese Website gefunden?";
 $GLOBALS["STR_USER_ORIGIN_OPTIONS_1"] = "Von einem Freund oder Familienmitglied";
@@ -925,7 +944,13 @@ $GLOBALS["STR_YOUR_UPDATE_ADDRESS_CREATE"] = "Änderung der Adresse ausgeführt.
 $GLOBALS["STR_ZERO_PRODUCT_ADD"] = "Ihrem Warenkorb wurde kein Artikel hinzugefügt";
 $GLOBALS["STR_ZIP"] = "Postleitzahl";
 $GLOBALS["STR_ZOOM"] = "Zoom";
+$GLOBALS["STR_PIECE"] = "";
+$GLOBALS["STR_CERTIFICATE_OF_EXEMPTION"] = "";
+$GLOBALS["STR_ERR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_NOT_SUBJECT_TO_VAT"] = "";
 $GLOBALS["STR_SELECT_FILE_VAT_EXEMPTION"] = "select file";
+$GLOBALS["STR_VAT_EXEMPTION"] = "";
+$GLOBALS["STR_QUANTITY_RESUME_COMMANDE"] = "Menge";
 $GLOBALS["STR_ERR_VALIDATE_VAT_EXEMPTION"] = "Please validate 'Not subject to VAT'";
 $GLOBALS["STR_CARD_ESTIMATE"] = "";
 $GLOBALS['STR_OPEN_RESELLER_ACCOUNT'] = "";
@@ -937,3 +962,13 @@ $GLOBALS["STR_EMAIL_SUBJECT_PRICE_REQUEST"] = "";
 $GLOBALS["STR_EMAIL_BODY_PRICE_REQUEST"] = "";
 $GLOBALS["STR_ON_REQUEST"] = "";
 $GLOBALS["STR_ESTIMATE"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_SCALE_STOCK"] = "";
+
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_DAYS"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_WEEK"] = "";
+$GLOBALS["STR_INFORMATION_ETAT_STOCK_MONTH"] = "Monate";
+$GLOBALS["STR_ORDER_SUSPECT"] = "";
+$GLOBALS["STR_CODE_CHORUS"] = "";
+$GLOBALS["STR_INSCRIPTION_WHATSAPP"] = "";
+$GLOBALS["STR_NAME_ADDRESS"] = "";

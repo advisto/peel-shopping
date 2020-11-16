@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: produits.php 64757 2020-10-22 09:00:10Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 
 include("../configuration.inc.php");
@@ -24,6 +24,39 @@ $id = intval(vn($_REQUEST['id']));
 $form_error_object = new FormError();
 $frm = $_POST;
 $output = '';
+
+if (!empty(vb($_REQUEST['modification_multiple'])) && !empty($frm['product_ids'])) {
+	$modification_multiple = $_REQUEST['modification_multiple'];
+	if($modification_multiple == 'on_our_selection'){
+		query("UPDATE peel_produits SET on_special=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'off_our_selection'){
+		query("UPDATE peel_produits SET on_special=0 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_news'){
+		query("UPDATE peel_produits SET on_new=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'off_news'){
+		query("UPDATE peel_produits SET on_new=0 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_promotions'){
+		query("UPDATE peel_produits SET on_promo=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'off_promotions'){
+		query("UPDATE peel_produits SET on_promo=0 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_best_sellers'){
+		query("UPDATE peel_produits SET on_top=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'off_best_sellers'){
+		query("UPDATE peel_produits SET on_top=0 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_recommended_products'){
+		query("UPDATE peel_produits SET recommanded_product_on_cart_page = 1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_top_block'){
+		query("UPDATE peel_produits SET on_rollover=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'on_etat'){
+		query("UPDATE peel_produits SET etat=1 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'off_etat'){
+		query("UPDATE peel_produits SET etat=0 WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} elseif($modification_multiple == 'suppr_multiple'){
+		query("DELETE FROM peel_produits WHERE id IN (". implode(',', nohtml_real_escape_string($frm['product_ids'])) .")");
+	} else {
+		$output .=  $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_ADMIN_ERR_FORM_INCOMPLETE']))->fetch();
+	}
+}
 
 switch (vb($_REQUEST['mode'])) {
 	case 'modif_tab';
@@ -222,6 +255,7 @@ switch (vb($_REQUEST['mode'])) {
 		$output .= affiche_liste_produits($_GET);
 		break;
 }
+
 include($GLOBALS['repertoire_modele'] . "/admin_haut.php");
 echo $output;
 include($GLOBALS['repertoire_modele'] . "/admin_bas.php");
@@ -268,7 +302,8 @@ function affiche_formulaire_ajout_produit($categorie_id = 0, &$frm, &$form_error
 		$frm['on_promo'] = "";
 		$frm['on_reseller'] = "";
 		$frm['on_rollover'] = "";
-		$frm['on_stock'] = "";
+		$frm['on_information'] = "";
+		$frm['scale_stock'] = "";
 		$frm['on_download'] = "";
 		$frm['extra_link'] = "";
 		$frm['technical_code'] = "";
@@ -476,7 +511,9 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 	$prix_flash = fprix(get_float_from_user_input(vb($frm['prix_flash'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	$prix_revendeur = fprix(get_float_from_user_input(vb($frm['prix_revendeur'])), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
 	$prix_achat = fprix(get_float_from_user_input($frm['prix_achat']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
-	$prix_promo = fprix(get_float_from_user_input($frm['prix_promo']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	if (vn($frm['prix_promo'])>0) {
+		$prix_promo = fprix(get_float_from_user_input($frm['prix_promo']), false, $GLOBALS['site_parameters']['code'], false, null, false, false);
+	}
 	// Si aucune référence n'est choisie on initialise le tableau des références.
 	if (!isset($frm['references'])) {
 		$frm['references'] = array();
@@ -579,6 +616,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('is_on_rollover', !empty($frm['on_rollover']));
 
 		$tpl->assign('is_on_estimate', !empty($frm['on_estimate']));
+		$tpl->assign('is_on_quote', !empty($frm['on_quote']));
 		$tpl->assign('display_recommanded_product_on_cart_page', !empty($GLOBALS['site_parameters']['display_recommanded_product_on_cart_page']));
 		$tpl->assign('is_recommanded_product_on_cart_page', !empty($frm['recommanded_product_on_cart_page']));
 		$tpl->assign('etat', vb($frm['etat']));
@@ -640,7 +678,31 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 			}
 		}
 		$tpl->assign('ecotaxe_options', $tpl_ecotaxe_options);
-
+		
+		$tpl_users_visit = array();
+		if (check_if_module_active('statistiques_visites')) {
+			$sql = "SELECT DISTINCT u.*
+				FROM peel_utilisateurs_visites uv
+				INNER JOIN peel_utilisateurs u ON u.id_utilisateur = uv.id_utilisateur
+				WHERE product_id = " . intval($frm['id']) . "
+				ORDER BY nom_famille";
+			$query = query($sql);
+			while ($users_visit = fetch_assoc($query)) {
+				$tpl_users_visit[] = array('email' => $users_visit['email'],
+					'prenom' => $users_visit['prenom'],
+					'nom_famille' => $users_visit['nom_famille'],
+					'id_utilisateur' => intval($users_visit['id_utilisateur']),
+					'code_client' => $users_visit['code_client']
+				);
+			}
+			$tpl->assign('STR_ADMIN_INDEX_USERS_LIST', $GLOBALS["STR_ADMIN_INDEX_USERS_LIST"]);
+			$tpl->assign('STR_ADMIN_UTILISATEURS_CLIENT_CODE', $GLOBALS["STR_ADMIN_UTILISATEURS_CLIENT_CODE"]);
+			$tpl->assign('STR_EMAIL', $GLOBALS["STR_EMAIL"]);
+			$tpl->assign('STR_NOM', $GLOBALS["STR_NAME"]);
+			$tpl->assign('STR_PRENOM', $GLOBALS["STR_FIRST_NAME"]);
+		}
+		$tpl->assign('users_visit', $tpl_users_visit);
+		
 		if (check_if_module_active('payment_by_product')) {
 			$tpl->assign('payment_by_product', display_payment_by_product($frm['paiment_allowed']));
 		}
@@ -709,46 +771,48 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		/**
 		 * ******************************* Gestion des images des couleurs ***************************************
 		 */
-		$selectCouleur = "SELECT c.*, pc.default_image, pc.image1, pc.image2, pc.image3, pc.image4, pc.image5, pc.couleur_id as coul
-			FROM peel_couleurs c
-			INNER JOIN peel_produits_couleurs pc ON pc.couleur_id = c.id AND pc.produit_id = '" . intval(vb($frm['id'])) . "'
-			WHERE " .  get_filter_site_cond('couleurs', 'c') . "
-			ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
-		$query = query($selectCouleur);
-		// Compteur permettant de fournir l'image par défaut en fonction de chaque couleur
-		$nomCouleur_array = array();
-		while ($nomCouleur = fetch_assoc($query)) {
-			$nomCouleur_array[] = $nomCouleur;
-		}
-		// Le nombre de champs d'images téléchargeables est limité par la configuration PHP max_file_uploads qui peut être modifiée dans php.ini ou httpd.conf
-		// Il est donc nécessaire de limiter le nombre de champs par couleur afin de ne pas dépasser cette limite
-		if (function_exists('ini_get') && @ini_get('max_file_uploads') && !empty($nomCouleur_array)) {
-			$upload_images_per_color = min(5, ceil(ini_get('max_file_uploads')) / count($nomCouleur_array));
-		} else {
-			$upload_images_per_color = 2;
-		}
-		$tpl->assign('upload_images_per_color', $upload_images_per_color);
-		foreach($nomCouleur_array as $this_couleur) {
-			$image_found = false;
-			for($i = 1;$i <= $upload_images_per_color;$i++) {
-				if (!empty($this_couleur['image' . $i])) {
-					$image_found = true;
-					break;
-				}
+		 if (!empty($frm['id'])) {
+			$selectCouleur = "SELECT c.*, pc.default_image, pc.image1, pc.image2, pc.image3, pc.image4, pc.image5, pc.couleur_id as coul
+				FROM peel_couleurs c
+				INNER JOIN peel_produits_couleurs pc ON pc.couleur_id = c.id AND pc.produit_id = '" . intval(vb($frm['id'])) . "'
+				WHERE " .  get_filter_site_cond('couleurs', 'c') . "
+				ORDER BY c.position ASC, c.nom_" . $_SESSION['session_langue'] . " ASC";
+			$query = query($selectCouleur);
+			// Compteur permettant de fournir l'image par défaut en fonction de chaque couleur
+			$nomCouleur_array = array();
+			while ($nomCouleur = fetch_assoc($query)) {
+				$nomCouleur_array[] = $nomCouleur;
 			}
-			$tpl_images = array();
-			if ($image_found) {
-				for ($i = 1; $i <= $upload_images_per_color; $i++) {
-					$tpl_images[$i] = get_uploaded_file_infos('imagecouleur' . $this_couleur['id'] . '_' . $i, $this_couleur['image' . $i], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&coul=' . $this_couleur['coul'] . '&file=image' . $i . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1));
-				}
+			// Le nombre de champs d'images téléchargeables est limité par la configuration PHP max_file_uploads qui peut être modifiée dans php.ini ou httpd.conf
+			// Il est donc nécessaire de limiter le nombre de champs par couleur afin de ne pas dépasser cette limite
+			if (function_exists('ini_get') && @ini_get('max_file_uploads') && !empty($nomCouleur_array)) {
+				$upload_images_per_color = min(5, ceil(ini_get('max_file_uploads')) / count($nomCouleur_array));
+			} else {
+				$upload_images_per_color = 2;
 			}
-			$tpl_colors[] = array('nom' => $this_couleur['nom_' . $_SESSION['session_langue']],
-				'id' => $this_couleur['id'],
-				'issel' => vb($frm['default_color_id']) == $this_couleur['coul'],
-				'coul' => $this_couleur['coul'],
-				'default_image' => vb($this_couleur['default_image']),
-				'images' => $tpl_images
-				);
+			$tpl->assign('upload_images_per_color', $upload_images_per_color);
+			foreach($nomCouleur_array as $this_couleur) {
+				$image_found = false;
+				for($i = 1;$i <= $upload_images_per_color;$i++) {
+					if (!empty($this_couleur['image' . $i])) {
+						$image_found = true;
+						break;
+					}
+				}
+				$tpl_images = array();
+				if ($image_found) {
+					for ($i = 1; $i <= $upload_images_per_color; $i++) {
+						$tpl_images[$i] = get_uploaded_file_infos('imagecouleur' . $this_couleur['id'] . '_' . $i, $this_couleur['image' . $i], get_current_url(false) . '?mode=supprfile&id=' . vb($frm['id']) . '&coul=' . $this_couleur['coul'] . '&file=image' . $i . '&page=' . (!empty($_GET['page']) ? $_GET['page'] : 1));
+					}
+				}
+				$tpl_colors[] = array('nom' => $this_couleur['nom_' . $_SESSION['session_langue']],
+					'id' => $this_couleur['id'],
+					'issel' => vb($frm['default_color_id']) == $this_couleur['coul'],
+					'coul' => $this_couleur['coul'],
+					'default_image' => vb($this_couleur['default_image']),
+					'images' => $tpl_images
+					);
+			}
 		}
 		$tpl->assign('colors', $tpl_colors);
 
@@ -790,20 +854,31 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		}
 
 		$tpl_produits_options = array();
-		$select = query("SELECT pr.reference_id, p.reference, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, pr.quantity
-			FROM peel_produits p
-			LEFT JOIN peel_produits_references pr ON pr.reference_id = p.id
-			WHERE produit_id = ".intval($frm['id'])." AND " . get_filter_site_cond('produits', 'p', true) . "
-			ORDER BY reference ASC");
-		$i=1;
-		while ($nom = fetch_assoc($select)) {
-			$tpl_produits_options[] = array('value' => intval($nom['reference_id']),
-				'reference' => $nom['reference'],
-				'name' => $nom['name'],
-				'i' => $i,
-				'qt' => intval($nom['quantity']),
-			);
-			$i++;
+		if(!empty($frm['id'])) {
+			$product_object = new Product($frm['id']);
+			if (empty($GLOBALS['site_parameters']['produits_references_quantity_disable'])) {
+				// dans ce cas de figure on 
+				$select = query("SELECT pr.reference_id, pr.quantity
+					FROM peel_produits_references pr
+					WHERE produit_id = ".intval($frm['id'])."
+				ORDER BY reference_id ASC");
+			} else {
+				$select = query("SELECT pr.reference_id
+					FROM peel_produits_references pr
+					WHERE produit_id = ".intval($frm['id'])."
+					ORDER BY reference_id ASC");
+			}
+			$i = 1;
+			while ($nom = fetch_assoc($select)) {
+				$tpl_produits_options[] = array('value' => intval($nom['reference_id']),
+					'reference' => $product_object->reference,
+					'name' => $product_object->name,
+					'i' => $i,
+					'qt' => intval(vn($nom['quantity'])),
+				);
+				$i++;
+			}
+			unset($product_object);
 		}
 		$tpl->assign('nb_produits', $frm['nb_produits']);
 		$tpl->assign('produits_options', $tpl_produits_options);
@@ -871,6 +946,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 
 		$tpl->assign('is_download_module_active', check_if_module_active('download'));
 		$tpl->assign('is_on_download', !empty($frm['on_download']));
+		$tpl->assign('is_statistiques_visites_module_active', check_if_module_active('statistiques_visites'));
 		$tpl->assign('zip', vb($frm['zip']));
 		$tpl->assign('product_attributs_price_href', $GLOBALS['wwwroot'] . '/modules/attributs/administrer/produits_attributs.php?id=' . vn($frm['id']) . '&mode=edit_price');
 		
@@ -917,6 +993,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ROLLOVER', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ROLLOVER']);
 		$tpl->assign('STR_ADMIN_PRODUITS_ESTIMATE_PRICE', $GLOBALS['STR_ADMIN_PRODUITS_ESTIMATE_PRICE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_ESTIMATE', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_ESTIMATE']);
+		$tpl->assign('STR_ADMIN_PRODUCTS_QUOTE', $GLOBALS['STR_ADMIN_PRODUCTS_QUOTE']);
 		$tpl->assign('STR_ADMIN_PRODUITS_IS_ON_CART_PAGE', $GLOBALS['STR_ADMIN_PRODUITS_IS_ON_CART_PAGE']);
 		$tpl->assign('STR_STATUS', $GLOBALS['STR_STATUS']);
 		$tpl->assign('STR_ADMIN_ONLINE', $GLOBALS['STR_ADMIN_ONLINE']);
@@ -1011,7 +1088,7 @@ function affiche_formulaire_produit(&$frm, &$form_error_object, $create_product_
 		$tpl->assign('STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN', $GLOBALS['STR_ADMIN_PRODUITS_GIFT_CHECK_EXPLAIN']);
 		$tpl->assign('STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT', $GLOBALS['STR_ADMIN_PRODUITS_DEFAULT_COLOR_IN_FRONT']);
 		$tpl->assign('STR_ADMIN_VARIOUS_INFORMATION_HEADER', $GLOBALS['STR_ADMIN_VARIOUS_INFORMATION_HEADER']);
-		$hook_result = call_module_hook('admin_formulaire_produit', array('id'=>vn($frm['id']), 'frm'=>$frm), 'array');
+		$hook_result = call_module_hook('admin_formulaire_produit', array('id'=>vn($frm['id']), 'frm' => $frm), 'array');
 
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
@@ -1289,7 +1366,7 @@ function insere_produit($frm)
 	}
 	
 	/* ajoute les références associées */
-	for ($i = 0; $i < count(vn($frm['references'])); $i++) {
+	for ($i = 0; $i < count(vb($frm['references'], array())); $i++) {
 		if (!empty($frm['references'][$i])) {
 			$sql = "SELECT reference_id
 				FROM peel_produits_references 
@@ -1305,7 +1382,7 @@ function insere_produit($frm)
 	}
 
 	/* ajoute les couleurs associées */
-	for ($i = 0; $i < count(vn($frm['couleurs'])); $i++) {
+	for ($i = 0; $i < count(vn($frm['couleurs'], array())); $i++) {
 		if (!empty($frm['couleurs'][$i])) {
 			$qid = query("INSERT INTO peel_produits_couleurs (couleur_id, produit_id)
 				VALUES ('" . nohtml_real_escape_string($frm['couleurs'][$i]) . "', '" . intval($product_id) . "')");
@@ -1313,7 +1390,7 @@ function insere_produit($frm)
 	}
 
 	/* ajoute les tailles associées */
-	for ($i = 0; $i < count(vn($frm['tailles'])); $i++) {
+	for ($i = 0; $i < count(vn($frm['tailles'], array())); $i++) {
 		if (!empty($frm['tailles'][$i])) {
 			$qid = query("INSERT INTO peel_produits_tailles (taille_id, produit_id)
 				VALUES ('" . nohtml_real_escape_string($frm['tailles'][$i]) . "', '" . intval($product_id) . "')");
@@ -1329,7 +1406,7 @@ function insere_produit($frm)
 	if (!empty($product_id)) {
 		$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_CREATED_OK'], StringMb::html_entity_decode_if_needed($frm['nom_' . $_SESSION['session_langue'] . '']))))->fetch();
 	}
-	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($product_id), 'frm'=>$frm));
+	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($product_id), 'frm' => $frm));
 	return $output;
 }
 
@@ -1414,7 +1491,7 @@ function maj_produit($id, $frm)
 	$product_fields[] = "on_reseller = '" . nohtml_real_escape_string(vn($frm['on_reseller'])) . "'";
 	$product_fields[] = "on_promo = '" . nohtml_real_escape_string(vn($frm['on_promo'])) . "'";
 	$product_fields[] = "on_new = '" . nohtml_real_escape_string(vn($frm['on_new'])) . "'";
-	$product_fields[] = "price_estimate = '" . nohtml_real_escape_string($frm['price_estimate']) . "'";
+	$product_fields[] = "price_estimate = '" . nohtml_real_escape_string(vb($frm['price_estimate'])) . "'";
 	$product_fields[] = "alpha = '" . nohtml_real_escape_string(StringMb::substr(StringMb::strtoupper(vb($frm['nom_' . $_SESSION['session_langue']])), 0, 1)) . "'";
 	$product_fields[] = "on_stock = '" . intval(vn($frm['on_stock'])) . "'";
 	$product_fields[] = "affiche_stock = '" . intval(vn($frm['affiche_stock'])) . "'";
@@ -1526,10 +1603,15 @@ function maj_produit($id, $frm)
 			$result = fetch_assoc($query);
 			if (empty($result)) {
 				// Association de produit non présente.
+				if (empty($GLOBALS['site_parameters']['produits_references_quantity_disable'])) {
 				query("INSERT INTO peel_produits_references (reference_id, produit_id, quantity)
 					VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "', '" . intval(vn($frm['quantity_product_reference'][$i])) . "')");
+				} else {
+					query("INSERT INTO peel_produits_references (reference_id, produit_id)
+						VALUES ('" . nohtml_real_escape_string($frm['references'][$i]) . "', '" . intval($id) . "')");
 			}
 		}
+	}
 	}
 	
 	foreach($frm['couleurs'] as $this_color_id) {
@@ -1573,7 +1655,7 @@ function maj_produit($id, $frm)
 	} else {
 		$product_name = vb($frm['nom_' . $_SESSION['session_langue']]);
 	}
-	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($id), 'frm'=>$frm));
+	call_module_hook('admin_insere_or_maj_product', array('id'=>intval($id), 'frm' => $frm));
 	return $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_ADMIN_PRODUITS_MSG_PRODUCT_UPDATE_OK'], StringMb::html_entity_decode_if_needed($product_name))))->fetch();
 }
 
@@ -1591,11 +1673,7 @@ function affiche_liste_produits_fournisseur()
 	$tpl->assign('add_src', $GLOBALS['administrer_url'] . '/images/add.png');
 	$tpl->assign('add_href', $GLOBALS['administrer_url'] . '/produits.php?mode=ajout');
 
-	$sql = "SELECT ";
-	if (check_if_module_active('gifts')) {
-		$sql .= "p.points, p.on_gift, p.on_gift_points, ";
-	}
-	$sql .= "p.id, p.reference, p.reference_fournisseur, p.etat_stock, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name, p.id_utilisateur, p.prix, p.etat, p.date_maj, p.on_stock
+	$sql = "SELECT p.*, p.nom_".(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue'])." AS name
 		FROM peel_produits p
 		WHERE p.id_utilisateur = '" . intval($_GET['id_utilisateur']) . "' AND " . get_filter_site_cond('produits', 'p', true) . "
 		ORDER BY p.id ASC";
@@ -1642,6 +1720,7 @@ function affiche_liste_produits_fournisseur()
 				'etat_onclick' => 'change_status("produits", "' . $ligne['id'] . '", this, "'.$GLOBALS['administrer_url'] . '")',
 				'etat_src' => $GLOBALS['administrer_url'] . '/images/' . (empty($ligne['etat']) ? 'puce-blanche.gif' : 'puce-verte.gif'),
 				'on_stock' => $ligne['on_stock'],
+				'scale_stock' => $ligne['scale_stock'],
 				'stock_href' => get_current_url(false) . '?mode=stock&id=' . $ligne['id'],
 				'stock_src' => $GLOBALS['administrer_url'] . '/images/stock.gif',
 				'points' => $ligne['points'],
@@ -1650,6 +1729,12 @@ function affiche_liste_produits_fournisseur()
 				);
 			if(!empty($GLOBALS['site_parameters']['site_country_allowed_array'])) {
 				$tmpLigne['site_country'] = get_country_name($ligne['site_country']);
+			}		
+			if(!empty($ligne['on_information'])) {
+				$tmpLigne['on_information'] = $ligne['on_information'];
+			}
+			if(!empty($ligne['scale_stock'])) {
+				$tmpLigne['scale_stock'] = $ligne['scale_stock'];
 			}
 			$tpl_results[] = $tmpLigne;
 			$i++;

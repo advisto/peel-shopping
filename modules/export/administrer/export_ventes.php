@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: export_ventes.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: export_ventes.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_PEEL_ADMIN', true);
 include("../../../configuration.inc.php");
 necessite_identification();
@@ -59,10 +59,10 @@ if (!empty($_GET['mode']) && $_GET['mode']=="affiche_liste_clients_par_produit" 
 		$extra_sql = "AND id_statut_paiement = '" . intval($_GET["id_statut_paiement"]) . "'";
 	} else {
 		$extra_sql = "";
-	}
-	if (!empty($_POST['export_selected_order']) && !empty($_POST['order_id'])) {
+}
+if (!empty($_POST['export_selected_order']) && !empty($_POST['order_id'])) {
 		$sql_cond = "AND c.id IN (".implode(',', nohtml_real_escape_string($_POST['order_id'])).")";
-	} else {
+} else {
 		$sql_cond = "AND c." . word_real_escape_string($_GET["date_field"]) . ">='" . nohtml_real_escape_string($_GET["dateadded1"]) . "' AND c." . word_real_escape_string($_GET["date_field"]) . "<='" . nohtml_real_escape_string($_GET["dateadded2"]) . "' " . $extra_sql . "";
 	}
 	if (!empty($_GET['zone_id'])) {

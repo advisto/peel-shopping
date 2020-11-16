@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.inc.php 61973 2019-11-20 17:13:21Z sdelaporte $
+// $Id: configuration.inc.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	define('IN_PEEL', true);
 } else {
@@ -43,7 +43,7 @@ if (version_compare(PHP_VERSION, '5.1.2', '<')) {
 // - la déclaration default charset dans le .htaccess à la racine
 // - le format de stockage à changer en BDD
 // - l'encodage des fichiers PHP (qui sont par défaut depuis PEEL 6.0 en UTF8 sans BOM)
-define('PEEL_VERSION', '9.2.2');
+define('PEEL_VERSION', '9.3.0');
 if (!defined('IN_CRON')) {
 	define('GENERAL_ENCODING', 'utf-8'); // En minuscules. ATTENTION : Seulement pour développeurs avertis
 }
@@ -94,7 +94,9 @@ if($GLOBALS['site_parameters']['mysql_extension'] == 'mysqli' && !class_exists('
 	$GLOBALS['site_parameters']['mysql_extension'] = 'mysql';
 }
 
-$GLOBALS['ip_for_debug_mode'] = '';
+if(!isset($GLOBALS['ip_for_debug_mode'])) {
+	$GLOBALS['ip_for_debug_mode'] = '';
+}
 foreach(explode(',', str_replace(array(' ', ';'), array(',', ','), $GLOBALS['ip_for_debug_mode'])) as $this_ip_part) {
 	if (!empty($this_ip_part) && ($this_ip_part == '*' || strpos($_SERVER['REMOTE_ADDR'], $this_ip_part) === 0) && (!defined('PEEL_DEBUG') || PEEL_DEBUG)) {
 		if(!defined('PEEL_DEBUG')) {
@@ -457,7 +459,7 @@ if (!IN_INSTALLATION) {
 if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
 	// Initialisation de la devise utilisateur car pas encore définie
 	if (check_if_module_active('devises')) {
-		// On séléctionne de préférence la devise de référence du site - si pas active, alors on prend la première devise qu'on trouve en tenant compte de la variable position croissante
+		// On sélectionne de préférence la devise de référence du site - si pas active, alors on prend la première devise qu'on trouve en tenant compte de la variable position croissante
 		set_current_devise(vb($GLOBALS['site_parameters']['code']));
 	}
 	if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['code'])) {
@@ -476,7 +478,7 @@ if (empty($_SESSION['session_devise']) || empty($_SESSION['session_devise']['cod
 		}
 	}
 }
-if (!defined('IN_CRON') && !defined('IN_IPN') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
+if (!defined('IN_CRON') && !defined('IN_IPN') && !defined('IN_WEBSERVICE') && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') && strpos($GLOBALS['wwwroot'], 'https://') === 0 && strpos($_SERVER['PHP_SELF'], 'sites.php') === false && strpos($_SERVER['PHP_SELF'], 'ipn.php') === false && strpos($GLOBALS['wwwroot'], $_SERVER['HTTP_HOST']) !== false) {
 	// On accède en http et non pas en https à un site explicitement configuré en https
 	// Attention : on perd les POST si il y en avait, mais on ne veut pas pour des raisons de sécurité exclure le cas où il y aurait des POST
 	// On ne souhaite pas faire la redirection si le nom de domaine utilisé n'est pas le domaine principal. Il faut faire la redirection uniquement si le $_SERVER['HTTP_HOST'] est présent dans wwwroot
@@ -636,13 +638,25 @@ if (!isset($_SESSION['session_country_detected']) && !empty($_SERVER['REMOTE_ADD
 	$_SESSION['session_country_detected'] = $geoIP->geoIPCountryIDByAddr($_SERVER['REMOTE_ADDR']);
 	$geoIP->geoIPClose();
 	unset($geoIP);
+	
+	//On souhaite forcer une langue selon la localisation du visiteur
+	if (!empty($GLOBALS['site_parameters']['array_redirect_language_id']) && empty($_SESSION['session_utilisateur']['redirect_language_done'])) {
+		//On crée une variable de session pour s'assurer que le visiteur puisse changer de langue après le forçage et ne se retrouve pas dans une boucle
+		$_SESSION['session_utilisateur']['redirect_language_done'] = true;
+		//On regarde si le pays détecté correspond à celui définit dans la variable de configuration array_redirect_language_id
+		foreach ($GLOBALS['site_parameters']['array_redirect_language_id'] as $id_pays => $url_redirection) {
+			if($_SESSION['session_country_detected'] == $id_pays) {
+				//On redirige vers l'url définit dans la variable de configuration
+				redirect_and_die($url_redirection);
+			}
+		}
+	}
 }
 // Gestion de l'affichage de contenu spécifique en fonction du pays du visiteur. Cette fonction nécessite une mise en place spécifique en SQL et n'est pas standard.
 if(isset($_GET['site_country'])) {
 	// L'utilisateur souhaite voir la version du site correspondant au pays $_GET['site_country']
 	if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && a_priv('admin*')) {
-		// Condition par le passé pour afficher le select à des utilisateurs : l'utilisateur est géolocalisé dans un pays qui est autorisé pour lui permettre de choisir son pays ET l'utilisateur n'a pas de pays forcé dans peel_utilisateurs
-		// if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && !empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
+		// Condition par le passé pour afficher le select à des utilisateurs : l'utilisateur est géolocalisé dans un pays qui est autorisé pour lui permettre de choisir son pays ET l'utilisateur n'a pas de pays forcé dans peel_utilisateurs : if(!empty($GLOBALS['site_parameters']['site_country_modify_allowed_array']) && !empty($_SESSION['session_country_detected']) && in_array(strval($_SESSION['session_country_detected']), $GLOBALS['site_parameters']['site_country_modify_allowed_array']) && empty($_SESSION['session_utilisateur']['site_country'])) {
 		if(in_array(strval($_GET['site_country']), $GLOBALS['site_parameters']['site_country_allowed_array'])) {
 			// Le choix en GET est autorisé => on le prend
 			set_session_site_country(intval($_GET['site_country']));

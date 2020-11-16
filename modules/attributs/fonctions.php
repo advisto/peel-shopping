@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -43,11 +43,13 @@ function attributs_hook_product_set_configuration(&$params) {
 		$params['this']->configuration_total_original_price_attributs_ht = 0;
 		$params['this']->configuration_total_original_price_attributs_ht_without_reduction = 0;
 		$params['this']->configuration_attributs_description = "";
+		$params['this']->configuration_total_original_base_product_price_ht = 0;
 		// Traitement des attributs
 		if (!empty($params['attributs_list'])) {
 			$params['this']->configuration_attributs_description = affiche_attributs_form_part($params['this'], 'selected_text', null, null, null, null, null, $params['reseller_mode']);;
 			$params['this']->configuration_total_original_price_attributs_ht = vn($GLOBALS['last_calculation_additional_price_ht']);
 			$params['this']->configuration_total_original_price_attributs_ht_without_reduction = vn($GLOBALS['last_calculation_additional_price_ht_without_reduction']);
+			$params['this']->configuration_total_original_base_product_price_ht = vn($GLOBALS['last_calculation_product_base_price_ht']);
 		}
 	}
 }
@@ -188,7 +190,8 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 		}
 		$sql = "SELECT ".$sql_select." , na.id AS nom_attribut_id, na.nom_" . $_SESSION['session_langue'] . " AS nom, na.technical_code, na.type_affichage_attribut, na.mandatory, na.texte_libre, na.upload, na.show_description, a.descriptif_" . $_SESSION['session_langue'] . " AS descriptif, a.prix, a.prix_revendeur ".(check_if_module_active('product_references_by_options')?', a.reference':'').", na.disable_reductions, a.image
 			".$sql_from_and_where."
-			ORDER BY IF(na.position IS NULL,9999999,na.position) ASC, IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
+			".(!defined('IN_PEEL_ADMIN') && !empty($GLOBALS['site_parameters']['attribut_display_exclude'])? 'AND na.technical_code NOT IN ("'.implode('","', $GLOBALS['site_parameters']['attribut_display_exclude']).'")':'')."
+			ORDER BY IF(a.position IS NULL,9999999,a.position) ASC, a.descriptif_" . $_SESSION['session_langue'] . " ASC, na.nom_" . $_SESSION['session_langue'] . " ASC";
 		$query = query($sql);
 		while ($result = fetch_assoc($query)) {
 			if ($result['type_affichage_attribut'] == 3) {
@@ -196,9 +199,13 @@ function get_possible_attributs($product_id = null, $return_mode = 'rough', $get
 				$result['type_affichage_attribut'] = $GLOBALS['site_parameters']['type_affichage_attribut'];
 			}
 			$result['descriptif'] = StringMb::str_shorten_words($result['descriptif'], 50, " [...] ", false, false);
-			$call_module_hook = call_module_hook('result_possible_attributs', array('result'=>$result, 'produit_id' =>$product_id), 'array');
+			$call_module_hook = call_module_hook('result_possible_attributs', array('result' => $result, 'produit_id' =>$product_id), 'array');
 			if (!empty($call_module_hook['prix'])) {
 				$result['prix'] = $call_module_hook['prix'];
+			} elseif ($result['technical_code'] == 'percage' && !empty($attribut_and_options_filter_array[41][0])) {
+				$result['prix'] = $result['prix']+vn($GLOBALS['site_parameters']['extra_cost_attribut_nombre_trous']);
+				// Affichage des prix en HT
+				$GLOBALS['output_price'][] = 'Coût du perçage:' . fprix($result['prix'] / (1 + $product_object->tva / 100), true);
 			}
 			$possible_attributs[$product_id . '-' . $_SESSION['session_langue'] . '-' . $attributs_list][] = $result;
 		}
@@ -318,6 +325,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 	$output = '';
 	$GLOBALS['last_calculation_additional_price_ht'] = 0;
 	$GLOBALS['last_calculation_additional_price_ht_without_reduction'] = 0;
+	$GLOBALS['last_calculation_product_base_price_ht'] = 0;
 	// On récupère éventuellement les attributs sauvegardés qui devront être présélectionnés
 	$attributs_list_array = explode('§', vb($product_object->configuration_attributs_list));
 	foreach($attributs_list_array as $this_attributs_list) {
@@ -386,9 +394,9 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				} elseif ($reseller_mode && $this_attribut_infos['prix_revendeur'] != 0) {
 					$additional_price_ttc = vn($this_attribut_infos['prix_revendeur']);
 				} else {
-					$hook_additional_price_ttc = call_module_hook('attribut_price', array('this_attribut_infos'=>$this_attribut_infos, 'product_object' => $product_object), 'string');
+					$hook_additional_price_ttc = call_module_hook('attribut_price', array('this_attribut_infos' => $this_attribut_infos, 'product_object' => $product_object), 'array');
 					if (!empty($hook_additional_price_ttc)) {
-						$additional_price_ttc = vn($hook_additional_price_ttc);
+						$additional_price_ttc = vn($hook_additional_price_ttc['price']);
 					} else {
 						$additional_price_ttc = vn($this_attribut_infos['prix']);
 					}
@@ -400,8 +408,14 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 				}
 				$attribut_additional_price_ttc += $additional_price_ttc;
 				$additional_price_ht = $additional_price_ttc / (1 + $product_object->tva / 100);
+
+
 				// On garde en mémoire le calcul pour utilisation potentielle après exécution de cette fonction
-				if (!empty($update_last_calculation_additional_price_ht) && !in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
+				if (!empty($hook_additional_price_ttc['product_price_is_attribut_price_value'])) {
+					$GLOBALS['last_calculation_product_base_price_ht'] = $additional_price_ht;
+				} elseif (!empty($GLOBALS['site_parameters']['attribut_product_base_price']) && $GLOBALS['site_parameters']['attribut_product_base_price'] == $this_attribut_infos['technical_code']) {
+					$GLOBALS['last_calculation_product_base_price_ht'] = $additional_price_ht;
+				} elseif (!empty($update_last_calculation_additional_price_ht) && !in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
 					if (empty($this_attribut_infos['disable_reductions'])) {
 						// On somme le montant des attributs, qui sera ensuite ajouté au prix du produit. Ce montant attribut+produit sera sujet aux réductions éventuelles.
 						$GLOBALS['last_calculation_additional_price_ht'] += $additional_price_ht;
@@ -411,7 +425,9 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 					}
 				}
 				if ($additional_price_ttc != 0 && $show_additionnal_price) {
-					if (in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
+					if (!empty($GLOBALS['site_parameters']['attribut_product_base_price']) && $GLOBALS['site_parameters']['attribut_product_base_price'] == $this_attribut_infos['technical_code']) {
+						$price_text = ' / ' . $GLOBALS['STR_BASE_PRICE'].' : '.$product_object->format_prices($additional_price_ht, display_prices_with_taxes_active(), false, true, false);
+					} elseif (in_array($this_attribut_infos['technical_code'], vb($GLOBALS['site_parameters']['attribut_overcost_percent'], array()))) {
 						$price_text = ' + '.$additional_price_ht.'%';
 					} else {
 						if (empty($this_attribut_infos['disable_reductions'])) {
@@ -419,7 +435,7 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						} else {
 							$final_additional_price_ht = $additional_price_ht;
 						}
-						$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, true);
+						$price_text = $GLOBALS['STR_BEFORE_TWO_POINTS'] . ': ' . ($additional_price_ttc > 0?'+':'') . $product_object->format_prices($final_additional_price_ht, display_prices_with_taxes_active(), false, true, false);
 					}
 				} else {
 					$price_text = '';
@@ -471,7 +487,11 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 					$input_id = $form_id . '_custom_attribut' . $this_nom_attribut_id;
 					$input_name = 'attribut' . $this_nom_attribut_id . '_texte_libre';
 					$input_type = 'text';
-					$input_value = $preselected_value;
+					// Si on se trouve dans le récap commande ou la facture, qu'il s'agit de l'attribut personnalisable "longueur" et que le client n'a pas indiqué de valeur, on affiche la valeur par défaut de la fiche produit "taille_base"
+					if($display_mode == 'selected_text' && $this_attribut_infos['technical_code'] == 'longueur' && !$preselected_value && !empty($product_object->taille_base))
+						$input_value = $product_object->taille_base;
+					else
+						$input_value = $preselected_value;
 					if(StringMb::strpos($this_attribut_infos['technical_code'], 'date') === 0) {
 						$input_class = 'datepicker';
 					}
@@ -497,7 +517,8 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'image_src' => (!empty($this_thumb)?$GLOBALS['repertoire_upload'] . '/thumbs/' . $this_thumb:null),
 								'id' =>  'image_attribut_'. $this_attribut_id,
 								'j' =>  $j,
-								'issel' => in_array($this_value, $attributs_list_array)
+								'issel' => in_array($this_value, $attributs_list_array),
+								'additional_price_ht' => $additional_price_ht
 							);
 					} elseif ($type_affichage_attribut == 1) {
 						// Affichage sous forme de boutons radio
@@ -511,7 +532,8 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
-								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
+								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();',
+								'additional_price_ht' => $additional_price_ht
 							);
 					} elseif ($type_affichage_attribut == 2) {
 						// Affichage sous forme de checkbox
@@ -522,7 +544,8 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 								'id' =>  $form_id . '_custom_attribut' . $this_nom_attribut_id . '-' . $j,
 								'issel' => !empty($attributs_list_array) && in_array($this_value, $attributs_list_array),
 								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']) . $price_text,
-								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();'
+								'onclick' => $input_on_change.' update_product_price' . $save_suffix_id . '();',
+								'additional_price_ht' => $additional_price_ht
 							);
 					} elseif ($type_affichage_attribut == 4) {
 						// Affichage sous forme de lien
@@ -530,13 +553,26 @@ function affiche_attributs_form_part(&$product_object, $display_mode = 'table', 
 						$options[] = array(
 								'value' => $this_attribut_id,
 								'name' => 'custom_attribut[' . $this_nom_attribut_id . ']',
-								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif'])
+								'text' => StringMb::html_entity_decode_if_needed($this_attribut_infos['descriptif']),
+								'additional_price_ht' => $additional_price_ht
 							);
 					}
 					$max_label_length = max($max_label_length, StringMb::strlen(StringMb::html_entity_decode_if_needed(vb($this_attribut_infos['descriptif']))));
 				}
 				$j++;
 			}
+
+			// Mise en place du tri des attributs sur le détail produits
+			// Le but et d'avoir une liste d'option triée en fonction : 1. du prix 2. du texte
+			usort($options, function($a, $b) {
+				// Si le prix est identique entre deux options, on effectue un tri en fonction du texte de l'option
+				if($a['additional_price_ht'] == $b['additional_price_ht'])
+			   		return strcmp($a['text'], $b['text']);
+				// Si le prix est différent entre deux options, on effectue un tri en fonction du prix
+			   	else
+			    	return $a['additional_price_ht'] - $b['additional_price_ht'];
+			});
+
 			if(isset($type_affichage_attribut) && empty($combine_attribut)) {
 				$attributes_text_array[] = array(
 						'text' => $attribut_text,
@@ -729,13 +765,13 @@ function build_attr_var_js($attr_var_name, $attributs_infos_array, $form_id, $pr
 		} elseif ($this_attributs_infos['type_affichage_attribut'] == 1) {
 			// Affichage sous forme de boutons radio
 			$output .= '
-	radio = document.getElementById("' . $form_id . '").attribut' . $this_nom_attribut_id . ';
-	for (var i=0; radio && i<radio.length;i++) {
-		if (radio[i].checked) {
-			' . $attr_var_name . '+= "§"+radio[i].value;
-			break;
-		}
-	}';
+			jQuery("[name=\'attribut' . $this_nom_attribut_id . '\']").each(function (index) {
+				if (jQuery(this).is(\':checked\')) {
+				' . $attr_var_name . '+= "§"+jQuery(this).val();
+				}
+			});
+
+	';
 		} elseif ($this_attributs_infos['type_affichage_attribut'] == 2) {
 			// Affichage sous forme de checkbox
 			$output .= '

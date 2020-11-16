@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: fonctions.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: fonctions.php 64927 2020-11-05 10:46:25Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -83,7 +83,7 @@ function securityCodeCreate($code, $fileName, $noise_level = null, $noise_max_si
 		$y_rand = mt_rand(35, 55);
 		$f_rand = mt_rand(-30, 30);
 		$color = imagecolorallocate($image, mt_rand(30, 100), mt_rand(30, 100), mt_rand(30, 100));
-		imagettftext ($image, $fontSize, $f_rand, $x_rand, $y_rand, $color, $font, $code{$i});
+		imagettftext ($image, $fontSize, $f_rand, $x_rand, $y_rand, $color, $font, $code[$i]);
 	}
 	for($i = 1;$i <= $noise_level;$i++) {
 		// Boucle pour faire $noise_level points de $color

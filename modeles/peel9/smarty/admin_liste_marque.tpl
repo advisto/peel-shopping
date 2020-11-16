@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_liste_marque.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_liste_marque.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<table class="admin_liste_marque">
 	<tr><td colspan="8" class="entete">{$STR_ADMIN_MARQUES_TITLE}</td></tr>
 	<tr><td colspan="8"><p><img src="{$add_src}" width="16" height="16" alt="" class="middle" /><a href="{$href|escape:'html'}">{$STR_ADMIN_MARQUES_ADD_BRAND}</a></p></td></tr>

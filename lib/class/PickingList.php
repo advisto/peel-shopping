@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: PickingList.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: PickingList.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -22,7 +22,7 @@ require_once($GLOBALS['dirroot'] . "/lib/class/pdf/tcpdf.php");
  * @package PEEL
  * @author oodorizzi
  * @copyright Copyright (c) 2010
- * @version $Id: PickingList.php 61970 2019-11-20 15:48:40Z sdelaporte $
+ * @version $Id: PickingList.php 64741 2020-10-21 13:48:51Z sdelaporte $
  * @access public
  */
 class PickingList extends TCPDF {
@@ -36,7 +36,7 @@ class PickingList extends TCPDF {
 	{
 		global $dateAdded1, $dateAdded2;
 		// Police freesans gras 15
-		$this->SetFont('freesans', 'B', 15);
+		$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), 'B', 15);
 		$this->SetDrawColor(0, 80, 180);
 		$this->SetFillColor(230, 210, 0);
 		$this->SetTextColor(220, 50, 50);
@@ -68,20 +68,20 @@ class PickingList extends TCPDF {
 	 * Numéro de page
 	 *
 	 * @return
-	 */
 	function AddPage()
 	{
 		TCPDF::AddPage();
 		$y1 = 16;
 		$this->SetXY(0, $y1);
-		$this->SetFont("freesans", "B", 9);
+		$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "B", 9);
 		foreach(explode("\n", $this->PickingList_title) as $this_title) {
 			$this->Cell(0, 4, $this_title, 0, 0, "C");
 			$y1 = $y1 + 6;
 			$this->SetXY(0, $y1);
 		}
-		$this->SetFont("freesans", "", 8);
+		$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "", 8);
 	}
+	 */
 
 	/**
 	 * PickingList::FillDocument()
@@ -149,20 +149,20 @@ class PickingList extends TCPDF {
 			$this->SetFillColor(255, 255, 255);
 			// $this->Rect($x1, $y1 + 9, $w, min($h-9, $y_max - ($y1 + 9)), 'DF');
 			$this->SetTextColor(0, 0, 0); #Noir*/
-			$this->SetFont("freesans", "B", 10);
+			$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "B", 10);
 			$this->SetXY($x1 + 2, $y1 + 1.5);
 			$this->Cell($w-2, 6, $GLOBALS["STR_ORDER_NAME"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$commande['order_id']."       ".$GLOBALS["STR_DATE"].$GLOBALS["STR_BEFORE_TWO_POINTS"].": ".$date_commande);
 
 			$y1 = $y1 + 11;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("freesans", "B", 8);
+			$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "B", 8);
 			$this->Cell($w-2, 4, $GLOBALS["STR_SHIP_ADDRESS"].$GLOBALS["STR_BEFORE_TWO_POINTS"].":");
 
 			$y1 = $y1 + 5;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("freesans", "", 8);
+			$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "", 8);
 			foreach(explode("\n", $client) as $this_line) {
 				$this->Cell(0, 3, $this_line);
 				$y1 = $y1 + 3;
@@ -172,11 +172,11 @@ class PickingList extends TCPDF {
 			$y1 = $y1 + 2;
 			$this->SetXY($x1 + 2, $y1);
 
-			$this->SetFont("freesans", "B", 8);
+			$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "B", 8);
 			$this->Cell($w-2, 4, $GLOBALS['STR_LIST_PRODUCT'] . " :");
 			$y1 = $y1 + 4;
 
-			$this->SetFont("freesans", "", 8);
+			$this->SetFont(vb($GLOBALS['site_parameters']['pdf_font_family'], "freesans"), "", 8);
 			if (!empty($product_infos_array)) {
 				$i = 1;
 				foreach ($product_infos_array as $this_ordered_product) {
@@ -217,6 +217,9 @@ class PickingList extends TCPDF {
 			$k++;
 		}
 		$this->lastPage();
+		if(function_exists('set_pdf_signature')) {
+			set_pdf_signature($this);
+		}
 		$this->Output();
 	}
 }

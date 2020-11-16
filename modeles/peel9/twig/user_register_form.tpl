@@ -1,9 +1,9 @@
 {# Twig
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
@@ -145,6 +145,9 @@
 				<span class="enregistrementdroite"><input name="naissance" class="form-control datepicker" type="text" id="naissance" size="10" maxlength="10" value="{{ naissance|str_form_value }}" style="width:110px" /></span>
 			</div>
 	{% endif %}
+			<div class="hidden">
+				<span class="enregistrementdroite"><input type="text" class="form-control" id="form_verif" name="form_verif" value="" /></span>
+			</div>
 			<div class="enregistrement">
 				<span class="enregistrementgauche"><label for="telephone">{{ STR_TELEPHONE }}{% if mandatory_fields.telephone %} <span class="etoile">*</span>{% endif %}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 			<span class="enregistrementdroite"><input type="tel" class="form-control" id="telephone" name="telephone" value="{{ telephone|str_form_value }}" /></span>{{ telephone_error }}
@@ -288,7 +291,17 @@
 				</span>
 			</div>
 	{% endif %}
+	{{ hook_output }}
 	{% if (captcha) %}
+		{% if google_recaptcha_sitekey %}
+			 <div class="enregistrement">
+                <span class="enregistrementgauche"><label for="code">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
+                <span class="enregistrementdroite">
+                     <div class="g-recaptcha" data-sitekey="{{ google_recaptcha_sitekey }}" style="display:inline-block;"></div>
+                    <!--{$captcha.inside_form}-->
+                </span>
+            </div>   
+		{% else %}
 			<div class="enregistrement">
 			<span class="enregistrementgauche"><label for="code">{{ captcha.validation_code_txt }}{{ STR_BEFORE_TWO_POINTS }}:</label></span>
 				<span class="enregistrementdroite">
@@ -301,7 +314,10 @@
 				<input name="code" size="5" maxlength="5" type="text" class="form-control" id="code" value="{{ captcha.value|str_form_value }}" />
 			</span>{{ captcha.error }}
 			</div>
+		{% endif %}
 	{% endif %}
+	
+	
 		<p><span class="form_mandatory">(*) {{ STR_MANDATORY }}</span></p>
 		</div>
 		<table class="inscription_form_table">

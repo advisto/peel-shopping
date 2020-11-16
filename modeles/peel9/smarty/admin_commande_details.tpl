@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_commande_details.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_commande_details.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}<table class="main_table">
 	<tr>
 		<td class="entete" colspan="2">{$STR_ADMIN_COMMANDER_CREATE_OR_UPDATE_TITLE}</td>
@@ -18,6 +18,7 @@
 	<tr>
 		<td colspan="2">&nbsp;</td>
 	</tr>
+
 {if $action_name != "insere" && $action_name != "ajout"}
 	<tr>
 		<td colspan="2">
@@ -26,30 +27,64 @@
 					<td colspan="2">
 					{if $allow_display_invoice_link}
 							<p><b>{$STR_INVOICE|upper}{$STR_BEFORE_TWO_POINTS}:</b>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$facture_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_INVOICE} PDF</a>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$sendfacture_pdf_href|escape:'html'}" data-confirm="{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM|str_form_value}">{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL}</a>
+							<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$facture_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_INVOICE} PDF</a>
+							<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$sendfacture_pdf_href|escape:'html'}" data-confirm="{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL_CONFIRM|str_form_value}">{$STR_ADMIN_COMMANDER_SEND_PDF_BILL_BY_EMAIL}</a>
 						{if $is_module_factures_html_active}
 							- <a href="{$facture_html_href|escape:'html'}">{$STR_INVOICE} HTML</a>
 						{/if}
 							</p>
 					{else}
-						<div class="alert alert-info">{$STR_ADMIN_CREATE_BILL_NUMBER_BEFORE}</div>
+						{if !empty($STR_ADMIN_CREATE_BILL_NUMBER_BEFORE)}
+							<div class="alert alert-info">{$STR_ADMIN_CREATE_BILL_NUMBER_BEFORE}</div>
+						{/if}
 					{/if}
-						<p><b>{$bill_anchor|upper}{$STR_BEFORE_TWO_POINTS}:</b>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$bill_anchor} PDF</a>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$sendproforma_pdf_href|escape:'html'}" data-confirm="{$bill_send_pdf_anchor_confirm|str_form_value}">{$bill_send_pdf_anchor}</a>
-						</p>
+						{if empty($specific_pdf_fact_button)}
+							<b>{if !empty($button_group_title)}{$button_group_title|upper}{else}{$bill_anchor|upper}{/if}{$STR_BEFORE_TWO_POINTS}:</b>
+							<a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">
+								<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> {$bill_anchor}
+							</a>
+						{/if}
+							{if !empty($sendproforma_pdf_href)}
+								<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$sendproforma_pdf_href|escape:'html'}" data-confirm="{$bill_send_pdf_anchor_confirm|str_form_value}">{$bill_send_pdf_anchor}</a>
+							{/if}
+						
 						{if !empty($devis_pdf_href)}
 						<p><b>{$STR_QUOTATION|upper}{$STR_BEFORE_TWO_POINTS}:</b>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$devis_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_QUOTATION} PDF</a>
-							<img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$senddevis_pdf_href|escape:'html'}" data-confirm="{$STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM|str_form_value}">{$STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL}</a>
+							<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$devis_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_QUOTATION} PDF</a>
+							{if !empty($senddevis_pdf_href)}
+								<img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$senddevis_pdf_href|escape:'html'}" data-confirm="{$STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL_CONFIRM|str_form_value}">{$STR_ADMIN_COMMANDER_SEND_PDF_QUOTATION_BY_EMAIL}</a>
+							{/if}
 						</p>
 						{/if}
 					{if empty($disable_bdc)}
-						<p><b>{$STR_ORDER_FORM|upper}{$STR_BEFORE_TWO_POINTS}:</b> <img src="{$pdf_src|escape:'html'}" width="8" height="11" alt="" /> <a href="{$bdc_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_ORDER_FORM} PDF</a></p>
+						<p><b>{$STR_ORDER_FORM|upper}{$STR_BEFORE_TWO_POINTS}:</b> <img style="width:20px;" src="/images/logoPDF_small.png" alt="logo PDF" /> <a href="{$bdc_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">{$STR_ORDER_FORM} PDF</a></p>
+					{/if}
+					<div class="row">
+					{if !empty($specific_pdf_fact_button)}
+						<div class="col-md-3">
+							<a href="{$proforma_pdf_href|escape:'html'}" onclick="return(window.open(this.href)?false:true);">
+								{$bill_anchor}
+							</a>
+						</div>
 					{/if}
 					{if !empty($convert_bill_button)}
-						<p>{$convert_bill_button}</p>
+						<div class="col-md-3">
+						{$convert_bill_button}
+						</div>
+					{/if}
+					{if !empty($send_bill_by_mail)}
+						<div class="col-md-6">
+						{$send_bill_by_mail}
+						</div>
+					{/if}
+					</div>
+					{if !empty($message)}
+					<div class="row">
+						<div class="col-md-12">
+							<br />
+							{$message}
+						</div>
+					</div>
 					{/if}
 					{if $is_module_factures_html_active && empty($disable_html_bill)}
 						<form class="entryform form-inline" role="form" method="post" action="{$bdc_action|escape:'html'}">
@@ -86,9 +121,29 @@
 		</tr>
 	{/if}
 </table>
+
 	{if empty($information_on_this_order_disabled)}
-	<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
-		<table>
+	<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+		<table>	
+		{if empty($order_detail_fields_disable.montant_displayed_prix) && $montant_displayed_prix>0}
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="2" class="bloc"><h2>{$STR_ADMIN_COMMANDER_ORDER_TOTAL}{$STR_BEFORE_TWO_POINTS}</h2></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<div class="well">
+						{$STR_ADMIN_TOTAL_TTC_ALL_INCLUDE} : {$montant_displayed_prix} {$ttc_ht}
+							<br />
+						{$STR_ADMIN_INCLUDING_VAT} : {$amount_tva}
+							<br />
+						{$STR_ADMIN_TOTAL_HT_ALL_INCLUDE} : {$amount_ht} {$ht}
+					</div>
+				</td>
+			</tr>
+		{/if}
 			<tr>
 				<td colspan="2">&nbsp;</td>
 			</tr>
@@ -158,13 +213,13 @@
 				<td><input name="autocomplete_order_adresses_with_account_info" type="checkbox" /></td>
 			</tr>
 	{else}
-	<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
-	<table>
+	<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+	<table style="width:100%;">
 	{/if}
 {else}
 </table>
-<form class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
-	<table>
+<form id="facturation_form" class="entryform form-inline" role="form" method="post" action="{$action|escape:'html'}">
+	<table style="width:100%;">
 {/if}
 
 	{if empty($order_detail_fields_disable.numero)}
@@ -286,10 +341,6 @@
 			<td><input type="text" class="form-control" name="currency_rate" value="{$currency_rate|str_form_value}" /></td>
 		</tr>
 	{/if}
-		<tr>
-			<td>{$STR_ADMIN_COMMANDER_ORDER_TOTAL}{$STR_BEFORE_TWO_POINTS}:</td>
-			<td><b>{$montant_displayed_prix} {$ttc_ht}</b></td>
-		</tr>
 	{if isset($total_remise_prix)}
 		<tr>
 			<td>{$STR_ADMIN_COMMANDER_INCLUDING_DISCOUNT}{$STR_BEFORE_TWO_POINTS}:</td>
@@ -341,21 +392,25 @@
 				</select>
 			</td>
 		</tr>
-	{/if}
+	{/if}	
+		<tr>
+			<td class="title_label">{$STR_ORDER_SUSPECT}{$STR_BEFORE_TWO_POINTS}:</td>
+			<td><input value="1" {if {$order_suspect}==1} checked="checked"{/if} name="suspect" type="checkbox" /></td>
+		</tr>
 	{if empty($order_detail_fields_disable.commentaires)}
 		<tr>
 			<td colspan="2" class="title_label">{$STR_COMMENTS}{$STR_BEFORE_TWO_POINTS}:<br />
 				<textarea class="form-control" name="commentaires" style="width:100%" rows="5" cols="54">{$commentaires|trim}</textarea>
 			</td>
 		</tr>
-	{/if}
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+	{/if}
 	{if empty($order_detail_fields_disable.commentaires_admin)}
 		<tr>
 			<td colspan="2" class="title_label">{$STR_ADMIN_COMMENTS}{$STR_BEFORE_TWO_POINTS}:<br />
-				<textarea class="form-control" name="commentaires_admin" style="width:100%" rows="5" cols="54">{$commentaires_admin|trim}</textarea>
+				{$commentaires_admin|trim}
 			</td>
 		</tr>
 	{/if}
@@ -422,6 +477,7 @@
 		</tr>
 {/foreach}
 	{/if}
+	{$specific_field_form_part}
 	{foreach $specific_fields as $f}
 		<tr>
 			{if !empty($f.field_title)}
@@ -491,21 +547,7 @@
 				<input type="hidden" name="id" value="{$id|str_form_value}" />
 				<input type="hidden" name="id_utilisateur" value="{$id_utilisateur|str_form_value}" />
 				<input type="hidden" name="lang" value="{$lang|str_form_value}" />
-				<p><input id="nb_produits" type="hidden" name="nb_produits" value="{$nb_produits|str_form_value}" />
-{if !empty($get_mode)}
-	{if $get_mode == "insere" OR $get_mode == "ajout"}
-					<input type="submit" value="{$STR_ADMIN_UTILISATEURS_CREATE_ORDER|str_form_value}" class="btn btn-primary" />
-	{else}
-		{if $is_order_modification_allowed}
-					<input type="submit" value="{$STR_ADMIN_FORM_SAVE_CHANGES|str_form_value}" class="btn btn-primary" />
-		{else}
-					{$STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED}
-		{/if}
-	{/if}
-{else}
-					<input type="submit" value="{$STR_ADMIN_FORM_SAVE_CHANGES|str_form_value}" class="btn btn-primary" />
-{/if}
-				</p>
+				<p><input id="nb_produits" type="hidden" name="nb_produits" value="{$nb_produits|str_form_value}" /></p>
 	</div>
 {if $is_order_modification_allowed}
 	<div class="entete">{$STR_ADMIN_COMMANDER_ADD_PRODUCTS_TO_ORDER}</div>
@@ -533,12 +575,28 @@
 				"percent" : "0"
 			}
 			//--><!]]></script>
-		<p style="margin-top:0px;"><input value="{$STR_ADMIN_ADD_EMPTY_LINE|str_form_value}" name="add_product" class="btn btn-primary" type="button" onclick="add_products_list_line(arr0, '{$STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript:true:true:true}', 'order'); return false;" /> 
+		<p style="margin-top:0px;"><input value="{$STR_ADMIN_ADD_EMPTY_LINE|str_form_value}" name="add_product" class="btn btn-primary" type="button" onclick="add_products_list_line(arr0, '{$STR_ADMIN_COMMANDER_ADD_LINE_TO_ORDER|filtre_javascript:true:true:true}', 'order', null); return false;" /> 
 		{/if}
 		{$STR_ADMIN_COMMANDER_OR_ADD_PRODUCT_WITH_FAST_SEARCH}{$STR_BEFORE_TWO_POINTS}: <input type="text" class="form-control" id="suggestions_input" name="suggestions_input" style="width:200px" value="" onkeyup="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}', 'order', '#suggestions', 'products', '{$rpc_path}', '{$this_page}');" onclick="lookup(this.value, '{$id_utilisateur}', '{$zone_tva}', '{$devise}', '{$currency_rate}', 'order', '#suggestions', 'products', '{$rpc_path}', '{$this_page}');" /></p>
 		<div class="suggestions" id="suggestions"></div>
 	</div>
 {/if}
+<br />
+	<div class="center">
+{if !empty($get_mode)}
+	{if $get_mode == "insere" OR $get_mode == "ajout"}
+					<input type="submit" {if !empty($disable_submit_form)}onclick="return false;"{/if} id="submit_fact_form" value="{$STR_ADMIN_UTILISATEURS_CREATE_ORDER|str_form_value}" class="btn btn-primary" />
+	{else}
+		{if $is_order_modification_allowed}
+					<input type="submit" {if !empty($disable_submit_form)}onclick="return false;"{/if} id="submit_fact_form" value="{$STR_ADMIN_FORM_SAVE_CHANGES|str_form_value}" class="btn btn-primary" />
+		{else}
+					{$STR_ADMIN_COMMANDER_WARNING_EDITION_NOT_ALLOWED}
+		{/if}
+	{/if}
+{else}
+					<input type="submit" {if !empty($disable_submit_form)}onclick="return false;"{/if} id="submit_fact_form" value="{$STR_ADMIN_FORM_SAVE_CHANGES|str_form_value}" class="btn btn-primary" />
+{/if}
+	</div>
 </form>
 {if isset($parrainage_form)}
 <form class="entryform form-inline" role="form" method="post" action="{$parrainage_form.action}">

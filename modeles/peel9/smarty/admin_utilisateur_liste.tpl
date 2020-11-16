@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: admin_utilisateur_liste.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: admin_utilisateur_liste.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}
 {if isset($groupes_options_utilisateurs)}
 <div class="entete">{$STR_ADMIN_ASSIGN_UNASSIGN_USERS_DO_NOT_HAVE_GROUP}</div>
@@ -374,6 +374,9 @@
 			{/if}
 			</div>
 		{/if}
+		{if !empty($extra_search_field)}
+			{$extra_search_field}
+		{/if}
 		</div>
 		<div id="search_col" class="col-md-3 col-sm-3 col-xs-12 center pull-right" style="margin-top: 20px; margin-bottom: 20px">
 			<input type="hidden" name="mode" value="search" /><input type="submit" class="btn btn-primary" value="{$STR_SEARCH|str_form_value}" />
@@ -381,7 +384,7 @@
 	</div>
 </form>
 <div class="clearfix"></div>
-<form class="entryform form-inline" role="form" action="{$wwwroot}/modules/webmail/administrer/webmail_send.php" method="post" style="margin-top:10px">
+<form class="entryform form-inline" role="form" action="{$action|escape:'html'}" method="post" style="margin-top:10px">
 	<div class="entete">{$STR_ADMIN_UTILISATEURS_USERS_COUNT}{$STR_BEFORE_TWO_POINTS}: {$nbRecord}</div>
 	<div><span class="glyphicon glyphicon-plus"></span> <a href="{$administrer_url}/utilisateurs.php?mode=ajout">{$STR_ADMIN_UTILISATEURS_CREATE}</a></div>
 {if isset($results)}
@@ -457,8 +460,9 @@
 	<div class="center">
 		<input type="button" class="btn btn-info" onclick="if (markAllRows('tablesForm')) return false;" value="{$STR_ADMIN_CHECK_ALL|str_form_value}" />
 		<input type="button" class="btn btn-info" onclick="if (unMarkAllRows('tablesForm')) return false;" value="{$STR_ADMIN_UNCHECK_ALL|str_form_value}" />
-			&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-primary" type="submit" value="{$STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value}" />
-		<a class="btn btn-primary" href="{$export_client_href}">{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a></td>
+			&nbsp; &nbsp; &nbsp; &nbsp; <input class="btn btn-primary" name="send_email_to_selected" type="submit" value="{$STR_ADMIN_UTILISATEURS_SEND_EMAIL_TO_SELECTED_USERS|str_form_value}" />
+		<a class="btn btn-primary" href="{$export_client_href}">{$STR_ADMIN_MENU_WEBMASTERING_CLIENTS_EXPORT}</a>
+		<input class="btn alert-danger" type="submit" name="mode" value="{$STR_DELETE_SELECTION}">
 	</div>
 	<div class="center">{$link_multipage}</div>
 	<div class="alert alert-info">{$STR_ADMIN_UTILISATEURS_LIST_EXPLAIN}</div>

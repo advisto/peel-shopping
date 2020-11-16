@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: configuration.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: configuration.php 64741 2020-10-21 13:48:51Z sdelaporte $
 define('IN_INSTALLATION', 5);
 include("../configuration.inc.php");
 
@@ -92,7 +92,7 @@ $modules_fonctions_variable_array = array('devises' => 'fonctionsdevises', 'sips
 		'facebook_connect' => 'fonctionfacebookconnect', 'ariane_panier' => 'fonctionsarianepanier'
 		);
 set_configuration_variable(array('technical_code' => 'modules_fonctions_variable_array', 'string' => $modules_fonctions_variable_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
-$modules_no_library_load_array = array('sips', 'cmcic', 'bluepaid', 'fianet', 'fianet_sac', 'ogone', 'omnikassa', 'paybox', 'spplus', 'systempay', 'moneybookers', 'paypal',
+$modules_no_library_load_array = array('sips', 'cmcic', 'bluepaid', 'ogone', 'omnikassa', 'paybox', 'spplus', 'systempay', 'paypal',
 		'birthday', 'good_clients', 'facture_advanced', 'statistiques', 'expeditor', 
 		'chart', 'reseller_map', 'photodesk');
 set_configuration_variable(array('technical_code' => 'modules_no_library_load_array', 'string' => $modules_no_library_load_array, 'type' => 'array', 'site_id' => 0, 'origin' => 'modules'), true);
@@ -154,11 +154,9 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'facebook' => '/modules/facebook/fonctions.php', 
 		'facebook_connect' => '/modules/facebook_connect/fonctions.php', // Module de fonctionnalités facebook
 		'sign_in_twitter' => '/modules/sign_in_twitter/fonctions.php', // Module sign_in_twitter
-		'googlefriendconnect' => '/modules/googlefriendconnect/fonctions.php',
 		'openid' => '/modules/openid/fonctions.php', 
 		'cmcic' => '/modules/cmcic/cmcic.php',
 		'bluepaid' => '/modules/bluepaid/fonctions.php',
-		'fianet_sac' => '/modules/fianet_sac/fonctions.php',
 		'omnikassa' => '/modules/omnikassa/fonctions.php',
 		'paybox' => '/modules/paybox/fonctions.php',
 		'spplus' => '/modules/spplus/fonctions.php',
@@ -215,7 +213,6 @@ $modules_front_office_functions_files_array = array('url_rewriting' => '/modules
 		'captcha' => '/modules/captcha/fonctions.php',
 		'vacances' => '/modules/vacances/fonctions.php', // Module de gestion des vacances administrateur / fournisseurs
 		'newsletter' => '/modules/newsletter/peel/fonctions.php',
-		'direaunami' => '/modules/direaunami',
 		'factures' => '/modules/factures',
 		'export' => '/modules/export',
 		'picking' => '/modules/picking',

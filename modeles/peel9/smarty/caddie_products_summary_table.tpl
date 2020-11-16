@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: caddie_products_summary_table.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: caddie_products_summary_table.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}
 <div class="col-sm-12">
 	<div class="table-responsive">
@@ -143,6 +143,9 @@
 </div>
 {if $with_totals_summary}
 <div id="step2caddie" class="col-sm-6 pull-right">
+	{if !empty($tva_intracom_vat_exemption)}
+	<div class="alert alert-info">{$STR_VAT_EXEMPTION}{$STR_BEFORE_TWO_POINTS}: {$tva_intracom}</div>
+	{/if}
 	{if isset($pallet_count)}
 	<p>
 		<label>{$STR_TOTAL_PALETTE}{$STR_BEFORE_TWO_POINTS}:</label>
@@ -179,19 +182,19 @@
 		{$sool.prix}
 	</p>
 	{/if}
-	{if isset($transport)}
+	{if isset($transport) && empty($display_transport_caddie_products_summary_table)}
 	<p>
 		<label>{$transport.shipping_text} {$taxes_displayed}{$STR_BEFORE_TWO_POINTS}:</label> {if !empty($transport.shipping_not_set)}{$STR_SHIPPING_TO_BE_DETERMINED}{else}{$transport.prix}{/if}
 	</p>
 	{/if}
-	{if isset($micro)}
+	{if isset($ht_tva)}
 	<p>
 		<label>{$STR_TOTAL_HT}{$STR_BEFORE_TWO_POINTS}:</label>
-		{$micro.prix_th}
+		{$ht_tva.prix_ht}
 	</p>
 	<p>
 		<label>{$STR_VAT}{$STR_BEFORE_TWO_POINTS}:</label>
-		{$micro.prix_tva}
+		{$ht_tva.prix_tva}
 	</p>
 	{else}
 	<p>{$STR_NO_VAT_APPLIABLE}</p>

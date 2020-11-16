@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: user.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: user.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -274,7 +274,7 @@ function insere_utilisateur($frm, $password_already_encoded = false, $send_user_
 		if(isset($frm['specific_field_sql_set'][$this_field])) {
 			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
 			continue;
-		} elseif(in_array($this_field, array('newsletter', 'commercial'))) {
+		} elseif(in_array($this_field, array('newsletter', 'commercial', 'on_client_module'))) {
 			// Pour l'inscription à la newselleter et aux offres commercial il faut prendre en compte la checkbox décochée.
 			$frm[$this_field] = vn($frm[$this_field]);
 		} elseif($this_field == 'mot_passe' && isset($password_hash)) {
@@ -453,7 +453,7 @@ function maj_utilisateur(&$frm, $update_current_session = false, $test_mode = fa
 			$sql_fields_array[$this_field] = $frm['specific_field_sql_set'][$this_field];
 			continue;
 		} elseif(!isset($frm[$this_field])) {
-			if ($this_field == 'newsletter' || $this_field == 'commercial' || $this_field == 'access_history' || in_array($this_field, vb($GLOBALS['site_parameters']['user_extra_database_fields_array'],array()))) {
+			if ($this_field == 'newsletter' || $this_field == 'commercial' || $this_field == 'access_history' || $this_field == 'on_client_module' || in_array($this_field, vb($GLOBALS['site_parameters']['user_extra_database_fields_array'],array()))) {
 				// Ce sont les champs en checkbox du formulaire. Si pas coché, alors il faut mettre 0 en base de données.
 				$frm[$this_field] = 0;
 			} else {
@@ -775,7 +775,7 @@ function user_logout()
 
 	unset($_SESSION['table_infos']); // Variable d'optimisation du chargement des listes de tables
 	unset($_SESSION['table_fields_infos']); // Variable d'optimisation du chargement des listes de tables
-	
+
 	call_module_hook('user_logout', array());
 }
 
@@ -833,7 +833,7 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 			// On vérifie des paramètres du type twitter_id => user_id;
 			$parameters_check = true;
 			foreach($check_parameters_array as $this_key => $this_value) {
-				if($parameters[$this_key] != $this_value) {
+				if($user_infos['parameters'][$this_key] != $this_value) {
 					$parameters_check = false;
 					break;
 				}
@@ -856,7 +856,8 @@ function verifier_authentification($email_or_pseudo, $mot_passe, $user_id = null
 }
 
 /**
- * get_user_password_hash()
+ * Génère un hash du mot de passe avec un "sel" aléatoire incorporé sur les 6 premiers caractères.
+ * OU teste si le hash donné correspond bien à un mot de passe qu'on aura été consulter en base de données.
  *
  * @param string $password
  * @param string $tested_hash
@@ -885,6 +886,7 @@ function get_user_password_hash($password, $tested_hash = null, $password_given_
 	if ($tested_hash == null) {
 		$salt_hash = StringMb::substr(sha256(vb($GLOBALS['site_parameters']['sha256_encoding_salt']) . uniqid(mt_rand(), true)), 0, 6);
 	} else {
+		// On va récupérer le sel du hash, et l'utiliser pour générer le hash à partir du mot de passe connu, et regarder si le résultat final est identique au hash proposé
 		$salt_hash = StringMb::substr($tested_hash, 0, 6);
 	}
 	// add salt into text hash at pass length position and hash it
@@ -962,9 +964,10 @@ function getUsername($user_id)
  * @param integer $user_id Si vide, alors on renvoie les informations de l'utilisateur connecté
  * @param boolean $get_full_infos
  * @param boolean $skip_cache
+ * @param array $data contient des informations complémentaires sur l'utilisateur concerné. Ne sert actuellement que dans le hook
  * @return
  */
-function get_user_information($user_id = null, $get_full_infos = false, $skip_cache = false)
+function get_user_information($user_id = null, $get_full_infos = false, $skip_cache = false, $data = null)
 {
 	static $result_array;
 	$sql_cond = '';
@@ -976,27 +979,32 @@ function get_user_information($user_id = null, $get_full_infos = false, $skip_ca
 	}
 	$cache_id = md5($user_id.$sql_cond.($get_full_infos?'full':''));
 	if (!empty($user_id)) {
-		if (!isset($result_array[$cache_id]) || $skip_cache) {
-			$sql_cond = "(u.id_utilisateur = '" . intval($user_id) . "' OR u.email = '" . nohtml_real_escape_string($user_id) . "') AND " . get_filter_site_cond('utilisateurs', 'u') . "" . $sql_cond;
-			$sql = "SELECT *
-				FROM peel_utilisateurs u";
-			if($get_full_infos) {
-				$sql .= "
-				LEFT JOIN peel_utilisateur_connexions uc ON uc.user_id=u.id_utilisateur
-				WHERE " . $sql_cond . "
-				ORDER BY uc.date DESC
-				LIMIT 1";
-			} else {
-				$sql .= "
-				WHERE " . $sql_cond;
-			}
-			$qid = query($sql);
-			if($result_array[$cache_id] = fetch_assoc($qid)) {
-				// L'utilisateur a été trouvé, on complète les informations
-				$result_array[$cache_id]['parameters'] = unserialize(vb($result_array[$cache_id]['parameters']));
-				if(!empty($result_array[$cache_id]) && $get_full_infos) {
-					$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat'], 'user_infos' => $result_array[$cache_id]), 'array');
-					$result_array[$cache_id] = array_merge_recursive_distinct($result_array[$cache_id], $hook_result);
+		$hook_output = call_module_hook('get_user_information', array('user_id' => $user_id, 'data' => $data), 'array');
+		if (!empty($hook_output['user_information'])) {
+			$result_array[$cache_id] = $hook_output['user_information'];
+		} else {
+			if (!isset($result_array[$cache_id]) || $skip_cache) {
+				$sql_cond = "(u.id_utilisateur = '" . intval($user_id) . "' OR u.email = '" . nohtml_real_escape_string($user_id) . "') AND " . get_filter_site_cond('utilisateurs', 'u') . "" . $sql_cond;
+				$sql = "SELECT *
+					FROM peel_utilisateurs u";
+				if($get_full_infos) {
+					$sql .= "
+					LEFT JOIN peel_utilisateur_connexions uc ON uc.user_id=u.id_utilisateur
+					WHERE " . $sql_cond . "
+					ORDER BY uc.date DESC
+					LIMIT 1";
+				} else {
+					$sql .= "
+					WHERE " . $sql_cond;
+				}
+				$qid = query($sql);
+				if($result_array[$cache_id] = fetch_assoc($qid)) {
+					// L'utilisateur a été trouvé, on complète les informations
+					$result_array[$cache_id]['parameters'] = unserialize(vb($result_array[$cache_id]['parameters']));
+					if(!empty($result_array[$cache_id]) && $get_full_infos) {
+						$hook_result = call_module_hook('user_get_information_full', array('id' => $user_id, 'etat' => $result_array[$cache_id]['etat'], 'user_infos' => $result_array[$cache_id]), 'array');
+						$result_array[$cache_id] = array_merge_recursive_distinct($result_array[$cache_id], $hook_result);
+					}
 				}
 			}
 		}
@@ -1042,11 +1050,17 @@ function is_user_tva_intracom_for_no_vat($user_id = null)
 	if (!empty($user_id)) {
 		if ($user_infos = get_user_information($user_id)) {
 			// Pas de vérification trop stricte du numéro de TVA intracommunautaire pour éviter les problèmes liés à des formats différents
-			if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && StringMb::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($user_infos['intracom_for_billing']) && !is_numeric(StringMb::substr($user_infos['intracom_for_billing'], 0, 2)) && StringMb::substr(StringMb::strtoupper($user_infos['intracom_for_billing']), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $user_infos['intracom_for_billing'])) >= 7 && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $user_infos['intracom_for_billing'])) <= 14) {
-				// Utilisateur avec un n° de TVA intracom, en Europe mais pas dans le pays de référence de la boutique dont le code ISO sur 2 chiffres est dans "pays_exoneration_tva"
-				return true;
-			}
+			$intracom_for_billing = $user_infos['intracom_for_billing'];
 		}
+	}
+	if (!empty($_SESSION['session_caddie']->num_tva)) {
+		$intracom_for_billing = $_SESSION['session_caddie']->num_tva;
+	}
+	if(!empty($intracom_for_billing)) {
+		if (!empty($GLOBALS['site_parameters']['pays_exoneration_tva']) && StringMb::strlen($GLOBALS['site_parameters']['pays_exoneration_tva'])==2 && !empty($intracom_for_billing) && !is_numeric(StringMb::substr($intracom_for_billing, 0, 2)) && StringMb::substr(StringMb::strtoupper($intracom_for_billing), 0, 2) != $GLOBALS['site_parameters']['pays_exoneration_tva'] && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $intracom_for_billing)) >= 7 && StringMb::strlen(str_replace(array(' ', '_', '-', '.', ','), '', $intracom_for_billing)) <= 14) {
+			// Utilisateur avec un n° de TVA intracom, en Europe mais pas dans le pays de référence de la boutique dont le code ISO sur 2 chiffres est dans "pays_exoneration_tva"
+			return true;
+		}	
 	}
 	return false;
 }
@@ -1395,7 +1409,7 @@ function user_account_completion($user_infos) {
 */
 function delete_address($id_address, $user_id) {
 	$output = '';
-	$hook_result = call_module_hook('address_delete_pre', array('id_address'=>$id_address, 'user_id'=>$user_id), 'boolean');
+	$hook_result = call_module_hook('address_delete_pre', array('id_address' => $id_address, 'user_id' => $user_id), 'boolean');
 	if (!empty($hook_result)) {
 		// La suppression est autorisé
 		$sql = 'DELETE FROM peel_adresses

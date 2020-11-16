@@ -1,16 +1,16 @@
 {* Smarty
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: produits.tpl 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: produits.tpl 64741 2020-10-21 13:48:51Z sdelaporte $
 *}{if $is_associated_product}
 	{if $associated_product_multiple_add_to_cart && $prods_line_mode} 
 		<form action="{$wwwroot}/achat/caddie_ajout.php?multiprodid=true" method="post" enctype="multipart/form-data" role="form"> 
@@ -35,7 +35,7 @@
 {if $no_results}{if isset($no_results_msg)}<p>{$no_results_msg}</p>{/if}
 {else}
 <div class="col-md-12">
-	<div class="produits row {if $allow_order}allow_order{/if}">
+	<div class="produits row {if $allow_order}allow_order{/if} {if isset($product_overlay_in_category_page)}product_overlay_in_category_page{/if}">
 		{foreach $products as $prod}
 			{if $prods_line_mode}
 		<div class="col-sm-12">
@@ -103,7 +103,7 @@
 								<!-- Ajout au panier -->
 								{$prod.check_critere_stock}
 					{else}
-							<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+							<div property="offers" typeof="Offer" class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
 					{/if}
 				{/if}
 			{/if}
@@ -132,7 +132,7 @@
 							{if !empty($prod.img_new)}<div style="position:absolute;z-index:1;left:-17px;top:-10px;"><img style="border:none;" src="{$prod.img_new}" alt="new"></div>{/if}
 							<span class="image_zoom">
 							{if !empty($prod.image)}
-								<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>
+								<a property="url" title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image.src|escape:'html'}"{if $prod.image.width} width="{$prod.image.width}"{/if}{if $prod.image.height} height="{$prod.image.height}"{/if} alt="{$prod.image.alt|str_form_value}" /></a>
 								{if isset($prod.image.zoom)}
 									{if $prod.image.zoom.is_lightbox}
 								<span class="fc_zoom"><a href="{$prod.image.zoom.href|escape:'html'}" typeof="ImageObject" class="lightbox" onclick="return false;" title="{$prod.name|str_form_value}"><span class="glyphicon glyphicon-fullscreen"></span></a></span>
@@ -149,10 +149,21 @@
 							<a property="url" title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><span property="name">{$prod.name}</span></a>
 						</td>
 					</tr>
+					{if !empty($product_overlay_in_category_page)}
+						<tr>
+							<td>
+								{assign var="foo" value=0}
+								{while $foo < 5}
+									<span class="glyphicon glyphicon-star {if $foo >= $prod.avisnote}star-grey{/if}"></span>
+									{$foo = $foo +1}
+								{/while}
+							</td>
+						</tr>
+					{/if}
 					<tr>
 						<td>
-							{if !empty($prod.description) && empty($product_description_catalogue_disabled)}
-							<div class="description_text"><a href="{$prod.href|escape:'html'}">{$prod.description}</a></div>
+							{if !empty($prod.description) && empty($product_description_catalogue_disabled) && empty($product_overlay_in_category_page)}
+							<div property="url" class="description_text"><a href="{$prod.href|escape:'html'}">{$prod.description}</a></div>
 							{/if}
 							{if isset($prod.flash)}
 							<div class="alert alert-warning">{$prod.flash}</div>
@@ -161,7 +172,7 @@
 								{if !empty($prod.price_estimate)}
 									<div><b>{$str_estimate}{$STR_BEFORE_TWO_POINTS}:{$prod.price_estimate}</b></div>
 								{/if}
-								<div class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
+								<div property="offers" typeof="Offer" class="fc_prix">{if !empty($prod.on_estimate)}{$prod.on_estimate}{else}<span class="prix">&nbsp;</span>{/if}</div>
 							
 							{/if}
 						</td>
@@ -191,6 +202,24 @@
 				{/if}
 				</table>
 			</div>
+			{if isset($product_overlay_in_category_page)}
+				<div class="produit_catalogue_hover">
+					<div class="produit_catalogue_hover_bloc">
+						{if !empty($prod.image_second)}
+							<a title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><img property="image" src="{$prod.image_second.src|escape:'html'}"{if $prod.image_second.width} width="{$prod.image_second.width}"{/if}{if $prod.image_second.height} height="{$prod.image_second.height}"{/if} alt="{$prod.image_second.alt|str_form_value}" /></a>
+						{/if}
+						<div class="produit_catalogue_hover_sub">
+							<a property="url" title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}"><span property="name">{$prod.name}</span></a><br>
+							{if !empty($prod.description) && empty($product_description_catalogue_disabled)}
+							<div class="description_text"><a href="{$prod.href|escape:'html'}">{$prod.description|str_shorten:'190'}</a></div>
+							{/if}
+							<div class="produit_catalogue_hover_link">
+								<a property="url" title="{$prod.name|str_form_value}" href="{$prod.href|escape:'html'}">{$LANG.STR_MORE_DETAILS} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-play"></span></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			{/if}
 			{/if}
 			</div>
 			{if $prod.i%$nb_col_md==0}

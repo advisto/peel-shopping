@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: display.php 64929 2020-11-05 11:28:13Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -213,6 +213,9 @@ if (!function_exists('affiche_meta')) {
 			// Titre tout en majuscule et pas juste un ou deux mots => on passe en minuscule car sinon mauvais pour moteurs de recherche
 			$this_title = StringMb::strtolower($this_title);
 		}
+		if (!empty($this_title)) {
+			$GLOBALS['HTMLHead_title'] = $this_title;
+		}
 		if (!empty($GLOBALS['STR_TITLE_SUFFIX']) && empty($GLOBALS['site_parameters']['title_suffix_disable'])) {
 			foreach(explode(' ', $GLOBALS['STR_TITLE_SUFFIX']) as $this_word) {
 				if ((StringMb::strlen($this_word)<=2 || (StringMb::strpos(StringMb::strtolower($this_title), StringMb::strtolower($this_word)) === false && empty($GLOBALS['site_parameters']['title_suffix_skip_keyword_in_double']))) && StringMb::strlen($this_title . ' ' . $this_word) < 80) {
@@ -344,7 +347,7 @@ if (!function_exists('affiche_ariane')) {
 			}
 
 			if (defined('IN_CATALOGUE')) {
-				$other['txt'] .= affiche_arbre_categorie(vn($_GET['catid']), null, null, array());
+				$other['txt'] .= affiche_arbre_categorie(vn($_GET['catid']), null, null, array(), false, $use_short_name);
 				if($hidden) {
 					$other['hidden'] = affiche_arbre_categorie(vn($_GET['catid']), null, null, array(), true, $use_short_name);
 				}
@@ -483,7 +486,17 @@ if (!function_exists('affiche_ariane')) {
 			} elseif (defined('IN_STEP3')) {
 				$other['txt'] = $GLOBALS['STR_STEP3'];
 			} elseif (defined('IN_SEARCH_BRAND')) {
-				$other['txt'] = $GLOBALS['STR_SEARCH_BRAND'];
+				if (empty($_GET['id_cat']) && empty($_GET['id'])) {
+					if (empty($GLOBALS['site_parameters']['display_brand_category'])) {
+						$other['txt'] = $GLOBALS['STR_SEARCH_BRAND'];
+					} else {
+						$other['txt'] = $GLOBALS['STR_SEARCH_BRAND'];
+						$ariane['href'] = get_url('/achat/marque.php');
+					}
+				} else {
+					$ariane['href'] = get_url('/achat/marque.php');
+					$other['txt'] = get_brand_link_html(vn($_GET['id'])) . ' &gt; ' . affiche_arbre_categorie(vn($_GET['id_cat']), null, null, array(), false, false, null, vn($_GET['id']));
+				}
 			} elseif (defined('IN_PENSE_BETE')) {
 				$other['txt'] = $GLOBALS['STR_PENSE_BETE'];
 				$other['href'] = get_url('/modules/pensebete/voir.php');
@@ -539,7 +552,7 @@ if (!function_exists('affiche_filtre')) {
 				$urlcat_with_suffixe = get_product_category_url($id, $cat['categorie'], true, true);
 				// En cas d'ajout d'une option ici, il faut aussi ajouter le champ dans le tableau de vérification dans la fonction params_affiche_produits => if(!in_array($_GET['tri'], array('nom_fr', 'prix'))) {
 			} else {
-				$urlcat_with_suffixe = get_current_url(false) . '?';
+				$urlcat_with_suffixe = get_current_url(true, false, array('tri','sort')) . '?';
 			}
 			$tpl = $GLOBALS['tplEngine']->createTemplate('filtre.tpl');
 			
@@ -676,7 +689,11 @@ if (!function_exists('get_brand_description_html')) {
 	function get_brand_description_html($id_marque, $return_mode = false, $show_links_to_details = true)
 	{
 		$tpl = $GLOBALS['tplEngine']->createTemplate('brand_description_html.tpl');
-		$sql = "SELECT id, image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom
+		$sql = "SELECT id, image, description_" . $_SESSION['session_langue'] . " AS description, nom_" . $_SESSION['session_langue'] . " AS nom";
+		if (!empty($GLOBALS['site_parameters']['brand_description_details'])) {
+			$sql .= ", description_details";
+		}
+		$sql .= "
 			FROM peel_marques
 			WHERE etat=1" . (!empty($id_marque)?" AND id = '" . intval($id_marque) . "'":"") . " AND " . get_filter_site_cond('marques') ."
 			ORDER BY position ASC, nom ASC";
@@ -721,8 +738,25 @@ if (!function_exists('get_brand_description_html')) {
 				$tmpData = get_default_content($tmpData, intval($brand_object->id), 'marques');
 			}
 			correct_output($tmpData['description'], true, 'html', $_SESSION['session_langue']);
+			if (!empty($GLOBALS['site_parameters']['brand_description_details'])) {
+				$tmpData['description_details'] = $brand_object->description_details;
+			}
+			$tmpData['suggestion_description_details'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur']);
+			$tmpData['suggestion_description_details_waiting'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur'], 'waiting');
+
+            $tmpData['suggestion_commentaire_details'] = get_suggestion_commentaire_details(0, $brand_object->id, $_SESSION['session_utilisateur']);
+            $tmpData['suggestion_commentaire_details_waiting'] = get_suggestion_commentaire_details(0, $brand_object->id, $_SESSION['session_utilisateur'], 'waiting');
+            
+			if (!empty($tmpData['suggestion_description_details_waiting'])){
+				$suggest_description_details = $tmpData['suggestion_description_details_waiting']['description'];
+			} elseif (!empty($GLOBALS['site_parameters']['brand_description_details'])) {
+				$suggest_description_details = $brand_object->description_details;
+			}
+			$tmpData['suggestion_description_details_waiting_html'] = getTextEditor('suggest_description_details', 1170, 100, StringMb::html_entity_decode_if_needed(vb($suggest_description_details)));
+			
 			$tplData[] = $tmpData;
 		}
+		$tpl->assign('display_description_details', a_priv('admin*') || a_priv('util_sale'));
 
 		if (empty($tplData)) {
 			$tpl->assign('is_error', true);
@@ -739,6 +773,107 @@ if (!function_exists('get_brand_description_html')) {
 		}	
 	}
 }
+
+
+if (!function_exists('get_brand_title')) {
+	/**
+	 * get_brand_title()
+	 *
+	 * @param integer $id_marque
+	 * @param boolean $return_mode
+	 * @param boolean $show_links_to_details
+	 * @return
+	 */
+	function get_brand_title($id_marque, $return_mode = false, $show_links_to_details = true)
+	{
+		$tpl = $GLOBALS['tplEngine']->createTemplate('brand_description_html.tpl');
+		$sql = "SELECT id, image AS description, nom_" . $_SESSION['session_langue'] . " AS nom
+			FROM peel_marques
+			WHERE etat=1" . (!empty($id_marque)?" AND id = '" . intval($id_marque) . "'":"") . " AND " . get_filter_site_cond('marques') ."
+			ORDER BY position ASC, nom ASC";
+		$query = query($sql);
+		$tplData = array();
+		while ($brand_object = fetch_object($query)) {
+			if(!empty($id_marque) || empty($GLOBALS['site_parameters']['brand_list_products_count_skip'])) {
+				$sql2 = 'SELECT COUNT(*) AS nb_produits
+					FROM peel_produits
+					WHERE id_marque=' . intval($brand_object->id) . ' AND etat=1 AND nom_'.(!empty($GLOBALS['site_parameters']['product_name_forced_lang'])?$GLOBALS['site_parameters']['product_name_forced_lang']:$_SESSION['session_langue']).' != ""' . " AND " . get_filter_site_cond('produits');
+				$query2 = query($sql2);
+				$brand_products = fetch_assoc($query2);
+			} else {
+				$brand_products['nb_produits'] = 'N/A';
+			}
+			$tmpData = array('nom' => $brand_object->nom,
+				'display_brand' => true
+				);
+			$tmpData['admin_content'] = a_priv('admin_content');
+			if ($tmpData['admin_content']) {
+				$tmpData['admin_link'] = array('href' => $GLOBALS['administrer_url'] . '/marques.php?mode=modif&id=' . $brand_object->id, 'name' => $GLOBALS['STR_MODIFY_BRAND']);
+			}
+			$tmpData['small_width'] = $GLOBALS['site_parameters']['small_width'];
+			$tmpData['has_image'] = !empty($brand_object->image);
+			if ($tmpData['has_image']) {
+				$thumb_file = thumbs($brand_object->image, $GLOBALS['site_parameters']['small_width'], $GLOBALS['site_parameters']['small_height'], 'fit');
+				if(!empty($thumb_file)) {
+					$tmpData['image'] = array('href' => ($show_links_to_details ? get_url('/achat/marque.php', array('id' => $brand_object->id)) : ''),
+							'src' => $GLOBALS['repertoire_upload'] . '/thumbs/' . $thumb_file
+						);
+				}
+			}
+			$tmpData['href'] = ($show_links_to_details ? get_url('/achat/marque.php', array('id' => $brand_object->id)) : '');
+			// Nombre produits non affichée dans cette fonction
+			// $tmpData['nb_produits_txt'] = $brand_products['nb_produits'] . ' ' . $GLOBALS['STR_ARTICLES'];
+			// if(is_int($brand_products['nb_produits']) && $brand_products['nb_produits']<=1 && StringMb::strtolower(StringMb::substr($tmpData['nb_produits_txt'], -1)) == 's') {
+				// $tmpData['nb_produits_txt'] = StringMb::substr($tmpData['nb_produits_txt'], 0, StringMb::strlen($tmpData['nb_produits_txt'])-1);
+			// }
+
+			// Description non affichée dans cette fonction
+			// $tmpData['description'] = $brand_object->description;
+			// get_default_content remplace le contenu par la langue par défaut si les conditions sont réunies
+			if (!empty($GLOBALS['site_parameters']['get_default_content_enable'])) {
+				$tmpData = get_default_content($tmpData, intval($brand_object->id), 'marques');
+			}
+			// Description non affichée dans cette fonction
+			// correct_output($tmpData['description'], true, 'html', $_SESSION['session_langue']);
+			// $tmpData['description_details'] = $brand_object->description_details;		
+			// $tmpData['suggestion_description_details'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur']);
+			// $tmpData['suggestion_description_details_waiting'] = get_suggestion_description_details(0, $brand_object->id, $_SESSION['session_utilisateur'], 'waiting');
+			// if (!empty($tmpData['suggestion_description_details_waiting'])){
+				// $suggest_description_details = $tmpData['suggestion_description_details_waiting']['description'];
+			// } else {
+				// $suggest_description_details = $brand_object->description_details;
+			// }
+			// $tmpData['suggestion_description_details_waiting_html'] = getTextEditor('suggest_description_details', 1170, 100, StringMb::html_entity_decode_if_needed(vb($suggest_description_details)));
+			
+			$tmpData['nb_produits_txt'] = "";
+			$tmpData['description'] = "";
+			$tmpData['description_details'] = "";
+			$tmpData['suggestion_description_details'] = "";
+			$tmpData['suggestion_commentaire_details'] = array('description'=>'', 'date_insere'=>'', 'statut'=>'');
+			$tmpData['suggestion_commentaire_details_waiting_html'] = "";
+			$tmpData['suggestion_description_details_waiting'] = "";
+			$tmpData['suggestion_description_details_waiting_html'] = "";
+			
+			$tplData[] = $tmpData;
+		}
+		$tpl->assign('display_description_details', a_priv('admin*') || a_priv('util_sale'));
+
+		if (empty($tplData)) {
+			$tpl->assign('is_error', true);
+			$tpl->assign('error_header', $GLOBALS['STR_BRAND']);
+			$tpl->assign('error_content', $GLOBALS['STR_SEARCH_NO_RESULT_BRAND']);
+		} else {
+			$tpl->assign('is_error', false);
+			$tpl->assign('data', $tplData);
+		}
+		if ($return_mode) {
+			return $tpl->fetch();
+		} else {
+			echo $tpl->fetch();
+		}
+	}
+}
+
 
 if (!function_exists('get_categories_output')) {
 	/**
@@ -765,9 +900,12 @@ if (!function_exists('get_categories_output')) {
 			// on transforme le code technique en tableau
 			$technical_code = array($technical_code);
 			$technical_code_cache = implode('_',$technical_code); 
+		} elseif(is_array($technical_code) && !empty($technical_code)) {
+			$technical_code_cache = implode('_',$technical_code); 
 		}
 		$output = '';
 		$item_name_array = array();
+		//on ne souhaite pas générer un cache si technical_code est renseigné, car une liste restreinte spécifique sera aussi appliquée pour les autres visiteurs
 		if(empty($selected_item)) {
 			// use_admin_rights => Converti en chaine de caractère. strval retourne 1 si true, et vide '' si false ou null.
 			$cache_id = $location . '_' . $mode . '_' .  $display_mode . '_' . $add_indent .  '_' .  $_SESSION['session_langue'] . '_' . $GLOBALS['site_id'] . '_' . vb($input_name). '_'  . vb($input_name). '_' . vb($technical_code_cache)  . '_' . strval($use_admin_rights) . '_' . vb($text_max_length).'_' . vb($max_depth_allowed).'_' . vn($columns_if_related_display_mode).'_' . vb($parent_id). '_' . vb($exclude_id). '_' . vn($_SESSION['session_admin_multisite']);
@@ -791,7 +929,8 @@ if (!function_exists('get_categories_output')) {
 		} elseif($mode == 'rubriques') {
 			$sql = 'SELECT r.id, r.parent_id, r.nom_' . $_SESSION['session_langue'] . ' AS nom, etat
 				FROM peel_rubriques r
-				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'r.etat="1"' . (!empty($GLOBALS['site_parameters']['get_default_content_enable'])?"":" AND r.nom_" . $_SESSION['session_langue'] . " != ''")). ' AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', $use_admin_rights) . '				ORDER BY r.position ASC, nom ASC';
+				WHERE '.(defined('IN_PEEL_ADMIN') && $use_admin_rights?'1':'r.etat="1"'). (!empty($GLOBALS['site_parameters']['get_default_content_enable'])?"":" AND r.nom_" . $_SESSION['session_langue'] . " != ''") . ' AND r.technical_code NOT IN ("other", "iphone_content") AND r.position>=0 AND ' . get_filter_site_cond('rubriques', 'r', $use_admin_rights) . '
+				ORDER BY r.position ASC, nom ASC';
 			if(!empty($GLOBALS['site_parameters']['content_categories_nb_limit_footer'])){
 				$sql .=' LIMIT '.$GLOBALS['site_parameters']['content_categories_nb_limit_footer'];
 			}
@@ -1064,7 +1203,7 @@ if (!function_exists('print_rib')) {
 				$tplData[] = array('label' => $GLOBALS['STR_DOMICILIATION'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $ligne->domiciliation);
 			}
 			if (!empty($ligne->iban)) {
-				$tplData[] = array('label' => $GLOBALS['STR_IBAN'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $ligne->iban);
+				$tplData[] = array('label' => $GLOBALS['STR_IBAN'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => chunk_split(str_replace(' ', '', $ligne->iban), 4, ' '));
 			}
 			if (!empty($ligne->swift)) {
 				$tplData[] = array('label' => $GLOBALS['STR_SWIFT'] . $GLOBALS['STR_BEFORE_TWO_POINTS'], 'value' => $ligne->swift);
@@ -1288,6 +1427,7 @@ if (!function_exists('print_compte')) {
 					$modules_data['cart']['product_ordered_history'] = array('txt' => '<span class="fa fa-cart-arrow-down fa-5x"></span><br />' . $GLOBALS['STR_PRODUCTS_PURCHASED_LIST'], 'href' => get_url(	'/achat/historique_commandes.php', array('mode' => 'product_ordered_history')));
 				}
 			}
+			
 			if (!empty($GLOBALS['site_parameters']['enable_create_product_in_front'])) {
 				$modules_data_group['catalog'] = array('header' => $GLOBALS['STR_CATALOGUE'], 'position' => 6);
 				$modules_data['catalog']['create_product'] = array('txt' => '' . $GLOBALS['STR_MODULE_CREATE_PRODUCT_IN_FRONT_OFFICE_CREATE_PRODUCT'], 'href' => get_content_url(null, null, null, null, false, false, 'display_product_form'));
@@ -1299,6 +1439,7 @@ if (!function_exists('print_compte')) {
 			if(empty($GLOBALS['site_parameters']['user_multiple_addresses_disable'])) {
 				$modules_data['account']['adresse'] = array('txt' => '<span class="fa fa-location-arrow fa-5x"></span><br />' . $GLOBALS['STR_ADDRESS_TEXT'], 'href' => get_url('/utilisateurs/adresse.php'));	
 			}
+			
 
 			if (!empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
 				$sql = "SELECT products_list_name, saved_products_list_id
@@ -1363,7 +1504,6 @@ if (!function_exists('print_compte')) {
 			$hook_result = call_module_hook('account_show', $user_infos, 'array');
 			$modules_data = array_merge_recursive_distinct($modules_data, vb($hook_result['modules_data'], array()));
 			$modules_data_group = array_merge_recursive_distinct($modules_data_group, vb($hook_result['modules_data_group'], array()));
-
 			if(!empty($modules_data)) {
 				$position_if_null = 100000;
 				foreach(array_keys($modules_data_group) as $this_group) {
@@ -1861,6 +2001,7 @@ if (!function_exists('affiche_footer')) {
 			$tpl->assign('footer_additional_link', vb($GLOBALS['site_parameters']['get_footer_additional_link']));
 		}
 		$tpl->assign('STR_SITE_GENERATOR', $GLOBALS['STR_SITE_GENERATOR']);
+		$tpl->assign('STR_YEARS', date('Y'));
 		if ($return_mode) {
 			return $tpl->fetch();
 		} else {
@@ -1953,7 +2094,7 @@ if (!function_exists('affiche_compte')) {
 				$tpl->assign('admin', array('href' => $GLOBALS['administrer_url'] . '/index.php', 'txt' => $GLOBALS['STR_ADMINISTRATION']));
 			}
 			if (!empty($GLOBALS['site_parameters']['quick_add_product_from_search_page'])) {
-				$tpl->assign('quick_add_product_from_search_page_href', $GLOBALS['wwwroot'] . '/search.php?type=quick_add_product_from_search_page');
+				$tpl->assign('quick_add_product_from_search_page_href', get_url('search') . '?type=quick_add_product_from_search_page');
 			}
 			$tpl->assign('STR_HELLO', $GLOBALS['STR_HELLO']);
 			$tpl->assign('STR_COMPTE', $GLOBALS['STR_COMPTE']);
@@ -1978,13 +2119,13 @@ if (!function_exists('affiche_compte')) {
 			if (empty($GLOBALS['site_parameters']['disable_register_button_on_login_form'])) {
 				$url_enregistrement = get_account_register_url(false, false);
 				$tpl->assign('enregistrement_href', $url_enregistrement);
-				$tpl->assign('enregistrement_lbl', $GLOBALS['STR_OPEN_ACCOUNT']);
+				$tpl->assign('enregistrement_lbl', (empty($GLOBALS['STR_OPEN_ACCOUNT'])?$GLOBALS['STR_FIRST_REGISTER_TITLE']:$GLOBALS['STR_OPEN_ACCOUNT']));
 			}
 			if (!empty($GLOBALS['site_parameters']['register_button_on_reseller_form'])) {
 				$tpl->assign('enregistrement_reseller_href', $GLOBALS['wwwroot'].'/modules/reseller/retailer.php');
 				$tpl->assign('enregistrement_reseller_lbl', $GLOBALS['STR_OPEN_RESELLER_ACCOUNT']);
 			}
-			$tpl->assign('via_lbl', $GLOBALS['STR_VIA']);
+			$tpl->assign('via_lbl', vb($GLOBALS['STR_VIA']));
 			if (function_exists('get_social_icone')) {
 				$tpl->assign('social_icone', get_social_icone());
 			}
@@ -2054,6 +2195,8 @@ if (!function_exists('getHTMLHead')) {
 		if (!empty($GLOBALS['site_parameters']['favicon'])) {
 			$tpl->assign('favicon_href', get_url_from_uploaded_filename($GLOBALS['site_parameters']['favicon']));
 		}
+		// Pour charger le captcha google
+		$tpl->assign('google_recpatcha', !empty($GLOBALS['site_parameters']['google_recaptcha_sitekey']));
 		if (empty($GLOBALS['site_parameters']['lightbox_disable']) || !empty($GLOBALS['lightbox_force'])) {
 			// Lightbox peut servir à différents endroits du logiciel. Si on est sûr qu'on ne s'en sert pas, on peut le désactiver avec disable_lightbox
 			$GLOBALS['css_files'][] = get_url('/lib/css/lightbox.css');
@@ -2159,49 +2302,12 @@ if (!function_exists('getHTMLHead')) {
 		// Compatibilité pour iOS
 		$(document).touchmove(function() { advisto_scroll() });
 		$(window).scroll(function() { advisto_scroll() });
-		function advisto_scroll() {
-			if ($(document).scrollTop() > 100) {
-				if($(".scroll_to_top").css("display") == "none") {
-					$(".scroll_to_top").stop(true, false).show(800);
-				}
-			} else if($(".scroll_to_top").css("display") != "none") {
-				$(".scroll_to_top").stop(true, false).hide(400);
-			}
-			$test_reach_bottom = $(window).scrollTop() + $(window).height();
-			if ($test_reach_bottom == $(document).height()) {
-				if($(".touch_bottom").css("display") != "none") {
-					$(".touch_bottom").stop(true, false).hide(400);
-				}
-			} else if($(".touch_bottom").css("display") == "none") {
-				$(".touch_bottom").stop(true, false).show(800);
-			}
-		}
 ';
 		}
-		if(!empty($GLOBALS['site_parameters']['main_menu_fixed'])) {
+		if(!empty($GLOBALS['site_parameters']['main_menu_fixed']) && !defined('IN_FAQ')) {
 			// Footer sur toutes les pages
-			$GLOBALS['js_ready_content_array'][] = '
-		// Compatibilité pour iOS
-			var stickyHeaderTop = $(".main_menu_wide").offset().top; // On calcule la différence entre le haut du menu et le haut de page
-		$(window).resize(function() { // Si on redimensionne la fenêtre, on refait le calcul précédent car la hauteur entre le haut de page et le haut du menu peut avoir changé
-			stickyHeaderTop = $(".main_menu_wide").offset().top;
-			console.log($(window).width());
-		});
-		$(document).touchmove(function() { advisto_menu_fixed() });
-		$(window).scroll(function() { advisto_menu_fixed() });
-		function advisto_menu_fixed() {
-			if( ($(window).scrollTop() > stickyHeaderTop) && ($(window).width() > 750) ) { // On change le css du menu pour fixed si on atteint le haut de celui ci en scrollant en excluant la résolution mobile car on aura à ce moment le menu burger
-				var main_content_offset = $(".main_menu_wide").height()+15;
-				console.log(main_content_offset);
-				$(".main_menu_wide").css({position: "fixed", top: "0px", width: "100%"});
-				$("#main_content").css({"margin-top": main_content_offset+"px"});
-			} else {
-				$(".main_menu_wide").css({position: "static", top: "0px"});
-				$("#main_content").css({"margin-top": "15px"});
+			$GLOBALS['js_ready_content_array'][] = get_sticky_element_js(".main_menu_wide", 'advisto_menu_fixed');
 			}
-		}
-';
-		}
 		if(!empty($GLOBALS['site_parameters']['images_preload_urls_array'])) {
 			foreach($GLOBALS['site_parameters']['images_preload_urls_array'] as $this_image_url) {
 				if (StringMb::strpos($this_image_url, '//') === false) {
@@ -2243,12 +2349,17 @@ if (!function_exists('getHTMLHead')) {
 		}
 		if(!empty($GLOBALS['site_parameters']['css'])) {
 			foreach (get_array_from_string($GLOBALS['site_parameters']['css']) as $this_css_file) {
+				$this_css_file = trim($this_css_file);
+				if (StringMb::strpos($this_css_file, '//') !== false) {
 					$GLOBALS['css_files'][] = $this_css_file;
+				} elseif(file_exists($GLOBALS['repertoire_modele'] . '/css/' . $this_css_file)) {
+					$GLOBALS['css_files'][] = get_url($GLOBALS['repertoire_css'] . '/' . $this_css_file);  // .'?'.time()
+				}
 			}
 		}
 		if ($page_name=="offline_site") {
 			// Lorsque l'on appel cette fonction dans le cron de génération de site statique, on veut pouvoir récupérer tous les fichiers CSS et JS pour pouvoir recréer ces fichiers dans un sous dossier du site statique.
-			return array('css'=>$GLOBALS['css_files'],'js'=>$GLOBALS['js_files']);
+			return array('css' => $GLOBALS['css_files'],'js' => $GLOBALS['js_files']);
 		}
 		$tpl->assign('css_files', get_css_files_to_load(!empty($GLOBALS['site_parameters']['minify_css']) && empty($_GET['page_offline'])));
 
@@ -2283,6 +2394,9 @@ if (!function_exists('getHTMLHead')) {
 				}
 			}
 		}
+
+		$hook_result = call_module_hook('html_head', array(), 'array');
+		$tpl->assign('html_head', $hook_result);
 
 		$hook_result = call_module_hook('front_html_header_template_data', array(), 'array');
 		foreach($hook_result as $this_key => $this_value) {
@@ -2330,18 +2444,23 @@ if (!function_exists('get_menu')) {
 			} else {
 				$GLOBALS['main_menu_items']['home'] = array($GLOBALS['wwwroot'] . '/' => $GLOBALS['STR_HOME']);
 			}
-			$GLOBALS['main_menu_items']['catalog'] = array(get_product_category_url() => $GLOBALS['STR_CATALOGUE']);
-			$GLOBALS['main_menu_items']['news'] = array(get_product_category_url() . 'nouveautes.php' => $GLOBALS['STR_NOUVEAUTES']);
-			$GLOBALS['main_menu_items']['content'] = array(get_content_category_url() => $GLOBALS["STR_INFORMATIONS"]);
-			$GLOBALS['main_menu_items']['other'] = array('#' => $GLOBALS["STR_OTHER"]);
-			$GLOBALS['main_menu_items']['faq'] = array(get_url('/modules/faq/faq.php') => $GLOBALS['STR_FAQ_TITLE']);
-			$GLOBALS['main_menu_items']['brand'] = array(get_url('/achat/marque.php') => $GLOBALS['STR_ALL_BRAND']);
-			$GLOBALS['main_menu_items']['contact_us'] = array(get_url('/contacts.php') => $GLOBALS["STR_CONTACT_INFO"]);
-			$GLOBALS['main_menu_items']['contact_form'] = array(get_url('/utilisateurs/contact.php') => $GLOBALS['STR_CONTACT_US']);
-			$GLOBALS['main_menu_items']['access_plan'] = array(get_url('/plan_acces.php') => $GLOBALS['STR_ACCESS_PLAN']);
-			$GLOBALS['main_menu_items']['flash'][get_url('/modules/flash/flash.php')] = $GLOBALS['STR_FLASH'];
-			$GLOBALS['main_menu_items']['promotions'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
-			$GLOBALS['main_menu_items']['reseller'][get_url('/modules/reseller/retailer.php')] = $GLOBALS['STR_RETAILER'];
+			if(empty($GLOBALS['site_parameters']['main_menu_items_standard_disable'])) {
+				$GLOBALS['main_menu_items']['catalog'] = array(get_product_category_url() => $GLOBALS['STR_CATALOGUE']);
+				$GLOBALS['main_menu_items']['news'] = array(get_product_category_url() . 'nouveautes.php' => $GLOBALS['STR_NOUVEAUTES']);
+				$GLOBALS['main_menu_items']['content'] = array(get_content_category_url() => $GLOBALS["STR_INFORMATIONS"]);
+				$GLOBALS['main_menu_items']['other'] = array('#' => $GLOBALS["STR_OTHER"]);
+				$GLOBALS['main_menu_items']['faq'] = array(get_url('/modules/faq/faq.php') => $GLOBALS['STR_FAQ_TITLE']);
+				$GLOBALS['main_menu_items']['brand'] = array(get_url('/achat/marque.php') => $GLOBALS['STR_ALL_BRAND']);
+				$GLOBALS['main_menu_items']['contact_us'] = array(get_url('/contacts.php') => $GLOBALS["STR_CONTACT_INFO"]);
+				$GLOBALS['main_menu_items']['contact_form'] = array(get_url('/utilisateurs/contact.php') => $GLOBALS['STR_CONTACT_US']);
+				$GLOBALS['main_menu_items']['access_plan'] = array(get_url('/plan_acces.php') => $GLOBALS['STR_ACCESS_PLAN']);
+				$GLOBALS['main_menu_items']['flash'][get_url('/modules/flash/flash.php')] = $GLOBALS['STR_FLASH'];
+				$GLOBALS['main_menu_items']['promotions'][get_product_category_url() . 'promotions.php'] = $GLOBALS['STR_PROMOTIONS'];
+				$GLOBALS['main_menu_items']['reseller'][get_url('/modules/reseller/retailer.php')] = $GLOBALS['STR_RETAILER'];
+			} else {
+				$GLOBALS['main_menu_items']['catalog'] = array();
+				$GLOBALS['main_menu_items']['news'] = array();
+			}
 			if (!empty($GLOBALS['site_parameters']['enable_create_product_in_front'])) {
 				$result = fetch_assoc(query("SELECT id FROM peel_categories WHERE technical_code = 'show_draft' AND etat = 1 AND " . get_filter_site_cond('categories') . ""));
 				if (!empty($result['id'])) {
@@ -2463,13 +2582,16 @@ if (!function_exists('get_menu')) {
 							// Si le lien n'est pas généré dans le menu pour une catégorie mère, il faut ajouter ce lien dans le sous menu pour que la catégorie mère reste accessible
 							// On utilise array_shift( array_keys() ) car array_keys()[0] n'est disponible qu'à partir de la version 5.4 de PHP
 							// array_shift() extrait la première valeur d'un tableau et la retourne, en raccourcissant le tableau d'un élément, et en déplaçant tous les éléments vers le bas. Toutes les clés numériques seront modifiées pour commencer à zéro.
-							$GLOBALS['submenu_html_array']["cat_".$catid] .= '<li><a href="'. array_shift(array_keys($GLOBALS['main_menu_items']["cat_".$catid])) . '">' . array_shift(array_values($GLOBALS['main_menu_items']["cat_".$catid])) . '</a></li>';
+							// On défini les variables $array_keys et $array_values si non il y a une erreur du type "Only variables should be passed by reference" 
+							$array_keys = array_keys($GLOBALS['main_menu_items']["cat_".$catid]);
+							$array_values = array_values($GLOBALS['main_menu_items']["cat_".$catid]);
+							$GLOBALS['submenu_html_array']["cat_".$catid] .= '<li><a href="'. array_shift($array_keys) . '">' . array_shift($array_values) . '</a></li>';
 						}
 						$GLOBALS['submenu_html_array']["cat_".$catid] .='</ul>';
 					}
 				}
 			}
-		} elseif (check_if_module_active('sauvegarde_recherche') && est_identifie()) {
+		} elseif (check_if_module_active('user_alerts') && est_identifie() && empty($GLOBALS['site_parameters']['display_ads_search_list_in_menu_disable'])) {
 			$GLOBALS['submenu_html_array']['catalog'] .= '<ul class="sousMenu dropdown-menu" role="menu">'.display_ads_search_list($_SESSION['session_utilisateur']['id_utilisateur'], true).'</ul>';
 		}
 		
@@ -2705,7 +2827,7 @@ if (!function_exists('get_menu')) {
 			// On ne prend que les menus demandés pour l'affichage
 			foreach ($this_main_array as $this_main_url => $this_main_title) {
 				// $this_main_url peut être vide, auquel cas il n'y aura pas de lien direct à partir du menu
-				if($avoid_links_when_hover && (!empty($GLOBALS['menu_items'][$this_main_item]) || !empty($GLOBALS['submenu_html_array'][$this_main_item]))) {
+				if($avoid_links_when_hover && !empty($this_main_url) && $this_main_url != '#' && (!empty($GLOBALS['menu_items'][$this_main_item]) || !empty($GLOBALS['submenu_html_array'][$this_main_item]))) {
 					// On retire le lien sur le menu principal pour le mettre sur un élément en haut du menu si pas existant
 					if(!empty($GLOBALS['menu_items'][$this_main_item]) && empty($GLOBALS['menu_items'][$this_main_item][$this_main_url])) {
 						$GLOBALS['menu_items'][$this_main_item] = array_merge(array($this_main_url => $this_main_title), $GLOBALS['menu_items'][$this_main_item]);
@@ -2893,8 +3015,11 @@ if (!function_exists('output_light_html_page')) {
 		if (empty($full_head_section_text) && $add_general_css_js_files) {
 			if(!empty($GLOBALS['site_parameters']['bootstrap_enabled'])) {
 				$GLOBALS['js_files'][-100] = get_url('/lib/js/jquery.js');
+				$GLOBALS['js_files'][-90] = get_url('/lib/js/jquery-ui.js');
+				$GLOBALS['css_files'][] = get_url('/lib/css/jquery-ui.css');
 				$GLOBALS['css_files'][] = get_url('/lib/css/bootstrap.css');
 				$GLOBALS['js_files'][] = get_url('/lib/js/bootstrap.js');
+				$GLOBALS['js_files'][-20] = get_url('/lib/js/advisto.js');
 			}
 			foreach (get_array_from_string($GLOBALS['site_parameters']['css']) as $this_css_filename) {
 				$this_css_file = trim($this_css_filename);
@@ -3131,7 +3256,7 @@ if (!function_exists('get_newsletter_form')) {
 		$tpl = $GLOBALS['tplEngine']->createTemplate('newsletter_form.tpl');
 		$tpl->assign('form_token', get_form_token_input('get_simple_newsletter', true));
 		$tpl->assign('label', $GLOBALS['STR_NEWSLETTER'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
-		$tpl->assign('default', $GLOBALS['STR_WRITE_EMAIL_HERE']);
+		$tpl->assign('default', $GLOBALS['STR_YOUR_EMAIL']);
 		$tpl->assign('value', $value);
 		return $tpl->fetch();
 	}
@@ -3179,12 +3304,17 @@ if (!function_exists('newsletter_validation')) {
 				$frm['priv'] = 'newsletter';
 				insere_utilisateur($frm);
 			}
+			// Si l'inscription à la newsletter se fait depuis le header, on envoi l'information dans le lien de confirmation
+			$url_add = '';
+			if(!empty($frm['form_newsletter_header'])) {
+				$url_add = '&from_header=1';
+			}
 			$custom_template_tags['EMAIL'] = $frm['email'];
 			// Envoi d'un email confirmant l'inscription à la newsletter
 			
 			// double optin pour l'inscription à la newsletter
 			$custom_template_tags['TYPE'] = $GLOBALS["STR_TO_NEWSLETTER"];
-			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter&email='.$frm['email'];
+			$custom_template_tags['CONFIRM_NEWSLETTER_REGISTER_LINK'] = $GLOBALS['wwwroot'].'/utilisateurs/newsletter.php?mode=subscribe_newsletter'.$url_add.'&email='.$frm['email'];
 			send_email($frm['email'], '', '', 'confirm_newsletter_registration',$custom_template_tags);
 
 			$message .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => $GLOBALS['STR_REQUEST_OK'] . ' ' . $GLOBALS['STR_SEE_YOU_SOON'] . ' ' . $GLOBALS['wwwroot'] . '/'))->fetch();
@@ -3198,6 +3328,26 @@ if (!function_exists('newsletter_validation')) {
 		}
 		$tpl->assign('message', $message);
 		return $tpl->fetch();
+	}
+}
+
+if (!function_exists('est_inscrit_newsletter')) {
+	/**
+	 * Permet de vérifier si un client est inscrit
+	 *
+	 * @param mixed $mail
+	 * @return
+	 */
+	function est_inscrit_newsletter($mail)
+	{
+		$q = query('SELECT id_utilisateur
+			FROM peel_utilisateurs
+			WHERE email = "' . nohtml_real_escape_string($mail) . '" AND ' . get_filter_site_cond('utilisateurs') . ' AND newsletter = "1"');
+		if ($data = fetch_assoc($q)) {
+			return $data['id_utilisateur'];
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -3255,7 +3405,7 @@ if (!function_exists('affiche_contenu_html')) {
 			$last_emplacement = $obj->emplacement;
 			$GLOBALS['affiche_contenu_html_last_found'] = true;
 		}
-		$zone_html_custom_template_tags = call_module_hook('zone_html_custom_template_tags', array(), 'array');
+		$zone_html_custom_template_tags = call_module_hook('zone_html_custom_template_tags', array('place' => $place), 'array');
 		if (!empty($custom_template_tags)) {
 			$custom_template_tags = array_merge($custom_template_tags, $zone_html_custom_template_tags);
 		} else {
@@ -3287,7 +3437,7 @@ if (!function_exists('addthis_buttons')) {
 				$share_item_array = $GLOBALS['site_parameters']['addthis_share_item_array'];
 			} else {
 				// Configuration par défaut
-				$share_item_array = array('twitter', 'google_plusone_share', 'facebook', 'pinterest_share');
+				$share_item_array = array('twitter', 'facebook', 'pinterest_share');
 			}
 		}
 		$output = '
@@ -3374,8 +3524,9 @@ if (!function_exists('get_diaporama')) {
 			// Erreur de paramétrage
 			return false;
 		}
-		$nb_colonnes = 3;
-		$j = 0;
+		$nb_colonnes_sm = 3;
+		$nb_colonnes_md = 6;
+		$j = 1;
 		$diapo = array();
 		$q = query("SELECT `image`
 			FROM `peel_diaporama`
@@ -3385,27 +3536,16 @@ if (!function_exists('get_diaporama')) {
 			$tmpdiapo['j'] =  $j;
 			$tmpdiapo['image'] =  get_url_from_uploaded_filename($img_diapo["image"]);
 			$tmpdiapo['thumbs'] = thumbs($img_diapo["image"], 175, 275, 'fit', null, null, true, true);
-			$tmpdiapo['is_row'] = ($j % $nb_colonnes == 0);
+			$tmpdiapo['is_row_sm'] = ($j % $nb_colonnes_sm == 0);
+			$tmpdiapo['is_row_md'] = ($j % $nb_colonnes_md == 0);
 			$j++;
-	
-			if ($j % $nb_colonnes == 0 || $j == $total_img) {
-				$tmpdiapo['empty_cells'] = 0;
-				if($j > $nb_colonnes) {
-					// On a déjà une ligne pleine => il faut compléter la dernière ligne pour du XTML bien structuré
-					while ($j % $nb_colonnes != 0) {
-						$tmpdiapo['empty_cells']++;
-						$j++;
-					}
-				} else {
-					// Une seule ligne => on ajuste le nombre de colonnes à la réalité de ce qu'on a affiché
-					$nb_colonnes = $j;
-				}
-			}
 			$diapo[] = $tmpdiapo;
 		}
 		if(count($diapo)) {
 			$GLOBALS['load_nyromodal']=true;
 			$tpl = $GLOBALS['tplEngine']->createTemplate('diaporama.tpl');
+			$tpl->assign('nb_colonnes_md', $nb_colonnes_md);
+			$tpl->assign('nb_colonnes_sm', $nb_colonnes_sm);
 			$tpl->assign('diaporama', $diapo);
 			return $tpl->fetch();
 		} else {
@@ -3430,6 +3570,7 @@ if (!function_exists('get_search_form')) {
 		$tpl_f->assign('value', $search);
 		$tpl_f->assign('match', $match);
 		$tpl_f->assign('match_display', empty($GLOBALS['site_parameters']['search_match_disable']));
+		$tpl_f->assign('search_by_country_disable', vb($GLOBALS['site_parameters']['search_by_country_disable']));
 		$tpl_f->assign('display', $display);
 		$tpl_f->assign('search', StringMb::strtoupper($real_search));
 		$tpl_f->assign('prix_min', vb($frm['prix_min']));
@@ -3614,6 +3755,7 @@ if (!function_exists('get_address_list')) {
 						<div>'.get_country_name($result['pays']).'</div>
 						<div>'.$result['portable'].'</div>
 						<div>'.$result['email'].'</div>
+						<div>'.$result['num_tva'].'</div>
 						<div style="margin-top:10px;">
 							<a class="btn btn-warning btn_p2" data-confirm="' . StringMb::str_form_value($GLOBALS["STR_DELETE_CONFIRM"]) . '" style="width:auto;" href="'.$url_delete.'" title="'.StringMb::str_form_value($GLOBALS['STR_DELETE']).'">'.$GLOBALS['STR_DELETE'].'</a>
 							<a class="btn btn-default btn_p2" href="'.$url_modify.'" title="'.StringMb::str_form_value($GLOBALS['STR_MODIFY']).'">'.$GLOBALS['STR_MODIFY'].'</a>
@@ -3634,4 +3776,44 @@ if (!function_exists('get_address_list')) {
 ';
 		return $output;
 	}
+}
+/*+
+ *
+ *
+ *
+ *
+*/
+function get_sticky_element_js($html_element, $fonction_name = 'advisto_menu_fixed', $bottom_element = null, $fixed_element_width = 100) {
+	$output = '
+		// Compatibilité pour iOS
+			var stickyHeaderTop = $("'.$html_element.'").offset().top; // On calcule la différence entre le haut du menu et le haut de page
+		$(window).resize(function() { // Si on redimensionne la fenêtre, on refait le calcul précédent car la hauteur entre le haut de page et le haut du menu peut avoir changé
+			stickyHeaderTop = $("'.$html_element.'").offset().top;
+			//console.log($(window).width());
+		});';
+		if(!empty($bottom_element)) {
+		$output .= '
+			// Compatibilité pour iOS
+				var stickyHeaderBottom = $("'.$bottom_element.'").offset().top; // On calcule la différence entre le haut du menu et le haut de page
+			$(window).resize(function() { // Si on redimensionne la fenêtre, on refait le calcul précédent car la hauteur entre le haut de page et le haut du menu peut avoir changé
+				stickyHeaderBottom = $("'.$bottom_element.'").offset().top;
+				//console.log($(window).width());
+			});';
+		}
+	$output .= '		
+		$(document).touchmove(function() { '.$fonction_name.'() });
+		$(window).scroll(function() { '.$fonction_name.'() });
+		function '.$fonction_name.'() {
+			if( ($(window).scrollTop() > stickyHeaderTop) && ($(window).width() > 750) '.(!empty($bottom_element)?' && ($(window).scrollTop() < stickyHeaderBottom)':'').') { // On change le css du menu pour fixed si on atteint le haut de celui-ci en scrollant en excluant la résolution mobile car on aura à ce moment le menu burger
+				var main_content_offset = $("'.$html_element.'").height()+15;
+				//console.log(main_content_offset);
+				$("'.$html_element.'").css({position: "fixed", top: "0px", width: "'.$fixed_element_width.'%"});
+				$("#main_content").css({"margin-top": main_content_offset+"px"});
+			} else {
+				$("'.$html_element.'").css({position: "static", top: "0px", width: "100%"});
+				$("#main_content").css({"margin-top": "15px"});
+			}
+		}
+';
+	return $output;
 }

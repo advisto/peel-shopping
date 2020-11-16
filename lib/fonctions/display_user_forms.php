@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: display_user_forms.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: display_user_forms.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -333,6 +333,10 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('enable_display_only_user_specific_field', !empty($GLOBALS['site_parameters']['enable_display_only_user_specific_field']));
 		$tpl->assign('specific_fields', get_specific_field_infos($frm, $form_error_object, 'user'));
 		if (check_if_module_active('captcha')) {
+			if (!empty($GLOBALS['site_parameters']['google_recaptcha_sitekey'])) {
+				$tpl->assign('captcha', array('validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE']));
+				$tpl->assign('google_recaptcha_sitekey', $GLOBALS['site_parameters']['google_recaptcha_sitekey']);
+			} else {
 			// L'appel à get_captcha_inside_form($frm) réinitialise la valeur de $frm['code'] si le code donné n'est pas bon, en même temps que générer nouvelle image
 			$tpl->assign('captcha', array(
 				'validation_code_txt' => $GLOBALS['STR_VALIDATION_CODE'],
@@ -341,6 +345,7 @@ if (!function_exists('get_user_register_form')) {
 				'error' => $form_error_object->text('code'),
 				'value' => vb($frm['code'])
 			));
+		}
 		}
 		
 		// Select permettant de paramétrer la langue par défaut du compte lors de l'envoi d'email
@@ -366,13 +371,25 @@ if (!function_exists('get_user_register_form')) {
 				$tpl->assign('logo', get_uploaded_file_infos("logo", $frm["logo"], get_current_url(false) . '?mode=supprfile&id=' . vb($_SESSION['session_utilisateur']['id_utilisateur']) . '&file=logo'));
 			}
 		}
+		if(!empty($GLOBALS['site_parameters']['register_form_force_newsletter_check'])) {
+		$tpl->assign('newsletter_issel', (!isset($frm['newsletter']) || !empty($frm['newsletter'])));
+		} else {
+			$tpl->assign('newsletter_issel', (!empty($frm['newsletter'])));
+		}
+		
+		if(!empty($GLOBALS['site_parameters']['register_form_force_commercial_check'])) {
+			$tpl->assign('commercial_issel', (!$form_error_object->count() || !empty($frm['commercial'])));
+			} else {
+			$tpl->assign('commercial_issel', !empty($frm['commercial']));
+			}
+		
+		
+		
 		$tpl->assign('STR_WEBSITE', $GLOBALS['STR_WEBSITE']);
 		$tpl->assign('language_for_automatic_emails_options', $language_for_automatic_emails_options);
 		$tpl->assign('language_for_automatic_emails_selected', $language_for_automatic_emails_selected);
 		$tpl->assign('STR_LANGUAGE_FOR_AUTOMATIC_EMAILS', $GLOBALS['STR_LANGUAGE_FOR_AUTOMATIC_EMAILS']);
-		$tpl->assign('newsletter_issel', (!empty($frm['newsletter'])));
 		$tpl->assign('newsletter_option_selected', vb($frm['newsletter_format']));
-		$tpl->assign('commercial_issel', (!empty($frm['commercial'])));
 		$tpl->assign('cnil_txt', StringMb::textEncode($GLOBALS['STR_CNIL']));
 		$tpl->assign('token', get_form_token_input('get_user_register_form', true));
 		$tpl->assign('js_password_control', js_password_control('mot_passe'));
@@ -388,7 +405,7 @@ if (!function_exists('get_user_register_form')) {
 			$tpl->assign('STR_FIRST_REGISTER_TITLE', $GLOBALS['STR_FIRST_REGISTER_TITLE']);
 			$tpl->assign('STR_FIRST_REGISTER_TEXT', $GLOBALS['STR_FIRST_REGISTER_TEXT']);
 			$tpl->assign('STR_OPEN_ACCOUNT', $GLOBALS['STR_OPEN_ACCOUNT']);
-			$tpl->assign('submit_text', $GLOBALS['STR_OPEN_ACCOUNT']);
+			$tpl->assign('submit_text', (empty($GLOBALS['STR_OPEN_ACCOUNT'])?$GLOBALS['STR_FIRST_REGISTER_TITLE']:$GLOBALS['STR_OPEN_ACCOUNT']));
 		}
 		$tpl->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		$tpl->assign('STR_EMAIL', $GLOBALS['STR_EMAIL']);
@@ -434,6 +451,8 @@ if (!function_exists('get_user_register_form')) {
 		$tpl->assign('STR_RECURRENT', $GLOBALS['STR_RECURRENT']);
 		$tpl->assign('STR_COPY_VERIFICATION_CODE', $GLOBALS['STR_COPY_VERIFICATION_CODE']);
 		$tpl->assign('hook_output', call_module_hook('user_register_form_additional_part', array('frm' => $frm, 'form_error_object' => $form_error_object), 'string'));
+		$tpl->assign('STR_USER_TYPE_OTHER', vb($GLOBALS['STR_USER_TYPE_OTHER']));
+		$tpl->assign('STR_USER_TYPE_ORGAN', vb($GLOBALS['STR_USER_TYPE_ORGAN']));
 		$hook_result = call_module_hook('user_register_form_template_data', array('frm' => $frm, 'form_error_object' => $form_error_object), 'array');
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
@@ -455,10 +474,13 @@ if (!function_exists('get_user_register_success')) {
 	function get_user_register_success(&$frm, $mode = null)
 	{
 		$output = '
-<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . StringMb::html_entity_decode_if_needed(vb($frm['pseudo'])) . '</h1>';
-		if ($mode=='retailer') {
+<h1 property="name" class="page_title">' . $GLOBALS['STR_HELLO'] . ' ' . StringMb::html_entity_decode_if_needed($frm['prenom']) . '</h1>';
+		if (!empty($GLOBALS['user_insert_existing_user'])) {
+			$output .= '<p>' . StringMb::nl2br_if_needed(sprintf($GLOBALS['STR_USER_ALREADY_EXISTS'], $frm['email'])) . '</p>';
+			unset($GLOBALS['user_insert_existing_user']);
+		} elseif ($mode=='retailer') { // $frm['priv']=='stop' :  $frm['priv'] n'est pas défini ici dans cette fonction
 			$output .= '<p>' . StringMb::nl2br_if_needed($GLOBALS['STR_MODULE_PREMIUM_MSG_RETAILER']) . '</p>';
-		} else  {
+		} else {
 			$output .= '<p>';
 			$output .= StringMb::nl2br_if_needed($GLOBALS['STR_LOGIN_OK']);
 			if (empty($GLOBALS['site_parameters']['user_double_optin_registration_disable'])) {
@@ -595,7 +617,7 @@ if (!function_exists('get_access_account_form')) {
 		$tpl->assign('pass_perdu_txt', $GLOBALS['STR_PASS_PERDU']);
 		$tpl->assign('pass_perdu_href', get_url('/utilisateurs/oubli_mot_passe.php'));
 		if (empty($GLOBALS['site_parameters']['pseudo_is_not_used'])) {
-			$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL_OR_PSEUDO'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL_OR_PSEUDO'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		} else {
 			$tpl->assign('email_or_pseudo', $GLOBALS['STR_EMAIL'] . $GLOBALS['STR_BEFORE_TWO_POINTS']);
 		}
@@ -769,6 +791,30 @@ if (!function_exists('get_contact_form')) {
 		foreach($hook_result as $this_key => $this_value) {
 			$tpl->assign($this_key, $this_value);
 		}
+		if (!empty($GLOBALS['STR_FP_TYPE_OF_EXPERIENCE'])) {
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_01', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_01']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_02', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_02']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_03', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_03']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_04', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_04']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_05', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_05']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_06', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_06']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_07', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_07']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_08', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_08']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_09', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_09']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_10', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_10']);
+		$tpl->assign('STR_FP_TYPE_OF_EXPERIENCE_11', $GLOBALS['STR_FP_TYPE_OF_EXPERIENCE_11']);
+		$tpl->assign('STR_FP_TYPE_OF_SAMPLE', $GLOBALS['STR_FP_TYPE_OF_SAMPLE']);
+		$tpl->assign('STR_FP_SAMPLE_ALREADY_INCLUED', $GLOBALS['STR_FP_SAMPLE_ALREADY_INCLUED']);
+		$tpl->assign('STR_FP_SAMPLE_ALREADY_INCLUED_01', $GLOBALS['STR_FP_SAMPLE_ALREADY_INCLUED_01']);
+		$tpl->assign('STR_FP_SAMPLE_ALREADY_INCLUED_02', $GLOBALS['STR_FP_SAMPLE_ALREADY_INCLUED_02']);
+		$tpl->assign('STR_FP_OTHER_INFORMATION', $GLOBALS['STR_FP_OTHER_INFORMATION']);
+		}
+		$tpl->assign('type_of_experience_value', vb($frm['type_of_experience'])==1?'':vb($frm['type_of_experience']));
+		$tpl->assign('type_of_samples_value', vb($frm['type_of_samples'])==1?'':vb($frm['type_of_samples']));
+		$tpl->assign('sample_already_inclued_value', vb($frm['sample_already_inclued'])==1?'':vb($frm['sample_already_inclued']));
+		$tpl->assign('other_information_value', vb($frm['other_information'])==1?'':vb($frm['other_information']));
+
 		$output .= $tpl->fetch();
 		return $output;
 	}
@@ -800,10 +846,10 @@ if (!function_exists('js_password_control')) {
 	 *
 	 * @return
 	 */
-	function js_password_control($field_id)
+	function js_password_control($field_id, $image_id = 'pwd_level_image')
 	{
 		$GLOBALS['js_ready_content_array'][] = '
-		set_password_image_level("' . filtre_javascript($field_id, true, false, true, true, false) . '","' . $GLOBALS['repertoire_images'] . '","' . filtre_javascript('pwd_level_image', true, false, true, true, false) . '",' . (!empty($GLOBALS['site_parameters']['bootstrap_enabled'])?'true':'false') . ');
+		set_password_image_level("' . filtre_javascript($field_id, true, false, true, true, false) . '","' . $GLOBALS['repertoire_images'] . '","' . filtre_javascript($image_id, true, false, true, true, false) . '",' . (!empty($GLOBALS['site_parameters']['bootstrap_enabled'])?'true':'false') . ');
 ';
 	}
 }
@@ -855,7 +901,7 @@ if (!function_exists('get_address_form')) {
 		}
 		$output .= '
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="name_adresse">' .$GLOBALS['STR_NAME']  . ' ' . StringMb::strtoupper($GLOBALS['STR_ADDRESS']) . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
+					<span class="enregistrementgauche"><label for="name_adresse">' .$GLOBALS['STR_NAME_ADDRESS'] .(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS']  . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="name_adresse" name="nom" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['nom']))).'" '.(!$in_admin?'required="required"':'').' /></span>
 				</div>
 				<div class="enregistrement">
@@ -908,6 +954,10 @@ if (!function_exists('get_address_form')) {
 					<span class="enregistrementgauche"><label for="code_postal">' . $GLOBALS['STR_ZIP'] . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="code_postal" name="code_postal" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['code_postal']))).'" '.(!$in_admin?'required="required"':'').' /></span>
 				</div>
+                <div class="enregistrement">
+					<span class="enregistrementgauche"><label for="num_tva">'.$GLOBALS["STR_INTRACOM_FORM"]. $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="num_tva" name="num_tva"  value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['num_tva']))).'"  /></span>
+				</div>                
 				<div class="enregistrement">
 					<span class="enregistrementgauche"><label for="ville">' . $GLOBALS['STR_TOWN'] . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="ville" name="ville" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['ville']))).'" '.(!$in_admin?'required="required"':'').' /></span>
@@ -921,12 +971,12 @@ if (!function_exists('get_address_form')) {
 					</span>
 				</div>
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_PORTABLE'] . ' '.(!$in_admin && empty($GLOBALS['site_parameters']['display_user_forms_required_portable_disabled'])?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
+					<span class="enregistrementgauche"><label for="portable">' . $GLOBALS['STR_PORTABLE'] . ' '.  (!$in_admin && empty($GLOBALS['site_parameters']['display_user_forms_required_portable_disabled'])?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
 					<span class="enregistrementdroite"><input type="text" class="form-control" id="portable" name="portable" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['portable']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" '.(!$in_admin && empty($GLOBALS['site_parameters']['display_user_forms_required_portable_disabled'])?'required="required"':'').' /></span>
 				</div>
 				<div class="enregistrement">
-					<span class="enregistrementgauche"><label for="telephone">' . $GLOBALS['STR_TELEPHONE'] . ' '.(!$in_admin?'<span class="etoile">*</span>':'').'' . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
-					<span class="enregistrementdroite"><input type="text" class="form-control" id="telephone" name="telephone" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['telephone']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" '.(!$in_admin?'required="required"':'').' /></span>
+					<span class="enregistrementgauche"><label for="telephone">' . $GLOBALS['STR_TELEPHONE'] . $GLOBALS['STR_BEFORE_TWO_POINTS'] . ':</label></span>
+					<span class="enregistrementdroite"><input type="text" class="form-control" id="telephone" name="telephone" value="'.StringMb::str_form_value(StringMb::html_entity_decode_if_needed(vb($frm['telephone']))).'" placeholder="'.StringMb::str_form_value(vb($GLOBALS['site_parameters']['form_placeholder_portable'])).'" /></span>
 				</div>
 				<p class="center" style="margin-top:10px"><input class="btn btn-primary btn-lg" type="submit" value="' . StringMb::str_form_value($GLOBALS["STR_VALIDATE"]) . '" /></p>
 			</fieldset>

@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: search.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: search.php 64741 2020-10-21 13:48:51Z sdelaporte $
 if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	if (substr($_SERVER['REQUEST_URI'], 0, 1) == '/' && substr($_SERVER['REQUEST_URI'], 3, 1) == '/' && substr($_SERVER['REQUEST_URI'], 1, 2) != 'js') {
 		// On a une langue dans l'URL en tant que premier répertoire
@@ -20,10 +20,14 @@ if (!empty($_GET['type']) && $_GET['type'] == 'error404') {
 	}
 	define('IN_404_ERROR_PAGE', true);
 	$GLOBALS['page_name'] = 'error404';
+	$_SERVER['REQUEST_URI'] = strip_tags($_SERVER['REQUEST_URI']);
 	if(in_array(substr($_SERVER['REQUEST_URI'],-4), array('.css', '.png', '.jpg', '.gif', '.txt', '.xml'))) {
 		// Fichier CSS demandé : aucun contenu envoyé
 		// En effet, si le dossier n'existe pas, on peut arriver ici malgré le .htaccess <FilesMatch "\.(gif|jpe?g|png|ico|xml|gz|zip|txt|js|css)$">	ErrorDocument 404 default </FilesMatch>
 		die();
+	}
+	if(strpos($_SERVER['REQUEST_URI'], '.pl?') !== false) {
+		$_SERVER['REQUEST_URI'] = '/';
 	}
 }
 if (defined('PEEL_PREFETCH')) {
@@ -96,6 +100,7 @@ $real_search = '';
 $GLOBALS['meta_title'] = '';
 $GLOBALS['meta_description'] = '';
 $GLOBALS['meta_keywords'] = '';
+$array_quality = '';
 
 if(!empty($_GET['latitude'])){
 	$_SESSION['session_latitude'] = floatval($_GET['latitude']);
@@ -103,10 +108,21 @@ if(!empty($_GET['latitude'])){
 if(!empty($_GET['longitude'])){
 	$_SESSION['session_longitude'] = floatval($_GET['longitude']);
 }
+
+	
+//On récupère les attributs de qualité du moteur de recherche spécifique en home page pour pouvoir également faire une recherche sur les champs de titre, description, descriptif d'un produit
+$quality_array = vb($_GET['quality_data'], array());
+foreach($quality_array as $this_quality) {
+	$array_quality[] = $this_quality;
+}
+if(!empty($array_quality)){
+	$search = implode(' ',$array_quality);
+}
+
 if (empty($search)) {
 	$search = '';
 	$terms = array();
-} elseif (StringMb::strlen($search) < 3) {
+} elseif (StringMb::strlen($search) < 3 && empty($array_quality)) {
 	if (get_current_url(false) != get_current_url(true)) {
 		// On n'autorise pas de recherche sur un seul caractère ou 2 caractères
 		// On prend une recherche vide à la place, mais en gardant la recherche sur les critères complémentaires
@@ -115,7 +131,7 @@ if (empty($search)) {
 	$search = '';
 	$terms = array();
 } else {
-	if (!empty($_GET['page']) && $_GET['page'] > 10 && StringMb::strpos($_SERVER['HTTP_USER_AGENT'], 'bingbot') !== false) {
+	if (!empty($_GET['page']) && $_GET['page'] > 10 && StringMb::strpos($_SERVER['HTTP_USER_AGENT'], 'bingbot') !== false && empty($array_quality)) {
 		// Si des données sont en GET (pas URL proprement réécrite sans aucun GET) : on n'autorise pas de recherche sur les pages > 10 de la part de bing car crawl trop agressif
 		if (get_current_url(false) != get_current_url(true)) {
 			redirect_and_die(get_current_url(false), true);
@@ -153,6 +169,7 @@ if($launch_search) {
 	}
 	
 	$tpl_r = $GLOBALS['tplEngine']->createTemplate('search_result.tpl');
+	$tpl_r->assign('filtre', affiche_filtre(null, true));
 	$tpl_r->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
 	$tpl_r->assign('STR_SEARCH_RESULT_PRODUCT', $GLOBALS['STR_SEARCH_RESULT_PRODUCT']);
 	$tpl_r->assign('STR_SEARCH_NO_RESULT_PRODUCT', $GLOBALS['STR_SEARCH_NO_RESULT_PRODUCT']);
@@ -177,6 +194,7 @@ if($launch_search) {
 			$tpl_r->assign('result_affichage_produit', $result_affichage_produit);
 			$tpl_r->assign('products_found', $GLOBALS['products_found']);
 			$tpl_r->assign('STR_PRODUCTS', $GLOBALS['STR_PRODUCTS']);
+			$tpl_r->assign('STR_CADDIE_OBJECTS_COUNT', $GLOBALS['STR_CADDIE_OBJECTS_COUNT']);
 		}
 	}
 	if (check_if_module_active('annonces') && (empty($GLOBALS['site_parameters']['search_types_array']) || in_array('ads', $GLOBALS['site_parameters']['search_types_array']))) {
@@ -189,7 +207,7 @@ if($launch_search) {
 		$tpl_r->assign('STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS', $GLOBALS['STR_MODULE_ANNONCES_SEARCH_NO_RESULT_ADS']);
 	}
 
-	if (vn($_GET['page'])<=1 && count($terms) > 0) {
+	if (vn($_GET['page'])<=1 && count($terms) > 0 && empty($array_quality)) {
 		// On ne recherche dans les articles & marques que si l'on a renseigné le champ texte
 		// Affichage sur la première page uniquement (pas de multipage)
 		$tpl_r->assign('are_terms', true);
@@ -202,6 +220,7 @@ if($launch_search) {
 			if($tpl_articles_found !== null) {
 				$tpl_r->assign('arts_found', $tpl_articles_found);
 				$tpl_r->assign('STR_ARTICLES', $GLOBALS['STR_ARTICLES']);
+				$tpl_r->assign('STR_ARTICLES_PLURAL_OPTIONAL', $GLOBALS['STR_ARTICLES_PLURAL_OPTIONAL']);
 			}
 		}
 		if(empty($GLOBALS['site_parameters']['search_types_array']) || in_array('brands', $GLOBALS['site_parameters']['search_types_array'])) {
@@ -209,12 +228,12 @@ if($launch_search) {
 			$tpl_brands_found = search_brands($terms, $match, $taille_texte_affiche);
 			if($tpl_brands_found !== null) {
 				$tpl_r->assign('brands_found', $tpl_brands_found);
-				$tpl_r->assign('STR_BRANDS', $GLOBALS['STR_BRANDS']);
+				$tpl_r->assign('STR_BRAND', $GLOBALS['STR_BRAND']);
 			}
 		}
 	}
 	// Résultats du hook : à renvoyer sous le format 'XXX(modulename)' => array('results' => $results_found, 'title' => $GLOBALS['STR_XXX_TITLE'], 'no_result' => null)
-	$GLOBALS['search_complementary_results_array'] = call_module_hook('search_complementary', array('frm' => $_GET, 'match' => $match, 'real_search' => $real_search, 'terms' => $terms, 'taille_texte_affiche' => $taille_texte_affiche, 'mode' => 'search', 'page' => vn($_GET['page'])), 'array');
+	$GLOBALS['search_complementary_results_array'] = (!empty($array_quality)?:call_module_hook('search_complementary', array('frm' => $_GET, 'match' => $match, 'real_search' => $real_search, 'terms' => $terms, 'taille_texte_affiche' => $taille_texte_affiche, 'mode' => 'search', 'page' => vn($_GET['page'])), 'array'));
 	if(!empty($GLOBALS['site_parameters']['search_complementary_found_sort_array'])) {
 		// Tri des thématiques de résultats si défini
 		// Le tableau search_complementary_found_sort_array peut être sous la forme 'type' => N, ...  ou simplement 'type1', 'type2', ...
@@ -267,6 +286,10 @@ $tpl->assign('result', vb($result));
 $tpl->assign('page', vn($_GET['page']));
 $tpl->assign('STR_SEARCH_HELP', $GLOBALS['STR_SEARCH_HELP']);
 $tpl->assign('STR_SEARCH_PRODUCT', $GLOBALS['STR_SEARCH_PRODUCT']);
+$tpl->assign('STR_NEW_SEARCH', $GLOBALS['STR_NEW_SEARCH']);
+if(function_exists('form_search_engine')) {
+	$tpl->assign('form_search_engine', form_search_engine('home'));
+}
 $output .= $tpl->fetch();
 
 include($GLOBALS['repertoire_modele'] . '/haut.php');
@@ -469,7 +492,7 @@ function search_brands_sql($terms, $fields, $match_method)
  */
 function search_brands($terms, $match, $taille_texte_affiche) {
 	// Recherche dans les marques : on teste d'abord si il existe des marques affichables
-	$tpl_brands_found = null;
+	$tpl_brands_found = array();
 	$sql = "SELECT id
 		FROM peel_marques m
 		WHERE m.etat = '1' AND m.nom_" . $_SESSION['session_langue'] . " != '' AND " . get_filter_site_cond('marques', 'm')  . "
@@ -604,7 +627,7 @@ function search_products($frm, $terms, $match, $real_search) {
 					}
 				}
 			}
-			$hook_result = call_module_hook('search_engine_attributs_lists', array('frm'=>$frm), 'array');
+			$hook_result = call_module_hook('search_engine_attributs_lists', array('frm' => $frm), 'array');
 			foreach($hook_result as $this_attribut_id) {
 				$attributs_array[intval($this_attribut_id)] = true;
 			}
@@ -640,9 +663,9 @@ function search_products($frm, $terms, $match, $real_search) {
 				$GLOBALS['search_attribut_array'] = array_unique($GLOBALS['search_attribut_array']);
 				$additional_sql_cond_array[] = "pat.produit_id IN (".implode(',', $product_ids_array).")";
 			}
-			$hook_result = call_module_hook('search_engine_additional_sql_cond', array('frm'=>$frm), 'array');
+			$hook_result = call_module_hook('search_engine_additional_sql_cond', array('frm' => $frm), 'array');
 			$additional_sql_cond_array = array_merge($additional_sql_cond_array,$hook_result);
-			$additional_sql_inner .= call_module_hook('search_engine_additional_inner', array('frm'=>$frm), 'string');
+			$additional_sql_inner .= call_module_hook('search_engine_additional_inner', array('frm' => $frm), 'string');
 			
 			// On recherche une éventuelle utilisation de la table peel_produits_attributs dans le tableau de condition SQL
 			foreach($additional_sql_cond_array as $this_condition) {
@@ -657,7 +680,7 @@ function search_products($frm, $terms, $match, $real_search) {
 				if (!empty($attributs_array)) {
 					$additional_sql_cond_array[] = 'pat.attribut_id IN (' . nohtml_real_escape_string(implode(',', array_keys($attributs_array))) . ')';
 					if(count($attributs_array)>1) {
-						$hook_result = call_module_hook('search_engine_nb_attributs_criterias', array('frm'=>$frm), 'integer');
+						$hook_result = call_module_hook('search_engine_nb_attributs_criterias', array('frm' => $frm), 'integer');
 						if (!empty($hook_result)) {
 							$nb_criterias = $hook_result;
 						} else {

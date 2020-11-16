@@ -1,14 +1,14 @@
 # +----------------------------------------------------------------------+
-# | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+# | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 # +----------------------------------------------------------------------+
-# | This file is part of PEEL Shopping 9.2.2, which is subject to an	 |
+# | This file is part of PEEL Shopping 9.3.0, which is subject to an	 |
 # | opensource GPL license: you are allowed to customize the code		 |
 # | for your own needs, but must keep your changes under GPL 			 |
 # | More information: https://www.peel.fr/lire/licence-gpl-70.html		 |
 # +----------------------------------------------------------------------+
 # | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	 |
 # +----------------------------------------------------------------------+
-# $Id: peel.sql 61970 2019-11-20 15:48:40Z sdelaporte $
+# $Id: peel.sql 64897 2020-11-03 15:18:28Z sdelaporte $
 #
 
 --
@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `peel_adresses` (
   `email` varchar(255) NOT NULL DEFAULT '',
   `longitude` varchar(255) NOT NULL DEFAULT '',
   `latitude` varchar(255) NOT NULL DEFAULT '',
+  `num_tva` varchar(255) NOT NULL DEFAULT '',
   `address_hash` varchar(2) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -221,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `peel_banniere` (
   `width` varchar(8) NOT NULL DEFAULT '',
   `height` varchar(8) NOT NULL DEFAULT '',
   `search_words_list` text NOT NULL,
-  `alt` varchar(255) DEFAULT NULL,
+  `alt` varchar(255) DEFAULT NULL DEFAULT '',
   `annonce_number` int(11) NOT NULL DEFAULT '0',
   `rang` int(10) DEFAULT NULL,
   `on_home_page` tinyint(1) NOT NULL DEFAULT '0',
@@ -440,6 +441,8 @@ CREATE TABLE IF NOT EXISTS `peel_commandes` (
   `delivery_tracking` mediumtext NOT NULL,
   `delivery_locationid` varchar(64) NOT NULL DEFAULT '',
   `moneybookers_payment_methods` varchar(50) NOT NULL DEFAULT '',
+  `num_tva` varchar(15) NOT NULL DEFAULT '',
+  `suspect` tinyint(1) NOT NULL DEFAULT '0',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),
   KEY `id_utilisateur` (`id_utilisateur`),
@@ -1392,6 +1395,8 @@ CREATE TABLE IF NOT EXISTS `peel_tarifs` (
   `tarif` float(10,2) NOT NULL DEFAULT '0.00',
   `type` int(11) NOT NULL DEFAULT '0',
   `zone` int(11) NOT NULL DEFAULT '0',
+  `on_franco` tinyint(1) NOT NULL DEFAULT '0',
+  `on_franco_amount` float(15,5) NOT NULL DEFAULT '0.00000',
   `tva` float(5,2) NOT NULL DEFAULT '0.00',
   `site_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`id`),

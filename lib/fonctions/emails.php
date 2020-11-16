@@ -1,16 +1,16 @@
 <?php
 // This file should be in UTF8 without BOM - Accents examples: éèê
 // +----------------------------------------------------------------------+
-// | Copyright (c) 2004-2019 Advisto SAS, service PEEL - contact@peel.fr  |
+// | Copyright (c) 2004-2020 Advisto SAS, service PEEL - contact@peel.fr  |
 // +----------------------------------------------------------------------+
-// | This file is part of PEEL Shopping 9.2.2, which is subject to an	  |
+// | This file is part of PEEL Shopping 9.3.0, which is subject to an	  |
 // | opensource GPL license: you are allowed to customize the code		  |
 // | for your own needs, but must keep your changes under GPL			  |
 // | More information: https://www.peel.fr/lire/licence-gpl-70.html		  |
 // +----------------------------------------------------------------------+
 // | Author: Advisto SAS, RCS 479 205 452, France, https://www.peel.fr/	  |
 // +----------------------------------------------------------------------+
-// $Id: emails.php 61970 2019-11-20 15:48:40Z sdelaporte $
+// $Id: emails.php 64743 2020-10-21 14:51:02Z sdelaporte $
 if (!defined('IN_PEEL')) {
 	die();
 }
@@ -34,9 +34,10 @@ if (!defined('IN_PEEL')) {
  * @param array $additional_infos_array contient des informations additionnelles pour d'éventuels hooks 
  * @param array $attachment_not_sent_by_email pour que la pièce jointe ne soit pas envoyé par email, mais pourra toujours être utilisée par une fonction hookable
  * @param boolean $filter_html_to_be_safe A activer si message envoyé par un utilisateur
+ * @param boolean $nom_expediteur Pour préciser le nom qui s'affichera comme expéditeur de l'email
  * @return
  */
-function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false, $filter_html_to_be_safe = false)
+function send_email($to, $mail_subject = '', $mail_content = '', $template_technical_code = null, $template_tags = null, $format = null, $sender = null, $html_add_structure = true, $html_correct_conformity = false, $html_convert_url_to_links = true, $reply_to = null, $attached_files_infos_array = null, $lang = null, $additional_infos_array = array(), $attachment_not_sent_by_email = false, $filter_html_to_be_safe = false, $nom_expediteur = null)
 {
 	$emails_force_delivery_technical_codes = array('user_double_optin_registration', 'new_message', 'warn_message_filtered', 'initialise_mot_passe', 'ifu_cerfa2561volet1', 'retenues_fiscales', 'edi_cerfa2561');
 	if($to == $GLOBALS['support'] || $to == $GLOBALS['support_sav_client'] || $to == $GLOBALS['support_commande']) {
@@ -72,23 +73,26 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	// En effet, la fonction send_mail ne peut pas servir à envoyer des emails avec des tags différents pour chaque destinataire, ceci doit être géré par ailleurs dans une boucle appelant send_email
 	// comme par exemple pour l'envoi de newsletter ou pour l'envoi d'emails par cron
 	// Si ici on a plusieurs destinataires, le second et suivants reçoivent une copie de l'email envoyé au premier destinataire
-	$sql = 'SELECT *
-		FROM peel_utilisateurs
-		WHERE email="' . real_escape_string(current($recipient_array)) . '"
-		LIMIT 1';
-	$query = query($sql);
+	if (empty($additional_infos_array['recipient_table']) || $additional_infos_array['recipient_table'] == 'peel_utilisateurs') {
+		$sql = 'SELECT *
+			FROM peel_utilisateurs
+			WHERE email="' . real_escape_string(current($recipient_array)) . '"
+			LIMIT 1';
+		$query = query($sql);
 
-	if($result = fetch_assoc($query)) {
-		foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
-			if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
-				$template_tags[$tag_key] = $result[$database_key];
+		if($result = fetch_assoc($query)) {
+			foreach(array('civilite' => 'GENDER', 'nom_famille' => 'NOM_FAMILLE', 'prenom' => 'PRENOM', 'pseudo' => 'PSEUDO') as $database_key => $tag_key) {
+				if(!isset($template_tags[$tag_key]) && isset($result[$database_key])) {
+					$template_tags[$tag_key] = $result[$database_key];
+				}
+			}
+			if(empty($for_admin_email) && empty($lang) && !empty($result['lang'])) {
+				// Email pour un utilisateur et non pas un administrateur => on veut utiliser par défaut la langue de l'utilisateur
+				$lang = $result['lang'];
 			}
 		}
-		if(empty($for_admin_email) && empty($lang) && !empty($result['lang'])) {
-			// Email pour un utilisateur et non pas un administrateur => on veut utiliser par défaut la langue de l'utilisateur
-			$lang = $result['lang'];
-		}
 	}
+	
 	if(empty($lang) || !in_array($lang, $GLOBALS['admin_lang_codes'])){
 		$lang = $_SESSION['session_langue'];
 	}
@@ -138,11 +142,14 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 	$mail_header .= "MIME-Version: 1.0" . $eol;
 	if (!empty($from)) {
 		// Au cas où $from ait plusieurs adresses emails (variable support par exemple)
-		if ($from == $GLOBALS['support'] && !empty($GLOBALS['site_parameters']['nom_expediteur'])) {
-			$email_name_rules = array("\r" => '', "\n" => '', "\t" => '', '"' => "'", ',' => '', '<' => '[', '>' => ']');
-			$nom_expediteur = strtr($GLOBALS['site_parameters']['nom_expediteur'], $email_name_rules);
-		} else {
-			$nom_expediteur = '';
+		if (empty($nom_expediteur)) {
+			// si le nom d'expéditeur passé en paramètre est vide
+			if ($from == $GLOBALS['support'] && !empty($GLOBALS['site_parameters']['nom_expediteur'])) {
+				$email_name_rules = array("\r" => '', "\n" => '', "\t" => '', '"' => "'", ',' => '', '<' => '[', '>' => ']');
+				$nom_expediteur = strtr($GLOBALS['site_parameters']['nom_expediteur'], $email_name_rules);
+			} else {
+				$nom_expediteur = '';
+			}
 		}
 		$temp = explode(',', str_replace(';', ',', $from));
 		$from = trim($temp[0]);
@@ -151,6 +158,9 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			$mail_header .= 'From: "' . $nom_expediteur . '" <' . $from . '>' . $eol;
 		} else {
 			$mail_header .= 'From: ' . $from . $eol;
+		}
+		if (!empty($additional_infos_array['cc_recipient'])) {
+			$mail_header .= "Cc: " . $additional_infos_array['cc_recipient'] . "" . $eol;
 		}
 		if (!empty($reply_to)) {
 			// Au cas où $reply_to ait plusieurs adresses emails (variable support par exemple)
@@ -291,7 +301,7 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 		if(empty($params['id_expediteur']) && !empty($from)) {
 			if(!empty($params['id_utilisateur'])) {
 				$params['id_expediteur'] = $params['id_utilisateur'];
-			} else {
+			} elseif(empty($additional_infos_array['recipient_table']) || $additional_infos_array['recipient_table'] == 'peel_utilisateurs') {
 				$query = query('SELECT id_utilisateur
 					FROM peel_utilisateurs
 					WHERE email="' . real_escape_string($from) . '"');
@@ -365,13 +375,33 @@ function send_email($to, $mail_subject = '', $mail_content = '', $template_techn
 			}
 			if (((strpos($GLOBALS['wwwroot'], '://localhost')===false && strpos($GLOBALS['wwwroot'], '://127.0.0.1')===false) || !empty($GLOBALS['site_parameters']['localhost_send_email_active'])) && !empty($GLOBALS['site_parameters']['send_email_active'])) {
 				if(EmailOK($this_email)){
-					if (StringMb::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
-						$result = mail($this_email, '=?' . StringMb::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_body, $mail_header);
+					$GLOBALS['last_email_error_text'] = null;
+					// hook_result vaut true si un hook a traité l'envoi d'email
+					// NB Pas forcement sans erreur, si erreur alors $GLOBALS['last_email_error_text'] est rempli. Si hook_result vaut false, on doit traiter l'envoi d'email nous même.
+					$hook_result = call_module_hook('mail', array('from' => $from, 'to' => $this_email, 'subject' => $mail_subject, 'body' => $mail_body, 'header' => $mail_header), 'boolean');
+
+					// send_email_hook_exist : le fonctionnement des hook pose problème ici, puisque la valeur par défaut est true. Mais le hook renvoi true aussi si l'envoi d'email a été géré par le hook. Donc on a deux cas opposé qui retourne la même valeur. Pour savoir si il faut prendre l'information du hook ou pas, on ajoute une variable de configuration qui permet de savoir si le hook retourne true parce que l'email a été géré par un hook ou pas.
+					// il faut donc définr send_email_hook_exist lors de l'ajout d'un hook mail
+					if(empty($hook_result) || empty($GLOBALS['site_parameters']['send_email_hook_exist'])) {
+						// La gestion de l'envoi d'email n'a pas été faite par un hook, on envoie donc l'email ci-dessous
+						if (StringMb::strtolower(GENERAL_ENCODING) != 'iso-8859-1') {
+							$result = mail($this_email, '=?' . StringMb::strtoupper(GENERAL_ENCODING) . '?B?' . base64_encode($mail_subject) . '?=', $mail_body, $mail_header);
+						} else {
+							$result = mail($this_email, $mail_subject, $mail_body, $mail_header);
+						}
+						if(!$result) {
+							$GLOBALS['last_email_error_text'] = error_get_last()['message'];
+						}
 					} else {
-						$result = mail($this_email, $mail_subject, $mail_body, $mail_header);
+						// Email déjà envoyé
+						$result = empty($GLOBALS['last_email_error_text']);
 					}
 					if(!empty($GLOBALS['site_parameters']['trigger_user_notice_email_sent']) && empty($GLOBALS['display_errors'])) {
-						trigger_error('Email sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
+						if($result) {
+							trigger_error('Email sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
+						} else {
+							trigger_error('ERROR ' . $GLOBALS['last_email_error_text'] . ' - Email not sent to ' . $this_email . ' : ' . $mail_subject, E_USER_NOTICE);
+						}
 					}
 				}else{
 					trigger_error('Email invalide : ' . $this_email, E_USER_NOTICE);
@@ -480,3 +510,235 @@ function get_last_newsletter($id = null, $lang = null) {
 	$res = query($sql);
 	return fetch_assoc($res);
 }
+
+/**
+ * Fonction permettant de composer un tableau contenant les informations sur l'envoi d'email groupé (étape avant l'envoi). Une fois le tableau composé, il faut soumettre son contenu à l'utilisateur pour qu'il puisse modifier les informations avant d'envoyer.
+ *
+ * @param array $data_array la liste des destinataires
+ * @param array $frm contient $_POST par exemple
+ * @param string $mode savoir si on passe de ids de facture en paramètre ou des utilisateurs
+ * @param string $fact_table utile dans le cas d'envoi de facture par email, pour savoir si il s'agit d'envoyer des devis, facture préparée ou facture du journal des ventes
+ * @return
+ */
+function handle_email_group($data_array, $frm, $mode = 'user', $fact_table = 'tampfact') {
+	$file_by_user_array = array();
+	$recipient_data_array = array();
+	$hook_result = call_module_hook('handle_email_group', array('data_array' => $data_array, 'frm' => $frm, 'mode' => $mode, 'fact_table' => $fact_table), 'array');
+	if (!empty($hook_result['recipient_data_array'])) {
+		$recipient_data_array = $hook_result['recipient_data_array'];
+	}
+	if (!empty($hook_result['file_by_user_array'])) {
+		$file_by_user_array = $hook_result['file_by_user_array'];
+	}
+
+	// On compose le tableau PHP d'information, client par client.
+	$recipient_array = array();
+	$output = '';
+	foreach($recipient_data_array as $this_recipient_data) {
+		// tags pour ce destinataire
+		$template_tags = array();
+		$upload_html = array();
+		
+		// mappage des champs pour faire une correspondance entre le modèle de données de PEEL et d'autre table clients
+		foreach(vb($GLOBALS['site_parameters']['client_table_map_fields'], array()) as $this_peel_field=>$this_external_field) {
+			if (!empty($this_recipient_data[$this_peel_field])) {
+				$this_recipient_data[$this_external_field] = $this_recipient_data[$this_peel_field];
+			}
+		}
+		foreach($this_recipient_data as $key=>$value) {
+			// Création des valeurs pour template_tags_replace
+			$template_tags[$key] = $value;
+		}
+		$i = 1;
+		if (!empty($frm['upload_multiple'])) {
+			// gestion des pièces jointes uploadée depuis l'étape 1 du formulaire d'envoi
+			foreach($frm['upload_multiple'] as $this_cache_file) {
+				$_REQUEST['upload_multiple_'.$i] = $this_cache_file;
+				$name = upload('upload_multiple_'.$i, true, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height'], null, null, basename($this_cache_file));
+				$tpl_image = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
+				// On ne supprime pas l'image si on clique sur effacer, car l'image vient peut-être d'une duplication
+				$file_infos = get_uploaded_file_infos('upload_multiple_'.$this_recipient_data['id'].$i, $name, 'javascript:reinit_upload_field("upload_multiple_'.$this_recipient_data['id'].$i.'","[DIV_ID]");');
+				$tpl_image->assign('f', $file_infos);
+				$tpl_image->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+				$tpl_image->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+				$upload_html[] = $tpl_image->fetch();
+				unset($tpl_image);
+				$i++;
+			}
+		}
+		// On affiche un champ téléchargement vide pour pouvoir ajouter d'autre pièces jointes pour ce destinataire : 
+		$tpl_image = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
+		// On ne supprime pas l'image si on clique sur effacer, car l'image vient peut-être d'une duplication
+		$file_infos = get_uploaded_file_infos('upload_multiple_'.$this_recipient_data['id'].$i, "", 'javascript:reinit_upload_field("upload_multiple_'.$this_recipient_data['id'].$i.'","[DIV_ID]");');
+		$tpl_image->assign('f', $file_infos);
+		$tpl_image->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+		$tpl_image->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+		$upload_html[] = $tpl_image->fetch();
+		$i++;
+		
+		if (!empty($file_by_user_array[$this_recipient_data['E_Mail']])) {
+			// gestion des fichiers éventuelles dans le cadre d'un envoi de facture par email. Les fichiers sont ajoutées à la liste des documents envoyés en pièce jointe
+			foreach($file_by_user_array[$this_recipient_data['E_Mail']] as $this_file_name) {
+				$tpl_image = $GLOBALS['tplEngine']->createTemplate('uploaded_file.tpl');
+				// On ne supprime pas l'image si on clique sur effacer, car l'image vient peut-être d'une duplication
+				$file_infos = get_uploaded_file_infos('upload_multiple_'.$this_recipient_data['id'].$i, $this_file_name, 'javascript:reinit_upload_field("upload_multiple_'.$this_recipient_data['id'].$i.'","[DIV_ID]");');
+				$tpl_image->assign('f', $file_infos);
+				$tpl_image->assign('STR_DELETE', $GLOBALS['STR_DELETE']);
+				$tpl_image->assign('STR_BEFORE_TWO_POINTS', $GLOBALS['STR_BEFORE_TWO_POINTS']);
+				$upload_html[] = $tpl_image->fetch();
+				$i++;	
+			}
+		}
+		
+		// template_tags_replace : Remplacement des tags. Avant dernier paramètre à true pour gérer les tags <# #>. Dernier paramètre à true pour ne pas forcer la casse des noms de tags (comme <#DEST*Client#> par exemple)
+		$recipient_array[$this_recipient_data['E_Mail']] = array(
+			'email_content'=>template_tags_replace($frm['form_message'], $template_tags, false, null, null, false, true, true),
+			'email_subject'=>template_tags_replace($frm['mail_subject'], $template_tags, false, null, null, false, true, true),
+			'expeditor_name' => $this_recipient_data['Client'] .' - '. $this_recipient_data['Nom1'] .' - '. $this_recipient_data['Nom2'],
+			'expeditor_address' => $frm['email'],
+			'id' => $this_recipient_data['id'],
+			'upload_html'=>implode('&nbsp;',$upload_html)
+		);
+	}
+	// Création du tableau HTML pour permettre à l'utilisateur d'éditer les données, destinataire par destinataire
+	$output .= '
+	<div class="col-md-12">
+		<div class="alert alert-info">
+			Cette page liste les différents messages et pièces jointes qui seront envoyés aux clients. Actuellement aucun email n\'a encore été envoyé. <br />
+			Dans chaque bloc ci-dessous vous pouvez consulter et modifier le texte que contiendra l\'email, et consulter le contenu de la (ou les) pièce(s) jointe(s) en cliquant sur l\'icône du fichier, supprimer la pièce jointe en cliquant sur "Supprimer" ou en ajouter une nouvelle en utilisant le bouton rouge de téléchargement<br />
+			Le bouton d\'envoi des emails se situe en bas de ce formulaire
+		</div>
+	</div>';
+	if ($mode == 'relances_clients') {
+		$output .= '
+		<div class="col-md-12">
+			<div class="alert alert-info">
+				Emails de relances : le contenu de l\'email contient le solde dû pour le client. La pièce jointe en PDF contient le détail des mouvements non soldés et le calcul du solde.
+			</div>
+		</div>';	
+	}
+	$output .= '
+	<form action="'.get_current_url().'" method="POST" />
+		<input type="hidden" name="cc_recipient" value="'.StringMb::str_form_value($frm['cc_recipient']).'" />';
+	$i=1;
+	foreach($recipient_array as $this_email=>$data) {
+		$output .= '
+		<div class="col-md-6">
+			<div class="well">
+				<div class="row">
+					<div class="col-md-12 titre_envoi_email_groupe">
+						<h3>' . $data['expeditor_name'] . '</h3>
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS['STR_TO_SEND'].' : <input type="checkbox" checked="checked" name="checked['.$i.']" value="'.$data['id'].'"/> (décocher la case pour ne pas envoyer d\'email à ce destinataire)
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS['STR_EMAIL_REPLY_TO'].' : <input class="form-control" type="text" value="'.$data['expeditor_address'].'" name="expeditor_address['.$i.']" />
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS['STR_EMAIL'].' : <input class="form-control" type="text" name="email['.$i.']" value="'.$this_email.'"/>
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS["STR_CONTACT_SUBJECT"].' : 
+						<input class="form-control" type="text" value="'.$data['email_subject'].'" name="mail_subject['.$i.']" />
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS["STR_TEXT"].'
+						'.getTextEditor('mail_content['.$i.']', '100%', 500, StringMb::html_entity_decode_if_needed($data['email_content']), null, 3).'
+					</div>
+					<div class="col-md-12 ligne_envoi_email_groupe">
+						'.$GLOBALS['STR_ATTACHEMENT'].' : '.$data['upload_html'].'
+					</div>
+				</div>
+			</div>
+		</div>
+';
+		if ($i%2 == 0) {
+			$output .= '<div class="clearfix"></div>';
+		}
+		$i++;
+	}
+	$output .= '
+		<div class="clearfix"></div>
+		<div style="text-align:center;">
+			<input class="btn btn-primary" type="submit" name="send_email_group" value="'.$GLOBALS['STR_SEND'].'" />
+		</div>
+	</form>';
+
+	return $output;
+}
+
+
+/**
+ * Fonction permettant d'envoyer des emails préparé par handle_email_group. Cette fonction utilise uniquement la fonction mail() de php et pas send_email. C'est volontaire, puisque les tags sont déjà remplacé dans le contenu, le contenu en lui même a pu être modifié au cas par cas par l'utilisateur, et l'adresse expéditeur peut être modifié par l'utilisateur donc on a pas besoin de la fonction send_email();
+ *
+ * @param array $frm
+ * @return
+ */
+function send_email_group($frm) {
+	$output = '';
+	if (!empty($frm['checked'])) {
+		// récupération de la société rattachée au collaborateur qui envoi l'email. Si on est admin alors on prend le nom de la licence.
+		if($_SESSION['Collab'] != 'Administrateur') {
+			$societe_collab = get_table_rows('collabor', $_SESSION['Collab'], null, true, 1, null, 'Societe');
+			$societe = get_table_rows('societes', $societe_collab, null, true, 1, null, 'Raison_Sociale');
+			$nom_expediteur = $societe . ' via Temps 2000';
+		} else {
+			$nom_expediteur = $_SESSION['Licence'] . ' via Temps 2000';
+		}
+		foreach($frm['checked'] as $i=>$this_id) {
+			$attached_files_infos_array = array();
+			for($j=1;$j<100;$j++) {
+				// L'utilisateur peux supprimer des pièces jointes avant l'envoi, donc on fait une boucle sur 100 pour être sûr de prendre en compte toutes les pièces jointes (on imagine qu'il n'y aura pas plus de 100 pièces jointes par destinataire)
+				if(isset($frm['upload_multiple_'.$this_id.$j])) {
+					if (is_array($frm['upload_multiple_'.$this_id.$j])) {
+						$k=0;
+						foreach($frm['upload_multiple_'.$this_id.$j] as $this_cache_file) {
+							$_REQUEST['upload_multiple_'.$this_id.$j.$k] = $this_cache_file;
+							$name = upload('upload_multiple_'.$this_id.$j.$k, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+							$attached_files_infos_array['name'][] = $name;
+							$attached_files_infos_array['path_file_attachment'][] = $GLOBALS['uploaddir'].'/';
+							$attached_files_infos_array['type-mime'][] = mime_content_type($GLOBALS['uploaddir'].'/'.$name);
+							$k++;
+						}
+					} else {
+						$name = upload('upload_multiple_'.$this_id.$j, false, 'image_or_pdf', $GLOBALS['site_parameters']['image_max_width'], $GLOBALS['site_parameters']['image_max_height']);
+						$attached_files_infos_array['name'][] = $name;
+						$attached_files_infos_array['path_file_attachment'][] = $GLOBALS['uploaddir'].'/';
+						$attached_files_infos_array['type-mime'][] = mime_content_type($GLOBALS['uploaddir'].'/'.$name);
+					}
+				}
+			}
+			if (!empty($frm['email'][$i])) {
+				$result = send_email($frm['email'][$i], $frm['mail_subject'][$i], $frm['mail_content'][$i], null, null, null, vb($GLOBALS['site_parameters']['default_email_from']), false, false, true, $frm['expeditor_address'][$i], $attached_files_infos_array, null, array('recipient_table' => 'clients', 'cc_recipient' => $frm['cc_recipient']), false, true, $nom_expediteur);
+				if($result === true) {
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_success.tpl', array('message' => sprintf($GLOBALS['STR_SEND_EMAIL_OK'], $frm['email'][$i])))->fetch();
+				} elseif (!empty($GLOBALS['last_error_text'])) {
+					$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['last_error_text']))->fetch();
+				}
+			} else {
+				$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => "Email vide pour le destinataire : " . $this_id))->fetch();
+			}
+		}
+	} else {
+		$output .= $GLOBALS['tplEngine']->createTemplate('global_error.tpl', array('message' => $GLOBALS['STR_MODULE_TEMPS_RECIPIENT_EMPTY']))->fetch();
+	}
+	return $output;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
